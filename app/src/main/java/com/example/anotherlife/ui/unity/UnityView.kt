@@ -37,6 +37,7 @@ fun UnityView(
     routeIntent: UnityRouteIntent = UnityRouteIntent.Preview,
     requestedCapabilities: List<String> = emptyList(),
     onRouteDispatched: () -> Unit = {},
+    onReady: (UnityRouteReady) -> Unit = {},
     onOutcome: (UnityRouteOutcome) -> Unit = {},
     onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
 ) {
@@ -47,6 +48,7 @@ fun UnityView(
         routeIntent = routeIntent,
         requestedCapabilities = requestedCapabilities,
         onRouteDispatched = onRouteDispatched,
+        onReady = onReady,
         onOutcome = onOutcome,
         onProtocolError = onProtocolError,
         dependencies = UnityRuntimeHostDependencies.Production
@@ -61,6 +63,7 @@ internal fun UnityViewForTest(
     routeIntent: UnityRouteIntent = UnityRouteIntent.Preview,
     requestedCapabilities: List<String> = emptyList(),
     onRouteDispatched: () -> Unit = {},
+    onReady: (UnityRouteReady) -> Unit = {},
     onOutcome: (UnityRouteOutcome) -> Unit = {},
     onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
 ) {
@@ -71,6 +74,7 @@ internal fun UnityViewForTest(
         routeIntent = routeIntent,
         requestedCapabilities = requestedCapabilities,
         onRouteDispatched = onRouteDispatched,
+        onReady = onReady,
         onOutcome = onOutcome,
         onProtocolError = onProtocolError,
         dependencies = dependencies
@@ -85,6 +89,7 @@ private fun UnityViewContent(
     routeIntent: UnityRouteIntent,
     requestedCapabilities: List<String>,
     onRouteDispatched: () -> Unit,
+    onReady: (UnityRouteReady) -> Unit,
     onOutcome: (UnityRouteOutcome) -> Unit,
     onProtocolError: (UnityBridgeProtocolError) -> Unit,
     dependencies: UnityRuntimeHostDependencies
@@ -95,6 +100,7 @@ private fun UnityViewContent(
     val currentRouteIntent = rememberUpdatedState(routeIntent)
     val currentRequestedCapabilities = rememberUpdatedState(requestedCapabilities)
     val currentOnRouteDispatched = rememberUpdatedState(onRouteDispatched)
+    val currentOnReady = rememberUpdatedState(onReady)
     val currentOnOutcome = rememberUpdatedState(onOutcome)
     val currentOnProtocolError = rememberUpdatedState(onProtocolError)
 
@@ -115,6 +121,7 @@ private fun UnityViewContent(
                         routeIntent = currentRouteIntent.value,
                         requestedCapabilities = currentRequestedCapabilities.value,
                         onRouteDispatched = currentOnRouteDispatched.value,
+                        onReady = currentOnReady.value,
                         onOutcome = currentOnOutcome.value,
                         onProtocolError = currentOnProtocolError.value
                     )
@@ -127,6 +134,7 @@ private fun UnityViewContent(
                     routeIntent = routeIntent,
                     requestedCapabilities = requestedCapabilities,
                     onRouteDispatched = currentOnRouteDispatched.value,
+                    onReady = currentOnReady.value,
                     onOutcome = currentOnOutcome.value,
                     onProtocolError = currentOnProtocolError.value
                 )
@@ -229,6 +237,17 @@ internal class UnityRuntimeContainer internal constructor(
             )
         }
     )
+    private val readyCallbackDispatcher = UnityBridgeCallbackDispatcher(
+        postToMain = { action -> post(action) },
+        onPayload = ::handleReady,
+        onProtocolError = ::showProtocolError,
+        onOverflow = {
+            bridgeSession.close()
+            showProtocolError(
+                UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SessionClosed)
+            )
+        }
+    )
     private var ownershipWaitToken: UnityRuntimeHostWaitToken? = null
     private var unityPlayer: UnityEmbeddedPlayer? = null
     private var lifecycleController: UnityHostLifecycleController<Configuration>? = null
@@ -246,11 +265,13 @@ internal class UnityRuntimeContainer internal constructor(
     private var activeRoutePayload: String? = null
     private var routeDispatchAttempted = false
     private var onRouteDispatched: () -> Unit = {}
+    private var onReady: (UnityRouteReady) -> Unit = {}
     private var onOutcome: (UnityRouteOutcome) -> Unit = {}
     private var onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
 
     init {
         setBackgroundColor(Color.BLACK)
+        showStatus(context.getString(R.string.unity_runtime_starting))
         requestOwnership()
     }
 
@@ -260,10 +281,12 @@ internal class UnityRuntimeContainer internal constructor(
         routeIntent: UnityRouteIntent,
         requestedCapabilities: List<String>,
         onRouteDispatched: () -> Unit,
+        onReady: (UnityRouteReady) -> Unit = {},
         onOutcome: (UnityRouteOutcome) -> Unit,
         onProtocolError: (UnityBridgeProtocolError) -> Unit
     ): Boolean {
         this.onRouteDispatched = onRouteDispatched
+        this.onReady = onReady
         this.onOutcome = onOutcome
         this.onProtocolError = onProtocolError
 
@@ -292,6 +315,7 @@ internal class UnityRuntimeContainer internal constructor(
         }
 
         start as UnityBridgeSessionStart.Started
+        showStatus(context.getString(R.string.unity_runtime_starting))
         activeLaunch = launch
         activeRoutePayload = start.encodedPayload
         routeDispatchAttempted = false
@@ -334,6 +358,7 @@ internal class UnityRuntimeContainer internal constructor(
     fun destroyUnity() {
         val closeDecision = activationLeaseState.close() ?: return
         callbackDispatcher.close()
+        readyCallbackDispatcher.close()
         bridgeSession.close()
         grantedLeaseHandoff.close()?.let(dependencies.ownershipRegistry::release)
         ownershipWaitToken?.let(dependencies.ownershipRegistry::cancel)
@@ -421,6 +446,8 @@ internal class UnityRuntimeContainer internal constructor(
 
     internal fun statusAccessibilityLiveRegionForTesting(): Int =
         statusView.accessibilityLiveRegion
+
+    internal fun isStatusVisibleForTesting(): Boolean = statusView.parent === this
 
     internal fun statusImportantForAccessibilityForTesting(): Int =
         statusView.importantForAccessibility
@@ -529,7 +556,10 @@ internal class UnityRuntimeContainer internal constructor(
                 abortActivation(message = null)
                 return
             }
-            activationCallbackToken = UnityBridgeCallbacks.register(callbackDispatcher::enqueue)
+            activationCallbackToken = UnityBridgeCallbacks.register(
+                outcomeCallback = callbackDispatcher::enqueue,
+                readyCallback = readyCallbackDispatcher::enqueue
+            )
             callbackToken = activationCallbackToken
             if (!activationLeaseState.canContinue(permit)) {
                 abortActivation(message = null)
@@ -615,7 +645,10 @@ internal class UnityRuntimeContainer internal constructor(
             return
         }
 
-        activationCallbackToken = UnityBridgeCallbacks.register(callbackDispatcher::enqueue)
+        activationCallbackToken = UnityBridgeCallbacks.register(
+            outcomeCallback = callbackDispatcher::enqueue,
+            readyCallback = readyCallbackDispatcher::enqueue
+        )
         callbackToken = activationCallbackToken
         if (!activationLeaseState.canContinue(permit)) {
             abortActivation(message = null)
@@ -645,13 +678,9 @@ internal class UnityRuntimeContainer internal constructor(
             return
         }
 
-        val statusHidden = runCatching { hideStatus() }.isSuccess
-        if (!statusHidden || !activationLeaseState.canContinue(permit)) {
-            abortActivation(
-                message = if (statusHidden) null else {
-                    context.getString(R.string.unity_runtime_unavailable_activation_failed)
-                }
-            )
+        statusView.bringToFront()
+        if (!activationLeaseState.canContinue(permit)) {
+            abortActivation(message = null)
             return
         }
 
@@ -697,6 +726,7 @@ internal class UnityRuntimeContainer internal constructor(
     ) {
         if (message != null) terminalRuntimeFailure = message
         callbackDispatcher.close()
+        readyCallbackDispatcher.close()
         bridgeSession.close()
         activationCallbackToken?.let(UnityBridgeCallbacks::clear)
         if (callbackToken == activationCallbackToken) callbackToken = null
@@ -805,8 +835,6 @@ internal class UnityRuntimeContainer internal constructor(
         }
         if (!canContinueDispatch(activationPermit)) return false
 
-        hideStatus()
-        if (!canContinueDispatch(activationPermit)) return false
         runCatching(onRouteDispatched)
         return canContinueDispatch(activationPermit)
     }
@@ -817,11 +845,23 @@ internal class UnityRuntimeContainer internal constructor(
     private fun handleOutcome(rawJson: String?) {
         when (val delivery = bridgeSession.consumeOutcome(rawJson)) {
             is UnityBridgeSessionDelivery.Delivered -> {
-                hideStatus()
                 onOutcome(delivery.outcome)
             }
 
             is UnityBridgeSessionDelivery.Rejected -> showProtocolError(delivery.error)
+        }
+    }
+
+    private fun handleReady(rawJson: String?) {
+        when (val delivery = bridgeSession.consumeReady(rawJson)) {
+            is UnityBridgeSessionReadyDelivery.Delivered -> {
+                hideStatus()
+                onReady(delivery.ready)
+            }
+
+            is UnityBridgeSessionReadyDelivery.Rejected -> {
+                if (!delivery.error.isInertReadyFence()) showProtocolError(delivery.error)
+            }
         }
     }
 
@@ -841,6 +881,7 @@ internal class UnityRuntimeContainer internal constructor(
             addView(statusView)
         }
         statusView.bringToFront()
+        statusView.requestFocus()
     }
 
     private fun hideStatus() {
@@ -852,17 +893,27 @@ internal class UnityRuntimeContainer internal constructor(
     private fun createStatusView(context: Context): TextView {
         return TextView(context).apply {
             layoutParams = LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                Gravity.CENTER
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
             )
+            gravity = Gravity.CENTER
+            setBackgroundColor(Color.BLACK)
             setTextColor(Color.WHITE)
             textSize = 18f
             textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+            isClickable = true
+            isFocusable = true
+            isFocusableInTouchMode = true
             accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         }
     }
+}
+
+private fun UnityBridgeProtocolError.isInertReadyFence(): Boolean {
+    return code == UnityBridgeProtocolErrorCode.RequestMismatch ||
+        code == UnityBridgeProtocolErrorCode.DuplicateReady ||
+        code == UnityBridgeProtocolErrorCode.ReadyAfterOutcome
 }
 
 internal class ReflectionUnityPlayer private constructor(

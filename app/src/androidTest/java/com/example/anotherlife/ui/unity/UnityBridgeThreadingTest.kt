@@ -39,6 +39,81 @@ class UnityBridgeThreadingTest {
     val composeRule = createComposeRule()
 
     @Test
+    fun nativeFallbackOwnsPresentationUntilCurrentReadyAcknowledgement() {
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val readySignals = CopyOnWriteArrayList<UnityRouteReady>()
+        val protocolErrors = AtomicInteger()
+        val dependencies = testDependencies(players, registrar)
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var host: UnityRuntimeContainer? = null
+
+        try {
+            composeRule.runOnUiThread {
+                host = UnityRuntimeContainer(context, dependencies)
+                assertTrue(
+                    host!!.setRoute(
+                        routeId = "bridge.ready-fence",
+                        routeLaunchSequence = 1,
+                        routeIntent = UnityRouteIntent.Preview,
+                        requestedCapabilities = emptyList(),
+                        onRouteDispatched = {},
+                        onReady = readySignals::add,
+                        onOutcome = {},
+                        onProtocolError = { protocolErrors.incrementAndGet() }
+                    )
+                )
+                assertTrue(host!!.isStatusVisibleForTesting())
+                assertEquals(
+                    context.getString(com.example.anotherlife.R.string.unity_runtime_starting),
+                    host!!.statusTextForTesting()
+                )
+            }
+
+            val request = requireNotNull(host!!.activeRequestForTesting())
+            val ready = buildJsonObject {
+                put("contractVersion", UNITY_BRIDGE_CONTRACT_VERSION)
+                put("requestId", request.requestId)
+                put("routeId", request.routeId)
+            }.toString()
+            val mismatchedRoute = buildJsonObject {
+                put("contractVersion", UNITY_BRIDGE_CONTRACT_VERSION)
+                put("requestId", request.requestId)
+                put("routeId", "bridge.wrong-route")
+            }.toString()
+
+            Thread { UnityBridgeCallbacks.reportReady(mismatchedRoute) }.apply {
+                start()
+                join()
+            }
+            composeRule.waitUntil(timeoutMillis = 5_000) { protocolErrors.get() == 1 }
+            composeRule.runOnUiThread {
+                assertTrue(host!!.isStatusVisibleForTesting())
+                assertEquals(
+                    "Unity bridge unavailable\nCode: bridge.route_mismatch",
+                    host!!.statusTextForTesting()
+                )
+            }
+
+            Thread { UnityBridgeCallbacks.reportReady(ready) }.apply {
+                start()
+                join()
+            }
+            composeRule.waitUntil(timeoutMillis = 5_000) { readySignals.size == 1 }
+            composeRule.runOnUiThread {
+                assertFalse(host!!.isStatusVisibleForTesting())
+            }
+
+            UnityBridgeCallbacks.reportReady(ready)
+            composeRule.waitForIdle()
+            assertEquals(1, readySignals.size)
+            assertEquals(1, protocolErrors.get())
+        } finally {
+            composeRule.runOnUiThread { host?.destroyUnity() }
+        }
+    }
+
+    @Test
     fun unknownRouteUnavailableOutcomeCompletesOneCorrelatedHostSession() {
         val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
         val registrar = RecordingComponentCallbackRegistrar()
@@ -290,7 +365,7 @@ class UnityBridgeThreadingTest {
                 "Unity runtime unavailable\nLifecycle callback registration failed",
                 host!!.statusTextForTesting()
             )
-            assertEquals(1, host!!.statusTextUpdateCountForTesting())
+            assertEquals(2, host!!.statusTextUpdateCountForTesting())
             assertEquals(
                 View.ACCESSIBILITY_LIVE_REGION_POLITE,
                 host!!.statusAccessibilityLiveRegionForTesting()

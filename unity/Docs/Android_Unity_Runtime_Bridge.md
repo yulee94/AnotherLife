@@ -270,7 +270,11 @@ performance evidence are separate dependent #135 gates.
   deliberately retains the process-wide lease so a second native player cannot start over an
   incomplete first teardown; process restart is the recovery boundary for that failure.
 - A replacement host gets a new callback token; disposal of the prior host cannot clear the replacement.
-- AndroidX `@Keep` preserves the exact `UnityBridgeCallbacks.reportOutcome(String)` JVM entry point in minified release builds while unused host and contract code can still be removed. The Java reference parameter is nullable at this external boundary; a null JNI/Unity argument is delivered as typed `bridge.null_message` failure instead of throwing across JNI.
+- AndroidX `@Keep` preserves the exact `UnityBridgeCallbacks.reportReady(String)` and
+  `UnityBridgeCallbacks.reportOutcome(String)` JVM entry points in minified release builds while
+  unused host and contract code can still be removed. Their Java reference parameters are nullable
+  at the external boundary; a null JNI/Unity argument is delivered as typed
+  `bridge.null_message` failure instead of throwing across JNI.
 
 The reflection host loads the named class without initialization and accepts it only when it can
 prove a compatible public one-argument constructor on a `View`, exact instance `void` `resume`,
@@ -415,6 +419,39 @@ The discarding sink remains the receiver's fallback only for standalone use with
 The component still defaults to a discarding sink when used without the host, so the
 receiver and sender remain testable without implying a production route.
 
+## Ready Acknowledgement Contract
+
+Sending a validated route request is not proof that Unity can present or own that route. The
+Android host keeps its full-screen native starting surface in front of the attached player, owns
+input and accessibility semantics, and waits for Unity to call:
+
+```text
+com.example.anotherlife.ui.unity.UnityBridgeCallbacks.reportReady(String rawJson)
+```
+
+Payload version 2 contains only the active request correlation:
+
+```json
+{
+  "contractVersion": 2,
+  "requestId": "76f35664-447f-49e1-9f05-e2fa6af47aac",
+  "routeId": "bridge.smoke"
+}
+```
+
+`requestId` is the attempt-generation fence: every route launch and recreated host creates a new
+request identity. Android accepts exactly one ready acknowledgement whose version, request, and
+route match the current incomplete session. Only that acknowledgement removes the native starting
+surface and invokes `onReady`. A prior-generation request ID, duplicate, or post-outcome ready
+callback is inert. A current request carrying the wrong route, or a malformed, oversized, or
+structurally invalid ready message, remains a typed protocol failure and does not transfer
+presentation ownership.
+
+The JVM boundary and Android-side parser/session/host transition are implemented. No production
+Unity route currently emits this acknowledgement, because no gameplay route is enabled. A future
+route must emit it only after that route has completed its own presentation/readiness checks; it
+must not treat receipt of `SetRouteContext` as readiness.
+
 ## Outcome Contract
 
 Unity reports a route outcome by calling the JVM static method:
@@ -533,7 +570,7 @@ A rejected malformed or mismatched outcome does not complete the active request,
 
 If the Unity runtime class is missing, `UnityView` shows `Unity runtime unavailable` with the requested route. This is a visible integration failure, not a gameplay substitute.
 
-`onRouteDispatched` is invoked only after a validated request is successfully sent through the reflected Unity message method. It is not a Unity-loaded or route-ready acknowledgement, and it is not invoked for a missing runtime, invalid route request, or unavailable send method.
+`onRouteDispatched` is invoked only after a validated request is successfully sent through the reflected Unity message method. It is not a Unity-loaded or route-ready acknowledgement, does not remove the native starting surface, and is not invoked for a missing runtime, invalid route request, or unavailable send method.
 
 Malformed, stale, mismatched, unsupported, and duplicate outcomes surface a stable `bridge.*` protocol diagnostic through `onProtocolError`. They do not fabricate a route result or consume the active request. Callback delivery is posted to the host view before invoking UI/navigation callbacks, and a disposed host's registration token cannot clear a newer host.
 

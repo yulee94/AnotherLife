@@ -10,6 +10,7 @@ class UnityFallbackResourceTest {
     @Test
     fun baseModuleOwnsCompleteDefaultFallbackCopy() {
         val expected = mapOf(
+            "unity_runtime_starting" to "Starting interactive experience…",
             "unity_runtime_unavailable" to "Unity runtime unavailable",
             "unity_runtime_unavailable_lifecycle_failure" to
                 "Unity runtime unavailable\\nLifecycle failure",
