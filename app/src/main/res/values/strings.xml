@@ -2,6 +2,7 @@
     <string name="app_name">Another Life</string>
     <string name="quest_preview_open">Open quest source</string>
     <string name="unity_bridge_smoke_open">Open Unity bridge smoke</string>
+    <string name="unity_runtime_starting">Starting interactive experience…</string>
     <string name="unity_runtime_unavailable">Unity runtime unavailable</string>
     <string name="unity_runtime_unavailable_lifecycle_failure">Unity runtime unavailable\nLifecycle failure</string>
     <string name="unity_runtime_unavailable_handoff_pending">Unity runtime unavailable\nHost handoff pending</string>
