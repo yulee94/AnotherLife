@@ -101,6 +101,9 @@ internal class UnityBridgeSession(
         activeRequest = null
         completedRequestId = null
     }
+
+    @Synchronized
+    internal fun activeRequestForTesting(): UnityRouteRequest? = activeRequest
 }
 
 internal sealed interface UnityBridgeSessionStart {

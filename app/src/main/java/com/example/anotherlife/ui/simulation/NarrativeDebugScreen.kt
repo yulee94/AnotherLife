@@ -21,7 +21,8 @@ import com.example.anotherlife.data.simulation.NarrativeState
 @Composable
 fun NarrativeDebugScreen(
     state: NarrativeState,
-    onOpenQuestPreview: () -> Unit = {}
+    onOpenQuestPreview: () -> Unit = {},
+    onOpenUnityBridgeSmoke: () -> Unit = {}
 ) {
     val errorMessage = remember { mutableStateOf<String?>(null) }
 
@@ -53,6 +54,18 @@ fun NarrativeDebugScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(text = stringResource(R.string.quest_preview_open))
+        }
+
+        OutlinedButton(
+            onClick = onOpenUnityBridgeSmoke,
+            modifier = Modifier.padding(bottom = 12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(R.string.unity_bridge_smoke_open))
         }
 
         errorMessage.value?.let { message ->
