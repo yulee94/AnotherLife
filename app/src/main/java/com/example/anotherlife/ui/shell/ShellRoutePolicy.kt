@@ -116,6 +116,15 @@ object ShellRoutePolicy {
         )
     }
 
+    fun reduceRouteNotice(currentMessage: String?, event: RouteNoticeEvent): String? {
+        return when (event) {
+            is RouteNoticeEvent.BackStackSanitized -> {
+                event.rejectedTopRoute?.message ?: currentMessage
+            }
+            RouteNoticeEvent.NavigationAcknowledged -> null
+        }
+    }
+
     private fun MutableList<Route>.addIfNotAdjacentDuplicate(route: Route) {
         if (lastOrNull() != route) {
             add(route)
@@ -141,3 +150,11 @@ data class BackStackSanitization(
     val routes: List<Route>,
     val rejectedTopRoute: RouteResolution.Rejected?
 )
+
+sealed interface RouteNoticeEvent {
+    data class BackStackSanitized(
+        val rejectedTopRoute: RouteResolution.Rejected?
+    ) : RouteNoticeEvent
+
+    data object NavigationAcknowledged : RouteNoticeEvent
+}
