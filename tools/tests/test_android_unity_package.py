@@ -40,11 +40,11 @@ def write_aar(path: Path, extra=(), omit=()):
         for name, data in required.items():
             if name not in omit:
                 aar.writestr(name, data)
-        classes = tempfile.SpooledTemporaryFile()
-        with zipfile.ZipFile(classes, "w") as jar:
-            jar.writestr("com/unity3d/player/UnityPlayer.class", b"class")
-        classes.seek(0)
-        aar.writestr("classes.jar", classes.read())
+        with tempfile.SpooledTemporaryFile() as classes:
+            with zipfile.ZipFile(classes, "w") as jar:
+                jar.writestr("com/unity3d/player/UnityPlayer.class", b"class")
+            classes.seek(0)
+            aar.writestr("classes.jar", classes.read())
         for name, data in extra:
             aar.writestr(name, data)
 

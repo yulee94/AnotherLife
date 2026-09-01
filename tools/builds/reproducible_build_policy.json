@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "authorityReferences": {
+    "releaseCriteria": "t_4a5b066c",
+    "capacityAndSloCriteria": "t_7f6be100",
+    "compatibilityDecisionOwner": "game-owner"
+  },
+  "projectEditor": {
+    "version": "6000.3.22f1",
+    "revision": "1c726e1fb402"
+  },
+  "sourceInputs": {
+    "trackedRoots": [
+      "unity/Assets",
+      "unity/Packages",
+      "unity/ProjectSettings"
+    ],
+    "explicitFiles": [
+      ".github/workflows/quality-gates.yml",
+      "app/build.gradle.kts",
+      "gradle.properties",
+      "gradle/libs.versions.toml",
+      "gradle/wrapper/gradle-wrapper.properties",
+      "gradlew.bat",
+      "settings.gradle.kts",
+      "tools/android_unity_package.py",
+      "tools/builds/reproducible_build_policy.json",
+      "tools/reproducible_build.py"
+    ],
+    "contentRoots": [
+      "unity/Assets/AL/StreamingAssets/GameData"
+    ]
+  },
+  "targets": {
+    "windows64-development": {
+      "unityVersion": "6000.3.22f1",
+      "executeMethod": "AL.EditorTools.ProductionPlayerBuilder.BuildWindows64Development",
+      "artifactRoot": "unity/Builds/Validation/Windows64",
+      "summary": "unity/Logs/ProductionPlayerBuildSummary.json",
+      "scriptingBackend": "Mono2x",
+      "architecture": "x86_64",
+      "buildOptions": ["Development"],
+      "cleanInputs": ["unity/Builds/Validation/Windows64"]
+    }
+  },
+  "launchSmoke": {
+    "target": "windows64-development",
+    "timeoutSeconds": 60,
+    "companyName": "DefaultCompany",
+    "productName": "AnotherLifeUnity",
+    "orderedEvidence": [
+      "[AL-SCENE-ACTIVE] id=al_scene_boot name=Boot path=Assets/AL/Scenes/Boot.unity role=production_entry version=223.2",
+      "AL Boot Sequence Started...",
+      "No Realm Selected. Transitioning to Realm Selection...",
+      "[AL-SCENE-ACTIVE] id=al_scene_realm_selection name=RealmSelection path=Assets/AL/Scenes/RealmSelection.unity role=onboarding_selection version=223.2"
+    ],
+    "failureTokens": [
+      "[AL-SCENE-ACTIVE-MISMATCH]",
+      "[BOOT_STACK_LOAD_FAILED]",
+      "[BOOT_STACK_PUBLICATION_FAILED]",
+      "[BOOT_STACK_PARTIAL_REGISTRY]",
+      "Failed to load scene",
+      "couldn't be loaded",
+      "NullReferenceException:",
+      "MissingReferenceException:",
+      "SerializationException:",
+      "The referenced script on this Behaviour is missing"
+    ]
+  },
+  "deferredAndroid": {
+    "task": "t_7b530af7",
+    "status": "deferred_pc_first",
+    "approvedEditor": "6000.3.22f1",
+    "legacyExporterEditor": "2022.3.62f3",
+    "legacyCrossVersionProjectAuthorized": false,
+    "androidModuleAvailable": false,
+    "requiredFutureSettings": {
+      "scriptingBackend": "IL2CPP",
+      "architectures": ["ARM64"],
+      "minimumApiLevel": 24,
+      "targetApiLevel": 36
+    },
+    "retainedPackageProfiles": {
+      "debug": {
+        "artifactRoot": "unity/Builds/AndroidArtifacts/debug",
+        "exportRoot": "unity/Builds/AndroidExport",
+        "buildProfile": "debug"
+      },
+      "release": {
+        "artifactRoot": "unity/Builds/AndroidArtifacts/release",
+        "exportRoot": "unity/Builds/AndroidExport",
+        "buildProfile": "release"
+      }
+    }
+  },
+  "androidHost": {
+    "gradle": "9.4.1",
+    "androidGradlePlugin": "9.2.1",
+    "jdkMajor": 21,
+    "compileSdk": "36.1",
+    "targetSdk": 36,
+    "minimumSdk": 24,
+    "abiFilters": ["arm64-v8a"]
+  },
+  "equivalence": {
+    "normalization": ["run", "manifestSha256"],
+    "artifactPolicy": "exact-tree-sha256",
+    "materialDivergence": "stop_ship"
+  }
+}

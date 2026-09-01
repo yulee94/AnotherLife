@@ -65,6 +65,28 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Reproducible build contract
+        shell: pwsh
+        timeout-minutes: 10
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $transcript = "artifacts/reproducible-build-contract.txt"
+          try {
+            python -m unittest tools.tests.test_reproducible_build tools.tests.test_android_unity_package *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Reproducible build contract tests exited with code $LASTEXITCODE."
+            }
+            python tools/reproducible_build.py --repo-root . inventory `
+              --output artifacts/reproducible-build-inventory.json *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Reproducible build inventory exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Upload quality-gate evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -74,6 +96,9 @@ jobs:
           path: |
             artifacts/repository-hygiene.txt
             artifacts/quality-gate-fixtures.txt
+            artifacts/reproducible-build-contract.txt
+            artifacts/reproducible-build-inventory.json
+            artifacts/reproducible-build-inventory.json.sha256
           if-no-files-found: error
           retention-days: 90
 
