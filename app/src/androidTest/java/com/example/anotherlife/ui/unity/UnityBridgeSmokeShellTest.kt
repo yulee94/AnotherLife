@@ -2,6 +2,10 @@ package com.example.anotherlife.ui.unity
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
@@ -61,10 +65,12 @@ class UnityBridgeSmokeShellTest {
         val safeReturnMessage =
             "Unity bridge smoke route is unavailable as expected. Returned safely to Debug."
         waitForText(safeReturnMessage)
+        assertPoliteLiveRegion(safeReturnMessage)
 
         composeRule.activityRule.scenario.recreate()
 
         waitForText(safeReturnMessage)
+        assertPoliteLiveRegion(safeReturnMessage)
         composeRule.onNodeWithText("Narrative Director Debug").assertIsDisplayed()
         composeRule.onNodeWithText("Unity bridge smoke").assertDoesNotExist()
         assertFalse(UnityBridgeCallbacks.hasActiveRegistrationForTesting())
@@ -228,5 +234,14 @@ class UnityBridgeSmokeShellTest {
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
+    }
+
+    private fun assertPoliteLiveRegion(text: String) {
+        composeRule.onNodeWithText(text).assert(
+            SemanticsMatcher.expectValue(
+                SemanticsProperties.LiveRegion,
+                LiveRegionMode.Polite
+            )
+        )
     }
 }
