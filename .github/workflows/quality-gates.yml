@@ -49,6 +49,21 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Android Unity package verifier tests
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/android-unity-package-tests.txt"
+          try {
+            & py -3 -m unittest -v tools.tests.test_android_unity_package *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Android Unity package verifier tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Quality-gate fixture proof
         shell: pwsh
         timeout-minutes: 10
@@ -73,6 +88,7 @@ jobs:
           name: quality-gate-evidence-${{ github.run_attempt }}
           path: |
             artifacts/repository-hygiene.txt
+            artifacts/android-unity-package-tests.txt
             artifacts/quality-gate-fixtures.txt
           if-no-files-found: error
           retention-days: 90
