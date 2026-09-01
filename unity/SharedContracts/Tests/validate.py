@@ -30,7 +30,9 @@ from decimal import Decimal
 from jsonschema import Draft202012Validator, FormatChecker, SchemaError, ValidationError
 
 import world_asset_inventory
+import test_four_realm_production_taxonomy
 import test_realm_character_taxonomy
+import test_rig_motion_standard
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent  # unity/SharedContracts
 SCHEMAS_DIR = ROOT / "Schemas"
@@ -41,6 +43,7 @@ GAMEDATA_DIR = (
 
 # schema-name -> real catalog file (for the ten content catalogs)
 REAL_CATALOGS = {
+    "al-map-disclosure": "al_map_disclosure_catalog.json",
     "al-realm": "al_realm_catalog.json",
     "al-realm-gem-wishgate-content": "al_realm_gem_wishgate_content_catalog.json",
     "al-notification-content": "al_notification_content_catalog.json",
@@ -56,6 +59,9 @@ REAL_CATALOGS = {
     "al-golden-scene": "al_golden_scene_catalog.json",
     "al-first-session-terrain": "al_first_session_terrain_catalog.json",
     "al-world-asset-inventory": "al_world_asset_inventory.json",
+    "al-four-realm-production-taxonomy": "al_four_realm_production_taxonomy.json",
+    "al-required-motion-manifest": "al_required_motion_manifest.json",
+    "al-rig-motion-standard": "al_rig_motion_standard.json",
 }
 
 # Known source-data defects that legitimately fail their schema today. These are
@@ -101,6 +107,8 @@ def main():
         "real": [],
         "inventory": [],
         "realmTaxonomy": [],
+        "fourRealmTaxonomy": [],
+        "rigMotion": [],
     }
 
     # 1. Compile every schema (validity of the schema itself).
@@ -195,6 +203,48 @@ def main():
             + realm_test_output.getvalue().strip()
         )
 
+    # 6. Integrated four-realm production taxonomy and acceptance audit.
+    suite = unittest.defaultTestLoader.loadTestsFromModule(
+        test_four_realm_production_taxonomy
+    )
+    integrated_test_output = io.StringIO()
+    integrated_result = unittest.TextTestRunner(
+        stream=integrated_test_output,
+        verbosity=0,
+    ).run(suite)
+    integrated_ok = integrated_result.wasSuccessful()
+    integrated_summary = (
+        f"{integrated_result.testsRun} tests, "
+        f"{len(integrated_result.failures)} failures, "
+        f"{len(integrated_result.errors)} errors"
+    )
+    reports["fourRealmTaxonomy"].append((integrated_ok, integrated_summary))
+    if not integrated_ok:
+        failures.append(
+            "integrated four-realm taxonomy fail-closed tests failed: "
+            + integrated_test_output.getvalue().strip()
+        )
+
+    # 7. Rig, motion, anatomy-exception, and required-coverage acceptance audit.
+    suite = unittest.defaultTestLoader.loadTestsFromModule(test_rig_motion_standard)
+    rig_motion_test_output = io.StringIO()
+    rig_motion_result = unittest.TextTestRunner(
+        stream=rig_motion_test_output,
+        verbosity=0,
+    ).run(suite)
+    rig_motion_ok = rig_motion_result.wasSuccessful()
+    rig_motion_summary = (
+        f"{rig_motion_result.testsRun} tests, "
+        f"{len(rig_motion_result.failures)} failures, "
+        f"{len(rig_motion_result.errors)} errors"
+    )
+    reports["rigMotion"].append((rig_motion_ok, rig_motion_summary))
+    if not rig_motion_ok:
+        failures.append(
+            "rig and required-motion fail-closed tests failed: "
+            + rig_motion_test_output.getvalue().strip()
+        )
+
     # ---- Report ----
     print("== Schema compilation ==")
     for key, ok, msg in reports["schemas"]:
@@ -226,6 +276,20 @@ def main():
     print("\n== Realm character taxonomy cross-validation ==")
     for ok, msg in reports["realmTaxonomy"]:
         print(f"  [{'OK' if ok else 'FAIL'}] al-realm-character-taxonomy  -> {msg}")
+
+    print("\n== Integrated four-realm taxonomy cross-validation ==")
+    for ok, msg in reports["fourRealmTaxonomy"]:
+        print(
+            f"  [{'OK' if ok else 'FAIL'}] "
+            f"al-four-realm-production-taxonomy  -> {msg}"
+        )
+
+    print("\n== Rig and required-motion cross-validation ==")
+    for ok, msg in reports["rigMotion"]:
+        print(
+            f"  [{'OK' if ok else 'FAIL'}] "
+            f"al-rig-motion-standard  -> {msg}"
+        )
 
     print()
     if failures:

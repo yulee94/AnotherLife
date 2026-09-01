@@ -8,3 +8,14 @@
 /tools/game-data/generate_phase_c_realm_shadow_artifact.py text eol=lf
 /tools/game-data/migrate_byte_stable_sources.py             text eol=lf
 /tools/game-data/validate_building_champion_art_catalogs.py text eol=lf
+
+# Canonical scene manifests are byte-compared by the fail-closed validator.
+/unity/Assets/AL/StreamingAssets/GameData/al_enabled_scene_manifest.v1.json   text eol=lf
+/unity/Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json text eol=lf
+
+# Hash-bound Slagfall provenance. Recorded SHA-256 values require raw LF bytes.
+/unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/slagfall_environment_meshy_cleanup_v001.json text eol=lf
+/unity/Docs/AI/Meshy/meshy_texture_inputs_slagfall_environment_2026-08-31_v001.json text eol=lf
+
+# Hash-bound approved enterable-architecture packets.
+/unity/Docs/Architecture/WorldSpaceEnterableV001/**/*.json text eol=lf

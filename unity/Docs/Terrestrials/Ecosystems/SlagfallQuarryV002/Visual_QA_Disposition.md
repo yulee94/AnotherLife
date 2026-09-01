@@ -8,12 +8,13 @@
 - Habitat state: `ReadyForUserReview`
 - Standard-adult fauna state: `ReadyForUserReview`
 - Overall disposition: `Pass`
-- User creative approval: `NotRequested`
-- Production/runtime: `Blocked`
+- User creative approval: `Slagfall environment kit approved 2026-08-31; Slagwhistle was not part of this review`
+- Production/runtime: `Environment kit integrated as profiling-scale production candidates; final world/gameplay authority remains gated`
 
-`Pass` means this packet clears A2 static-source and motion-source review. It
-does not approve generated pixels for direct production reuse and does not
-grant runtime authority.
+`Pass` means the original packet cleared A2 static-source and motion-source
+review. The later environment-kit approval below grants production-candidate
+authority only to the eight named Unity assets and does not expand into final
+world dimensions, routes, navigation, gallery entry, or unrelated fauna.
 
 ## Per-Asset Disposition
 
@@ -40,6 +41,36 @@ grant runtime authority.
 - Tail drift: corrected to a short broad dorsoventrally flattened brace.
 - Illustrative-only motion: corrected with grounded contact and weight-transfer
   phases.
+
+## 2026-08-31 Environment Kit Owner Approval
+
+The owner reviewed the corrected profiling-scale kit in Unity Editor and
+approved all eight families. The selected variants are frozen; no further
+Meshy generation is justified for this set. The review occurred after the
+Blender Z-up to Unity Y-up export regression was corrected and the focused
+Unity EditMode contract passed `9 / 9`.
+
+| Family | Selected 3D source | Owner disposition | Remaining scope |
+| --- | --- | --- | --- |
+| Irregular fracture raft | `Raw/01_irregular_fracture_raft_meshy_t2_v001.fbx` | `OwnerApprovedProductionCandidate` | Placement, final scale, and world blending only. |
+| Broken fracture raft | `Replacement/02_broken_fracture_raft_meshy7_v002.fbx` | `OwnerApprovedProductionCandidate` | Placement, final scale, and world blending only. |
+| Undercut extraction ledge | `Replacement/03_undercut_extraction_ledge_meshy7_v002.fbx` | `OwnerApprovedProductionCandidate` | Placement, final scale, and world blending only. |
+| Talus apron | `Replacement/04_talus_apron_meshy7_v002.fbx` | `OwnerApprovedProductionCandidate` | Placement, final scale, and world blending only. |
+| Collapsed gallery mouth | `Raw/05_collapsed_gallery_mouth_meshy_t2_v001.fbx` | `OwnerApprovedProductionCandidate` | Gallery-entry and collision behavior remain separately gated. |
+| Diagonal fault slab | `Replacement/06_diagonal_fault_slab_meshy7_v002.fbx` | `OwnerApprovedProductionCandidate` | Placement, final scale, and world blending only. |
+| Braided runoff pool | `Replacement/07_braided_runoff_pool_meshy7_v002.fbx` | `OwnerApprovedProductionCandidate` | Water behavior and gameplay interaction remain separately gated. |
+| Iron-soil wedge | `Replacement/08_iron_soil_wedge_meshy7_v002.fbx` | `OwnerApprovedProductionCandidate` | Placement, final scale, and world blending only. |
+
+Evidence:
+
+- Unity review scene:
+  `Assets/AL/Scenes/Review/Terrestrials/SlagfallEnvironmentKitReview.unity`
+- Corrected owner-review image:
+  `VisualReview/Unity/slagfall_environment_kit_unity_lineup_v003.png`
+- Focused contract:
+  `AL.Tests.EditMode.Terrestrials.SlagfallEnvironmentKitProductionTests`
+- Execution and hash record:
+  `unity/Docs/AI/Meshy/meshy_execution_slagfall_environment_2026-08-31_v001.json`
 
 ## Remaining Engineering Gates
 

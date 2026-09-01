@@ -1416,7 +1416,8 @@ namespace AL.Data.Catalogs
             for (var index = 0; index < root.Properties.Count; index++)
             {
                 var property = root.Properties[index];
-                if (RecognizedTopLevelFields.Contains(property.Name))
+                if (RecognizedTopLevelFields.Contains(property.Name) ||
+                    IsNeutralMapDisclosurePlaceholder(property))
                 {
                     continue;
                 }
@@ -1430,6 +1431,69 @@ namespace AL.Data.Catalogs
                     SaveSemanticDomain.Envelope,
                     SaveSemanticDiagnosticSeverity.Warning);
             }
+        }
+
+        private static bool IsNeutralMapDisclosurePlaceholder(
+            StrictJsonProperty property)
+        {
+            if (!string.Equals(
+                    property.Name,
+                    "MapDisclosure",
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            if (property.Value is StrictJsonNull)
+            {
+                return true;
+            }
+
+            // Unity 6 materializes a missing serializable class as its all-default
+            // object during JsonUtility rewrites. Admit only that exact placeholder;
+            // non-neutral or extended state remains byte-preserved and read-only.
+            var value = property.Value as StrictJsonObject;
+            return value != null &&
+                   value.Properties.Count == 10 &&
+                   HasZeroNumber(value, "Version") &&
+                   HasZeroNumber(value, "AuthorityEpoch") &&
+                   HasZeroNumber(value, "AuthorityRevision") &&
+                   HasEmptyString(value, "CatalogVersion") &&
+                   HasEmptyString(value, "CatalogSha256") &&
+                   HasEmptyString(value, "StateDigest") &&
+                   HasEmptyArray(value, "DiscoveredFeatureIds") &&
+                   HasEmptyArray(value, "VisibleRouteIds") &&
+                   HasEmptyArray(value, "VisibleObjectiveIds") &&
+                   HasEmptyArray(value, "VisibleAllegianceMarkerIds");
+        }
+
+        private static bool HasZeroNumber(StrictJsonObject root, string name)
+        {
+            StrictJsonValue value;
+            var number = root.TryGet(name, out value)
+                ? value as StrictJsonNumber
+                : null;
+            return number != null &&
+                   number.HasFiniteDoubleValue &&
+                   !number.HasNonZeroSignificand;
+        }
+
+        private static bool HasEmptyString(StrictJsonObject root, string name)
+        {
+            StrictJsonValue value;
+            var text = root.TryGet(name, out value)
+                ? value as StrictJsonString
+                : null;
+            return text != null && text.Value.Length == 0;
+        }
+
+        private static bool HasEmptyArray(StrictJsonObject root, string name)
+        {
+            StrictJsonValue value;
+            var rows = root.TryGet(name, out value)
+                ? value as StrictJsonArray
+                : null;
+            return rows != null && rows.Items.Count == 0;
         }
 
         private static bool HasLegacyFingerprint(StrictJsonObject root)

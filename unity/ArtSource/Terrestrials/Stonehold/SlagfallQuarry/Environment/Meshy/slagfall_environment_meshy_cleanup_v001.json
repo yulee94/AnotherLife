@@ -1,0 +1,545 @@
+{
+  "schema": "anotherlife.slagfall-meshy-cleanup.v1",
+  "blender_version": "5.2.0 LTS",
+  "family_count": 8,
+  "profiling_footprint_metres": 4.0,
+  "gameplay_dimensions_authorized": false,
+  "atlas_size": 2048,
+  "atlas_tile_inner_size": 480,
+  "lod_ratios": [
+    1.0,
+    0.55,
+    0.25,
+    0.08
+  ],
+  "master_blend": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/tdf_envkit_stonehold_slagfall_meshy_cleanup_v001.blend",
+  "master_blend_sha256": "c03104d878f77f47713438584797e5b60a307c92e14bc0300221c209405a8e3d",
+  "atlases": {
+    "base_color": {
+      "path": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Textures/tdf_atlas_stonehold_slagfall_environment_basecolor_v001.png",
+      "sha256": "5613e73b522760862924f8adf441b283a6f29df7141a40174b44337a205a0380"
+    },
+    "normal": {
+      "path": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Textures/tdf_atlas_stonehold_slagfall_environment_normal_v001.png",
+      "sha256": "effd49b1a6134b3be9a2f4bc9dd76c8a2440bd1ea8d5b457d4783e87e2712397"
+    },
+    "metallic_smoothness": {
+      "path": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Textures/tdf_atlas_stonehold_slagfall_environment_metallic_smoothness_v001.png",
+      "sha256": "9792015566d454e07c854d2fc49df9f52b969e8c74a8abe64cc52daf2a882c44"
+    }
+  },
+  "families": [
+    {
+      "key": "01",
+      "family_id": "irregular_fracture_raft",
+      "profiling_scale_only": true,
+      "source": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/01_irregular_fracture_raft_meshy_t2_v001.fbx",
+      "source_sha256": "564a622f057b44a67782e0020320377c7db8113a7036ad95e9051944a07c0299",
+      "atlas_tile": 0,
+      "output": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_irregular_fracture_raft_v001.fbx",
+      "output_sha256": "8b43948339ae62a18abeb9af91cdf1feaf5a6b8341356db560e8f41a05a60dc6",
+      "lods": [
+        {
+          "vertices": 4479,
+          "triangles": 7812,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 844,
+          "non_manifold_edges": 844,
+          "dimensions_metres": [
+            4.0,
+            3.7891,
+            0.4336
+          ]
+        },
+        {
+          "vertices": 2665,
+          "triangles": 4295,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 733,
+          "non_manifold_edges": 733,
+          "dimensions_metres": [
+            4.0025,
+            3.7952,
+            0.4336
+          ]
+        },
+        {
+          "vertices": 1390,
+          "triangles": 1953,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 525,
+          "non_manifold_edges": 525,
+          "dimensions_metres": [
+            4.0036,
+            3.7947,
+            0.4454
+          ]
+        },
+        {
+          "vertices": 607,
+          "triangles": 624,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 286,
+          "non_manifold_edges": 287,
+          "dimensions_metres": [
+            4.0039,
+            3.7923,
+            0.4516
+          ]
+        }
+      ]
+    },
+    {
+      "key": "02",
+      "family_id": "broken_fracture_raft",
+      "profiling_scale_only": true,
+      "source": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/02_broken_fracture_raft_meshy7_v002.fbx",
+      "source_sha256": "d00e0b6007b072ef7e055c252223daf02dc5298661760ed012b429c320c5d0a5",
+      "atlas_tile": 1,
+      "output": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_broken_fracture_raft_v001.fbx",
+      "output_sha256": "ef0096bf027d6959c0fa077dba664f869da2c6251965e65635af391696875548",
+      "lods": [
+        {
+          "vertices": 4081,
+          "triangles": 8197,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 32,
+          "non_manifold_edges": 66,
+          "dimensions_metres": [
+            4.0,
+            3.8556,
+            0.3538
+          ]
+        },
+        {
+          "vertices": 2236,
+          "triangles": 4507,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 32,
+          "non_manifold_edges": 66,
+          "dimensions_metres": [
+            4.0,
+            3.8424,
+            0.352
+          ]
+        },
+        {
+          "vertices": 1007,
+          "triangles": 2049,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 32,
+          "non_manifold_edges": 66,
+          "dimensions_metres": [
+            3.993,
+            3.8377,
+            0.3508
+          ]
+        },
+        {
+          "vertices": 310,
+          "triangles": 655,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 32,
+          "non_manifold_edges": 66,
+          "dimensions_metres": [
+            3.9871,
+            3.7306,
+            0.3349
+          ]
+        }
+      ]
+    },
+    {
+      "key": "03",
+      "family_id": "undercut_extraction_ledge",
+      "profiling_scale_only": true,
+      "source": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/03_undercut_extraction_ledge_meshy7_v002.fbx",
+      "source_sha256": "8d2e54a390bb8afc068acac90146d32d6315431b84a65f4604c4d2c0d9a287e8",
+      "atlas_tile": 2,
+      "output": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_undercut_extraction_ledge_v001.fbx",
+      "output_sha256": "fbc6d32d4415f85ae1fe50e8824f77f3323030e5ec5bf3963dcd2dc605bbbe5a",
+      "lods": [
+        {
+          "vertices": 5048,
+          "triangles": 10236,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 98,
+          "non_manifold_edges": 213,
+          "dimensions_metres": [
+            4.0,
+            3.391,
+            1.4417
+          ]
+        },
+        {
+          "vertices": 2744,
+          "triangles": 5629,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 97,
+          "non_manifold_edges": 212,
+          "dimensions_metres": [
+            3.9776,
+            3.3908,
+            1.4328
+          ]
+        },
+        {
+          "vertices": 1209,
+          "triangles": 2559,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 97,
+          "non_manifold_edges": 212,
+          "dimensions_metres": [
+            3.9663,
+            3.381,
+            1.4289
+          ]
+        },
+        {
+          "vertices": 370,
+          "triangles": 882,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 96,
+          "non_manifold_edges": 211,
+          "dimensions_metres": [
+            3.9663,
+            3.381,
+            1.4092
+          ]
+        }
+      ]
+    },
+    {
+      "key": "04",
+      "family_id": "talus_apron",
+      "profiling_scale_only": true,
+      "source": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/04_talus_apron_meshy7_v002.fbx",
+      "source_sha256": "5114464538c12d43f6178a8050df794ab790c529b81187f89427c8f007e3c374",
+      "atlas_tile": 3,
+      "output": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_talus_apron_v001.fbx",
+      "output_sha256": "505e0f0e7bd5ee28e603be120e1b8804138f6d34be47bf4559c7f54d4eb46e75",
+      "lods": [
+        {
+          "vertices": 5104,
+          "triangles": 10267,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 87,
+          "non_manifold_edges": 178,
+          "dimensions_metres": [
+            3.6708,
+            4.0,
+            0.6793
+          ]
+        },
+        {
+          "vertices": 2793,
+          "triangles": 5645,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 87,
+          "non_manifold_edges": 178,
+          "dimensions_metres": [
+            3.6705,
+            3.99,
+            0.679
+          ]
+        },
+        {
+          "vertices": 1253,
+          "triangles": 2566,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 86,
+          "non_manifold_edges": 177,
+          "dimensions_metres": [
+            3.6302,
+            3.9653,
+            0.6739
+          ]
+        },
+        {
+          "vertices": 380,
+          "triangles": 820,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 86,
+          "non_manifold_edges": 177,
+          "dimensions_metres": [
+            3.5717,
+            3.9439,
+            0.5994
+          ]
+        }
+      ]
+    },
+    {
+      "key": "05",
+      "family_id": "collapsed_gallery_mouth",
+      "profiling_scale_only": true,
+      "source": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/05_collapsed_gallery_mouth_meshy_t2_v001.fbx",
+      "source_sha256": "c2dba88638ff047255405b8d21a30f9e915b3c01dc766078c3ec0637e5cc8d3e",
+      "atlas_tile": 4,
+      "output": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_collapsed_gallery_mouth_v001.fbx",
+      "output_sha256": "23c8f30f50ccb1338e7480909bb553650c17cefbe193d75aa019599393883760",
+      "lods": [
+        {
+          "vertices": 6428,
+          "triangles": 11940,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 123,
+          "non_manifold_edges": 128,
+          "dimensions_metres": [
+            4.0,
+            4.0,
+            1.4336
+          ]
+        },
+        {
+          "vertices": 3736,
+          "triangles": 6567,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 112,
+          "non_manifold_edges": 117,
+          "dimensions_metres": [
+            4.0092,
+            4.0071,
+            1.4342
+          ]
+        },
+        {
+          "vertices": 1939,
+          "triangles": 2985,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 100,
+          "non_manifold_edges": 105,
+          "dimensions_metres": [
+            4.0292,
+            4.0131,
+            1.425
+          ]
+        },
+        {
+          "vertices": 912,
+          "triangles": 954,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 77,
+          "non_manifold_edges": 82,
+          "dimensions_metres": [
+            4.0364,
+            4.0256,
+            1.443
+          ]
+        }
+      ]
+    },
+    {
+      "key": "06",
+      "family_id": "diagonal_fault_slab",
+      "profiling_scale_only": true,
+      "source": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/06_diagonal_fault_slab_meshy7_v002.fbx",
+      "source_sha256": "41476fa63099363717f9a8292ce48cc70f6b3a3a785ba37e07b5e78c053e5090",
+      "atlas_tile": 5,
+      "output": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_diagonal_fault_slab_v001.fbx",
+      "output_sha256": "1d9487064b4e18c6d2f3e87fe8b92eccc1056b682665b5a550530d6997499a46",
+      "lods": [
+        {
+          "vertices": 4138,
+          "triangles": 8253,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 46,
+          "non_manifold_edges": 69,
+          "dimensions_metres": [
+            4.0,
+            1.6778,
+            1.0143
+          ]
+        },
+        {
+          "vertices": 2281,
+          "triangles": 4539,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 46,
+          "non_manifold_edges": 69,
+          "dimensions_metres": [
+            3.9965,
+            1.678,
+            1.0141
+          ]
+        },
+        {
+          "vertices": 1043,
+          "triangles": 2063,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 46,
+          "non_manifold_edges": 69,
+          "dimensions_metres": [
+            3.9995,
+            1.6878,
+            1.0104
+          ]
+        },
+        {
+          "vertices": 341,
+          "triangles": 659,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 46,
+          "non_manifold_edges": 69,
+          "dimensions_metres": [
+            3.9697,
+            1.6181,
+            1.0032
+          ]
+        }
+      ]
+    },
+    {
+      "key": "07",
+      "family_id": "braided_runoff_pool",
+      "profiling_scale_only": true,
+      "source": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/07_braided_runoff_pool_meshy7_v002.fbx",
+      "source_sha256": "a917ed09676dbec7a0c640823729ceb06ffe55891a7c627fcd82ca752479c409",
+      "atlas_tile": 6,
+      "output": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_braided_runoff_pool_v001.fbx",
+      "output_sha256": "b7eeeb0beced771fe186b35232f5228d9cd4b9afa895313af621ed419e89f018",
+      "lods": [
+        {
+          "vertices": 3635,
+          "triangles": 7270,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 26,
+          "non_manifold_edges": 48,
+          "dimensions_metres": [
+            4.0,
+            3.2529,
+            0.4225
+          ]
+        },
+        {
+          "vertices": 1999,
+          "triangles": 3998,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 26,
+          "non_manifold_edges": 48,
+          "dimensions_metres": [
+            4.0037,
+            3.2386,
+            0.4245
+          ]
+        },
+        {
+          "vertices": 908,
+          "triangles": 1816,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 26,
+          "non_manifold_edges": 48,
+          "dimensions_metres": [
+            3.99,
+            3.2325,
+            0.4245
+          ]
+        },
+        {
+          "vertices": 290,
+          "triangles": 580,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 26,
+          "non_manifold_edges": 48,
+          "dimensions_metres": [
+            3.9079,
+            3.1514,
+            0.4093
+          ]
+        }
+      ]
+    },
+    {
+      "key": "08",
+      "family_id": "iron_soil_wedge",
+      "profiling_scale_only": true,
+      "source": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/08_iron_soil_wedge_meshy7_v002.fbx",
+      "source_sha256": "cb54651db55815162191a7e8a5b328695ea333ef048105b08d7bdea102cadc2f",
+      "atlas_tile": 7,
+      "output": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_iron_soil_wedge_v001.fbx",
+      "output_sha256": "2d580b12bd71e0a5a7723fe591bef4fb18d7ab74459a0ddaf5c60c7642af2ceb",
+      "lods": [
+        {
+          "vertices": 3544,
+          "triangles": 7106,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 94,
+          "non_manifold_edges": 175,
+          "dimensions_metres": [
+            4.0,
+            2.6599,
+            0.7302
+          ]
+        },
+        {
+          "vertices": 1945,
+          "triangles": 3908,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 94,
+          "non_manifold_edges": 175,
+          "dimensions_metres": [
+            3.9797,
+            2.6121,
+            0.7315
+          ]
+        },
+        {
+          "vertices": 878,
+          "triangles": 1775,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 93,
+          "non_manifold_edges": 174,
+          "dimensions_metres": [
+            3.9499,
+            2.5659,
+            0.7393
+          ]
+        },
+        {
+          "vertices": 284,
+          "triangles": 588,
+          "uv_layers": 1,
+          "material_slots": 1,
+          "boundary_edges": 92,
+          "non_manifold_edges": 173,
+          "dimensions_metres": [
+            3.9499,
+            2.5659,
+            0.6916
+          ]
+        }
+      ]
+    }
+  ]
+}

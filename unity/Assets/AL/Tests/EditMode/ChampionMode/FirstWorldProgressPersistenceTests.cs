@@ -94,6 +94,33 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
+        public void LegacySaveWithoutMapDisclosureLoadsWithoutRewritingBytes()
+        {
+            LocalSaveGameService service = CreateSaveService(_root);
+            service.CreateNewSave(RealmId.Crownlands);
+            string primaryPath = Path.Combine(_root, "save.json");
+            byte[] legacyBytes = File.ReadAllBytes(primaryPath);
+
+            Assert.That(
+                service.CurrentSave.MapDisclosure == null ||
+                service.CurrentSave.MapDisclosure.Version == 0,
+                Is.True);
+
+            LocalSaveGameService reloaded = CreateSaveService(_root);
+            reloaded.Load();
+
+            Assert.That(reloaded.CurrentSave, Is.Not.Null, reloaded.LastLoadMessage);
+            Assert.That(
+                reloaded.CurrentSave.MapDisclosure == null ||
+                reloaded.CurrentSave.MapDisclosure.Version == 0,
+                Is.True);
+            CollectionAssert.AreEqual(
+                legacyBytes,
+                File.ReadAllBytes(primaryPath),
+                "Loading a save without map disclosure state must not rewrite its bytes.");
+        }
+
+        [Test]
         public void TutorialResumesEachDurableBeatAndHandsOffOmenExactlyOnce()
         {
             LocalSaveGameService service = CreateSaveService(_root);

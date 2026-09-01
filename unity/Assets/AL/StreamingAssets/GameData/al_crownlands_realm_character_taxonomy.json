@@ -388,6 +388,8 @@
         "rct_crownlands_motion_champion_ranger_huntermarshal_traversal_v001",
         "rct_crownlands_motion_champion_ranger_huntermarshal_weapon_draw_v001",
         "rct_crownlands_motion_champion_ranger_huntermarshal_weapon_stow_v001",
+        "rct_crownlands_motion_champion_shared_attack_charged_v001",
+        "rct_crownlands_motion_champion_shared_skill_use_v001",
         "rct_crownlands_motion_champion_warrior_warlord_attack_basic_v001",
         "rct_crownlands_motion_champion_warrior_warlord_attack_chain_v001",
         "rct_crownlands_motion_champion_warrior_warlord_attack_heavy_v001",
@@ -1198,6 +1200,7 @@
       "requiredMotionKeys": [
         "attack.basic",
         "attack.chain",
+        "attack.charged",
         "attack.heavy",
         "combat.block",
         "combat.dodge",
@@ -1219,6 +1222,7 @@
         "reaction.get_up",
         "reaction.hit",
         "reaction.knockdown",
+        "skill.use",
         "traversal",
         "weapon.draw",
         "weapon.stow"
@@ -9490,6 +9494,66 @@
       ],
       "skillId": null,
       "motionKey": "weapon.stow",
+      "skillPhase": null,
+      "rigFamilyId": "rct_crownlands_rig_modular_humanoid_v001",
+      "clipRef": null,
+      "rootMotionMode": "in_place",
+      "timingAuthority": "presentation_only",
+      "eventMarkers": []
+    },
+    {
+      "id": "rct_crownlands_motion_champion_shared_attack_charged_v001",
+      "displayName": "Crownlands Champion Shared attack.charged Motion Hold",
+      "authority": {
+        "status": "owner_decision_required",
+        "ownerStatus": "PENDING",
+        "provenanceIds": [
+          "rct_crownlands_provenance_class_progression_v001",
+          "rct_crownlands_provenance_owner_progression_approval_v001"
+        ],
+        "decisionPacketIds": [
+          "rct_crownlands_decision_production_identity_v001"
+        ],
+        "approvalEvidenceRefs": []
+      },
+      "subjectIds": [
+        "rct_crownlands_champion_assassin_veilreaver_v001",
+        "rct_crownlands_champion_mage_spellmarshal_v001",
+        "rct_crownlands_champion_ranger_huntermarshal_v001",
+        "rct_crownlands_champion_warrior_warlord_v001"
+      ],
+      "skillId": null,
+      "motionKey": "attack.charged",
+      "skillPhase": null,
+      "rigFamilyId": "rct_crownlands_rig_modular_humanoid_v001",
+      "clipRef": null,
+      "rootMotionMode": "in_place",
+      "timingAuthority": "presentation_only",
+      "eventMarkers": []
+    },
+    {
+      "id": "rct_crownlands_motion_champion_shared_skill_use_v001",
+      "displayName": "Crownlands Champion Shared skill.use Motion Hold",
+      "authority": {
+        "status": "owner_decision_required",
+        "ownerStatus": "PENDING",
+        "provenanceIds": [
+          "rct_crownlands_provenance_class_progression_v001",
+          "rct_crownlands_provenance_owner_progression_approval_v001"
+        ],
+        "decisionPacketIds": [
+          "rct_crownlands_decision_production_identity_v001"
+        ],
+        "approvalEvidenceRefs": []
+      },
+      "subjectIds": [
+        "rct_crownlands_champion_assassin_veilreaver_v001",
+        "rct_crownlands_champion_mage_spellmarshal_v001",
+        "rct_crownlands_champion_ranger_huntermarshal_v001",
+        "rct_crownlands_champion_warrior_warlord_v001"
+      ],
+      "skillId": null,
+      "motionKey": "skill.use",
       "skillPhase": null,
       "rigFamilyId": "rct_crownlands_rig_modular_humanoid_v001",
       "clipRef": null,

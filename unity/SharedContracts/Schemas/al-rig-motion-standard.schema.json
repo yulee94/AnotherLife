@@ -1,0 +1,651 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.dev/schemas/al-rig-motion-standard.schema.json",
+  "title": "Another Life rig and motion production standard",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gameId",
+    "standardId",
+    "schemaVersion",
+    "contentVersion",
+    "authority",
+    "coordinateSystem",
+    "identifierPolicy",
+    "boneConventions",
+    "skeletonProfiles",
+    "bindPoses",
+    "socketDefinitions",
+    "hitboxConvention",
+    "facialProfiles",
+    "retargetProfiles",
+    "rootMotionPolicies",
+    "layerProfiles",
+    "interruptionPolicy",
+    "qualityBudgets",
+    "representativeProfiles",
+    "motionManifestId"
+  ],
+  "properties": {
+    "gameId": { "const": "another-life" },
+    "standardId": { "const": "rmc_standard_rig_motion_v001" },
+    "schemaVersion": { "const": 1 },
+    "contentVersion": { "$ref": "#/$defs/semver" },
+    "authority": { "$ref": "#/$defs/authority" },
+    "coordinateSystem": { "$ref": "#/$defs/coordinateSystem" },
+    "identifierPolicy": { "$ref": "#/$defs/identifierPolicy" },
+    "boneConventions": { "$ref": "#/$defs/boneConventions" },
+    "skeletonProfiles": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "$ref": "#/$defs/skeletonProfile" }
+    },
+    "bindPoses": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "$ref": "#/$defs/bindPose" }
+    },
+    "socketDefinitions": {
+      "type": "array",
+      "minItems": 10,
+      "items": { "$ref": "#/$defs/socket" }
+    },
+    "hitboxConvention": { "$ref": "#/$defs/hitboxConvention" },
+    "facialProfiles": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "$ref": "#/$defs/facialProfile" }
+    },
+    "retargetProfiles": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "$ref": "#/$defs/retargetProfile" }
+    },
+    "rootMotionPolicies": {
+      "type": "array",
+      "minItems": 7,
+      "items": { "$ref": "#/$defs/rootMotionPolicy" }
+    },
+    "layerProfiles": {
+      "type": "array",
+      "minItems": 4,
+      "items": { "$ref": "#/$defs/layerProfile" }
+    },
+    "interruptionPolicy": { "$ref": "#/$defs/interruptionPolicy" },
+    "qualityBudgets": {
+      "type": "array",
+      "minItems": 5,
+      "items": { "$ref": "#/$defs/qualityBudget" }
+    },
+    "representativeProfiles": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/representative" }
+    },
+    "motionManifestId": { "const": "rmc_manifest_required_motion_v001" }
+  },
+  "$defs": {
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "canonicalId": {
+      "type": "string",
+      "pattern": "^rmc_[a-z0-9]+(?:_[a-z0-9]+)*_v[0-9]{3}$"
+    },
+    "canonicalName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+    "canonicalPath": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(?:/[a-z][a-z0-9_]*)*$"
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "idArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/canonicalId" }
+    },
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "number" }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "technicalOwner",
+        "creativeOwner",
+        "gameplayTimingOwner",
+        "resultAuthority",
+        "sourceAdmission",
+        "importOrderAuthority"
+      ],
+      "properties": {
+        "status": { "const": "active_technical_standard" },
+        "technicalOwner": { "const": "rig_motion_pipeline" },
+        "creativeOwner": { "const": "project_owner" },
+        "gameplayTimingOwner": { "const": "gameplay_runtime" },
+        "resultAuthority": { "const": "gameplay_runtime_or_server" },
+        "sourceAdmission": { "const": "explicit_versioned_catalog_binding_only" },
+        "importOrderAuthority": { "const": false }
+      }
+    },
+    "coordinateSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit",
+        "unityUnitsPerMeter",
+        "blenderUnitSystem",
+        "blenderUnitScale",
+        "blenderUp",
+        "blenderForward",
+        "unityUp",
+        "unityForward",
+        "fbxForward",
+        "fbxUp",
+        "requiredObjectLocation",
+        "requiredObjectRotationDegrees",
+        "requiredObjectScale",
+        "groundToleranceMeters",
+        "scaleTolerance"
+      ],
+      "properties": {
+        "unit": { "const": "meter" },
+        "unityUnitsPerMeter": { "const": 1 },
+        "blenderUnitSystem": { "const": "METRIC" },
+        "blenderUnitScale": { "const": 1 },
+        "blenderUp": { "const": "+Z" },
+        "blenderForward": { "const": "-Y" },
+        "unityUp": { "const": "+Y" },
+        "unityForward": { "const": "+Z" },
+        "fbxForward": { "const": "-Z" },
+        "fbxUp": { "const": "+Y" },
+        "requiredObjectLocation": { "const": [0, 0, 0] },
+        "requiredObjectRotationDegrees": { "const": [0, 0, 0] },
+        "requiredObjectScale": { "const": [1, 1, 1] },
+        "groundToleranceMeters": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.005 },
+        "scaleTolerance": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.0001 }
+      }
+    },
+    "identifierPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pattern",
+        "versionRule",
+        "lookupRule",
+        "orderingRule",
+        "skeletonSignatureAlgorithm",
+        "clipSignatureAlgorithm",
+        "renameRule"
+      ],
+      "properties": {
+        "pattern": { "const": "rmc_<kind>_<slug>_v<NNN>" },
+        "versionRule": { "$ref": "#/$defs/nonBlank" },
+        "lookupRule": { "const": "exact_id_and_declared_version_only" },
+        "orderingRule": { "const": "bytewise_utf8_id_sort_for_serialization_only" },
+        "skeletonSignatureAlgorithm": { "const": "sha256_canonical_parent_path_bind_matrix_deform_flag_v1" },
+        "clipSignatureAlgorithm": { "const": "sha256_skeleton_signature_sample_rate_frame_count_curve_paths_events_v1" },
+        "renameRule": { "const": "meaning_or_hierarchy_change_requires_new_version" }
+      }
+    },
+    "boneConventions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rootBone",
+        "motionRootBone",
+        "sideSuffixes",
+        "humanoidRequiredBones",
+        "optionalHumanoidChains",
+        "nonHumanoidRequiredChains",
+        "hierarchyRules",
+        "exportRules"
+      ],
+      "properties": {
+        "rootBone": { "const": "root" },
+        "motionRootBone": { "const": "motion_root" },
+        "sideSuffixes": { "const": ["_l", "_r"] },
+        "humanoidRequiredBones": {
+          "type": "array",
+          "minItems": 20,
+          "items": { "$ref": "#/$defs/canonicalName" }
+        },
+        "optionalHumanoidChains": { "$ref": "#/$defs/stringArray" },
+        "nonHumanoidRequiredChains": {
+          "type": "array",
+          "minItems": 5,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        },
+        "hierarchyRules": {
+          "type": "array",
+          "minItems": 5,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        },
+        "exportRules": {
+          "type": "array",
+          "minItems": 5,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        }
+      }
+    },
+    "skeletonProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subjectKinds",
+        "classification",
+        "bindPoseId",
+        "bones",
+        "requiredSocketNames",
+        "compatibilityRule"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "subjectKinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "enum": ["champion", "npc", "beast", "monster"] }
+        },
+        "classification": { "enum": ["humanoid", "non_humanoid"] },
+        "bindPoseId": { "$ref": "#/$defs/canonicalId" },
+        "bones": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "parent", "deform", "semantic"],
+            "properties": {
+              "name": { "$ref": "#/$defs/canonicalName" },
+              "parent": {
+                "oneOf": [
+                  { "type": "null" },
+                  { "$ref": "#/$defs/canonicalName" }
+                ]
+              },
+              "deform": { "type": "boolean" },
+              "semantic": { "$ref": "#/$defs/nonBlank" }
+            }
+          }
+        },
+        "requiredSocketNames": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/canonicalName" }
+        },
+        "compatibilityRule": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "bindPose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subjectKinds",
+        "pose",
+        "symmetryToleranceMeters",
+        "jointOrientationRule",
+        "contactRule",
+        "exceptions"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "subjectKinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "enum": ["champion", "npc", "beast", "monster"] }
+        },
+        "pose": { "$ref": "#/$defs/nonBlank" },
+        "symmetryToleranceMeters": { "type": "number", "minimum": 0, "maximum": 0.005 },
+        "jointOrientationRule": { "$ref": "#/$defs/nonBlank" },
+        "contactRule": { "$ref": "#/$defs/nonBlank" },
+        "exceptions": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "socket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "parentSemantic", "requiredFor", "purpose", "scaleRule"],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "name": { "$ref": "#/$defs/canonicalName" },
+        "parentSemantic": { "$ref": "#/$defs/nonBlank" },
+        "requiredFor": {
+          "type": "array",
+          "items": { "enum": ["champion", "npc", "beast", "monster"] }
+        },
+        "purpose": { "$ref": "#/$defs/nonBlank" },
+        "scaleRule": { "const": "identity_no_inherited_nonuniform_scale" }
+      }
+    },
+    "hitboxConvention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visualAuthority",
+        "shapeAuthority",
+        "allowedShapes",
+        "attachmentRule",
+        "activationRule",
+        "lodRule",
+        "negativeScaleAllowed"
+      ],
+      "properties": {
+        "visualAuthority": { "const": false },
+        "shapeAuthority": { "const": "gameplay_catalog" },
+        "allowedShapes": { "const": ["box", "capsule", "sphere", "low_poly_convex_proxy"] },
+        "attachmentRule": { "$ref": "#/$defs/nonBlank" },
+        "activationRule": { "$ref": "#/$defs/nonBlank" },
+        "lodRule": { "const": "lod_independent" },
+        "negativeScaleAllowed": { "const": false }
+      }
+    },
+    "facialProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subjectKinds",
+        "mode",
+        "requiredControls",
+        "requiredVisemes",
+        "requiredExpressions",
+        "gazeRequired",
+        "mobileFallback"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "subjectKinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "enum": ["champion", "npc", "beast", "monster"] }
+        },
+        "mode": { "enum": ["hybrid", "bones", "blendshapes", "none"] },
+        "requiredControls": { "$ref": "#/$defs/stringArray" },
+        "requiredVisemes": { "$ref": "#/$defs/stringArray" },
+        "requiredExpressions": { "$ref": "#/$defs/stringArray" },
+        "gazeRequired": { "type": "boolean" },
+        "mobileFallback": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "retargetProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "mode",
+        "sourceBindPoseId",
+        "targetKinds",
+        "signaturePolicy",
+        "translationPolicy",
+        "scalePolicy",
+        "validationPoses"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "mode": { "enum": ["unity_humanoid", "generic_exact_signature", "generic_semantic_chain"] },
+        "sourceBindPoseId": { "$ref": "#/$defs/canonicalId" },
+        "targetKinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "enum": ["champion", "npc", "beast", "monster"] }
+        },
+        "signaturePolicy": { "$ref": "#/$defs/nonBlank" },
+        "translationPolicy": { "$ref": "#/$defs/nonBlank" },
+        "scalePolicy": { "$ref": "#/$defs/nonBlank" },
+        "validationPoses": {
+          "type": "array",
+          "minItems": 5,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        }
+      }
+    },
+    "rootMotionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "runtimeMode",
+        "sourceTrajectoryRequired",
+        "allowedChannels",
+        "runtimeAuthority",
+        "fallback"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "category": {
+          "enum": ["locomotion", "combat", "skill", "traversal", "interaction", "npc_life", "reaction", "cinematic"]
+        },
+        "runtimeMode": { "enum": ["in_place", "bounded_root_motion", "authored_root_motion"] },
+        "sourceTrajectoryRequired": { "type": "boolean" },
+        "allowedChannels": {
+          "type": "array",
+          "items": { "enum": ["horizontal_x", "horizontal_z", "vertical", "yaw"] }
+        },
+        "runtimeAuthority": { "$ref": "#/$defs/nonBlank" },
+        "fallback": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "layerProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "subjectKind", "layers", "maximumSimultaneousLayers", "missingLayerFallback"],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "subjectKind": { "enum": ["champion", "npc", "beast", "monster"] },
+        "layers": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "mode", "maskPaths", "priority"],
+            "properties": {
+              "id": { "$ref": "#/$defs/canonicalId" },
+              "mode": { "enum": ["override", "additive"] },
+              "maskPaths": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "#/$defs/canonicalPath" }
+              },
+              "priority": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "maximumSimultaneousLayers": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "missingLayerFallback": { "const": "base_safe_pose_never_bind_pose" }
+      }
+    },
+    "interruptionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "priorityOrder",
+        "preCommitRule",
+        "postCommitRule",
+        "missingClipRule",
+        "maximumBlendOutSeconds",
+        "maximumRecoverySeconds",
+        "eventDeduplicationKey"
+      ],
+      "properties": {
+        "priorityOrder": {
+          "const": ["defeat", "hard_control", "interruption", "reaction", "skill", "attack", "interaction", "traversal", "locomotion", "idle"]
+        },
+        "preCommitRule": { "$ref": "#/$defs/nonBlank" },
+        "postCommitRule": { "$ref": "#/$defs/nonBlank" },
+        "missingClipRule": { "const": "reject_optional_action_or_use_declared_safe_fallback_never_t_pose" },
+        "maximumBlendOutSeconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.25 },
+        "maximumRecoverySeconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "eventDeduplicationKey": { "const": "actor_instance_id+action_sequence+event_id+event_ordinal" }
+      }
+    },
+    "qualityBudget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subjectKinds",
+        "platformTier",
+        "topology",
+        "skinning",
+        "deformation",
+        "contacts",
+        "animation"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "subjectKinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "enum": ["champion", "npc", "beast", "monster"] }
+        },
+        "platformTier": { "const": "mobile_floor" },
+        "topology": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maximumLod0Triangles", "maximumMaterialSlots", "degenerateTriangleAreaSquareMeters", "nonManifoldAllowed", "ngonsAllowed"],
+          "properties": {
+            "maximumLod0Triangles": { "type": "integer", "minimum": 1, "maximum": 100000 },
+            "maximumMaterialSlots": { "type": "integer", "minimum": 1, "maximum": 4 },
+            "degenerateTriangleAreaSquareMeters": { "type": "number", "exclusiveMinimum": 0, "maximum": 1e-8 },
+            "nonManifoldAllowed": { "const": "documented_module_seams_only" },
+            "ngonsAllowed": { "const": false }
+          }
+        },
+        "skinning": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maximumDeformingBones", "maximumAnimatedTransforms", "maximumInfluencesPerVertex", "minimumStoredWeight", "weightSumTolerance", "unweightedVerticesAllowed"],
+          "properties": {
+            "maximumDeformingBones": { "type": "integer", "minimum": 1, "maximum": 119 },
+            "maximumAnimatedTransforms": { "type": "integer", "minimum": 1, "maximum": 160 },
+            "maximumInfluencesPerVertex": { "const": 4 },
+            "minimumStoredWeight": { "type": "number", "minimum": 0.0001, "maximum": 0.001 },
+            "weightSumTolerance": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.0001 },
+            "unweightedVerticesAllowed": { "const": 0 }
+          }
+        },
+        "deformation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["requiredPoseCount", "maximumSeamGapMeters", "maximumProtectedPenetrationMeters", "maximumProtectedPenetrationAreaSquareMeters", "invertedTrianglesAllowed", "finiteVerticesRequired"],
+          "properties": {
+            "requiredPoseCount": { "type": "integer", "minimum": 12 },
+            "maximumSeamGapMeters": { "type": "number", "minimum": 0, "maximum": 0.002 },
+            "maximumProtectedPenetrationMeters": { "type": "number", "minimum": 0, "maximum": 0.005 },
+            "maximumProtectedPenetrationAreaSquareMeters": { "type": "number", "minimum": 0, "maximum": 0.0001 },
+            "invertedTrianglesAllowed": { "const": 0 },
+            "finiteVerticesRequired": { "const": true }
+          }
+        },
+        "contacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maximumPlantedHorizontalDriftMeters", "maximumPlantedVerticalErrorMeters", "maximumLoopPositionErrorMeters", "maximumLoopRotationErrorDegrees", "maximumStrideErrorPercent"],
+          "properties": {
+            "maximumPlantedHorizontalDriftMeters": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.02 },
+            "maximumPlantedVerticalErrorMeters": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.01 },
+            "maximumLoopPositionErrorMeters": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.01 },
+            "maximumLoopRotationErrorDegrees": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+            "maximumStrideErrorPercent": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 }
+          }
+        },
+        "animation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maximumResidentClipCount", "maximumCompressedMemoryMiB", "maximumRuntimeLayers", "minimumSampleRateHz", "maximumSampleRateHz"],
+          "properties": {
+            "maximumResidentClipCount": { "type": "integer", "minimum": 1, "maximum": 64 },
+            "maximumCompressedMemoryMiB": { "type": "number", "exclusiveMinimum": 0, "maximum": 24 },
+            "maximumRuntimeLayers": { "type": "integer", "minimum": 1, "maximum": 4 },
+            "minimumSampleRateHz": { "type": "integer", "minimum": 30 },
+            "maximumSampleRateHz": { "type": "integer", "maximum": 60 }
+          }
+        }
+      }
+    },
+    "representative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subjectKind",
+        "assetId",
+        "sourcePath",
+        "authorityState",
+        "skeletonProfileId",
+        "retargetProfileId",
+        "bindPoseId",
+        "bindPoseOverrideReason",
+        "facialProfileId",
+        "layerProfileId",
+        "budgetProfileId",
+        "requiredMotionSetId",
+        "skeletonSignature",
+        "currentState",
+        "exceptions",
+        "admissionState"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "subjectKind": { "enum": ["champion", "npc", "beast"] },
+        "assetId": { "type": "string", "minLength": 1 },
+        "sourcePath": { "$ref": "#/$defs/nonBlank" },
+        "authorityState": { "enum": ["bounded_engineering", "mvp_runtime_candidate"] },
+        "skeletonProfileId": { "$ref": "#/$defs/canonicalId" },
+        "retargetProfileId": { "$ref": "#/$defs/canonicalId" },
+        "bindPoseId": { "$ref": "#/$defs/canonicalId" },
+        "bindPoseOverrideReason": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/nonBlank" }
+          ]
+        },
+        "facialProfileId": { "$ref": "#/$defs/canonicalId" },
+        "layerProfileId": { "$ref": "#/$defs/canonicalId" },
+        "budgetProfileId": { "$ref": "#/$defs/canonicalId" },
+        "requiredMotionSetId": { "$ref": "#/$defs/canonicalId" },
+        "skeletonSignature": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+          ]
+        },
+        "currentState": { "$ref": "#/$defs/nonBlank" },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "rule", "reason", "requiredResolution"],
+            "properties": {
+              "id": { "$ref": "#/$defs/canonicalId" },
+              "rule": { "$ref": "#/$defs/nonBlank" },
+              "reason": { "$ref": "#/$defs/nonBlank" },
+              "requiredResolution": { "$ref": "#/$defs/nonBlank" }
+            }
+          }
+        },
+        "admissionState": { "enum": ["blocked_pending_cleanup", "blocked_missing_required_motion"] }
+      }
+    }
+  }
+}
