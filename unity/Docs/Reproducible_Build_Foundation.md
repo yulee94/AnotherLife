@@ -64,7 +64,8 @@ Every signed-ready build manifest records:
   embedded Android SDK/NDK/JDK availability inventory;
 - target settings, scripting backend, architecture, options, and ordered scene list;
 - content paths, sizes, hashes, and content-tree digest;
-- artifact paths, sizes, hashes, artifact-tree digest, and structural smoke result;
+- artifact paths, raw sizes/hashes/tree digest, reproducible sizes/hashes/tree digest,
+  declared per-file normalization, and structural smoke result;
 - run timestamps, host, log path, and clean-Library choice;
 - release/capacity authority references.
 
@@ -125,9 +126,12 @@ Before launching Unity, the runner:
 8. writes the signed-ready manifest atomically.
 
 Cleanup refuses repository root, outside-repository paths, symlinks, and reparse points.
-Two builds are equivalent only when all fields except `run` and `manifestSha256` match. Artifact,
-toolchain, setting, source, scene, or content divergence returns `stop_ship` with exact field paths.
-No broad binary normalization is allowed.
+Two builds are equivalent only when all reproducible fields match after excluding `run`,
+`manifestSha256`, and the exact decimal `player-connection-guid` value Unity emits into a
+development Player's `AnotherLifeUnity_Data/boot.config`. Manifests retain the raw size/hash/tree
+evidence alongside the normalized digest; malformed or duplicate connection-guid lines fail closed.
+Any other artifact, toolchain, setting, source, scene, or content divergence returns `stop_ship`
+with exact field paths. No broad binary normalization is allowed.
 
 The packaged golden-scene identity derives its timestamp from the source commit rather than wall
 clock time. `NoUniqueIdentifier` prevents Unity from writing a fresh build GUID into each Player.

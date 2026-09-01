@@ -548,11 +548,47 @@ def run_windows_launch_smoke(
     )
 
 
-def _artifact_entries(root: Path) -> tuple[list[dict[str, Any]], str]:
+def _normalize_artifact(path: Path, relative: str, size: int, digest: str) -> dict[str, Any]:
+    entry = {
+        "path": relative,
+        "bytes": size,
+        "sha256": digest,
+        "reproducibleBytes": size,
+        "reproducibleSha256": digest,
+        "normalization": [],
+    }
+    if relative != "AnotherLifeUnity_Data/boot.config":
+        return entry
+
+    text = path.read_text(encoding="utf-8")
+    normalized_lines = []
+    match_count = 0
+    for line in text.splitlines(keepends=True):
+        ending = "\r\n" if line.endswith("\r\n") else "\n" if line.endswith("\n") else ""
+        content = line[: -len(ending)] if ending else line
+        prefix = "player-connection-guid="
+        if content.startswith(prefix):
+            value = content[len(prefix):]
+            if not value.isdecimal():
+                raise BuildContractError("boot.config player-connection-guid must be decimal")
+            match_count += 1
+            content = prefix + "<normalized>"
+        normalized_lines.append(content + ending)
+    if match_count != 1:
+        raise BuildContractError("boot.config must contain exactly one player-connection-guid")
+    normalized = "".join(normalized_lines).encode("utf-8")
+    entry["reproducibleBytes"] = len(normalized)
+    entry["reproducibleSha256"] = sha256_bytes(normalized)
+    entry["normalization"] = ["player-connection-guid"]
+    return entry
+
+
+def _artifact_entries(root: Path) -> tuple[list[dict[str, Any]], str, str]:
     if not root.is_dir() or root.is_symlink():
         raise BuildContractError(f"artifact root is missing or symlinked: {root}")
     entries = []
     tree = bytearray()
+    reproducible_tree = bytearray()
     for path in sorted(
         (item for item in root.rglob("*") if item.is_file()),
         key=lambda item: item.relative_to(root).as_posix().encode("utf-8"),
@@ -562,16 +598,23 @@ def _artifact_entries(root: Path) -> tuple[list[dict[str, Any]], str]:
         relative = path.relative_to(root).as_posix()
         size = path.stat().st_size
         digest = sha256_file(path)
-        entries.append({"path": relative, "bytes": size, "sha256": digest})
+        entry = _normalize_artifact(path, relative, size, digest)
+        entries.append(entry)
         tree.extend(relative.encode("utf-8"))
         tree.extend(b"\0")
         tree.extend(str(size).encode("ascii"))
         tree.extend(b"\0")
         tree.extend(digest.encode("ascii"))
         tree.extend(b"\n")
+        reproducible_tree.extend(relative.encode("utf-8"))
+        reproducible_tree.extend(b"\0")
+        reproducible_tree.extend(str(entry["reproducibleBytes"]).encode("ascii"))
+        reproducible_tree.extend(b"\0")
+        reproducible_tree.extend(entry["reproducibleSha256"].encode("ascii"))
+        reproducible_tree.extend(b"\n")
     if not entries:
         raise BuildContractError(f"artifact root contains no files: {root}")
-    return entries, sha256_bytes(bytes(tree))
+    return entries, sha256_bytes(bytes(tree)), sha256_bytes(bytes(reproducible_tree))
 
 
 def _smoke_windows(root: Path) -> dict[str, Any]:
@@ -602,7 +645,7 @@ def _smoke_android(root: Path) -> dict[str, Any]:
 
 def inspect_artifacts(root: Path, target: str) -> dict[str, Any]:
     root = Path(root).resolve()
-    entries, tree_hash = _artifact_entries(root)
+    entries, tree_hash, reproducible_tree_hash = _artifact_entries(root)
     if target == "windows64-development":
         smoke = _smoke_windows(root)
     elif target in ANDROID_TARGETS:
@@ -614,6 +657,8 @@ def inspect_artifacts(root: Path, target: str) -> dict[str, Any]:
         "fileCount": len(entries),
         "totalBytes": sum(item["bytes"] for item in entries),
         "treeSha256": tree_hash,
+        "reproducibleTotalBytes": sum(item["reproducibleBytes"] for item in entries),
+        "reproducibleTreeSha256": reproducible_tree_hash,
         "files": entries,
         "smoke": smoke,
     }
@@ -639,7 +684,27 @@ def _without_normalized(payload: dict[str, Any]) -> dict[str, Any]:
     normalized = copy.deepcopy(payload)
     normalized.pop("run", None)
     normalized.pop("manifestSha256", None)
+    artifacts = normalized.get("artifacts")
+    if isinstance(artifacts, dict) and "reproducibleTreeSha256" in artifacts:
+        artifacts.pop("totalBytes", None)
+        artifacts.pop("treeSha256", None)
+        for entry in artifacts.get("files", []):
+            if "reproducibleSha256" in entry:
+                entry.pop("bytes", None)
+                entry.pop("sha256", None)
     return normalized
+
+
+def _normalizations(*payloads: dict[str, Any]) -> list[str]:
+    result = ["run", "manifestSha256"]
+    declared = set()
+    for payload in payloads:
+        artifacts = payload.get("artifacts", {})
+        for entry in artifacts.get("files", []):
+            for field in entry.get("normalization", []):
+                declared.add(f'{entry.get("path", "<unknown>")}:{field}')
+    result.extend(sorted(declared, key=lambda value: value.encode("utf-8")))
+    return result
 
 
 def _differences(left: Any, right: Any, prefix: str = "") -> list[str]:
@@ -673,10 +738,14 @@ def compare_manifests(first: dict[str, Any], second: dict[str, Any]) -> dict[str
     if not differences:
         return {
             "status": "normalized_equivalent",
-            "normalization": ["run", "manifestSha256"],
+            "normalization": _normalizations(first, second),
             "differences": [],
         }
-    return {"status": "stop_ship", "normalization": ["run", "manifestSha256"], "differences": differences}
+    return {
+        "status": "stop_ship",
+        "normalization": _normalizations(first, second),
+        "differences": differences,
+    }
 
 
 def preflight_build(

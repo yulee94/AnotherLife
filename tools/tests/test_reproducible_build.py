@@ -202,6 +202,54 @@ class ReproducibleBuildTests(unittest.TestCase):
             self.assertEqual(comparison["status"], "stop_ship")
             self.assertIn("artifacts.treeSha256", comparison["differences"])
 
+    def test_windows_boot_connection_guid_is_exactly_normalized_with_raw_hashes_preserved(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifests = []
+            for name, connection_guid in (("first", "123"), ("second", "987654321")):
+                player = root / name
+                data = player / "AnotherLifeUnity_Data"
+                data.mkdir(parents=True)
+                (player / "AnotherLifeUnity.exe").write_bytes(b"MZ" + b"\0" * 62)
+                (data / "globalgamemanagers").write_bytes(b"manager")
+                (data / "boot.config").write_text(
+                    "player-connection-mode=Listen\n"
+                    f"player-connection-guid={connection_guid}\n"
+                    "player-connection-ip=192.0.2.10\n",
+                    encoding="utf-8",
+                )
+                artifacts = module.inspect_artifacts(player, "windows64-development")
+                artifacts["root"] = "player"
+                manifests.append({
+                    "target": "windows64-development",
+                    "artifacts": artifacts,
+                    "run": {"host": name},
+                })
+
+            first_boot = next(
+                item for item in manifests[0]["artifacts"]["files"]
+                if item["path"] == "AnotherLifeUnity_Data/boot.config"
+            )
+            second_boot = next(
+                item for item in manifests[1]["artifacts"]["files"]
+                if item["path"] == "AnotherLifeUnity_Data/boot.config"
+            )
+            self.assertNotEqual(first_boot["sha256"], second_boot["sha256"])
+            self.assertEqual(first_boot["reproducibleSha256"], second_boot["reproducibleSha256"])
+            self.assertEqual(first_boot["normalization"], ["player-connection-guid"])
+
+            comparison = module.compare_manifests(*manifests)
+            self.assertEqual(comparison["status"], "normalized_equivalent")
+            self.assertIn(
+                "AnotherLifeUnity_Data/boot.config:player-connection-guid",
+                comparison["normalization"],
+            )
+
+            manifests[1]["artifacts"]["files"][2]["reproducibleSha256"] = "f" * 64
+            comparison = module.compare_manifests(*manifests)
+            self.assertEqual(comparison["status"], "stop_ship")
+
     def test_manifest_source_summary_includes_actual_editor_settings_and_input_hashes(self):
         module = load_module()
         source = {
