@@ -537,6 +537,41 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(1, terminalCount);
         }
 
+        [Test]
+        public void HostCleanupGuardContainsPlatformExceptionAndDoesNotRetry()
+        {
+            GameObject root = CreateHostObject(out LaunchCinematicVideoPlayerHost host);
+            int operationCount = 0;
+            Action failingOperation = () =>
+            {
+                operationCount++;
+                throw new System.InvalidOperationException("test-only cleanup failure");
+            };
+
+            try
+            {
+                bool released = true;
+                Assert.DoesNotThrow(
+                    () => released = (bool)InvokePrivate(
+                        host,
+                        "TryRunCleanupOperation",
+                        failingOperation));
+
+                Assert.IsFalse(released);
+                Assert.AreEqual(1, operationCount);
+                Assert.IsTrue(
+                    (bool)InvokePrivate(
+                        host,
+                        "TryRunCleanupOperation",
+                        new Action(() => operationCount++)));
+                Assert.AreEqual(2, operationCount);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
         [TestCase(
             "/Applications/AnotherLife/StreamingAssets",
             "LaunchCinematic/Desktop/launch_omen_01.mp4",
