@@ -1495,6 +1495,17 @@ namespace AL.Tests.EditMode.FirstUserGameTest
                 diagnostic);
         }
 
+        private static AudioSource AddOwnedCombatAudioChannel(Transform parent)
+        {
+            var channel = new GameObject("OwnedRuntimeCombatAudio");
+            channel.transform.SetParent(parent, false);
+            AudioSource source = channel.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            source.priority = 80;
+            return source;
+        }
+
         [Test]
         public void EnvironmentFactoryBoundaryRejectsReparentedPreexistingSceneObject()
         {
@@ -1753,6 +1764,38 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             _lease.PlayerControllerValue.transform.position = Vector3.forward * 2f;
 
             Assert.That(Validate(_lease).IsValid, Is.True);
+        }
+
+        [Test]
+        public void RuntimeComponentInventoryAllowsExactPlayerOwnedCombatAudioChannel()
+        {
+            _lease = TestEnvironmentLease.Create();
+            AddOwnedCombatAudioChannel(_lease.PlayerChampionValue.transform);
+
+            Assert.That(
+                FirstUserOnboardingFixedAssetInventoryVerifier.Instance
+                    .TryVerifyRuntimeComponentInventory(
+                        _lease,
+                        out string diagnostic),
+                Is.True,
+                diagnostic);
+        }
+
+        [Test]
+        public void RuntimeComponentInventoryRejectsAudioOutsideExactPlayerOwnedChannel()
+        {
+            _lease = TestEnvironmentLease.Create();
+            AddOwnedCombatAudioChannel(_lease.RootValue.transform);
+
+            Assert.That(
+                FirstUserOnboardingFixedAssetInventoryVerifier.Instance
+                    .TryVerifyRuntimeComponentInventory(
+                        _lease,
+                        out string diagnostic),
+                Is.False);
+            Assert.That(
+                diagnostic,
+                Is.EqualTo("runtime_component_not_admitted:UnityEngine.AudioSource"));
         }
 
         [Test]
