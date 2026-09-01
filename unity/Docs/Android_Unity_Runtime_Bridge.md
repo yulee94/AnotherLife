@@ -447,10 +447,17 @@ callback is inert. A current request carrying the wrong route, or a malformed, o
 structurally invalid ready message, remains a typed protocol failure and does not transfer
 presentation ownership.
 
-The JVM boundary and Android-side parser/session/host transition are implemented. No production
-Unity route currently emits this acknowledgement, because no gameplay route is enabled. A future
-route must emit it only after that route has completed its own presentation/readiness checks; it
-must not treat receipt of `SetRouteContext` as readiness.
+The JVM boundary and Android-side parser/session/host transition are implemented. Unity also owns a
+canonical `UnityRouteReady` validator/encoder, an exact `reportReady(String)` Android adapter, and a
+bounded, main-thread `UnityBridgeReadySender`. A route reports readiness explicitly through
+`AndroidBridgeRuntimeHost.TryReportReady(validatedRequest)`; bridge initialization and
+`SetRouteContext` never call that API. An unavailable platform callback is retryable only for the
+same pinned request envelope, while an invoked or ambiguously failed callback becomes terminal and
+cannot be replayed by the sender.
+
+No production Unity route currently calls this sender, because no gameplay route is enabled. A
+future route must call it only after that route has completed its own presentation/readiness checks;
+it must not treat receipt of `SetRouteContext` as readiness.
 
 ## Outcome Contract
 
