@@ -10,7 +10,7 @@ namespace AL.EditorTools
     public sealed class SharedGameDataStreamingAssetsBuildProcessor : BuildPlayerProcessor
     {
         internal const string DestinationPath = "GameData";
-        private const int MaximumCatalogCount = 32;
+        private const int MaximumCatalogCount = 64;
 
         public override int callbackOrder => -1000;
 

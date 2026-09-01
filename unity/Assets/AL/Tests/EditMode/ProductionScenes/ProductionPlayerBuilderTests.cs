@@ -45,10 +45,15 @@ namespace AL.Tests.EditMode.ProductionScenes
             FieldInfo destination = processor.GetField(
                 "DestinationPath",
                 BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            FieldInfo maximumCatalogCount = processor.GetField(
+                "MaximumCatalogCount",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.That(resolveSource, Is.Not.Null);
             Assert.That(resolveCatalogs, Is.Not.Null);
             Assert.That(resolveRegistrations, Is.Not.Null);
             Assert.That(destination, Is.Not.Null);
+            Assert.That(maximumCatalogCount, Is.Not.Null);
+            Assert.That(maximumCatalogCount.GetRawConstantValue(), Is.EqualTo(64));
 
             string source = (string)resolveSource.Invoke(null, new object[] { Application.dataPath });
             Assert.That(
@@ -92,7 +97,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
-        public void SharedGameDataBuildProcessorRejectsMissingDuplicateEmptyAndOverBoundedSources()
+        public void SharedGameDataBuildProcessorRejectsMissingDuplicateEmptyAndOver64Sources()
         {
             Type processor = Runtime("AL.EditorTools.SharedGameDataStreamingAssetsBuildProcessor");
             MethodInfo resolveCatalogs = processor.GetMethod(
@@ -110,20 +115,20 @@ namespace AL.Tests.EditMode.ProductionScenes
                 AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "source directory is missing");
 
                 Directory.CreateDirectory(source);
-                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..32");
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..64");
 
                 File.WriteAllText(Path.Combine(source, "catalog-00.json"), "{}");
                 Directory.CreateDirectory(duplicate);
                 AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "Duplicate GameData");
 
                 Directory.Delete(duplicate, true);
-                for (int i = 1; i < 33; i++)
+                for (int i = 1; i < 65; i++)
                 {
                     File.WriteAllText(
                         Path.Combine(source, "catalog-" + i.ToString("00", CultureInfo.InvariantCulture) + ".json"),
                         "{}");
                 }
-                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..32");
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..64");
             }
             finally
             {
