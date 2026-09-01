@@ -1,0 +1,83 @@
+{
+  "schema": "anotherlife.enterable-fort-gatehouse-layout.v1",
+  "status": "owner_approved_2d_authority_2026-09-01",
+  "purpose": "Shared functional core for realm-specific enterable fort and castle gatehouses.",
+  "units": "meters",
+  "envelope": {
+    "width": 18.0,
+    "depth": 10.0,
+    "height": 9.0,
+    "wallThickness": 0.5,
+    "floorToFloor": 4.0,
+    "groundClearHeight": 3.5,
+    "upperClearHeight": 3.2
+  },
+  "gatePolicy": {
+    "centralSlotWidth": 4.0,
+    "centralSlotX": 7.0,
+    "physicalPassage": false,
+    "runtimeAuthority": "separate teleport/breach gameplay system",
+    "defaultCollision": "impassable",
+    "enemyBreachVariant": "separate authorized state; not modeled into intact shell"
+  },
+  "doorPolicy": {
+    "shellContainsDoorMeshes": false,
+    "openingsOnly": true,
+    "futureDoorPrefabs": "separate deferred asset family"
+  },
+  "assemblyPolicy": {
+    "gridMeters": 0.5,
+    "sharedCivicKitReuse": true,
+    "fortSpecificModules": [
+      "embrasure_wall_2m",
+      "wallwalk_parapet_1m",
+      "battlement_merlon_1m",
+      "gate_portal_frame_4m",
+      "control_gallery_beam_4m",
+      "murder_hole_ceiling_2m",
+      "fort_buttress_1m",
+      "breach_state_end_cap"
+    ],
+    "runtimeBake": "combine static opaque modules per left wing, right wing, upper gallery, roof and exterior wall cell"
+  },
+  "groundFloor": [
+    {"id": "left_guard_ready", "x": 0.5, "z": 0.5, "width": 3.5, "depth": 4.5, "furniture": ["benches", "weapon_rack_zone", "clear_response_aisle"]},
+    {"id": "left_stair_service", "x": 4.0, "z": 0.5, "width": 2.5, "depth": 9.0, "furniture": ["u_stair_1_5m", "utility_storage"]},
+    {"id": "left_stores", "x": 0.5, "z": 5.0, "width": 3.5, "depth": 4.5, "furniture": ["supply_racks", "secure_chests"]},
+    {"id": "central_gate_slot", "x": 7.0, "z": 0.0, "width": 4.0, "depth": 10.0, "impassable": true, "furniture": []},
+    {"id": "right_stair_armory", "x": 11.5, "z": 0.5, "width": 2.5, "depth": 9.0, "furniture": ["u_stair_1_5m", "armory_racks"]},
+    {"id": "right_inspection", "x": 14.0, "z": 0.5, "width": 3.5, "depth": 4.5, "furniture": ["inspection_counter", "records_shelf", "clear_aisle"]},
+    {"id": "right_holding_records", "x": 14.0, "z": 5.0, "width": 3.5, "depth": 4.5, "furniture": ["records_table", "secure_storage"]}
+  ],
+  "upperFloor": [
+    {"id": "left_barracks", "x": 0.5, "z": 0.5, "width": 3.5, "depth": 9.0, "furniture": ["four_bunks", "lockers", "clear_aisle"]},
+    {"id": "left_landing", "x": 4.0, "z": 0.5, "width": 2.5, "depth": 9.0, "furniture": ["u_stair_landing", "wallwalk_access"]},
+    {"id": "gate_control_gallery", "x": 6.5, "z": 2.0, "width": 5.0, "depth": 6.0, "furniture": ["control_console_zone", "guard_rail", "observation_positions"]},
+    {"id": "right_landing", "x": 11.5, "z": 0.5, "width": 2.5, "depth": 9.0, "furniture": ["u_stair_landing", "wallwalk_access"]},
+    {"id": "right_barracks", "x": 14.0, "z": 0.5, "width": 3.5, "depth": 9.0, "furniture": ["four_bunks", "lockers", "clear_aisle"]}
+  ],
+  "apertures": [
+    {"floor": "ground", "kind": "exterior", "room": "left_guard_ready", "orientation": "horizontal", "x": 2.25, "z": 0.0, "width": 1.4},
+    {"floor": "ground", "kind": "exterior", "room": "right_inspection", "orientation": "horizontal", "x": 15.75, "z": 0.0, "width": 1.4},
+    {"floor": "ground", "kind": "internal", "between": ["left_guard_ready", "left_stair_service"], "orientation": "vertical", "x": 4.0, "z": 2.5, "width": 1.2},
+    {"floor": "ground", "kind": "internal", "between": ["left_stores", "left_stair_service"], "orientation": "vertical", "x": 4.0, "z": 7.0, "width": 1.2},
+    {"floor": "ground", "kind": "internal", "between": ["right_inspection", "right_stair_armory"], "orientation": "vertical", "x": 14.0, "z": 2.5, "width": 1.2},
+    {"floor": "ground", "kind": "internal", "between": ["right_holding_records", "right_stair_armory"], "orientation": "vertical", "x": 14.0, "z": 7.0, "width": 1.2},
+    {"floor": "ground", "kind": "rear_service", "room": "left_stair_service", "orientation": "horizontal", "x": 5.25, "z": 10.0, "width": 1.4},
+    {"floor": "ground", "kind": "rear_service", "room": "right_stair_armory", "orientation": "horizontal", "x": 12.75, "z": 10.0, "width": 1.4},
+    {"floor": "upper", "kind": "internal", "between": ["left_barracks", "left_landing"], "orientation": "vertical", "x": 4.0, "z": 5.0, "width": 1.2},
+    {"floor": "upper", "kind": "internal", "between": ["left_landing", "gate_control_gallery"], "orientation": "vertical", "x": 6.5, "z": 5.0, "width": 1.2},
+    {"floor": "upper", "kind": "internal", "between": ["gate_control_gallery", "right_landing"], "orientation": "vertical", "x": 11.5, "z": 5.0, "width": 1.2},
+    {"floor": "upper", "kind": "internal", "between": ["right_landing", "right_barracks"], "orientation": "vertical", "x": 14.0, "z": 5.0, "width": 1.2},
+    {"floor": "upper", "kind": "wallwalk", "room": "left_landing", "orientation": "horizontal", "x": 5.25, "z": 10.0, "width": 1.5},
+    {"floor": "upper", "kind": "wallwalk", "room": "right_landing", "orientation": "horizontal", "x": 12.75, "z": 10.0, "width": 1.5}
+  ],
+  "runtimeIntent": {
+    "streaming": "seamless_small_interior",
+    "visibilityCells": ["left_wing", "right_wing", "upper_gallery", "roof", "exterior"],
+    "roofOcclusion": "separate roof group",
+    "wallWalkConnections": "openings only; adjoining fort walls remain separate cells",
+    "colliders": "simple wall/portal/room primitives; no tile colliders or decorative MeshColliders",
+    "combatReadability": "minimum 1.5m stairs, 1.2m internal apertures and clear response aisles"
+  }
+}

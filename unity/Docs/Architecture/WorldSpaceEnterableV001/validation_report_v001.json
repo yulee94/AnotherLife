@@ -1,0 +1,32 @@
+{
+  "schema": "anotherlife.enterable-architecture-2d-validation.v1",
+  "status": "passed",
+  "ownerApprovalRecordedOn": "2026-09-01",
+  "packetCount": 2,
+  "artifactCount": 12,
+  "verifiedArtifactCount": 12,
+  "checks": {
+    "hashesAndByteLengths": "passed",
+    "pngDimensions": "passed",
+    "uniqueSafeLocators": "passed",
+    "lfHashBoundJson": "passed",
+    "ownerApproval": "passed",
+    "noNew3dJobs": "passed",
+    "civicModularPolicy": "passed",
+    "fortStairAlignment": "passed",
+    "fortGateImpassable": "passed",
+    "doorMeshesExcluded": "passed"
+  },
+  "packets": {
+    "civic_hall": {
+      "artifactCount": 8,
+      "verifiedCount": 8,
+      "status": "owner_approved_six_construction_assets_two_exterior_references_only"
+    },
+    "fort_gatehouse": {
+      "artifactCount": 4,
+      "verifiedCount": 4,
+      "status": "owner_approved_four_construction_assets"
+    }
+  }
+}
