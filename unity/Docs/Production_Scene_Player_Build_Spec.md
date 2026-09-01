@@ -1,7 +1,8 @@
 # Production Scene, Build Settings, and Player Launch-Smoke Specification
 
 > Historical baseline notice: scene-count and Build Settings applicability statements in this
-> 2026-07-15 specification are superseded by owner-approved `DEC-SCENE-DELIVERY-001` and the
+> 2026-07-15 specification are superseded by owner-approved `DEC-SCENE-DELIVERY-001`, its
+> non-shipping inventory amendment `DEC-SCENE-DELIVERY-002`, and the
 > current `ProductionSceneDescriptor`. The authoritative direct order is now Boot,
 > RealmSelection, CharacterCreation, ChampionArena, Kingdom; the 78 catalog-generated scenes are
 > local Addressables. See `Architecture/Deterministic_Scene_Content_Delivery_Decision.md`.

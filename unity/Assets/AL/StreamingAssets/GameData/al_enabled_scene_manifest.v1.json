@@ -1,7 +1,7 @@
 {
-  "accountingFingerprintSha256": "6d92fc7cac0f4477c5d29454b50e831bff423a1809a72e7de60dcf8d5eff3321",
-  "contentFingerprintSha256": "6164a9a9afef475a398c1bf4ffad98a742089b95f7aaa4e8cd58a8189ef5ac76",
-  "decisionId": "DEC-SCENE-DELIVERY-001",
+  "accountingFingerprintSha256": "69bde1c10261830c458de15dad3449d6cf973dd2a563f0c3373d559de914e936",
+  "contentFingerprintSha256": "7c1a9018b7843bc728a097952b6cf6f0cb72db6255b642a7d4747043384a6f05",
+  "decisionId": "DEC-SCENE-DELIVERY-002",
   "deliveryDependencies": {
     "addressablesVersion": "2.9.1",
     "packagesLockSha256": "87899072e8b43a6c6e46ce4623026617239520c481b814a2bfc0ba88f82c8f6d",
@@ -31,7 +31,7 @@
         {
           "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
           "guid": "373eb8627471831489396976562eb9b1",
-          "sha256": "1d2d4af11f22125a8c54fe21a62e155585dfa67e567e0a402f31b572f16f1d0e"
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
         },
         {
           "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
@@ -51,10 +51,10 @@
         {
           "assetPath": "Assets/AL/Scripts/UI/BootController.cs",
           "guid": "a6bcae63b59f3ac47b172b4520cd0675",
-          "sha256": "187eab89ba9e157b4f8fafdefabd4ae6c327c53ccdd04560736dfe309ed9f63a"
+          "sha256": "cd4f5e1c1b34850250f6d21c66c641d5024907edb9ed6a376726666a2671634f"
         }
       ],
-      "dependencyProjectionSha256": "c2e5f61143ac9ae19c72c5a205ced4ac27d0149f135d1b651d3b18a20eb46244",
+      "dependencyProjectionSha256": "eab461ed4c71064433f32b6e3c4370bc286bbac2e9d9727ea19da77a0ca416ff",
       "guid": "14733c561820e497a96a3f2467d247cc",
       "metaSha256": "5e2a739cb92edbfaa1dcc3d0d064ae40e7235fa4fbfb80b0a54f9b3ea60292ea",
       "ownership": {
@@ -87,7 +87,7 @@
         {
           "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
           "guid": "373eb8627471831489396976562eb9b1",
-          "sha256": "1d2d4af11f22125a8c54fe21a62e155585dfa67e567e0a402f31b572f16f1d0e"
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
         },
         {
           "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
@@ -135,7 +135,7 @@
           "sha256": "f5c7e351ec930aac69f6df02d03034bc38c465ed8dfa787dd4feba044f33f82b"
         }
       ],
-      "dependencyProjectionSha256": "1d7d66794c3dd5cad9fb54c255dc1165cd57ea22d45ea69b733312b2ee30d50b",
+      "dependencyProjectionSha256": "8ce28f8a5ff12d7c7e2342aaf07dab789beaf67e1adc7d5746a5add9d7125982",
       "guid": "5c580ae0acb5e4b4db4b57a93077e308",
       "metaSha256": "e580527f283dc5df832d15ceeae00557463f5f3f53f63e0a5a5ae274e539a020",
       "ownership": {
@@ -168,7 +168,7 @@
         {
           "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
           "guid": "373eb8627471831489396976562eb9b1",
-          "sha256": "1d2d4af11f22125a8c54fe21a62e155585dfa67e567e0a402f31b572f16f1d0e"
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
         },
         {
           "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
@@ -188,10 +188,10 @@
         {
           "assetPath": "Assets/AL/Scripts/UI/CharacterCreation/CharacterCreationController.cs",
           "guid": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
-          "sha256": "f3674a086d4c9adb2f2a34a5e5c92bc1b7852ca36a12350109e4d0e27268324f"
+          "sha256": "61e55a86f4e74bc13d1452574b6bc0a896f106d834cea15c5119eaa5f48a5e8f"
         }
       ],
-      "dependencyProjectionSha256": "3dca6da47b2d206928b21ca689536a44352e2f6daecff2a2c795ed9f5e30d07a",
+      "dependencyProjectionSha256": "2ecf3f9663edef2bfbc0bdad80b219b3879b4cc2d4397bab66d2fd647bf27b29",
       "guid": "c3d4e5f60718293a4b5c6d7e8f901234",
       "metaSha256": "e7a51fc6b54b1cad420f29705ba46c17d176b18201cbb5853762076bae42e745",
       "ownership": {
@@ -224,7 +224,7 @@
         {
           "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
           "guid": "373eb8627471831489396976562eb9b1",
-          "sha256": "1d2d4af11f22125a8c54fe21a62e155585dfa67e567e0a402f31b572f16f1d0e"
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
         },
         {
           "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
@@ -244,10 +244,10 @@
         {
           "assetPath": "Assets/AL/Scripts/ChampionMode/ChampionArenaSceneController.cs",
           "guid": "d1b51d977c4e478c970a023b1c018edb",
-          "sha256": "72982df5dee82ad2c343ed30d0899c90cdc2ea09335c06b5777f83ccc7e8629b"
+          "sha256": "d35014cb9ddf7b8db7e24aacd49d05387759e9fca135f18d21cd2f6e5c93d0b9"
         }
       ],
-      "dependencyProjectionSha256": "0187af2cd23b4f06b6807f532f42ed00c92c679f47685f30b20376b55ba63ebb",
+      "dependencyProjectionSha256": "32cfa24b4ad4d937dd149edf19ee5a6e923e043ef34f2dc2520fa2d693b8a043",
       "guid": "9c8e973279bb149b49b9938b1781c775",
       "metaSha256": "2100665ef47d52685ebd308f4380535542bcee01e11d73684721c6e5bf18f98a",
       "ownership": {
@@ -280,7 +280,7 @@
         {
           "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
           "guid": "373eb8627471831489396976562eb9b1",
-          "sha256": "1d2d4af11f22125a8c54fe21a62e155585dfa67e567e0a402f31b572f16f1d0e"
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
         },
         {
           "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
@@ -303,7 +303,7 @@
           "sha256": "bae53ee49c14a60865cb191ded543577e6092d520581fba7519a6e511ef9bd37"
         }
       ],
-      "dependencyProjectionSha256": "169a7d71b4a3b6ce9a1c5ee6c3e6ebea2e4a3149981cbd63227e1d34f2e7df56",
+      "dependencyProjectionSha256": "e71820b3bf72380dce062c5aed210fd8636ab9c8c8aaa864fd941eeeabe62659",
       "guid": "dea6fe75315c3402fbfa8de764bd9873",
       "metaSha256": "57fc04d7c2e1f9606bc1fc0c4c65f033a5b3f0a32d27abe364ada1bdfc0a875b",
       "ownership": {
@@ -337,7 +337,7 @@
         {
           "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
           "guid": "373eb8627471831489396976562eb9b1",
-          "sha256": "1d2d4af11f22125a8c54fe21a62e155585dfa67e567e0a402f31b572f16f1d0e"
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
         },
         {
           "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
@@ -347,7 +347,7 @@
         {
           "assetPath": "Assets/AL/Scripts/World/InnerRealmWorldSceneController.cs",
           "guid": "5e17b4c90a8d4f2ea6c3d1b87540e29f",
-          "sha256": "45cd2fa765bc9709e26436365de18ed06ae8c72abc88db54870bd919629ec488"
+          "sha256": "796339ecf41ef0649e949a5f7ed8c5d43ec8cd5cc2ac3ab3f42afef2b4ae2387"
         },
         {
           "assetPath": "unity-external://76c392e42b5098c458856cdf6ecaaaa1",
@@ -355,7 +355,7 @@
           "sha256": "resolved_by_pinned_unity_and_package_lock"
         }
       ],
-      "dependencyProjectionSha256": "13bd751978ec6a06327365d3e01215e669c2a9056a0152ecab59b7a7b9e8a8fb",
+      "dependencyProjectionSha256": "39a02be556b8498aa159ec5f1948bc0132ee4e539e00757214b6d216c2d622a2",
       "guid": "2a8f6c14d9e347b0a5c1e8d73620b4fa",
       "metaSha256": "686784a1c7c6cbd56caa248775f1c69e23b85d7b351740b8ef16a5a103c7c8ff",
       "ownership": {
@@ -1127,6 +1127,81 @@
       "shippingStatus": "non_shipping"
     },
     {
+      "assetPath": "Assets/AL/Scenes/Review/Terrestrials/SlagfallEnvironmentKitReview.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_broken_fracture_raft_v001.prefab",
+          "guid": "050e315c37567074c8c3815f8c1c9386",
+          "sha256": "d701d3d46c8db8e37f8f222ec52dec1373222c53171a506956f55baf81001c68"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_diagonal_fault_slab_v001.prefab",
+          "guid": "13cfffac67a52e9439654cf0a9193d31",
+          "sha256": "67824090a9313e25cc4ee1d3896d5622cc01b5680388a56b15c36681380fda6c"
+        },
+        {
+          "assetPath": "Assets/AL/Scenes/Review/Materials/SlagfallReviewSurface.mat",
+          "guid": "45e0a23365ff85c42877d664394b88af",
+          "sha256": "ec9ca35cc46f20d0f2201478a362980db3694305f2a3a79120a4f105beaf8282"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_collapsed_gallery_mouth_v001.prefab",
+          "guid": "5e07ad535a2549943abfa59112152a0d",
+          "sha256": "655a39b00f8f419338525e00cd39df0894cf95c0dac98a2f5113fc715233cd00"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_braided_runoff_pool_v001.prefab",
+          "guid": "679539947cf7a8a43af4acd9fe46cecf",
+          "sha256": "0577e9f48933dc11392675ea94f7bc48917b2af735bb5c590f189e487dad5201"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_iron_soil_wedge_v001.prefab",
+          "guid": "a9960e57f18711449a97b494913de9a7",
+          "sha256": "09e5f762447deab7821ce7ae5884a477add6c0b95e484aa028184ede5681dd86"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_irregular_fracture_raft_v001.prefab",
+          "guid": "aae30ddda5d7169439b52b1360ac1b77",
+          "sha256": "89eb4741ee89950d86730a577ed6135153a6bb53858f1ef2a9d7af9d12ea2a57"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_undercut_extraction_ledge_v001.prefab",
+          "guid": "b38e991c17b0dcd4e846afce7c0deda5",
+          "sha256": "c9f7a530aea22b0230d8358f1ac9de612b83bd23c60132c39bedeae19a2bdc37"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_talus_apron_v001.prefab",
+          "guid": "bd3dcdd8949b71d4eae5af186dc164a4",
+          "sha256": "732230949cc5c7c91e147940cd19778a5f71ea73db8d7d1a0be1754bfe1a402e"
+        }
+      ],
+      "dependencyProjectionSha256": "34fd262cfce3e0f3b91071ec3b720771e79595bf808b021c6e9752f229787db1",
+      "guid": "9bf1a4fe1fb57fe4db0e96437105aab3",
+      "metaSha256": "ff666ed07bdea52ac5867e55dae248a96f949676aec741c389ab1a7958204219",
+      "ownership": {
+        "domain": "terrestrials"
+      },
+      "purpose": "terrestrial_environment_review",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "al_scene_slagfall_environment_kit_review",
+      "sceneName": "SlagfallEnvironmentKitReview",
+      "sceneSha256": "7a329e63188a241dfb4638f0381e40b15eb29ebada5d3c178768e1fff85c99da",
+      "shippingStatus": "non_shipping"
+    },
+    {
       "assetPath": "Assets/Test.unity",
       "dependencies": [
         {
@@ -1152,10 +1227,10 @@
         {
           "assetPath": "Assets/AL/Scripts/ChampionMode/Camera/CameraFollow.cs",
           "guid": "f37514be767c61b4fa799cee17860b84",
-          "sha256": "4ffee8916f5322c0cd51a506542784395d57f024e5b884c69ce678e18cb346e4"
+          "sha256": "f759d84ddd1e60200682f22ba93ea3c978792a097f0fd4ddbfc9771d35c62de5"
         }
       ],
-      "dependencyProjectionSha256": "b8bccc4aca6f80a5cf9485ef2463ce05cf1f15e166b5f27182aae6cdd114870c",
+      "dependencyProjectionSha256": "cb6a47bdd33811edefcee4b4ed180ed82e0de5317d3494e350c45f5eb5b64d8b",
       "guid": "30477a26c93c85546a8612b1c5716a60",
       "metaSha256": "a5dcb8783b2e969066bb4261bae6f69bca732050fa2ec9ac860cb7b2066313ef",
       "ownership": {
@@ -1172,6 +1247,7 @@
       "shippingStatus": "non_shipping"
     }
   ],
-  "knownSceneCount": 103,
-  "schemaVersion": 1
+  "knownSceneCount": 104,
+  "schemaVersion": 1,
+  "supersedesDecisionId": "DEC-SCENE-DELIVERY-001"
 }

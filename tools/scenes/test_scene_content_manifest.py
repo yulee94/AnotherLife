@@ -28,7 +28,7 @@ class SceneContentManifestTests(unittest.TestCase):
 
     def test_every_known_scene_is_accounted_for(self) -> None:
         self.assertEqual(5, len(self.enabled["enabledScenes"]))
-        self.assertEqual(20, len(self.enabled["excludedScenes"]))
+        self.assertEqual(21, len(self.enabled["excludedScenes"]))
         self.assertEqual(78, len(self.generated["generatedScenes"]))
         accounted = {
             record["assetPath"]
@@ -37,8 +37,25 @@ class SceneContentManifestTests(unittest.TestCase):
             + self.generated["generatedScenes"]
         }
         actual = set(self.module.discover_scene_paths(REPO_ROOT))
-        self.assertEqual(103, len(actual))
+        self.assertEqual(104, len(actual))
         self.assertEqual(actual, accounted)
+
+    def test_owner_approved_slagfall_review_scene_is_non_shipping(self) -> None:
+        self.assertEqual("DEC-SCENE-DELIVERY-002", self.enabled["decisionId"])
+        self.assertEqual("DEC-SCENE-DELIVERY-001", self.enabled["supersedesDecisionId"])
+        review = next(
+            record
+            for record in self.enabled["excludedScenes"]
+            if record["assetPath"]
+            == "Assets/AL/Scenes/Review/Terrestrials/SlagfallEnvironmentKitReview.unity"
+        )
+        self.assertEqual("terrestrial_environment_review", review["purpose"])
+        self.assertEqual({"domain": "terrestrials"}, review["ownership"])
+        self.assertEqual("non_shipping", review["shippingStatus"])
+        self.assertEqual(
+            {"entry": False, "mode": "not_runtime_reachable"},
+            review["reachability"],
+        )
 
     def test_shipping_order_and_local_addressable_identity_are_exact(self) -> None:
         self.assertEqual(
@@ -132,8 +149,8 @@ class SceneContentManifestTests(unittest.TestCase):
         result = self.module.validate_repository(REPO_ROOT)
         self.assertEqual(5, result.enabled_count)
         self.assertEqual(78, result.generated_count)
-        self.assertEqual(20, result.excluded_count)
-        self.assertEqual(103, result.accounted_count)
+        self.assertEqual(21, result.excluded_count)
+        self.assertEqual(104, result.accounted_count)
 
 
 if __name__ == "__main__":

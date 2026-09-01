@@ -2,7 +2,7 @@
   "catalogSha256": "32d310ef5710674a1173b3d540836bbd933216accc8c0b74e735caba1afecda8",
   "catalogVersion": "0.1.0",
   "contentFingerprintSha256": "ddf5b5eb697181c173e5f61ff425d480271ab934fe38cacdb7e41e705bf1700c",
-  "decisionId": "DEC-SCENE-DELIVERY-001",
+  "decisionId": "DEC-SCENE-DELIVERY-002",
   "deliveryDependencies": {
     "addressablesVersion": "2.9.1",
     "packagesLockSha256": "87899072e8b43a6c6e46ce4623026617239520c481b814a2bfc0ba88f82c8f6d",
@@ -5785,5 +5785,6 @@
   "grouping": "one_local_addressables_group_per_world_instance",
   "localAddressablesVersion": "2.9.1",
   "remoteCatalogsEnabled": false,
-  "schemaVersion": 1
+  "schemaVersion": 1,
+  "supersedesDecisionId": "DEC-SCENE-DELIVERY-001"
 }

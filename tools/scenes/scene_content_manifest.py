@@ -3,7 +3,7 @@
 
 The committed manifests are the reviewed scene-set boundary. Generation is explicit;
 normal validation never rewrites them. Any new or removed scene therefore fails closed
-until DEC-SCENE-DELIVERY-001 is reopened and the owner approves a replacement set.
+until the current decision is reopened and the owner approves a replacement set.
 """
 
 from __future__ import annotations
@@ -17,7 +17,8 @@ from pathlib import Path
 from typing import Iterable, NamedTuple
 
 SCHEMA_VERSION = 1
-DECISION_ID = "DEC-SCENE-DELIVERY-001"
+DECISION_ID = "DEC-SCENE-DELIVERY-002"
+SUPERSEDED_DECISION_ID = "DEC-SCENE-DELIVERY-001"
 UNITY_ROOT = Path("unity")
 ASSETS_ROOT = UNITY_ROOT / "Assets"
 CATALOG_PATH = ASSETS_ROOT / "AL/StreamingAssets/GameData/al_world_streaming_catalog.json"
@@ -236,6 +237,12 @@ def _excluded_classification(scene_path: str) -> tuple[str, str, str]:
         return "al_scene_test_representative", "representative_test_only", "qa"
     if scene_path == "Assets/AL/Scenes/InnerRealmWorld.unity":
         return "al_scene_inner_realm_world_legacy", "legacy_monolithic_world", "world_streaming"
+    if scene_path == "Assets/AL/Scenes/Review/Terrestrials/SlagfallEnvironmentKitReview.unity":
+        return (
+            "al_scene_slagfall_environment_kit_review",
+            "terrestrial_environment_review",
+            "terrestrials",
+        )
     if scene_path.startswith("Assets/AL/Scenes/Prototype/Terrestrials/"):
         return (
             "excluded_" + Path(scene_path).stem.lower(),
@@ -431,6 +438,7 @@ def generate_manifests(root: Path) -> tuple[dict, dict]:
             "excludedScenes": excluded_records,
             "knownSceneCount": len(scene_paths),
             "schemaVersion": SCHEMA_VERSION,
+            "supersedesDecisionId": SUPERSEDED_DECISION_ID,
         },
         "enabledScenes",
     )
@@ -449,6 +457,7 @@ def generate_manifests(root: Path) -> tuple[dict, dict]:
             "localAddressablesVersion": "2.9.1",
             "remoteCatalogsEnabled": False,
             "schemaVersion": SCHEMA_VERSION,
+            "supersedesDecisionId": SUPERSEDED_DECISION_ID,
         },
         "generatedScenes",
     )
@@ -483,7 +492,7 @@ def validate_scene_accounting(
     if set(accounted) != set(actual) or len(accounted) != len(actual):
         raise ManifestError(
             "SCENE_SET_REVIEW_REQUIRED",
-            "scene inventory differs from the owner-approved 103-scene set",
+            "scene inventory differs from the owner-approved scene set",
         )
 
 

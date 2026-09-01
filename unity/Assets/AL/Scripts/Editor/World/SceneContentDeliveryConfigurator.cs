@@ -54,8 +54,9 @@ namespace AL.Editor.World
     }
 
     /// <summary>
-    /// Applies owner-approved DEC-SCENE-DELIVERY-001. The five shell scenes remain direct Build
-    /// Settings entries; all 78 catalog chunks are local-only Addressables grouped by world.
+    /// Applies owner-approved DEC-SCENE-DELIVERY-001 as amended by DEC-SCENE-DELIVERY-002.
+    /// The five shell scenes remain direct Build Settings entries; all 78 catalog chunks are
+    /// local-only Addressables grouped by world.
     /// </summary>
     public static class SceneContentDeliveryConfigurator
     {

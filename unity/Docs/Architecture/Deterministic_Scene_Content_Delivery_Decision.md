@@ -1,8 +1,10 @@
 # Deterministic Scene Inventory and Content Delivery Decision
 
-Decision ID: `DEC-SCENE-DELIVERY-001`
+Decision IDs: `DEC-SCENE-DELIVERY-001`, amended by `DEC-SCENE-DELIVERY-002`
 Status: approved and implemented
-Owner approval: `APPROVE DEC-SCENE-DELIVERY-001 HYBRID-LOCAL-ADDRESSABLES`
+Owner approvals:
+- `APPROVE DEC-SCENE-DELIVERY-001 HYBRID-LOCAL-ADDRESSABLES`
+- `APPROVE DEC-SCENE-DELIVERY-002 ADD SLAGFALL-ENVIRONMENT-REVIEW NON-SHIPPING`
 Approval date: 2026-09-01
 Unity authority: `6000.3.22f1`
 Addressables authority: `com.unity.addressables` `2.9.1`
@@ -15,7 +17,7 @@ AnotherLife uses a hybrid local delivery model:
    `Boot`, `RealmSelection`, `CharacterCreation`, `ChampionArena`, `Kingdom`.
 2. All 78 scenes named by `al_world_streaming_catalog.json` are local Addressable scenes and remain outside Build Settings.
 3. Generated scenes are grouped one bundle group per catalog world instance. Each group uses `Local.BuildPath` and `Local.LoadPath`; each address is `scene/<worldId>/<chunkId>`.
-4. The remaining 20 known scenes are non-shipping review, prototype, legacy, or representative-test assets. They remain outside Build Settings and Addressables.
+4. The remaining 21 known scenes are non-shipping review, prototype, legacy, or representative-test assets. They remain outside Build Settings and Addressables.
 5. Remote catalogs, CDN delivery, startup catalog-update checks, and content-only update schemas are disabled. Enabling any of them requires a separate owner-approved decision and a rollback-tested delivery plan.
 
 The committed machine-readable authorities are:
@@ -23,7 +25,12 @@ The committed machine-readable authorities are:
 - `Assets/AL/StreamingAssets/GameData/al_enabled_scene_manifest.v1.json`
 - `Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json`
 
-Together they account for all 103 known `.unity` assets. Every record includes purpose, reachability, ownership, shipping status, GUID, scene/meta hashes, and a deterministic dependency projection. Generated records additionally include dimension, world, catalog access policy, neighbor reachability, Addressables group, and address.
+Together they account for all 104 known `.unity` assets. Every record includes purpose, reachability, ownership, shipping status, GUID, scene/meta hashes, and a deterministic dependency projection. Generated records additionally include dimension, world, catalog access policy, neighbor reachability, Addressables group, and address.
+
+`DEC-SCENE-DELIVERY-002` classifies
+`Assets/AL/Scenes/Review/Terrestrials/SlagfallEnvironmentKitReview.unity` as
+`terrestrial_environment_review`, owned by `terrestrials`, non-shipping,
+runtime-unreachable, and outside Build Settings and Addressables. It changes no delivery topology.
 
 ## Options evaluated
 
@@ -88,7 +95,7 @@ Reopen this decision by recording:
 2. whether direct Build Settings order, a world group, or delivery topology changes;
 3. dependency and install-size impact;
 4. rollback behavior and any remote/content-update implications;
-5. a replacement decision ID or explicit owner approval that supersedes `DEC-SCENE-DELIVERY-001`.
+5. a replacement decision ID or explicit owner approval that supersedes `DEC-SCENE-DELIVERY-002`.
 
 After approval, update catalog/configuration and regenerate both manifests in the same reviewed change. Without that approval, the validator must continue to fail closed.
 
