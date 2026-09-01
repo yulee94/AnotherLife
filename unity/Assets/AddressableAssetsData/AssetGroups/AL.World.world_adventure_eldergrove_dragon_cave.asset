@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: AL.World.world_adventure_eldergrove_dragon_cave
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: AL.World.world_adventure_eldergrove_dragon_cave
+  m_GUID: 68810fdf66dfa4342a1de38731b62556
+  m_SerializeEntries:
+  - m_GUID: 4c3eda8a8c4d48947ae5988f68e2e918
+    m_Address: scene/world_adventure_eldergrove_dragon_cave/chunk_eldergrove_dragon_cave_entrance
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ace7353855e83f5428a9ce566396b500
+    m_Address: scene/world_adventure_eldergrove_dragon_cave/chunk_eldergrove_dragon_cave_descent
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c697a8b2f91938547894dc96311866bc
+    m_Address: scene/world_adventure_eldergrove_dragon_cave/chunk_eldergrove_dragon_cave_lair
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: cf3bb32b8466c0a40aad4591db5490df, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 307bb21d9e5506b40af2a98cae2b17e0, type: 2}

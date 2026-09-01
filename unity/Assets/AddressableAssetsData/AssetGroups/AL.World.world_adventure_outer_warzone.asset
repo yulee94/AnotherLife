@@ -1,0 +1,124 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: AL.World.world_adventure_outer_warzone
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: AL.World.world_adventure_outer_warzone
+  m_GUID: 84215c60e8e304e409e1f263c64bb86d
+  m_SerializeEntries:
+  - m_GUID: 044f50c02d055b44b9a3adec13c73ccd
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_sector_03
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1fc9194b37add9945ab0c58ecfa2ff66
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_bridge_01_02_b
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 294551a06846eb4439faff5267f1896e
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_bridge_03_04_b
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c1b0d274dced764c98b7b182e59c31d
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_crossroads
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 45c6c92922e7d3545a0a58bf8b25cc46
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_bridge_04_01_a
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 610982d898d7d4540984f150ad148a70
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_bridge_01_02_a
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d8527d63603aa74e910baf66d139043
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_gate_approach_04
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 79a47676506a99941958cfc9a8e0f128
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_bridge_02_03_b
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8758c1c42e3fb144383d59ae9d9e1dac
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_gate_approach_02
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 90bc970136f95dc4f9587084316e5aea
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_sector_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a374635f0db739045a4ddc9abcdcf74e
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_gate_approach_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a860022aa45e4244f83da0734656420f
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_sector_04
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be6414e8153d0ab48821b0cb2249d70b
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_bridge_03_04_a
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c06c8d134db222c4c884ce722bb20283
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_bridge_04_01_b
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c89f2cbe05e6b2044a5fab85215a5c24
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_gate_approach_03
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e10efc5d2b349144289ed37540b50e81
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_bridge_02_03_a
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f942eef4b197a5c449cf65e85ae6fd16
+    m_Address: scene/world_adventure_outer_warzone/chunk_warzone_sector_02
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: cf3bb32b8466c0a40aad4591db5490df, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 37e6adb6603e040489fdfc1ee69e6c0b, type: 2}
