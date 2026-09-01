@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using AL.UI;
@@ -462,6 +463,70 @@ namespace AL.Tests.EditMode
                     GetField<int>(host, "_activeGeneration"));
 
                 InvokeLifecycle(host, "Update");
+                Assert.AreEqual(1, terminalCount);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+
+            Assert.AreEqual(1, terminalCount);
+        }
+
+        [Test]
+        public void HostConvertsSynchronousDecoderExceptionToFallbackOnce()
+        {
+            GameObject root = CreateHostObject(out LaunchCinematicVideoPlayerHost host);
+            int operationCount = 0;
+            int terminalCount = 0;
+            LaunchCinematicPlaybackTerminal terminal = default;
+            host.Terminated += value =>
+            {
+                terminalCount++;
+                terminal = value;
+            };
+
+            try
+            {
+                LaunchCinematicPlaybackCoordinator coordinator =
+                    GetField<LaunchCinematicPlaybackCoordinator>(host, "_coordinator");
+                LaunchCinematicPlaybackAttempt attempt = coordinator.Begin(
+                    ValidRecord(),
+                    LaunchCinematicPlatform.Desktop,
+                    releaseBuild: true,
+                    reducedMotion: false);
+                SetField(host, "_activeGeneration", attempt.Generation);
+                Action failingOperation = () =>
+                {
+                    operationCount++;
+                    throw new System.InvalidOperationException("test-only decoder failure");
+                };
+
+                bool accepted = false;
+                Assert.DoesNotThrow(
+                    () => accepted = (bool)InvokePrivate(
+                        host,
+                        "TryRunDecoderOperation",
+                        failingOperation,
+                        "decoder-start-failed"));
+
+                Assert.IsFalse(accepted);
+                Assert.AreEqual(1, operationCount);
+                Assert.AreEqual(1, terminalCount);
+                Assert.AreEqual(
+                    LaunchCinematicPlaybackTerminalReason.PlaybackFailed,
+                    terminal.Reason);
+                Assert.AreEqual("decoder-start-failed", terminal.Detail);
+                Assert.AreEqual(LaunchCinematicPlaybackState.Fallback, host.State);
+                Assert.AreEqual(0, GetField<int>(host, "_activeGeneration"));
+
+                Assert.IsFalse(
+                    (bool)InvokePrivate(
+                        host,
+                        "TryRunDecoderOperation",
+                        failingOperation,
+                        "late-decoder-failure"));
+                Assert.AreEqual(1, operationCount);
                 Assert.AreEqual(1, terminalCount);
             }
             finally
