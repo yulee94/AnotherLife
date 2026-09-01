@@ -565,7 +565,9 @@ fabricate another route outcome, and do not activate fallback gameplay.
 Required checks for bridge changes:
 
 - Android unit tests: `:app:testDebugUnitTest`
-- Android instrumentation: off-main callback delivery and disposed-host rejection
+- Android instrumentation: off-main callback delivery, disposed-host rejection,
+  real-shell safe return, back-navigation disposal, and Activity recreation with
+  stale-request rejection
 - Android debug/release assembly and lint
 - Focused Unity EditMode exporter contract tests, including every preflight
   rejection, exact-path cleanup, settings restoration, artifact drift, and
@@ -603,6 +605,14 @@ final `libil2cpp.so`, AAR, Android-app inclusion, installed-size delta, or
 device execution was produced or claimed.
 
 Current Android contract coverage includes valid/invalid request and outcome JSON, unsupported versions and exact enum values, malformed and oversized input, duplicate request/outcome members, nullable Java/JNI boundary rejection, bounded payloads, same-route retries, stale and duplicate outcomes, malformed-then-valid recovery, callback replacement, off-main UI dispatch, and host disposal.
+
+Compiled Android instrumentation also mounts the debug smoke route through the real
+`MainActivity` shell. It verifies correlated unavailable safe return, visible containment of an
+unapproved success, back-navigation disposal followed by a dropped late outcome, and Activity
+recreation with a new request identity. A late outcome for the pre-recreation request must not
+complete or replace the new session; the current correlated unavailable outcome can still return
+safely to Debug. These tests do not claim physical-device execution or a generated Unity-enabled
+APK on this host.
 
 Current Android host-lifecycle coverage additionally includes deferred focus until resume,
 duplicate resume/pause/stop suppression, focus restoration after a real resume, ordered and
@@ -693,10 +703,9 @@ unperformed packaged/device round trip.
 
 Still blocked for #135 completion:
 
-- production registration/wiring of the receiver and sender;
-- successful exact-profile `unityLibrary` generation on the integration
-  baseline, followed by native Gradle inclusion and compatibility proof;
-- unknown-route end-to-end unavailable behavior;
+- regeneration of exact-profile debug and release Unity AARs on the authorized Windows host,
+  followed by Unity-enabled APK verification against those exact artifacts;
+- physical-device execution of the correlated unknown-route unavailable round trip;
 - packaged back/home/app-switch, rotation/recreation, multi-window, process-death/runtime-loss,
   audio/input/keyboard/controller, focus, low-memory, and repeated-launch lifecycle proof;
 - packaged representative-device performance, memory, thermal, and size evidence;

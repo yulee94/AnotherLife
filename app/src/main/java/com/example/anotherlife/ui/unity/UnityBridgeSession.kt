@@ -144,6 +144,9 @@ internal class UnityBridgeCallbackRegistry {
         val callback = synchronized(this) { activeRegistration?.second }
         runCatching { callback?.invoke(rawJson) }
     }
+
+    @Synchronized
+    fun hasActiveRegistration(): Boolean = activeRegistration != null
 }
 
 @Keep
@@ -157,6 +160,9 @@ object UnityBridgeCallbacks {
     internal fun clear(token: UnityBridgeCallbackToken) {
         registry.clear(token)
     }
+
+    internal fun hasActiveRegistrationForTesting(): Boolean =
+        registry.hasActiveRegistration()
 
     @Keep
     @JvmStatic
