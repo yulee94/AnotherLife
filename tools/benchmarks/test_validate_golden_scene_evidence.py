@@ -32,6 +32,13 @@ class GoldenSceneEvidenceValidatorTests(unittest.TestCase):
         self.assertEqual([], second_errors)
         self.assertEqual([], validator.compare_repetitions([first_package, second_package], "GS-03"))
 
+    def test_accepts_windows_player_with_explicit_unavailable_device_apis(self) -> None:
+        package = self._write_package("run-windows")
+        self._apply_windows_device_policy(package)
+        validated, errors = validator.validate_package(package)
+        self.assertIsNotNone(validated, errors)
+        self.assertEqual([], errors)
+
     def test_rejects_missing_identity_metadata(self) -> None:
         package = self._write_package("run-metadata")
         identity = self._read(package, "runtime-identity.json")
@@ -106,10 +113,68 @@ class GoldenSceneEvidenceValidatorTests(unittest.TestCase):
         errors = validator.compare_repetitions([first_package, second_package], "GS-03")
         self.assertTrue(any("buildId" in error for error in errors), errors)
 
+    def test_rejects_missing_device_snapshot_metadata(self) -> None:
+        package = self._write_package("run-device-metadata")
+        telemetry = self._read(package, "telemetry.json")
+        telemetry["deviceStart"].pop("temperatureCelsius")
+        self._write_json(package / "telemetry.json", telemetry)
+        self._assert_rejected(package, "device snapshot field is missing: temperatureCelsius")
+
+    def test_rejects_windows_unavailable_device_capability_without_reason(self) -> None:
+        package = self._write_package("run-windows-device-reason")
+        self._apply_windows_device_policy(package)
+        telemetry = self._read(package, "telemetry.json")
+        capability = next(
+            item
+            for item in telemetry["capabilities"]
+            if item["metricId"] == "device.temperature"
+        )
+        capability["reason"] = ""
+        self._write_json(package / "telemetry.json", telemetry)
+        self._assert_rejected(package, "required device capability has invalid platform status")
+
     def _assert_rejected(self, package: Path, expected: str) -> None:
         validated, errors = validator.validate_package(package)
         self.assertIsNone(validated)
         self.assertTrue(any(expected in error for error in errors), errors)
+
+    def _apply_windows_device_policy(self, package: Path) -> None:
+        identity = self._read(package, "runtime-identity.json")
+        identity["platform"] = "WindowsPlayer"
+        identity["operatingSystem"] = "Windows 11 Fixture"
+        identity["graphicsApi"] = "Direct3D11"
+        self._write_json(package / "runtime-identity.json", identity)
+        manifest = self._read(package, "capture-manifest.json")
+        manifest["identity"] = copy.deepcopy(identity)
+        self._write_json(package / "capture-manifest.json", manifest)
+        telemetry = self._read(package, "telemetry.json")
+        empty_snapshot = {
+            "batteryLevel": None,
+            "batteryStatus": "",
+            "temperatureCelsius": None,
+            "thermalState": "",
+        }
+        telemetry["batteryDelta"] = None
+        telemetry["deviceStart"] = copy.deepcopy(empty_snapshot)
+        telemetry["deviceEnd"] = copy.deepcopy(empty_snapshot)
+        telemetry["deviceSamples"] = [
+            {
+                "elapsedSeconds": 0.0,
+                "interval": "measured",
+                "snapshot": copy.deepcopy(empty_snapshot),
+            },
+            {
+                "elapsedSeconds": 2.0,
+                "interval": "measured",
+                "snapshot": copy.deepcopy(empty_snapshot),
+            },
+        ]
+        for capability in telemetry["capabilities"]:
+            if capability["metricId"] in validator.REQUIRED_DEVICE_CAPABILITIES:
+                capability["status"] = "unsupported"
+                capability["sampleCount"] = 0
+                capability["reason"] = "Windows does not expose this metric through Unity SystemInfo."
+        self._write_json(package / "telemetry.json", telemetry)
 
     def _write_package(self, run_id: str) -> Path:
         package = self.root / run_id

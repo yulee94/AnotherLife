@@ -252,6 +252,61 @@ namespace AL.Tests.EditMode.Benchmarks
         }
 
         [Test]
+        public void FfmpegFacilityRequiresWindowsAndBuildsBoundedWindowCaptureArguments()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "al-gs-ffmpeg-capture-" + Guid.NewGuid().ToString("N"));
+            string ffmpegPath = Path.Combine(root, "ffmpeg.exe");
+            string outputPath = Path.Combine(root, "capture.mp4");
+            try
+            {
+                Directory.CreateDirectory(root);
+                File.WriteAllBytes(ffmpegPath, new byte[] { 1 });
+                var media = new GoldenSceneCaptureMediaSettings(
+                    1920,
+                    1080,
+                    30,
+                    60d,
+                    GoldenSceneUiCaptureMode.Excluded,
+                    string.Empty);
+                var windows = new GoldenSceneFfmpegVideoCaptureFacility(
+                    ffmpegPath,
+                    "AnotherLifeUnity",
+                    isWindowsPlayer: true);
+                var unsupportedPlatform = new GoldenSceneFfmpegVideoCaptureFacility(
+                    ffmpegPath,
+                    "AnotherLifeUnity",
+                    isWindowsPlayer: false);
+
+                Assert.That(windows.IsSupported, Is.True);
+                Assert.That(windows.Format, Is.EqualTo("video/mp4"));
+                Assert.That(windows.Extension, Is.EqualTo("mp4"));
+                Assert.That(unsupportedPlatform.IsSupported, Is.False);
+                Assert.That(unsupportedPlatform.UnsupportedReason, Does.Contain("Windows Player"));
+                string arguments = GoldenSceneFfmpegVideoCaptureFacility.BuildArguments(
+                    outputPath,
+                    "AnotherLifeUnity",
+                    media);
+                Assert.That(arguments, Does.Contain("-f gdigrab"));
+                Assert.That(arguments, Does.Contain("-framerate 30"));
+                Assert.That(arguments, Does.Contain("\"title=AnotherLifeUnity\""));
+                Assert.That(arguments, Does.Contain("\"scale=1920:1080:flags=lanczos,setsar=1\""));
+                Assert.That(arguments, Does.EndWith("\"" + outputPath + "\""));
+                Assert.That(
+                    () => GoldenSceneFfmpegVideoCaptureFacility.BuildArguments(
+                        outputPath,
+                        "unsafe\"title",
+                        media),
+                    Throws.ArgumentException);
+            }
+            finally
+            {
+                if (Directory.Exists(root)) Directory.Delete(root, true);
+            }
+        }
+
+        [Test]
         public void UiAndProvenancePolicyFailClosed()
         {
             GoldenSceneSetup capital = Resolve("GS-02", "distant_approach", "balanced_60");
@@ -494,7 +549,11 @@ namespace AL.Tests.EditMode.Benchmarks
                     clock);
 
                 session.Begin(camera);
+                Assert.That(canvas.enabled, Is.False,
+                    "External capture requires the UI policy to persist between frame callbacks.");
                 session.CaptureVideoFrame(camera);
+                Assert.That(canvas.enabled, Is.False,
+                    "External capture requires the UI policy to persist through the video window.");
                 clock.AdvanceSeconds(1d);
                 session.Complete(camera, null);
 

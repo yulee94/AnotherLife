@@ -309,7 +309,27 @@ def _validate_identity(identity: dict[str, Any], label: str, errors: list[str]) 
             errors.append(f"{label}: {field} must be positive")
 
 
-def _validate_telemetry(telemetry: dict[str, Any], label: str, errors: list[str]) -> None:
+def _validate_device_snapshot(snapshot: Any, label: str, errors: list[str]) -> None:
+    if not isinstance(snapshot, dict):
+        errors.append(f"{label}: device snapshot must be an object")
+        return
+    for field in ("batteryLevel", "batteryStatus", "temperatureCelsius", "thermalState"):
+        if field not in snapshot:
+            errors.append(f"{label}: device snapshot field is missing: {field}")
+    battery = snapshot.get("batteryLevel")
+    if battery is not None and (not _is_number(battery) or battery < 0 or battery > 1):
+        errors.append(f"{label}: batteryLevel must be null or a ratio within 0..1")
+    temperature = snapshot.get("temperatureCelsius")
+    if temperature is not None and not _is_number(temperature):
+        errors.append(f"{label}: temperatureCelsius must be null or finite")
+    for field in ("batteryStatus", "thermalState"):
+        if field in snapshot and not isinstance(snapshot[field], str):
+            errors.append(f"{label}: {field} must be a string")
+
+
+def _validate_telemetry(
+    telemetry: dict[str, Any], platform: Any, label: str, errors: list[str]
+) -> None:
     required = (
         "schemaVersion",
         "collectionStartedAtUtc",
@@ -376,6 +396,24 @@ def _validate_telemetry(telemetry: dict[str, Any], label: str, errors: list[str]
     elif measurement <= 0 or actual + 1e-9 < warmup + measurement:
         errors.append(f"{label}: telemetry duration does not cover warmup plus measurement")
 
+    _validate_device_snapshot(telemetry.get("deviceStart"), f"{label}.deviceStart", errors)
+    _validate_device_snapshot(telemetry.get("deviceEnd"), f"{label}.deviceEnd", errors)
+    device_samples = telemetry.get("deviceSamples")
+    if not isinstance(device_samples, list) or not device_samples:
+        errors.append(f"{label}: deviceSamples are missing")
+    else:
+        for index, sample in enumerate(device_samples):
+            if not isinstance(sample, dict):
+                errors.append(f"{label}: deviceSamples[{index}] must be an object")
+                continue
+            if not _is_number(sample.get("elapsedSeconds")) or sample["elapsedSeconds"] < 0:
+                errors.append(f"{label}: deviceSamples[{index}].elapsedSeconds is invalid")
+            if sample.get("interval") not in ("warmup", "measured"):
+                errors.append(f"{label}: deviceSamples[{index}].interval is invalid")
+            _validate_device_snapshot(
+                sample.get("snapshot"), f"{label}.deviceSamples[{index}].snapshot", errors
+            )
+
     aggregates = telemetry.get("aggregates")
     if not isinstance(aggregates, dict):
         errors.append(f"{label}: aggregates must be an object")
@@ -396,12 +434,31 @@ def _validate_telemetry(telemetry: dict[str, Any], label: str, errors: list[str]
             if capability["metricId"] in capability_map:
                 errors.append(f"{label}: duplicate capability: {capability['metricId']}")
             capability_map[capability["metricId"]] = capability
-    for metric_id in (*REQUIRED_AGGREGATES, *REQUIRED_DEVICE_CAPABILITIES):
+    for metric_id in REQUIRED_AGGREGATES:
         capability = capability_map.get(metric_id)
         if capability is None:
             errors.append(f"{label}: required capability is missing: {metric_id}")
         elif capability.get("status") != "supported" or not isinstance(capability.get("sampleCount"), int) or capability["sampleCount"] <= 0:
             errors.append(f"{label}: required capability is not supported with samples: {metric_id}")
+    for metric_id in REQUIRED_DEVICE_CAPABILITIES:
+        capability = capability_map.get(metric_id)
+        if capability is None:
+            errors.append(f"{label}: required device capability is missing: {metric_id}")
+            continue
+        supported = (
+            capability.get("status") == "supported"
+            and isinstance(capability.get("sampleCount"), int)
+            and capability["sampleCount"] > 0
+        )
+        explicitly_unsupported_on_windows = (
+            platform == "WindowsPlayer"
+            and capability.get("status") == "unsupported"
+            and capability.get("sampleCount") == 0
+            and isinstance(capability.get("reason"), str)
+            and bool(capability["reason"].strip())
+        )
+        if not supported and not explicitly_unsupported_on_windows:
+            errors.append(f"{label}: required device capability has invalid platform status: {metric_id}")
 
 
 def _validate_manifest_and_artifacts(
@@ -546,7 +603,9 @@ def validate_package(package: Path) -> tuple[ValidatedPackage | None, list[str]]
     scorecard = _load_json(package / "scorecard.json", errors)
     result = _load_json(package / "benchmark-result.json", errors)
     _validate_identity(identity, f"{label}/runtime-identity.json", errors)
-    _validate_telemetry(telemetry, f"{label}/telemetry.json", errors)
+    _validate_telemetry(
+        telemetry, identity.get("platform"), f"{label}/telemetry.json", errors
+    )
 
     result_identity = result.get("identity")
     if not isinstance(result_identity, dict):

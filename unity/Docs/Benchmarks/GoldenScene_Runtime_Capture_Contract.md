@@ -43,11 +43,14 @@ only when benchmark-required UI is requested, then restores every Canvas and ren
 
 ## Video and profiler capabilities
 
-The repository does not install a licensed runtime video encoder. Therefore the default
-video facility is fail-closed and writes `AL-GS-VIDEO-UNSUPPORTED`. A platform integration
-may inject `IGoldenSceneVideoCaptureFacility`; the session still owns anchor reapplication,
-drift checks, UI exclusion or benchmark-required routing during synchronous frame capture,
-naming, hashing, and manifest linkage.
+The repository does not install or redistribute a runtime video encoder. Therefore the default
+video facility is fail-closed and writes `AL-GS-VIDEO-UNSUPPORTED`. Windows Player runs may
+select an operator-installed `ffmpeg.exe` with `--al-gs-ffmpeg <absolute-path>`. The runner uses
+FFmpeg `gdigrab` against the Player window, writes MP4 `yuv420p` media, and never adds the
+executable to the evidence package. The path must identify an existing file named `ffmpeg.exe`;
+all other platforms remain unsupported through this CLI integration. The session still owns
+anchor reapplication, drift checks, UI exclusion or benchmark-required routing across the entire
+external capture interval, naming, hashing, and manifest linkage.
 
 `GoldenSceneNativeProfilerCaptureFacility` uses Unity native binary profiler logging and
 writes the Unity-assigned raw `.raw` artifact required for Unity Profiler review. If `Profiler.supported`
@@ -91,10 +94,11 @@ one atomic result directory. Example Player invocation:
 ```text
 AnotherLife.exe --al-gs-run \
   --al-gs-scene GS-03 --al-gs-anchor boss_entry \
-  --al-gs-quality android_floor_30 --al-gs-seed 903031 \
-  --al-gs-warmup-seconds 10 --al-gs-measurement-seconds 60 \
+  --al-gs-quality pc_high_60 --al-gs-seed 903031 \
+  --al-gs-warmup-seconds 300 --al-gs-measurement-seconds 1200 \
   --al-gs-width 1920 --al-gs-height 1080 --al-gs-video-fps 30 \
   --al-gs-ui excluded --al-gs-output C:/captures \
+  --al-gs-ffmpeg C:/Tools/ffmpeg/bin/ffmpeg.exe \
   --al-gs-run-id run-0001 --al-gs-operator automation \
   --al-gs-certification target-platform
 ```
@@ -121,9 +125,13 @@ benchmark-result.json
 ```
 
 `benchmark-result.json` links the exact identity, raw telemetry and capability/error records,
-artifact statuses, provenance declaration, and scorecard. Unsupported video/profiler/device
+artifact statuses, provenance declaration, and scorecard. Unsupported video or profiler
 capabilities remain explicit and keep certification evidence incomplete; they are never filled
-with inferred or invented values.
+with inferred or invented values. Windows Player device APIs are platform-aware: battery level,
+device temperature, and thermal state may be recorded as `unsupported` only when each capability
+has zero samples and a non-empty platform reason, while start/end/device-sample records remain
+present. Android certification still requires those three capabilities to be supported with
+samples.
 
 ## Certifying-package validation
 
@@ -151,7 +159,12 @@ directory). Do not add those generated binaries to the repository. Commit only a
 manifests, hashes, stable evidence URIs, and summaries when a later gate explicitly requires them.
 
 The strict validator intentionally rejects development packages that record unsupported video,
-profiler, thermal, battery, actor-density, streaming, or other mandatory capabilities. Such
-packages remain useful diagnostics but are not certifying evidence. Android-floor certification
-still requires the physical-device procedure, three valid repetitions, five-minute warmups, and
-20-minute measured soaks; short Player smoke runs do not satisfy that procedure.
+profiler, actor-density, streaming, or other mandatory capabilities. It applies the explicit
+Windows device-API policy above without inventing device readings. Such incomplete packages
+remain useful diagnostics but are not certifying evidence. Current execution is PC-first:
+GS-01 through GS-05 are certified as Windows Player evidence, with representative repetitions
+using identical build, device pseudonym, seed, anchor, quality, and media settings. Every Android
+row is explicitly deferred/blocked to Kanban task `t_7b530af7`; no Windows result is evidence of
+mobile readiness. Android-floor certification still requires the physical-device procedure,
+three valid repetitions, five-minute warmups, and 20-minute measured soaks; short Player smoke
+runs do not satisfy that procedure.

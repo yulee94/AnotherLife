@@ -196,12 +196,20 @@ namespace AL.Benchmarks.GoldenScenes
 
             try
             {
+                IGoldenSceneVideoCaptureFacility videoFacility =
+                    string.IsNullOrEmpty(context.Request.FfmpegPath)
+                        ? null
+                        : new GoldenSceneFfmpegVideoCaptureFacility(
+                            context.Request.FfmpegPath,
+                            Application.productName,
+                            Application.platform == RuntimePlatform.WindowsPlayer);
                 capture.BeginCapture(
                     benchmarkCamera,
                     context.Setup,
                     context.Identity,
                     mediaSettings,
                     stagingRoot,
+                    videoFacility,
                     telemetry: telemetry);
             }
             catch (Exception exception)
