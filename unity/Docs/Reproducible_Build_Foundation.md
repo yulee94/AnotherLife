@@ -8,7 +8,7 @@ The current supported target is PC Windows under the canonical Unity editor:
 - Windows Standalone support
 - Mono scripting backend
 - x86_64
-- Development Player
+- Development Player with Unity's `NoUniqueIdentifier` build option
 - five ordered ShellFoundation scenes from `EditorBuildSettings.asset`
 
 The owner moved Android implementation and physical-device certification to deferred task
@@ -128,6 +128,10 @@ Cleanup refuses repository root, outside-repository paths, symlinks, and reparse
 Two builds are equivalent only when all fields except `run` and `manifestSha256` match. Artifact,
 toolchain, setting, source, scene, or content divergence returns `stop_ship` with exact field paths.
 No broad binary normalization is allowed.
+
+The packaged golden-scene identity derives its timestamp from the source commit rather than wall
+clock time. `NoUniqueIdentifier` prevents Unity from writing a fresh build GUID into each Player.
+These are source-level determinism controls, not post-build binary normalization.
 
 ## Disposable-profile launch smoke
 
