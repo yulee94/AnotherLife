@@ -313,7 +313,7 @@ namespace AL.Tests.EditMode.FirstUserGameTest
         }
 
         [Test]
-        public void EditorIdentityAdapterOwnsPreviewCopyWithoutChangingPlayerPresenter()
+        public void EditorIdentityAdapterOwnsPreviewBehaviorWithoutChangingPlayerCopy()
         {
             FirstUserIdentityDraftPresenter production =
                 FirstUserIdentityDraftPresenter.CreateStandalone();
@@ -322,7 +322,7 @@ namespace AL.Tests.EditMode.FirstUserGameTest
                 .GetComponentInChildren<Text>(true);
             Assert.That(
                 productionAction.text,
-                Is.EqualTo("Continue with this realm draft"));
+                Is.EqualTo("Continue to class"));
             Assert.That(
                 production.GetRealmChoiceButton(RealmId.Umbral)
                     .GetComponent<EventTrigger>(),
@@ -335,7 +335,7 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             _ownedObjects.Add(editor.transform.root.gameObject);
             Text editorAction = editor.ConfirmRealmButton
                 .GetComponentInChildren<Text>(true);
-            Assert.That(editorAction.text, Is.EqualTo("Select Realm"));
+            Assert.That(editorAction.text, Is.EqualTo("Continue to class"));
 
             Button previewButton = editor.GetRealmChoiceButton(RealmId.Umbral);
             Assert.That(previewButton.GetComponent<EventTrigger>(), Is.Not.Null);
