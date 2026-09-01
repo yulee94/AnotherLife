@@ -260,7 +260,11 @@ namespace AL.UI
             }
 
             _surface.texture = _ownedRenderTexture;
-            _surface.enabled = true;
+            // Keep the truthful loading fallback visible until this attempt has produced an
+            // actual frame. Allocating a RenderTexture does not prove that the decoder can render
+            // into it, and exposing it here would cover the fallback with a blank surface while
+            // preparation is still pending.
+            _surface.enabled = false;
             return true;
         }
 
@@ -318,9 +322,14 @@ namespace AL.UI
 
             if (_coordinator.State == LaunchCinematicPlaybackState.AwaitingFirstFrame)
             {
-                _coordinator.TryMarkFirstFrameVisible(
-                    _activeGeneration,
-                    frameIndex);
+                if (_coordinator.TryMarkFirstFrameVisible(
+                        _activeGeneration,
+                        frameIndex) &&
+                    _surface != null &&
+                    _surface.texture == _ownedRenderTexture)
+                {
+                    _surface.enabled = true;
+                }
                 return;
             }
 

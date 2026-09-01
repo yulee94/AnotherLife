@@ -331,6 +331,48 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(1, terminalCount);
         }
 
+        [Test]
+        public void HostKeepsFallbackVisibleUntilCurrentFirstFrameArrives()
+        {
+            GameObject root = CreateHostObject(out LaunchCinematicVideoPlayerHost host);
+            VideoPlayer player = root.GetComponent<VideoPlayer>();
+            RawImage surface = root.GetComponent<RawImage>();
+
+            try
+            {
+                SetField(host, "_surface", surface);
+                LaunchCinematicPlaybackCoordinator coordinator =
+                    GetField<LaunchCinematicPlaybackCoordinator>(host, "_coordinator");
+                LaunchCinematicPlaybackAttempt attempt = coordinator.Begin(
+                    ValidRecord(),
+                    LaunchCinematicPlatform.Desktop,
+                    releaseBuild: true,
+                    reducedMotion: false);
+                SetField(host, "_activeGeneration", attempt.Generation);
+
+                Assert.IsTrue(
+                    (bool)InvokePrivate(host, "TryCreateRenderTarget", attempt));
+                Assert.IsNotNull(surface.texture);
+                Assert.IsFalse(
+                    surface.enabled,
+                    "Render-target allocation is not first-frame readiness.");
+
+                Assert.IsTrue(coordinator.TryMarkPrepared(attempt.Generation));
+                InvokePrivate(host, "OnFrameReady", player, 0L);
+
+                Assert.AreEqual(
+                    LaunchCinematicPlaybackState.Playing,
+                    coordinator.State);
+                Assert.IsTrue(
+                    surface.enabled,
+                    "The current attempt's first rendered frame may replace the fallback.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
         [TestCase(
             "/Applications/AnotherLife/StreamingAssets",
             "LaunchCinematic/Desktop/launch_omen_01.mp4",
@@ -421,11 +463,19 @@ namespace AL.Tests.EditMode
             string methodName,
             params object[] arguments)
         {
+            InvokePrivate(host, methodName, arguments);
+        }
+
+        private static object InvokePrivate(
+            LaunchCinematicVideoPlayerHost host,
+            string methodName,
+            params object[] arguments)
+        {
             MethodInfo method = typeof(LaunchCinematicVideoPlayerHost).GetMethod(
                 methodName,
                 BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.IsNotNull(method, "Missing lifecycle callback " + methodName);
-            method.Invoke(host, arguments);
+            return method.Invoke(host, arguments);
         }
 
         private static LaunchCinematicRuntimeRecord ValidRecord()
