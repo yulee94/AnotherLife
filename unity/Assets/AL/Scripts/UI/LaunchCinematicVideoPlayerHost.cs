@@ -188,17 +188,40 @@ namespace AL.UI
                 !LaunchCinematicMediaPath.TryResolve(
                     Application.streamingAssetsPath,
                     attempt.StreamingAssetsPath,
-                    out string mediaUrl) ||
-                !TryCreateRenderTarget(attempt))
+                    out string mediaUrl))
             {
                 _coordinator.TryFail(_activeGeneration, "playback-owner-unavailable");
                 PublishTerminalAndRelease();
                 return false;
             }
 
-            ConfigurePlayer(mediaUrl);
-            _prepareStartedAt = Time.realtimeSinceStartup;
-            _videoPlayer.Prepare();
+            bool renderTargetReady = false;
+            if (!TryRunDecoderOperation(
+                    () => renderTargetReady = TryCreateRenderTarget(attempt),
+                    "render-target-failed") ||
+                !renderTargetReady)
+            {
+                if (_coordinator.TryFail(
+                        _activeGeneration,
+                        "playback-owner-unavailable"))
+                {
+                    PublishTerminalAndRelease();
+                }
+                return false;
+            }
+
+            if (!TryRunDecoderOperation(
+                    () =>
+                    {
+                        ConfigurePlayer(mediaUrl);
+                        _prepareStartedAt = Time.realtimeSinceStartup;
+                        _videoPlayer.Prepare();
+                    },
+                    "decoder-start-failed"))
+            {
+                return false;
+            }
+
             return true;
         }
 
@@ -316,13 +339,18 @@ namespace AL.UI
                 return;
             }
 
-            if (source.audioTrackCount > 0)
-            {
-                source.EnableAudioTrack(0, true);
-                source.SetTargetAudioSource(0, _audioSource);
-            }
+            TryRunDecoderOperation(
+                () =>
+                {
+                    if (source.audioTrackCount > 0)
+                    {
+                        source.EnableAudioTrack(0, true);
+                        source.SetTargetAudioSource(0, _audioSource);
+                    }
 
-            source.Play();
+                    source.Play();
+                },
+                "decoder-play-failed");
         }
 
         private void OnFrameReady(VideoPlayer source, long frameIndex)
@@ -370,6 +398,33 @@ namespace AL.UI
             {
                 Debug.LogWarning("Launch cinematic playback failed; using the static fallback.");
                 PublishTerminalAndRelease();
+            }
+        }
+
+        private bool TryRunDecoderOperation(Action operation, string failureDetail)
+        {
+            if (_activeGeneration <= 0 || operation == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                operation();
+                return true;
+            }
+            catch (Exception)
+            {
+                // Decoder and render-target setup are optional. A synchronous platform failure
+                // must converge on the same bounded fallback as asynchronous VideoPlayer errors
+                // without exposing media paths or raw platform exception text.
+                if (_coordinator.TryFail(_activeGeneration, failureDetail))
+                {
+                    Debug.LogWarning(
+                        "Launch cinematic decoder operation failed; using the static fallback.");
+                    PublishTerminalAndRelease();
+                }
+                return false;
             }
         }
 
