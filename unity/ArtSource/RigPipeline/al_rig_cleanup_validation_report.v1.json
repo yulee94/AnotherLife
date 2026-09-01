@@ -1,0 +1,31 @@
+{
+  "assets": {
+    "rmc_cleanup_beast_slagwhistle_v002": {
+      "blendContentSignature": "c60044aa09248900864ae2c1cb63a77929dca25d4ff94ec9b8b24828c8326b40",
+      "fbxPath": "3bbf59bafc689600da9f6c8cb7283c8d45a071958ae92f5e78ae20e7d7720dad",
+      "fbxReceiptSemanticSignature": "99c1ea84042344be351682d4ec7d720e4cf5de3f977056f08702d93b1d3b7460",
+      "sidecarPath": "e0bf46002fd8a7321552b291209c16ede7a67f3bb1a9fd92b7de05a91c438f2d"
+    },
+    "rmc_cleanup_champion_vanguard_v002": {
+      "blendContentSignature": "0eb9b42d656014d42191ad0d8d90174b35276f56bda57a6977102837350d66b1",
+      "fbxPath": "007e9492820d21f9c609f2886c12d875ab92f2b44b8ffff5b1028240cb478db1",
+      "fbxReceiptSemanticSignature": "b05003678f9b7e55c80de6ba60bd58ef6c2e47b846cd98ea8cc14c4d712ae316",
+      "sidecarPath": "e86aa1b73f8ee7ba1f7f0a4047829adc5722602354ebeff18ef075152816e38a"
+    },
+    "rmc_cleanup_npc_covenant_sentinel_v003": {
+      "blendContentSignature": "f2bb2c6d074fb844f945c5c0ae04a403969732310e1225aa5e8f2553fe7866af",
+      "fbxReceiptSemanticSignature": "6c497ceec07e06da2aa7fdf37528e1d0bd9c45b230c52d551c30194db6e68a12",
+      "fbxSemanticSignature": "6c497ceec07e06da2aa7fdf37528e1d0bd9c45b230c52d551c30194db6e68a12",
+      "sidecarPath": "19c6e0ff000a96a7e73901d78ac0859cec4e51d6d55679e08d452a10ee2cc90c"
+    }
+  },
+  "determinismPolicy": {
+    "animatedFbx": "semantic_roundtrip_receipt_v1",
+    "animationFloatTolerance": 1e-05,
+    "blend": "semantic_content_signature_v1",
+    "staticFbx": "byte_exact_sha256_v1"
+  },
+  "pipelineId": "rmc_pipeline_blender_rig_cleanup_v001",
+  "schemaVersion": 1,
+  "status": "validated"
+}

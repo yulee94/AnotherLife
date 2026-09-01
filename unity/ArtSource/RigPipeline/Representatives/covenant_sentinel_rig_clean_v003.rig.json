@@ -1,0 +1,1498 @@
+{
+  "approvalState": "bounded_engineering",
+  "assetId": "rmc_cleanup_npc_covenant_sentinel_v003",
+  "bindings": {
+    "bindPoseId": "rmc_bind_humanoid_a_pose_v001",
+    "budgetProfileId": "rmc_budget_npc_mobile_floor_v001",
+    "facialProfileId": "rmc_face_npc_bones_v001",
+    "representativeProfileId": "rmc_representative_npc_covenant_sentinel_v001",
+    "requiredMotionSetId": "rmc_set_npc_complete_v001",
+    "retargetProfileId": "rmc_retarget_humanoid_shared_v001",
+    "skeletonProfileId": "rmc_skeleton_humanoid_shared_v001"
+  },
+  "catalogAssetId": "covenant_sentinel_meshy6_walking_v002",
+  "cleanupEvidence": {
+    "actionSignature": "f6d9149dfbd2e62972c47341e612dd2d5746ea001f8708b4224e8d444fc50458",
+    "boneRenames": 24,
+    "canonicalAction": {
+      "actionName": "ANIM_rmc_cleanup_npc_covenant_sentinel_v003_source_v001",
+      "animatedBones": [
+        "chest",
+        "clavicle_l",
+        "clavicle_r",
+        "face_front",
+        "foot_l",
+        "foot_r",
+        "hand_l",
+        "hand_r",
+        "head",
+        "head_tip",
+        "lower_arm_l",
+        "lower_arm_r",
+        "lower_leg_l",
+        "lower_leg_r",
+        "neck_01",
+        "pelvis",
+        "spine_01",
+        "spine_02",
+        "toe_l",
+        "toe_r",
+        "upper_arm_l",
+        "upper_arm_r",
+        "upper_leg_l",
+        "upper_leg_r"
+      ],
+      "frameCount": 32,
+      "frameEnd": 32,
+      "frameStart": 1
+    },
+    "cleanedGeometrySignature": "12b1d20bf51ed4da91f071455c726a779a47b91e03c66fba92a3a7db04888cf0",
+    "cleanedWeights": {
+      "maximumInfluencesPerVertex": 4,
+      "nonNormalizedVertices": 0,
+      "unweightedVertices": 0,
+      "vertices": 6226,
+      "verticesOverInfluenceBudget": 0,
+      "weightsBelowFloor": 0
+    },
+    "constantObjectTransformCurvesRemoved": true,
+    "deformationCleanupMaximumDriftMeters": 0.03227375,
+    "deformationCleanupToleranceMeters": 0.035,
+    "geometryMaximumDriftMeters": 1.209e-06,
+    "geometrySignatureAfter": "8492fdb71d3c9a99a16baefc61269ecb4d7e6fdc9849decef543dc6e72250dde",
+    "geometrySignatureBefore": "cfc1b9a8ff17e732afe70b40803d73051407845e44174ca268bdb76728700d97",
+    "removedObjects": [],
+    "sampleFrames": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32
+    ],
+    "socketsAdded": 15,
+    "sourceActionCount": 1,
+    "sourceGroundOffsetMeters": -0.0,
+    "sourceWeights": {
+      "maximumInfluencesPerVertex": 9,
+      "nonNormalizedVertices": 0,
+      "unweightedVertices": 0,
+      "vertices": 6226,
+      "verticesOverInfluenceBudget": 1417,
+      "weightsBelowFloor": 893
+    },
+    "topologyCleanup": {
+      "degenerateFacesRemoved": 0,
+      "duplicateFacesRemoved": 0,
+      "nonTriFacesConverted": 0
+    }
+  },
+  "errors": [],
+  "meshes": [
+    {
+      "degenerateTriangles": 0,
+      "edges": 18665,
+      "faces": 12441,
+      "materialSlots": 1,
+      "maximumZ": 2.15,
+      "minimumZ": -0.0,
+      "name": "M_CovenantSentinel_LOD0",
+      "ngons": 0,
+      "nonManifoldEdges": 35,
+      "nonTriFaces": 0,
+      "triangles": 12441,
+      "vertices": 6226
+    }
+  ],
+  "output": {
+    "blendContentSignature": "f2bb2c6d074fb844f945c5c0ae04a403969732310e1225aa5e8f2553fe7866af",
+    "blendPath": "unity/ArtSource/RigPipeline/Representatives/covenant_sentinel_rig_clean_v003.blend",
+    "blenderVersion": "5.2.0 LTS"
+  },
+  "pipelineId": "rmc_pipeline_blender_rig_cleanup_v001",
+  "preflight": {
+    "actionSignature": "f6d9149dfbd2e62972c47341e612dd2d5746ea001f8708b4224e8d444fc50458",
+    "actions": 1,
+    "animatedTransforms": 41,
+    "deformingBones": 24,
+    "degenerateTriangles": 0,
+    "maximumInfluencesPerVertex": 4,
+    "minimumZ": -0.0,
+    "ngons": 0,
+    "nonManifoldEdges": 35,
+    "nonNormalizedVertices": 0,
+    "nonTriFaces": 0,
+    "unweightedVertices": 0,
+    "vertices": 6226,
+    "verticesOverInfluenceBudget": 0,
+    "warnings": [
+      "DocumentedModuleSeams: M_CovenantSentinel_LOD0=35 non-manifold edges"
+    ],
+    "weightsBelowFloor": 0
+  },
+  "productionEligible": false,
+  "productionGaps": [
+    "source_specific_meshy_rights_record_missing",
+    "npc_facial_deformation_profile_not_authored",
+    "weight_reduction_deformation_delta_requires_owner_review",
+    "walk_take_requires_contact_and_loop_qualification",
+    "required_motion_set_not_in_this_pipeline",
+    "owner_creative_approval_required"
+  ],
+  "schemaVersion": 1,
+  "skeleton": {
+    "algorithm": "sha256_canonical_parent_path_bind_matrix_deform_flag_v1",
+    "records": [
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "root",
+        "parentPath": "",
+        "path": "root"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "motion_root",
+        "parentPath": "root",
+        "path": "root/motion_root"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            -0.034379,
+            0.998526,
+            0.042001,
+            0.005482
+          ],
+          [
+            -0.97956,
+            -0.042001,
+            0.196718,
+            -0.005056
+          ],
+          [
+            0.198192,
+            -0.034379,
+            0.97956,
+            1.235054
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "pelvis",
+        "parentPath": "root/motion_root",
+        "path": "root/motion_root/pelvis"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            -0.03438,
+            -0.97956,
+            0.198192,
+            -0.0
+          ],
+          [
+            0.998526,
+            -0.042001,
+            -0.034379,
+            0.166532
+          ],
+          [
+            0.042001,
+            0.196718,
+            0.97956,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_cloth_waist",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/socket_cloth_waist"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            -0.03438,
+            -0.97956,
+            0.198192,
+            -0.0
+          ],
+          [
+            0.998526,
+            -0.042001,
+            -0.034379,
+            0.166532
+          ],
+          [
+            0.042001,
+            0.196718,
+            0.97956,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_pelvis",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/socket_pelvis"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            -0.027427,
+            0.204576,
+            0.978466,
+            0.031636
+          ],
+          [
+            0.998538,
+            -0.040013,
+            0.036355,
+            -0.006188
+          ],
+          [
+            0.046588,
+            0.978033,
+            -0.20318,
+            0.151243
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "spine_01",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/spine_01"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            1.0,
+            0.0,
+            0.154639
+          ],
+          [
+            0.0,
+            -0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "spine_02",
+        "parentPath": "root/motion_root/pelvis/spine_01",
+        "path": "root/motion_root/pelvis/spine_01/spine_02"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.999996,
+            -0.002178,
+            -0.001783,
+            -0.0
+          ],
+          [
+            0.002342,
+            0.995206,
+            0.097769,
+            0.15464
+          ],
+          [
+            0.001561,
+            -0.097773,
+            0.995208,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "chest",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            -0.083011,
+            0.996515,
+            -0.008203,
+            0.043114
+          ],
+          [
+            0.091799,
+            -0.00055,
+            -0.995777,
+            0.080935
+          ],
+          [
+            -0.992311,
+            -0.083414,
+            -0.091433,
+            -0.005839
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "clavicle_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.543443,
+            0.147368,
+            0.826409,
+            0.0
+          ],
+          [
+            0.614282,
+            0.601153,
+            -0.511149,
+            0.170704
+          ],
+          [
+            -0.572125,
+            0.785428,
+            0.236167,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "upper_arm_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.939564,
+            -0.290858,
+            -0.180613,
+            0.0
+          ],
+          [
+            0.342184,
+            0.780189,
+            0.523656,
+            0.328111
+          ],
+          [
+            -0.011397,
+            -0.553811,
+            0.832564,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "lower_arm_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.971806,
+            -0.127745,
+            0.198177,
+            -0.0
+          ],
+          [
+            0.175923,
+            0.952466,
+            -0.248716,
+            0.344084
+          ],
+          [
+            -0.156985,
+            0.276568,
+            0.948085,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "hand_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.873624,
+            0.41042,
+            0.261413,
+            -0.0
+          ],
+          [
+            0.41042,
+            -0.332884,
+            -0.848966,
+            0.344084
+          ],
+          [
+            -0.261412,
+            0.848966,
+            -0.45926,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_hand_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l/socket_hand_l"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.873624,
+            0.41042,
+            0.261413,
+            -0.0
+          ],
+          [
+            0.41042,
+            -0.332884,
+            -0.848966,
+            0.344084
+          ],
+          [
+            -0.261412,
+            0.848966,
+            -0.45926,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_vfx_hand_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l/socket_vfx_hand_l"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.873624,
+            0.41042,
+            0.261413,
+            -0.0
+          ],
+          [
+            0.41042,
+            -0.332884,
+            -0.848966,
+            0.344084
+          ],
+          [
+            -0.261412,
+            0.848966,
+            -0.45926,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_weapon_off",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l/socket_weapon_off"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            -0.066238,
+            -0.99777,
+            -0.008203,
+            -0.04249
+          ],
+          [
+            -0.090694,
+            0.014208,
+            -0.995777,
+            0.079004
+          ],
+          [
+            0.993674,
+            -0.065214,
+            -0.091433,
+            -0.005198
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "clavicle_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.567903,
+            -0.14135,
+            -0.810868,
+            -0.0
+          ],
+          [
+            -0.586504,
+            0.621697,
+            -0.51914,
+            0.172613
+          ],
+          [
+            0.577495,
+            0.770398,
+            0.270161,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "upper_arm_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.930459,
+            0.330058,
+            0.159085,
+            0.0
+          ],
+          [
+            -0.363955,
+            0.782562,
+            0.505107,
+            0.333552
+          ],
+          [
+            0.042221,
+            -0.527881,
+            0.848268,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "lower_arm_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.972793,
+            0.12277,
+            -0.196471,
+            -0.0
+          ],
+          [
+            -0.171555,
+            0.951666,
+            -0.254755,
+            0.342627
+          ],
+          [
+            0.155699,
+            0.28153,
+            0.946836,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "hand_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.876255,
+            -0.405707,
+            -0.259962,
+            0.0
+          ],
+          [
+            -0.405707,
+            -0.330134,
+            -0.852299,
+            0.342628
+          ],
+          [
+            0.259961,
+            0.852299,
+            -0.45388,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_hand_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r/socket_hand_r"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.876255,
+            -0.405707,
+            -0.259962,
+            0.0
+          ],
+          [
+            -0.405707,
+            -0.330134,
+            -0.852299,
+            0.342628
+          ],
+          [
+            0.259961,
+            0.852299,
+            -0.45388,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_vfx_hand_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r/socket_vfx_hand_r"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.876255,
+            -0.405707,
+            -0.259962,
+            0.0
+          ],
+          [
+            -0.405707,
+            -0.330134,
+            -0.852299,
+            0.342628
+          ],
+          [
+            0.259961,
+            0.852299,
+            -0.45388,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_weapon_main",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r/socket_weapon_main"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.999965,
+            -0.005535,
+            -0.006266,
+            -0.000624
+          ],
+          [
+            0.004895,
+            0.995188,
+            -0.097861,
+            0.112285
+          ],
+          [
+            0.006778,
+            0.097827,
+            0.99518,
+            0.011038
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "neck_01",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.999969,
+            0.007521,
+            -0.00247,
+            0.0
+          ],
+          [
+            -0.007614,
+            0.828464,
+            -0.55999,
+            0.08601
+          ],
+          [
+            -0.002166,
+            0.559992,
+            0.828495,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "head",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.999914,
+            0.011572,
+            -0.006098,
+            0.001721
+          ],
+          [
+            -0.011572,
+            0.565265,
+            -0.824828,
+            0.084087
+          ],
+          [
+            -0.006098,
+            0.824828,
+            0.56535,
+            0.1227
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "face_front",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head/face_front"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.999977,
+            -0.006638,
+            -0.00167,
+            -0.001721
+          ],
+          [
+            0.006638,
+            0.880934,
+            0.473193,
+            0.228428
+          ],
+          [
+            -0.00167,
+            -0.473193,
+            0.880957,
+            -0.1227
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "head_tip",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head/head_tip"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.999914,
+            -0.011572,
+            0.006098,
+            0.0
+          ],
+          [
+            -0.011572,
+            -0.565265,
+            0.824828,
+            0.20403
+          ],
+          [
+            -0.006098,
+            -0.824828,
+            -0.56535,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_camera_focus",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head/socket_camera_focus"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.999914,
+            -0.011572,
+            0.006098,
+            0.0
+          ],
+          [
+            -0.011572,
+            -0.565265,
+            0.824828,
+            0.20403
+          ],
+          [
+            -0.006098,
+            -0.824828,
+            -0.56535,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_hair",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head/socket_hair"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.999914,
+            -0.011572,
+            0.006098,
+            0.0
+          ],
+          [
+            -0.011572,
+            -0.565265,
+            0.824828,
+            0.20403
+          ],
+          [
+            -0.006098,
+            -0.824828,
+            -0.56535,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_head",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head/socket_head"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.999938,
+            -0.007484,
+            0.008203,
+            0.0
+          ],
+          [
+            -0.007484,
+            0.091495,
+            0.995777,
+            0.09819
+          ],
+          [
+            -0.008203,
+            -0.995777,
+            0.091433,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_back",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/socket_back"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.999938,
+            -0.007484,
+            0.008203,
+            0.0
+          ],
+          [
+            -0.007484,
+            0.091495,
+            0.995777,
+            0.09819
+          ],
+          [
+            -0.008203,
+            -0.995777,
+            0.091433,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_cape",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/socket_cape"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.999938,
+            -0.007484,
+            0.008203,
+            0.0
+          ],
+          [
+            -0.007484,
+            0.091495,
+            0.995777,
+            0.09819
+          ],
+          [
+            -0.008203,
+            -0.995777,
+            0.091433,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_chest",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/socket_chest"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            0.999938,
+            -0.007484,
+            0.008203,
+            0.0
+          ],
+          [
+            -0.007484,
+            0.091495,
+            0.995777,
+            0.09819
+          ],
+          [
+            -0.008203,
+            -0.995777,
+            0.091433,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_vfx_chest",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/socket_vfx_chest"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            -0.118854,
+            -0.134376,
+            -0.983777,
+            -0.019957
+          ],
+          [
+            0.979991,
+            0.143445,
+            -0.13799,
+            0.126683
+          ],
+          [
+            0.15966,
+            -0.980493,
+            0.114638,
+            -0.113532
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "upper_leg_l",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/upper_leg_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.998815,
+            -0.013052,
+            0.046888,
+            0.0
+          ],
+          [
+            0.025063,
+            0.963751,
+            -0.265622,
+            0.481935
+          ],
+          [
+            -0.041722,
+            0.266482,
+            0.962936,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "lower_leg_l",
+        "parentPath": "root/motion_root/pelvis/upper_leg_l",
+        "path": "root/motion_root/pelvis/upper_leg_l/lower_leg_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.994099,
+            0.072677,
+            -0.080532,
+            -0.0
+          ],
+          [
+            0.039977,
+            0.444682,
+            0.894796,
+            0.49502
+          ],
+          [
+            0.100842,
+            -0.892735,
+            0.439153,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "foot_l",
+        "parentPath": "root/motion_root/pelvis/upper_leg_l/lower_leg_l",
+        "path": "root/motion_root/pelvis/upper_leg_l/lower_leg_l/foot_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.99742,
+            0.043193,
+            -0.057334,
+            0.0
+          ],
+          [
+            -0.0,
+            0.798712,
+            0.601714,
+            0.174142
+          ],
+          [
+            0.071783,
+            -0.600161,
+            0.796652,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "toe_l",
+        "parentPath": "root/motion_root/pelvis/upper_leg_l/lower_leg_l/foot_l",
+        "path": "root/motion_root/pelvis/upper_leg_l/lower_leg_l/foot_l/toe_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.05269,
+            -0.128171,
+            -0.990352,
+            -0.011679
+          ],
+          [
+            0.99546,
+            -0.071986,
+            0.062278,
+            -0.120496
+          ],
+          [
+            -0.079274,
+            -0.989136,
+            0.123796,
+            -0.124531
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "upper_leg_r",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/upper_leg_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.99972,
+            -0.007069,
+            -0.022584,
+            0.0
+          ],
+          [
+            0.000897,
+            0.96498,
+            -0.262324,
+            0.484582
+          ],
+          [
+            0.023648,
+            0.26223,
+            0.964716,
+            -0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "lower_leg_r",
+        "parentPath": "root/motion_root/pelvis/upper_leg_r",
+        "path": "root/motion_root/pelvis/upper_leg_r/lower_leg_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.995047,
+            -0.043206,
+            0.08953,
+            -0.0
+          ],
+          [
+            -0.059866,
+            0.45855,
+            0.88665,
+            0.49003
+          ],
+          [
+            -0.079363,
+            -0.887618,
+            0.453692,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "foot_r",
+        "parentPath": "root/motion_root/pelvis/upper_leg_r/lower_leg_r",
+        "path": "root/motion_root/pelvis/upper_leg_r/lower_leg_r/foot_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.997122,
+            -0.046265,
+            0.060063,
+            0.0
+          ],
+          [
+            -1e-06,
+            0.792214,
+            0.610243,
+            0.174622
+          ],
+          [
+            -0.075816,
+            -0.608487,
+            0.789934,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "toe_r",
+        "parentPath": "root/motion_root/pelvis/upper_leg_r/lower_leg_r/foot_r",
+        "path": "root/motion_root/pelvis/upper_leg_r/lower_leg_r/foot_r/toe_r"
+      }
+    ],
+    "signature": "cbe1c6ad6f0395cdf93522e18a66680214c5f9427965f14e3dad9eb9b804d973"
+  },
+  "source": {
+    "localSourceRequired": true,
+    "path": "unity/Assets/AL/Art/Production/FirstUserOnboarding/Enemies/Covenant_Sentinel_Meshy6_Walking_v002.fbx",
+    "productionRightsCleared": false,
+    "provenanceId": "rmc_provenance_covenant_sentinel_meshy6_v002",
+    "rightsState": "provider_output_rights_record_missing",
+    "sha256": "8b8678c49d8261495f0f2ec2525c239b088cbe2fd0d652cc4ca83e79147c716e",
+    "sourceMaterialOnly": true
+  },
+  "status": "technical_candidate_valid",
+  "subjectKind": "npc"
+}

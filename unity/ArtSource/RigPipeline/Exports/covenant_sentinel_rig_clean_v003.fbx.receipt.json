@@ -1,0 +1,36 @@
+{
+  "assetId": "rmc_cleanup_npc_covenant_sentinel_v003",
+  "export": {
+    "addLeafBones": false,
+    "animationsIncluded": true,
+    "axisForward": "-Z",
+    "axisUp": "Y",
+    "determinismLevel": "semantic",
+    "fixedCreationTimeUtc": "2000-01-01T00:00:00Z",
+    "globalScale": 1.0,
+    "path": "unity/ArtSource/RigPipeline/Exports/covenant_sentinel_rig_clean_v003.fbx",
+    "presetId": "rmc_export_fbx_unity_rig_v001",
+    "sha256": "800e0de82f7995886b0da3cf730cff6a6748674eaaaff6e52353a30e5a4bc1cb",
+    "uuidPolicy": "best_effort_sha256_repr_int63_v1"
+  },
+  "pipelineId": "rmc_pipeline_blender_rig_cleanup_v001",
+  "roundTrip": {
+    "actions": 1,
+    "armatures": 1,
+    "bones": 41,
+    "errors": [],
+    "meshes": 1,
+    "triangles": 12441,
+    "trianglesByMesh": {
+      "M_CovenantSentinel_LOD0": 12441
+    }
+  },
+  "schemaVersion": 1,
+  "source": {
+    "actionSignature": "f6d9149dfbd2e62972c47341e612dd2d5746ea001f8708b4224e8d444fc50458",
+    "blendContentSignature": "f2bb2c6d074fb844f945c5c0ae04a403969732310e1225aa5e8f2553fe7866af",
+    "blendPath": "unity/ArtSource/RigPipeline/Representatives/covenant_sentinel_rig_clean_v003.blend",
+    "skeletonSignature": "cbe1c6ad6f0395cdf93522e18a66680214c5f9427965f14e3dad9eb9b804d973"
+  },
+  "status": "export_valid"
+}
