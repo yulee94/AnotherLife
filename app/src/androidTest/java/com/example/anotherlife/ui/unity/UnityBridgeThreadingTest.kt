@@ -290,6 +290,15 @@ class UnityBridgeThreadingTest {
                 "Unity runtime unavailable\nLifecycle callback registration failed",
                 host!!.statusTextForTesting()
             )
+            assertEquals(1, host!!.statusTextUpdateCountForTesting())
+            assertEquals(
+                View.ACCESSIBILITY_LIVE_REGION_POLITE,
+                host!!.statusAccessibilityLiveRegionForTesting()
+            )
+            assertEquals(
+                View.IMPORTANT_FOR_ACCESSIBILITY_YES,
+                host!!.statusImportantForAccessibilityForTesting()
+            )
             host!!.destroyUnity()
         }
 

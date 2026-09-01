@@ -237,6 +237,7 @@ internal class UnityRuntimeContainer internal constructor(
     private var lifecycleState = Lifecycle.State.INITIALIZED
     private var latestWindowFocus = false
     private var terminalRuntimeFailure: String? = null
+    private var statusTextUpdateCount = 0
     private var ownershipReleaseBlocked = false
     private val destroyed: Boolean
         get() = activationLeaseState.isClosed()
@@ -414,6 +415,14 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     internal fun statusTextForTesting(): String = statusView.text.toString()
+
+    internal fun statusTextUpdateCountForTesting(): Int = statusTextUpdateCount
+
+    internal fun statusAccessibilityLiveRegionForTesting(): Int =
+        statusView.accessibilityLiveRegion
+
+    internal fun statusImportantForAccessibilityForTesting(): Int =
+        statusView.importantForAccessibility
 
     internal fun callbackAdmissionSnapshotForTesting() = callbackDispatcher.snapshot()
 
@@ -812,7 +821,10 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     private fun showStatus(message: String) {
-        statusView.text = message
+        if (statusView.text.toString() != message) {
+            statusView.text = message
+            statusTextUpdateCount += 1
+        }
         if (statusView.parent == null) {
             addView(statusView)
         }
@@ -835,6 +847,8 @@ internal class UnityRuntimeContainer internal constructor(
             setTextColor(Color.WHITE)
             textSize = 18f
             textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+            accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         }
     }
 }
