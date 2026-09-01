@@ -8,16 +8,28 @@ class UnityBridgeSmokePolicyTest {
     fun unavailableAndCancelledReturnToTheSafeShell() {
         assertEquals(
             UnityBridgeSmokeDecision.SafeReturn(
-                "Unity bridge smoke route is unavailable as expected. Returned safely to Debug."
+                UnityBridgeSmokeSafeReturnNotice.Unavailable
             ),
             UnityBridgeSmokePolicy.decide(outcome(UnityRouteOutcomeStatus.Unavailable))
         )
         assertEquals(
             UnityBridgeSmokeDecision.SafeReturn(
-                "Unity bridge smoke route was cancelled. Returned safely to Debug."
+                UnityBridgeSmokeSafeReturnNotice.Cancelled
             ),
             UnityBridgeSmokePolicy.decide(outcome(UnityRouteOutcomeStatus.Cancelled))
         )
+    }
+
+    @Test
+    fun safeReturnNoticesRestoreOnlyFromBoundedPersistenceKeys() {
+        UnityBridgeSmokeSafeReturnNotice.values().forEach { notice ->
+            assertEquals(
+                notice,
+                UnityBridgeSmokeSafeReturnNotice.fromPersistenceKey(notice.persistenceKey)
+            )
+        }
+        assertEquals(null, UnityBridgeSmokeSafeReturnNotice.fromPersistenceKey(null))
+        assertEquals(null, UnityBridgeSmokeSafeReturnNotice.fromPersistenceKey("raw-bridge-payload"))
     }
 
     @Test
