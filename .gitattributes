@@ -12,3 +12,6 @@
 # Hash-bound Slagfall provenance. Recorded SHA-256 values require raw LF bytes.
 /unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/slagfall_environment_meshy_cleanup_v001.json text eol=lf
 /unity/Docs/AI/Meshy/meshy_texture_inputs_slagfall_environment_2026-08-31_v001.json text eol=lf
+
+# Hash-bound approved enterable-architecture packets.
+/unity/Docs/Architecture/WorldSpaceEnterableV001/**/*.json text eol=lf

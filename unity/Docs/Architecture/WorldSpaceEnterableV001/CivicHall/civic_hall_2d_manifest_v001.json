@@ -1,0 +1,103 @@
+{
+  "schema": "anotherlife.enterable-civic-hall-2d-packet.v1",
+  "status": "owner_approved_six_construction_assets_two_exterior_references_only",
+  "ownerApproval": {
+    "recordedOn": "2026-09-01",
+    "scope": "all artifacts shown in the civic-hall packet",
+    "authority": "approved 2D spatial, modular-construction and visual-reference authority for downstream 3D modeling"
+  },
+  "assemblyPolicy": "reusable modules on 0.5m grid; static source pieces combined per room/exterior visibility cell and material atlas",
+  "doorPolicy": "building shells contain apertures only; door meshes, frames, hinges, colliders and interaction are excluded and deferred",
+  "silent3dAuthorization": "expired_2026-09-01T08:00:00+09:00",
+  "new3dJobsSubmitted": 0,
+  "artifacts": [
+    {
+      "id": "shared_layout_spec",
+      "locator": "2d/plans/shared_civic_hall_layout_v001.json",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "288ecaebe52a0817ecbbc041d5b7fa107cf99668324d79cae39f9dc0cf85f5e0",
+      "byteLength": 9049
+    },
+    {
+      "id": "shared_floorplans",
+      "locator": "2d/plans/shared_civic_hall_floorplans_v001.png",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "03e7bcb03c903c1e170534e4cdac58a1593c02c36e53366270d6ac58943030be",
+      "byteLength": 106001,
+      "pixelDimensions": [
+        2400,
+        1320
+      ]
+    },
+    {
+      "id": "shared_section",
+      "locator": "2d/plans/shared_civic_hall_section_v001.png",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "52bd9ce4d6b99abe614f94bab4f77012f05259dd427ec53871c99358e1143b74",
+      "byteLength": 61441,
+      "pixelDimensions": [
+        2200,
+        1180
+      ]
+    },
+    {
+      "id": "shared_interior_modules",
+      "locator": "2d/plans/shared_civic_hall_interior_modules_v001.png",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "da7e6c2ddbce8d21f323c9945f9f8c3958da604938b34f86ca222450391d8e14",
+      "byteLength": 91784,
+      "pixelDimensions": [
+        2200,
+        1830
+      ]
+    },
+    {
+      "id": "shared_structural_roof_modules",
+      "locator": "2d/plans/shared_civic_hall_reusable_shell_modules_v001.png",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "754ae5f5860b41e75e0d216502eaff6e2bfaddc9769d3e8ffb7b76e93c037d13",
+      "byteLength": 91150,
+      "pixelDimensions": [
+        2400,
+        1710
+      ]
+    },
+    {
+      "id": "shared_layered_finish_tiles",
+      "locator": "2d/plans/shared_civic_hall_layered_finish_tiles_v001.png",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "c7ca526f657d71e57afa7542ae27c5500230e74aa95b6ae6a4d9faaee7ba6991",
+      "byteLength": 96906,
+      "pixelDimensions": [
+        2400,
+        1760
+      ]
+    },
+    {
+      "id": "eldergrove_exterior_reference",
+      "locator": "2d/exteriors-corrective/eldergrove_world_civic_hall_exterior_v002.png",
+      "disposition": "massing_material_reference_only",
+      "provider": "Meshy text-to-image / nano-banana-pro",
+      "providerTaskId": "01a05a42-a20e-711b-9e5f-f5f960a77ab2",
+      "sha256": "a1abeeaa04aed90568b62a825200208c3e6dd8945c9b57637952a0985792d879",
+      "byteLength": 1306221,
+      "pixelDimensions": [
+        1200,
+        896
+      ]
+    },
+    {
+      "id": "crownlands_exterior_reference",
+      "locator": "2d/exteriors-corrective/crownlands_world_civic_hall_exterior_v002.png",
+      "disposition": "massing_material_reference_only",
+      "provider": "Meshy text-to-image / nano-banana-pro",
+      "providerTaskId": "01a05a42-a33b-72f5-aca5-7b4b6935cafa",
+      "sha256": "7d23ffb78f3f5edfa6ef3166b132c7a888784aba8348cc0ce7bf17c346127ff8",
+      "byteLength": 1129631,
+      "pixelDimensions": [
+        1200,
+        896
+      ]
+    }
+  ]
+}
