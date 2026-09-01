@@ -63,8 +63,32 @@ class ShellRoutePolicyTest {
             ShellRoutePolicy.navigationSelection(Route.Quest)
         )
         assertEquals(
+            Route.NarrativeDebug,
+            ShellRoutePolicy.navigationSelection(Route.UnityBridgeSmoke)
+        )
+        assertEquals(
             Route.Kingdom,
             ShellRoutePolicy.navigationSelection(Route.Kingdom)
+        )
+    }
+
+    @Test
+    fun unityBridgeSmokeIsDebugOnlyAndFallsBackSafelyInRelease() {
+        val debugResolution = ShellRoutePolicy.resolveRoute(
+            Route.UnityBridgeSmoke,
+            debugToolsEnabled = true
+        )
+        val releaseResolution = ShellRoutePolicy.resolveRoute(
+            Route.UnityBridgeSmoke,
+            debugToolsEnabled = false
+        )
+
+        assertEquals(Route.UnityBridgeSmoke, debugResolution.route)
+        assertTrue(releaseResolution is RouteResolution.Rejected)
+        assertEquals(Route.Kingdom, releaseResolution.route)
+        assertEquals(
+            ShellRoutePolicy.UNITY_BRIDGE_SMOKE_UNAVAILABLE_MESSAGE,
+            (releaseResolution as RouteResolution.Rejected).message
         )
     }
 
@@ -77,7 +101,8 @@ class ShellRoutePolicyTest {
             Route.Battle,
             Route.Warzone,
             Route.Quest,
-            Route.NarrativeDebug
+            Route.NarrativeDebug,
+            Route.UnityBridgeSmoke
         )
 
         routes.forEach { route ->

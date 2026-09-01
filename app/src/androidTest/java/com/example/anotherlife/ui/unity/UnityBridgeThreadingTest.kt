@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertEquals
@@ -35,6 +37,59 @@ import org.junit.runner.RunWith
 class UnityBridgeThreadingTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun unknownRouteUnavailableOutcomeCompletesOneCorrelatedHostSession() {
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val outcomes = CopyOnWriteArrayList<UnityRouteOutcome>()
+        val protocolErrors = AtomicInteger()
+        val dependencies = testDependencies(players, registrar)
+
+        composeRule.setContent {
+            UnityViewForTest(
+                routeId = UnityBridgeSmokePolicy.ROUTE_ID,
+                dependencies = dependencies,
+                onOutcome = outcomes::add,
+                onProtocolError = { protocolErrors.incrementAndGet() }
+            )
+        }
+        composeRule.waitForIdle()
+
+        val player = players.single()
+        val dispatchedPayload = requireNotNull(player.lastPayload)
+        val request = when (
+            val parsed = UnityBridgeContract.parseRequest(dispatchedPayload)
+        ) {
+            is UnityBridgeContractResult.Accepted -> parsed.value
+            is UnityBridgeContractResult.Rejected -> error(
+                "Dispatched request was rejected: ${parsed.error.code}"
+            )
+        }
+        val unavailable = buildJsonObject {
+            put("contractVersion", UNITY_BRIDGE_CONTRACT_VERSION)
+            put("requestId", request.requestId)
+            put("routeId", request.routeId)
+            put("status", UnityRouteOutcomeStatus.Unavailable.wireValue)
+            put("diagnosticCode", "route.not_available")
+        }.toString()
+
+        Thread { UnityBridgeCallbacks.reportOutcome(unavailable) }.apply {
+            start()
+            join()
+        }
+
+        composeRule.waitUntil(timeoutMillis = 5_000) { outcomes.size == 1 }
+        assertEquals(UnityRouteOutcomeStatus.Unavailable, outcomes.single().status)
+        assertEquals(request.requestId, outcomes.single().requestId)
+        assertEquals(request.routeId, outcomes.single().routeId)
+        assertEquals("route.not_available", outcomes.single().diagnosticCode)
+        assertEquals(0, protocolErrors.get())
+
+        UnityBridgeCallbacks.reportOutcome(unavailable)
+        composeRule.waitUntil(timeoutMillis = 5_000) { protocolErrors.get() == 1 }
+        assertEquals(1, outcomes.size)
+    }
 
     @Test
     fun offMainProtocolCallbackReachesUiOnMainThread() {
@@ -839,6 +894,7 @@ class UnityBridgeThreadingTest {
             }
         var sendCount = 0
         var destroyCount = 0
+        var lastPayload: String? = null
 
         override fun resume(): Boolean {
             onResume()
@@ -860,6 +916,7 @@ class UnityBridgeThreadingTest {
 
         override fun sendMessage(gameObject: String, method: String, payload: String): Boolean {
             sendCount += 1
+            lastPayload = payload
             assertEquals("AndroidBridge", gameObject)
             assertEquals("SetRouteContext", method)
             assertNotNull(payload)

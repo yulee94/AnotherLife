@@ -7,10 +7,13 @@ object ShellRoutePolicy {
         "Developer preview is unavailable in this build. Returned to a safe screen."
     const val QUEST_ROUTE_UNAVAILABLE_MESSAGE =
         "Quest preview is unavailable in this build. Returned to Kingdom."
+    const val UNITY_BRIDGE_SMOKE_UNAVAILABLE_MESSAGE =
+        "Unity bridge smoke is unavailable in this build. Returned to Kingdom."
 
     private val debugOnlyRoutes: Set<Route> = setOf(
         Route.Quest,
-        Route.NarrativeDebug
+        Route.NarrativeDebug,
+        Route.UnityBridgeSmoke
     )
 
     val primaryRoutes: List<Route> = listOf(
@@ -29,7 +32,11 @@ object ShellRoutePolicy {
     }
 
     fun navigationSelection(route: Route): Route {
-        return if (route == Route.Quest) Route.NarrativeDebug else route
+        return when (route) {
+            Route.Quest,
+            Route.UnityBridgeSmoke -> Route.NarrativeDebug
+            else -> route
+        }
     }
 
     fun persistenceKey(route: Route): String {
@@ -41,6 +48,7 @@ object ShellRoutePolicy {
             Route.Warzone -> "warzone"
             Route.Quest -> "quest"
             Route.NarrativeDebug -> "narrative_debug"
+            Route.UnityBridgeSmoke -> "unity_bridge_smoke"
         }
     }
 
@@ -53,6 +61,7 @@ object ShellRoutePolicy {
             "warzone" -> Route.Warzone
             "quest" -> Route.Quest
             "narrative_debug" -> Route.NarrativeDebug
+            "unity_bridge_smoke" -> Route.UnityBridgeSmoke
             else -> null
         }
     }
@@ -65,10 +74,10 @@ object ShellRoutePolicy {
                 RouteResolution.Rejected(
                     requestedRoute = route,
                     fallbackRoute = Route.Kingdom,
-                    message = if (route == Route.Quest) {
-                        QUEST_ROUTE_UNAVAILABLE_MESSAGE
-                    } else {
-                        DEBUG_ROUTE_UNAVAILABLE_MESSAGE
+                    message = when (route) {
+                        Route.Quest -> QUEST_ROUTE_UNAVAILABLE_MESSAGE
+                        Route.UnityBridgeSmoke -> UNITY_BRIDGE_SMOKE_UNAVAILABLE_MESSAGE
+                        else -> DEBUG_ROUTE_UNAVAILABLE_MESSAGE
                     }
                 )
             }

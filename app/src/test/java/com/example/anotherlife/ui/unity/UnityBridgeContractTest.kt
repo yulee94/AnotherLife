@@ -202,6 +202,26 @@ class UnityBridgeContractTest {
     }
 
     @Test
+    fun cancelledOutcomeCompletesOneCorrelatedSessionWithoutAResultIdentity() {
+        val session = UnityBridgeSession { REQUEST_ONE }
+        val start = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        val cancelled = outcomeJson(
+            requestId = start.request.requestId,
+            status = "cancelled"
+        )
+
+        val outcome = delivered(session.consumeOutcome(cancelled))
+
+        assertEquals(UnityRouteOutcomeStatus.Cancelled, outcome.status)
+        assertEquals(start.request.requestId, outcome.requestId)
+        assertNull(outcome.resultId)
+        assertDeliveryRejected(
+            session.consumeOutcome(cancelled),
+            UnityBridgeProtocolErrorCode.DuplicateOutcome
+        )
+    }
+
+    @Test
     fun sameRouteRelaunchGetsNewCorrelationAndRejectsPriorResult() {
         val requestIds = ArrayDeque(listOf(REQUEST_ONE, REQUEST_TWO))
         val session = UnityBridgeSession { requestIds.removeFirst() }

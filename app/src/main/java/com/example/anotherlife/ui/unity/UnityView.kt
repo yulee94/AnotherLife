@@ -417,6 +417,9 @@ internal class UnityRuntimeContainer internal constructor(
 
     internal fun callbackAdmissionSnapshotForTesting() = callbackDispatcher.snapshot()
 
+    internal fun activeRequestForTesting(): UnityRouteRequest? =
+        bridgeSession.activeRequestForTesting()
+
     private fun requestOwnership() {
         when (
             val acquisition = dependencies.ownershipRegistry.acquireOrQueue(

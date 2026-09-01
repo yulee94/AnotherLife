@@ -48,6 +48,7 @@ import com.example.anotherlife.data.simulation.DialogueNode
 import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.NarrativeState
 import com.example.anotherlife.data.contracts.AndroidSharedCatalogLoader
+import com.example.anotherlife.ui.unity.UnityBridgeSmokeRoute
 
 /**
  * The core adaptive shell of "Another Life".
@@ -85,6 +86,7 @@ fun AnotherLifeShell() {
         mutableStateListOf(Route.Kingdom)
     }
     val routeNotice = remember { mutableStateOf<String?>(null) }
+    val transientRouteNotice = remember { mutableStateOf<String?>(null) }
     LaunchedEffect(debugToolsEnabled, backStack.toList()) {
         val sanitized = ShellRoutePolicy.sanitizeBackStack(backStack, debugToolsEnabled)
         if (sanitized.routes != backStack) {
@@ -114,6 +116,7 @@ fun AnotherLifeShell() {
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
+                            transientRouteNotice.value = null
                             if (route == Route.Kingdom) {
                                 backStack.clear()
                                 backStack.add(Route.Kingdom)
@@ -141,7 +144,7 @@ fun AnotherLifeShell() {
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
-            routeNotice.value?.let { message ->
+            (transientRouteNotice.value ?: routeNotice.value)?.let { message ->
                 Text(
                     text = message,
                     color = MaterialTheme.colorScheme.error,
@@ -182,9 +185,25 @@ fun AnotherLifeShell() {
                             NarrativeDebugScreen(
                                 state = narrativeState,
                                 onOpenQuestPreview = {
+                                    transientRouteNotice.value = null
                                     if (backStack.lastOrNull() != Route.Quest) {
                                         backStack.add(Route.Quest)
                                     }
+                                },
+                                onOpenUnityBridgeSmoke = {
+                                    transientRouteNotice.value = null
+                                    if (backStack.lastOrNull() != Route.UnityBridgeSmoke) {
+                                        backStack.add(Route.UnityBridgeSmoke)
+                                    }
+                                }
+                            )
+                        }
+                        Route.UnityBridgeSmoke -> NavEntry(resolvedRoute) {
+                            UnityBridgeSmokeRoute(
+                                onBack = navigateBack,
+                                onSafeReturn = { message ->
+                                    transientRouteNotice.value = message
+                                    navigateBack()
                                 }
                             )
                         }
@@ -244,6 +263,7 @@ private fun labelForRoute(route: Route): String {
         Route.NarrativeDebug -> "Debug"
         Route.Battle -> "Battle"
         Route.Quest -> "Quest"
+        Route.UnityBridgeSmoke -> "Unity Smoke"
     }
 }
 
@@ -255,4 +275,5 @@ private fun iconForRoute(route: Route) = when (route) {
     Route.NarrativeDebug -> Icons.Rounded.Info
     Route.Battle -> Icons.Rounded.Star
     Route.Quest -> Icons.Rounded.Star
+    Route.UnityBridgeSmoke -> Icons.Rounded.Info
 }

@@ -11,7 +11,11 @@ The current Android foundation:
 - sends a bounded, versioned route request;
 - validates and correlates one terminal outcome to one active request;
 - posts UI-facing callbacks through the Android view's main-thread queue;
-- owns callback registration and disposal by host token.
+- owns callback registration and disposal by host token;
+- exposes a debug-only `bridge.smoke.unavailable` route from the developer tools,
+  consumes terminal outcomes without granting gameplay authority, returns to the
+  safe Android shell on unavailable or cancelled, and keeps failed or unexpected
+  success outcomes visibly contained for investigation.
 
 The current Unity foundation:
 
@@ -317,9 +321,16 @@ Contract rules:
 An invalid Android request is shown as a bridge protocol error and is not sent.
 The wired Unity receiver returns a correlated `unavailable` outcome for every
 unknown but syntactically valid route, and the registered sender delivers that
-outcome back to the JVM in an Android player build. End-to-end physical-device
-round-trip visibility and a route that returns a non-`unavailable` outcome
-remain future slices. No route is enabled by this contract alone.
+outcome back to the JVM in an Android player build. The Android debug shell now
+mounts that exact safe-unavailable smoke route and returns to Debug only after an
+unavailable or cancelled outcome. Failure and unapproved success remain visible
+and apply no result. Focused host tests prove off-main callback admission,
+correlation, typed unavailable consumption, and duplicate rejection; shell tests
+prove the route is inaccessible in release and cannot navigate into gameplay.
+These deterministic tests do not replace an installed ARM64 package run.
+End-to-end physical-device visibility and a route that returns an approved
+non-`unavailable` outcome remain future slices. No gameplay route is enabled by
+this contract alone.
 
 ## Unity Receiver Boundary
 
