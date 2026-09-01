@@ -61,6 +61,7 @@ namespace AL.UI
         private int _activeGeneration;
         private int _publishedTerminalGeneration;
         private float _prepareStartedAt;
+        private float _lastPlaybackProgressAt;
         private bool _attemptStarted;
         private bool _eventsSubscribed;
 
@@ -95,6 +96,17 @@ namespace AL.UI
                 float elapsed = Time.realtimeSinceStartup - _prepareStartedAt;
                 if (_coordinator.TryPrepareTimedOut(_activeGeneration, elapsed))
                 {
+                    PublishTerminalAndRelease();
+                }
+            }
+            else if (state == LaunchCinematicPlaybackState.Playing ||
+                     state == LaunchCinematicPlaybackState.SkipEligible)
+            {
+                float elapsed = Time.realtimeSinceStartup - _lastPlaybackProgressAt;
+                if (_coordinator.TryPlaybackStalled(_activeGeneration, elapsed))
+                {
+                    Debug.LogWarning(
+                        "Launch cinematic playback stopped advancing; using the static fallback.");
                     PublishTerminalAndRelease();
                 }
             }
@@ -324,16 +336,22 @@ namespace AL.UI
             {
                 if (_coordinator.TryMarkFirstFrameVisible(
                         _activeGeneration,
-                        frameIndex) &&
-                    _surface != null &&
-                    _surface.texture == _ownedRenderTexture)
+                        frameIndex))
                 {
-                    _surface.enabled = true;
+                    _lastPlaybackProgressAt = Time.realtimeSinceStartup;
+                    if (_surface != null &&
+                        _surface.texture == _ownedRenderTexture)
+                    {
+                        _surface.enabled = true;
+                    }
                 }
                 return;
             }
 
-            _coordinator.TryAdvanceFrame(_activeGeneration, frameIndex);
+            if (_coordinator.TryObservePlaybackFrame(_activeGeneration, frameIndex))
+            {
+                _lastPlaybackProgressAt = Time.realtimeSinceStartup;
+            }
         }
 
         private void OnLoopPointReached(VideoPlayer source)
@@ -366,6 +384,7 @@ namespace AL.UI
 
             _publishedTerminalGeneration = terminal.Generation;
             _activeGeneration = 0;
+            _lastPlaybackProgressAt = 0f;
             ReleasePlayerResources();
             Terminated?.Invoke(terminal);
         }
