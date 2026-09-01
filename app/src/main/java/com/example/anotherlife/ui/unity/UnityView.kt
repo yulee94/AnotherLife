@@ -26,6 +26,8 @@ import com.example.anotherlife.R
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier as ReflectionModifier
 
+internal const val UNITY_ROUTE_READY_TIMEOUT_MILLIS = 30_000L
+
 /**
  * Hosts the Unity runtime when the exported Unity Android library is present.
  */
@@ -184,7 +186,8 @@ internal fun interface UnityComponentCallbackRegistrarFactory {
 internal data class UnityRuntimeHostDependencies(
     val ownershipRegistry: UnityRuntimeHostRegistry,
     val playerFactory: UnityEmbeddedPlayerFactory,
-    val callbackRegistrarFactory: UnityComponentCallbackRegistrarFactory
+    val callbackRegistrarFactory: UnityComponentCallbackRegistrarFactory,
+    val readyTimeoutMillis: Long = UNITY_ROUTE_READY_TIMEOUT_MILLIS
 ) {
     companion object {
         val Production = UnityRuntimeHostDependencies(
@@ -262,14 +265,20 @@ internal class UnityRuntimeContainer internal constructor(
     private val destroyed: Boolean
         get() = activationLeaseState.isClosed()
     private var activeLaunch: UnityRouteLaunch? = null
+    private var activeRouteRequest: UnityRouteRequest? = null
     private var activeRoutePayload: String? = null
     private var routeDispatchAttempted = false
+    private var readyTimeoutRequest: UnityRouteRequest? = null
+    private var readyTimeoutRunnable: Runnable? = null
     private var onRouteDispatched: () -> Unit = {}
     private var onReady: (UnityRouteReady) -> Unit = {}
     private var onOutcome: (UnityRouteOutcome) -> Unit = {}
     private var onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
 
     init {
+        require(dependencies.readyTimeoutMillis > 0L) {
+            "Unity route readiness timeout must be positive"
+        }
         setBackgroundColor(Color.BLACK)
         showStatus(context.getString(R.string.unity_runtime_starting))
         requestOwnership()
@@ -315,8 +324,10 @@ internal class UnityRuntimeContainer internal constructor(
         }
 
         start as UnityBridgeSessionStart.Started
+        cancelReadyTimeout(clearPendingRequest = true)
         showStatus(context.getString(R.string.unity_runtime_starting))
         activeLaunch = launch
+        activeRouteRequest = start.request
         activeRoutePayload = start.encodedPayload
         routeDispatchAttempted = false
         return dispatchActiveRoute()
@@ -325,6 +336,7 @@ internal class UnityRuntimeContainer internal constructor(
     fun resumeUnity() {
         if (destroyed) return
         lifecycleState = Lifecycle.State.RESUMED
+        scheduleReadyTimeoutIfNeeded()
         val controller = lifecycleController ?: return
         controller.resume()
         closeAfterLifecycleFailure(controller)
@@ -333,6 +345,7 @@ internal class UnityRuntimeContainer internal constructor(
     fun pauseUnity() {
         if (destroyed) return
         lifecycleState = Lifecycle.State.STARTED
+        cancelReadyTimeout(clearPendingRequest = false)
         val controller = lifecycleController ?: return
         controller.pause()
         closeAfterLifecycleFailure(controller)
@@ -341,6 +354,7 @@ internal class UnityRuntimeContainer internal constructor(
     fun stopUnity() {
         if (destroyed) return
         lifecycleState = Lifecycle.State.CREATED
+        cancelReadyTimeout(clearPendingRequest = false)
         val controller = lifecycleController ?: return
         controller.stop()
         closeAfterLifecycleFailure(controller)
@@ -356,6 +370,7 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     fun destroyUnity() {
+        cancelReadyTimeout(clearPendingRequest = true)
         val closeDecision = activationLeaseState.close() ?: return
         callbackDispatcher.close()
         readyCallbackDispatcher.close()
@@ -725,6 +740,7 @@ internal class UnityRuntimeContainer internal constructor(
         cleanupUncertain: Boolean
     ) {
         if (message != null) terminalRuntimeFailure = message
+        cancelReadyTimeout(clearPendingRequest = true)
         callbackDispatcher.close()
         readyCallbackDispatcher.close()
         bridgeSession.close()
@@ -826,7 +842,10 @@ internal class UnityRuntimeContainer internal constructor(
         }
 
         routeDispatchAttempted = true
+        val request = activeRouteRequest ?: return false
+        beginReadyTimeout(request)
         if (!player.sendMessage("AndroidBridge", "SetRouteContext", payload)) {
+            cancelReadyTimeout(clearPendingRequest = true)
             if (!canContinueDispatch(activationPermit)) return false
             showProtocolError(
                 UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SendUnavailable)
@@ -845,6 +864,7 @@ internal class UnityRuntimeContainer internal constructor(
     private fun handleOutcome(rawJson: String?) {
         when (val delivery = bridgeSession.consumeOutcome(rawJson)) {
             is UnityBridgeSessionDelivery.Delivered -> {
+                completeReadyWait(delivery.outcome.requestId)
                 onOutcome(delivery.outcome)
             }
 
@@ -855,6 +875,7 @@ internal class UnityRuntimeContainer internal constructor(
     private fun handleReady(rawJson: String?) {
         when (val delivery = bridgeSession.consumeReady(rawJson)) {
             is UnityBridgeSessionReadyDelivery.Delivered -> {
+                completeReadyWait(delivery.ready.requestId)
                 hideStatus()
                 onReady(delivery.ready)
             }
@@ -870,6 +891,60 @@ internal class UnityRuntimeContainer internal constructor(
             context.getString(R.string.unity_bridge_unavailable_code, error.code.wireValue)
         )
         onProtocolError(error)
+    }
+
+    private fun beginReadyTimeout(request: UnityRouteRequest) {
+        cancelReadyTimeout(clearPendingRequest = true)
+        readyTimeoutRequest = request
+        scheduleReadyTimeoutIfNeeded()
+    }
+
+    private fun scheduleReadyTimeoutIfNeeded() {
+        if (
+            destroyed ||
+            !lifecycleState.isAtLeast(Lifecycle.State.RESUMED) ||
+            readyTimeoutRunnable != null
+        ) {
+            return
+        }
+        val request = readyTimeoutRequest ?: return
+        val runnable = Runnable { handleReadyTimeout(request) }
+        readyTimeoutRunnable = runnable
+        if (!postDelayed(runnable, dependencies.readyTimeoutMillis)) {
+            readyTimeoutRunnable = null
+            handleReadyTimeout(request)
+        }
+    }
+
+    private fun handleReadyTimeout(request: UnityRouteRequest) {
+        readyTimeoutRunnable = null
+        if (readyTimeoutRequest != request) return
+        readyTimeoutRequest = null
+        when (
+            bridgeSession.expireReady(
+                requestId = request.requestId,
+                routeId = request.routeId
+            )
+        ) {
+            is UnityBridgeSessionReadyTimeout.Expired -> {
+                showProtocolError(
+                    UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.ReadyTimeout)
+                )
+            }
+
+            is UnityBridgeSessionReadyTimeout.Rejected -> Unit
+        }
+    }
+
+    private fun completeReadyWait(requestId: String) {
+        if (readyTimeoutRequest?.requestId != requestId) return
+        cancelReadyTimeout(clearPendingRequest = true)
+    }
+
+    private fun cancelReadyTimeout(clearPendingRequest: Boolean) {
+        readyTimeoutRunnable?.let(::removeCallbacks)
+        readyTimeoutRunnable = null
+        if (clearPendingRequest) readyTimeoutRequest = null
     }
 
     private fun showStatus(message: String) {
@@ -913,7 +988,8 @@ internal class UnityRuntimeContainer internal constructor(
 private fun UnityBridgeProtocolError.isInertReadyFence(): Boolean {
     return code == UnityBridgeProtocolErrorCode.RequestMismatch ||
         code == UnityBridgeProtocolErrorCode.DuplicateReady ||
-        code == UnityBridgeProtocolErrorCode.ReadyAfterOutcome
+        code == UnityBridgeProtocolErrorCode.ReadyAfterOutcome ||
+        code == UnityBridgeProtocolErrorCode.ReadyAfterTimeout
 }
 
 internal class ReflectionUnityPlayer private constructor(

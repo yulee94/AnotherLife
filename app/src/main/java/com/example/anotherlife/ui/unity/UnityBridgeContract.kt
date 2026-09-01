@@ -111,6 +111,8 @@ enum class UnityBridgeProtocolErrorCode(val wireValue: String) {
     RouteMismatch("bridge.route_mismatch"),
     DuplicateReady("bridge.duplicate_ready"),
     ReadyAfterOutcome("bridge.ready_after_outcome"),
+    ReadyTimeout("bridge.ready_timeout"),
+    ReadyAfterTimeout("bridge.ready_after_timeout"),
     DuplicateOutcome("bridge.duplicate_outcome"),
     SessionClosed("bridge.session_closed"),
     SendUnavailable("bridge.send_unavailable")

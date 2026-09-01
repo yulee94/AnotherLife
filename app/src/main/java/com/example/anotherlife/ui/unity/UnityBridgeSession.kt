@@ -9,6 +9,7 @@ internal class UnityBridgeSession(
     private var activeRequest: UnityRouteRequest? = null
     private var readyRequestId: String? = null
     private var completedRequestId: String? = null
+    private var timedOutRequestId: String? = null
     private var closed = false
 
     @Synchronized
@@ -53,6 +54,7 @@ internal class UnityBridgeSession(
         activeRequest = request
         readyRequestId = null
         completedRequestId = null
+        timedOutRequestId = null
         return UnityBridgeSessionStart.Started(request, payload)
     }
 
@@ -82,12 +84,45 @@ internal class UnityBridgeSession(
         if (completedRequestId == request.requestId) {
             return rejectedReadyDelivery(UnityBridgeProtocolErrorCode.ReadyAfterOutcome)
         }
+        if (timedOutRequestId == request.requestId) {
+            return rejectedReadyDelivery(UnityBridgeProtocolErrorCode.ReadyAfterTimeout)
+        }
         if (readyRequestId == request.requestId) {
             return rejectedReadyDelivery(UnityBridgeProtocolErrorCode.DuplicateReady)
         }
 
         readyRequestId = request.requestId
         return UnityBridgeSessionReadyDelivery.Delivered(ready)
+    }
+
+    @Synchronized
+    fun expireReady(requestId: String, routeId: String): UnityBridgeSessionReadyTimeout {
+        if (closed) {
+            return rejectedReadyTimeout(UnityBridgeProtocolErrorCode.SessionClosed)
+        }
+        val request = activeRequest
+            ?: return rejectedReadyTimeout(UnityBridgeProtocolErrorCode.NoActiveRequest)
+        if (requestId != request.requestId) {
+            return rejectedReadyTimeout(
+                UnityBridgeProtocolErrorCode.RequestMismatch,
+                "requestId"
+            )
+        }
+        if (routeId != request.routeId) {
+            return rejectedReadyTimeout(UnityBridgeProtocolErrorCode.RouteMismatch, "routeId")
+        }
+        if (completedRequestId == request.requestId) {
+            return rejectedReadyTimeout(UnityBridgeProtocolErrorCode.ReadyAfterOutcome)
+        }
+        if (timedOutRequestId == request.requestId) {
+            return rejectedReadyTimeout(UnityBridgeProtocolErrorCode.ReadyAfterTimeout)
+        }
+        if (readyRequestId == request.requestId) {
+            return rejectedReadyTimeout(UnityBridgeProtocolErrorCode.DuplicateReady)
+        }
+
+        timedOutRequestId = request.requestId
+        return UnityBridgeSessionReadyTimeout.Expired(request)
     }
 
     @Synchronized
@@ -137,6 +172,7 @@ internal class UnityBridgeSession(
         activeRequest = null
         readyRequestId = null
         completedRequestId = null
+        timedOutRequestId = null
     }
 
     @Synchronized
@@ -160,6 +196,11 @@ internal sealed interface UnityBridgeSessionDelivery {
 internal sealed interface UnityBridgeSessionReadyDelivery {
     data class Delivered(val ready: UnityRouteReady) : UnityBridgeSessionReadyDelivery
     data class Rejected(val error: UnityBridgeProtocolError) : UnityBridgeSessionReadyDelivery
+}
+
+internal sealed interface UnityBridgeSessionReadyTimeout {
+    data class Expired(val request: UnityRouteRequest) : UnityBridgeSessionReadyTimeout
+    data class Rejected(val error: UnityBridgeProtocolError) : UnityBridgeSessionReadyTimeout
 }
 
 internal data class UnityBridgeCallbackToken(val value: Long)
@@ -254,6 +295,13 @@ private fun rejectedReadyDelivery(
     field: String? = null
 ): UnityBridgeSessionReadyDelivery {
     return UnityBridgeSessionReadyDelivery.Rejected(UnityBridgeProtocolError(code, field))
+}
+
+private fun rejectedReadyTimeout(
+    code: UnityBridgeProtocolErrorCode,
+    field: String? = null
+): UnityBridgeSessionReadyTimeout {
+    return UnityBridgeSessionReadyTimeout.Rejected(UnityBridgeProtocolError(code, field))
 }
 
 private fun rejectedDelivery(

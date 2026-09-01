@@ -245,6 +245,62 @@ class UnityBridgeContractTest {
     }
 
     @Test
+    fun readinessTimeoutExpiresOnlyTheCurrentPendingRequestOnce() {
+        val requestIds = ArrayDeque(listOf(REQUEST_ONE, REQUEST_TWO))
+        val session = UnityBridgeSession { requestIds.removeFirst() }
+        val first = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        val second = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+
+        assertReadyTimeoutRejected(
+            session.expireReady(first.request.requestId, first.request.routeId),
+            UnityBridgeProtocolErrorCode.RequestMismatch
+        )
+        assertEquals(
+            second.request,
+            readyTimeoutExpired(
+                session.expireReady(second.request.requestId, second.request.routeId)
+            )
+        )
+        assertReadyTimeoutRejected(
+            session.expireReady(second.request.requestId, second.request.routeId),
+            UnityBridgeProtocolErrorCode.ReadyAfterTimeout
+        )
+    }
+
+    @Test
+    fun readinessTimeoutCannotOverrideReadyOrTerminalOutcome() {
+        val requestIds = ArrayDeque(listOf(REQUEST_ONE, REQUEST_TWO))
+        val session = UnityBridgeSession { requestIds.removeFirst() }
+        val readyStart = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        readyDelivered(session.consumeReady(readyJson(readyStart.request.requestId)))
+
+        assertReadyTimeoutRejected(
+            session.expireReady(readyStart.request.requestId, readyStart.request.routeId),
+            UnityBridgeProtocolErrorCode.DuplicateReady
+        )
+
+        val outcomeStart = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        delivered(session.consumeOutcome(outcomeJson(outcomeStart.request.requestId)))
+
+        assertReadyTimeoutRejected(
+            session.expireReady(outcomeStart.request.requestId, outcomeStart.request.routeId),
+            UnityBridgeProtocolErrorCode.ReadyAfterOutcome
+        )
+    }
+
+    @Test
+    fun readyAcknowledgementAfterTimeoutIsInert() {
+        val session = UnityBridgeSession { REQUEST_ONE }
+        val start = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        readyTimeoutExpired(session.expireReady(start.request.requestId, start.request.routeId))
+
+        assertReadyRejected(
+            session.consumeReady(readyJson(start.request.requestId)),
+            UnityBridgeProtocolErrorCode.ReadyAfterTimeout
+        )
+    }
+
+    @Test
     fun malformedOutcomeDoesNotConsumeLaterValidOutcome() {
         val session = UnityBridgeSession { REQUEST_ONE }
         val start = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
@@ -535,6 +591,24 @@ class UnityBridgeContractTest {
         assertEquals(
             expected,
             (delivery as UnityBridgeSessionReadyDelivery.Rejected).error.code
+        )
+    }
+
+    private fun readyTimeoutExpired(
+        timeout: UnityBridgeSessionReadyTimeout
+    ): UnityRouteRequest {
+        assertTrue(timeout is UnityBridgeSessionReadyTimeout.Expired)
+        return (timeout as UnityBridgeSessionReadyTimeout.Expired).request
+    }
+
+    private fun assertReadyTimeoutRejected(
+        timeout: UnityBridgeSessionReadyTimeout,
+        expected: UnityBridgeProtocolErrorCode
+    ) {
+        assertTrue(timeout is UnityBridgeSessionReadyTimeout.Rejected)
+        assertEquals(
+            expected,
+            (timeout as UnityBridgeSessionReadyTimeout.Rejected).error.code
         )
     }
 

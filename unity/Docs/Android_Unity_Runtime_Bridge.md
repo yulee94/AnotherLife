@@ -447,6 +447,15 @@ callback is inert. A current request carrying the wrong route, or a malformed, o
 structurally invalid ready message, remains a typed protocol failure and does not transfer
 presentation ownership.
 
+After a request is successfully dispatched, Android gives the current route 30 seconds of
+foreground `RESUMED` time to acknowledge readiness. Pausing or stopping the host cancels the
+scheduled callback without consuming the request; resuming starts a fresh 30-second window. An
+accepted ready acknowledgement, any accepted terminal outcome, a replacement route, or host
+destruction cancels the wait. If the window expires first, Android keeps the native surface in
+front, reports `bridge.ready_timeout`, and permanently fences a later ready acknowledgement for
+that request. The timeout does not destroy the Unity runtime, so a correlated terminal outcome can
+still complete the route and let the Android owner decide how to recover.
+
 The JVM boundary and Android-side parser/session/host transition are implemented. Unity also owns a
 canonical `UnityRouteReady` validator/encoder, an exact `reportReady(String)` Android adapter, and a
 bounded, main-thread `UnityBridgeReadySender`. A route reports readiness explicitly through

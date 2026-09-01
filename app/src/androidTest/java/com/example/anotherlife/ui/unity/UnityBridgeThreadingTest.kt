@@ -114,6 +114,81 @@ class UnityBridgeThreadingTest {
     }
 
     @Test
+    fun readinessTimeoutRunsOnlyInForegroundAndFencesLateReady() {
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val readySignals = CopyOnWriteArrayList<UnityRouteReady>()
+        val protocolErrors = CopyOnWriteArrayList<UnityBridgeProtocolError>()
+        val readyTimeoutMillis = 100L
+        val dependencies = testDependencies(
+            players = players,
+            registrar = registrar,
+            readyTimeoutMillis = readyTimeoutMillis
+        )
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var host: UnityRuntimeContainer? = null
+
+        try {
+            composeRule.runOnUiThread {
+                host = UnityRuntimeContainer(context, dependencies)
+                host!!.resumeUnity()
+                assertTrue(
+                    host!!.setRoute(
+                        routeId = "bridge.ready-timeout",
+                        routeLaunchSequence = 1,
+                        routeIntent = UnityRouteIntent.Preview,
+                        requestedCapabilities = emptyList(),
+                        onRouteDispatched = {},
+                        onReady = readySignals::add,
+                        onOutcome = {},
+                        onProtocolError = protocolErrors::add
+                    )
+                )
+                host!!.pauseUnity()
+            }
+
+            Thread.sleep(readyTimeoutMillis * 2)
+            composeRule.runOnUiThread {
+                assertTrue(protocolErrors.isEmpty())
+                assertTrue(host!!.isStatusVisibleForTesting())
+                host!!.resumeUnity()
+            }
+
+            composeRule.waitUntil(timeoutMillis = 5_000) {
+                protocolErrors.size == 1
+            }
+            assertEquals(
+                UnityBridgeProtocolErrorCode.ReadyTimeout,
+                protocolErrors.single().code
+            )
+            composeRule.runOnUiThread {
+                assertTrue(host!!.isStatusVisibleForTesting())
+                assertEquals(
+                    "Unity bridge unavailable\nCode: bridge.ready_timeout",
+                    host!!.statusTextForTesting()
+                )
+            }
+
+            val request = requireNotNull(host!!.activeRequestForTesting())
+            val lateReady = buildJsonObject {
+                put("contractVersion", UNITY_BRIDGE_CONTRACT_VERSION)
+                put("requestId", request.requestId)
+                put("routeId", request.routeId)
+            }.toString()
+            UnityBridgeCallbacks.reportReady(lateReady)
+            composeRule.waitForIdle()
+
+            assertTrue(readySignals.isEmpty())
+            assertEquals(1, protocolErrors.size)
+            composeRule.runOnUiThread {
+                assertTrue(host!!.isStatusVisibleForTesting())
+            }
+        } finally {
+            composeRule.runOnUiThread { host?.destroyUnity() }
+        }
+    }
+
+    @Test
     fun unknownRouteUnavailableOutcomeCompletesOneCorrelatedHostSession() {
         val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
         val registrar = RecordingComponentCallbackRegistrar()
@@ -921,14 +996,16 @@ class UnityBridgeThreadingTest {
 
     private fun testDependencies(
         players: MutableList<RecordingEmbeddedPlayer>,
-        registrar: RecordingComponentCallbackRegistrar
+        registrar: RecordingComponentCallbackRegistrar,
+        readyTimeoutMillis: Long = UNITY_ROUTE_READY_TIMEOUT_MILLIS
     ): UnityRuntimeHostDependencies {
         return UnityRuntimeHostDependencies(
             ownershipRegistry = UnityRuntimeHostRegistry(),
             playerFactory = UnityEmbeddedPlayerFactory { context ->
                 RecordingEmbeddedPlayer(context).also(players::add)
             },
-            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar },
+            readyTimeoutMillis = readyTimeoutMillis
         )
     }
 
