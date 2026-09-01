@@ -9,10 +9,15 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.example.anotherlife.MainActivity
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,19 +59,105 @@ class UnityBridgeSmokeShellTest {
         composeRule.onNodeWithText("Kingdom Management").assertDoesNotExist()
     }
 
+    @Test
+    fun backNavigationDisposesSmokeHostAndDropsLateOutcome() {
+        val disposedRequest = openSmokeAndReadRequest()
+
+        composeRule.onNodeWithText("Back to developer tools").performClick()
+        waitForText("Narrative Director Debug")
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+        assertFalse(UnityBridgeCallbacks.hasActiveRegistrationForTesting())
+        composeRule.runOnUiThread {
+            assertNull(findUnityRuntimeContainer(composeRule.activity.window.decorView))
+        }
+
+        reportOutcomeOffMain(
+            outcomeJson(
+                request = disposedRequest,
+                status = UnityRouteOutcomeStatus.Unavailable,
+                diagnosticCode = "route.not_available"
+            )
+        )
+
+        assertFalse(UnityBridgeCallbacks.hasActiveRegistrationForTesting())
+        composeRule.onNodeWithText("Narrative Director Debug").assertIsDisplayed()
+        composeRule.onNodeWithText("Unity bridge smoke").assertDoesNotExist()
+        composeRule.onNodeWithText(
+            "Unity bridge smoke route is unavailable as expected. Returned safely to Debug."
+        ).assertDoesNotExist()
+        composeRule.onNodeWithText("Kingdom Management").assertDoesNotExist()
+    }
+
+    @Test
+    fun recreationCreatesNewRequestAndRejectsLatePriorOutcome() {
+        val priorRequest = openSmokeAndReadRequest()
+
+        composeRule.activityRule.scenario.recreate()
+        waitForText("Non-authoritative transport check")
+        val currentRequest = readActiveRequest()
+        assertNotEquals(priorRequest.requestId, currentRequest.requestId)
+        assertEquals(priorRequest.routeId, currentRequest.routeId)
+
+        reportOutcomeOffMain(
+            outcomeJson(
+                request = priorRequest,
+                status = UnityRouteOutcomeStatus.Unavailable,
+                diagnosticCode = "route.not_available"
+            )
+        )
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+        assertEquals(
+            "Unity bridge unavailable\nCode: bridge.request_mismatch",
+            readHostStatus()
+        )
+        composeRule.onNodeWithText("Unity bridge smoke").assertIsDisplayed()
+        composeRule.onNodeWithText("Narrative Director Debug").assertDoesNotExist()
+        assertEquals(currentRequest, readActiveRequest())
+
+        reportOutcomeOffMain(
+            outcomeJson(
+                request = currentRequest,
+                status = UnityRouteOutcomeStatus.Unavailable,
+                diagnosticCode = "route.not_available"
+            )
+        )
+
+        waitForText(
+            "Unity bridge smoke route is unavailable as expected. Returned safely to Debug."
+        )
+        composeRule.onNodeWithText("Narrative Director Debug").assertIsDisplayed()
+        composeRule.onNodeWithText("Unity bridge smoke").assertDoesNotExist()
+        composeRule.onNodeWithText("Kingdom Management").assertDoesNotExist()
+    }
+
     private fun openSmokeAndReadRequest(): UnityRouteRequest {
         composeRule.onNodeWithText("Debug").performClick()
         composeRule.onNodeWithText("Open Unity bridge smoke").performClick()
         waitForText("Non-authoritative transport check")
 
+        return readActiveRequest().also {
+            check(it.routeId == UnityBridgeSmokePolicy.ROUTE_ID)
+        }
+    }
+
+    private fun readActiveRequest(): UnityRouteRequest {
         val request = AtomicReference<UnityRouteRequest?>()
         composeRule.runOnUiThread {
             val host = findUnityRuntimeContainer(composeRule.activity.window.decorView)
             request.set(host?.activeRequestForTesting())
         }
-        return requireNotNull(request.get()).also {
-            check(it.routeId == UnityBridgeSmokePolicy.ROUTE_ID)
+        return requireNotNull(request.get())
+    }
+
+    private fun readHostStatus(): String {
+        val status = AtomicReference<String?>()
+        composeRule.runOnUiThread {
+            val host = findUnityRuntimeContainer(composeRule.activity.window.decorView)
+            status.set(host?.statusTextForTesting())
         }
+        return requireNotNull(status.get())
     }
 
     private fun reportOutcomeOffMain(outcome: String) {
