@@ -92,6 +92,19 @@ class ReproducibleBuildTests(unittest.TestCase):
         self.assertIn("tools/builds/reproducible_build_policy.json", first["inputFiles"])
         self.assertIn("gradle/wrapper/gradle-wrapper.properties", first["inputFiles"])
 
+    def test_unity6_builtin_package_pins_match_the_resolved_lock(self):
+        manifest = json.loads((REPO_ROOT / "unity/Packages/manifest.json").read_text(encoding="utf-8"))
+        lock = json.loads((REPO_ROOT / "unity/Packages/packages-lock.json").read_text(encoding="utf-8"))
+        expected = {
+            "com.unity.test-framework": "1.6.0",
+            "com.unity.textmeshpro": "5.0.0",
+            "com.unity.ugui": "2.0.0",
+        }
+
+        for package, version in expected.items():
+            self.assertEqual(manifest["dependencies"][package], version)
+            self.assertEqual(lock["dependencies"][package]["version"], version)
+
     def test_artifact_hash_and_smoke_are_stable_and_fail_closed(self):
         module = load_module()
         with tempfile.TemporaryDirectory() as temporary:
