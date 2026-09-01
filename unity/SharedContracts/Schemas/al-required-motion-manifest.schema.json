@@ -1,0 +1,317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.dev/schemas/al-required-motion-manifest.schema.json",
+  "title": "Another Life required motion manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gameId",
+    "manifestId",
+    "schemaVersion",
+    "contentVersion",
+    "standardId",
+    "eventHandler",
+    "eventDefinitions",
+    "clipCandidates",
+    "skillPhases",
+    "motionKeys",
+    "requiredSets",
+    "representativeCoverage",
+    "anatomyExceptions",
+    "acceptance"
+  ],
+  "properties": {
+    "gameId": { "const": "another-life" },
+    "manifestId": { "const": "rmc_manifest_required_motion_v001" },
+    "schemaVersion": { "const": 1 },
+    "contentVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "standardId": { "const": "rmc_standard_rig_motion_v001" },
+    "eventHandler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unityFunction", "payloadEncoding", "timingRule", "authorityRule"],
+      "properties": {
+        "unityFunction": { "const": "AL_MotionEventV1" },
+        "payloadEncoding": { "const": "utf8_json_object" },
+        "timingRule": { "$ref": "#/$defs/nonBlank" },
+        "authorityRule": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "eventDefinitions": {
+      "type": "array",
+      "minItems": 8,
+      "items": { "$ref": "#/$defs/eventDefinition" }
+    },
+    "clipCandidates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/clipCandidate" }
+    },
+    "skillPhases": {
+      "type": "array",
+      "minItems": 10,
+      "items": { "$ref": "#/$defs/skillPhase" }
+    },
+    "motionKeys": {
+      "type": "array",
+      "minItems": 40,
+      "items": { "$ref": "#/$defs/motionKey" }
+    },
+    "requiredSets": {
+      "type": "array",
+      "minItems": 6,
+      "items": { "$ref": "#/$defs/requiredSet" }
+    },
+    "representativeCoverage": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/representativeCoverage" }
+    },
+    "anatomyExceptions": {
+      "type": "array",
+      "minItems": 4,
+      "items": { "$ref": "#/$defs/anatomyException" }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "undefinedRequiredMotionKeyCount",
+        "unclassifiedRepresentativeRequirementCount",
+        "duplicateIdCount",
+        "invalidReferenceCount",
+        "representativeCount",
+        "skillPhaseCount"
+      ],
+      "properties": {
+        "undefinedRequiredMotionKeyCount": { "const": 0 },
+        "unclassifiedRepresentativeRequirementCount": { "const": 0 },
+        "duplicateIdCount": { "const": 0 },
+        "invalidReferenceCount": { "const": 0 },
+        "representativeCount": { "const": 3 },
+        "skillPhaseCount": { "const": 10 }
+      }
+    }
+  },
+  "$defs": {
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "canonicalId": {
+      "type": "string",
+      "pattern": "^rmc_[a-z0-9]+(?:_[a-z0-9]+)*_v[0-9]{3}$"
+    },
+    "motionKeyName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$"
+    },
+    "subjectKind": {
+      "enum": ["champion", "npc", "beast", "monster"]
+    },
+    "eventDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "eventName", "purpose", "payloadFields", "gameplayAuthority"],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "eventName": {
+          "type": "string",
+          "pattern": "^al\\.motion\\.[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$"
+        },
+        "purpose": { "$ref": "#/$defs/nonBlank" },
+        "payloadFields": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "type", "required", "rule"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z][a-zA-Z0-9]*$"
+              },
+              "type": { "enum": ["string", "integer", "number", "boolean"] },
+              "required": { "type": "boolean" },
+              "rule": { "$ref": "#/$defs/nonBlank" }
+            }
+          }
+        },
+        "gameplayAuthority": { "enum": ["presentation_only", "request_only", "contact_evidence_only"] }
+      }
+    },
+    "clipCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "representativeProfileId",
+        "skeletonProfileId",
+        "motionKey",
+        "sourcePath",
+        "sourceTake",
+        "skeletonSignature",
+        "clipSignature",
+        "qualificationState"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "representativeProfileId": { "$ref": "#/$defs/canonicalId" },
+        "skeletonProfileId": { "$ref": "#/$defs/canonicalId" },
+        "motionKey": { "$ref": "#/$defs/motionKeyName" },
+        "sourcePath": { "$ref": "#/$defs/nonBlank" },
+        "sourceTake": { "$ref": "#/$defs/nonBlank" },
+        "skeletonSignature": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+          ]
+        },
+        "clipSignature": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+          ]
+        },
+        "qualificationState": { "enum": ["source_candidate", "qualified"] }
+      }
+    },
+    "skillPhase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "phase", "order", "requirement", "entryEvent", "exitEvent", "authorityRule"],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "phase": {
+          "enum": ["anticipation", "cast", "channel_start", "channel_loop", "commit", "release", "impact", "recovery", "interruption", "cancellation"]
+        },
+        "order": { "type": "integer", "minimum": 0, "maximum": 9 },
+        "requirement": { "enum": ["required", "conditional"] },
+        "entryEvent": { "const": "al.motion.phase.enter" },
+        "exitEvent": { "const": "al.motion.phase.exit" },
+        "authorityRule": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "motionKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "key",
+        "category",
+        "applicableKinds",
+        "defaultRootPolicyId",
+        "loopPolicy",
+        "contactRequirement",
+        "requiredEventNames",
+        "fallbackKey"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "key": { "$ref": "#/$defs/motionKeyName" },
+        "category": {
+          "enum": ["idle", "locomotion", "combat", "skill", "interaction", "npc_life", "traversal", "reaction", "special", "boss"]
+        },
+        "applicableKinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/subjectKind" }
+        },
+        "defaultRootPolicyId": { "$ref": "#/$defs/canonicalId" },
+        "loopPolicy": { "enum": ["must_loop", "must_not_loop", "authoring_variant"] },
+        "contactRequirement": { "enum": ["none", "foot_or_limb", "interaction_anchor", "weapon_or_attack_origin"] },
+        "requiredEventNames": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^al\\.motion\\.[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$"
+          }
+        },
+        "fallbackKey": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/motionKeyName" }
+          ]
+        }
+      }
+    },
+    "requiredSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "subjectKinds", "requiredMotionKeys", "conditionalMotionKeys", "skillPhasePolicy", "notes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "subjectKinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/subjectKind" }
+        },
+        "requiredMotionKeys": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/motionKeyName" }
+        },
+        "conditionalMotionKeys": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/motionKeyName" }
+        },
+        "skillPhasePolicy": { "enum": ["all_declared_phases", "not_applicable", "source_specific"] },
+        "notes": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "coverageRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["motionKey", "status", "clipId", "source", "rationale"],
+      "properties": {
+        "motionKey": { "$ref": "#/$defs/motionKeyName" },
+        "status": { "enum": ["available_source_candidate", "required_missing", "not_applicable", "blocked_owner_authorization"] },
+        "clipId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/canonicalId" }
+          ]
+        },
+        "source": { "$ref": "#/$defs/nonBlank" },
+        "rationale": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "representativeCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["representativeProfileId", "requiredSetId", "requirements", "clipCeiling", "admissionState"],
+      "properties": {
+        "representativeProfileId": { "$ref": "#/$defs/canonicalId" },
+        "requiredSetId": { "$ref": "#/$defs/canonicalId" },
+        "requirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/coverageRequirement" }
+        },
+        "clipCeiling": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "admissionState": { "const": "blocked_until_required_available_and_validated" }
+      }
+    },
+    "anatomyException": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "anatomyClass", "incompatibleWith", "requiredTreatment", "forbiddenAssumption"],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "anatomyClass": { "enum": ["recumbent_burrower", "serpentine", "avian", "multiped", "aquatic"] },
+        "incompatibleWith": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "enum": ["unity_humanoid", "generic_exact_signature", "generic_semantic_chain", "biped_contact_model"] }
+        },
+        "requiredTreatment": { "$ref": "#/$defs/nonBlank" },
+        "forbiddenAssumption": { "$ref": "#/$defs/nonBlank" }
+      }
+    }
+  }
+}
