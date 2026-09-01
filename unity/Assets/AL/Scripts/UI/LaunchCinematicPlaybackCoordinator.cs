@@ -22,6 +22,7 @@ namespace AL.UI
         MediaUnavailable,
         ReducedMotionFallback,
         ManifestFallbackOnly,
+        PlaybackStalled,
         PlaybackFailed
     }
 
@@ -81,6 +82,7 @@ namespace AL.UI
         private int _generation;
         private int _skipEligibilityFrame;
         private float _prepareTimeoutSeconds;
+        private long _lastObservedFrame;
 
         public LaunchCinematicPlaybackState State { get; private set; } =
             LaunchCinematicPlaybackState.Idle;
@@ -101,6 +103,7 @@ namespace AL.UI
             TerminalCount = 0;
             _skipEligibilityFrame = 0;
             _prepareTimeoutSeconds = 0f;
+            _lastObservedFrame = -1;
 
             LaunchCinematicRuntimeRecord snapshot = Snapshot(record);
             LaunchCinematicValidationResult validation =
@@ -181,6 +184,27 @@ namespace AL.UI
             State = frame >= _skipEligibilityFrame
                 ? LaunchCinematicPlaybackState.SkipEligible
                 : LaunchCinematicPlaybackState.Playing;
+            _lastObservedFrame = frame;
+            return true;
+        }
+
+        public bool TryObservePlaybackFrame(int generation, long frame)
+        {
+            if (!IsCurrent(generation) ||
+                (State != LaunchCinematicPlaybackState.Playing &&
+                 State != LaunchCinematicPlaybackState.SkipEligible) ||
+                frame <= _lastObservedFrame)
+            {
+                return false;
+            }
+
+            _lastObservedFrame = frame;
+            if (State == LaunchCinematicPlaybackState.Playing &&
+                frame >= _skipEligibilityFrame)
+            {
+                State = LaunchCinematicPlaybackState.SkipEligible;
+            }
+
             return true;
         }
 
@@ -193,8 +217,7 @@ namespace AL.UI
                 return false;
             }
 
-            State = LaunchCinematicPlaybackState.SkipEligible;
-            return true;
+            return TryObservePlaybackFrame(generation, frame);
         }
 
         public bool TrySkip(int generation)
@@ -238,6 +261,25 @@ namespace AL.UI
             return Finish(
                 LaunchCinematicPlaybackTerminalReason.PrepareTimedOut,
                 "prepare-timeout");
+        }
+
+        public bool TryPlaybackStalled(int generation, float elapsedWithoutProgressSeconds)
+        {
+            if (!IsCurrent(generation) ||
+                (State != LaunchCinematicPlaybackState.Playing &&
+                 State != LaunchCinematicPlaybackState.SkipEligible) ||
+                float.IsNaN(elapsedWithoutProgressSeconds) ||
+                elapsedWithoutProgressSeconds < _prepareTimeoutSeconds)
+            {
+                return false;
+            }
+
+            // The approved manifest's bounded media-prepare window is also the maximum interval
+            // in which an active decoder may produce no strictly newer frame. This keeps optional
+            // playback from stranding onboarding without introducing an unversioned second timeout.
+            return Finish(
+                LaunchCinematicPlaybackTerminalReason.PlaybackStalled,
+                "playback-stalled");
         }
 
         public bool TryFail(int generation, string detail)

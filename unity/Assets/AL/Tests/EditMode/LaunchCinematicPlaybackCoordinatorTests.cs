@@ -86,6 +86,52 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void PlaybackProgressMustAdvanceAndStallUsesManifestLimit()
+        {
+            var coordinator = PlayingCoordinator(out int generation);
+
+            Assert.IsFalse(
+                coordinator.TryObservePlaybackFrame(generation, 0),
+                "A duplicate frame is not decoder progress.");
+            Assert.IsTrue(coordinator.TryObservePlaybackFrame(generation, 1));
+            Assert.IsFalse(coordinator.TryPlaybackStalled(generation, 7.999f));
+            Assert.IsTrue(coordinator.TryPlaybackStalled(generation, 8f));
+            Assert.AreEqual(
+                LaunchCinematicPlaybackTerminalReason.PlaybackStalled,
+                coordinator.Terminal.Reason);
+            Assert.AreEqual("playback-stalled", coordinator.Terminal.Detail);
+            Assert.AreEqual(LaunchCinematicPlaybackState.Fallback, coordinator.State);
+            Assert.AreEqual(1, coordinator.TerminalCount);
+
+            Assert.IsFalse(coordinator.TryPlaybackStalled(generation, 99f));
+            Assert.IsFalse(coordinator.TryObservePlaybackFrame(generation, 2));
+            Assert.AreEqual(1, coordinator.TerminalCount);
+        }
+
+        [Test]
+        public void PlaybackStallFromRetiredGenerationCannotFailReplacement()
+        {
+            var coordinator = new LaunchCinematicPlaybackCoordinator();
+            LaunchCinematicPlaybackAttempt first = coordinator.Begin(
+                ValidRecord(),
+                LaunchCinematicPlatform.Desktop,
+                releaseBuild: true,
+                reducedMotion: false);
+            LaunchCinematicPlaybackAttempt replacement = coordinator.Begin(
+                ValidRecord(),
+                LaunchCinematicPlatform.Desktop,
+                releaseBuild: true,
+                reducedMotion: false);
+
+            Assert.IsFalse(coordinator.TryPlaybackStalled(first.Generation, 99f));
+            Assert.IsTrue(coordinator.TryMarkPrepared(replacement.Generation));
+            Assert.IsTrue(
+                coordinator.TryMarkFirstFrameVisible(replacement.Generation, 0));
+            Assert.AreEqual(LaunchCinematicPlaybackState.Playing, coordinator.State);
+            Assert.AreEqual(0, coordinator.TerminalCount);
+        }
+
+        [Test]
         public void ReducedMotionNeverEntersMediaPreparation()
         {
             var coordinator = new LaunchCinematicPlaybackCoordinator();
@@ -371,6 +417,59 @@ namespace AL.Tests.EditMode
             {
                 UnityEngine.Object.DestroyImmediate(root);
             }
+        }
+
+        [Test]
+        public void HostPublishesPlaybackStallOnceAndReleasesPlayer()
+        {
+            GameObject root = CreateHostObject(out LaunchCinematicVideoPlayerHost host);
+            int terminalCount = 0;
+            LaunchCinematicPlaybackTerminal terminal = default;
+            host.Terminated += value =>
+            {
+                terminalCount++;
+                terminal = value;
+            };
+
+            try
+            {
+                LaunchCinematicPlaybackCoordinator coordinator =
+                    GetField<LaunchCinematicPlaybackCoordinator>(host, "_coordinator");
+                LaunchCinematicPlaybackAttempt attempt = coordinator.Begin(
+                    ValidRecord(),
+                    LaunchCinematicPlatform.Desktop,
+                    releaseBuild: true,
+                    reducedMotion: false);
+                Assert.IsTrue(coordinator.TryMarkPrepared(attempt.Generation));
+                Assert.IsTrue(
+                    coordinator.TryMarkFirstFrameVisible(attempt.Generation, 0));
+                SetField(host, "_activeGeneration", attempt.Generation);
+                SetField(
+                    host,
+                    "_lastPlaybackProgressAt",
+                    Time.realtimeSinceStartup - 9f);
+
+                InvokeLifecycle(host, "Update");
+
+                Assert.AreEqual(1, terminalCount);
+                Assert.AreEqual(
+                    LaunchCinematicPlaybackTerminalReason.PlaybackStalled,
+                    terminal.Reason);
+                Assert.AreEqual("playback-stalled", terminal.Detail);
+                Assert.AreEqual(LaunchCinematicPlaybackState.Fallback, host.State);
+                Assert.AreEqual(
+                    0,
+                    GetField<int>(host, "_activeGeneration"));
+
+                InvokeLifecycle(host, "Update");
+                Assert.AreEqual(1, terminalCount);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+
+            Assert.AreEqual(1, terminalCount);
         }
 
         [TestCase(
