@@ -1,0 +1,10 @@
+[package]
+name = "al_provider_adapter_playfab_spike"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+publish = false
+description = "Disposable non-production PlayFab MPS adapter spike for AnotherLife"
+
+[dependencies]
+al_server_core = { path = "../al_server_core" }
