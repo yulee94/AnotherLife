@@ -47,6 +47,38 @@ class UnityBridgeSmokeShellTest {
     }
 
     @Test
+    fun safeReturnNoticeSurvivesRecreationWithoutRestoringTheUnityHost() {
+        val request = openSmokeAndReadRequest()
+
+        reportOutcomeOffMain(
+            outcomeJson(
+                request = request,
+                status = UnityRouteOutcomeStatus.Unavailable,
+                diagnosticCode = "route.not_available"
+            )
+        )
+
+        val safeReturnMessage =
+            "Unity bridge smoke route is unavailable as expected. Returned safely to Debug."
+        waitForText(safeReturnMessage)
+
+        composeRule.activityRule.scenario.recreate()
+
+        waitForText(safeReturnMessage)
+        composeRule.onNodeWithText("Narrative Director Debug").assertIsDisplayed()
+        composeRule.onNodeWithText("Unity bridge smoke").assertDoesNotExist()
+        assertFalse(UnityBridgeCallbacks.hasActiveRegistrationForTesting())
+        composeRule.runOnUiThread {
+            assertNull(findUnityRuntimeContainer(composeRule.activity.window.decorView))
+        }
+
+        composeRule.onNodeWithText("Kingdom").performClick()
+
+        composeRule.onNodeWithText(safeReturnMessage).assertDoesNotExist()
+        composeRule.onNodeWithText("Kingdom Management").assertIsDisplayed()
+    }
+
+    @Test
     fun unapprovedSuccessStaysVisibleAndAppliesNothing() {
         val request = openSmokeAndReadRequest()
 

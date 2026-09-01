@@ -52,6 +52,7 @@ import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.NarrativeState
 import com.example.anotherlife.data.contracts.AndroidSharedCatalogLoader
 import com.example.anotherlife.ui.unity.UnityBridgeSmokeRoute
+import com.example.anotherlife.ui.unity.UnityBridgeSmokeSafeReturnNotice
 
 /**
  * The core adaptive shell of "Another Life".
@@ -89,7 +90,7 @@ fun AnotherLifeShell() {
         mutableStateListOf(Route.Kingdom)
     }
     val routeNotice = rememberSaveable { mutableStateOf<String?>(null) }
-    val transientRouteNotice = remember { mutableStateOf<String?>(null) }
+    val safeReturnNoticeKey = rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(debugToolsEnabled, backStack.toList()) {
         val sanitized = ShellRoutePolicy.sanitizeBackStack(backStack, debugToolsEnabled)
         if (sanitized.routes != backStack) {
@@ -104,6 +105,9 @@ fun AnotherLifeShell() {
     val currentKey = backStack.lastOrNull() ?: Route.Kingdom
     val currentRoute = ShellRoutePolicy.resolveRoute(currentKey, debugToolsEnabled).route
     val selectedNavigationRoute = ShellRoutePolicy.navigationSelection(currentRoute)
+    val safeReturnNotice = UnityBridgeSmokeSafeReturnNotice.fromPersistenceKey(
+        safeReturnNoticeKey.value
+    )
     val useLargeTextNavigation = usesLargeTextLayout()
     val acknowledgeRouteNotice: () -> Unit = {
         routeNotice.value = ShellRoutePolicy.reduceRouteNotice(
@@ -111,14 +115,21 @@ fun AnotherLifeShell() {
             event = RouteNoticeEvent.NavigationAcknowledged
         )
     }
-    val navigateBack: () -> Unit = {
-        acknowledgeRouteNotice()
+    val popBackStack: () -> Unit = {
         if (backStack.size > 1) {
             backStack.removeAt(backStack.lastIndex)
         } else {
             backStack.clear()
             backStack.add(Route.Kingdom)
         }
+    }
+    val acknowledgeVisibleNotices: () -> Unit = {
+        acknowledgeRouteNotice()
+        safeReturnNoticeKey.value = null
+    }
+    val navigateBack: () -> Unit = {
+        acknowledgeVisibleNotices()
+        popBackStack()
     }
 
     Scaffold(
@@ -145,8 +156,7 @@ fun AnotherLifeShell() {
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
-                                acknowledgeRouteNotice()
-                                transientRouteNotice.value = null
+                                acknowledgeVisibleNotices()
                                 if (route == Route.Kingdom) {
                                     backStack.clear()
                                     backStack.add(Route.Kingdom)
@@ -185,7 +195,7 @@ fun AnotherLifeShell() {
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
-            (transientRouteNotice.value ?: routeNotice.value)?.let { message ->
+            (safeReturnNotice?.message ?: routeNotice.value)?.let { message ->
                 Text(
                     text = message,
                     color = MaterialTheme.colorScheme.error,
@@ -227,15 +237,13 @@ fun AnotherLifeShell() {
                             NarrativeDebugScreen(
                                 state = narrativeState,
                                 onOpenQuestPreview = {
-                                    acknowledgeRouteNotice()
-                                    transientRouteNotice.value = null
+                                    acknowledgeVisibleNotices()
                                     if (backStack.lastOrNull() != Route.Quest) {
                                         backStack.add(Route.Quest)
                                     }
                                 },
                                 onOpenUnityBridgeSmoke = {
-                                    acknowledgeRouteNotice()
-                                    transientRouteNotice.value = null
+                                    acknowledgeVisibleNotices()
                                     if (backStack.lastOrNull() != Route.UnityBridgeSmoke) {
                                         backStack.add(Route.UnityBridgeSmoke)
                                     }
@@ -245,9 +253,9 @@ fun AnotherLifeShell() {
                         Route.UnityBridgeSmoke -> NavEntry(resolvedRoute) {
                             UnityBridgeSmokeRoute(
                                 onBack = navigateBack,
-                                onSafeReturn = { message ->
-                                    transientRouteNotice.value = message
-                                    navigateBack()
+                                onSafeReturn = { notice ->
+                                    safeReturnNoticeKey.value = notice.persistenceKey
+                                    popBackStack()
                                 }
                             )
                         }

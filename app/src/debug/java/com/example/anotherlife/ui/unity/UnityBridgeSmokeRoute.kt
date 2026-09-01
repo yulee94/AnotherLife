@@ -15,9 +15,9 @@ import androidx.compose.ui.unit.dp
  * state. Only the expected unavailable/cancelled statuses return automatically to the shell.
  */
 @Composable
-fun UnityBridgeSmokeRoute(
+internal fun UnityBridgeSmokeRoute(
     onBack: () -> Unit,
-    onSafeReturn: (String) -> Unit,
+    onSafeReturn: (UnityBridgeSmokeSafeReturnNotice) -> Unit,
     modifier: Modifier = Modifier
 ) {
     UnityBridgeSmokeRouteContent(
@@ -38,7 +38,7 @@ fun UnityBridgeSmokeRoute(
 @Composable
 internal fun UnityBridgeSmokeRouteContent(
     onBack: () -> Unit,
-    onSafeReturn: (String) -> Unit,
+    onSafeReturn: (UnityBridgeSmokeSafeReturnNotice) -> Unit,
     modifier: Modifier = Modifier,
     unityHost: @Composable (Modifier, (UnityRouteOutcome) -> Unit) -> Unit
 ) {
