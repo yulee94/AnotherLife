@@ -226,6 +226,9 @@ namespace AL.RealmWar.Warzone
             {
                 renderer.renderMode = ParticleSystemRenderMode.Billboard;
                 renderer.sortingOrder = -1;
+                AL.Utilities.RuntimeParticleMaterialFactory.EnsureSoftMaterial(
+                    particles,
+                    "MAT_RuntimeWeatherPrimary");
             }
         }
 
@@ -276,6 +279,9 @@ namespace AL.RealmWar.Warzone
             {
                 renderer.renderMode = ParticleSystemRenderMode.Billboard;
                 renderer.sortingOrder = -3;
+                AL.Utilities.RuntimeParticleMaterialFactory.EnsureSoftMaterial(
+                    particles,
+                    "MAT_RuntimeWeatherGroundMist");
             }
         }
 
@@ -326,6 +332,9 @@ namespace AL.RealmWar.Warzone
             {
                 renderer.renderMode = ParticleSystemRenderMode.Billboard;
                 renderer.sortingOrder = -4;
+                AL.Utilities.RuntimeParticleMaterialFactory.EnsureSoftMaterial(
+                    particles,
+                    "MAT_RuntimeWeatherHorizonHaze");
             }
         }
 
@@ -383,6 +392,9 @@ namespace AL.RealmWar.Warzone
                 renderer.velocityScale = 0.55f;
                 renderer.cameraVelocityScale = 0.05f;
                 renderer.sortingOrder = -2;
+                AL.Utilities.RuntimeParticleMaterialFactory.EnsureSoftMaterial(
+                    particles,
+                    "MAT_RuntimeWeatherWindStreak");
             }
         }
 

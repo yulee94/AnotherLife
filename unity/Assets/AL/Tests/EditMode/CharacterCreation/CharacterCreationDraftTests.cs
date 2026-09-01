@@ -73,6 +73,28 @@ namespace AL.Tests.EditMode.CharacterCreation
         }
 
         [Test]
+        public void PaletteControlsSetAndPersistSkinHairAndEyeColors()
+        {
+            Assert.IsTrue(CharacterCreationDraft.TryCreate(
+                RealmId.Eldergrove,
+                out CharacterCreationDraft draft,
+                out _));
+            draft.SetSkinToneIndex(3);
+            draft.SetHairColorIndex(2);
+            draft.SetEyeColorIndex(4);
+
+            var copy = new ChampionCustomizationState();
+            CharacterCreationLook.CopyInto(copy, draft.Customization);
+
+            Assert.That(copy.SkinR, Is.EqualTo(CharacterCreationLook.BodyTints[3][0]));
+            Assert.That(copy.HairR, Is.EqualTo(CharacterCreationLook.HairColors[2][0]));
+            Assert.That(copy.EyeR, Is.EqualTo(CharacterCreationLook.EyeColors[4][0]));
+            Assert.That(copy.EyeG, Is.EqualTo(CharacterCreationLook.EyeColors[4][1]));
+            Assert.That(copy.EyeB, Is.EqualTo(CharacterCreationLook.EyeColors[4][2]));
+            Assert.That(CharacterCreationLook.Matches(copy, draft.Customization), Is.True);
+        }
+
+        [Test]
         public void CyclesBetweenMaleAndFemaleBodyBasesAndPersistsDifference()
         {
             Assert.IsTrue(CharacterCreationDraft.TryCreate(
@@ -108,6 +130,9 @@ namespace AL.Tests.EditMode.CharacterCreation
                 CharacterCreationLook.NormalizeBodyBaseId(
                     loaded.ChampionCustomization.BodyBaseId),
                 Is.EqualTo("male"));
+            var migrated = new ChampionCustomizationState();
+            CharacterCreationLook.CopyInto(migrated, loaded.ChampionCustomization);
+            Assert.That(migrated.EyeR, Is.EqualTo(CharacterCreationLook.EyeColors[0][0]));
         }
 
         [Test]

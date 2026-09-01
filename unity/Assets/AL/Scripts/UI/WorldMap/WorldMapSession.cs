@@ -1,4 +1,6 @@
 using System;
+using AL.ChampionMode.UI;
+using AL.UI.SharedMenu;
 
 namespace AL.UI.WorldMap
 {
@@ -23,6 +25,7 @@ namespace AL.UI.WorldMap
 
         public static void OpenMap()
         {
+            PrepareToOpen();
             Set(WorldMapSurface.Map);
         }
 
@@ -36,6 +39,11 @@ namespace AL.UI.WorldMap
 
         public static void ToggleMap()
         {
+            if (!IsMapOpen)
+            {
+                PrepareToOpen();
+            }
+
             Set(IsMapOpen ? WorldMapSurface.Closed : WorldMapSurface.Map);
         }
 
@@ -48,8 +56,28 @@ namespace AL.UI.WorldMap
 
         public static void ResetStatics()
         {
+            PruneDestroyedSubscribers();
             Surface = WorldMapSurface.Closed;
-            Changed = null;
+            Changed?.Invoke();
+        }
+
+        private static void PruneDestroyedSubscribers()
+        {
+            if (Changed == null)
+            {
+                return;
+            }
+
+            Delegate[] subscribers = Changed.GetInvocationList();
+            for (int i = 0; i < subscribers.Length; i++)
+            {
+                Delegate subscriber = subscribers[i];
+                if (subscriber.Target is UnityEngine.Object unityTarget &&
+                    unityTarget == null)
+                {
+                    Changed -= (Action)subscriber;
+                }
+            }
         }
 
         private static void Set(WorldMapSurface next)
@@ -61,6 +89,12 @@ namespace AL.UI.WorldMap
 
             Surface = next;
             Changed?.Invoke();
+        }
+
+        private static void PrepareToOpen()
+        {
+            ChampionHudSession.CloseActiveMenu();
+            SharedMenuModeSwitchHost.CloseActiveMenus();
         }
     }
 }

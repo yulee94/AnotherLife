@@ -11,6 +11,7 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using AL.RealmSelection;
+using AL.Services.Local;
 using AL.UI.Kingdom;
 using AL.UI.QuestHud;
 using AL.UI.RealmSelection;
@@ -479,6 +480,8 @@ namespace AL.Tests.PlayMode
                 IdentityConfirmed = true,
                 Username = "LiveLordshipTester"
             };
+            CompleteFirstWorldTutorial(
+                (ISaveGameService)_controllableSave);
             FirstSessionChampionStart.ResetToFirstSessionLanding();
             QuestHudAutoQuest.SetEnabled(false);
             _quiesceSceneControllers = false;
@@ -487,9 +490,22 @@ namespace AL.Tests.PlayMode
             ProofOfWorthDirector proof = Object.FindObjectOfType<ProofOfWorthDirector>();
             Assert.That(proof, Is.Not.Null);
 
+            if (proof.State.Phase == ProofOfWorthPhase.OmenOffered)
+            {
+                Object.FindObjectOfType<NpcConversationView>()?.Collapse();
+                Assert.That(
+                    proof.ApplyForTests(ProofOfWorthCommand.AcceptOffer).Changed,
+                    Is.True,
+                    ProofOfWorthCommand.AcceptOffer.ToString());
+            }
+            else
+            {
+                Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenTalk));
+                Assert.That(proof.State.DialogueId, Is.EqualTo(ProofOfWorthIds.StartDialogueId));
+            }
+
             foreach (ProofOfWorthCommand command in new[]
             {
-                ProofOfWorthCommand.AcceptOffer,
                 ProofOfWorthCommand.Investigate,
                 ProofOfWorthCommand.DeployChampion,
                 ProofOfWorthCommand.ArenaSuccess,
@@ -501,6 +517,7 @@ namespace AL.Tests.PlayMode
                 ProofOfWorthCommand.GuardianDefeated
             })
             {
+                Object.FindObjectOfType<NpcConversationView>()?.Collapse();
                 Assert.That(proof.ApplyForTests(command).Changed, Is.True, command.ToString());
             }
 
@@ -1022,6 +1039,40 @@ namespace AL.Tests.PlayMode
                 ProofOfWorthLordship.TryWriteMark(save, ProofOfWorthLordship.ResolveMarkId(realm)),
                 Is.True);
             return save;
+        }
+
+        private static void CompleteFirstWorldTutorial(
+            ISaveGameService saveGameService)
+        {
+            Assert.That(
+                FirstWorldProgressSaveAuthority.TryRead(
+                    saveGameService,
+                    out FirstWorldProgressSnapshot snapshot,
+                    out string message),
+                Is.True,
+                message);
+
+            foreach (FirstWorldTutorialProgressCommand command in new[]
+                     {
+                         FirstWorldTutorialProgressCommand.CameraLookAccepted,
+                         FirstWorldTutorialProgressCommand.MovementAccepted,
+                         FirstWorldTutorialProgressCommand.GuideInteractionAccepted,
+                         FirstWorldTutorialProgressCommand.BasicAttackAccepted
+                     })
+            {
+                FirstWorldProgressCommitResult result =
+                    FirstWorldProgressSaveAuthority.TryAdvanceTutorial(
+                        saveGameService,
+                        snapshot,
+                        command);
+                Assert.That(result, Is.Not.Null, command.ToString());
+                Assert.That(result.Accepted, Is.True,
+                    command + ": " + result.Message);
+                Assert.That(result.Snapshot, Is.Not.Null, command.ToString());
+                snapshot = result.Snapshot;
+            }
+
+            Assert.That(snapshot.CanRunProof, Is.True);
         }
 
         private static void CompleteKingdomTeaching(

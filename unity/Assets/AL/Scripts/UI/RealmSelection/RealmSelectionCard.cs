@@ -73,18 +73,27 @@ namespace AL.UI.RealmSelection
                 _iconImage.sprite = definition.Icon;
             }
 
+            RealmSelectionFormationEffect formation =
+                GetComponent<RealmSelectionFormationEffect>() ??
+                gameObject.AddComponent<RealmSelectionFormationEffect>();
+            formation.Configure(
+                definition != null ? definition.Id : RealmId.None,
+                _iconImage != null ? _iconImage.sprite : definition?.Icon);
+
             BindSelectionButton();
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
             _hovered = true;
+            GetComponent<RealmSelectionFormationEffect>()?.SetHovered(true);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             _hovered = false;
             _pressed = false;
+            GetComponent<RealmSelectionFormationEffect>()?.SetHovered(false);
         }
 
         public void OnPointerDown(PointerEventData eventData)

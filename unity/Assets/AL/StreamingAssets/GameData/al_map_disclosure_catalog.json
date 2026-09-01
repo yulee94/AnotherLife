@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "catalogId": "al_map_disclosure_catalog",
+  "idFormat": "lowercase_snake_case",
+  "authority": {
+    "owner": "server",
+    "snapshotStateVersion": 1,
+    "staleSnapshotPolicy": "ignore_lower_epoch_or_revision",
+    "equalRevisionConflictPolicy": "intersect_visible_identifiers_and_require_refresh",
+    "catalogMismatchPolicy": "suppress_all_and_require_refresh",
+    "reconnectPolicy": "suppress_until_authoritative_snapshot"
+  },
+  "visibilityRules": [
+    { "id": "visibility_world_outline", "mode": "always" },
+    { "id": "visibility_discovered", "mode": "discovered" },
+    { "id": "visibility_active_objective", "mode": "active_objective" },
+    { "id": "visibility_authoritative_allegiance", "mode": "authoritative_allegiance" }
+  ],
+  "realmGlyphs": [
+    { "id": "realm_glyph_crownlands", "realmId": "crownlands", "assetReference": "ui.realm_glyph.crownlands", "nonColorShape": "crown" },
+    { "id": "realm_glyph_stonehold", "realmId": "stonehold", "assetReference": "ui.realm_glyph.stonehold", "nonColorShape": "anvil" },
+    { "id": "realm_glyph_eldergrove", "realmId": "eldergrove", "assetReference": "ui.realm_glyph.eldergrove", "nonColorShape": "leaf" },
+    { "id": "realm_glyph_umbral", "realmId": "umbral", "assetReference": "ui.realm_glyph.umbral", "nonColorShape": "veiled_eye" }
+  ],
+  "features": [
+    { "id": "feature_inner_crownlands", "sourceType": "atlas_zone", "sourceId": "zone_inner_crownlands", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.inner", "nonColorShape": "shield" },
+    { "id": "feature_inner_stonehold", "sourceType": "atlas_zone", "sourceId": "zone_inner_stonehold", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.inner", "nonColorShape": "shield" },
+    { "id": "feature_inner_eldergrove", "sourceType": "atlas_zone", "sourceId": "zone_inner_eldergrove", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.inner", "nonColorShape": "shield" },
+    { "id": "feature_inner_umbral", "sourceType": "atlas_zone", "sourceId": "zone_inner_umbral", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.inner", "nonColorShape": "shield" },
+    { "id": "feature_warzone_crownlands_gate", "sourceType": "atlas_zone", "sourceId": "zone_warzone_crownlands_gate", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.warzone", "nonColorShape": "crossed_blades" },
+    { "id": "feature_warzone_stonehold_gate", "sourceType": "atlas_zone", "sourceId": "zone_warzone_stonehold_gate", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.warzone", "nonColorShape": "crossed_blades" },
+    { "id": "feature_warzone_eldergrove_gate", "sourceType": "atlas_zone", "sourceId": "zone_warzone_eldergrove_gate", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.warzone", "nonColorShape": "crossed_blades" },
+    { "id": "feature_warzone_umbral_gate", "sourceType": "atlas_zone", "sourceId": "zone_warzone_umbral_gate", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.warzone", "nonColorShape": "crossed_blades" },
+    { "id": "feature_crossroads_bridges", "sourceType": "atlas_zone", "sourceId": "zone_crossroads_bridges", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.crossroads", "nonColorShape": "bridge" },
+    { "id": "feature_accordant_isle", "sourceType": "atlas_zone", "sourceId": "zone_accordant_isle", "visibilityRuleId": "visibility_world_outline", "surfaces": ["world_map"], "iconReference": "ui.map.zone.shared", "nonColorShape": "island" },
+    { "id": "feature_sky_castle_marker", "sourceType": "atlas_zone", "sourceId": "zone_sky_castle_marker", "visibilityRuleId": "visibility_discovered", "surfaces": ["world_map"], "iconReference": "ui.map.poi.sky_castle", "nonColorShape": "castle" }
+  ],
+  "routes": [
+    { "id": "route_crownlands_to_accordant", "featureIds": ["feature_inner_crownlands", "feature_warzone_crownlands_gate", "feature_crossroads_bridges", "feature_accordant_isle"], "visibilityRuleId": "visibility_discovered", "surfaces": ["world_map"], "nonColorShape": "solid_line" },
+    { "id": "route_stonehold_to_accordant", "featureIds": ["feature_inner_stonehold", "feature_warzone_stonehold_gate", "feature_crossroads_bridges", "feature_accordant_isle"], "visibilityRuleId": "visibility_discovered", "surfaces": ["world_map"], "nonColorShape": "double_line" },
+    { "id": "route_eldergrove_to_accordant", "featureIds": ["feature_inner_eldergrove", "feature_warzone_eldergrove_gate", "feature_crossroads_bridges", "feature_accordant_isle"], "visibilityRuleId": "visibility_discovered", "surfaces": ["world_map"], "nonColorShape": "leaf_dash" },
+    { "id": "route_umbral_to_accordant", "featureIds": ["feature_inner_umbral", "feature_warzone_umbral_gate", "feature_crossroads_bridges", "feature_accordant_isle"], "visibilityRuleId": "visibility_discovered", "surfaces": ["world_map"], "nonColorShape": "broken_line" }
+  ],
+  "objectives": [
+    { "id": "map_objective_realm_main_gate_defense", "sourceObjectiveId": "objective_realm_main_gate_defense", "featureId": "feature_crossroads_bridges", "visibilityRuleId": "visibility_active_objective", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.objective.defense", "nonColorShape": "shield_star" },
+    { "id": "map_objective_crossroads_control", "sourceObjectiveId": "objective_crossroads_control", "featureId": "feature_crossroads_bridges", "visibilityRuleId": "visibility_active_objective", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.objective.control", "nonColorShape": "four_point" },
+    { "id": "map_objective_warzone_save_pillar", "sourceObjectiveId": "objective_warzone_save_pillar", "featureId": "feature_crossroads_bridges", "visibilityRuleId": "visibility_active_objective", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.objective.pillar", "nonColorShape": "pillar" },
+    { "id": "map_objective_eight_gem_custody", "sourceObjectiveId": "objective_eight_gem_custody", "featureId": "feature_accordant_isle", "visibilityRuleId": "visibility_active_objective", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.objective.gem", "nonColorShape": "octagon" },
+    { "id": "map_objective_accordant_isle_concordance", "sourceObjectiveId": "objective_accordant_isle_concordance", "featureId": "feature_accordant_isle", "visibilityRuleId": "visibility_active_objective", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.objective.concordance", "nonColorShape": "ring" }
+  ],
+  "allegianceMarkers": [
+    { "id": "allegiance_crownlands", "realmId": "crownlands", "featureId": "feature_inner_crownlands", "realmGlyphId": "realm_glyph_crownlands", "visibilityRuleId": "visibility_authoritative_allegiance", "surfaces": ["minimap", "world_map"], "nonColorShape": "crown" },
+    { "id": "allegiance_stonehold", "realmId": "stonehold", "featureId": "feature_inner_stonehold", "realmGlyphId": "realm_glyph_stonehold", "visibilityRuleId": "visibility_authoritative_allegiance", "surfaces": ["minimap", "world_map"], "nonColorShape": "anvil" },
+    { "id": "allegiance_eldergrove", "realmId": "eldergrove", "featureId": "feature_inner_eldergrove", "realmGlyphId": "realm_glyph_eldergrove", "visibilityRuleId": "visibility_authoritative_allegiance", "surfaces": ["minimap", "world_map"], "nonColorShape": "leaf" },
+    { "id": "allegiance_umbral", "realmId": "umbral", "featureId": "feature_inner_umbral", "realmGlyphId": "realm_glyph_umbral", "visibilityRuleId": "visibility_authoritative_allegiance", "surfaces": ["minimap", "world_map"], "nonColorShape": "veiled_eye" }
+  ]
+}

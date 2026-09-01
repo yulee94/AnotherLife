@@ -89,6 +89,13 @@ namespace AL.UI.CharacterCreation
             CharacterCreationLook.CopyRgb(next, out Customization.SkinR, out Customization.SkinG, out Customization.SkinB);
         }
 
+        public void SetSkinToneIndex(int index)
+        {
+            float[] color = CharacterCreationLook.BodyTints[
+                CharacterCreationLook.NormalizePaletteIndex(index, CharacterCreationLook.BodyTints.Length)];
+            CharacterCreationLook.CopyRgb(color, out Customization.SkinR, out Customization.SkinG, out Customization.SkinB);
+        }
+
         public void CycleHairStyle()
         {
             int index = CharacterCreationLook.IndexOfId(Customization.HairStyleId, CharacterCreationLook.HairStyles);
@@ -104,6 +111,20 @@ namespace AL.UI.CharacterCreation
                 CharacterCreationLook.HairColors);
             float[] next = CharacterCreationLook.HairColors[(index + 1) % CharacterCreationLook.HairColors.Length];
             CharacterCreationLook.CopyRgb(next, out Customization.HairR, out Customization.HairG, out Customization.HairB);
+        }
+
+        public void SetHairColorIndex(int index)
+        {
+            float[] color = CharacterCreationLook.HairColors[
+                CharacterCreationLook.NormalizePaletteIndex(index, CharacterCreationLook.HairColors.Length)];
+            CharacterCreationLook.CopyRgb(color, out Customization.HairR, out Customization.HairG, out Customization.HairB);
+        }
+
+        public void SetEyeColorIndex(int index)
+        {
+            float[] color = CharacterCreationLook.EyeColors[
+                CharacterCreationLook.NormalizePaletteIndex(index, CharacterCreationLook.EyeColors.Length)];
+            CharacterCreationLook.CopyRgb(color, out Customization.EyeR, out Customization.EyeG, out Customization.EyeB);
         }
 
         public void CycleBodyPreset()

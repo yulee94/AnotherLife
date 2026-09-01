@@ -158,7 +158,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             public string RealmHeading => _source.RealmHeading;
             public string RealmInstruction => _source.RealmInstruction;
             public string RealmSelectionRequired => _source.RealmSelectionRequired;
-            public string ConfirmRealmAction => "Select Realm";
+            public string ConfirmRealmAction => _source.ConfirmRealmAction;
             public string ClassHeading => _source.ClassHeading;
             public string ClassInstruction => _source.ClassInstruction;
             public string ClassSelectionRequired => _source.ClassSelectionRequired;

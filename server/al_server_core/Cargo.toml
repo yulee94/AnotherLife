@@ -1,0 +1,9 @@
+[package]
+name = "al_server_core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+publish = false
+description = "Engine-free deterministic simulation and inter-cell protocol primitives for AnotherLife"
+
+[dependencies]
