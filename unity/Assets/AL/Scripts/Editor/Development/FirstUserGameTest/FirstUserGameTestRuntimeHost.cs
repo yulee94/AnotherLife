@@ -1978,6 +1978,7 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             DestroyOwnedSelectionUi();
             _identityPresenter = FirstUserGameTestIdentityAdapter.CreateStandalone();
+            _identityPresenter.BindExitAction(_exitButton);
             _identityCanvas = _identityPresenter.transform.parent == null
                 ? _identityPresenter.gameObject
                 : _identityPresenter.transform.parent.gameObject;
@@ -2098,6 +2099,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 return;
             }
 
+            _identityPresenter.BindExitAction(_exitButton);
             _identityCanvas = _identityPresenter.transform.parent == null
                 ? _identityPresenter.gameObject
                 : _identityPresenter.transform.parent.gameObject;

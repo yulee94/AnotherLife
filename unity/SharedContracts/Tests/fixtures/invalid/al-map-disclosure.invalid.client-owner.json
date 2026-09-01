@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0",
+  "catalogId": "al_map_disclosure_catalog",
+  "idFormat": "lowercase_snake_case",
+  "authority": {
+    "owner": "client",
+    "snapshotStateVersion": 1,
+    "staleSnapshotPolicy": "ignore_lower_epoch_or_revision",
+    "equalRevisionConflictPolicy": "intersect_visible_identifiers_and_require_refresh",
+    "catalogMismatchPolicy": "suppress_all_and_require_refresh",
+    "reconnectPolicy": "suppress_until_authoritative_snapshot"
+  },
+  "visibilityRules": [
+    { "id": "visibility_discovered", "mode": "discovered" },
+    { "id": "visibility_active_objective", "mode": "active_objective" },
+    { "id": "visibility_authoritative_allegiance", "mode": "authoritative_allegiance" }
+  ],
+  "realmGlyphs": [
+    { "id": "realm_glyph_test", "realmId": "test_realm", "assetReference": "ui.realm_glyph.test", "nonColorShape": "diamond" }
+  ],
+  "features": [
+    { "id": "feature_test_inner", "sourceType": "atlas_zone", "sourceId": "zone_test_inner", "visibilityRuleId": "visibility_discovered", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.zone.test", "nonColorShape": "circle" },
+    { "id": "feature_test_outer", "sourceType": "atlas_zone", "sourceId": "zone_test_outer", "visibilityRuleId": "visibility_discovered", "surfaces": ["world_map"], "iconReference": "ui.map.zone.test", "nonColorShape": "square" }
+  ],
+  "routes": [
+    { "id": "route_test", "featureIds": ["feature_test_inner", "feature_test_outer"], "visibilityRuleId": "visibility_discovered", "surfaces": ["world_map"], "nonColorShape": "solid_line" }
+  ],
+  "objectives": [
+    { "id": "map_objective_test", "sourceObjectiveId": "objective_test", "featureId": "feature_test_outer", "visibilityRuleId": "visibility_active_objective", "surfaces": ["minimap", "world_map"], "iconReference": "ui.map.objective.test", "nonColorShape": "star" }
+  ],
+  "allegianceMarkers": [
+    { "id": "allegiance_test", "realmId": "test_realm", "featureId": "feature_test_inner", "realmGlyphId": "realm_glyph_test", "visibilityRuleId": "visibility_authoritative_allegiance", "surfaces": ["minimap", "world_map"], "nonColorShape": "diamond" }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "record_version": "1.0.0",
+  "decision_id": "MMO-PROVIDER-DECISION-20260901-001",
+  "plan_id": "MMO-BAKEOFF-v1.0.0",
+  "contract_id": "MMO-CONTRACTS-v1.0.0",
+  "status": "awaiting_owner_approval",
+  "recommendation": "no_selection",
+  "owner_decision": null,
+  "owner_approval": {
+    "required": true,
+    "status": "not_granted",
+    "approval_record": null,
+    "scope": "provider selection or no-selection, every managed-versus-custom boundary, spend, commitment, quota posture, residency exposure, production use, and residual risk"
+  },
+  "claim_classes": [
+    "requirement",
+    "measured_result",
+    "vendor_documented_fact",
+    "assumption",
+    "blocker",
+    "owner_judgment"
+  ],
+  "source_baseline": {
+    "id": "MMO-BL-20260831-001",
+    "captured_commit": "a18de3698f85130c1dcdbf7aac652cdb2adfc6a6",
+    "capacity_claim": null,
+    "price_claim": null,
+    "latency_claim": null,
+    "device_tier_claim": null
+  },
+  "comparison_equivalence": {
+    "criteria_equal": true,
+    "scenario_catalog_equal": true,
+    "scenario_count_per_candidate": 16,
+    "current_rerun_source_commit_equal": true,
+    "current_rerun_source_commit": "956f452a30dcf028fd35f0c9af0fbc210b9b8d92",
+    "pair_validator_status": "blocked",
+    "pair_validator_failure": "paired comparison common-driver input drifted: server_artifact_fingerprint",
+    "other_observed_input_drift": [
+      "workload_manifest_hash",
+      "configuration_shape",
+      "payload_bytes",
+      "request_envelopes",
+      "operation_ids",
+      "teardown_assertions",
+      "topology",
+      "warmup_rule"
+    ],
+    "interpretation": "The candidates were evaluated against the same predeclared criteria and scenario IDs, but the retained blocked records are not a valid equivalent measured pair. No comparative provider conclusion is permitted until both candidates rerun one identical artifact-bound workload."
+  },
+  "criteria": [
+    {"id": "CR-01", "name": "correctness_and_state_ownership_fit", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"},
+    {"id": "CR-02", "name": "regional_data_and_backup_isolation", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"},
+    {"id": "CR-03", "name": "idempotency_ambiguity_reconciliation_and_retry", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"},
+    {"id": "CR-04", "name": "failure_containment_recovery_and_rollback", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"},
+    {"id": "CR-05", "name": "quota_capacity_signal_and_admission_behavior", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"},
+    {"id": "CR-06", "name": "security_credentials_audit_and_privacy", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"},
+    {"id": "CR-07", "name": "observability_raw_evidence_and_exportability", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"},
+    {"id": "CR-08", "name": "compatibility_migration_adapter_removal_and_exit", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"},
+    {"id": "CR-09", "name": "owner_plus_ai_operational_burden", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"},
+    {"id": "CR-10", "name": "approved_gate_cost_evidence", "amazon_gamelift": "blocked", "microsoft_playfab": "blocked"}
+  ],
+  "candidates": [
+    {
+      "id": "amazon_gamelift",
+      "display_name": "Amazon GameLift",
+      "spike_task_id": "t_ff702849",
+      "source_pr": "https://github.com/yulee94/AnotherLife/pull/645",
+      "source_merge_commit": "5ec1918374be01912d47d5de8bd74d1fe0d7330c",
+      "parent_packet_archive_sha256": "b08ec175bc3472a02db6f15156a941eb765215e3849c329e9726cda402db52e1",
+      "scenario_summary": {"total": 16, "pass": 0, "fail": 0, "blocked": 16},
+      "measured_results": {
+        "claim_class": "measured_result",
+        "scope": "local fail-closed preflight and neutral contract execution only",
+        "credential_resolved": false,
+        "provider_mutation_requests_attempted": 0,
+        "provider_resources_created": 0,
+        "provider_sandbox_scenarios_measured": 0,
+        "selection_recommendation": null
+      },
+      "vendor_documentation": {
+        "claim_class": "vendor_documented_fact",
+        "scope": "API and lifecycle documentation retained in the packet; not a measured limit or compliance result"
+      },
+      "contract_assessment": "unknown_blocked",
+      "contract_violations": [],
+      "contract_interpretation": "No violation was observed because provider-dependent paths did not run; absence of an observed violation is not compliance evidence.",
+      "unknown_limits": [
+        {"id": "UL-01", "status": "unknown_measurement_required"},
+        {"id": "UL-02", "status": "unknown_measurement_required"},
+        {"id": "UL-03", "status": "unknown_measurement_required"},
+        {"id": "UL-04", "status": "unknown_measurement_required"},
+        {"id": "UL-05", "status": "unknown_measurement_required"},
+        {"id": "UL-06", "status": "unknown_measurement_required"},
+        {"id": "UL-07", "status": "unknown_measurement_required"},
+        {"id": "UL-08", "status": "unknown_measurement_required"},
+        {"id": "UL-09", "status": "unknown_measurement_required"}
+      ],
+      "rollback": {
+        "provider_rollback_status": "blocked",
+        "neutral_hash_restored": true,
+        "regional_state_hash_restored": true,
+        "core_tests": "pass",
+        "provider_resources_created": 0,
+        "authenticated_residual_inventory": false
+      },
+      "current_rerun": {
+        "driver_commit": "956f452a30dcf028fd35f0c9af0fbc210b9b8d92",
+        "run_id": "gamelift-20260831-234935z",
+        "run_record_sha256": "44f66ef865a38ecce1cdf3d80d67d13f0a55663d87ffad6ec9005aef1b6a4bc6",
+        "server_artifact_fingerprint": "c400889797ac9d252b863c88365d74462331dc34cd5c27a82f508a8d3514a67d",
+        "workload_manifest_hash": "bd89f1a1e9ba6f7bbdb48cb3d63a780e934252c03d5476c1a078c9a928b296b7"
+      }
+    },
+    {
+      "id": "microsoft_playfab",
+      "display_name": "Microsoft PlayFab",
+      "spike_task_id": "t_27759e01",
+      "source_pr": "https://github.com/yulee94/AnotherLife/pull/659",
+      "source_merge_commit": "956f452a30dcf028fd35f0c9af0fbc210b9b8d92",
+      "parent_packet_archive_sha256": "4a9bd58c059706a9fc254c57f6344ef6e7a9c7c7fa179a893e8cdbb210788b40",
+      "scenario_summary": {"total": 16, "pass": 0, "fail": 0, "blocked": 16},
+      "measured_results": {
+        "claim_class": "measured_result",
+        "scope": "local fail-closed preflight, public-status retrieval, and neutral contract execution only",
+        "credential_resolved": false,
+        "provider_mutation_requests_attempted": 0,
+        "provider_resources_created": 0,
+        "provider_sandbox_scenarios_measured": 0,
+        "selection_recommendation": null
+      },
+      "vendor_documentation": {
+        "claim_class": "vendor_documented_fact",
+        "scope": "MPS, quota, lifecycle, credential, throttle, log, and deletion documentation retained in the packet; not a measured title limit or compliance result"
+      },
+      "contract_assessment": "unknown_blocked",
+      "contract_violations": [],
+      "contract_interpretation": "No violation was observed because title-scoped provider paths did not run; absence of an observed violation is not compliance evidence.",
+      "unknown_limits": [
+        {"id": "UL-01", "status": "unknown_measurement_required"},
+        {"id": "UL-02", "status": "unknown_measurement_required"},
+        {"id": "UL-03", "status": "unknown_measurement_required"},
+        {"id": "UL-04", "status": "unknown_measurement_required"},
+        {"id": "UL-05", "status": "unknown_measurement_required"},
+        {"id": "UL-06", "status": "unknown_measurement_required"},
+        {"id": "UL-07", "status": "unknown_measurement_required"},
+        {"id": "UL-08", "status": "unknown_measurement_required"},
+        {"id": "UL-09", "status": "unknown_measurement_required"}
+      ],
+      "rollback": {
+        "provider_rollback_status": "blocked",
+        "neutral_hash_restored": true,
+        "regional_state_hash_restored": true,
+        "core_tests": "pass",
+        "provider_resources_created": 0,
+        "authenticated_residual_inventory": false
+      },
+      "current_rerun": {
+        "driver_commit": "956f452a30dcf028fd35f0c9af0fbc210b9b8d92",
+        "run_id": "playfab-blocked-956f452a30dc",
+        "run_record_sha256": "9f4b6979a8cb733c21ed1ba7797e88ae91a14ebf6d1b0a67fba672cdf7124def",
+        "server_artifact_fingerprint": "80516df381f38587bdd24f456d950f65580d0272db07d5fc83e092f9afb5c895",
+        "workload_manifest_hash": "800249fca88e5aea89f4050d07c532db10a22dcf7c26eb92a9a8c0a7695457af"
+      }
+    }
+  ],
+  "raw_evidence": {
+    "task_id": "t_aed15bbd",
+    "artifact_filename": "mmo-provider-decision-evidence-956f452a.zip",
+    "artifact_sha256": "d06406db914d8c4f0ddb3a2b8863e99d2dec0d4d98e54c799781e04e58f88c46",
+    "retention": "attach to the completing Kanban task; packet manifests bind every retained file by SHA-256",
+    "reproduction_commands": [
+      "python tools/architecture/run_gamelift_spike.py . --output evidence/amazon_gamelift/current",
+      "python tools/architecture/run_playfab_spike.py --packet evidence/microsoft_playfab/current",
+      "python tools/architecture/validate_mmo_bakeoff_plan.py . --record evidence/amazon_gamelift/current/run-record.json",
+      "python tools/architecture/validate_mmo_bakeoff_plan.py . --record evidence/microsoft_playfab/current/run-record.json"
+    ]
+  },
+  "owner_reserved_boundaries": [
+    {"id": "provider_or_no_selection", "status": "unresolved"},
+    {"id": "managed_versus_custom_per_capability", "status": "unresolved"},
+    {"id": "spend_commitment_and_cost_ceiling", "status": "unresolved"},
+    {"id": "quota_and_capacity_posture", "status": "unresolved"},
+    {"id": "region_residency_and_production_exposure", "status": "unresolved"},
+    {"id": "service_and_recovery_objectives", "status": "unresolved"},
+    {"id": "acceptable_residual_and_lock_in_risk", "status": "unresolved"}
+  ],
+  "contingency": {
+    "mode": "provider_neutral_no_selection",
+    "candidate_adapters": "disabled_disposable_spikes",
+    "production_provider": null,
+    "production_use_authorized": false,
+    "rollback_viable": true,
+    "runbook_document": "MMO_Provider_No_Selection_Contingency_v1.md",
+    "follow_up_gate": "Obtain owner-authorized non-production sandboxes and live executors, normalize one common artifact-bound workload, rerun all 16 scenarios for both candidates, validate the pair, then request explicit owner approval."
+  },
+  "epic_exit_assessment": {
+    "adrs_reviewed": true,
+    "provider_neutral_contracts_reviewed": true,
+    "data_map_reviewed": true,
+    "threat_model_reviewed": true,
+    "candidate_results_reviewed": true,
+    "decision_log_complete": true,
+    "contingency_complete": true,
+    "measured_provider_comparison_complete": false,
+    "owner_decision_complete": false,
+    "exit_status": "blocked_pending_evidence_and_owner_approval"
+  }
+}

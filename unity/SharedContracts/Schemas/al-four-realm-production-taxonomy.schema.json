@@ -1,0 +1,690 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.dev/schemas/al-four-realm-production-taxonomy.schema.json",
+  "title": "Another Life integrated four-realm production taxonomy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gameId",
+    "taxonomyId",
+    "schemaVersion",
+    "contentVersion",
+    "authority",
+    "normalization",
+    "sourceCatalogs",
+    "matrices",
+    "sharingMatrix",
+    "duplicateAudit",
+    "ownerDecisionPackets",
+    "acceptance"
+  ],
+  "properties": {
+    "gameId": { "const": "another-life" },
+    "taxonomyId": { "const": "frt_four_realm_production_taxonomy_v001" },
+    "schemaVersion": { "const": 1 },
+    "contentVersion": { "$ref": "#/$defs/nonBlank" },
+    "authority": { "$ref": "#/$defs/authority" },
+    "normalization": { "$ref": "#/$defs/normalization" },
+    "sourceCatalogs": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/sourceCatalog" }
+    },
+    "matrices": { "$ref": "#/$defs/matrices" },
+    "sharingMatrix": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/sharingRow" }
+    },
+    "duplicateAudit": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/duplicateRow" }
+    },
+    "ownerDecisionPackets": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/ownerPacket" }
+    },
+    "acceptance": { "$ref": "#/$defs/acceptance" }
+  },
+  "$defs": {
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonBlank" }
+    },
+    "realmId": {
+      "enum": ["crownlands", "eldergrove", "stonehold", "umbral"]
+    },
+    "entityKind": {
+      "enum": ["playable_race", "npc", "champion", "beast", "monster"]
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "finalCreativeOwner",
+        "generationState",
+        "activationState",
+        "releaseState",
+        "runtimeAuthority"
+      ],
+      "properties": {
+        "status": { "const": "preparation_held" },
+        "finalCreativeOwner": { "const": "project_owner" },
+        "generationState": { "const": "held" },
+        "activationState": { "const": "held" },
+        "releaseState": { "const": "held" },
+        "runtimeAuthority": { "const": false }
+      }
+    },
+    "normalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalRealmIds",
+        "canonicalEntityKinds",
+        "stableIdPolicy",
+        "terminologyMappings",
+        "skillAliases"
+      ],
+      "properties": {
+        "canonicalRealmIds": {
+          "const": ["crownlands", "eldergrove", "stonehold", "umbral"]
+        },
+        "canonicalEntityKinds": {
+          "const": ["playable_race", "npc", "champion", "beast", "monster"]
+        },
+        "stableIdPolicy": { "$ref": "#/$defs/nonBlank" },
+        "terminologyMappings": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["sourceTerm", "canonicalTerm", "rationale"],
+            "properties": {
+              "sourceTerm": { "$ref": "#/$defs/nonBlank" },
+              "canonicalTerm": { "$ref": "#/$defs/nonBlank" },
+              "rationale": { "$ref": "#/$defs/nonBlank" }
+            }
+          }
+        },
+        "skillAliases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["canonicalSkillKey", "realmRecordIds"],
+            "properties": {
+              "canonicalSkillKey": { "$ref": "#/$defs/nonBlank" },
+              "realmRecordIds": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["realmId", "recordId"],
+                  "properties": {
+                    "realmId": { "$ref": "#/$defs/realmId" },
+                    "recordId": { "$ref": "#/$defs/nonBlank" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sourceCatalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realmId",
+        "catalogId",
+        "path",
+        "sha256",
+        "schemaVersion",
+        "contentVersion",
+        "authorityStatus",
+        "generationState",
+        "activationState",
+        "recordCount",
+        "skillCount"
+      ],
+      "properties": {
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "catalogId": { "$ref": "#/$defs/nonBlank" },
+        "path": { "$ref": "#/$defs/nonBlank" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "schemaVersion": { "type": "integer", "minimum": 1 },
+        "contentVersion": { "$ref": "#/$defs/nonBlank" },
+        "authorityStatus": { "const": "preparation_held" },
+        "generationState": { "const": "held" },
+        "activationState": { "const": "held" },
+        "recordCount": { "type": "integer", "minimum": 1 },
+        "skillCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "matrices": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rosterCoverage",
+        "rigFeasibility",
+        "motionCoverage",
+        "skillToMotion",
+        "skillToVfx",
+        "platformVariants",
+        "budgets",
+        "provenance"
+      ],
+      "properties": {
+        "rosterCoverage": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/rosterRow" }
+        },
+        "rigFeasibility": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/rigRow" }
+        },
+        "motionCoverage": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/motionRow" }
+        },
+        "skillToMotion": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/skillMotionRow" }
+        },
+        "skillToVfx": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/skillVfxRow" }
+        },
+        "platformVariants": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/platformRow" }
+        },
+        "budgets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/budgetRow" }
+        },
+        "provenance": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/provenanceRow" }
+        }
+      }
+    },
+    "rosterRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realmId",
+        "catalogId",
+        "entityKind",
+        "sourceSection",
+        "entityId",
+        "displayName",
+        "role",
+        "rank",
+        "classSourceIds",
+        "skillIds"
+      ],
+      "properties": {
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "catalogId": { "$ref": "#/$defs/nonBlank" },
+        "entityKind": { "$ref": "#/$defs/entityKind" },
+        "sourceSection": { "$ref": "#/$defs/nonBlank" },
+        "entityId": { "$ref": "#/$defs/nonBlank" },
+        "displayName": { "$ref": "#/$defs/nonBlank" },
+        "role": { "type": ["string", "null"] },
+        "rank": { "type": ["string", "null"] },
+        "classSourceIds": { "$ref": "#/$defs/stringArray" },
+        "skillIds": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "rigRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realmId",
+        "entityId",
+        "entityKind",
+        "rigFamilyIds",
+        "skeletonFamilies",
+        "bindPoseRefs",
+        "bindPoseDisposition",
+        "retargetGroups",
+        "bodyModuleIds",
+        "equipmentModuleIds",
+        "facialSystemIds",
+        "secondaryPhysicsProfileIds",
+        "feasible",
+        "disposition"
+      ],
+      "properties": {
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "entityId": { "$ref": "#/$defs/nonBlank" },
+        "entityKind": { "$ref": "#/$defs/entityKind" },
+        "rigFamilyIds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "skeletonFamilies": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "bindPoseRefs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": ["string", "null"] }
+        },
+        "bindPoseDisposition": { "enum": ["specified", "owner_gated"] },
+        "retargetGroups": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "bodyModuleIds": { "$ref": "#/$defs/stringArray" },
+        "equipmentModuleIds": { "$ref": "#/$defs/stringArray" },
+        "facialSystemIds": { "$ref": "#/$defs/stringArray" },
+        "secondaryPhysicsProfileIds": { "$ref": "#/$defs/stringArray" },
+        "feasible": { "const": true },
+        "disposition": { "const": "held_feasible_plan" }
+      }
+    },
+    "motionRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realmId",
+        "entityId",
+        "entityKind",
+        "templateSubjectKinds",
+        "requiredMotionKeys",
+        "presentMotionKeys",
+        "missingMotionKeys",
+        "bossTransitionKeys",
+        "missingBossTransitionKeys"
+      ],
+      "properties": {
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "entityId": { "$ref": "#/$defs/nonBlank" },
+        "entityKind": { "$ref": "#/$defs/entityKind" },
+        "templateSubjectKinds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "requiredMotionKeys": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "presentMotionKeys": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "missingMotionKeys": { "type": "array", "maxItems": 0 },
+        "bossTransitionKeys": { "$ref": "#/$defs/stringArray" },
+        "missingBossTransitionKeys": { "type": "array", "maxItems": 0 }
+      }
+    },
+    "traceCell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "recordIds", "rationale"],
+      "properties": {
+        "state": { "enum": ["required", "not_applicable"] },
+        "recordIds": { "$ref": "#/$defs/stringArray" },
+        "rationale": { "$ref": "#/$defs/nonBlank" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "state": { "const": "required" } },
+            "required": ["state"]
+          },
+          "then": { "properties": { "recordIds": { "minItems": 1 } } },
+          "else": { "properties": { "recordIds": { "maxItems": 0 } } }
+        }
+      ]
+    },
+    "skillMotionRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["realmId", "skillId", "canonicalSkillKey", "subjectIds", "phases"],
+      "properties": {
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "skillId": { "$ref": "#/$defs/nonBlank" },
+        "canonicalSkillKey": { "$ref": "#/$defs/nonBlank" },
+        "subjectIds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "phases": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["anticipation", "cast", "channel", "release", "recovery"],
+          "properties": {
+            "anticipation": { "$ref": "#/$defs/traceCell" },
+            "cast": { "$ref": "#/$defs/traceCell" },
+            "channel": { "$ref": "#/$defs/traceCell" },
+            "release": { "$ref": "#/$defs/traceCell" },
+            "recovery": { "$ref": "#/$defs/traceCell" }
+          }
+        }
+      }
+    },
+    "skillVfxRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["realmId", "skillId", "canonicalSkillKey", "subjectIds", "effects"],
+      "properties": {
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "skillId": { "$ref": "#/$defs/nonBlank" },
+        "canonicalSkillKey": { "$ref": "#/$defs/nonBlank" },
+        "subjectIds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "effects": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "telegraph",
+            "cast",
+            "channel",
+            "release",
+            "trail",
+            "projectile",
+            "impact",
+            "area",
+            "buff",
+            "debuff",
+            "status",
+            "environmental",
+            "result",
+            "cleanup"
+          ],
+          "properties": {
+            "telegraph": { "$ref": "#/$defs/traceCell" },
+            "cast": { "$ref": "#/$defs/traceCell" },
+            "channel": { "$ref": "#/$defs/traceCell" },
+            "release": { "$ref": "#/$defs/traceCell" },
+            "trail": { "$ref": "#/$defs/traceCell" },
+            "projectile": { "$ref": "#/$defs/traceCell" },
+            "impact": { "$ref": "#/$defs/traceCell" },
+            "area": { "$ref": "#/$defs/traceCell" },
+            "buff": { "$ref": "#/$defs/traceCell" },
+            "debuff": { "$ref": "#/$defs/traceCell" },
+            "status": { "$ref": "#/$defs/traceCell" },
+            "environmental": { "$ref": "#/$defs/traceCell" },
+            "result": { "$ref": "#/$defs/traceCell" },
+            "cleanup": { "$ref": "#/$defs/traceCell" }
+          }
+        }
+      }
+    },
+    "costTreatments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "geometry",
+        "materials",
+        "textures",
+        "bones",
+        "physics",
+        "animation",
+        "vfx",
+        "colliders",
+        "hitboxes"
+      ],
+      "properties": {
+        "geometry": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "materials": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "textures": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "bones": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "physics": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "animation": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "vfx": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "colliders": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "hitboxes": { "$ref": "#/$defs/nonEmptyStringArray" }
+      }
+    },
+    "platformRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realmId",
+        "entityId",
+        "entityKind",
+        "explicitPlatformVariantIds",
+        "budgetProfileIds",
+        "mobileFloorBudgetProfileIds",
+        "platformTierCoverage",
+        "deliveryMode",
+        "costDimensionTreatments"
+      ],
+      "properties": {
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "entityId": { "$ref": "#/$defs/nonBlank" },
+        "entityKind": { "$ref": "#/$defs/entityKind" },
+        "explicitPlatformVariantIds": { "$ref": "#/$defs/stringArray" },
+        "budgetProfileIds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "mobileFloorBudgetProfileIds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "platformTierCoverage": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "deliveryMode": {
+          "enum": ["explicit_platform_variants_and_budgets", "budget_profile_only"]
+        },
+        "costDimensionTreatments": { "$ref": "#/$defs/costTreatments" }
+      }
+    },
+    "metricRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "dimension",
+        "state",
+        "limitKind",
+        "value",
+        "secondaryValue",
+        "unit",
+        "sourceRefs",
+        "decisionPacketIds",
+        "rationale"
+      ],
+      "properties": {
+        "path": { "$ref": "#/$defs/nonBlank" },
+        "dimension": {
+          "enum": [
+            "geometry",
+            "materials",
+            "textures",
+            "bones",
+            "physics",
+            "animation",
+            "vfx",
+            "colliders",
+            "hitboxes"
+          ]
+        },
+        "state": { "enum": ["owner_decision_required", "documented_provisional", "approved_limit"] },
+        "limitKind": { "$ref": "#/$defs/nonBlank" },
+        "value": { "type": ["number", "null"] },
+        "secondaryValue": { "type": ["number", "null"] },
+        "unit": { "$ref": "#/$defs/nonBlank" },
+        "sourceRefs": { "$ref": "#/$defs/stringArray" },
+        "decisionPacketIds": { "$ref": "#/$defs/stringArray" },
+        "rationale": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "budgetRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realmId",
+        "budgetProfileId",
+        "platformTier",
+        "scopeKinds",
+        "metrics",
+        "allCostDimensionsExplicit"
+      ],
+      "properties": {
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "budgetProfileId": { "$ref": "#/$defs/nonBlank" },
+        "platformTier": { "enum": ["mobile_floor", "mobile_high", "pc_high"] },
+        "scopeKinds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/metricRow" }
+        },
+        "allCostDimensionsExplicit": { "const": true }
+      }
+    },
+    "provenanceRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realmId",
+        "provenanceId",
+        "sourceKind",
+        "sourceRef",
+        "creator",
+        "tool",
+        "toolVersion",
+        "rightsState",
+        "sha256",
+        "claimIds"
+      ],
+      "properties": {
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "provenanceId": { "$ref": "#/$defs/nonBlank" },
+        "sourceKind": { "$ref": "#/$defs/nonBlank" },
+        "sourceRef": { "$ref": "#/$defs/nonBlank" },
+        "creator": { "$ref": "#/$defs/nonBlank" },
+        "tool": { "$ref": "#/$defs/nonBlank" },
+        "toolVersion": { "$ref": "#/$defs/nonBlank" },
+        "rightsState": { "$ref": "#/$defs/nonBlank" },
+        "sha256": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+          ]
+        },
+        "claimIds": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "sharingRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assetClass", "sharingScope", "sourceIds", "rationale"],
+      "properties": {
+        "assetClass": {
+          "enum": [
+            "body_modules",
+            "equipment_slots",
+            "skeletons_rigs",
+            "animations",
+            "skill_identities",
+            "vfx"
+          ]
+        },
+        "sharingScope": {
+          "enum": [
+            "realm_scoped_no_cross_realm_compatibility_claim",
+            "contract_only",
+            "gameplay_identity_only"
+          ]
+        },
+        "sourceIds": { "$ref": "#/$defs/stringArray" },
+        "rationale": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "duplicateRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "normalizedId",
+        "realms",
+        "sourceSections",
+        "classification",
+        "semanticBasis",
+        "resolution"
+      ],
+      "properties": {
+        "sourceId": { "$ref": "#/$defs/nonBlank" },
+        "normalizedId": { "$ref": "#/$defs/nonBlank" },
+        "realms": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "sourceSections": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "classification": {
+          "enum": ["compatible_contract_alias", "incompatible"]
+        },
+        "semanticBasis": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "resolution": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "ownerPacket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "decisionArea",
+        "question",
+        "affectedCatalogIds",
+        "affectedSubjectIds",
+        "sourceDecisionIds",
+        "alternatives",
+        "ownerStatus",
+        "approvedResponse",
+        "ownerResponse",
+        "decidedAtUtc"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonBlank" },
+        "decisionArea": { "enum": ["identity", "technical_mobile", "motion_effect"] },
+        "question": { "$ref": "#/$defs/nonBlank" },
+        "affectedCatalogIds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "affectedSubjectIds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "sourceDecisionIds": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "alternatives": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["response", "consequence"],
+            "properties": {
+              "response": { "enum": ["APPROVE", "REVISE", "REJECT"] },
+              "consequence": { "$ref": "#/$defs/nonBlank" }
+            }
+          }
+        },
+        "ownerStatus": { "const": "PENDING" },
+        "approvedResponse": { "type": "null" },
+        "ownerResponse": { "type": "null" },
+        "decidedAtUtc": { "type": "null" }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "orphanSkillCount",
+        "missingRequiredCellCount",
+        "unriggableConceptCount",
+        "undocumentedProvenanceCount",
+        "unbudgetedMobileCostCount",
+        "incompatibleDuplicateCount",
+        "unresolvedOwnerDecisionPacketCount"
+      ],
+      "properties": {
+        "orphanSkillCount": { "const": 0 },
+        "missingRequiredCellCount": { "const": 0 },
+        "unriggableConceptCount": { "const": 0 },
+        "undocumentedProvenanceCount": { "const": 0 },
+        "unbudgetedMobileCostCount": { "const": 0 },
+        "incompatibleDuplicateCount": { "const": 0 },
+        "unresolvedOwnerDecisionPacketCount": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

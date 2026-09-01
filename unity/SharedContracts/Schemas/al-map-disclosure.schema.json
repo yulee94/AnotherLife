@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-map-disclosure.schema.json",
+  "title": "Another Life Map Disclosure Catalog",
+  "description": "Authoritative progressive minimap/world-map content and disclosure policy contract.",
+  "type": "object",
+  "required": [
+    "version",
+    "catalogId",
+    "idFormat",
+    "authority",
+    "visibilityRules",
+    "realmGlyphs",
+    "features",
+    "routes",
+    "objectives",
+    "allegianceMarkers"
+  ],
+  "properties": {
+    "version": { "const": "1.0.0" },
+    "catalogId": { "const": "al_map_disclosure_catalog" },
+    "idFormat": { "const": "lowercase_snake_case" },
+    "authority": { "$ref": "#/$defs/authority" },
+    "visibilityRules": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/visibilityRule" }
+    },
+    "realmGlyphs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/realmGlyph" }
+    },
+    "features": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/feature" }
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/route" }
+    },
+    "objectives": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/objective" }
+    },
+    "allegianceMarkers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/allegianceMarker" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "canonicalId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+    "nonblank": {
+      "type": "string",
+      "minLength": 1
+    },
+    "realmId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+    "surfaces": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "enum": ["minimap", "world_map"] }
+    },
+    "authority": {
+      "type": "object",
+      "required": [
+        "owner",
+        "snapshotStateVersion",
+        "staleSnapshotPolicy",
+        "equalRevisionConflictPolicy",
+        "catalogMismatchPolicy",
+        "reconnectPolicy"
+      ],
+      "properties": {
+        "owner": { "const": "server" },
+        "snapshotStateVersion": { "const": 1 },
+        "staleSnapshotPolicy": { "const": "ignore_lower_epoch_or_revision" },
+        "equalRevisionConflictPolicy": { "const": "intersect_visible_identifiers_and_require_refresh" },
+        "catalogMismatchPolicy": { "const": "suppress_all_and_require_refresh" },
+        "reconnectPolicy": { "const": "suppress_until_authoritative_snapshot" }
+      },
+      "additionalProperties": false
+    },
+    "visibilityRule": {
+      "type": "object",
+      "required": ["id", "mode"],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "mode": {
+          "enum": [
+            "always",
+            "discovered",
+            "active_objective",
+            "authoritative_allegiance"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "realmGlyph": {
+      "type": "object",
+      "required": ["id", "realmId", "assetReference", "nonColorShape"],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "assetReference": { "$ref": "#/$defs/nonblank" },
+        "nonColorShape": { "$ref": "#/$defs/canonicalId" }
+      },
+      "additionalProperties": false
+    },
+    "feature": {
+      "type": "object",
+      "required": [
+        "id",
+        "sourceType",
+        "sourceId",
+        "visibilityRuleId",
+        "surfaces",
+        "iconReference",
+        "nonColorShape"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "sourceType": { "const": "atlas_zone" },
+        "sourceId": { "$ref": "#/$defs/canonicalId" },
+        "visibilityRuleId": { "$ref": "#/$defs/canonicalId" },
+        "surfaces": { "$ref": "#/$defs/surfaces" },
+        "iconReference": { "$ref": "#/$defs/nonblank" },
+        "nonColorShape": { "$ref": "#/$defs/canonicalId" }
+      },
+      "additionalProperties": false
+    },
+    "route": {
+      "type": "object",
+      "required": [
+        "id",
+        "featureIds",
+        "visibilityRuleId",
+        "surfaces",
+        "nonColorShape"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "featureIds": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/canonicalId" }
+        },
+        "visibilityRuleId": { "$ref": "#/$defs/canonicalId" },
+        "surfaces": { "$ref": "#/$defs/surfaces" },
+        "nonColorShape": { "$ref": "#/$defs/canonicalId" }
+      },
+      "additionalProperties": false
+    },
+    "objective": {
+      "type": "object",
+      "required": [
+        "id",
+        "sourceObjectiveId",
+        "featureId",
+        "visibilityRuleId",
+        "surfaces",
+        "iconReference",
+        "nonColorShape"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "sourceObjectiveId": { "$ref": "#/$defs/canonicalId" },
+        "featureId": { "$ref": "#/$defs/canonicalId" },
+        "visibilityRuleId": { "$ref": "#/$defs/canonicalId" },
+        "surfaces": { "$ref": "#/$defs/surfaces" },
+        "iconReference": { "$ref": "#/$defs/nonblank" },
+        "nonColorShape": { "$ref": "#/$defs/canonicalId" }
+      },
+      "additionalProperties": false
+    },
+    "allegianceMarker": {
+      "type": "object",
+      "required": [
+        "id",
+        "realmId",
+        "featureId",
+        "realmGlyphId",
+        "visibilityRuleId",
+        "surfaces",
+        "nonColorShape"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/canonicalId" },
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "featureId": { "$ref": "#/$defs/canonicalId" },
+        "realmGlyphId": { "$ref": "#/$defs/canonicalId" },
+        "visibilityRuleId": { "$ref": "#/$defs/canonicalId" },
+        "surfaces": { "$ref": "#/$defs/surfaces" },
+        "nonColorShape": { "$ref": "#/$defs/canonicalId" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
