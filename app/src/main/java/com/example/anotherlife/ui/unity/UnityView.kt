@@ -22,6 +22,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.anotherlife.R
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier as ReflectionModifier
 
@@ -411,7 +412,7 @@ internal class UnityRuntimeContainer internal constructor(
     ) {
         if (!controller.isDestroyed() || destroyed) return
         destroyUnity()
-        showStatus("Unity runtime unavailable\nLifecycle failure")
+        showStatus(context.getString(R.string.unity_runtime_unavailable_lifecycle_failure))
     }
 
     internal fun statusTextForTesting(): String = statusView.text.toString()
@@ -438,12 +439,13 @@ internal class UnityRuntimeContainer internal constructor(
             is UnityRuntimeHostAcquisition.Acquired -> activateOwnedRuntime(acquisition.lease)
             is UnityRuntimeHostAcquisition.Waiting -> {
                 ownershipWaitToken = acquisition.token
-                showStatus("Unity runtime unavailable\nHost handoff pending")
+                showStatus(context.getString(R.string.unity_runtime_unavailable_handoff_pending))
             }
 
             UnityRuntimeHostAcquisition.CapacityReached -> {
-                val message =
-                    "Unity runtime unavailable\nHost handoff capacity reached"
+                val message = context.getString(
+                    R.string.unity_runtime_unavailable_handoff_capacity
+                )
                 terminalRuntimeFailure = message
                 showStatus(message)
             }
@@ -515,7 +517,7 @@ internal class UnityRuntimeContainer internal constructor(
         if (playerResult.isFailure) {
             // A throwing constructor may have initialized native state without returning a handle.
             abortActivation(
-                message = "Unity runtime unavailable\nHost activation failed",
+                message = context.getString(R.string.unity_runtime_unavailable_activation_failed),
                 cleanupUncertain = true
             )
             return
@@ -533,11 +535,13 @@ internal class UnityRuntimeContainer internal constructor(
                 abortActivation(message = null)
                 return
             }
-            val statusShown = runCatching { showStatus("Unity runtime unavailable") }.isSuccess
+            val statusShown = runCatching {
+                showStatus(context.getString(R.string.unity_runtime_unavailable))
+            }.isSuccess
             if (!statusShown || !activationLeaseState.canContinue(permit)) {
                 abortActivation(
                     message = if (statusShown) null else {
-                        "Unity runtime unavailable\nHost activation failed"
+                        context.getString(R.string.unity_runtime_unavailable_activation_failed)
                     }
                 )
                 return
@@ -553,7 +557,7 @@ internal class UnityRuntimeContainer internal constructor(
         val playerViewResult = runCatching { player!!.view }
         if (playerViewResult.isFailure) {
             abortActivation(
-                message = "Unity runtime unavailable\nHost activation failed",
+                message = context.getString(R.string.unity_runtime_unavailable_activation_failed),
                 cleanupUncertain = true
             )
             return
@@ -563,7 +567,7 @@ internal class UnityRuntimeContainer internal constructor(
         if (!playerViewObserved || !activationLeaseState.canContinue(permit)) {
             abortActivation(
                 message = if (playerViewObserved) null else {
-                    "Unity runtime unavailable\nHost activation failed"
+                    context.getString(R.string.unity_runtime_unavailable_activation_failed)
                 },
                 cleanupUncertain = !playerViewObserved
             )
@@ -576,7 +580,9 @@ internal class UnityRuntimeContainer internal constructor(
         }
         if (registrarResult.isFailure) {
             abortActivation(
-                message = "Unity runtime unavailable\nLifecycle callback registration failed"
+                message = context.getString(
+                    R.string.unity_runtime_unavailable_callback_registration_failed
+                )
             )
             return
         }
@@ -587,7 +593,9 @@ internal class UnityRuntimeContainer internal constructor(
         val registrar = registrarResult.getOrNull()
         if (registrar == null) {
             abortActivation(
-                message = "Unity runtime unavailable\nLifecycle callback registration failed"
+                message = context.getString(
+                    R.string.unity_runtime_unavailable_callback_registration_failed
+                )
             )
             return
         }
@@ -600,7 +608,9 @@ internal class UnityRuntimeContainer internal constructor(
         }
         if (!callbacksRegistered) {
             abortActivation(
-                message = "Unity runtime unavailable\nLifecycle callback registration failed"
+                message = context.getString(
+                    R.string.unity_runtime_unavailable_callback_registration_failed
+                )
             )
             return
         }
@@ -629,7 +639,7 @@ internal class UnityRuntimeContainer internal constructor(
         if (!attached || !activationLeaseState.canContinue(permit)) {
             abortActivation(
                 message = if (attached) null else {
-                    "Unity runtime unavailable\nHost activation failed"
+                    context.getString(R.string.unity_runtime_unavailable_activation_failed)
                 }
             )
             return
@@ -639,7 +649,7 @@ internal class UnityRuntimeContainer internal constructor(
         if (!statusHidden || !activationLeaseState.canContinue(permit)) {
             abortActivation(
                 message = if (statusHidden) null else {
-                    "Unity runtime unavailable\nHost activation failed"
+                    context.getString(R.string.unity_runtime_unavailable_activation_failed)
                 }
             )
             return
@@ -651,7 +661,7 @@ internal class UnityRuntimeContainer internal constructor(
         if (!retainedStateApplied || !activationLeaseState.canContinue(permit)) {
             abortActivation(
                 message = if (destroyed) null else {
-                    "Unity runtime unavailable\nHost activation failed"
+                    context.getString(R.string.unity_runtime_unavailable_activation_failed)
                 }
             )
             return
@@ -663,7 +673,7 @@ internal class UnityRuntimeContainer internal constructor(
         if (!routeDispatchCompleted || !activationLeaseState.canContinue(permit)) {
             abortActivation(
                 message = if (destroyed) null else {
-                    "Unity runtime unavailable\nHost activation failed"
+                    context.getString(R.string.unity_runtime_unavailable_activation_failed)
                 }
             )
             return
@@ -777,9 +787,9 @@ internal class UnityRuntimeContainer internal constructor(
         if (player == null) {
             val routeId = activeLaunch?.routeId.orEmpty()
             val status = if (ownershipWaitToken != null) {
-                "Unity runtime unavailable\nHost handoff pending"
+                context.getString(R.string.unity_runtime_unavailable_handoff_pending)
             } else {
-                "Unity runtime unavailable\nRoute: $routeId"
+                context.getString(R.string.unity_runtime_unavailable_route, routeId)
             }
             showStatus(status)
             return false
@@ -816,7 +826,9 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     private fun showProtocolError(error: UnityBridgeProtocolError) {
-        showStatus("Unity bridge unavailable\nCode: ${error.code.wireValue}")
+        showStatus(
+            context.getString(R.string.unity_bridge_unavailable_code, error.code.wireValue)
+        )
         onProtocolError(error)
     }
 

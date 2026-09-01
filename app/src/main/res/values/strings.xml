@@ -2,4 +2,12 @@
     <string name="app_name">Another Life</string>
     <string name="quest_preview_open">Open quest source</string>
     <string name="unity_bridge_smoke_open">Open Unity bridge smoke</string>
+    <string name="unity_runtime_unavailable">Unity runtime unavailable</string>
+    <string name="unity_runtime_unavailable_lifecycle_failure">Unity runtime unavailable\nLifecycle failure</string>
+    <string name="unity_runtime_unavailable_handoff_pending">Unity runtime unavailable\nHost handoff pending</string>
+    <string name="unity_runtime_unavailable_handoff_capacity">Unity runtime unavailable\nHost handoff capacity reached</string>
+    <string name="unity_runtime_unavailable_activation_failed">Unity runtime unavailable\nHost activation failed</string>
+    <string name="unity_runtime_unavailable_callback_registration_failed">Unity runtime unavailable\nLifecycle callback registration failed</string>
+    <string name="unity_runtime_unavailable_route">Unity runtime unavailable\nRoute: %1$s</string>
+    <string name="unity_bridge_unavailable_code">Unity bridge unavailable\nCode: %1$s</string>
 </resources>
