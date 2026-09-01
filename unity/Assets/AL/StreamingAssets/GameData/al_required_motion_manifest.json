@@ -1,0 +1,423 @@
+{
+  "gameId": "another-life",
+  "manifestId": "rmc_manifest_required_motion_v001",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "standardId": "rmc_standard_rig_motion_v001",
+  "eventHandler": {
+    "unityFunction": "AL_MotionEventV1",
+    "payloadEncoding": "utf8_json_object",
+    "timingRule": "Store events at integer source frames and serialize normalizedTime only as evidence; runtime orders by actionSequence, clip local time, then eventOrdinal and deduplicates retries.",
+    "authorityRule": "Events synchronize or request presentation. They never create damage, healing, movement permission, control, resource cost, cooldown, loot, or state results."
+  },
+  "eventDefinitions": [
+    {
+      "id": "rmc_event_audio_request_v001",
+      "eventName": "al.motion.audio.request",
+      "purpose": "Request a cataloged owned audio cue at a presentation moment.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Monotonic actor-owned action sequence."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "cueId", "type": "string", "required": true, "rule": "Exact cataloged audio cue ID; never a Resources path."}
+      ],
+      "gameplayAuthority": "presentation_only"
+    },
+    {
+      "id": "rmc_event_contact_begin_v001",
+      "eventName": "al.motion.contact.begin",
+      "purpose": "Declare the beginning of a measured foot, limb, body, prop, or surface contact interval.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Monotonic actor-owned action sequence."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "contactId", "type": "string", "required": true, "rule": "Canonical socket or semantic contact name."}
+      ],
+      "gameplayAuthority": "contact_evidence_only"
+    },
+    {
+      "id": "rmc_event_contact_end_v001",
+      "eventName": "al.motion.contact.end",
+      "purpose": "Declare the end of a measured contact interval.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Monotonic actor-owned action sequence."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "contactId", "type": "string", "required": true, "rule": "Must match an open contact begin in the same action sequence."}
+      ],
+      "gameplayAuthority": "contact_evidence_only"
+    },
+    {
+      "id": "rmc_event_hitbox_request_begin_v001",
+      "eventName": "al.motion.hitbox.request_begin",
+      "purpose": "Request opening a named gameplay window after authoritative action and phase checks.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Must match the authoritative active action."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "windowId", "type": "string", "required": true, "rule": "Exact gameplay-catalog window ID."}
+      ],
+      "gameplayAuthority": "request_only"
+    },
+    {
+      "id": "rmc_event_hitbox_request_end_v001",
+      "eventName": "al.motion.hitbox.request_end",
+      "purpose": "Request closing a named gameplay window; cancellation and interruption close it even if this event is absent.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Must match the authoritative active or just-ended action."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "windowId", "type": "string", "required": true, "rule": "Must match a requested window in the same action sequence."}
+      ],
+      "gameplayAuthority": "request_only"
+    },
+    {
+      "id": "rmc_event_interruptible_begin_v001",
+      "eventName": "al.motion.interruptible.begin",
+      "purpose": "Expose the beginning of a presentation cancel window while gameplay remains authoritative.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Monotonic actor-owned action sequence."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "windowId", "type": "string", "required": true, "rule": "Canonical cancel-window ID."}
+      ],
+      "gameplayAuthority": "request_only"
+    },
+    {
+      "id": "rmc_event_interruptible_end_v001",
+      "eventName": "al.motion.interruptible.end",
+      "purpose": "Expose the end of a presentation cancel window.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Monotonic actor-owned action sequence."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "windowId", "type": "string", "required": true, "rule": "Must match an open cancel-window ID."}
+      ],
+      "gameplayAuthority": "request_only"
+    },
+    {
+      "id": "rmc_event_phase_enter_v001",
+      "eventName": "al.motion.phase.enter",
+      "purpose": "Synchronize presentation entry to a canonical action or skill phase.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Must match the authoritative active action."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "phase", "type": "string", "required": true, "rule": "One canonical skill phase or declared non-skill phase."}
+      ],
+      "gameplayAuthority": "presentation_only"
+    },
+    {
+      "id": "rmc_event_phase_exit_v001",
+      "eventName": "al.motion.phase.exit",
+      "purpose": "Synchronize presentation exit from a canonical phase without authorizing the next phase.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Must match the authoritative active or just-ended action."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "phase", "type": "string", "required": true, "rule": "Must match the entered phase in the same action sequence."}
+      ],
+      "gameplayAuthority": "presentation_only"
+    },
+    {
+      "id": "rmc_event_vfx_request_v001",
+      "eventName": "al.motion.vfx.request",
+      "purpose": "Request a cataloged owned VFX cue attached to a canonical socket.",
+      "payloadFields": [
+        {"name": "schemaVersion", "type": "integer", "required": true, "rule": "Exactly 1."},
+        {"name": "eventId", "type": "string", "required": true, "rule": "Canonical event definition ID."},
+        {"name": "actionSequence", "type": "integer", "required": true, "rule": "Monotonic actor-owned action sequence."},
+        {"name": "eventOrdinal", "type": "integer", "required": true, "rule": "Zero-based ordinal within the clip."},
+        {"name": "normalizedTime", "type": "number", "required": true, "rule": "Inclusive zero through one evidence value."},
+        {"name": "cueId", "type": "string", "required": true, "rule": "Exact VFX catalog ID; socket and lifetime come from that binding."}
+      ],
+      "gameplayAuthority": "presentation_only"
+    }
+  ],
+  "clipCandidates": [
+    {
+      "id": "rmc_clip_sentinel_walk_source_v001",
+      "representativeProfileId": "rmc_representative_npc_covenant_sentinel_v001",
+      "skeletonProfileId": "rmc_skeleton_humanoid_shared_v001",
+      "motionKey": "locomotion.walk",
+      "sourcePath": "unity/Assets/AL/Art/Production/FirstUserOnboarding/Enemies/Covenant_Sentinel_Meshy6_Walking_v002.fbx",
+      "sourceTake": "Armature|Armature|walking_man|baselayer",
+      "skeletonSignature": null,
+      "clipSignature": null,
+      "qualificationState": "source_candidate"
+    }
+  ],
+  "skillPhases": [
+    {"id": "rmc_phase_anticipation_v001", "phase": "anticipation", "order": 0, "requirement": "required", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Communicates intent before commit; cannot spend resources or apply results."},
+    {"id": "rmc_phase_cast_v001", "phase": "cast", "order": 1, "requirement": "required", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Follows gameplay cast state and may be interruptible; clip duration never changes configured cast duration."},
+    {"id": "rmc_phase_channel_start_v001", "phase": "channel_start", "order": 2, "requirement": "conditional", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Required only for channeled skills; gameplay confirms channel entry."},
+    {"id": "rmc_phase_channel_loop_v001", "phase": "channel_loop", "order": 3, "requirement": "conditional", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Loops while gameplay channel remains active and exits on authoritative stop or interruption."},
+    {"id": "rmc_phase_commit_v001", "phase": "commit", "order": 4, "requirement": "required", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Mirrors a committed gameplay receipt; an animation event cannot create commit."},
+    {"id": "rmc_phase_release_v001", "phase": "release", "order": 5, "requirement": "conditional", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Required for projectile, beam, summon, thrown, or visibly released skills after commit."},
+    {"id": "rmc_phase_impact_v001", "phase": "impact", "order": 6, "requirement": "conditional", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Plays only from authoritative contact or result evidence and never predicts damage."},
+    {"id": "rmc_phase_recovery_v001", "phase": "recovery", "order": 7, "requirement": "required", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Returns to a legal locomotion or idle state within the bounded recovery time."},
+    {"id": "rmc_phase_interruption_v001", "phase": "interruption", "order": 8, "requirement": "conditional", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Required when gameplay interruption is possible; closes presentation windows without undoing an already committed result."},
+    {"id": "rmc_phase_cancellation_v001", "phase": "cancellation", "order": 9, "requirement": "conditional", "entryEvent": "al.motion.phase.enter", "exitEvent": "al.motion.phase.exit", "authorityRule": "Required when pre-commit cancellation is possible and returns to a declared safe state."}
+  ],
+  "motionKeys": [
+    {"id": "rmc_motion_attack_basic_v001", "key": "attack.basic", "category": "combat", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_combat_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.hitbox.request_begin", "al.motion.hitbox.request_end", "al.motion.phase.exit"], "fallbackKey": null},
+    {"id": "rmc_motion_attack_chain_v001", "key": "attack.chain", "category": "combat", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_combat_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.hitbox.request_begin", "al.motion.hitbox.request_end", "al.motion.phase.exit"], "fallbackKey": "attack.basic"},
+    {"id": "rmc_motion_attack_charged_v001", "key": "attack.charged", "category": "combat", "applicableKinds": ["champion", "npc", "monster"], "defaultRootPolicyId": "rmc_root_combat_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.hitbox.request_begin", "al.motion.hitbox.request_end", "al.motion.phase.exit"], "fallbackKey": "attack.heavy"},
+    {"id": "rmc_motion_attack_heavy_v001", "key": "attack.heavy", "category": "combat", "applicableKinds": ["champion", "npc", "monster"], "defaultRootPolicyId": "rmc_root_combat_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.hitbox.request_begin", "al.motion.hitbox.request_end", "al.motion.phase.exit"], "fallbackKey": "attack.basic"},
+    {"id": "rmc_motion_attack_special_v001", "key": "attack.special", "category": "special", "applicableKinds": ["beast", "monster"], "defaultRootPolicyId": "rmc_root_combat_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "attack.basic"},
+    {"id": "rmc_motion_boss_enter_v001", "key": "boss.enter", "category": "boss", "applicableKinds": ["monster"], "defaultRootPolicyId": "rmc_root_interaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_boss_phase_v001", "key": "boss.phase", "category": "boss", "applicableKinds": ["monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_boss_transition_v001", "key": "boss.transition", "category": "boss", "applicableKinds": ["monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_combat_alert_v001", "key": "combat.alert", "category": "combat", "applicableKinds": ["monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_combat_block_v001", "key": "combat.block", "category": "combat", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "authoring_variant", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_combat_defend_v001", "key": "combat.defend", "category": "combat", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "authoring_variant", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "combat.block"},
+    {"id": "rmc_motion_combat_dodge_v001", "key": "combat.dodge", "category": "combat", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_combat_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": null},
+    {"id": "rmc_motion_combat_parry_v001", "key": "combat.parry", "category": "combat", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "combat.block"},
+    {"id": "rmc_motion_daily_carry_v001", "key": "daily.carry", "category": "npc_life", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_npc_life_locked_v001", "loopPolicy": "authoring_variant", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_daily_craft_v001", "key": "daily.craft", "category": "npc_life", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_npc_life_locked_v001", "loopPolicy": "authoring_variant", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "daily.work"},
+    {"id": "rmc_motion_daily_gather_v001", "key": "daily.gather", "category": "npc_life", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_npc_life_locked_v001", "loopPolicy": "authoring_variant", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "daily.work"},
+    {"id": "rmc_motion_daily_sit_v001", "key": "daily.sit", "category": "npc_life", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_npc_life_locked_v001", "loopPolicy": "authoring_variant", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_daily_sleep_v001", "key": "daily.sleep", "category": "npc_life", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_npc_life_locked_v001", "loopPolicy": "must_loop", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_daily_trade_v001", "key": "daily.trade", "category": "npc_life", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_npc_life_locked_v001", "loopPolicy": "authoring_variant", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "social.gesture"},
+    {"id": "rmc_motion_daily_work_v001", "key": "daily.work", "category": "npc_life", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_npc_life_locked_v001", "loopPolicy": "authoring_variant", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_defeat_v001", "key": "defeat", "category": "reaction", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": null},
+    {"id": "rmc_motion_emote_generic_v001", "key": "emote.generic", "category": "interaction", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_interaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_idle_neutral_v001", "key": "idle.neutral", "category": "idle", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin"], "fallbackKey": null},
+    {"id": "rmc_motion_idle_variant_v001", "key": "idle.variant", "category": "idle", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_interaction_cut_v001", "key": "interaction.cut", "category": "interaction", "applicableKinds": ["beast"], "defaultRootPolicyId": "rmc_root_interaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "interaction.generic"},
+    {"id": "rmc_motion_interaction_generic_v001", "key": "interaction.generic", "category": "interaction", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_interaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_locomotion_crawl_v001", "key": "locomotion.crawl", "category": "locomotion", "applicableKinds": ["beast", "monster"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end"], "fallbackKey": "locomotion.walk"},
+    {"id": "rmc_motion_locomotion_fall_v001", "key": "locomotion.fall", "category": "locomotion", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_locomotion_fly_v001", "key": "locomotion.fly", "category": "locomotion", "applicableKinds": ["beast", "monster"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_locomotion_jump_v001", "key": "locomotion.jump", "category": "locomotion", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.end", "al.motion.phase.exit"], "fallbackKey": "locomotion.fall"},
+    {"id": "rmc_motion_locomotion_land_v001", "key": "locomotion.land", "category": "locomotion", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_locomotion_run_v001", "key": "locomotion.run", "category": "locomotion", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end"], "fallbackKey": "locomotion.walk"},
+    {"id": "rmc_motion_locomotion_sprint_v001", "key": "locomotion.sprint", "category": "locomotion", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end"], "fallbackKey": "locomotion.run"},
+    {"id": "rmc_motion_locomotion_start_v001", "key": "locomotion.start", "category": "locomotion", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end"], "fallbackKey": "locomotion.walk"},
+    {"id": "rmc_motion_locomotion_stop_v001", "key": "locomotion.stop", "category": "locomotion", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_locomotion_strafe_l_v001", "key": "locomotion.strafe_l", "category": "locomotion", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end"], "fallbackKey": "locomotion.walk"},
+    {"id": "rmc_motion_locomotion_strafe_r_v001", "key": "locomotion.strafe_r", "category": "locomotion", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end"], "fallbackKey": "locomotion.walk"},
+    {"id": "rmc_motion_locomotion_swim_v001", "key": "locomotion.swim", "category": "locomotion", "applicableKinds": ["beast", "monster"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_locomotion_turn_v001", "key": "locomotion.turn", "category": "locomotion", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "authoring_variant", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_locomotion_walk_v001", "key": "locomotion.walk", "category": "locomotion", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "must_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_reaction_flee_v001", "key": "reaction.flee", "category": "reaction", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_locomotion_in_place_v001", "loopPolicy": "authoring_variant", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "locomotion.run"},
+    {"id": "rmc_motion_reaction_get_up_v001", "key": "reaction.get_up", "category": "reaction", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_reaction_hit_v001", "key": "reaction.hit", "category": "reaction", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_reaction_knockdown_v001", "key": "reaction.knockdown", "category": "reaction", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.phase.enter", "al.motion.contact.begin", "al.motion.phase.exit"], "fallbackKey": "reaction.hit"},
+    {"id": "rmc_motion_reaction_react_v001", "key": "reaction.react", "category": "reaction", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "reaction.hit"},
+    {"id": "rmc_motion_reaction_spoil_push_v001", "key": "reaction.spoil_push", "category": "interaction", "applicableKinds": ["beast"], "defaultRootPolicyId": "rmc_root_interaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_reaction_stagger_v001", "key": "reaction.stagger", "category": "reaction", "applicableKinds": ["beast", "monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "reaction.hit"},
+    {"id": "rmc_motion_skill_anticipation_v001", "key": "skill.anticipation", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_skill_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.interruptible.begin", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_skill_cancellation_v001", "key": "skill.cancellation", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "skill.recovery"},
+    {"id": "rmc_motion_skill_cast_v001", "key": "skill.cast", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_skill_bounded_v001", "loopPolicy": "authoring_variant", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.interruptible.begin", "al.motion.phase.exit"], "fallbackKey": "skill.anticipation"},
+    {"id": "rmc_motion_skill_channel_loop_v001", "key": "skill.channel_loop", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_skill_bounded_v001", "loopPolicy": "must_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.interruptible.begin", "al.motion.interruptible.end", "al.motion.phase.exit"], "fallbackKey": "skill.cast"},
+    {"id": "rmc_motion_skill_channel_start_v001", "key": "skill.channel_start", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_skill_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "skill.cast"},
+    {"id": "rmc_motion_skill_commit_v001", "key": "skill.commit", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_skill_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "skill.cast"},
+    {"id": "rmc_motion_skill_impact_v001", "key": "skill.impact", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "reaction.hit"},
+    {"id": "rmc_motion_skill_interruption_v001", "key": "skill.interruption", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "skill.recovery"},
+    {"id": "rmc_motion_skill_recovery_v001", "key": "skill.recovery", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_reaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "foot_or_limb", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_skill_release_v001", "key": "skill.release", "category": "skill", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_skill_bounded_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "skill.commit"},
+    {"id": "rmc_motion_social_gesture_v001", "key": "social.gesture", "category": "npc_life", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_npc_life_locked_v001", "loopPolicy": "authoring_variant", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_social_talk_v001", "key": "social.talk", "category": "npc_life", "applicableKinds": ["npc"], "defaultRootPolicyId": "rmc_root_npc_life_locked_v001", "loopPolicy": "must_loop", "contactRequirement": "none", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_traversal_climb_v001", "key": "traversal.climb", "category": "traversal", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_traversal_authored_v001", "loopPolicy": "authoring_variant", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end", "al.motion.phase.exit"], "fallbackKey": null},
+    {"id": "rmc_motion_traversal_generic_v001", "key": "traversal.generic", "category": "traversal", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_traversal_authored_v001", "loopPolicy": "must_not_loop", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": null},
+    {"id": "rmc_motion_traversal_vault_v001", "key": "traversal.vault", "category": "traversal", "applicableKinds": ["champion", "npc", "beast", "monster"], "defaultRootPolicyId": "rmc_root_traversal_authored_v001", "loopPolicy": "must_not_loop", "contactRequirement": "interaction_anchor", "requiredEventNames": ["al.motion.contact.begin", "al.motion.contact.end", "al.motion.phase.exit"], "fallbackKey": null},
+    {"id": "rmc_motion_weapon_draw_v001", "key": "weapon.draw", "category": "combat", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_interaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"},
+    {"id": "rmc_motion_weapon_stow_v001", "key": "weapon.stow", "category": "combat", "applicableKinds": ["champion", "npc"], "defaultRootPolicyId": "rmc_root_interaction_locked_v001", "loopPolicy": "must_not_loop", "contactRequirement": "weapon_or_attack_origin", "requiredEventNames": ["al.motion.phase.enter", "al.motion.phase.exit"], "fallbackKey": "idle.neutral"}
+  ],
+  "requiredSets": [
+    {
+      "id": "rmc_set_beast_complete_v001",
+      "subjectKinds": ["beast"],
+      "requiredMotionKeys": ["attack.basic", "attack.special", "defeat", "idle.neutral", "idle.variant", "locomotion.turn", "reaction.hit", "reaction.stagger"],
+      "conditionalMotionKeys": ["interaction.generic", "locomotion.crawl", "locomotion.fly", "locomotion.run", "locomotion.swim", "locomotion.walk", "skill.anticipation", "skill.cancellation", "skill.cast", "skill.channel_loop", "skill.channel_start", "skill.commit", "skill.impact", "skill.interruption", "skill.recovery", "skill.release", "traversal.climb", "traversal.generic", "traversal.vault"],
+      "skillPhasePolicy": "all_declared_phases",
+      "notes": "Every declared locomotion mode and skill makes its conditional keys mandatory; anatomy-specific omissions require a versioned exception, not silent deletion."
+    },
+    {
+      "id": "rmc_set_boss_complete_v001",
+      "subjectKinds": ["monster"],
+      "requiredMotionKeys": ["attack.basic", "attack.special", "boss.enter", "boss.phase", "boss.transition", "combat.alert", "defeat", "idle.neutral", "idle.variant", "locomotion.turn", "reaction.hit", "reaction.stagger"],
+      "conditionalMotionKeys": ["attack.charged", "attack.heavy", "locomotion.crawl", "locomotion.fly", "locomotion.run", "locomotion.swim", "locomotion.walk", "skill.anticipation", "skill.cancellation", "skill.cast", "skill.channel_loop", "skill.channel_start", "skill.commit", "skill.impact", "skill.interruption", "skill.recovery", "skill.release"],
+      "skillPhasePolicy": "all_declared_phases",
+      "notes": "Every named boss phase or transition adds its own versioned motion key and must preserve telegraph and interruption readability on mobile."
+    },
+    {
+      "id": "rmc_set_champion_complete_v001",
+      "subjectKinds": ["champion"],
+      "requiredMotionKeys": ["attack.basic", "attack.chain", "attack.charged", "attack.heavy", "combat.block", "combat.dodge", "combat.parry", "defeat", "emote.generic", "idle.neutral", "idle.variant", "interaction.generic", "locomotion.fall", "locomotion.jump", "locomotion.land", "locomotion.run", "locomotion.sprint", "locomotion.start", "locomotion.stop", "locomotion.strafe_l", "locomotion.strafe_r", "locomotion.turn", "locomotion.walk", "reaction.get_up", "reaction.hit", "reaction.knockdown", "skill.anticipation", "skill.cast", "skill.commit", "skill.recovery", "traversal.generic", "weapon.draw", "weapon.stow"],
+      "conditionalMotionKeys": ["skill.cancellation", "skill.channel_loop", "skill.channel_start", "skill.impact", "skill.interruption", "skill.release", "traversal.climb", "traversal.vault"],
+      "skillPhasePolicy": "all_declared_phases",
+      "notes": "Every cataloged skill declares applicability for all ten phases; conditional phases become mandatory when the gameplay skill can channel, release, impact, interrupt, cancel, climb, or vault."
+    },
+    {
+      "id": "rmc_set_monster_complete_v001",
+      "subjectKinds": ["monster"],
+      "requiredMotionKeys": ["attack.basic", "attack.special", "combat.alert", "defeat", "idle.neutral", "idle.variant", "locomotion.turn", "reaction.hit", "reaction.stagger"],
+      "conditionalMotionKeys": ["attack.charged", "attack.heavy", "interaction.generic", "locomotion.crawl", "locomotion.fly", "locomotion.run", "locomotion.swim", "locomotion.walk", "skill.anticipation", "skill.cancellation", "skill.cast", "skill.channel_loop", "skill.channel_start", "skill.commit", "skill.impact", "skill.interruption", "skill.recovery", "skill.release", "traversal.climb", "traversal.generic", "traversal.vault"],
+      "skillPhasePolicy": "all_declared_phases",
+      "notes": "Every declared locomotion mode, traversal capability, and skill expands the mandatory set. Bosses use the separate boss set."
+    },
+    {
+      "id": "rmc_set_npc_complete_v001",
+      "subjectKinds": ["npc"],
+      "requiredMotionKeys": ["attack.basic", "attack.chain", "attack.heavy", "combat.block", "combat.defend", "combat.dodge", "combat.parry", "daily.carry", "daily.craft", "daily.gather", "daily.sit", "daily.sleep", "daily.trade", "daily.work", "defeat", "emote.generic", "idle.neutral", "idle.variant", "interaction.generic", "locomotion.fall", "locomotion.jump", "locomotion.land", "locomotion.run", "locomotion.sprint", "locomotion.start", "locomotion.stop", "locomotion.strafe_l", "locomotion.strafe_r", "locomotion.turn", "locomotion.walk", "reaction.flee", "reaction.get_up", "reaction.hit", "reaction.knockdown", "reaction.react", "skill.anticipation", "skill.cast", "skill.commit", "skill.recovery", "social.gesture", "social.talk", "traversal.generic", "weapon.draw", "weapon.stow"],
+      "conditionalMotionKeys": ["attack.charged", "skill.cancellation", "skill.channel_loop", "skill.channel_start", "skill.impact", "skill.interruption", "skill.release", "traversal.climb", "traversal.vault"],
+      "skillPhasePolicy": "all_declared_phases",
+      "notes": "A noncombat role still needs its explicit safe reactions and role-life set; combat-only keys may become not applicable only through a role-specific approved binding with rationale."
+    },
+    {
+      "id": "rmc_set_slagwhistle_source_bounded_v001",
+      "subjectKinds": ["beast"],
+      "requiredMotionKeys": ["idle.neutral", "interaction.cut", "locomotion.stop", "locomotion.turn", "locomotion.walk", "reaction.spoil_push"],
+      "conditionalMotionKeys": [],
+      "skillPhasePolicy": "source_specific",
+      "notes": "Exactly the six source-bounded presentations: rest/vent, scurry, plant-stop, cut, spoil-push, and turn. Attack, defeat, burrow, standing-rest, and additional clips are blocked until owner authorization."
+    }
+  ],
+  "representativeCoverage": [
+    {
+      "representativeProfileId": "rmc_representative_beast_slagwhistle_v001",
+      "requiredSetId": "rmc_set_slagwhistle_source_bounded_v001",
+      "requirements": [
+        {"motionKey": "attack.basic", "status": "blocked_owner_authorization", "clipId": null, "source": "Slagwhistle cleanup notes and bounded authority", "rationale": "Combat behavior was not authorized for the approved source."},
+        {"motionKey": "attack.special", "status": "blocked_owner_authorization", "clipId": null, "source": "Slagwhistle cleanup notes and bounded authority", "rationale": "Special combat behavior was not authorized for the approved source."},
+        {"motionKey": "defeat", "status": "blocked_owner_authorization", "clipId": null, "source": "Slagwhistle cleanup notes and bounded authority", "rationale": "Defeat behavior was not authorized for the approved source."},
+        {"motionKey": "idle.neutral", "status": "required_missing", "clipId": null, "source": "Authorized rest/vent slot", "rationale": "The source has zero actions; author only after root and deformation cleanup."},
+        {"motionKey": "interaction.cut", "status": "required_missing", "clipId": null, "source": "Authorized cut slot", "rationale": "The source has zero actions; interaction authority remains external."},
+        {"motionKey": "locomotion.stop", "status": "required_missing", "clipId": null, "source": "Authorized plant-stop slot", "rationale": "The source has zero actions."},
+        {"motionKey": "locomotion.turn", "status": "required_missing", "clipId": null, "source": "Authorized turn slot", "rationale": "The source has zero actions and recumbent contacts require explicit authoring."},
+        {"motionKey": "locomotion.walk", "status": "required_missing", "clipId": null, "source": "Authorized scurry slot", "rationale": "The source has zero actions; runtime locomotion remains in-place and motor-owned."},
+        {"motionKey": "reaction.spoil_push", "status": "required_missing", "clipId": null, "source": "Authorized spoil-push slot", "rationale": "The source has zero actions; result authority remains external."}
+      ],
+      "clipCeiling": 6,
+      "admissionState": "blocked_until_required_available_and_validated"
+    },
+    {
+      "representativeProfileId": "rmc_representative_champion_vanguard_v001",
+      "requiredSetId": "rmc_set_champion_complete_v001",
+      "requirements": [
+        {"motionKey": "attack.basic", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored combat clip is bound."},
+        {"motionKey": "attack.chain", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored chain clip is bound."},
+        {"motionKey": "attack.charged", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No distinct charged clip is bound."},
+        {"motionKey": "attack.heavy", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No distinct heavy clip is bound."},
+        {"motionKey": "combat.block", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored block clip is bound."},
+        {"motionKey": "combat.dodge", "status": "required_missing", "clipId": null, "source": "none", "rationale": "Gameplay dodge exists but no authored clip is bound."},
+        {"motionKey": "combat.parry", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored parry clip is bound."},
+        {"motionKey": "defeat", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored defeat clip is bound."},
+        {"motionKey": "emote.generic", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored emote clip is bound."},
+        {"motionKey": "idle.neutral", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No qualified canonical idle clip is bound."},
+        {"motionKey": "idle.variant", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No qualified idle variant is bound."},
+        {"motionKey": "interaction.generic", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored interaction clip is bound."},
+        {"motionKey": "locomotion.fall", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored fall loop is bound."},
+        {"motionKey": "locomotion.jump", "status": "required_missing", "clipId": null, "source": "none", "rationale": "Gameplay jump exists but no authored clip is bound."},
+        {"motionKey": "locomotion.land", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored land clip is bound."},
+        {"motionKey": "locomotion.run", "status": "required_missing", "clipId": null, "source": "Existing generic source take is not qualified", "rationale": "The current visual binder loops one candidate take without a valid Avatar or contact validation."},
+        {"motionKey": "locomotion.sprint", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored sprint clip is bound."},
+        {"motionKey": "locomotion.start", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored start clip is bound."},
+        {"motionKey": "locomotion.stop", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored stop clip is bound."},
+        {"motionKey": "locomotion.strafe_l", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored left strafe is bound."},
+        {"motionKey": "locomotion.strafe_r", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored right strafe is bound."},
+        {"motionKey": "locomotion.turn", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored turn set is bound."},
+        {"motionKey": "locomotion.walk", "status": "required_missing", "clipId": null, "source": "Generic source take only", "rationale": "The candidate take lacks canonical retarget, contact, loop, and import evidence."},
+        {"motionKey": "reaction.get_up", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored get-up clip is bound."},
+        {"motionKey": "reaction.hit", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored hit reaction is bound."},
+        {"motionKey": "reaction.knockdown", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored knockdown clip is bound."},
+        {"motionKey": "skill.anticipation", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No skill anticipation clip is bound."},
+        {"motionKey": "skill.cast", "status": "required_missing", "clipId": null, "source": "none", "rationale": "Gameplay cast timing exists but no authored cast clip is bound."},
+        {"motionKey": "skill.commit", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No gameplay-receipt-synchronized commit clip is bound."},
+        {"motionKey": "skill.recovery", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored recovery clip is bound."},
+        {"motionKey": "traversal.generic", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored traversal clip is bound."},
+        {"motionKey": "weapon.draw", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored draw clip is bound."},
+        {"motionKey": "weapon.stow", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No authored stow clip is bound."}
+      ],
+      "clipCeiling": 48,
+      "admissionState": "blocked_until_required_available_and_validated"
+    },
+    {
+      "representativeProfileId": "rmc_representative_npc_covenant_sentinel_v001",
+      "requiredSetId": "rmc_set_npc_complete_v001",
+      "requirements": [
+        {"motionKey": "attack.basic", "status": "required_missing", "clipId": null, "source": "none", "rationale": "Dedicated attack remains a documented gap."},
+        {"motionKey": "attack.chain", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No chain clip exists."},
+        {"motionKey": "attack.heavy", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No heavy clip exists."},
+        {"motionKey": "combat.block", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No block clip exists."},
+        {"motionKey": "combat.defend", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No defend clip exists."},
+        {"motionKey": "combat.dodge", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No dodge clip exists."},
+        {"motionKey": "combat.parry", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No parry clip exists."},
+        {"motionKey": "daily.carry", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No carry clip exists."},
+        {"motionKey": "daily.craft", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No craft clip exists."},
+        {"motionKey": "daily.gather", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No gather clip exists."},
+        {"motionKey": "daily.sit", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No sit clip exists."},
+        {"motionKey": "daily.sleep", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No sleep clip exists."},
+        {"motionKey": "daily.trade", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No trade clip exists."},
+        {"motionKey": "daily.work", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No work clip exists."},
+        {"motionKey": "defeat", "status": "required_missing", "clipId": null, "source": "none", "rationale": "Dedicated defeat remains a documented gap."},
+        {"motionKey": "emote.generic", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No emote clip exists."},
+        {"motionKey": "idle.neutral", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No canonical idle clip exists."},
+        {"motionKey": "idle.variant", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No idle variant exists."},
+        {"motionKey": "interaction.generic", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No interaction clip exists."},
+        {"motionKey": "locomotion.fall", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No fall clip exists."},
+        {"motionKey": "locomotion.jump", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No jump clip exists."},
+        {"motionKey": "locomotion.land", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No land clip exists."},
+        {"motionKey": "locomotion.run", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No run clip exists."},
+        {"motionKey": "locomotion.sprint", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No sprint clip exists."},
+        {"motionKey": "locomotion.start", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No start clip exists."},
+        {"motionKey": "locomotion.stop", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No stop clip exists."},
+        {"motionKey": "locomotion.strafe_l", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No left strafe exists."},
+        {"motionKey": "locomotion.strafe_r", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No right strafe exists."},
+        {"motionKey": "locomotion.turn", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No turn set exists."},
+        {"motionKey": "locomotion.walk", "status": "available_source_candidate", "clipId": "rmc_clip_sentinel_walk_source_v001", "source": "Covenant_Sentinel_Meshy6_Walking_v002.fbx embedded take", "rationale": "One Generic 1.033-second 30 Hz non-looping source take exists; it still requires cleanup, explicit loop/contact/root metadata, and fresh import before qualification."},
+        {"motionKey": "reaction.flee", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No flee clip exists."},
+        {"motionKey": "reaction.get_up", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No get-up clip exists."},
+        {"motionKey": "reaction.hit", "status": "required_missing", "clipId": null, "source": "none", "rationale": "Dedicated hit remains a documented gap."},
+        {"motionKey": "reaction.knockdown", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No knockdown clip exists."},
+        {"motionKey": "reaction.react", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No role reaction clip exists."},
+        {"motionKey": "skill.anticipation", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No skill anticipation exists."},
+        {"motionKey": "skill.cast", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No skill cast exists."},
+        {"motionKey": "skill.commit", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No skill commit exists."},
+        {"motionKey": "skill.recovery", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No skill recovery exists."},
+        {"motionKey": "social.gesture", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No gesture clip exists."},
+        {"motionKey": "social.talk", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No talk loop exists."},
+        {"motionKey": "traversal.generic", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No traversal clip exists."},
+        {"motionKey": "weapon.draw", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No draw clip exists."},
+        {"motionKey": "weapon.stow", "status": "required_missing", "clipId": null, "source": "none", "rationale": "No stow clip exists."}
+      ],
+      "clipCeiling": 32,
+      "admissionState": "blocked_until_required_available_and_validated"
+    }
+  ],
+  "anatomyExceptions": [
+    {"id": "rmc_anatomy_aquatic_v001", "anatomyClass": "aquatic", "incompatibleWith": ["unity_humanoid", "biped_contact_model"], "requiredTreatment": "Define support datum, buoyancy-facing axis, propulsion chains, and surface/bottom contact separately; root vertical motion remains gameplay-owned unless traversal authorizes it.", "forbiddenAssumption": "Do not require ground contacts or a standing bind pose for a fully aquatic anatomy."},
+    {"id": "rmc_anatomy_avian_v001", "anatomyClass": "avian", "incompatibleWith": ["unity_humanoid", "biped_contact_model"], "requiredTreatment": "Use explicit wing, leg, contact, center-of-mass, ground, takeoff, flight, and landing semantics; airborne contacts are not fabricated.", "forbiddenAssumption": "Do not map wings to arms merely to obtain Humanoid retargeting."},
+    {"id": "rmc_anatomy_multiped_v001", "anatomyClass": "multiped", "incompatibleWith": ["unity_humanoid", "biped_contact_model", "generic_semantic_chain"], "requiredTreatment": "Declare every limb and gait phase explicitly; semantic-chain retargeting requires equal contact count, chain order, phase offsets, and center-of-mass behavior.", "forbiddenAssumption": "Do not truncate extra limbs or reuse quadruped event timing by index."},
+    {"id": "rmc_anatomy_recumbent_burrower_v001", "anatomyClass": "recumbent_burrower", "incompatibleWith": ["unity_humanoid", "biped_contact_model", "generic_semantic_chain"], "requiredTreatment": "Preserve the approved recumbent bind, derive exact-signature roots and semantic contacts in a new version, and author only the six authorized Slagwhistle presentations.", "forbiddenAssumption": "Do not invent standing, combat, defeat, or burrow motion from the species label."},
+    {"id": "rmc_anatomy_serpentine_v001", "anatomyClass": "serpentine", "incompatibleWith": ["unity_humanoid", "biped_contact_model"], "requiredTreatment": "Use ordered axial segments, declared support/contact regions, curvature limits, and exact or explicitly mapped chain signatures.", "forbiddenAssumption": "Do not synthesize pelvis, feet, or stride contacts to fit a biped or quadruped template."}
+  ],
+  "acceptance": {
+    "undefinedRequiredMotionKeyCount": 0,
+    "unclassifiedRepresentativeRequirementCount": 0,
+    "duplicateIdCount": 0,
+    "invalidReferenceCount": 0,
+    "representativeCount": 3,
+    "skillPhaseCount": 10
+  }
+}
