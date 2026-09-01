@@ -165,9 +165,9 @@ Build the opted-in host from the repository root with JDK 21 and the Android
 SDK used by the host:
 
 ```powershell
-.\gradlew.bat clean :app:testDebugUnitTest :app:assembleDebug `
+.\gradlew.bat clean :app:testDebugUnitTest :app:verifyUnityDebugApk `
   :app:assembleDebugAndroidTest :app:lintDebug -PwithUnity=true --rerun-tasks
-.\gradlew.bat clean :app:testDebugUnitTest :app:assembleRelease `
+.\gradlew.bat clean :app:testDebugUnitTest :app:verifyUnityReleaseApk `
   -PwithUnity=true --rerun-tasks
 ```
 
@@ -177,8 +177,20 @@ makes the corresponding pre-build task verify its inventory. Without the flag,
 the ordinary visible-unavailable Android shell remains intentionally buildable;
 it must not be reported as a packaged Unity result.
 
+The variant-specific verification tasks build the matching host APK and then
+run `android_unity_package.py --verify-apk`. Verification revalidates the staged
+AAR against the exact repository commit and Unity version, rejects any APK ABI
+other than ARM64, validates the packaged `libmain.so`, `libunity.so`, and
+`libil2cpp.so` ELF targets, binds those native libraries and
+`globalgamemanagers` byte-for-byte back to the staged AAR inventory, and parses
+every `classes*.dex` class-definition table to prove that
+`com.unity3d.player.UnityPlayer` survived DEX conversion and release shrinking.
+The verifier prints both the final APK and source AAR SHA-256 identities.
+
 Before accepting either generated package, inspect it rather than trusting the
-build result alone:
+build result alone. The automated verifier covers package presence, identity,
+ABI, ELF machine, player data, and the retained Unity player class; retain the
+following manual/native inspection for dynamic-link and signing evidence:
 
 ```powershell
 # AAR/APK contents: require Unity assets/classes and only arm64-v8a Unity ELFs.
