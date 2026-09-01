@@ -5,6 +5,7 @@ import com.example.anotherlife.BuildConfig
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBox
@@ -30,11 +31,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.anotherlife.ui.layout.debugTestTag
+import com.example.anotherlife.ui.layout.usesLargeTextLayout
 import com.example.anotherlife.ui.navigation.Route
 import com.example.anotherlife.ui.simulation.AcademyScreen
 import com.example.anotherlife.ui.simulation.BattleSimulatorScreen
@@ -101,7 +104,7 @@ fun AnotherLifeShell() {
     val currentKey = backStack.lastOrNull() ?: Route.Kingdom
     val currentRoute = ShellRoutePolicy.resolveRoute(currentKey, debugToolsEnabled).route
     val selectedNavigationRoute = ShellRoutePolicy.navigationSelection(currentRoute)
-    val useSelectedOnlyLabels = LocalDensity.current.fontScale >= 1.3f
+    val useLargeTextNavigation = usesLargeTextLayout()
     val acknowledgeRouteNotice: () -> Unit = {
         routeNotice.value = ShellRoutePolicy.reduceRouteNotice(
             currentMessage = routeNotice.value,
@@ -120,32 +123,59 @@ fun AnotherLifeShell() {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                ShellRoutePolicy.bottomNavigationRoutes(debugToolsEnabled).forEach { route ->
-                    val isSelected = selectedNavigationRoute == route
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = {
-                            acknowledgeRouteNotice()
-                            transientRouteNotice.value = null
-                            if (route == Route.Kingdom) {
-                                backStack.clear()
-                                backStack.add(Route.Kingdom)
-                            } else if (currentKey != route) {
-                                backStack.add(route)
-                            }
-                        },
-                        icon = { Icon(iconForRoute(route), contentDescription = labelForRoute(route)) },
-                        label = {
-                            Text(
-                                text = labelForRoute(route),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                softWrap = false
-                            )
-                        },
-                        alwaysShowLabel = !useSelectedOnlyLabels
+            Column {
+                if (useLargeTextNavigation) {
+                    Text(
+                        text = labelForRoute(selectedNavigationRoute),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 24.dp)
+                            .padding(horizontal = 16.dp, vertical = 2.dp)
+                            .debugTestTag("selected_navigation_label"),
+                        style = MaterialTheme.typography.labelLarge,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Clip,
+                        softWrap = false
                     )
+                }
+                NavigationBar {
+                    ShellRoutePolicy.bottomNavigationRoutes(debugToolsEnabled).forEach { route ->
+                        val isSelected = selectedNavigationRoute == route
+                        NavigationBarItem(
+                            selected = isSelected,
+                            onClick = {
+                                acknowledgeRouteNotice()
+                                transientRouteNotice.value = null
+                                if (route == Route.Kingdom) {
+                                    backStack.clear()
+                                    backStack.add(Route.Kingdom)
+                                } else if (currentKey != route) {
+                                    backStack.add(route)
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    iconForRoute(route),
+                                    contentDescription = labelForRoute(route)
+                                )
+                            },
+                            label = if (useLargeTextNavigation) {
+                                null
+                            } else {
+                                {
+                                    Text(
+                                        text = labelForRoute(route),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        softWrap = false
+                                    )
+                                }
+                            },
+                            alwaysShowLabel = !useLargeTextNavigation,
+                            modifier = Modifier.debugTestTag("navigation_${labelForRoute(route)}")
+                        )
+                    }
                 }
             }
         }
