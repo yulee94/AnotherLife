@@ -9,8 +9,10 @@ using AL.UI.SharedMenu;
 using AL.UI.WorldMap;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace AL.Tests.PlayMode.WorldMap
 {
@@ -449,6 +451,71 @@ namespace AL.Tests.PlayMode.WorldMap
             Object.Destroy(firstHudRoot);
             Object.Destroy(secondHudRoot);
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator WorldMapModalOwnsVisibleFocusAndRestoresPriorSelectionOnClose()
+        {
+            _championScene = SceneManager.CreateScene(WorldMapIds.ChampionArenaScene);
+            WorldMapHost.EnsureForScene(_championScene);
+            var priorRoot = new GameObject(
+                "PriorWorldMapFocus",
+                typeof(RectTransform),
+                typeof(Image),
+                typeof(Button));
+            SceneManager.MoveGameObjectToScene(priorRoot, _championScene);
+            Button prior = priorRoot.GetComponent<Button>();
+            EventSystem.current.SetSelectedGameObject(prior.gameObject);
+
+            WorldMapSession.OpenMap();
+            yield return null;
+
+            WorldMapOverlay overlay = FindInScene<WorldMapOverlay>(_championScene);
+            Button close = FindDescendant(overlay.transform, "WorldMap_Close").GetComponent<Button>();
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(close.gameObject));
+            Assert.That(close.navigation.mode, Is.EqualTo(Navigation.Mode.Explicit));
+            Assert.That(close.navigation.selectOnUp, Is.SameAs(close));
+            Assert.That(close.GetComponent<AL.UI.DesignSystem.UiFocusVisibility>(), Is.Not.Null);
+            Assert.That(close.GetComponent<RectTransform>().rect.width, Is.GreaterThanOrEqualTo(56f));
+            Assert.That(close.GetComponent<RectTransform>().rect.height, Is.GreaterThanOrEqualTo(56f));
+
+            ExecuteEvents.Execute(
+                close.gameObject,
+                new BaseEventData(EventSystem.current),
+                ExecuteEvents.submitHandler);
+            yield return null;
+
+            Assert.That(WorldMapSession.IsMapOpen, Is.False);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(prior.gameObject));
+            Object.Destroy(priorRoot);
+        }
+
+        [UnityTest]
+        public IEnumerator WorldMapCancelClosesWithoutLosingRestoredFocus()
+        {
+            _championScene = SceneManager.CreateScene(WorldMapIds.ChampionArenaScene);
+            WorldMapHost.EnsureForScene(_championScene);
+            var priorRoot = new GameObject(
+                "PriorCancelFocus",
+                typeof(RectTransform),
+                typeof(Image),
+                typeof(Button));
+            SceneManager.MoveGameObjectToScene(priorRoot, _championScene);
+            EventSystem.current.SetSelectedGameObject(priorRoot);
+            WorldMapSession.OpenMap();
+            yield return null;
+
+            WorldMapOverlay overlay = FindInScene<WorldMapOverlay>(_championScene);
+            MethodInfo cancel = typeof(WorldMapOverlay).GetMethod(
+                "ProcessCancelInput",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(cancel, Is.Not.Null);
+            cancel.Invoke(overlay, new object[] { true });
+            yield return null;
+
+            Assert.That(WorldMapSession.IsMapOpen, Is.False);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.SameAs(priorRoot));
+            Object.Destroy(priorRoot);
         }
 
         [UnityTest]

@@ -3,8 +3,10 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using AL.UI.DesignSystem;
+using AL.UI.WorldMap;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace AL.Tests.EditMode.UI
@@ -16,6 +18,8 @@ namespace AL.Tests.EditMode.UI
         [TearDown]
         public void TearDown()
         {
+            UiAccessibilityPreferences.Reset();
+            ProgressiveMapSession.ResetForTests();
             if (_canvas != null)
             {
                 UnityEngine.Object.DestroyImmediate(_canvas);
@@ -170,6 +174,14 @@ namespace AL.Tests.EditMode.UI
                 Is.EqualTo(UiFormFactor.Pc16By9));
             object target = Invoke(current, "Get", HudSlotId.CurrentTarget);
             Assert.That(GetProperty<Text>(target, "Primary").fontSize, Is.EqualTo(36));
+            Assert.That(UiAccessibilityPreferences.TextScale, Is.EqualTo(2f));
+            Assert.That(UiAccessibilityPreferences.ReduceMotion, Is.True);
+            Assert.That(UiAccessibilityPreferences.ReduceFlash, Is.True);
+            Assert.That(UiAccessibilityPreferences.ReduceVfx, Is.True);
+            Assert.That(ProgressiveMapSession.Accessibility.Settings.TextScale, Is.EqualTo(2f));
+            Assert.That(ProgressiveMapSession.Accessibility.Settings.ReducedMotion, Is.True);
+            Assert.That(ProgressiveMapSession.Accessibility.Settings.ReducedFlash, Is.True);
+            Assert.That(ProgressiveMapSession.Accessibility.Settings.ReducedVfx, Is.True);
         }
 
         [TestCase(2400, 1080, true, 180f, 80f, 2040f, 920f, UiFormFactor.PhoneLandscape)]
@@ -329,6 +341,155 @@ namespace AL.Tests.EditMode.UI
             Assert.That(cueRoot.Find("ToothA"), Is.Null);
         }
 
+        [Test]
+        public void FocusScopeFiltersUnavailableResponsiveVariantsAndContainsNavigation()
+        {
+            var eventSystemRoot = new GameObject(
+                "AccessibilityFocusEventSystem",
+                typeof(EventSystem),
+                typeof(StandaloneInputModule));
+            EventSystem eventSystem = eventSystemRoot.GetComponent<EventSystem>();
+            _canvas = new GameObject("AccessibilityFocusCanvas", typeof(RectTransform));
+            try
+            {
+                RectTransform viewport = _canvas.GetComponent<RectTransform>();
+                viewport.anchorMin = Vector2.zero;
+                viewport.anchorMax = Vector2.zero;
+                viewport.pivot = Vector2.zero;
+                viewport.sizeDelta = new Vector2(400f, 300f);
+                Button first = CreateFocusButton(viewport, "First", new Vector2(20f, 20f));
+                Button second = CreateFocusButton(viewport, "Second", new Vector2(20f, 100f));
+                Button hidden = CreateFocusButton(viewport, "Hidden", new Vector2(20f, 180f));
+                Button disabled = CreateFocusButton(viewport, "Disabled", new Vector2(120f, 20f));
+                Button offscreen = CreateFocusButton(viewport, "Offscreen", new Vector2(900f, 20f));
+                hidden.gameObject.SetActive(false);
+                disabled.interactable = false;
+                Canvas.ForceUpdateCanvases();
+
+                var scope = new UiAccessibilityFocusScope(viewport);
+                scope.Activate(new Selectable[] { first, hidden, disabled, offscreen, second });
+
+                Assert.That(scope.FocusableControls, Is.EqualTo(new[] { first, second }));
+                Assert.That(eventSystem.currentSelectedGameObject, Is.SameAs(first.gameObject));
+                Assert.That(first.navigation.mode, Is.EqualTo(Navigation.Mode.Explicit));
+                Assert.That(first.navigation.selectOnUp, Is.SameAs(second));
+                Assert.That(first.navigation.selectOnDown, Is.SameAs(second));
+                Assert.That(second.navigation.selectOnUp, Is.SameAs(first));
+                Assert.That(second.navigation.selectOnDown, Is.SameAs(first));
+                Assert.That(first.GetComponent<UiFocusVisibility>(), Is.Not.Null);
+                Assert.That(second.GetComponent<UiFocusVisibility>(), Is.Not.Null);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(eventSystemRoot);
+            }
+        }
+
+        [Test]
+        public void FocusScopeRestoresPriorFocusAndKeyboardSubmitActivatesCurrentControl()
+        {
+            var eventSystemRoot = new GameObject(
+                "AccessibilityRestoreEventSystem",
+                typeof(EventSystem),
+                typeof(StandaloneInputModule));
+            EventSystem eventSystem = eventSystemRoot.GetComponent<EventSystem>();
+            _canvas = new GameObject("AccessibilityRestoreCanvas", typeof(RectTransform));
+            try
+            {
+                RectTransform viewport = _canvas.GetComponent<RectTransform>();
+                viewport.anchorMin = Vector2.zero;
+                viewport.anchorMax = Vector2.zero;
+                viewport.pivot = Vector2.zero;
+                viewport.sizeDelta = new Vector2(400f, 300f);
+                Button prior = CreateFocusButton(viewport, "Prior", new Vector2(20f, 20f));
+                Button modal = CreateFocusButton(viewport, "Modal", new Vector2(20f, 100f));
+                int activations = 0;
+                modal.onClick.AddListener(() => activations++);
+                Canvas.ForceUpdateCanvases();
+                eventSystem.SetSelectedGameObject(prior.gameObject);
+
+                var scope = new UiAccessibilityFocusScope(viewport);
+                scope.Activate(new Selectable[] { modal });
+                Assert.That(eventSystem.currentSelectedGameObject, Is.SameAs(modal.gameObject));
+                Assert.That(scope.SubmitCurrent(), Is.True);
+                Assert.That(activations, Is.EqualTo(1));
+
+                scope.Deactivate(restoreFocus: true);
+
+                Assert.That(eventSystem.currentSelectedGameObject, Is.SameAs(prior.gameObject));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(eventSystemRoot);
+            }
+        }
+
+        [Test]
+        public void FocusScopeRestoresAValidSiblingWhenPriorControlBecomesUnavailable()
+        {
+            var eventSystemRoot = new GameObject(
+                "AccessibilityFallbackEventSystem",
+                typeof(EventSystem),
+                typeof(StandaloneInputModule));
+            EventSystem eventSystem = eventSystemRoot.GetComponent<EventSystem>();
+            _canvas = new GameObject(
+                "AccessibilityFallbackCanvas",
+                typeof(RectTransform),
+                typeof(Canvas));
+            try
+            {
+                RectTransform viewport = _canvas.GetComponent<RectTransform>();
+                viewport.anchorMin = Vector2.zero;
+                viewport.anchorMax = Vector2.zero;
+                viewport.pivot = Vector2.zero;
+                viewport.sizeDelta = new Vector2(400f, 300f);
+                Button prior = CreateFocusButton(viewport, "Prior", new Vector2(20f, 20f));
+                Button fallback = CreateFocusButton(viewport, "Fallback", new Vector2(120f, 20f));
+                Button modal = CreateFocusButton(viewport, "Modal", new Vector2(20f, 100f));
+                Canvas.ForceUpdateCanvases();
+                eventSystem.SetSelectedGameObject(prior.gameObject);
+
+                var scope = new UiAccessibilityFocusScope(viewport);
+                scope.Activate(new Selectable[] { modal });
+                prior.interactable = false;
+
+                scope.Deactivate(restoreFocus: true);
+
+                Assert.That(eventSystem.currentSelectedGameObject, Is.SameAs(fallback.gameObject));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(eventSystemRoot);
+            }
+        }
+
+        [Test]
+        public void AccessibilityTextScalingIsStableAndClampedAcrossRepeatedRefreshes()
+        {
+            _canvas = new GameObject("AccessibilityTextCanvas", typeof(RectTransform));
+            Text text = new GameObject("ScaledText", typeof(RectTransform), typeof(Text))
+                .GetComponent<Text>();
+            text.transform.SetParent(_canvas.transform, false);
+            text.fontSize = 16;
+            RectTransform textRect = text.rectTransform;
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.zero;
+            textRect.sizeDelta = new Vector2(100f, 20f);
+
+            UiAccessibilityRuntime.ApplyTextScale(_canvas.transform, 2f);
+            UiAccessibilityRuntime.ApplyTextScale(_canvas.transform, 2f);
+
+            Assert.That(text.fontSize, Is.EqualTo(32));
+            Assert.That(text.GetComponent<UiScalableText>().BaseFontSize, Is.EqualTo(16));
+            Assert.That(textRect.sizeDelta.x, Is.GreaterThanOrEqualTo(200f));
+            Assert.That(textRect.sizeDelta.y, Is.GreaterThanOrEqualTo(40f));
+            Assert.That(text.verticalOverflow, Is.EqualTo(VerticalWrapMode.Overflow));
+
+            UiAccessibilityRuntime.ApplyTextScale(_canvas.transform, 0.1f);
+            Assert.That(text.fontSize, Is.EqualTo(14),
+                "Readable map text must not shrink below the approved runtime floor.");
+        }
+
         private object Build(
             int width,
             int height,
@@ -361,6 +522,24 @@ namespace AL.Tests.EditMode.UI
                 new Rect(0f, 0f, width, height),
                 safeArea
             });
+        }
+
+        private static Button CreateFocusButton(
+            RectTransform parent,
+            string name,
+            Vector2 position)
+        {
+            var root = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+            root.transform.SetParent(parent, false);
+            RectTransform rect = root.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.zero;
+            rect.pivot = Vector2.zero;
+            rect.anchoredPosition = position;
+            rect.sizeDelta = new Vector2(80f, 56f);
+            Button button = root.GetComponent<Button>();
+            button.targetGraphic = root.GetComponent<Image>();
+            return button;
         }
 
         private static Type RequireRuntimeType(string name)
