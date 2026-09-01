@@ -210,6 +210,7 @@ namespace AL.UI.WorldMap
             _content.anchorMax = Vector2.one;
             _content.offsetMin = new Vector2(12f, 12f);
             _content.offsetMax = new Vector2(-12f, -12f);
+            ApplyAccessibility();
         }
 
         private void ApplyResponsiveLayout(bool force = false)
@@ -381,6 +382,7 @@ namespace AL.UI.WorldMap
                 new Color(0.48f, 0.84f, 1f, 1f));
             _playerLabel = playerLabel.rectTransform;
             UpdatePlayerMarker();
+            ApplyAccessibility();
         }
 
         private void RefreshProgressiveMap()
@@ -418,10 +420,10 @@ namespace AL.UI.WorldMap
                     "[" + shape.ToUpperInvariant() + "] " + item.Label,
                     uv,
                     new Vector2(0f, 17f),
-                    visual.Color,
-                    visual.TextScale);
+                    visual.Color);
                 _visibleMarkerIds.Add(item.Id);
             }
+            ApplyAccessibility();
         }
 
         private static WorldMapUv ResolveProgressiveUv(MapDisplayItem item)
@@ -485,15 +487,35 @@ namespace AL.UI.WorldMap
                 return;
             }
 
+            UiAccessibilitySettings settings = ProgressiveMapSession.Accessibility.Settings;
+            Image image = _questMarker.GetComponent<Image>();
+            if (settings.ReducedMotion || settings.ReducedFlash || settings.ReducedVfx)
+            {
+                _questMarker.localScale = Vector3.one;
+                if (image != null)
+                {
+                    Color staticColor = image.color;
+                    staticColor.a = 1f;
+                    image.color = staticColor;
+                }
+                return;
+            }
+
             float pulse = (Mathf.Sin(Time.unscaledTime * 3.6f) + 1f) * 0.5f;
             _questMarker.localScale = Vector3.one * Mathf.Lerp(0.92f, 1.24f, pulse);
-            Image image = _questMarker.GetComponent<Image>();
             if (image != null)
             {
                 Color color = image.color;
                 color.a = Mathf.Lerp(0.68f, 1f, pulse);
                 image.color = color;
             }
+        }
+
+        private void ApplyAccessibility()
+        {
+            UiAccessibilityRuntime.ApplySettings(
+                gameObject,
+                ProgressiveMapSession.Accessibility.Settings);
         }
 
         private static Image CreateMarker(

@@ -23,6 +23,7 @@ namespace AL.UI.WorldMap
         private Transform _questMarkerRoot;
         private Transform _progressiveRoot;
         private RectTransform _plateRect;
+        private Button _closeButton;
         private HudResponsiveCompositionSet _compositions;
         private Vector2Int _lastScreenSize;
         private Rect _lastSafeArea;
@@ -30,6 +31,8 @@ namespace AL.UI.WorldMap
         private IDisposable _gameplaySuppressionOwnership;
         private bool _presentationAuthority;
         private bool _sessionHooked;
+        private bool _focusScopeActive;
+        private readonly UiAccessibilityFocusScope _focusScope = new UiAccessibilityFocusScope();
 
         public WorldMapPresentation Presentation => _presentation;
 
@@ -218,6 +221,12 @@ namespace AL.UI.WorldMap
 
             RefreshQuestMarker();
             RefreshProgressiveMap();
+            if (_mapRoot != null)
+            {
+                UiAccessibilityRuntime.ApplySettings(
+                    _mapRoot,
+                    ProgressiveMapSession.Accessibility.Settings);
+            }
 
             if (mapOpen && _mapRoot.activeInHierarchy)
             {
@@ -225,10 +234,20 @@ namespace AL.UI.WorldMap
                     ChampionHudCameraGate.AcquireCursorOwnership("world-map");
                 _gameplaySuppressionOwnership ??=
                     GameInputBridge.AcquireSuppression("world-map");
+                ActivateFocusScope();
             }
             else
             {
+                RestorePreviousFocus();
                 ReleaseViewOwnership();
+            }
+        }
+
+        private void ProcessCancelInput(bool cancelPressed)
+        {
+            if (cancelPressed && _presentationAuthority && WorldMapSession.IsMapOpen)
+            {
+                WorldMapSession.CloseMap();
             }
         }
 
@@ -250,7 +269,12 @@ namespace AL.UI.WorldMap
 
         private void LateUpdate()
         {
+            ProcessCancelInput(AL.Input.GameInput.CancelPressed());
             ApplyResponsiveLayout();
+            if (_focusScopeActive)
+            {
+                _focusScope.Refresh();
+            }
         }
 
         private void OnDestroy()
@@ -262,6 +286,7 @@ namespace AL.UI.WorldMap
 
         private void HideAndRelease()
         {
+            RestorePreviousFocus();
             if (_mapRoot != null)
             {
                 _mapRoot.SetActive(false);
@@ -280,15 +305,20 @@ namespace AL.UI.WorldMap
 
         private void Build()
         {
+            RestorePreviousFocus();
             ClearVisualTree();
             _mapRoot = null;
             _questMarkerRoot = null;
             _progressiveRoot = null;
             _plateRect = null;
+            _closeButton = null;
             EnsureEventSystem();
             Canvas canvas = CreateCanvas(transform);
             Font font = RealmSelectionIdentity.ResolvePresentationFont(22);
             _mapRoot = BuildMap(canvas.transform, font);
+            UiAccessibilityRuntime.ApplySettings(
+                _mapRoot,
+                ProgressiveMapSession.Accessibility.Settings);
             _mapRoot.SetActive(_presentationAuthority && WorldMapSession.IsMapOpen);
         }
 
@@ -329,7 +359,7 @@ namespace AL.UI.WorldMap
             CreateText(plate.transform, "WorldMap_Temporary", font, WorldMapIds.TemporaryLabel, 14, new Vector2(0.62f, 0.91f), new Vector2(0.78f, 0.97f), TextAnchor.MiddleLeft, new Color(0.72f, 0.62f, 0.38f, 0.9f));
             CreateText(plate.transform, "WorldMap_Hint", font, WorldMapIds.CloseHintCopy, 16, new Vector2(0.04f, 0.02f), new Vector2(0.55f, 0.08f), TextAnchor.MiddleLeft, new Color(0.7f, 0.68f, 0.6f, 0.88f));
 
-            Button close = CreateButton(plate.transform, "WorldMap_Close", font, "✕", new Vector2(0.92f, 0.9f), new Vector2(0.98f, 0.98f), WorldMapSession.CloseMap);
+            _closeButton = CreateButton(plate.transform, "WorldMap_Close", font, "✕", new Vector2(0.92f, 0.9f), new Vector2(0.98f, 0.98f), WorldMapSession.CloseMap);
 
             Image viewport = CreatePanel(
                 plate.transform,
@@ -368,7 +398,7 @@ namespace AL.UI.WorldMap
             _progressiveRoot = progressiveRoot.transform;
             RefreshProgressiveMap();
 
-            close.transform.SetAsLastSibling();
+            _closeButton.transform.SetAsLastSibling();
             return veil.gameObject;
         }
 
@@ -557,7 +587,7 @@ namespace AL.UI.WorldMap
                     item.Id + "_label",
                     font,
                     "[" + shape.ToUpperInvariant() + "] " + item.Label,
-                    Mathf.RoundToInt(11f * visual.TextScale),
+                    11,
                     labelRect.min,
                     labelRect.max,
                     TextAnchor.MiddleCenter,
@@ -865,7 +895,41 @@ namespace AL.UI.WorldMap
             rect.anchorMax = anchorMax;
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+            go.AddComponent<UiScalableText>();
             return text;
+        }
+
+        private void ActivateFocusScope()
+        {
+            if (_focusScopeActive || _closeButton == null || _plateRect == null)
+            {
+                return;
+            }
+
+            EventSystem activeEventSystem = EventSystem.current ?? FindFirstObjectByType<EventSystem>();
+            if (activeEventSystem == null)
+            {
+                return;
+            }
+
+            UiAccessibilityRuntime.EnsureMinimumTouchTarget(_closeButton.transform as RectTransform);
+            _focusScope.Activate(
+                activeEventSystem,
+                _plateRect,
+                new Selectable[] { _closeButton },
+                _closeButton);
+            _focusScopeActive = true;
+        }
+
+        private void RestorePreviousFocus()
+        {
+            if (!_focusScopeActive)
+            {
+                return;
+            }
+
+            _focusScope.RestorePreviousFocus();
+            _focusScopeActive = false;
         }
 
         private static Button CreateButton(

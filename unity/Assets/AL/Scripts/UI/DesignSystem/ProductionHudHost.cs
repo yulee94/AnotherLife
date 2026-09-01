@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AL.UI.WorldMap;
 using UnityEngine;
 
 namespace AL.UI.DesignSystem
@@ -54,6 +55,11 @@ namespace AL.UI.DesignSystem
         {
             _activeTouchPrimary = touchPrimary;
             _activeAccessibility = accessibility;
+            UiAccessibilityPreferences.Configure(accessibility);
+            ProgressiveMapSession.ConfigureAccessibility(
+                new MapAccessibilityProfile(
+                    accessibility,
+                    ProgressiveMapSession.Accessibility.HighContrast));
             _hasActiveConfiguration = true;
             RefreshGeometry(viewport, physicalSafeArea);
         }
@@ -159,6 +165,11 @@ namespace AL.UI.DesignSystem
                 _reducedMotion,
                 _reducedFlash,
                 _reducedVfx);
+            UiAccessibilityPreferences.Configure(_activeAccessibility);
+            ProgressiveMapSession.ConfigureAccessibility(
+                new MapAccessibilityProfile(
+                    _activeAccessibility,
+                    ProgressiveMapSession.Accessibility.HighContrast));
             _hasActiveConfiguration = true;
         }
 
