@@ -126,11 +126,7 @@ namespace AL.Benchmarks.GoldenScenes
 
             Camera benchmarkCamera = Camera.main;
             if (benchmarkCamera == null) benchmarkCamera = FindAnyObjectByType<Camera>();
-            if (benchmarkCamera == null)
-            {
-                Fail("AL-GS-BENCHMARK-CAMERA-MISSING", context.Setup.UnitySceneName);
-                yield break;
-            }
+            if (benchmarkCamera == null) benchmarkCamera = CreateFallbackBenchmarkCamera(gameObject);
 
             if (!GoldenSceneBenchmarkRuntimeActions.TryInvoke(
                     () =>
@@ -294,6 +290,14 @@ namespace AL.Benchmarks.GoldenScenes
             return GoldenSceneBenchmarkInputLoader.CombinePath(
                 Application.streamingAssetsPath,
                 "GameData");
+        }
+
+        internal static Camera CreateFallbackBenchmarkCamera(GameObject host)
+        {
+            if (host == null) throw new ArgumentNullException(nameof(host));
+            var cameraObject = new GameObject("AL Golden Scene Benchmark Camera");
+            cameraObject.transform.SetParent(host.transform, false);
+            return cameraObject.AddComponent<Camera>();
         }
 
         private void Fail(string diagnosticCode, string detail)

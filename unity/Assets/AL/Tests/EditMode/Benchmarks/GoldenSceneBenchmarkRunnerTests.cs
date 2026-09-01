@@ -403,6 +403,24 @@ namespace AL.Tests.EditMode.Benchmarks
         }
 
         [Test]
+        public void MissingSceneCameraUsesAHostOwnedBenchmarkCamera()
+        {
+            var host = new GameObject("GoldenSceneBenchmarkRunner-CameraHost");
+            try
+            {
+                Camera camera = GoldenSceneBenchmarkRunner.CreateFallbackBenchmarkCamera(host);
+                Assert.That(camera, Is.Not.Null);
+                Assert.That(camera.name, Is.EqualTo("AL Golden Scene Benchmark Camera"));
+                Assert.That(camera.transform.parent, Is.EqualTo(host.transform));
+                Assert.That(camera.enabled, Is.True);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(host);
+            }
+        }
+
+        [Test]
         public void AtomicPublisherExposesOnlyCompleteValidatedPackage()
         {
             string root = Path.Combine(
