@@ -440,7 +440,9 @@ namespace AL.UI
             _publishedTerminalGeneration = terminal.Generation;
             _activeGeneration = 0;
             _lastPlaybackProgressAt = 0f;
-            ReleasePlayerResources();
+            // Teardown is best-effort optional-media cleanup. It must finish before publication
+            // when possible, but a platform cleanup exception cannot suppress the terminal signal.
+            TryRunCleanupOperation(ReleasePlayerResources);
             Terminated?.Invoke(terminal);
         }
 
@@ -448,17 +450,19 @@ namespace AL.UI
         {
             if (_videoPlayer != null)
             {
-                _videoPlayer.Stop();
-                _videoPlayer.targetTexture = null;
-                _videoPlayer.url = string.Empty;
+                VideoPlayer player = _videoPlayer;
+                TryRunCleanupOperation(player.Stop);
+                TryRunCleanupOperation(() => player.targetTexture = null);
+                TryRunCleanupOperation(() => player.url = string.Empty);
             }
 
             if (_audioSource != null)
             {
-                _audioSource.Stop();
+                AudioSource audioSource = _audioSource;
+                TryRunCleanupOperation(audioSource.Stop);
             }
 
-            ReleaseOwnedRenderTexture();
+            TryRunCleanupOperation(ReleaseOwnedRenderTexture);
         }
 
         private void ReleaseOwnedRenderTexture()
@@ -468,23 +472,55 @@ namespace AL.UI
                 return;
             }
 
-            if (_surface != null && _surface.texture == _ownedRenderTexture)
-            {
-                _surface.texture = null;
-                _surface.enabled = false;
-            }
-
-            _ownedRenderTexture.Release();
-            if (Application.isPlaying)
-            {
-                Destroy(_ownedRenderTexture);
-            }
-            else
-            {
-                DestroyImmediate(_ownedRenderTexture);
-            }
-
+            RenderTexture renderTexture = _ownedRenderTexture;
             _ownedRenderTexture = null;
+
+            bool surfaceOwnsRenderTexture = false;
+            if (_surface != null)
+            {
+                RawImage surface = _surface;
+                TryRunCleanupOperation(
+                    () => surfaceOwnsRenderTexture = surface.texture == renderTexture);
+                if (surfaceOwnsRenderTexture)
+                {
+                    TryRunCleanupOperation(() => surface.texture = null);
+                    TryRunCleanupOperation(() => surface.enabled = false);
+                }
+            }
+
+            TryRunCleanupOperation(renderTexture.Release);
+            TryRunCleanupOperation(
+                () =>
+                {
+                    if (Application.isPlaying)
+                    {
+                        Destroy(renderTexture);
+                    }
+                    else
+                    {
+                        DestroyImmediate(renderTexture);
+                    }
+                });
+        }
+
+        private bool TryRunCleanupOperation(Action operation)
+        {
+            if (operation == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                operation();
+                return true;
+            }
+            catch (Exception)
+            {
+                Debug.LogWarning(
+                    "Launch cinematic resource cleanup failed; continuing fallback teardown.");
+                return false;
+            }
         }
     }
 }
