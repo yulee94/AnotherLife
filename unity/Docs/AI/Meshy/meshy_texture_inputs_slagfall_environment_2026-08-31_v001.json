@@ -1,0 +1,247 @@
+{
+  "schema": "anotherlife.meshy-texture-input-manifest.v1",
+  "familyCount": 8,
+  "textureInputCount": 32,
+  "families": [
+    {
+      "familyId": "irregular_fracture_raft",
+      "sourceFbx": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/01_irregular_fracture_raft_meshy_t2_v001.fbx",
+      "textureInputs": [
+        {
+          "channel": "baseColor",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/01_irregular_fracture_raft_meshy_t2_v001_textures/base_color.png",
+          "sha256": "cb090112e9d1894c365ec0f304d134f5a16d678a7c8cab4352a73f64b6bf8fe8",
+          "byteLength": 8455225
+        },
+        {
+          "channel": "normal",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/01_irregular_fracture_raft_meshy_t2_v001_textures/normal.png",
+          "sha256": "d6f6f08cd400a9beb1a1923253ea2120e267c70ad7a929e3190a03d305953c21",
+          "byteLength": 6346008
+        },
+        {
+          "channel": "metallic",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/01_irregular_fracture_raft_meshy_t2_v001_textures/metallic.png",
+          "sha256": "fb8c5ed8062a9a4e115f8c16b4f2ee266773138a05ec3d91291875a63289a63f",
+          "byteLength": 22978
+        },
+        {
+          "channel": "roughness",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/01_irregular_fracture_raft_meshy_t2_v001_textures/roughness.png",
+          "sha256": "d7c4e799495a05a877b3a7e327fd55e3d6605362bdaa04ac831f4fcf7f7e4389",
+          "byteLength": 1224655
+        }
+      ]
+    },
+    {
+      "familyId": "broken_fracture_raft",
+      "sourceFbx": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/02_broken_fracture_raft_meshy7_v002.fbx",
+      "textureInputs": [
+        {
+          "channel": "baseColor",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/02_broken_fracture_raft_meshy7_v002_textures/base_color.png",
+          "sha256": "6aea18f11149c9525cf83fd9bc7bbec593379aa915997a97d3bafdf95bb9557a",
+          "byteLength": 6507654
+        },
+        {
+          "channel": "normal",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/02_broken_fracture_raft_meshy7_v002_textures/normal.png",
+          "sha256": "a8773a592d961771bc8c4cbe7c2a202abc4b703d13bb6e93ac8a6b32803a2b1b",
+          "byteLength": 6843126
+        },
+        {
+          "channel": "metallic",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/02_broken_fracture_raft_meshy7_v002_textures/metallic.png",
+          "sha256": "d3274df5ed63be6c70116ef76b1d321bace0887a45022f93e865cc0f1293347d",
+          "byteLength": 44429
+        },
+        {
+          "channel": "roughness",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/02_broken_fracture_raft_meshy7_v002_textures/roughness.png",
+          "sha256": "b9adbe08a12dcc42b71a9fb5cbf988c98c44679812f2c328cbd61bc2df32d039",
+          "byteLength": 1453824
+        }
+      ]
+    },
+    {
+      "familyId": "undercut_extraction_ledge",
+      "sourceFbx": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/03_undercut_extraction_ledge_meshy7_v002.fbx",
+      "textureInputs": [
+        {
+          "channel": "baseColor",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/03_undercut_extraction_ledge_meshy7_v002_textures/base_color.png",
+          "sha256": "74c3f9b3cbad7ea87de4d397af8fe2682792c84764b3b38a97ff5142a4702938",
+          "byteLength": 5373412
+        },
+        {
+          "channel": "normal",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/03_undercut_extraction_ledge_meshy7_v002_textures/normal.png",
+          "sha256": "dffd2f5a9a43ec6b04596c1a0c5f2a7a01d6e48e9c4c533e65bdd654d954ec88",
+          "byteLength": 6690535
+        },
+        {
+          "channel": "metallic",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/03_undercut_extraction_ledge_meshy7_v002_textures/metallic.png",
+          "sha256": "01cd4a7e99a9b573029193df2b35ec342d924116fb7e11485d8d40fd0027eeb8",
+          "byteLength": 21702
+        },
+        {
+          "channel": "roughness",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/03_undercut_extraction_ledge_meshy7_v002_textures/roughness.png",
+          "sha256": "24231fce9b3c28c7a63b93ee02d4a51527faf64616f06e6f896fc6eb96d00a0d",
+          "byteLength": 1484953
+        }
+      ]
+    },
+    {
+      "familyId": "talus_apron",
+      "sourceFbx": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/04_talus_apron_meshy7_v002.fbx",
+      "textureInputs": [
+        {
+          "channel": "baseColor",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/04_talus_apron_meshy7_v002_textures/base_color.png",
+          "sha256": "de3a821367665eb94f71af851a62e3663dfe39df62c81a9770d0532a4287cc6c",
+          "byteLength": 6772930
+        },
+        {
+          "channel": "normal",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/04_talus_apron_meshy7_v002_textures/normal.png",
+          "sha256": "63f8444a07510b4070d76acbc25cd5d9901287a9a5fed1943849678c9088a7eb",
+          "byteLength": 7823171
+        },
+        {
+          "channel": "metallic",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/04_talus_apron_meshy7_v002_textures/metallic.png",
+          "sha256": "fb5fba3b7baf3e4715b5eba7545154705f5e5c6913377e0266fde02e75ae71e2",
+          "byteLength": 25269
+        },
+        {
+          "channel": "roughness",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/04_talus_apron_meshy7_v002_textures/roughness.png",
+          "sha256": "3b4c43e8046d5b3c06101068da292f73b6b2e141347a20beca577bb4032c8e48",
+          "byteLength": 1623474
+        }
+      ]
+    },
+    {
+      "familyId": "collapsed_gallery_mouth",
+      "sourceFbx": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/05_collapsed_gallery_mouth_meshy_t2_v001.fbx",
+      "textureInputs": [
+        {
+          "channel": "baseColor",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/05_collapsed_gallery_mouth_meshy_t2_v001_textures/base_color.png",
+          "sha256": "290d0950d28fffc2b1fdf95e697e52bf611da97750e0e0a7fdb889167529477c",
+          "byteLength": 8541638
+        },
+        {
+          "channel": "normal",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/05_collapsed_gallery_mouth_meshy_t2_v001_textures/normal.png",
+          "sha256": "c2f13672553c04677e6eaf9e6ad8f7beb80ef8b8e7c8a877f3e6e9031085d2dc",
+          "byteLength": 6614667
+        },
+        {
+          "channel": "metallic",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/05_collapsed_gallery_mouth_meshy_t2_v001_textures/metallic.png",
+          "sha256": "8fa003edbf991b84712f952ecc8efcc15ab9d4a27147d4987a10cd5daeaaae62",
+          "byteLength": 21147
+        },
+        {
+          "channel": "roughness",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/05_collapsed_gallery_mouth_meshy_t2_v001_textures/roughness.png",
+          "sha256": "02097111ac6c2bf1f2874ef8d7b1da43fa7273d3290e55fc2daad437905ee0b2",
+          "byteLength": 1252195
+        }
+      ]
+    },
+    {
+      "familyId": "diagonal_fault_slab",
+      "sourceFbx": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/06_diagonal_fault_slab_meshy7_v002.fbx",
+      "textureInputs": [
+        {
+          "channel": "baseColor",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/06_diagonal_fault_slab_meshy7_v002_textures/base_color.png",
+          "sha256": "1aaa19cf1d1b34db48af25c8f5bd104b7f268c8e249867fc60af3d723876348e",
+          "byteLength": 6183941
+        },
+        {
+          "channel": "normal",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/06_diagonal_fault_slab_meshy7_v002_textures/normal.png",
+          "sha256": "bf84cca7f3beb556dd7ab628271f4c4ac94cd4a5f0c37c01ac6612d40880c6ca",
+          "byteLength": 6617326
+        },
+        {
+          "channel": "metallic",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/06_diagonal_fault_slab_meshy7_v002_textures/metallic.png",
+          "sha256": "292d9a8340a09aab54f727a3a991a2e36f224d68b99ba6374cae601c5a6f8d06",
+          "byteLength": 22505
+        },
+        {
+          "channel": "roughness",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/06_diagonal_fault_slab_meshy7_v002_textures/roughness.png",
+          "sha256": "eeb3b5cb1cb8464e3dc3b16602ddef22d074a3695ba2a9aace04620ba4df517f",
+          "byteLength": 1444088
+        }
+      ]
+    },
+    {
+      "familyId": "braided_runoff_pool",
+      "sourceFbx": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/07_braided_runoff_pool_meshy7_v002.fbx",
+      "textureInputs": [
+        {
+          "channel": "baseColor",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/07_braided_runoff_pool_meshy7_v002_textures/base_color.png",
+          "sha256": "4c29460f62be7252205eca9b5f67841698f1583f67b58b5ef380af1ecbe5b081",
+          "byteLength": 6676187
+        },
+        {
+          "channel": "normal",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/07_braided_runoff_pool_meshy7_v002_textures/normal.png",
+          "sha256": "495743a572d4f2fc34c57938e2e1bc2f6f5aa1ed2579b73874ff00cd50abc3ff",
+          "byteLength": 7185394
+        },
+        {
+          "channel": "metallic",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/07_braided_runoff_pool_meshy7_v002_textures/metallic.png",
+          "sha256": "275b9eff02d7dbe63804c41f25c46e04218abb9fdb60caccd46c0a1c9598ac59",
+          "byteLength": 35751
+        },
+        {
+          "channel": "roughness",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/07_braided_runoff_pool_meshy7_v002_textures/roughness.png",
+          "sha256": "fce21ab8a5dd4460e55ac7325449eb16b34038602bad11ddee2d0c3434bcc13b",
+          "byteLength": 1525240
+        }
+      ]
+    },
+    {
+      "familyId": "iron_soil_wedge",
+      "sourceFbx": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/08_iron_soil_wedge_meshy7_v002.fbx",
+      "textureInputs": [
+        {
+          "channel": "baseColor",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/08_iron_soil_wedge_meshy7_v002_textures/base_color.png",
+          "sha256": "1e7866dd9d2858cb3748b09913c8a1627650089c95dfe5d0a2286e3c2c2ecb6f",
+          "byteLength": 5329874
+        },
+        {
+          "channel": "normal",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/08_iron_soil_wedge_meshy7_v002_textures/normal.png",
+          "sha256": "9aa59320e4a50ab3b45f7e267c559b7ea7f82a0fb9cdc6dabc7d1383da992f74",
+          "byteLength": 6244616
+        },
+        {
+          "channel": "metallic",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/08_iron_soil_wedge_meshy7_v002_textures/metallic.png",
+          "sha256": "185c060c8bedb8c604c813a7566bb81170d6e94fcb0dcf84a705edb0b78e6821",
+          "byteLength": 31830
+        },
+        {
+          "channel": "roughness",
+          "locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/08_iron_soil_wedge_meshy7_v002_textures/roughness.png",
+          "sha256": "4851af85b116ae8b3bd73d91cdc752fd8e569f620e24218ab0588b37c0038c85",
+          "byteLength": 1320310
+        }
+      ]
+    }
+  ]
+}
