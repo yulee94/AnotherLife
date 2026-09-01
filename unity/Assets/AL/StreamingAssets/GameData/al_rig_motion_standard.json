@@ -1,0 +1,512 @@
+{
+  "gameId": "another-life",
+  "standardId": "rmc_standard_rig_motion_v001",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "authority": {
+    "status": "active_technical_standard",
+    "technicalOwner": "rig_motion_pipeline",
+    "creativeOwner": "project_owner",
+    "gameplayTimingOwner": "gameplay_runtime",
+    "resultAuthority": "gameplay_runtime_or_server",
+    "sourceAdmission": "explicit_versioned_catalog_binding_only",
+    "importOrderAuthority": false
+  },
+  "coordinateSystem": {
+    "unit": "meter",
+    "unityUnitsPerMeter": 1,
+    "blenderUnitSystem": "METRIC",
+    "blenderUnitScale": 1,
+    "blenderUp": "+Z",
+    "blenderForward": "-Y",
+    "unityUp": "+Y",
+    "unityForward": "+Z",
+    "fbxForward": "-Z",
+    "fbxUp": "+Y",
+    "requiredObjectLocation": [0, 0, 0],
+    "requiredObjectRotationDegrees": [0, 0, 0],
+    "requiredObjectScale": [1, 1, 1],
+    "groundToleranceMeters": 0.002,
+    "scaleTolerance": 0.0001
+  },
+  "identifierPolicy": {
+    "pattern": "rmc_<kind>_<slug>_v<NNN>",
+    "versionRule": "IDs are immutable. A meaning, hierarchy, bind-pose, payload, or compatibility break creates the next zero-padded revision; display-only text may change in place.",
+    "lookupRule": "exact_id_and_declared_version_only",
+    "orderingRule": "bytewise_utf8_id_sort_for_serialization_only",
+    "skeletonSignatureAlgorithm": "sha256_canonical_parent_path_bind_matrix_deform_flag_v1",
+    "clipSignatureAlgorithm": "sha256_skeleton_signature_sample_rate_frame_count_curve_paths_events_v1",
+    "renameRule": "meaning_or_hierarchy_change_requires_new_version"
+  },
+  "boneConventions": {
+    "rootBone": "root",
+    "motionRootBone": "motion_root",
+    "sideSuffixes": ["_l", "_r"],
+    "humanoidRequiredBones": [
+      "root",
+      "motion_root",
+      "pelvis",
+      "spine_01",
+      "spine_02",
+      "chest",
+      "neck_01",
+      "head",
+      "clavicle_l",
+      "upper_arm_l",
+      "lower_arm_l",
+      "hand_l",
+      "clavicle_r",
+      "upper_arm_r",
+      "lower_arm_r",
+      "hand_r",
+      "upper_leg_l",
+      "lower_leg_l",
+      "foot_l",
+      "toe_l",
+      "upper_leg_r",
+      "lower_leg_r",
+      "foot_r",
+      "toe_r"
+    ],
+    "optionalHumanoidChains": [
+      "upper_chest",
+      "eye_l/eye_r",
+      "jaw",
+      "finger chains named thumb|index|middle|ring|little_<01..03>_<side>",
+      "twist chains named <segment>_twist_<01..NN>_<side>"
+    ],
+    "nonHumanoidRequiredChains": [
+      "root/motion_root/body_root",
+      "one ordered axial chain from body_root to head or primary facing control",
+      "one ordered chain per load-bearing limb ending in a contact bone",
+      "one semantic attack-origin bone or socket for every anatomy-provided attack origin",
+      "tail, wing, tentacle, fin, or extra-limb chains are explicit numbered semantic chains and never mapped by array position"
+    ],
+    "hierarchyRules": [
+      "root is the only parentless exported bone and is non-deforming.",
+      "motion_root is a non-deforming child of root; body_root or pelvis is its child.",
+      "No deform bone may be parented to a socket, control, constraint target, or preview helper.",
+      "Every exported name is lowercase ASCII snake_case; sides use terminal _l or _r and chain indices use _01, _02, and so on.",
+      "Bone identity is its canonical full parent path, never display order or Blender/Unity internal index.",
+      "Negative scale, shear, duplicate names, disconnected undeclared roots, zero-length deform bones, and cyclic parenting are invalid."
+    ],
+    "exportRules": [
+      "Export root, motion_root, deform bones, and explicitly declared sockets only.",
+      "Do not export IK controls, constraints, drivers, preview helpers, cameras, lights, or FBX leaf bones.",
+      "Bake constraint results to deform bones at the declared sample rate before export.",
+      "Keep sockets non-deforming with identity scale and stable canonical parent paths across every LOD.",
+      "Triangulate runtime meshes deterministically and preserve one skeleton signature across mesh and clip files.",
+      "Custom properties and animation events travel in the versioned JSON sidecar; FBX take order is not authority."
+    ]
+  },
+  "skeletonProfiles": [
+    {
+      "id": "rmc_skeleton_humanoid_shared_v001",
+      "subjectKinds": ["champion", "npc"],
+      "classification": "humanoid",
+      "bindPoseId": "rmc_bind_humanoid_a_pose_v001",
+      "bones": [
+        {"name": "root", "parent": null, "deform": false, "semantic": "world-stable skeleton root"},
+        {"name": "motion_root", "parent": "root", "deform": false, "semantic": "authored trajectory and yaw"},
+        {"name": "pelvis", "parent": "motion_root", "deform": true, "semantic": "humanoid hips"},
+        {"name": "spine_01", "parent": "pelvis", "deform": true, "semantic": "lower spine"},
+        {"name": "spine_02", "parent": "spine_01", "deform": true, "semantic": "middle spine"},
+        {"name": "chest", "parent": "spine_02", "deform": true, "semantic": "upper torso"},
+        {"name": "neck_01", "parent": "chest", "deform": true, "semantic": "neck"},
+        {"name": "head", "parent": "neck_01", "deform": true, "semantic": "head"},
+        {"name": "clavicle_l", "parent": "chest", "deform": true, "semantic": "left shoulder girdle"},
+        {"name": "upper_arm_l", "parent": "clavicle_l", "deform": true, "semantic": "left upper arm"},
+        {"name": "lower_arm_l", "parent": "upper_arm_l", "deform": true, "semantic": "left forearm"},
+        {"name": "hand_l", "parent": "lower_arm_l", "deform": true, "semantic": "left hand"},
+        {"name": "clavicle_r", "parent": "chest", "deform": true, "semantic": "right shoulder girdle"},
+        {"name": "upper_arm_r", "parent": "clavicle_r", "deform": true, "semantic": "right upper arm"},
+        {"name": "lower_arm_r", "parent": "upper_arm_r", "deform": true, "semantic": "right forearm"},
+        {"name": "hand_r", "parent": "lower_arm_r", "deform": true, "semantic": "right hand"},
+        {"name": "upper_leg_l", "parent": "pelvis", "deform": true, "semantic": "left thigh"},
+        {"name": "lower_leg_l", "parent": "upper_leg_l", "deform": true, "semantic": "left shin"},
+        {"name": "foot_l", "parent": "lower_leg_l", "deform": true, "semantic": "left foot"},
+        {"name": "toe_l", "parent": "foot_l", "deform": true, "semantic": "left toe contact"},
+        {"name": "upper_leg_r", "parent": "pelvis", "deform": true, "semantic": "right thigh"},
+        {"name": "lower_leg_r", "parent": "upper_leg_r", "deform": true, "semantic": "right shin"},
+        {"name": "foot_r", "parent": "lower_leg_r", "deform": true, "semantic": "right foot"},
+        {"name": "toe_r", "parent": "foot_r", "deform": true, "semantic": "right toe contact"}
+      ],
+      "requiredSocketNames": ["socket_back", "socket_camera_focus", "socket_cape", "socket_chest", "socket_cloth_waist", "socket_hair", "socket_hand_l", "socket_hand_r", "socket_head", "socket_pelvis", "socket_vfx_chest", "socket_vfx_hand_l", "socket_vfx_hand_r", "socket_weapon_main", "socket_weapon_off"],
+      "compatibilityRule": "Unity Humanoid mapping, canonical A-pose, scale, contact, socket, deformation, and skeleton-signature gates must all pass; a similar biped silhouette is insufficient."
+    },
+    {
+      "id": "rmc_skeleton_nonhumanoid_avian_v001",
+      "subjectKinds": ["beast", "monster"],
+      "classification": "non_humanoid",
+      "bindPoseId": "rmc_bind_nonhumanoid_neutral_contact_v001",
+      "bones": [
+        {"name": "root", "parent": null, "deform": false, "semantic": "world-stable skeleton root"},
+        {"name": "motion_root", "parent": "root", "deform": false, "semantic": "authored trajectory and yaw"},
+        {"name": "body_root", "parent": "motion_root", "deform": true, "semantic": "center of mass"},
+        {"name": "spine_01", "parent": "body_root", "deform": true, "semantic": "axial chain"},
+        {"name": "neck_01", "parent": "spine_01", "deform": true, "semantic": "neck chain"},
+        {"name": "head", "parent": "neck_01", "deform": true, "semantic": "head and facing reference"},
+        {"name": "wing_01_l", "parent": "spine_01", "deform": true, "semantic": "left wing root"},
+        {"name": "wing_02_l", "parent": "wing_01_l", "deform": true, "semantic": "left wing span"},
+        {"name": "wing_01_r", "parent": "spine_01", "deform": true, "semantic": "right wing root"},
+        {"name": "wing_02_r", "parent": "wing_01_r", "deform": true, "semantic": "right wing span"},
+        {"name": "leg_01_l", "parent": "body_root", "deform": true, "semantic": "left load-bearing limb"},
+        {"name": "contact_l", "parent": "leg_01_l", "deform": true, "semantic": "left ground contact"},
+        {"name": "leg_01_r", "parent": "body_root", "deform": true, "semantic": "right load-bearing limb"},
+        {"name": "contact_r", "parent": "leg_01_r", "deform": true, "semantic": "right ground contact"}
+      ],
+      "requiredSocketNames": ["socket_attack_origin", "socket_camera_focus", "socket_contact_l", "socket_contact_r", "socket_vfx_chest"],
+      "compatibilityRule": "Retarget only between the same wing, leg, contact, axial-chain, and center-of-mass semantics after proportional and contact tests; never retarget through Unity Humanoid."
+    },
+    {
+      "id": "rmc_skeleton_nonhumanoid_grounded_v001",
+      "subjectKinds": ["beast", "monster"],
+      "classification": "non_humanoid",
+      "bindPoseId": "rmc_bind_nonhumanoid_neutral_contact_v001",
+      "bones": [
+        {"name": "root", "parent": null, "deform": false, "semantic": "world-stable skeleton root"},
+        {"name": "motion_root", "parent": "root", "deform": false, "semantic": "authored trajectory and yaw"},
+        {"name": "body_root", "parent": "motion_root", "deform": true, "semantic": "center of mass"},
+        {"name": "spine_01", "parent": "body_root", "deform": true, "semantic": "lower axial chain"},
+        {"name": "spine_02", "parent": "spine_01", "deform": true, "semantic": "upper axial chain"},
+        {"name": "neck_01", "parent": "spine_02", "deform": true, "semantic": "neck or primary facing chain"},
+        {"name": "head", "parent": "neck_01", "deform": true, "semantic": "head and facing reference"},
+        {"name": "limb_front_01_l", "parent": "spine_02", "deform": true, "semantic": "left front load-bearing limb"},
+        {"name": "limb_front_02_l", "parent": "limb_front_01_l", "deform": true, "semantic": "left front distal limb"},
+        {"name": "contact_front_l", "parent": "limb_front_02_l", "deform": true, "semantic": "left front contact"},
+        {"name": "limb_front_01_r", "parent": "spine_02", "deform": true, "semantic": "right front load-bearing limb"},
+        {"name": "limb_front_02_r", "parent": "limb_front_01_r", "deform": true, "semantic": "right front distal limb"},
+        {"name": "contact_front_r", "parent": "limb_front_02_r", "deform": true, "semantic": "right front contact"},
+        {"name": "limb_rear_01_l", "parent": "body_root", "deform": true, "semantic": "left rear load-bearing limb"},
+        {"name": "limb_rear_02_l", "parent": "limb_rear_01_l", "deform": true, "semantic": "left rear distal limb"},
+        {"name": "contact_rear_l", "parent": "limb_rear_02_l", "deform": true, "semantic": "left rear contact"},
+        {"name": "limb_rear_01_r", "parent": "body_root", "deform": true, "semantic": "right rear load-bearing limb"},
+        {"name": "limb_rear_02_r", "parent": "limb_rear_01_r", "deform": true, "semantic": "right rear distal limb"},
+        {"name": "contact_rear_r", "parent": "limb_rear_02_r", "deform": true, "semantic": "right rear contact"},
+        {"name": "tail_01", "parent": "body_root", "deform": true, "semantic": "optional balance chain root"}
+      ],
+      "requiredSocketNames": ["socket_attack_origin", "socket_camera_focus", "socket_contact_front_l", "socket_contact_front_r", "socket_contact_rear_l", "socket_contact_rear_r", "socket_vfx_chest"],
+      "compatibilityRule": "Retarget only when contact count, limb order, axial chain, center of mass, gait class, bind-pose disposition, and exact semantic-chain map are declared and validated."
+    }
+  ],
+  "bindPoses": [
+    {
+      "id": "rmc_bind_humanoid_a_pose_v001",
+      "subjectKinds": ["champion", "npc"],
+      "pose": "Upright neutral A-pose: feet parallel and grounded, knees and elbows with a visible five-degree preferred bend, arms forty-five degrees below horizontal, palms toward thighs, fingers relaxed, head and eyes forward, pelvis and shoulders level.",
+      "symmetryToleranceMeters": 0.002,
+      "jointOrientationRule": "Local primary axis points childward; paired limbs mirror orientation and roll; Unity Humanoid Configure Avatar must report a valid mapping and enforced T-pose conversion without changing the stored source bind matrices.",
+      "contactRule": "Both sole contact planes are at source Z=0 within two millimeters; root and motion_root remain at world origin.",
+      "exceptions": ["Approved asymmetrical anatomy requires a versioned anatomy exception and cannot share this retarget profile until mirrored validation is replaced by explicit per-side evidence."]
+    },
+    {
+      "id": "rmc_bind_nonhumanoid_neutral_contact_v001",
+      "subjectKinds": ["beast", "monster"],
+      "pose": "Lowest-strain anatomy-neutral rest with center of mass supported by every declared load-bearing contact, axial chain readable, appendages separated enough to weight and inspect, and no invented humanoid posture.",
+      "symmetryToleranceMeters": 0.005,
+      "jointOrientationRule": "Each chain axis points childward with documented bend plane; paired chains mirror roll only when anatomy is actually bilateral.",
+      "contactRule": "All declared supporting contacts lie on source Z=0 within two millimeters; airborne or aquatic anatomies use a cataloged support datum and anatomy exception.",
+      "exceptions": ["Serpentine, avian flight, aquatic, multiped, and recumbent anatomies require their explicit exception and cannot inherit biped contact assumptions."]
+    },
+    {
+      "id": "rmc_bind_slagwhistle_recumbent_v001",
+      "subjectKinds": ["beast"],
+      "pose": "Retain the owner-bounded recumbent Slagwhistle source pose; do not unpose it into a standing silhouette that the approved crop does not show.",
+      "symmetryToleranceMeters": 0.005,
+      "jointOrientationRule": "Preserve the measured source bind matrices while deriving a non-deforming root, motion_root, canonical semantic aliases, and contact map in a new source version.",
+      "contactRule": "The folded support surface remains grounded at source Z=0; planted-motion contacts are authored from the validated moving pose, not inferred from a quadruped template.",
+      "exceptions": ["This bind pose is incompatible with Unity Humanoid and generic standing-quadruped retargeting.", "Standing rest, attack, defeat, or burrow poses require new owner authorization."]
+    }
+  ],
+  "socketDefinitions": [
+    {"id": "rmc_socket_attack_origin_v001", "name": "socket_attack_origin", "parentSemantic": "anatomy-specific attack chain", "requiredFor": ["beast", "monster"], "purpose": "Cataloged origin for anatomy-provided attacks; does not authorize an attack.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_back_v001", "name": "socket_back", "parentSemantic": "chest", "requiredFor": ["champion", "npc"], "purpose": "Rigid back equipment and stowed weapon attachment.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_camera_focus_v001", "name": "socket_camera_focus", "parentSemantic": "head or upper body focus", "requiredFor": ["champion", "npc", "beast", "monster"], "purpose": "Stable presentation focus that never drives gameplay targeting.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_cape_v001", "name": "socket_cape", "parentSemantic": "chest", "requiredFor": ["champion", "npc"], "purpose": "Short skinned mantle or rigid segmented cape root.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_chest_v001", "name": "socket_chest", "parentSemantic": "chest", "requiredFor": ["champion", "npc"], "purpose": "Chest armor and rigid torso attachment.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_cloth_waist_v001", "name": "socket_cloth_waist", "parentSemantic": "pelvis", "requiredFor": ["champion", "npc"], "purpose": "Waist cloth root; solver remains profile-driven and optional on mobile.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_contact_front_l_v001", "name": "socket_contact_front_l", "parentSemantic": "left front contact", "requiredFor": ["beast", "monster"], "purpose": "Left front contact and IK target reference.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_contact_front_r_v001", "name": "socket_contact_front_r", "parentSemantic": "right front contact", "requiredFor": ["beast", "monster"], "purpose": "Right front contact and IK target reference.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_contact_l_v001", "name": "socket_contact_l", "parentSemantic": "left primary contact", "requiredFor": ["beast", "monster"], "purpose": "Left primary contact and IK target reference for bipedal non-humanoid anatomy.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_contact_r_v001", "name": "socket_contact_r", "parentSemantic": "right primary contact", "requiredFor": ["beast", "monster"], "purpose": "Right primary contact and IK target reference for bipedal non-humanoid anatomy.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_contact_rear_l_v001", "name": "socket_contact_rear_l", "parentSemantic": "left rear contact", "requiredFor": ["beast", "monster"], "purpose": "Left rear contact and IK target reference.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_contact_rear_r_v001", "name": "socket_contact_rear_r", "parentSemantic": "right rear contact", "requiredFor": ["beast", "monster"], "purpose": "Right rear contact and IK target reference.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_hair_v001", "name": "socket_hair", "parentSemantic": "head", "requiredFor": ["champion", "npc"], "purpose": "Hair mesh or reduced secondary-motion root.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_hand_l_v001", "name": "socket_hand_l", "parentSemantic": "hand_l", "requiredFor": ["champion", "npc"], "purpose": "Left hand attachment and interaction alignment.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_hand_r_v001", "name": "socket_hand_r", "parentSemantic": "hand_r", "requiredFor": ["champion", "npc"], "purpose": "Right hand attachment and interaction alignment.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_head_v001", "name": "socket_head", "parentSemantic": "head", "requiredFor": ["champion", "npc"], "purpose": "Head equipment attachment.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_pelvis_v001", "name": "socket_pelvis", "parentSemantic": "pelvis", "requiredFor": ["champion", "npc"], "purpose": "Belt, side equipment, and center-of-mass reference.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_vfx_chest_v001", "name": "socket_vfx_chest", "parentSemantic": "chest or body_root", "requiredFor": ["champion", "npc", "beast", "monster"], "purpose": "Presentation-only torso VFX origin.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_vfx_hand_l_v001", "name": "socket_vfx_hand_l", "parentSemantic": "hand_l", "requiredFor": ["champion", "npc"], "purpose": "Presentation-only left hand VFX origin.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_vfx_hand_r_v001", "name": "socket_vfx_hand_r", "parentSemantic": "hand_r", "requiredFor": ["champion", "npc"], "purpose": "Presentation-only right hand VFX origin.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_weapon_main_v001", "name": "socket_weapon_main", "parentSemantic": "hand_r by default; handedness profile may remap explicitly", "requiredFor": ["champion", "npc"], "purpose": "Main-hand weapon attachment; bind offset is equipment data.", "scaleRule": "identity_no_inherited_nonuniform_scale"},
+    {"id": "rmc_socket_weapon_off_v001", "name": "socket_weapon_off", "parentSemantic": "hand_l by default; handedness profile may remap explicitly", "requiredFor": ["champion", "npc"], "purpose": "Off-hand weapon or shield attachment; bind offset is equipment data.", "scaleRule": "identity_no_inherited_nonuniform_scale"}
+  ],
+  "hitboxConvention": {
+    "visualAuthority": false,
+    "shapeAuthority": "gameplay_catalog",
+    "allowedShapes": ["box", "capsule", "sphere", "low_poly_convex_proxy"],
+    "attachmentRule": "Hurtboxes attach by canonical skeleton path or socket_hit_<region>; attack volumes attach by canonical attack-origin socket. Shape, local offset, layer, team filtering, and damage identity live in gameplay data, not mesh or clip files.",
+    "activationRule": "Animation events are request or presentation evidence only. The action sequence and authoritative gameplay phase decide whether a window opens; duplicate, late, missing, or reordered events fail closed without creating a result.",
+    "lodRule": "lod_independent",
+    "negativeScaleAllowed": false
+  },
+  "facialProfiles": [
+    {
+      "id": "rmc_face_champion_hybrid_v001",
+      "subjectKinds": ["champion"],
+      "mode": "hybrid",
+      "requiredControls": ["eye_aim_l", "eye_aim_r", "jaw_open", "blink_l", "blink_r"],
+      "requiredVisemes": ["sil", "aa", "ee", "ih", "oh", "ou", "fv", "l", "mbp", "wq"],
+      "requiredExpressions": ["neutral", "focus", "pain", "anger", "fear", "joy", "sadness", "surprise"],
+      "gazeRequired": true,
+      "mobileFallback": "Keep eye aim, blink, jaw, sil, aa, ee, oh, fv, and mbp; reduce secondary expression correctives before removing readable speech or focus."
+    },
+    {
+      "id": "rmc_face_creature_none_v001",
+      "subjectKinds": ["beast", "monster"],
+      "mode": "none",
+      "requiredControls": [],
+      "requiredVisemes": [],
+      "requiredExpressions": [],
+      "gazeRequired": false,
+      "mobileFallback": "Use authored head, jaw, lid, ear, membrane, or equivalent anatomy bones only when the approved design needs them; do not add a humanoid face rig by default."
+    },
+    {
+      "id": "rmc_face_npc_bones_v001",
+      "subjectKinds": ["npc"],
+      "mode": "bones",
+      "requiredControls": ["eye_aim_l", "eye_aim_r", "jaw_open", "blink_l", "blink_r"],
+      "requiredVisemes": ["sil", "aa", "ee", "oh", "fv", "l", "mbp", "wq"],
+      "requiredExpressions": ["neutral", "focus", "pain", "anger"],
+      "gazeRequired": true,
+      "mobileFallback": "Ambient distance uses gaze plus jaw only; conversation distance restores blink and eight visemes."
+    }
+  ],
+  "retargetProfiles": [
+    {
+      "id": "rmc_retarget_generic_exact_v001",
+      "mode": "generic_exact_signature",
+      "sourceBindPoseId": "rmc_bind_nonhumanoid_neutral_contact_v001",
+      "targetKinds": ["beast", "monster"],
+      "signaturePolicy": "Source and target skeleton signatures must match exactly; only mesh, materials, and non-skeletal sockets may vary.",
+      "translationPolicy": "Preserve root and motion_root curves; all deform translation curves require an explicit anatomy exception.",
+      "scalePolicy": "Uniform model scale only and exactly one meter per Unity unit; no per-chain runtime scale compensation.",
+      "validationPoses": ["bind", "compression", "extension", "left_contact", "right_contact", "turn_left", "turn_right", "attack_or_interaction_extreme"]
+    },
+    {
+      "id": "rmc_retarget_generic_semantic_v001",
+      "mode": "generic_semantic_chain",
+      "sourceBindPoseId": "rmc_bind_nonhumanoid_neutral_contact_v001",
+      "targetKinds": ["beast", "monster"],
+      "signaturePolicy": "A versioned one-to-one semantic chain map is mandatory; contact count, chain order, gait class, and facing reference must match before retargeting.",
+      "translationPolicy": "Retarget rotations and normalized chain extension; preserve target bind translations except root and motion_root trajectory.",
+      "scalePolicy": "Scale stride from declared contact-to-contact and body-length metrics, then pass the two-percent stride and contact tolerances.",
+      "validationPoses": ["bind", "compression", "extension", "all_contacts", "left_turn", "right_turn", "maximum_stride", "special_motion_extreme"]
+    },
+    {
+      "id": "rmc_retarget_humanoid_shared_v001",
+      "mode": "unity_humanoid",
+      "sourceBindPoseId": "rmc_bind_humanoid_a_pose_v001",
+      "targetKinds": ["champion", "npc"],
+      "signaturePolicy": "Canonical required bones and sockets must exist, Unity Avatar must be valid, and stored skeleton signature remains an exact binding key even though muscle retargeting is used.",
+      "translationPolicy": "Root and motion_root carry world trajectory; pelvis vertical motion is retained; other translation curves are rejected unless explicitly required by the avatar mapping.",
+      "scalePolicy": "Normalize by measured standing height in meters; no runtime transform scale repair or per-limb nonuniform scaling.",
+      "validationPoses": ["bind", "crouch", "full_stride", "left_foot_plant", "right_foot_plant", "arms_overhead", "weapon_guard", "torso_twist"]
+    },
+    {
+      "id": "rmc_retarget_slagwhistle_exact_v001",
+      "mode": "generic_exact_signature",
+      "sourceBindPoseId": "rmc_bind_slagwhistle_recumbent_v001",
+      "targetKinds": ["beast"],
+      "signaturePolicy": "The remediated Slagwhistle source and every bound clip must share one exact recumbent skeleton signature; no standing, quadruped, or cross-beast retargeting is permitted.",
+      "translationPolicy": "Preserve the recumbent source bind translations and only root/motion_root trajectory; any other translated deform channel requires a new versioned anatomy exception.",
+      "scalePolicy": "Preserve measured source proportions at one meter per Unity unit; no standing-height or limb-length normalization.",
+      "validationPoses": ["recumbent_bind", "rest_vent", "scurry_stride", "plant_stop", "cut", "spoil_push", "turn_left", "turn_right"]
+    }
+  ],
+  "rootMotionPolicies": [
+    {"id": "rmc_root_cinematic_authored_v001", "category": "cinematic", "runtimeMode": "authored_root_motion", "sourceTrajectoryRequired": true, "allowedChannels": ["horizontal_x", "horizontal_z", "vertical", "yaw"], "runtimeAuthority": "Timeline or cinematic controller owns the isolated shot path; gameplay cinematics still reconcile to a legal gameplay anchor.", "fallback": "Block the production shot; previs may use an explicitly labeled proxy."},
+    {"id": "rmc_root_combat_bounded_v001", "category": "combat", "runtimeMode": "bounded_root_motion", "sourceTrajectoryRequired": true, "allowedChannels": ["horizontal_x", "horizontal_z", "yaw"], "runtimeAuthority": "Gameplay action owns displacement, collision, and cancellation; animation supplies a normalized trajectory sampled and clamped by the motor.", "fallback": "Use an in-place clip and gameplay-owned displacement; never silently apply raw Animator root motion."},
+    {"id": "rmc_root_interaction_locked_v001", "category": "interaction", "runtimeMode": "in_place", "sourceTrajectoryRequired": false, "allowedChannels": [], "runtimeAuthority": "Gameplay interaction alignment owns the actor anchor; optional motion warping is bounded to the declared target transform.", "fallback": "Blend to idle at the legal interaction anchor."},
+    {"id": "rmc_root_locomotion_in_place_v001", "category": "locomotion", "runtimeMode": "in_place", "sourceTrajectoryRequired": true, "allowedChannels": [], "runtimeAuthority": "Character motor or server owns movement; a retained source trajectory provides stride evidence and derives the in-place runtime clip.", "fallback": "Use the nearest declared speed-set locomotion or idle while movement remains motor-owned."},
+    {"id": "rmc_root_npc_life_locked_v001", "category": "npc_life", "runtimeMode": "in_place", "sourceTrajectoryRequired": false, "allowedChannels": [], "runtimeAuthority": "NPC schedule and navigation own position; prop alignment uses sockets and interaction anchors.", "fallback": "Return to role-appropriate idle without moving the gameplay root."},
+    {"id": "rmc_root_reaction_locked_v001", "category": "reaction", "runtimeMode": "in_place", "sourceTrajectoryRequired": false, "allowedChannels": [], "runtimeAuthority": "Gameplay knockback, control, ragdoll, or defeat state owns displacement and result.", "fallback": "Use bounded additive hit response or safe incapacitated pose selected by gameplay state."},
+    {"id": "rmc_root_skill_bounded_v001", "category": "skill", "runtimeMode": "bounded_root_motion", "sourceTrajectoryRequired": true, "allowedChannels": ["horizontal_x", "horizontal_z", "yaw"], "runtimeAuthority": "Gameplay skill phase and committed receipt own displacement and result; motion trajectory cannot create a hit, teleport, or status.", "fallback": "Use in-place phase clips and gameplay-owned displacement while preserving commit and protected cues."},
+    {"id": "rmc_root_traversal_authored_v001", "category": "traversal", "runtimeMode": "authored_root_motion", "sourceTrajectoryRequired": true, "allowedChannels": ["horizontal_x", "horizontal_z", "vertical", "yaw"], "runtimeAuthority": "Traversal controller validates start, target, collision sweep, cancel rules, and final legal anchor before consuming the authored path.", "fallback": "Reject traversal entry and return to locomotion; never snap through blocked geometry."}
+  ],
+  "layerProfiles": [
+    {
+      "id": "rmc_layers_beast_mobile_v001",
+      "subjectKind": "beast",
+      "layers": [
+        {"id": "rmc_layer_beast_base_v001", "mode": "override", "maskPaths": ["root/motion_root/body_root"], "priority": 0},
+        {"id": "rmc_layer_beast_reaction_v001", "mode": "additive", "maskPaths": ["root/motion_root/body_root/spine_01"], "priority": 40}
+      ],
+      "maximumSimultaneousLayers": 2,
+      "missingLayerFallback": "base_safe_pose_never_bind_pose"
+    },
+    {
+      "id": "rmc_layers_champion_mobile_v001",
+      "subjectKind": "champion",
+      "layers": [
+        {"id": "rmc_layer_champion_base_v001", "mode": "override", "maskPaths": ["root/motion_root/pelvis"], "priority": 0},
+        {"id": "rmc_layer_champion_upper_action_v001", "mode": "override", "maskPaths": ["root/motion_root/pelvis/spine_01/spine_02/chest"], "priority": 20},
+        {"id": "rmc_layer_champion_aim_look_v001", "mode": "additive", "maskPaths": ["root/motion_root/pelvis/spine_01/spine_02/chest/neck_01"], "priority": 30},
+        {"id": "rmc_layer_champion_reaction_v001", "mode": "additive", "maskPaths": ["root/motion_root/pelvis"], "priority": 40}
+      ],
+      "maximumSimultaneousLayers": 4,
+      "missingLayerFallback": "base_safe_pose_never_bind_pose"
+    },
+    {
+      "id": "rmc_layers_monster_mobile_v001",
+      "subjectKind": "monster",
+      "layers": [
+        {"id": "rmc_layer_monster_base_v001", "mode": "override", "maskPaths": ["root/motion_root/body_root"], "priority": 0},
+        {"id": "rmc_layer_monster_action_v001", "mode": "override", "maskPaths": ["root/motion_root/body_root/spine_01"], "priority": 20},
+        {"id": "rmc_layer_monster_reaction_v001", "mode": "additive", "maskPaths": ["root/motion_root/body_root"], "priority": 40}
+      ],
+      "maximumSimultaneousLayers": 3,
+      "missingLayerFallback": "base_safe_pose_never_bind_pose"
+    },
+    {
+      "id": "rmc_layers_npc_mobile_v001",
+      "subjectKind": "npc",
+      "layers": [
+        {"id": "rmc_layer_npc_base_v001", "mode": "override", "maskPaths": ["root/motion_root/pelvis"], "priority": 0},
+        {"id": "rmc_layer_npc_upper_action_v001", "mode": "override", "maskPaths": ["root/motion_root/pelvis/spine_01/spine_02/chest"], "priority": 20},
+        {"id": "rmc_layer_npc_look_reaction_v001", "mode": "additive", "maskPaths": ["root/motion_root/pelvis/spine_01/spine_02/chest/neck_01"], "priority": 30}
+      ],
+      "maximumSimultaneousLayers": 3,
+      "missingLayerFallback": "base_safe_pose_never_bind_pose"
+    }
+  ],
+  "interruptionPolicy": {
+    "priorityOrder": ["defeat", "hard_control", "interruption", "reaction", "skill", "attack", "interaction", "traversal", "locomotion", "idle"],
+    "preCommitRule": "Before gameplay commit, cancellation may suppress the result, closes request-only hitbox/VFX/audio windows, emits cancellation once, and blends through a declared cancellation or recovery clip.",
+    "postCommitRule": "After gameplay commit, the result remains authoritative. Interruption closes presentation windows, emits interruption once, and blends to the highest-priority legal reaction or bounded recovery without replaying commit events.",
+    "missingClipRule": "reject_optional_action_or_use_declared_safe_fallback_never_t_pose",
+    "maximumBlendOutSeconds": 0.15,
+    "maximumRecoverySeconds": 0.75,
+    "eventDeduplicationKey": "actor_instance_id+action_sequence+event_id+event_ordinal"
+  },
+  "qualityBudgets": [
+    {
+      "id": "rmc_budget_beast_mobile_floor_v001",
+      "subjectKinds": ["beast"],
+      "platformTier": "mobile_floor",
+      "topology": {"maximumLod0Triangles": 25000, "maximumMaterialSlots": 2, "degenerateTriangleAreaSquareMeters": 1e-10, "nonManifoldAllowed": "documented_module_seams_only", "ngonsAllowed": false},
+      "skinning": {"maximumDeformingBones": 42, "maximumAnimatedTransforms": 56, "maximumInfluencesPerVertex": 4, "minimumStoredWeight": 0.001, "weightSumTolerance": 0.0001, "unweightedVerticesAllowed": 0},
+      "deformation": {"requiredPoseCount": 12, "maximumSeamGapMeters": 0.002, "maximumProtectedPenetrationMeters": 0.005, "maximumProtectedPenetrationAreaSquareMeters": 0.0001, "invertedTrianglesAllowed": 0, "finiteVerticesRequired": true},
+      "contacts": {"maximumPlantedHorizontalDriftMeters": 0.02, "maximumPlantedVerticalErrorMeters": 0.01, "maximumLoopPositionErrorMeters": 0.01, "maximumLoopRotationErrorDegrees": 1, "maximumStrideErrorPercent": 2},
+      "animation": {"maximumResidentClipCount": 16, "maximumCompressedMemoryMiB": 4, "maximumRuntimeLayers": 2, "minimumSampleRateHz": 30, "maximumSampleRateHz": 60}
+    },
+    {
+      "id": "rmc_budget_boss_mobile_floor_v001",
+      "subjectKinds": ["monster"],
+      "platformTier": "mobile_floor",
+      "topology": {"maximumLod0Triangles": 45000, "maximumMaterialSlots": 3, "degenerateTriangleAreaSquareMeters": 1e-10, "nonManifoldAllowed": "documented_module_seams_only", "ngonsAllowed": false},
+      "skinning": {"maximumDeformingBones": 96, "maximumAnimatedTransforms": 128, "maximumInfluencesPerVertex": 4, "minimumStoredWeight": 0.001, "weightSumTolerance": 0.0001, "unweightedVerticesAllowed": 0},
+      "deformation": {"requiredPoseCount": 16, "maximumSeamGapMeters": 0.002, "maximumProtectedPenetrationMeters": 0.005, "maximumProtectedPenetrationAreaSquareMeters": 0.0001, "invertedTrianglesAllowed": 0, "finiteVerticesRequired": true},
+      "contacts": {"maximumPlantedHorizontalDriftMeters": 0.02, "maximumPlantedVerticalErrorMeters": 0.01, "maximumLoopPositionErrorMeters": 0.01, "maximumLoopRotationErrorDegrees": 1, "maximumStrideErrorPercent": 2},
+      "animation": {"maximumResidentClipCount": 48, "maximumCompressedMemoryMiB": 16, "maximumRuntimeLayers": 4, "minimumSampleRateHz": 30, "maximumSampleRateHz": 60}
+    },
+    {
+      "id": "rmc_budget_champion_mobile_floor_v001",
+      "subjectKinds": ["champion"],
+      "platformTier": "mobile_floor",
+      "topology": {"maximumLod0Triangles": 60000, "maximumMaterialSlots": 3, "degenerateTriangleAreaSquareMeters": 1e-10, "nonManifoldAllowed": "documented_module_seams_only", "ngonsAllowed": false},
+      "skinning": {"maximumDeformingBones": 89, "maximumAnimatedTransforms": 110, "maximumInfluencesPerVertex": 4, "minimumStoredWeight": 0.001, "weightSumTolerance": 0.0001, "unweightedVerticesAllowed": 0},
+      "deformation": {"requiredPoseCount": 16, "maximumSeamGapMeters": 0.002, "maximumProtectedPenetrationMeters": 0.005, "maximumProtectedPenetrationAreaSquareMeters": 0.0001, "invertedTrianglesAllowed": 0, "finiteVerticesRequired": true},
+      "contacts": {"maximumPlantedHorizontalDriftMeters": 0.02, "maximumPlantedVerticalErrorMeters": 0.01, "maximumLoopPositionErrorMeters": 0.01, "maximumLoopRotationErrorDegrees": 1, "maximumStrideErrorPercent": 2},
+      "animation": {"maximumResidentClipCount": 48, "maximumCompressedMemoryMiB": 12, "maximumRuntimeLayers": 4, "minimumSampleRateHz": 30, "maximumSampleRateHz": 60}
+    },
+    {
+      "id": "rmc_budget_monster_mobile_floor_v001",
+      "subjectKinds": ["monster"],
+      "platformTier": "mobile_floor",
+      "topology": {"maximumLod0Triangles": 45000, "maximumMaterialSlots": 3, "degenerateTriangleAreaSquareMeters": 1e-10, "nonManifoldAllowed": "documented_module_seams_only", "ngonsAllowed": false},
+      "skinning": {"maximumDeformingBones": 72, "maximumAnimatedTransforms": 96, "maximumInfluencesPerVertex": 4, "minimumStoredWeight": 0.001, "weightSumTolerance": 0.0001, "unweightedVerticesAllowed": 0},
+      "deformation": {"requiredPoseCount": 12, "maximumSeamGapMeters": 0.002, "maximumProtectedPenetrationMeters": 0.005, "maximumProtectedPenetrationAreaSquareMeters": 0.0001, "invertedTrianglesAllowed": 0, "finiteVerticesRequired": true},
+      "contacts": {"maximumPlantedHorizontalDriftMeters": 0.02, "maximumPlantedVerticalErrorMeters": 0.01, "maximumLoopPositionErrorMeters": 0.01, "maximumLoopRotationErrorDegrees": 1, "maximumStrideErrorPercent": 2},
+      "animation": {"maximumResidentClipCount": 32, "maximumCompressedMemoryMiB": 8, "maximumRuntimeLayers": 3, "minimumSampleRateHz": 30, "maximumSampleRateHz": 60}
+    },
+    {
+      "id": "rmc_budget_npc_mobile_floor_v001",
+      "subjectKinds": ["npc"],
+      "platformTier": "mobile_floor",
+      "topology": {"maximumLod0Triangles": 45000, "maximumMaterialSlots": 3, "degenerateTriangleAreaSquareMeters": 1e-10, "nonManifoldAllowed": "documented_module_seams_only", "ngonsAllowed": false},
+      "skinning": {"maximumDeformingBones": 72, "maximumAnimatedTransforms": 96, "maximumInfluencesPerVertex": 4, "minimumStoredWeight": 0.001, "weightSumTolerance": 0.0001, "unweightedVerticesAllowed": 0},
+      "deformation": {"requiredPoseCount": 12, "maximumSeamGapMeters": 0.002, "maximumProtectedPenetrationMeters": 0.005, "maximumProtectedPenetrationAreaSquareMeters": 0.0001, "invertedTrianglesAllowed": 0, "finiteVerticesRequired": true},
+      "contacts": {"maximumPlantedHorizontalDriftMeters": 0.02, "maximumPlantedVerticalErrorMeters": 0.01, "maximumLoopPositionErrorMeters": 0.01, "maximumLoopRotationErrorDegrees": 1, "maximumStrideErrorPercent": 2},
+      "animation": {"maximumResidentClipCount": 32, "maximumCompressedMemoryMiB": 8, "maximumRuntimeLayers": 3, "minimumSampleRateHz": 30, "maximumSampleRateHz": 60}
+    }
+  ],
+  "representativeProfiles": [
+    {
+      "id": "rmc_representative_beast_slagwhistle_v001",
+      "subjectKind": "beast",
+      "assetId": "rct_stonehold_beast_slagwhistle_burrower_v001",
+      "sourcePath": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/tdf_fauna_stonehold_slagwhistle_burrower_working_v001.blend",
+      "authorityState": "bounded_engineering",
+      "skeletonProfileId": "rmc_skeleton_nonhumanoid_grounded_v001",
+      "retargetProfileId": "rmc_retarget_slagwhistle_exact_v001",
+      "bindPoseId": "rmc_bind_slagwhistle_recumbent_v001",
+      "bindPoseOverrideReason": "The shared grounded non-humanoid profile supplies canonical chain and contact semantics, while this owner-bounded source must preserve its documented recumbent bind through the dedicated exact-signature retarget profile.",
+      "facialProfileId": "rmc_face_creature_none_v001",
+      "layerProfileId": "rmc_layers_beast_mobile_v001",
+      "budgetProfileId": "rmc_budget_beast_mobile_floor_v001",
+      "requiredMotionSetId": "rmc_set_slagwhistle_source_bounded_v001",
+      "skeletonSignature": null,
+      "currentState": "Measured 9,200 triangles, 38 deform bones, one material, at most four influences, grounded, recumbent bind, Root deforming, no motion_root, and zero actions.",
+      "exceptions": [
+        {"id": "rmc_exception_slagwhistle_authorization_v001", "rule": "Only owner-authorized motion may be produced for an approved fantasy beast identity.", "reason": "The bounded source authorizes at most six presentation clips: rest/vent, scurry, plant-stop, cut, spoil-push, and turn; combat, defeat, and burrow behavior are not authorized.", "requiredResolution": "Use the six-key source-bounded set. Any attack, defeat, burrow, standing-rest, or additional clip requires a new owner decision before authoring."},
+        {"id": "rmc_exception_slagwhistle_recumbent_bind_v001", "rule": "Non-humanoid bind pose follows approved anatomy rather than a standing quadruped template.", "reason": "Unposing the folded source would invent silhouette not shown by the approved crop.", "requiredResolution": "Preserve the recumbent bind while deriving non-deforming root and motion_root, semantic aliases, contacts, and a new exact skeleton signature in v002 or later."}
+      ],
+      "admissionState": "blocked_pending_cleanup"
+    },
+    {
+      "id": "rmc_representative_champion_vanguard_v001",
+      "subjectKind": "champion",
+      "assetId": "champion_vanguard_working_v001",
+      "sourcePath": "unity/ArtSource/Champions/champion_vanguard_working_v001.blend",
+      "authorityState": "bounded_engineering",
+      "skeletonProfileId": "rmc_skeleton_humanoid_shared_v001",
+      "retargetProfileId": "rmc_retarget_humanoid_shared_v001",
+      "bindPoseId": "rmc_bind_humanoid_a_pose_v001",
+      "bindPoseOverrideReason": null,
+      "facialProfileId": "rmc_face_champion_hybrid_v001",
+      "layerProfileId": "rmc_layers_champion_mobile_v001",
+      "budgetProfileId": "rmc_budget_champion_mobile_floor_v001",
+      "requiredMotionSetId": "rmc_set_champion_complete_v001",
+      "skeletonSignature": null,
+      "currentState": "Measured 11,386/4,480/1,084 triangles, 22 bones, 1.781 m and correct facing; 488 lower-LOD vertices exceed four influences and no valid Unity Humanoid Avatar or complete motion library exists.",
+      "exceptions": [
+        {"id": "rmc_exception_champion_weight_cleanup_v001", "rule": "Every LOD must have no more than four normalized influences.", "reason": "The retained v001 lower LODs exceed the ceiling and blind pruning would discard material weight.", "requiredResolution": "Create a new version, deliberately repaint or prune, compare all required deformation poses, import fresh, and obtain owner approval; never overwrite v001."}
+      ],
+      "admissionState": "blocked_pending_cleanup"
+    },
+    {
+      "id": "rmc_representative_npc_covenant_sentinel_v001",
+      "subjectKind": "npc",
+      "assetId": "covenant_sentinel_meshy6_walking_v002",
+      "sourcePath": "unity/Assets/AL/Art/Production/FirstUserOnboarding/Enemies/Covenant_Sentinel_Meshy6_Walking_v002.fbx",
+      "authorityState": "mvp_runtime_candidate",
+      "skeletonProfileId": "rmc_skeleton_humanoid_shared_v001",
+      "retargetProfileId": "rmc_retarget_humanoid_shared_v001",
+      "bindPoseId": "rmc_bind_humanoid_a_pose_v001",
+      "bindPoseOverrideReason": null,
+      "facialProfileId": "rmc_face_npc_bones_v001",
+      "layerProfileId": "rmc_layers_npc_mobile_v001",
+      "budgetProfileId": "rmc_budget_npc_mobile_floor_v001",
+      "requiredMotionSetId": "rmc_set_npc_complete_v001",
+      "skeletonSignature": null,
+      "currentState": "The skin-bound 12,441-triangle source supplies one Generic walking take through an AnimationPlayable; import has no Avatar, no explicit clip definitions, no root node, and no dedicated attack, hit, interaction, or defeat clips.",
+      "exceptions": [
+        {"id": "rmc_exception_sentinel_generic_source_v001", "rule": "Humanoid NPC promotion requires the shared canonical skeleton, valid Avatar, canonical bind pose, roots, sockets, and explicit clips.", "reason": "The retained Meshy FBX is an admitted MVP visual and single-clip source candidate, not a production retarget package.", "requiredResolution": "Retain provenance, clean and rebind in Blender as a new source version, author explicit clip sidecars, import fresh, and compare against the MVP visual before replacement."}
+      ],
+      "admissionState": "blocked_missing_required_motion"
+    }
+  ],
+  "motionManifestId": "rmc_manifest_required_motion_v001"
+}

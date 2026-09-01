@@ -32,6 +32,7 @@ from jsonschema import Draft202012Validator, FormatChecker, SchemaError, Validat
 import world_asset_inventory
 import test_four_realm_production_taxonomy
 import test_realm_character_taxonomy
+import test_rig_motion_standard
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent  # unity/SharedContracts
 SCHEMAS_DIR = ROOT / "Schemas"
@@ -59,6 +60,8 @@ REAL_CATALOGS = {
     "al-first-session-terrain": "al_first_session_terrain_catalog.json",
     "al-world-asset-inventory": "al_world_asset_inventory.json",
     "al-four-realm-production-taxonomy": "al_four_realm_production_taxonomy.json",
+    "al-required-motion-manifest": "al_required_motion_manifest.json",
+    "al-rig-motion-standard": "al_rig_motion_standard.json",
 }
 
 # Known source-data defects that legitimately fail their schema today. These are
@@ -105,6 +108,7 @@ def main():
         "inventory": [],
         "realmTaxonomy": [],
         "fourRealmTaxonomy": [],
+        "rigMotion": [],
     }
 
     # 1. Compile every schema (validity of the schema itself).
@@ -221,6 +225,26 @@ def main():
             + integrated_test_output.getvalue().strip()
         )
 
+    # 7. Rig, motion, anatomy-exception, and required-coverage acceptance audit.
+    suite = unittest.defaultTestLoader.loadTestsFromModule(test_rig_motion_standard)
+    rig_motion_test_output = io.StringIO()
+    rig_motion_result = unittest.TextTestRunner(
+        stream=rig_motion_test_output,
+        verbosity=0,
+    ).run(suite)
+    rig_motion_ok = rig_motion_result.wasSuccessful()
+    rig_motion_summary = (
+        f"{rig_motion_result.testsRun} tests, "
+        f"{len(rig_motion_result.failures)} failures, "
+        f"{len(rig_motion_result.errors)} errors"
+    )
+    reports["rigMotion"].append((rig_motion_ok, rig_motion_summary))
+    if not rig_motion_ok:
+        failures.append(
+            "rig and required-motion fail-closed tests failed: "
+            + rig_motion_test_output.getvalue().strip()
+        )
+
     # ---- Report ----
     print("== Schema compilation ==")
     for key, ok, msg in reports["schemas"]:
@@ -258,6 +282,13 @@ def main():
         print(
             f"  [{'OK' if ok else 'FAIL'}] "
             f"al-four-realm-production-taxonomy  -> {msg}"
+        )
+
+    print("\n== Rig and required-motion cross-validation ==")
+    for ok, msg in reports["rigMotion"]:
+        print(
+            f"  [{'OK' if ok else 'FAIL'}] "
+            f"al-rig-motion-standard  -> {msg}"
         )
 
     print()
