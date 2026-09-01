@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cf8a46fb2488c44ba7270131d7a9ecd, type: 3}
+  m_Name: SlagwhistleExactMotionImportPreset
+  m_EditorClassIdentifier: AL.Runtime::AL.Motion.MotionImportPreset
+  presetId: rmc_import_slagwhistle_exact_v001
+  skeletonProfileId: rmc_skeleton_nonhumanoid_grounded_v001
+  retargetProfileId: rmc_retarget_slagwhistle_exact_v001
+  rigClassification: 1
+  retargetMode: 1
+  sampleRateHz: 30
+  globalScale: 1
+  bakeAxisConversion: 1
+  preserveHierarchy: 1
+  importBlendShapes: 0
+  optimizeGameObjects: 0
+  rotationError: 0.25
+  positionError: 0.5
+  scaleError: 0.5
