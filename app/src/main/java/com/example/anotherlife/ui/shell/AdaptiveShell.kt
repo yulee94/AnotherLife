@@ -85,7 +85,7 @@ fun AnotherLifeShell() {
     val backStack = rememberSaveable(saver = routeBackStackSaver) {
         mutableStateListOf(Route.Kingdom)
     }
-    val routeNotice = remember { mutableStateOf<String?>(null) }
+    val routeNotice = rememberSaveable { mutableStateOf<String?>(null) }
     val transientRouteNotice = remember { mutableStateOf<String?>(null) }
     LaunchedEffect(debugToolsEnabled, backStack.toList()) {
         val sanitized = ShellRoutePolicy.sanitizeBackStack(backStack, debugToolsEnabled)
@@ -93,13 +93,23 @@ fun AnotherLifeShell() {
             backStack.clear()
             backStack.addAll(sanitized.routes)
         }
-        routeNotice.value = sanitized.rejectedTopRoute?.message
+        routeNotice.value = ShellRoutePolicy.reduceRouteNotice(
+            currentMessage = routeNotice.value,
+            event = RouteNoticeEvent.BackStackSanitized(sanitized.rejectedTopRoute)
+        )
     }
     val currentKey = backStack.lastOrNull() ?: Route.Kingdom
     val currentRoute = ShellRoutePolicy.resolveRoute(currentKey, debugToolsEnabled).route
     val selectedNavigationRoute = ShellRoutePolicy.navigationSelection(currentRoute)
     val useSelectedOnlyLabels = LocalDensity.current.fontScale >= 1.3f
+    val acknowledgeRouteNotice: () -> Unit = {
+        routeNotice.value = ShellRoutePolicy.reduceRouteNotice(
+            currentMessage = routeNotice.value,
+            event = RouteNoticeEvent.NavigationAcknowledged
+        )
+    }
     val navigateBack: () -> Unit = {
+        acknowledgeRouteNotice()
         if (backStack.size > 1) {
             backStack.removeAt(backStack.lastIndex)
         } else {
@@ -116,6 +126,7 @@ fun AnotherLifeShell() {
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
+                            acknowledgeRouteNotice()
                             transientRouteNotice.value = null
                             if (route == Route.Kingdom) {
                                 backStack.clear()
@@ -178,6 +189,7 @@ fun AnotherLifeShell() {
                         Route.Warzone -> NavEntry(resolvedRoute) {
                             WarzoneMapScreen(state = kingdomState, onAttack = { territory ->
                                 // Navigate to Battle screen for the selected territory
+                                acknowledgeRouteNotice()
                                 backStack.add(Route.Battle)
                             })
                         }
@@ -185,12 +197,14 @@ fun AnotherLifeShell() {
                             NarrativeDebugScreen(
                                 state = narrativeState,
                                 onOpenQuestPreview = {
+                                    acknowledgeRouteNotice()
                                     transientRouteNotice.value = null
                                     if (backStack.lastOrNull() != Route.Quest) {
                                         backStack.add(Route.Quest)
                                     }
                                 },
                                 onOpenUnityBridgeSmoke = {
+                                    acknowledgeRouteNotice()
                                     transientRouteNotice.value = null
                                     if (backStack.lastOrNull() != Route.UnityBridgeSmoke) {
                                         backStack.add(Route.UnityBridgeSmoke)
