@@ -101,7 +101,8 @@ The manifest is evidence metadata, not an approval or certification decision.
 canonical catalog, resolves one exact scene/anchor/preset/seed, applies the Built-in pipeline
 quality setup, runs bounded warmup and measurement windows, invokes runtime telemetry and
 capture, maps every scorecard template row to `pass`, `fail`, or `unavailable`, then publishes
-one atomic result directory. Example Player invocation:
+one atomic result directory. Unattended Windows Player runs force `Application.runInBackground`
+so an unfocused capture window cannot pause the measurement coroutine. Example Player invocation:
 
 ```text
 AnotherLife.exe --al-gs-run \

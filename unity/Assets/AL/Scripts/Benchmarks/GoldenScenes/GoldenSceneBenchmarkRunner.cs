@@ -29,6 +29,7 @@ namespace AL.Benchmarks.GoldenScenes
         {
             string[] arguments = Environment.GetCommandLineArgs();
             if (!GoldenSceneBenchmarkRequestParser.IsRequested(arguments)) return;
+            Application.runInBackground = true;
             var host = new GameObject("AL Golden Scene Benchmark Runner");
             DontDestroyOnLoad(host);
             host.AddComponent<GoldenSceneBenchmarkRunner>();
