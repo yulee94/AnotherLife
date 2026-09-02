@@ -9,7 +9,7 @@
 - Editable source available: no
 - External user-supplied media: none
 - Final source count: three
-- Retained generation inputs in this packet: none
+- Retained generation inputs in the original v002 packet: none
 
 Frozen PR #369 at exact head
 `d94e3ea38ac37c2481f857cc592811d91d839542` was used as read-only lineage
@@ -131,3 +131,30 @@ Only the three accepted final PNGs are retained in this packet. First-pass
 generated images remain in tool output history but are not copied into the
 repository. The frozen v001 files remain on their original exact branch and
 are not duplicated here.
+
+## 2026-08-31 Meshy Environment-Kit Extension
+
+The later 2D-first production extension isolated the eight approved quarry-kit
+families, corrected wrong-subject reads before 3D generation, and retained the
+selected 2D handoff images under
+`GenerationInputs/MeshyEnvironment/Generated2D/`. Meshy produced eight original
+`meshy-t2` candidates and six selected `meshy-7` replacements. The original
+outputs remain provenance sources; they are not all selected production
+candidates.
+
+Final selected 3D variants:
+
+- original `meshy-t2`: irregular fracture raft and collapsed gallery mouth;
+- corrective `meshy-7`: broken fracture raft, undercut extraction ledge,
+  talus apron, diagonal fault slab, braided runoff pool, and iron-soil wedge.
+
+The owner reviewed the corrected profiling-scale kit in Unity Editor on
+2026-08-31 and approved all eight. This approval freezes the visual production
+candidates but does not authorize final dimensions, routes, navigation,
+gallery-entry gameplay, or unrelated fauna work.
+
+Exact provider task IDs, selected source hashes, raw and processed FBX hashes,
+atlas hashes, credit observations, the Unity review image, and the `9 / 9`
+focused EditMode result are recorded in:
+
+`unity/Docs/AI/Meshy/meshy_execution_slagfall_environment_2026-08-31_v001.json`

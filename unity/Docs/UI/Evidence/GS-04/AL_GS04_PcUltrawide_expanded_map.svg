@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3440 1440" role="img">
+<title>AnotherLife GS-04 PcUltrawide expanded_map</title>
+<rect width="3440" height="1440" fill="#0b0c10"/>
+<rect x="0.0" y="0.0" width="3440.0" height="1440.0" fill="none" stroke="#b8a988" stroke-width="2" stroke-dasharray="12 10" opacity="0.65"/>
+<rect x="275.2" y="115.2" width="2889.6" height="1209.6" rx="8" fill="#202127" stroke="#b8a988" stroke-width="4"/>
+<text x="299.2" y="157.2" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="22.0" font-weight="700">EXPANDED WORLD MAP · GAMEPLAY INPUT SUPPRESSED</text>
+<text x="299.2" y="187.2" text-anchor="start" fill="#b8a988" font-family="sans-serif" font-size="16.0" font-weight="500">Authority epoch 12 · revision 48 · surface rules agree</text>
+<rect x="900.9" y="516.5" width="20" height="20" transform="rotate(45 910.9 526.5)" fill="none" stroke="#b8a988" stroke-width="3"/>
+<text x="928.9" y="532.5" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="15.0" font-weight="500">1. SELF · stonehold · shield</text>
+<rect x="1941.2" y="443.9" width="20" height="20" transform="rotate(45 1951.2 453.9)" fill="none" stroke="#b8a988" stroke-width="3"/>
+<text x="1969.2" y="459.9" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="15.0" font-weight="500">2. OBJECTIVE · crossroads_control · four_point</text>
+<rect x="2461.3" y="891.4" width="20" height="20" transform="rotate(45 2471.3 901.4)" fill="none" stroke="#b8a988" stroke-width="3"/>
+<text x="2489.3" y="907.4" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="15.0" font-weight="500">3. ROUTE · stonehold_to_accordant · double_line</text>
+<rect x="2362.6" y="203.2" width="780.2" height="338.7" fill="#0b0c10" stroke="#b8a988" stroke-width="2"/>
+<text x="2374.6" y="227.2" text-anchor="start" fill="#b8a988" font-family="sans-serif" font-size="13.0" font-weight="700">MINIMAP PROJECTION</text>
+<text x="2374.6" y="251.2" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="11.0" font-weight="500">shared objective / allegiance</text>
+<text x="2374.6" y="271.2" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="11.0" font-weight="500">world-map-only route omitted</text>
+<text x="1720.0" y="1426.0" text-anchor="middle" fill="#f0ebdd" font-family="sans-serif" font-size="13.0" font-weight="700">EXPANDED MAP · MINIMAP AUTHORITY AGREEMENT · MODAL FOCUS</text>
+<text x="1720.0" y="1404.0" text-anchor="middle" fill="#b8a988" font-family="sans-serif" font-size="11.0" font-weight="500">DETERMINISTIC LAYOUT EVIDENCE · NOT DEVICE, PERFORMANCE, FONT, OR OWNER APPROVAL</text>
+</svg>

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "ledgerId": "rmc_provenance_rig_cleanup_sources_v001",
+  "records": [
+    {
+      "id": "rmc_provenance_champion_vanguard_v001",
+      "catalogAssetId": "champion_vanguard_working_v001",
+      "sourcePath": "unity/ArtSource/Champions/champion_vanguard_working_v001.blend",
+      "sourceSha256": "10c07b25d4e7316ac664621adaf11156066b57ab9a35471df9d76ab3900bc4cb",
+      "sourceProvider": "anotherlife_blender_authoring",
+      "generationProvider": null,
+      "rightsState": "project_authored_retained_source",
+      "rightsEvidence": [
+        "unity/ArtSource/al_blender_source_validation.v1.json",
+        "unity/Docs/ArtPipeline/AnotherLife_Blender_Asset_Production_Contract.md"
+      ],
+      "localSourceRequired": true,
+      "sourceMaterialOnly": true,
+      "productionRightsCleared": true,
+      "notes": "The retained modular engineering mannequin remains bounded technical scaffolding; this record does not grant creative-final or runtime admission."
+    },
+    {
+      "id": "rmc_provenance_covenant_sentinel_meshy6_v002",
+      "catalogAssetId": "covenant_sentinel_meshy6_walking_v002",
+      "sourcePath": "unity/Assets/AL/Art/Production/FirstUserOnboarding/Enemies/Covenant_Sentinel_Meshy6_Walking_v002.fbx",
+      "sourceSha256": "8b8678c49d8261495f0f2ec2525c239b088cbe2fd0d652cc4ca83e79147c716e",
+      "sourceProvider": "meshy",
+      "generationProvider": "meshy",
+      "rightsState": "provider_output_rights_record_missing",
+      "rightsEvidence": [
+        "unity/Assets/AL/Art/Production/FirstUserOnboarding/Enemies/Covenant_Sentinel_Meshy6_Walking_v002.fbx.meta",
+        "unity/Docs/ArtPipeline/AnotherLife_Rig_Motion_Catalog_Production_Standard_v1.md"
+      ],
+      "localSourceRequired": true,
+      "sourceMaterialOnly": true,
+      "productionRightsCleared": false,
+      "notes": "The local FBX and Unity import identity are pinned, but no source-specific Meshy task/account/license record was found. Cleanup and review export are allowed as bounded engineering evidence; production promotion remains blocked until that record is supplied."
+    },
+    {
+      "id": "rmc_provenance_slagwhistle_meshy_v001",
+      "catalogAssetId": "rct_stonehold_beast_slagwhistle_burrower_v001",
+      "sourcePath": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/tdf_fauna_stonehold_slagwhistle_burrower_working_v001.blend",
+      "sourceSha256": "493e44350356d9d10d72cde21aa8b2df0298d096dfbc61c4827efd40b7e987d1",
+      "sourceProvider": "meshy_then_blender_cleanup",
+      "generationProvider": "meshy",
+      "rightsState": "authorized_source_candidate_with_recorded_visual_lineage",
+      "rightsEvidence": [
+        "unity/Docs/AI/Meshy/meshy_a1_authorization_2026-08-20_slagwhistle_crop_v001.json",
+        "unity/Docs/AI/Meshy/meshy_a1_authorization_2026-08-19_slagwhistle_retry_v001.json",
+        "unity/ArtSource/al_blender_source_validation.v1.json"
+      ],
+      "localSourceRequired": true,
+      "sourceMaterialOnly": true,
+      "productionRightsCleared": false,
+      "notes": "The bounded source-candidate authorization and visual lineage are recorded. This does not override the six-clip ceiling, owner creative approval, or a later production-rights gate."
+    }
+  ]
+}

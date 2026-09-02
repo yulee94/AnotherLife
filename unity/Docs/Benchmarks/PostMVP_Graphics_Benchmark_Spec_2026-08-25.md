@@ -405,8 +405,8 @@ presented as an AnotherLife asset.
 [5] https://www.playthroneandliberty.com/en-ca/news/articles/throne-and-liberty-update-1-3-0 — THRONE AND LIBERTY Update 1.3.0
 [6] https://play.google.com/store/apps/details?id=com.gtarcade.ioe.global — Infinity Kingdom on Google Play
 [7] https://news.samsung.com/global/the-samsung-galaxy-a54-5g-and-galaxy-a34-5g-awesome-experiences-for-all — Samsung Galaxy A54 5G and A34 5G specifications
-[8] https://qualcomm.com/news/releases/2021/05/qualcomm-announces-new-snapdragon-778g-5g-mobile-platform-showcases-mass — Qualcomm Snapdragon 778G announcement
-[9] https://www.mediatek.com/products/tablets/mediatek-dimensity-1080 — MediaTek Dimensity 1080 specifications
+[8] https://www.qualcomm.com/smartphones/products/7-series/snapdragon-778g-5g-mobile-platform — Qualcomm Snapdragon 778G specifications
+[9] https://i.mediatek.com/dimensity-1080 — MediaTek Dimensity 1080 specifications
 [10] https://developer.android.com/games/optimize/adpf/best-practices-adpf — Android ADPF best practices
 [11] https://developer.android.com/games/sdk/frame-pacing — Android Frame Pacing library
 [12] https://docs.unity3d.com/6000.3/Documentation/Manual/Profiler.html — Unity 6.3 Profiler manual

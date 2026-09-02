@@ -4,7 +4,8 @@
     "references": [
         "AL.Runtime",
         "AL.GameDataCatalog",
-        "AL.Development.FirstUserGameTest.Editor"
+        "AL.Development.FirstUserGameTest.Editor",
+        "Unity.Addressables.Editor"
     ],
     "includePlatforms": [
         "Editor"

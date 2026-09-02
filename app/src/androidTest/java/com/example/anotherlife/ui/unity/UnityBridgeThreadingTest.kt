@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertEquals
@@ -35,6 +37,209 @@ import org.junit.runner.RunWith
 class UnityBridgeThreadingTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun nativeFallbackOwnsPresentationUntilCurrentReadyAcknowledgement() {
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val readySignals = CopyOnWriteArrayList<UnityRouteReady>()
+        val protocolErrors = AtomicInteger()
+        val dependencies = testDependencies(players, registrar)
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var host: UnityRuntimeContainer? = null
+
+        try {
+            composeRule.runOnUiThread {
+                host = UnityRuntimeContainer(context, dependencies)
+                assertTrue(
+                    host!!.setRoute(
+                        routeId = "bridge.ready-fence",
+                        routeLaunchSequence = 1,
+                        routeIntent = UnityRouteIntent.Preview,
+                        requestedCapabilities = emptyList(),
+                        onRouteDispatched = {},
+                        onReady = readySignals::add,
+                        onOutcome = {},
+                        onProtocolError = { protocolErrors.incrementAndGet() }
+                    )
+                )
+                assertTrue(host!!.isStatusVisibleForTesting())
+                assertEquals(
+                    context.getString(com.example.anotherlife.R.string.unity_runtime_starting),
+                    host!!.statusTextForTesting()
+                )
+            }
+
+            val request = requireNotNull(host!!.activeRequestForTesting())
+            val ready = buildJsonObject {
+                put("contractVersion", UNITY_BRIDGE_CONTRACT_VERSION)
+                put("requestId", request.requestId)
+                put("routeId", request.routeId)
+            }.toString()
+            val mismatchedRoute = buildJsonObject {
+                put("contractVersion", UNITY_BRIDGE_CONTRACT_VERSION)
+                put("requestId", request.requestId)
+                put("routeId", "bridge.wrong-route")
+            }.toString()
+
+            Thread { UnityBridgeCallbacks.reportReady(mismatchedRoute) }.apply {
+                start()
+                join()
+            }
+            composeRule.waitUntil(timeoutMillis = 5_000) { protocolErrors.get() == 1 }
+            composeRule.runOnUiThread {
+                assertTrue(host!!.isStatusVisibleForTesting())
+                assertEquals(
+                    "Unity bridge unavailable\nCode: bridge.route_mismatch",
+                    host!!.statusTextForTesting()
+                )
+            }
+
+            Thread { UnityBridgeCallbacks.reportReady(ready) }.apply {
+                start()
+                join()
+            }
+            composeRule.waitUntil(timeoutMillis = 5_000) { readySignals.size == 1 }
+            composeRule.runOnUiThread {
+                assertFalse(host!!.isStatusVisibleForTesting())
+            }
+
+            UnityBridgeCallbacks.reportReady(ready)
+            composeRule.waitForIdle()
+            assertEquals(1, readySignals.size)
+            assertEquals(1, protocolErrors.get())
+        } finally {
+            composeRule.runOnUiThread { host?.destroyUnity() }
+        }
+    }
+
+    @Test
+    fun readinessTimeoutRunsOnlyInForegroundAndFencesLateReady() {
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val readySignals = CopyOnWriteArrayList<UnityRouteReady>()
+        val protocolErrors = CopyOnWriteArrayList<UnityBridgeProtocolError>()
+        val readyTimeoutMillis = 100L
+        val dependencies = testDependencies(
+            players = players,
+            registrar = registrar,
+            readyTimeoutMillis = readyTimeoutMillis
+        )
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var host: UnityRuntimeContainer? = null
+
+        try {
+            composeRule.runOnUiThread {
+                host = UnityRuntimeContainer(context, dependencies)
+                host!!.resumeUnity()
+                assertTrue(
+                    host!!.setRoute(
+                        routeId = "bridge.ready-timeout",
+                        routeLaunchSequence = 1,
+                        routeIntent = UnityRouteIntent.Preview,
+                        requestedCapabilities = emptyList(),
+                        onRouteDispatched = {},
+                        onReady = readySignals::add,
+                        onOutcome = {},
+                        onProtocolError = protocolErrors::add
+                    )
+                )
+                host!!.pauseUnity()
+            }
+
+            Thread.sleep(readyTimeoutMillis * 2)
+            composeRule.runOnUiThread {
+                assertTrue(protocolErrors.isEmpty())
+                assertTrue(host!!.isStatusVisibleForTesting())
+                host!!.resumeUnity()
+            }
+
+            composeRule.waitUntil(timeoutMillis = 5_000) {
+                protocolErrors.size == 1
+            }
+            assertEquals(
+                UnityBridgeProtocolErrorCode.ReadyTimeout,
+                protocolErrors.single().code
+            )
+            composeRule.runOnUiThread {
+                assertTrue(host!!.isStatusVisibleForTesting())
+                assertEquals(
+                    "Unity bridge unavailable\nCode: bridge.ready_timeout",
+                    host!!.statusTextForTesting()
+                )
+            }
+
+            val request = requireNotNull(host!!.activeRequestForTesting())
+            val lateReady = buildJsonObject {
+                put("contractVersion", UNITY_BRIDGE_CONTRACT_VERSION)
+                put("requestId", request.requestId)
+                put("routeId", request.routeId)
+            }.toString()
+            UnityBridgeCallbacks.reportReady(lateReady)
+            composeRule.waitForIdle()
+
+            assertTrue(readySignals.isEmpty())
+            assertEquals(1, protocolErrors.size)
+            composeRule.runOnUiThread {
+                assertTrue(host!!.isStatusVisibleForTesting())
+            }
+        } finally {
+            composeRule.runOnUiThread { host?.destroyUnity() }
+        }
+    }
+
+    @Test
+    fun unknownRouteUnavailableOutcomeCompletesOneCorrelatedHostSession() {
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val outcomes = CopyOnWriteArrayList<UnityRouteOutcome>()
+        val protocolErrors = AtomicInteger()
+        val dependencies = testDependencies(players, registrar)
+
+        composeRule.setContent {
+            UnityViewForTest(
+                routeId = UnityBridgeSmokePolicy.ROUTE_ID,
+                dependencies = dependencies,
+                onOutcome = outcomes::add,
+                onProtocolError = { protocolErrors.incrementAndGet() }
+            )
+        }
+        composeRule.waitForIdle()
+
+        val player = players.single()
+        val dispatchedPayload = requireNotNull(player.lastPayload)
+        val request = when (
+            val parsed = UnityBridgeContract.parseRequest(dispatchedPayload)
+        ) {
+            is UnityBridgeContractResult.Accepted -> parsed.value
+            is UnityBridgeContractResult.Rejected -> error(
+                "Dispatched request was rejected: ${parsed.error.code}"
+            )
+        }
+        val unavailable = buildJsonObject {
+            put("contractVersion", UNITY_BRIDGE_CONTRACT_VERSION)
+            put("requestId", request.requestId)
+            put("routeId", request.routeId)
+            put("status", UnityRouteOutcomeStatus.Unavailable.wireValue)
+            put("diagnosticCode", "route.not_available")
+        }.toString()
+
+        Thread { UnityBridgeCallbacks.reportOutcome(unavailable) }.apply {
+            start()
+            join()
+        }
+
+        composeRule.waitUntil(timeoutMillis = 5_000) { outcomes.size == 1 }
+        assertEquals(UnityRouteOutcomeStatus.Unavailable, outcomes.single().status)
+        assertEquals(request.requestId, outcomes.single().requestId)
+        assertEquals(request.routeId, outcomes.single().routeId)
+        assertEquals("route.not_available", outcomes.single().diagnosticCode)
+        assertEquals(0, protocolErrors.get())
+
+        UnityBridgeCallbacks.reportOutcome(unavailable)
+        composeRule.waitUntil(timeoutMillis = 5_000) { protocolErrors.get() == 1 }
+        assertEquals(1, outcomes.size)
+    }
 
     @Test
     fun offMainProtocolCallbackReachesUiOnMainThread() {
@@ -234,6 +439,15 @@ class UnityBridgeThreadingTest {
             assertEquals(
                 "Unity runtime unavailable\nLifecycle callback registration failed",
                 host!!.statusTextForTesting()
+            )
+            assertEquals(2, host!!.statusTextUpdateCountForTesting())
+            assertEquals(
+                View.ACCESSIBILITY_LIVE_REGION_POLITE,
+                host!!.statusAccessibilityLiveRegionForTesting()
+            )
+            assertEquals(
+                View.IMPORTANT_FOR_ACCESSIBILITY_YES,
+                host!!.statusImportantForAccessibilityForTesting()
             )
             host!!.destroyUnity()
         }
@@ -782,14 +996,16 @@ class UnityBridgeThreadingTest {
 
     private fun testDependencies(
         players: MutableList<RecordingEmbeddedPlayer>,
-        registrar: RecordingComponentCallbackRegistrar
+        registrar: RecordingComponentCallbackRegistrar,
+        readyTimeoutMillis: Long = UNITY_ROUTE_READY_TIMEOUT_MILLIS
     ): UnityRuntimeHostDependencies {
         return UnityRuntimeHostDependencies(
             ownershipRegistry = UnityRuntimeHostRegistry(),
             playerFactory = UnityEmbeddedPlayerFactory { context ->
                 RecordingEmbeddedPlayer(context).also(players::add)
             },
-            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar },
+            readyTimeoutMillis = readyTimeoutMillis
         )
     }
 
@@ -839,6 +1055,7 @@ class UnityBridgeThreadingTest {
             }
         var sendCount = 0
         var destroyCount = 0
+        var lastPayload: String? = null
 
         override fun resume(): Boolean {
             onResume()
@@ -860,6 +1077,7 @@ class UnityBridgeThreadingTest {
 
         override fun sendMessage(gameObject: String, method: String, payload: String): Boolean {
             sendCount += 1
+            lastPayload = payload
             assertEquals("AndroidBridge", gameObject)
             assertEquals("SetRouteContext", method)
             assertNotNull(payload)

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.unity.addressables": "2.9.1",
     "com.unity.inputsystem": "1.7.0",
     "com.unity.test-framework": "1.6.0",
     "com.unity.textmeshpro": "5.0.0",

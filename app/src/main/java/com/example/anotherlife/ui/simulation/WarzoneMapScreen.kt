@@ -11,9 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.Territory
+import com.example.anotherlife.ui.layout.debugTestTag
+import com.example.anotherlife.ui.layout.usesLargeTextLayout
 
 @Composable
 fun WarzoneMapScreen(state: KingdomState, onAttack: (Territory) -> Unit) {
@@ -29,14 +32,20 @@ fun WarzoneMapScreen(state: KingdomState, onAttack: (Territory) -> Unit) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        BoxWithConstraints(
             modifier = Modifier.weight(1f)
         ) {
-            items(state.territories) { territory ->
-                TerritoryCard(territory = territory, onAttack = { onAttack(territory) })
+            val columnCount = if (usesLargeTextLayout() || maxWidth < 360.dp) 1 else 2
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columnCount),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(state.territories) { territory ->
+                    TerritoryCard(territory = territory, onAttack = { onAttack(territory) })
+                }
             }
         }
     }
@@ -55,14 +64,14 @@ fun TerritoryCard(territory: Territory, onAttack: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp),
+            .heightIn(min = 150.dp)
+            .debugTestTag("territory_${territory.name}"),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(
             modifier = Modifier
                 .padding(12.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxWidth()
         ) {
             Column {
                 Text(text = territory.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -74,10 +83,15 @@ fun TerritoryCard(territory: Territory, onAttack: () -> Unit) {
                 Text(text = "Owned by: ${territory.owner}", style = MaterialTheme.typography.bodySmall)
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             if (territory.owner != "Crownlands") { // Assuming player is Crownlands for simulation
                 Button(
                     onClick = onAttack,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp)
+                        .debugTestTag("territory_action_${territory.name}"),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
                     Text("Attack")
@@ -87,7 +101,11 @@ fun TerritoryCard(territory: Territory, onAttack: () -> Unit) {
                     text = "SAFE / DEFENDED",
                     color = Color(0xFF388E3C),
                     style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .debugTestTag("territory_status_${territory.name}")
                 )
             }
         }

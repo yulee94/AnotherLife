@@ -43,6 +43,7 @@ namespace AL.Tests.EditMode.AndroidBridge
 
             host.InitializeBridge();
             Assert.That(host.LastDispatchStatus, Is.Null);
+            Assert.That(host.LastReadyDispatchStatus, Is.Null);
 
             bridge.SetRouteContext(ValidRequestJson());
 
@@ -53,6 +54,35 @@ namespace AL.Tests.EditMode.AndroidBridge
                 host.LastDispatchStatus,
                 Is.EqualTo(
                     UnityBridgeOutcomeDispatchStatus.PlatformUnavailable));
+            Assert.That(
+                host.LastReadyDispatchStatus,
+                Is.Null,
+                "Receiving a route must never claim presentation readiness.");
+        }
+
+        [Test]
+        public void ReadyDispatchRequiresAnExplicitValidatedRouteSignal()
+        {
+            CreateHost();
+
+            host.InitializeBridge();
+            Assert.That(host.LastReadyDispatchStatus, Is.Null);
+
+            var result = host.TryReportReady(CreateRequest());
+
+            Assert.That(
+                result.Status,
+                Is.EqualTo(
+                    UnityBridgeReadyDispatchStatus.PlatformUnavailable));
+            Assert.That(result.CanRetry, Is.True);
+            Assert.That(
+                result.Error.Code,
+                Is.EqualTo(
+                    UnityBridgeProtocolErrorCode.SendUnavailable));
+            Assert.That(
+                host.LastReadyDispatchStatus,
+                Is.EqualTo(
+                    UnityBridgeReadyDispatchStatus.PlatformUnavailable));
         }
 
         [Test]
@@ -119,6 +149,16 @@ namespace AL.Tests.EditMode.AndroidBridge
                    "\"routeId\":\"" + Route + "\"," +
                    "\"intent\":\"preview\"," +
                    "\"requestedCapabilities\":[]}";
+        }
+
+        private static UnityRouteRequest CreateRequest()
+        {
+            return new UnityRouteRequest(
+                UnityBridgeContract.ContractVersion,
+                RequestOne,
+                Route,
+                UnityRouteIntent.Preview,
+                System.Array.Empty<string>());
         }
     }
 }

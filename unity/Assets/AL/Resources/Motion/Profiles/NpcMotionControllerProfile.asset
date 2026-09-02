@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6a7d7402ba22b842a5e22777b1deb8b, type: 3}
+  m_Name: NpcMotionControllerProfile
+  m_EditorClassIdentifier: AL.Runtime::AL.Motion.MotionControllerProfile
+  standardId: rmc_standard_rig_motion_v001
+  profileId: rmc_runtime_npc_mobile_v001
+  subjectKind: 1
+  rigClassification: 0
+  skeletonProfileId: rmc_skeleton_humanoid_shared_v001
+  retargetProfileId: rmc_retarget_humanoid_shared_v001
+  bindPoseId: rmc_bind_humanoid_a_pose_v001
+  layerProfileId: rmc_layers_npc_mobile_v001
+  safeMotionKey: idle.neutral
+  requiredMotionManifest: {fileID: 4900000, guid: 9ed9006ae3844ce4198bb4ba33ae6580, type: 3}
+  maximumLayers: 3
+  layers:
+  - layerId: rmc_layer_npc_base_v001
+    additive: 0
+    mask: {fileID: 0}
+    priority: 0
+  - layerId: rmc_layer_npc_upper_action_v001
+    additive: 0
+    mask: {fileID: 0}
+    priority: 20
+  - layerId: rmc_layer_npc_look_reaction_v001
+    additive: 1
+    mask: {fileID: 0}
+    priority: 30

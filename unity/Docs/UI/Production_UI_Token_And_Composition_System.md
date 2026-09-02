@@ -190,12 +190,25 @@ bind authoritative feature content into its fixed component
 
 `HudCompositionPreviewRenderer` remains the deterministic composition-review plate. `ProductionHudRenderer` builds the reusable runtime hierarchy with localized wrapping, bounded row aggregation, stable meters, semantic non-color cues, and protected layer ordering while retaining the same authored slot transforms and protected scan path.
 
+## GS-04 release-readiness evidence
+
+Run `python tools/ui/validate_ui_release_readiness.py` from the repository root. The command
+first runs the base design-system validator, then emits and validates 16 deterministic vector
+captures under `unity/Docs/UI/Evidence/GS-04/`: four supported form factors crossed with dense
+combat, 200% text plus extreme safe area and reduced effects, expanded map/minimap agreement,
+and touch/controller/keyboard focus paths. The manifest hashes every capture and the exact
+token, composition, map-disclosure, and generator inputs.
+
+This evidence is a repeatable layout/accessibility gate, not a target-device performance
+capture or owner creative approval. The reviewed GS-04 result and limitations live in
+`unity/Docs/Benchmarks/Scorecards/GS-04_UI_HUD_Map_Release_Readiness_2026-09-02.md`.
+
 ## Originality and provenance
 
 - Author: Hermes Agent for AnotherLife.
 - Date: 2026-09-01.
 - Inputs: repository-owned governing documents and existing AnotherLife presentation code only.
 - External visual, font, icon, screenshot, or comparator binary inputs: none.
-- Generated imagery: none.
+- Generated imagery: repository-owned deterministic SVG evidence only; no external visual input.
 - Comparator reproduction: prohibited by contract and not present in the token or composition assets.
 - Creative disposition: reserved for the project owner after objective rendering, accessibility, and gameplay-readability evidence.

@@ -14,6 +14,10 @@ val packageVerifierPath = rootProject.layout.projectDirectory
     .file("tools/android_unity_package.py").asFile.absolutePath
 val unityArtifactsPath = unityArtifactsRoot.asFile.absolutePath
 val pythonCommand = providers.environmentVariable("PYTHON").getOrElse("python3")
+val debugApkPath = layout.buildDirectory.file("outputs/apk/debug/app-debug.apk")
+    .get().asFile.absolutePath
+val releaseApkPath = layout.buildDirectory.file("outputs/apk/release/app-release-unsigned.apk")
+    .get().asFile.absolutePath
 
 val verifyUnityDebugPackageInput by tasks.registering(Exec::class) {
     group = "verification"
@@ -31,6 +35,36 @@ val verifyUnityReleasePackageInput by tasks.registering(Exec::class) {
     enabled = withUnity.get()
     commandLine(
         pythonCommand, packageVerifierPath, "--variant", "release", "--verify-only",
+        "--artifacts-dir", unityArtifactsPath,
+    )
+}
+
+val verifyUnityDebugApk by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Builds and verifies the final Unity-enabled debug APK."
+    dependsOn("assembleDebug")
+    doFirst {
+        check(withUnity.get()) {
+            "verifyUnityDebugApk requires -PwithUnity=true."
+        }
+    }
+    commandLine(
+        pythonCommand, packageVerifierPath, "--variant", "debug", "--verify-apk", debugApkPath,
+        "--artifacts-dir", unityArtifactsPath,
+    )
+}
+
+val verifyUnityReleaseApk by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Builds and verifies the final Unity-enabled release APK."
+    dependsOn("assembleRelease")
+    doFirst {
+        check(withUnity.get()) {
+            "verifyUnityReleaseApk requires -PwithUnity=true."
+        }
+    }
+    commandLine(
+        pythonCommand, packageVerifierPath, "--variant", "release", "--verify-apk", releaseApkPath,
         "--artifacts-dir", unityArtifactsPath,
     )
 }
