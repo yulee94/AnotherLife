@@ -3,6 +3,7 @@
     "rootNamespace": "AL.Tests.EditMode",
     "references": [
         "AL.Runtime",
+        "AL.Editor",
         "AL.SaveAuthority",
         "AL.GameDataCatalog",
         "AL.NotificationCatalogAdapter",
