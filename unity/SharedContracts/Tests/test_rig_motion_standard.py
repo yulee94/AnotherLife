@@ -98,7 +98,12 @@ class RigMotionStandardTests(unittest.TestCase):
 
     def test_qualified_clip_requires_both_signatures(self) -> None:
         manifest = copy.deepcopy(self.manifest)
-        manifest["clipCandidates"][0]["qualificationState"] = "qualified"
+        unsigned = next(
+            row
+            for row in manifest["clipCandidates"]
+            if row["skeletonSignature"] is None or row["clipSignature"] is None
+        )
+        unsigned["qualificationState"] = "qualified"
         self.assert_rejected("UnsignedQualifiedClip", manifest=manifest)
 
     def test_event_payloads_require_ordered_action_identity_fields(self) -> None:
