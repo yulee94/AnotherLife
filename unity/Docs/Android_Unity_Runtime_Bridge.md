@@ -11,7 +11,11 @@ The current Android foundation:
 - sends a bounded, versioned route request;
 - validates and correlates one terminal outcome to one active request;
 - posts UI-facing callbacks through the Android view's main-thread queue;
-- owns callback registration and disposal by host token.
+- owns callback registration and disposal by host token;
+- exposes a debug-only `bridge.smoke.unavailable` route from the developer tools,
+  consumes terminal outcomes without granting gameplay authority, returns to the
+  safe Android shell on unavailable or cancelled, and keeps failed or unexpected
+  success outcomes visibly contained for investigation.
 
 The current Unity foundation:
 
@@ -165,9 +169,9 @@ Build the opted-in host from the repository root with JDK 21 and the Android
 SDK used by the host:
 
 ```powershell
-.\gradlew.bat clean :app:testDebugUnitTest :app:assembleDebug `
+.\gradlew.bat clean :app:testDebugUnitTest :app:verifyUnityDebugApk `
   :app:assembleDebugAndroidTest :app:lintDebug -PwithUnity=true --rerun-tasks
-.\gradlew.bat clean :app:testDebugUnitTest :app:assembleRelease `
+.\gradlew.bat clean :app:testDebugUnitTest :app:verifyUnityReleaseApk `
   -PwithUnity=true --rerun-tasks
 ```
 
@@ -177,8 +181,20 @@ makes the corresponding pre-build task verify its inventory. Without the flag,
 the ordinary visible-unavailable Android shell remains intentionally buildable;
 it must not be reported as a packaged Unity result.
 
+The variant-specific verification tasks build the matching host APK and then
+run `android_unity_package.py --verify-apk`. Verification revalidates the staged
+AAR against the exact repository commit and Unity version, rejects any APK ABI
+other than ARM64, validates the packaged `libmain.so`, `libunity.so`, and
+`libil2cpp.so` ELF targets, binds those native libraries and
+`globalgamemanagers` byte-for-byte back to the staged AAR inventory, and parses
+every `classes*.dex` class-definition table to prove that
+`com.unity3d.player.UnityPlayer` survived DEX conversion and release shrinking.
+The verifier prints both the final APK and source AAR SHA-256 identities.
+
 Before accepting either generated package, inspect it rather than trusting the
-build result alone:
+build result alone. The automated verifier covers package presence, identity,
+ABI, ELF machine, player data, and the retained Unity player class; retain the
+following manual/native inspection for dynamic-link and signing evidence:
 
 ```powershell
 # AAR/APK contents: require Unity assets/classes and only arm64-v8a Unity ELFs.
@@ -254,7 +270,11 @@ performance evidence are separate dependent #135 gates.
   deliberately retains the process-wide lease so a second native player cannot start over an
   incomplete first teardown; process restart is the recovery boundary for that failure.
 - A replacement host gets a new callback token; disposal of the prior host cannot clear the replacement.
-- AndroidX `@Keep` preserves the exact `UnityBridgeCallbacks.reportOutcome(String)` JVM entry point in minified release builds while unused host and contract code can still be removed. The Java reference parameter is nullable at this external boundary; a null JNI/Unity argument is delivered as typed `bridge.null_message` failure instead of throwing across JNI.
+- AndroidX `@Keep` preserves the exact `UnityBridgeCallbacks.reportReady(String)` and
+  `UnityBridgeCallbacks.reportOutcome(String)` JVM entry points in minified release builds while
+  unused host and contract code can still be removed. Their Java reference parameters are nullable
+  at the external boundary; a null JNI/Unity argument is delivered as typed
+  `bridge.null_message` failure instead of throwing across JNI.
 
 The reflection host loads the named class without initialization and accepts it only when it can
 prove a compatible public one-argument constructor on a `View`, exact instance `void` `resume`,
@@ -305,9 +325,16 @@ Contract rules:
 An invalid Android request is shown as a bridge protocol error and is not sent.
 The wired Unity receiver returns a correlated `unavailable` outcome for every
 unknown but syntactically valid route, and the registered sender delivers that
-outcome back to the JVM in an Android player build. End-to-end physical-device
-round-trip visibility and a route that returns a non-`unavailable` outcome
-remain future slices. No route is enabled by this contract alone.
+outcome back to the JVM in an Android player build. The Android debug shell now
+mounts that exact safe-unavailable smoke route and returns to Debug only after an
+unavailable or cancelled outcome. Failure and unapproved success remain visible
+and apply no result. Focused host tests prove off-main callback admission,
+correlation, typed unavailable consumption, and duplicate rejection; shell tests
+prove the route is inaccessible in release and cannot navigate into gameplay.
+These deterministic tests do not replace an installed ARM64 package run.
+End-to-end physical-device visibility and a route that returns an approved
+non-`unavailable` outcome remain future slices. No gameplay route is enabled by
+this contract alone.
 
 ## Unity Receiver Boundary
 
@@ -391,6 +418,55 @@ The discarding sink remains the receiver's fallback only for standalone use with
 
 The component still defaults to a discarding sink when used without the host, so the
 receiver and sender remain testable without implying a production route.
+
+## Ready Acknowledgement Contract
+
+Sending a validated route request is not proof that Unity can present or own that route. The
+Android host keeps its full-screen native starting surface in front of the attached player, owns
+input and accessibility semantics, and waits for Unity to call:
+
+```text
+com.example.anotherlife.ui.unity.UnityBridgeCallbacks.reportReady(String rawJson)
+```
+
+Payload version 2 contains only the active request correlation:
+
+```json
+{
+  "contractVersion": 2,
+  "requestId": "76f35664-447f-49e1-9f05-e2fa6af47aac",
+  "routeId": "bridge.smoke"
+}
+```
+
+`requestId` is the attempt-generation fence: every route launch and recreated host creates a new
+request identity. Android accepts exactly one ready acknowledgement whose version, request, and
+route match the current incomplete session. Only that acknowledgement removes the native starting
+surface and invokes `onReady`. A prior-generation request ID, duplicate, or post-outcome ready
+callback is inert. A current request carrying the wrong route, or a malformed, oversized, or
+structurally invalid ready message, remains a typed protocol failure and does not transfer
+presentation ownership.
+
+After a request is successfully dispatched, Android gives the current route 30 seconds of
+foreground `RESUMED` time to acknowledge readiness. Pausing or stopping the host cancels the
+scheduled callback without consuming the request; resuming starts a fresh 30-second window. An
+accepted ready acknowledgement, any accepted terminal outcome, a replacement route, or host
+destruction cancels the wait. If the window expires first, Android keeps the native surface in
+front, reports `bridge.ready_timeout`, and permanently fences a later ready acknowledgement for
+that request. The timeout does not destroy the Unity runtime, so a correlated terminal outcome can
+still complete the route and let the Android owner decide how to recover.
+
+The JVM boundary and Android-side parser/session/host transition are implemented. Unity also owns a
+canonical `UnityRouteReady` validator/encoder, an exact `reportReady(String)` Android adapter, and a
+bounded, main-thread `UnityBridgeReadySender`. A route reports readiness explicitly through
+`AndroidBridgeRuntimeHost.TryReportReady(validatedRequest)`; bridge initialization and
+`SetRouteContext` never call that API. An unavailable platform callback is retryable only for the
+same pinned request envelope, while an invoked or ambiguously failed callback becomes terminal and
+cannot be replayed by the sender.
+
+No production Unity route currently calls this sender, because no gameplay route is enabled. A
+future route must call it only after that route has completed its own presentation/readiness checks;
+it must not treat receipt of `SetRouteContext` as readiness.
 
 ## Outcome Contract
 
@@ -510,7 +586,7 @@ A rejected malformed or mismatched outcome does not complete the active request,
 
 If the Unity runtime class is missing, `UnityView` shows `Unity runtime unavailable` with the requested route. This is a visible integration failure, not a gameplay substitute.
 
-`onRouteDispatched` is invoked only after a validated request is successfully sent through the reflected Unity message method. It is not a Unity-loaded or route-ready acknowledgement, and it is not invoked for a missing runtime, invalid route request, or unavailable send method.
+`onRouteDispatched` is invoked only after a validated request is successfully sent through the reflected Unity message method. It is not a Unity-loaded or route-ready acknowledgement, does not remove the native starting surface, and is not invoked for a missing runtime, invalid route request, or unavailable send method.
 
 Malformed, stale, mismatched, unsupported, and duplicate outcomes surface a stable `bridge.*` protocol diagnostic through `onProtocolError`. They do not fabricate a route result or consume the active request. Callback delivery is posted to the host view before invoking UI/navigation callbacks, and a disposed host's registration token cannot clear a newer host.
 
@@ -542,7 +618,9 @@ fabricate another route outcome, and do not activate fallback gameplay.
 Required checks for bridge changes:
 
 - Android unit tests: `:app:testDebugUnitTest`
-- Android instrumentation: off-main callback delivery and disposed-host rejection
+- Android instrumentation: off-main callback delivery, disposed-host rejection,
+  real-shell safe return, back-navigation disposal, and Activity recreation with
+  stale-request rejection
 - Android debug/release assembly and lint
 - Focused Unity EditMode exporter contract tests, including every preflight
   rejection, exact-path cleanup, settings restoration, artifact drift, and
@@ -580,6 +658,14 @@ final `libil2cpp.so`, AAR, Android-app inclusion, installed-size delta, or
 device execution was produced or claimed.
 
 Current Android contract coverage includes valid/invalid request and outcome JSON, unsupported versions and exact enum values, malformed and oversized input, duplicate request/outcome members, nullable Java/JNI boundary rejection, bounded payloads, same-route retries, stale and duplicate outcomes, malformed-then-valid recovery, callback replacement, off-main UI dispatch, and host disposal.
+
+Compiled Android instrumentation also mounts the debug smoke route through the real
+`MainActivity` shell. It verifies correlated unavailable safe return, visible containment of an
+unapproved success, back-navigation disposal followed by a dropped late outcome, and Activity
+recreation with a new request identity. A late outcome for the pre-recreation request must not
+complete or replace the new session; the current correlated unavailable outcome can still return
+safely to Debug. These tests do not claim physical-device execution or a generated Unity-enabled
+APK on this host.
 
 Current Android host-lifecycle coverage additionally includes deferred focus until resume,
 duplicate resume/pause/stop suppression, focus restoration after a real resume, ordered and
@@ -670,10 +756,9 @@ unperformed packaged/device round trip.
 
 Still blocked for #135 completion:
 
-- production registration/wiring of the receiver and sender;
-- successful exact-profile `unityLibrary` generation on the integration
-  baseline, followed by native Gradle inclusion and compatibility proof;
-- unknown-route end-to-end unavailable behavior;
+- regeneration of exact-profile debug and release Unity AARs on the authorized Windows host,
+  followed by Unity-enabled APK verification against those exact artifacts;
+- physical-device execution of the correlated unknown-route unavailable round trip;
 - packaged back/home/app-switch, rotation/recreation, multi-window, process-death/runtime-loss,
   audio/input/keyboard/controller, focus, low-memory, and repeated-launch lifecycle proof;
 - packaged representative-device performance, memory, thermal, and size evidence;

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1080" role="img">
+<title>AnotherLife GS-04 PhoneLandscape input_focus_paths</title>
+<rect width="2400" height="1080" fill="#0b0c10"/>
+<rect x="0.0" y="0.0" width="2400.0" height="1080.0" fill="none" stroke="#b8a988" stroke-width="2" stroke-dasharray="12 10" opacity="0.65"/>
+<rect x="384.0" y="172.8" width="1632.0" height="734.4" rx="8" fill="#15161b" stroke="#b8a988" stroke-width="3"/>
+<text x="408.0" y="214.8" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="22.0" font-weight="700">INPUT FOCUS PATHS · ONE AUTHORITATIVE STATE</text>
+<circle cx="436.0" cy="397.7" r="22" fill="none" stroke="#b8a988" stroke-width="3"/>
+<text x="436.0" y="404.7" text-anchor="middle" fill="#b8a988" font-family="sans-serif" font-size="18.0" font-weight="700">1</text>
+<text x="472.0" y="392.7" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="17.0" font-weight="700">TOUCH: map toggle → filter → marker → close</text>
+<text x="472.0" y="419.7" text-anchor="start" fill="#b8a988" font-family="sans-serif" font-size="13.0" font-weight="500">56-unit targets; no hover dependency</text>
+<circle cx="436.0" cy="544.6" r="22" fill="none" stroke="#b8a988" stroke-width="3"/>
+<text x="436.0" y="551.6" text-anchor="middle" fill="#b8a988" font-family="sans-serif" font-size="18.0" font-weight="700">2</text>
+<text x="472.0" y="539.6" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="17.0" font-weight="700">CONTROLLER: prior control → close → filters → marker → close</text>
+<text x="472.0" y="566.6" text-anchor="start" fill="#b8a988" font-family="sans-serif" font-size="13.0" font-weight="500">contained explicit navigation; restore prior focus</text>
+<circle cx="436.0" cy="691.4" r="22" fill="none" stroke="#b8a988" stroke-width="3"/>
+<text x="436.0" y="698.4" text-anchor="middle" fill="#b8a988" font-family="sans-serif" font-size="18.0" font-weight="700">3</text>
+<text x="472.0" y="686.4" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="17.0" font-weight="700">KEYBOARD: prior control → close → filters → marker → Escape</text>
+<text x="472.0" y="713.4" text-anchor="start" fill="#b8a988" font-family="sans-serif" font-size="13.0" font-weight="500">submit/cancel parity; hidden controls skipped</text>
+<text x="1200.0" y="1066.0" text-anchor="middle" fill="#f0ebdd" font-family="sans-serif" font-size="13.0" font-weight="700">TOUCH · CONTROLLER · KEYBOARD · RESTORATION PATHS</text>
+<text x="1200.0" y="1044.0" text-anchor="middle" fill="#b8a988" font-family="sans-serif" font-size="11.0" font-weight="500">DETERMINISTIC LAYOUT EVIDENCE · NOT DEVICE, PERFORMANCE, FONT, OR OWNER APPROVAL</text>
+</svg>

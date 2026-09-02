@@ -61,6 +61,12 @@ data class UnityRouteOutcome(
     val payload: String?
 )
 
+data class UnityRouteReady(
+    val contractVersion: Int,
+    val requestId: String,
+    val routeId: String
+)
+
 enum class UnityRouteOutcomeStatus(val wireValue: String) {
     Success("success"),
     Failure("failure"),
@@ -103,6 +109,10 @@ enum class UnityBridgeProtocolErrorCode(val wireValue: String) {
     NoActiveRequest("bridge.no_active_request"),
     RequestMismatch("bridge.request_mismatch"),
     RouteMismatch("bridge.route_mismatch"),
+    DuplicateReady("bridge.duplicate_ready"),
+    ReadyAfterOutcome("bridge.ready_after_outcome"),
+    ReadyTimeout("bridge.ready_timeout"),
+    ReadyAfterTimeout("bridge.ready_after_timeout"),
     DuplicateOutcome("bridge.duplicate_outcome"),
     SessionClosed("bridge.session_closed"),
     SendUnavailable("bridge.send_unavailable")
@@ -139,6 +149,16 @@ object UnityBridgeContract {
     private val outcomeDuplicateSchema = DuplicateObjectMemberSchema(
         descriptorName = "UnityRouteOutcomeDuplicateGuard",
         memberNames = outcomeMemberNames
+    )
+    private val readyMemberNames = listOf(
+        "contractVersion",
+        "requestId",
+        "routeId"
+    )
+    private val readyKeys = readyMemberNames.toSet()
+    private val readyDuplicateSchema = DuplicateObjectMemberSchema(
+        descriptorName = "UnityRouteReadyDuplicateGuard",
+        memberNames = readyMemberNames
     )
 
     fun createRequest(
@@ -316,6 +336,52 @@ object UnityBridgeContract {
                     diagnosticCode = diagnosticCode,
                     resultId = resultId,
                     payload = payload
+                )
+            )
+        } catch (violation: BridgeContractViolation) {
+            UnityBridgeContractResult.Rejected(violation.error)
+        }
+    }
+
+    fun parseReady(rawJson: String?): UnityBridgeContractResult<UnityRouteReady> {
+        if (rawJson == null) {
+            return rejected(UnityBridgeProtocolErrorCode.NullMessage)
+        }
+        if (rawJson.exceedsUtf8Limit(MAX_UNITY_BRIDGE_MESSAGE_BYTES)) {
+            return rejected(UnityBridgeProtocolErrorCode.MessageTooLarge)
+        }
+        if (rawJson.isBlank()) {
+            return rejected(UnityBridgeProtocolErrorCode.EmptyMessage)
+        }
+
+        findDuplicateObjectMember(
+            rawJson = rawJson,
+            schema = readyDuplicateSchema
+        )?.let { duplicate ->
+            return rejected(UnityBridgeProtocolErrorCode.DuplicateField, duplicate)
+        }
+
+        val root = runCatching { bridgeJson.parseToJsonElement(rawJson) as? JsonObject }
+            .getOrNull()
+            ?: return rejected(UnityBridgeProtocolErrorCode.MalformedJson)
+
+        return try {
+            root.requireOnlyKeys(readyKeys)
+            UnityBridgeContractResult.Accepted(
+                UnityRouteReady(
+                    contractVersion = root.requiredVersion(),
+                    requestId = root.requiredString(
+                        key = "requestId",
+                        maxLength = MAX_REQUEST_ID_LENGTH,
+                        pattern = correlationIdPattern,
+                        errorCode = UnityBridgeProtocolErrorCode.InvalidRequestId
+                    ),
+                    routeId = root.requiredString(
+                        key = "routeId",
+                        maxLength = MAX_ROUTE_ID_LENGTH,
+                        pattern = routeIdPattern,
+                        errorCode = UnityBridgeProtocolErrorCode.InvalidRouteId
+                    )
                 )
             )
         } catch (violation: BridgeContractViolation) {

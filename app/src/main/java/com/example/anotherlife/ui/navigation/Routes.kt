@@ -17,4 +17,6 @@ sealed interface Route {
     data object Dossier : Route
     @Serializable
     data object NarrativeDebug : Route
+    @Serializable
+    data object UnityBridgeSmoke : Route
 }

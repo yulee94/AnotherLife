@@ -63,8 +63,32 @@ class ShellRoutePolicyTest {
             ShellRoutePolicy.navigationSelection(Route.Quest)
         )
         assertEquals(
+            Route.NarrativeDebug,
+            ShellRoutePolicy.navigationSelection(Route.UnityBridgeSmoke)
+        )
+        assertEquals(
             Route.Kingdom,
             ShellRoutePolicy.navigationSelection(Route.Kingdom)
+        )
+    }
+
+    @Test
+    fun unityBridgeSmokeIsDebugOnlyAndFallsBackSafelyInRelease() {
+        val debugResolution = ShellRoutePolicy.resolveRoute(
+            Route.UnityBridgeSmoke,
+            debugToolsEnabled = true
+        )
+        val releaseResolution = ShellRoutePolicy.resolveRoute(
+            Route.UnityBridgeSmoke,
+            debugToolsEnabled = false
+        )
+
+        assertEquals(Route.UnityBridgeSmoke, debugResolution.route)
+        assertTrue(releaseResolution is RouteResolution.Rejected)
+        assertEquals(Route.Kingdom, releaseResolution.route)
+        assertEquals(
+            ShellRoutePolicy.UNITY_BRIDGE_SMOKE_UNAVAILABLE_MESSAGE,
+            (releaseResolution as RouteResolution.Rejected).message
         )
     }
 
@@ -77,7 +101,8 @@ class ShellRoutePolicyTest {
             Route.Battle,
             Route.Warzone,
             Route.Quest,
-            Route.NarrativeDebug
+            Route.NarrativeDebug,
+            Route.UnityBridgeSmoke
         )
 
         routes.forEach { route ->
@@ -118,6 +143,66 @@ class ShellRoutePolicyTest {
         )
         assertEquals(Route.NarrativeDebug, sanitized.rejectedTopRoute?.requestedRoute)
         assertEquals(ShellRoutePolicy.DEBUG_ROUTE_UNAVAILABLE_MESSAGE, sanitized.rejectedTopRoute?.message)
+    }
+
+    @Test
+    fun rejectedRouteNoticeSurvivesTheSecondSanitizedBackStackPass() {
+        val firstPass = ShellRoutePolicy.sanitizeBackStack(
+            listOf(Route.Kingdom, Route.NarrativeDebug),
+            debugToolsEnabled = false
+        )
+        val noticeAfterRejection = ShellRoutePolicy.reduceRouteNotice(
+            currentMessage = null,
+            event = RouteNoticeEvent.BackStackSanitized(firstPass.rejectedTopRoute)
+        )
+
+        val stablePass = ShellRoutePolicy.sanitizeBackStack(
+            firstPass.routes,
+            debugToolsEnabled = false
+        )
+        val noticeAfterStablePass = ShellRoutePolicy.reduceRouteNotice(
+            currentMessage = noticeAfterRejection,
+            event = RouteNoticeEvent.BackStackSanitized(stablePass.rejectedTopRoute)
+        )
+
+        assertEquals(
+            ShellRoutePolicy.DEBUG_ROUTE_UNAVAILABLE_MESSAGE,
+            noticeAfterStablePass
+        )
+    }
+
+    @Test
+    fun acknowledgedRouteNoticeDoesNotReplayDuringStableRecomposition() {
+        val acknowledged = ShellRoutePolicy.reduceRouteNotice(
+            currentMessage = ShellRoutePolicy.DEBUG_ROUTE_UNAVAILABLE_MESSAGE,
+            event = RouteNoticeEvent.NavigationAcknowledged
+        )
+        val stablePass = ShellRoutePolicy.sanitizeBackStack(
+            listOf(Route.Kingdom),
+            debugToolsEnabled = false
+        )
+
+        val noticeAfterStablePass = ShellRoutePolicy.reduceRouteNotice(
+            currentMessage = acknowledged,
+            event = RouteNoticeEvent.BackStackSanitized(stablePass.rejectedTopRoute)
+        )
+
+        assertEquals(null, noticeAfterStablePass)
+    }
+
+    @Test
+    fun aNewRejectedRouteReplacesThePreviousNoticeDeterministically() {
+        val questRejection = ShellRoutePolicy.sanitizeBackStack(
+            listOf(Route.Kingdom, Route.Quest),
+            debugToolsEnabled = false
+        )
+
+        val updatedNotice = ShellRoutePolicy.reduceRouteNotice(
+            currentMessage = ShellRoutePolicy.DEBUG_ROUTE_UNAVAILABLE_MESSAGE,
+            event = RouteNoticeEvent.BackStackSanitized(questRejection.rejectedTopRoute)
+        )
+
+        assertEquals(ShellRoutePolicy.QUEST_ROUTE_UNAVAILABLE_MESSAGE, updatedNotice)
     }
 
     @Test
