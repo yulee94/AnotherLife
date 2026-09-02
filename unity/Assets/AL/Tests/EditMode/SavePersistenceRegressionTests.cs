@@ -62,6 +62,96 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void EmptyProfileLoadCreatesValidFirstGenerationAndPriorShapeStillLoads()
+        {
+            string createdRoot = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            string priorRoot = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(createdRoot);
+            Directory.CreateDirectory(priorRoot);
+
+            try
+            {
+                object created = CreateSaveService(createdRoot);
+                Invoke(created, "Load");
+                Assert.AreEqual(
+                    "CreatedNew",
+                    GetProperty(created, "LastLoadStatus").ToString(),
+                    (string)GetProperty(created, "LastLoadMessage"));
+                Assert.NotNull(GetProperty(created, "CurrentSave"));
+
+                string createdPrimary = Path.Combine(createdRoot, "save.json");
+                SaveSemanticCandidate createdCandidate = SaveSemanticCandidateValidator.Validate(
+                    File.ReadAllBytes(createdPrimary),
+                    SaveCandidateSourceGeneration.Primary,
+                    CreateSemanticPolicy());
+                Assert.AreEqual(
+                    SaveSemanticCandidateOutcome.Valid,
+                    createdCandidate.Outcome,
+                    string.Join(
+                        ", ",
+                        createdCandidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+                Assert.True(createdCandidate.IsWritable);
+
+                string createdJson = File.ReadAllText(createdPrimary);
+                int mapStart = createdJson.IndexOf("    \"MapDisclosure\": {", StringComparison.Ordinal);
+                int mapEnd = createdJson.IndexOf("    \"WarzoneCredits\":", StringComparison.Ordinal);
+                Assert.That(mapStart, Is.GreaterThanOrEqualTo(0));
+                Assert.That(mapEnd, Is.GreaterThan(mapStart));
+                string priorJson = createdJson.Remove(mapStart, mapEnd - mapStart);
+                Assert.That(priorJson, Does.Not.Contain("\"MapDisclosure\""));
+                string priorPrimary = Path.Combine(priorRoot, "save.json");
+                File.WriteAllText(priorPrimary, priorJson);
+
+                object priorReloaded = CreateSaveService(priorRoot);
+                Invoke(priorReloaded, "Load");
+                Assert.NotNull(
+                    GetProperty(priorReloaded, "CurrentSave"),
+                    (string)GetProperty(priorReloaded, "LastLoadMessage"));
+                SaveSemanticCandidate priorCandidate = SaveSemanticCandidateValidator.Validate(
+                    File.ReadAllBytes(priorPrimary),
+                    SaveCandidateSourceGeneration.Primary,
+                    CreateSemanticPolicy());
+                Assert.AreEqual(SaveSemanticCandidateOutcome.Valid, priorCandidate.Outcome);
+                Assert.True(priorCandidate.IsWritable);
+
+                string unknownJson = priorJson.TrimEnd();
+                Assert.That(unknownJson, Does.EndWith("}"));
+                unknownJson = unknownJson.Substring(0, unknownJson.Length - 1) +
+                    ",\"FutureEnvelope\":1}";
+                SaveSemanticCandidate unknownCandidate = SaveSemanticCandidateValidator.Validate(
+                    Encoding.UTF8.GetBytes(unknownJson),
+                    SaveCandidateSourceGeneration.Primary,
+                    CreateSemanticPolicy());
+                Assert.AreEqual(
+                    SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                    unknownCandidate.Outcome);
+                Assert.False(unknownCandidate.IsWritable);
+                Assert.That(
+                    unknownCandidate.Diagnostics.Select(item => item.Code),
+                    Does.Contain("SAVE_UNKNOWN_TOP_LEVEL_FIELD"));
+            }
+            finally
+            {
+                if (Directory.Exists(createdRoot))
+                {
+                    Directory.Delete(createdRoot, true);
+                }
+
+                if (Directory.Exists(priorRoot))
+                {
+                    Directory.Delete(priorRoot, true);
+                }
+            }
+        }
+
+
+        [Test]
         public void LegacyProfileCannotBeRewrittenBeforeExplicitMigration()
         {
             string root = Path.Combine(

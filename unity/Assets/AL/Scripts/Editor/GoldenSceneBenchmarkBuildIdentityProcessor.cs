@@ -18,12 +18,12 @@ namespace AL.EditorTools
             if (buildPlayerContext == null)
                 throw new ArgumentNullException(nameof(buildPlayerContext));
             EnsureRepositoryClean(ResolveRepositoryStatus());
+            string sourceCommit = ResolveSourceCommit();
             GoldenSceneBuildIdentityMetadata metadata = CreateMetadataForBuild(
                 Application.dataPath,
-                ResolveSourceCommit(),
+                sourceCommit,
                 EditorUserBuildSettings.activeBuildTarget.ToString(),
-                Application.unityVersion,
-                DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture));
+                Application.unityVersion);
             string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
             string path = Path.Combine(
                 projectRoot,
@@ -37,6 +37,20 @@ namespace AL.EditorTools
         }
 
         internal static GoldenSceneBuildIdentityMetadata CreateMetadataForBuild(
+            string assetsRoot,
+            string sourceCommit,
+            string buildTarget,
+            string unityVersion)
+        {
+            return CreateMetadataForBuildAtTimestamp(
+                assetsRoot,
+                sourceCommit,
+                buildTarget,
+                unityVersion,
+                ResolveSourceCommitTimestamp(sourceCommit));
+        }
+
+        internal static GoldenSceneBuildIdentityMetadata CreateMetadataForBuildAtTimestamp(
             string assetsRoot,
             string sourceCommit,
             string buildTarget,
@@ -93,12 +107,28 @@ namespace AL.EditorTools
                 generatedAt.ToString("O", CultureInfo.InvariantCulture));
         }
 
-        private static string ResolveSourceCommit()
+        internal static string ResolveSourceCommit()
         {
             string output = RunGit("rev-parse HEAD", "AL-GS-BUILD-COMMIT-UNAVAILABLE");
             if (!IsLowerHex(output, 40))
                 throw new BuildFailedException("AL-GS-BUILD-COMMIT-INVALID");
             return output;
+        }
+
+        private static string ResolveSourceCommitTimestamp(string sourceCommit)
+        {
+            if (!IsLowerHex(sourceCommit, 40))
+                throw new BuildFailedException("AL-GS-BUILD-COMMIT-INVALID");
+            string output = RunGit(
+                "show -s --format=%cI " + sourceCommit,
+                "AL-GS-BUILD-COMMIT-TIME-UNAVAILABLE");
+            if (!DateTimeOffset.TryParse(
+                    output,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out DateTimeOffset timestamp))
+                throw new BuildFailedException("AL-GS-BUILD-COMMIT-TIME-INVALID");
+            return timestamp.UtcDateTime.ToString("O", CultureInfo.InvariantCulture);
         }
 
         private static string ResolveRepositoryStatus()

@@ -1195,7 +1195,8 @@ namespace AL.EditorTools
         internal IReadOnlyList<string> ScenePaths => _scenePaths;
         internal IReadOnlyList<string> Failures => _failures;
         internal BuildTarget Target => BuildTarget.StandaloneWindows64;
-        internal BuildOptions Options => BuildOptions.Development;
+        internal BuildOptions Options =>
+            BuildOptions.Development | BuildOptions.NoUniqueIdentifier;
         internal bool IsValid => _failures.Count == 0;
         internal bool CanWriteSummary { get; }
 
