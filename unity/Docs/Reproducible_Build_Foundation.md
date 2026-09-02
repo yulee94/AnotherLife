@@ -137,21 +137,25 @@ The packaged golden-scene identity derives its timestamp from the source commit 
 clock time. `NoUniqueIdentifier` prevents Unity from writing a fresh build GUID into each Player.
 These are source-level determinism controls, not post-build binary normalization.
 
-## Disposable-profile launch smoke
+## Current-user launch smoke
 
-The structural artifact smoke is not the launch smoke. The launch smoke must run while signed
-in to a separately authenticated disposable Windows profile. It refuses the developer identity,
-the developer LocalLow path, a non-empty Player persistent-data directory, and any observed
-reparse point in the launch profile chain before starting the Player.
+The structural artifact smoke is not the launch smoke. Owner decision 2026-09-02 waived the
+distinct-Windows-profile requirement for this PC-first card. Isolated-profile launch evidence is
+NOT claimed and must not be inferred. The packaged Player smoke runs under the current
+authenticated user, keeps dirty-tree/source/settings/scene/content/artifact/toolchain checks
+fail-closed, and records `isolatedProfileClaimed: false`.
 
-From that disposable profile, run:
+Boot no longer auto-routes. After the production Boot marker and `AL Boot Sequence Started...`,
+the harness focuses the Player and sends keyboard Enter (the production Submit binding) until
+RealmSelection appears or the timeout fires. The stale `No Realm Selected...` log is not emitted
+by current Boot and is not required.
+
+From the same authenticated user that owns the workspace, run:
 
 ```powershell
 python tools/reproducible_build.py --repo-root . launch-smoke `
   --build-manifest unity/Logs/ReproducibleBuilds/windows64-b.json `
-  --output unity/Logs/ReproducibleBuilds/windows64-launch.json `
-  --developer-identity 'DESKTOP-69Q7D2K\MY' `
-  --developer-local-low 'C:\Users\MY\AppData\LocalLow'
+  --output unity/Logs/ReproducibleBuilds/windows64-launch.json
 ```
 
 The harness verifies the manifest digest and Player executable hash, requires a new Player log,
@@ -159,11 +163,21 @@ launches the packaged artifact, and accepts only this exact ordered sequence:
 
 1. production Boot scene marker;
 2. Boot sequence started;
-3. fresh-profile branch selected;
-4. production RealmSelection scene marker.
+3. production RealmSelection scene marker after explicit Continue.
 
 Failure tokens, wrong marker order, an unexpected scene, early exit, timeout, stale log, source or
-artifact mismatch, and profile-isolation drift fail closed. After the transition, the harness
+artifact mismatch, and a false isolated-profile claim fail closed. After the transition, the harness
 terminates the Player externally and makes no graceful-quit or save claim. Its signed-ready JSON
-links the build-manifest digest, source revision/tree, artifact tree, observed profile/process
-boundary, Player-log digest, and exact transition evidence.
+links the build-manifest digest, source revision/tree, artifact tree, observed current-user
+boundary, Player-log digest, Continue attempts, and exact transition evidence. Android and
+physical-device readiness remain deferred to `t_7b530af7`.
+
+A current-user LocalLow leftover (`save.tmp.json` plus quarantine generations) is RecoveryRequired.
+The harness temporarily overlays an empty product folder and restores the original files afterward;
+user saves are not deleted. Isolated-profile launch evidence is still not claimed.
+
+Observed packaged Windows Player smoke against `windows64-b` (`13ff538b`, Unity `6000.3.22f1`):
+Boot marker and `AL Boot Sequence Started...` were observed. RealmSelection was not reached.
+First-generation create in the empty overlay failed with `SAVE_UNKNOWN_TOP_LEVEL_FIELD`
+(`AL-SAVE-CREATE-TEMP-INVALID`), so Boot never exposed Continue. That is a fail-closed save-create
+result, not launch-smoke success, and it is not a mobile-readiness claim.

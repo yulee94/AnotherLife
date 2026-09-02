@@ -20,6 +20,7 @@ import stat
 import subprocess
 import sys
 import time
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterable
@@ -269,10 +270,27 @@ def evaluate_windows_launch_smoke(
         "profileChainHasNoReparsePoints",
     }
     if not isinstance(isolation, dict) or not required.issubset(isolation):
-        return {"status": "stop_ship", "reasonCode": "isolation_evidence_missing", "observedEvidence": []}
-    if isolation["developerIdentity"].strip().casefold() == isolation["launchIdentity"].strip().casefold():
-        return {"status": "stop_ship", "reasonCode": "launch_identity_not_isolated", "observedEvidence": []}
-    developer_local_low = _canonical_windows_path(isolation["developerLocalLow"])
+        return {
+            "status": "stop_ship",
+            "reasonCode": "isolation_evidence_missing",
+            "observedEvidence": [],
+            "isolatedProfileClaimed": False,
+        }
+    claimed = bool(isolation.get("isolatedProfileClaimed"))
+    if claimed:
+        return {
+            "status": "stop_ship",
+            "reasonCode": "isolated_profile_not_claimed",
+            "observedEvidence": [],
+            "isolatedProfileClaimed": True,
+        }
+    if isolation["developerIdentity"].strip().casefold() != isolation["launchIdentity"].strip().casefold():
+        return {
+            "status": "stop_ship",
+            "reasonCode": "launch_identity_not_current_user",
+            "observedEvidence": [],
+            "isolatedProfileClaimed": False,
+        }
     launch_local_low = _canonical_windows_path(isolation["launchLocalLow"])
     launch_persistent = _canonical_windows_path(isolation["launchPersistentDataPath"])
     expected_persistent = _canonical_windows_path(ntpath.join(
@@ -281,19 +299,24 @@ def evaluate_windows_launch_smoke(
         launch_policy["productName"],
     ))
     if (
-        not developer_local_low
-        or not launch_local_low
+        not launch_local_low
         or not launch_persistent
-        or developer_local_low == launch_local_low
         or ntpath.basename(launch_local_low).casefold() != "locallow"
         or launch_persistent != expected_persistent
-        or launch_persistent.startswith(developer_local_low + "\\")
     ):
-        return {"status": "stop_ship", "reasonCode": "launch_profile_not_isolated", "observedEvidence": []}
-    if not isolation["freshProfile"]:
-        return {"status": "stop_ship", "reasonCode": "launch_profile_not_fresh", "observedEvidence": []}
+        return {
+            "status": "stop_ship",
+            "reasonCode": "launch_persistent_path_invalid",
+            "observedEvidence": [],
+            "isolatedProfileClaimed": False,
+        }
     if not isolation["profileChainHasNoReparsePoints"]:
-        return {"status": "stop_ship", "reasonCode": "launch_profile_reparse_point", "observedEvidence": []}
+        return {
+            "status": "stop_ship",
+            "reasonCode": "launch_profile_reparse_point",
+            "observedEvidence": [],
+            "isolatedProfileClaimed": False,
+        }
 
     ordered = launch_policy["orderedEvidence"]
     observed: list[str] = []
@@ -306,6 +329,7 @@ def evaluate_windows_launch_smoke(
                     "reasonCode": "launch_failure_token",
                     "failureToken": failure_token,
                     "observedEvidence": observed,
+                    "isolatedProfileClaimed": False,
                 }
         present = [index for index, token in enumerate(ordered) if token in line]
         if present:
@@ -314,6 +338,7 @@ def evaluate_windows_launch_smoke(
                     "status": "stop_ship",
                     "reasonCode": "launch_evidence_out_of_order",
                     "observedEvidence": observed,
+                    "isolatedProfileClaimed": False,
                 }
             observed.append(ordered[next_index])
             next_index += 1
@@ -322,6 +347,7 @@ def evaluate_windows_launch_smoke(
                 "status": "stop_ship",
                 "reasonCode": "unexpected_scene_marker",
                 "observedEvidence": observed,
+                "isolatedProfileClaimed": False,
             }
     if next_index != len(ordered):
         return {
@@ -329,8 +355,121 @@ def evaluate_windows_launch_smoke(
             "reasonCode": "launch_evidence_incomplete",
             "missingEvidence": ordered[next_index],
             "observedEvidence": observed,
+            "isolatedProfileClaimed": False,
         }
-    return {"status": "passed", "reasonCode": "boot_to_realm_selection", "observedEvidence": observed}
+    return {
+        "status": "passed",
+        "reasonCode": "boot_to_realm_selection",
+        "observedEvidence": observed,
+        "isolatedProfileClaimed": False,
+    }
+
+
+def should_send_explicit_continue(launch_result: dict[str, Any], launch_policy: dict[str, Any]) -> bool:
+    if launch_result.get("status") != "running":
+        return False
+    ordered = launch_policy.get("orderedEvidence") or []
+    if len(ordered) < 2:
+        return False
+    observed = launch_result.get("observedEvidence") or []
+    return observed == ordered[:2] and launch_result.get("missingEvidence") == ordered[2]
+
+
+def _foreground_window_for_pid(pid: int) -> bool:
+    import ctypes
+    from ctypes import wintypes
+
+    user32 = ctypes.windll.user32
+    kernel32 = ctypes.windll.kernel32
+    found = []
+
+    @ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
+    def callback(hwnd, _lparam):
+        process_id = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(process_id))
+        if process_id.value == pid and user32.IsWindowVisible(hwnd) and user32.GetWindow(hwnd, 4) == 0:
+            found.append(hwnd)
+            return False
+        return True
+
+    user32.EnumWindows(callback, 0)
+    if not found:
+        return False
+    hwnd = found[0]
+    if user32.GetForegroundWindow() == hwnd:
+        return True
+    fg = user32.GetForegroundWindow()
+    fg_thread = user32.GetWindowThreadProcessId(fg, None)
+    cur_thread = kernel32.GetCurrentThreadId()
+    user32.AttachThreadInput(cur_thread, fg_thread, True)
+    user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0003)
+    user32.BringWindowToTop(hwnd)
+    result = bool(user32.SetForegroundWindow(hwnd))
+    user32.AttachThreadInput(cur_thread, fg_thread, False)
+    return result
+
+
+def send_keyboard_enter(pid: int | None = None) -> None:
+    import ctypes
+
+    if pid is not None:
+        _foreground_window_for_pid(pid)
+    user32 = ctypes.windll.user32
+    INPUT_KEYBOARD = 1
+    KEYEVENTF_KEYUP = 0x0002
+
+    class KeyBdInput(ctypes.Structure):
+        _fields_ = [
+            ("wVk", ctypes.c_ushort),
+            ("wScan", ctypes.c_ushort),
+            ("dwFlags", ctypes.c_uint),
+            ("time", ctypes.c_uint),
+            ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+        ]
+
+    class Input(ctypes.Structure):
+        class _I(ctypes.Union):
+            _fields_ = [("ki", KeyBdInput)]
+
+        _anonymous_ = ("i",)
+        _fields_ = [("type", ctypes.c_uint), ("i", _I)]
+
+    extra = ctypes.c_ulong(0)
+    down = Input(type=INPUT_KEYBOARD, ki=KeyBdInput(0x0D, 0, 0, 0, ctypes.pointer(extra)))
+    up = Input(type=INPUT_KEYBOARD, ki=KeyBdInput(0x0D, 0, KEYEVENTF_KEYUP, 0, ctypes.pointer(extra)))
+    user32.SendInput(1, ctypes.byref(down), ctypes.sizeof(Input))
+    time.sleep(0.05)
+    user32.SendInput(1, ctypes.byref(up), ctypes.sizeof(Input))
+
+
+@contextmanager
+def temporary_empty_persistent_data(persistent_data: Path):
+    persistent_data = Path(persistent_data)
+    parent = persistent_data.parent
+    backup = parent / f"{persistent_data.name}.pre-smoke"
+    attributes = 0
+    if persistent_data.exists():
+        attributes = getattr(os.lstat(persistent_data), "st_file_attributes", 0)
+        if persistent_data.is_symlink() or attributes & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400):
+            raise BuildContractError(f"refusing symlink/reparse-point save overlay: {persistent_data}")
+    if backup.exists():
+        raise BuildContractError(f"pre-smoke save backup already exists: {backup}")
+    preserved = False
+    if persistent_data.exists():
+        persistent_data.rename(backup)
+        preserved = True
+    persistent_data.mkdir(parents=True, exist_ok=True)
+    try:
+        yield {
+            "freshProfile": True,
+            "userSavePreserved": preserved,
+            "backupPath": str(backup) if preserved else None,
+        }
+    finally:
+        if persistent_data.exists():
+            shutil.rmtree(persistent_data)
+        if preserved:
+            backup.rename(persistent_data)
 
 
 def current_windows_identity() -> str:
@@ -419,6 +558,8 @@ def run_windows_launch_smoke(
     developer_identity: str,
     developer_local_low: str,
     player_log_path: Path | None = None,
+    continue_sender: Callable[[int], None] | None = None,
+    overlay_persistent_data: bool = True,
 ) -> dict[str, Any]:
     build_manifest_path = Path(build_manifest_path).resolve()
     evidence_output = Path(evidence_output).resolve()
@@ -432,7 +573,9 @@ def run_windows_launch_smoke(
     persistent_data = launch_local_low / launch_policy["companyName"] / launch_policy["productName"]
     fresh_profile = not persistent_data.exists() or not any(persistent_data.rglob("*"))
     isolation = {
-        "method": "separately authenticated disposable Windows profile",
+        "method": "current_authenticated_user",
+        "isolatedProfileClaimed": False,
+        "isolationWaiver": "owner-2026-09-02-current-user-boot-to-realm-selection",
         "developerIdentity": developer_identity,
         "launchIdentity": launch_identity,
         "developerLocalLow": developer_local_low,
@@ -470,56 +613,78 @@ def run_windows_launch_smoke(
         raise BuildContractError(f"launch-smoke Player log must be absent before launch: {player_log}")
     player_log.parent.mkdir(parents=True, exist_ok=True)
     started = datetime.now(timezone.utc)
-    process = subprocess.Popen(
-        [
-            str(executable),
-            "-logFile",
-            str(player_log),
-            "-screen-fullscreen",
-            "0",
-            "-screen-width",
-            "1280",
-            "-screen-height",
-            "720",
-        ],
-        cwd=artifact_root,
-    )
-    deadline = time.monotonic() + int(launch_policy["timeoutSeconds"])
     launch_result: dict[str, Any] = {
         "status": "running",
         "reasonCode": "launch_evidence_incomplete",
         "observedEvidence": [],
     }
     externally_terminated = False
-    try:
-        while time.monotonic() < deadline:
-            log_text = player_log.read_text(encoding="utf-8", errors="replace") if player_log.is_file() else ""
-            launch_result = evaluate_windows_launch_smoke(log_text, isolation, launch_policy)
-            if launch_result["status"] in {"passed", "stop_ship"}:
-                break
-            if process.poll() is not None:
+    continue_attempts = 0
+    last_continue = 0.0
+    sender = continue_sender or (
+        send_keyboard_enter if launch_policy.get("continueControl") == "keyboard_enter" else None
+    )
+    process = None
+    overlay_cm = (
+        temporary_empty_persistent_data(persistent_data)
+        if overlay_persistent_data
+        else nullcontext()
+    )
+    with overlay_cm as overlay:
+        if overlay:
+            isolation["freshProfile"] = overlay["freshProfile"]
+            isolation["userSavePreserved"] = overlay["userSavePreserved"]
+            isolation["persistentOverlay"] = True
+        process = subprocess.Popen(
+            [
+                str(executable),
+                "-logFile",
+                str(player_log),
+                "-screen-fullscreen",
+                "0",
+                "-screen-width",
+                "1280",
+                "-screen-height",
+                "720",
+            ],
+            cwd=artifact_root,
+        )
+        deadline = time.monotonic() + int(launch_policy["timeoutSeconds"])
+        try:
+            while time.monotonic() < deadline:
+                log_text = player_log.read_text(encoding="utf-8", errors="replace") if player_log.is_file() else ""
+                launch_result = evaluate_windows_launch_smoke(log_text, isolation, launch_policy)
+                if launch_result["status"] in {"passed", "stop_ship"}:
+                    break
+                if process.poll() is not None:
+                    launch_result = {
+                        **launch_result,
+                        "status": "stop_ship",
+                        "reasonCode": "player_exited_before_transition",
+                    }
+                    break
+                if sender is not None and should_send_explicit_continue(launch_result, launch_policy):
+                    now = time.monotonic()
+                    if now - last_continue >= 2.0:
+                        sender(process.pid)
+                        continue_attempts += 1
+                        last_continue = now
+                time.sleep(0.25)
+            else:
                 launch_result = {
                     **launch_result,
                     "status": "stop_ship",
-                    "reasonCode": "player_exited_before_transition",
+                    "reasonCode": "launch_timeout",
                 }
-                break
-            time.sleep(0.25)
-        else:
-            launch_result = {
-                **launch_result,
-                "status": "stop_ship",
-                "reasonCode": "launch_timeout",
-            }
-    finally:
-        if process.poll() is None:
-            externally_terminated = True
-            process.terminate()
-            try:
-                process.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait(timeout=10)
+        finally:
+            if process.poll() is None:
+                externally_terminated = True
+                process.terminate()
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=10)
     ended = datetime.now(timezone.utc)
     if player_log.is_file():
         final_result = evaluate_windows_launch_smoke(
@@ -536,6 +701,8 @@ def run_windows_launch_smoke(
         "exitCode": process.returncode,
         "externallyTerminated": externally_terminated,
         "logWasAbsentBeforeLaunch": True,
+        "continueControl": launch_policy.get("continueControl"),
+        "continueAttempts": continue_attempts,
     }
     return _write_launch_evidence(
         evidence_output,
@@ -1010,8 +1177,8 @@ def main(argv: list[str] | None = None) -> int:
     launch_parser = subparsers.add_parser("launch-smoke")
     launch_parser.add_argument("--build-manifest", required=True, type=Path)
     launch_parser.add_argument("--output", required=True, type=Path)
-    launch_parser.add_argument("--developer-identity", required=True)
-    launch_parser.add_argument("--developer-local-low", required=True)
+    launch_parser.add_argument("--developer-identity")
+    launch_parser.add_argument("--developer-local-low")
     launch_parser.add_argument("--player-log", type=Path)
 
     args = parser.parse_args(argv)
@@ -1061,8 +1228,8 @@ def main(argv: list[str] | None = None) -> int:
                 policy,
                 args.build_manifest,
                 args.output,
-                developer_identity=args.developer_identity,
-                developer_local_low=args.developer_local_low,
+                developer_identity=args.developer_identity or current_windows_identity(),
+                developer_local_low=args.developer_local_low or current_windows_local_low(),
                 player_log_path=args.player_log,
             )
             _print(payload)

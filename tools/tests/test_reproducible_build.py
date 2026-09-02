@@ -33,6 +33,14 @@ class ReproducibleBuildTests(unittest.TestCase):
         self.assertEqual(windows["scriptingBackend"], "Mono2x")
         self.assertEqual(windows["architecture"], "x86_64")
         self.assertEqual(set(policy["targets"]), {"windows64-development"})
+        self.assertEqual(policy["launchSmoke"]["isolationMode"], "current_authenticated_user")
+        self.assertFalse(policy["launchSmoke"]["isolatedProfileClaimed"])
+        self.assertEqual(policy["launchSmoke"]["continueControl"], "keyboard_enter")
+        self.assertEqual(policy["launchSmoke"]["orderedEvidence"], [
+            "[AL-SCENE-ACTIVE] id=al_scene_boot name=Boot path=Assets/AL/Scenes/Boot.unity role=production_entry version=223.2",
+            "AL Boot Sequence Started...",
+            "[AL-SCENE-ACTIVE] id=al_scene_realm_selection name=RealmSelection path=Assets/AL/Scenes/RealmSelection.unity role=onboarding_selection version=223.2",
+        ])
         android = policy["deferredAndroid"]
         self.assertEqual(android["task"], "t_7b530af7")
         self.assertEqual(android["status"], "deferred_pc_first")
@@ -267,41 +275,123 @@ class ReproducibleBuildTests(unittest.TestCase):
         self.assertEqual(summary["projectSettings"], source["projectSettings"])
         self.assertEqual(summary["inputFiles"], source["inputFiles"])
 
-    def test_launch_smoke_requires_distinct_profile_and_exact_ordered_markers(self):
+    def test_launch_smoke_accepts_current_user_and_refuses_isolation_inference(self):
         module = load_module()
         policy = module.load_policy(POLICY)
         launch = policy["launchSmoke"]
         isolation = {
+            "method": "current_authenticated_user",
+            "isolatedProfileClaimed": False,
             "developerIdentity": "desktop\\developer",
-            "launchIdentity": "desktop\\smoke",
+            "launchIdentity": "desktop\\developer",
             "developerLocalLow": "C:/Users/Developer/AppData/LocalLow",
-            "launchLocalLow": "C:/Users/Smoke/AppData/LocalLow",
-            "launchPersistentDataPath": "C:/Users/Smoke/AppData/LocalLow/DefaultCompany/AnotherLifeUnity",
-            "freshProfile": True,
+            "launchLocalLow": "C:/Users/Developer/AppData/LocalLow",
+            "launchPersistentDataPath": "C:/Users/Developer/AppData/LocalLow/DefaultCompany/AnotherLifeUnity",
+            "freshProfile": False,
             "profileChainHasNoReparsePoints": True,
         }
-        log = "\n".join([
-            launch["orderedEvidence"][0],
-            launch["orderedEvidence"][1],
-            launch["orderedEvidence"][2],
-            launch["orderedEvidence"][3],
-        ])
+        log = "\n".join(launch["orderedEvidence"])
 
         passed = module.evaluate_windows_launch_smoke(log, isolation, launch)
         self.assertEqual(passed["status"], "passed")
+        self.assertEqual(passed["reasonCode"], "boot_to_realm_selection")
         self.assertEqual(passed["observedEvidence"], launch["orderedEvidence"])
+        self.assertFalse(passed["isolatedProfileClaimed"])
 
-        same_profile = dict(isolation, launchIdentity="desktop\\developer")
-        rejected = module.evaluate_windows_launch_smoke(log, same_profile, launch)
+        claimed = dict(isolation, isolatedProfileClaimed=True)
+        rejected = module.evaluate_windows_launch_smoke(log, claimed, launch)
         self.assertEqual(rejected["status"], "stop_ship")
-        self.assertEqual(rejected["reasonCode"], "launch_identity_not_isolated")
+        self.assertEqual(rejected["reasonCode"], "isolated_profile_not_claimed")
+
+        other_user = dict(isolation, launchIdentity="desktop\\smoke")
+        rejected = module.evaluate_windows_launch_smoke(log, other_user, launch)
+        self.assertEqual(rejected["status"], "stop_ship")
+        self.assertEqual(rejected["reasonCode"], "launch_identity_not_current_user")
 
         wrong_order = "\n".join([launch["orderedEvidence"][1], launch["orderedEvidence"][0]])
         rejected = module.evaluate_windows_launch_smoke(wrong_order, isolation, launch)
         self.assertEqual(rejected["status"], "stop_ship")
         self.assertEqual(rejected["reasonCode"], "launch_evidence_out_of_order")
 
-    def test_launch_smoke_runner_refuses_developer_identity_before_starting_player(self):
+    def test_launch_smoke_arms_continue_only_after_boot_sequence_started(self):
+        module = load_module()
+        policy = module.load_policy(POLICY)
+        launch = policy["launchSmoke"]
+        isolation = {
+            "method": "current_authenticated_user",
+            "isolatedProfileClaimed": False,
+            "developerIdentity": "desktop\\developer",
+            "launchIdentity": "desktop\\developer",
+            "developerLocalLow": "C:/Users/Developer/AppData/LocalLow",
+            "launchLocalLow": "C:/Users/Developer/AppData/LocalLow",
+            "launchPersistentDataPath": "C:/Users/Developer/AppData/LocalLow/DefaultCompany/AnotherLifeUnity",
+            "freshProfile": False,
+            "profileChainHasNoReparsePoints": True,
+        }
+        boot_only = module.evaluate_windows_launch_smoke(launch["orderedEvidence"][0], isolation, launch)
+        self.assertFalse(module.should_send_explicit_continue(boot_only, launch))
+
+        boot_ready = module.evaluate_windows_launch_smoke(
+            "\n".join(launch["orderedEvidence"][:2]),
+            isolation,
+            launch,
+        )
+        self.assertTrue(module.should_send_explicit_continue(boot_ready, launch))
+
+        complete = module.evaluate_windows_launch_smoke("\n".join(launch["orderedEvidence"]), isolation, launch)
+        self.assertFalse(module.should_send_explicit_continue(complete, launch))
+
+    def test_launch_smoke_does_not_stop_on_current_user_recovery_required(self):
+        module = load_module()
+        policy = module.load_policy(POLICY)
+        launch = policy["launchSmoke"]
+        isolation = {
+            "method": "current_authenticated_user",
+            "isolatedProfileClaimed": False,
+            "developerIdentity": "desktop\\developer",
+            "launchIdentity": "desktop\\developer",
+            "developerLocalLow": "C:/Users/Developer/AppData/LocalLow",
+            "launchLocalLow": "C:/Users/Developer/AppData/LocalLow",
+            "launchPersistentDataPath": "C:/Users/Developer/AppData/LocalLow/DefaultCompany/AnotherLifeUnity",
+            "freshProfile": False,
+            "profileChainHasNoReparsePoints": True,
+        }
+        log = "\n".join([
+            "AL-SAVE-RECOVERY-REQUIRED: Existing generations were preserved because none can be activated without an explicit recovery decision.",
+            "[BOOT_STACK_LOAD_FAILED] Bootloader save load failed: Load status RecoveryRequired; current save present: False.",
+            launch["orderedEvidence"][0],
+            launch["orderedEvidence"][1],
+        ])
+
+        result = module.evaluate_windows_launch_smoke(log, isolation, launch)
+
+        self.assertNotEqual(result["reasonCode"], "launch_failure_token")
+        self.assertEqual(result["status"], "running")
+        self.assertEqual(result["observedEvidence"], launch["orderedEvidence"][:2])
+        self.assertTrue(module.should_send_explicit_continue(result, launch))
+
+    def test_persistent_overlay_restores_user_saves(self):
+        module = load_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            live = Path(temporary) / "AnotherLifeUnity"
+            live.mkdir()
+            (live / "save.tmp.json").write_text("keep-me", encoding="utf-8")
+            nested = live / "quarantine" / "save.json"
+            nested.parent.mkdir()
+            nested.write_text("nested", encoding="utf-8")
+
+            with module.temporary_empty_persistent_data(live) as overlay:
+                self.assertTrue(overlay["freshProfile"])
+                self.assertTrue(overlay["userSavePreserved"])
+                self.assertFalse((live / "save.tmp.json").exists())
+                (live / "smoke-only.txt").write_text("transient", encoding="utf-8")
+
+            self.assertEqual((live / "save.tmp.json").read_text(encoding="utf-8"), "keep-me")
+            self.assertEqual(nested.read_text(encoding="utf-8"), "nested")
+            self.assertFalse((live / "smoke-only.txt").exists())
+            self.assertFalse((live.parent / "AnotherLifeUnity.pre-smoke").exists())
+
+    def test_launch_smoke_runner_accepts_current_user_and_does_not_claim_isolation(self):
         module = load_module()
         policy = module.load_policy(POLICY)
         with tempfile.TemporaryDirectory() as temporary:
@@ -329,17 +419,51 @@ class ReproducibleBuildTests(unittest.TestCase):
             current_identity = module.current_windows_identity()
             current_local_low = module.current_windows_local_low()
             output = root / "launch.json"
+            launches = []
 
-            result = module.run_windows_launch_smoke(
-                policy,
-                manifest_path,
-                output,
-                developer_identity=current_identity,
-                developer_local_low=current_local_low,
-            )
+            class FakeProcess:
+                pid = 4242
+                returncode = 1
 
-            self.assertEqual(result["status"], "stop_ship")
-            self.assertEqual(result["launchResult"]["reasonCode"], "launch_identity_not_isolated")
+                def poll(self):
+                    return 1
+
+                def terminate(self):
+                    return None
+
+                def kill(self):
+                    return None
+
+                def wait(self, timeout=None):
+                    return 1
+
+            original_popen = module.subprocess.Popen
+
+            def fake_popen(command, cwd=None, **kwargs):
+                if command and str(command[0]).endswith("AnotherLifeUnity.exe"):
+                    launches.append({"command": command, "cwd": cwd})
+                    return FakeProcess()
+                return original_popen(command, cwd=cwd, **kwargs)
+
+            module.subprocess.Popen = fake_popen
+            try:
+                result = module.run_windows_launch_smoke(
+                    policy,
+                    manifest_path,
+                    output,
+                    developer_identity=current_identity,
+                    developer_local_low=current_local_low,
+                    overlay_persistent_data=False,
+                )
+            finally:
+                module.subprocess.Popen = original_popen
+
+            self.assertEqual(result["isolation"]["method"], "current_authenticated_user")
+            self.assertFalse(result["isolation"]["isolatedProfileClaimed"])
+            self.assertEqual(result["isolation"]["developerIdentity"], current_identity)
+            self.assertEqual(result["isolation"]["launchIdentity"], current_identity)
+            self.assertNotEqual(result["launchResult"]["reasonCode"], "launch_identity_not_isolated")
+            self.assertEqual(len(launches), 1)
             self.assertTrue(output.is_file())
 
     def test_toolchain_inventory_captures_embedded_android_sdk_ndk_and_jdk(self):
