@@ -176,8 +176,8 @@ A current-user LocalLow leftover (`save.tmp.json` plus quarantine generations) i
 The harness temporarily overlays an empty product folder and restores the original files afterward;
 user saves are not deleted. Isolated-profile launch evidence is still not claimed.
 
-Observed packaged Windows Player smoke against `windows64-b` (`13ff538b`, Unity `6000.3.22f1`):
-Boot marker and `AL Boot Sequence Started...` were observed. RealmSelection was not reached.
-First-generation create in the empty overlay failed with `SAVE_UNKNOWN_TOP_LEVEL_FIELD`
-(`AL-SAVE-CREATE-TEMP-INVALID`), so Boot never exposed Continue. That is a fail-closed save-create
-result, not launch-smoke success, and it is not a mobile-readiness claim.
+Observed packaged Windows Player smoke against `windows64-fix` (`35d165e4`, Unity
+`6000.3.22f1`): Boot marker, `AL Boot Sequence Started...`, and the production RealmSelection
+marker were observed in order after explicit Continue. First-generation create in the empty overlay
+logged `AL-SAVE-CREATED-NEW`. Isolated-profile launch is still not claimed. User LocalLow leftovers
+were restored after the overlay; Android/mobile remains deferred to `t_7b530af7`.
