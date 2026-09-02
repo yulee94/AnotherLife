@@ -54,6 +54,7 @@ REAL_CATALOGS = {
     "al-relationship-authority-content": "al_relationship_authority_content_catalog.json",
     "al-world-atlas-narrative": "al_world_atlas_narrative_catalog.json",
     "al-world-event-content": "al_world_event_content_catalog.json",
+    "al-main-quest-line-runtime": "al_main_quest_line_runtime.v1.json",
     "al-building": "al_building_catalog.json",
     "al-champion": "al_champion_catalog.json",
     "al-golden-scene": "al_golden_scene_catalog.json",
