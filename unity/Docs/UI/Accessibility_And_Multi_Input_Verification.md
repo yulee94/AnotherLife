@@ -10,6 +10,7 @@ Run with Unity 6000.3.22f1 and read the NUnit XML totals rather than relying on 
 - `AL.Tests.EditMode.WorldMap`: progressive disclosure and authority, semantic labels/shapes, responsive map layout, large minimap text, and reduced motion/flash/VFX suppression for nonessential objective effects.
 - `AL.Tests.PlayMode.WorldMap`: modal initial focus, visible focus treatment, minimum close-target size, submit activation, cancel/back close, restored prior focus, and overlay lifecycle repair.
 - `tools/ui/validate_ui_design_system.py`: authored form factors, semantic states, reusable HUD components, and protected scan-path geometry.
+- `tools/ui/validate_ui_release_readiness.py`: 16 hashed GS-04 captures covering all four form factors and the dense-combat/hostile-cue, 200% text/extreme-safe-area/reduced-effects, expanded-map authority, and touch/controller/keyboard focus-path scenarios.
 
 ## Manual device matrix
 

@@ -1,0 +1,393 @@
+{
+  "schemaVersion": 1,
+  "systemId": "al.ui.gs04.release_readiness_evidence.v1",
+  "status": "automated_layout_evidence_not_final_release_approval",
+  "goldenScene": "GS-04",
+  "evidenceInputSha256": "83ce0a9b667f94bef1a9294373c5432495c88d1c50b46f28b853f61343c1a0c8",
+  "tokenAsset": "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_ProductionDesignTokens.json",
+  "compositionAsset": "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_HudResponsiveCompositions.json",
+  "componentAsset": "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_HudComponentAuthoring.json",
+  "validatorDependency": "tools/ui/validate_ui_design_system.py",
+  "mapAuthorityCatalog": "unity/Assets/AL/StreamingAssets/GameData/al_map_disclosure_catalog.json",
+  "mapAuthorityOwner": "server",
+  "authoritativeProjectionIds": {
+    "sharedObjective": "map_objective_crossroads_control",
+    "worldMapOnlyRoute": "route_stonehold_to_accordant",
+    "sharedAllegiance": "allegiance_stonehold"
+  },
+  "artifacts": [
+    {
+      "formFactor": "PhoneLandscape",
+      "scenarioId": "dense_combat",
+      "referenceResolution": {
+        "x": 2400,
+        "y": 1080
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": false,
+      "inputModes": [],
+      "artifact": "AL_GS04_PhoneLandscape_dense_combat.svg",
+      "sha256": "83bd2b7c300ef972b60d7ac9cabf7588c5bd77bd75f9b31b1f47706d29936713"
+    },
+    {
+      "formFactor": "PhoneLandscape",
+      "scenarioId": "accessibility_stress",
+      "referenceResolution": {
+        "x": 2400,
+        "y": 1080
+      },
+      "safeAreaNormalized": {
+        "x": 0.075,
+        "y": 0.055,
+        "width": 0.85,
+        "height": 0.89
+      },
+      "textScale": 2.0,
+      "reducedMotion": true,
+      "reducedFlash": true,
+      "reducedVfx": true,
+      "mapAuthorityAgreement": false,
+      "inputModes": [],
+      "artifact": "AL_GS04_PhoneLandscape_accessibility_stress.svg",
+      "sha256": "ddf247ea0d32d5cdd4325b78df5d0c8b39d4d478a34b068d29f57f993c3b43e5"
+    },
+    {
+      "formFactor": "PhoneLandscape",
+      "scenarioId": "expanded_map",
+      "referenceResolution": {
+        "x": 2400,
+        "y": 1080
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": true,
+      "inputModes": [],
+      "artifact": "AL_GS04_PhoneLandscape_expanded_map.svg",
+      "sha256": "abf351ffed8638026ddd6b44196fc699d04d63623a26580f5589da8837084829"
+    },
+    {
+      "formFactor": "PhoneLandscape",
+      "scenarioId": "input_focus_paths",
+      "referenceResolution": {
+        "x": 2400,
+        "y": 1080
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": false,
+      "inputModes": [
+        "touch",
+        "controller",
+        "keyboard"
+      ],
+      "artifact": "AL_GS04_PhoneLandscape_input_focus_paths.svg",
+      "sha256": "12146cf2842cba0c68b59932634b834a9313752bb54f9e802be1ac3dbc1114a5"
+    },
+    {
+      "formFactor": "TabletLandscape",
+      "scenarioId": "dense_combat",
+      "referenceResolution": {
+        "x": 2732,
+        "y": 2048
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": false,
+      "inputModes": [],
+      "artifact": "AL_GS04_TabletLandscape_dense_combat.svg",
+      "sha256": "67abbf8047182f16811b37c964f77b12489cea9eea0f3e177558b91bcc534a2a"
+    },
+    {
+      "formFactor": "TabletLandscape",
+      "scenarioId": "accessibility_stress",
+      "referenceResolution": {
+        "x": 2732,
+        "y": 2048
+      },
+      "safeAreaNormalized": {
+        "x": 0.045,
+        "y": 0.04,
+        "width": 0.91,
+        "height": 0.92
+      },
+      "textScale": 2.0,
+      "reducedMotion": true,
+      "reducedFlash": true,
+      "reducedVfx": true,
+      "mapAuthorityAgreement": false,
+      "inputModes": [],
+      "artifact": "AL_GS04_TabletLandscape_accessibility_stress.svg",
+      "sha256": "fa4bab6dbb0c4d06b55e22752ac2471ae4605d19b28795394b44bef2463a94f5"
+    },
+    {
+      "formFactor": "TabletLandscape",
+      "scenarioId": "expanded_map",
+      "referenceResolution": {
+        "x": 2732,
+        "y": 2048
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": true,
+      "inputModes": [],
+      "artifact": "AL_GS04_TabletLandscape_expanded_map.svg",
+      "sha256": "17a6ef48525c5c84b74a0d09a55266060c0712bd9720a39faa0d9ffeb2be6e64"
+    },
+    {
+      "formFactor": "TabletLandscape",
+      "scenarioId": "input_focus_paths",
+      "referenceResolution": {
+        "x": 2732,
+        "y": 2048
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": false,
+      "inputModes": [
+        "touch",
+        "controller",
+        "keyboard"
+      ],
+      "artifact": "AL_GS04_TabletLandscape_input_focus_paths.svg",
+      "sha256": "3e3c0a07739eabaa55518c60ef1f76edd5e1e061207c61f8f55eeb7295f86780"
+    },
+    {
+      "formFactor": "Pc16By9",
+      "scenarioId": "dense_combat",
+      "referenceResolution": {
+        "x": 1920,
+        "y": 1080
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": false,
+      "inputModes": [],
+      "artifact": "AL_GS04_Pc16By9_dense_combat.svg",
+      "sha256": "e6e5943f916f4b55d3a752a6503577ddf1199706922b53f6097fb90e512848ab"
+    },
+    {
+      "formFactor": "Pc16By9",
+      "scenarioId": "accessibility_stress",
+      "referenceResolution": {
+        "x": 1920,
+        "y": 1080
+      },
+      "safeAreaNormalized": {
+        "x": 0.035,
+        "y": 0.035,
+        "width": 0.93,
+        "height": 0.93
+      },
+      "textScale": 2.0,
+      "reducedMotion": true,
+      "reducedFlash": true,
+      "reducedVfx": true,
+      "mapAuthorityAgreement": false,
+      "inputModes": [],
+      "artifact": "AL_GS04_Pc16By9_accessibility_stress.svg",
+      "sha256": "512a15b909a672b1a8302aa939deda48bf2b843ac4ab8ade040233080b32fdac"
+    },
+    {
+      "formFactor": "Pc16By9",
+      "scenarioId": "expanded_map",
+      "referenceResolution": {
+        "x": 1920,
+        "y": 1080
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": true,
+      "inputModes": [],
+      "artifact": "AL_GS04_Pc16By9_expanded_map.svg",
+      "sha256": "171a97eb6563ada702656e131d3269a67a1729c2e70989f8e123e5e5cb6f9d2f"
+    },
+    {
+      "formFactor": "Pc16By9",
+      "scenarioId": "input_focus_paths",
+      "referenceResolution": {
+        "x": 1920,
+        "y": 1080
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": false,
+      "inputModes": [
+        "touch",
+        "controller",
+        "keyboard"
+      ],
+      "artifact": "AL_GS04_Pc16By9_input_focus_paths.svg",
+      "sha256": "8d5a2c532d42cde1fbff862f10f17be423555da0bb15550e3a3327f601153dc5"
+    },
+    {
+      "formFactor": "PcUltrawide",
+      "scenarioId": "dense_combat",
+      "referenceResolution": {
+        "x": 3440,
+        "y": 1440
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": false,
+      "inputModes": [],
+      "artifact": "AL_GS04_PcUltrawide_dense_combat.svg",
+      "sha256": "d161f63918a080dea1651a2f4613f3f4ad83e3669f62a38133f6917fb858a914"
+    },
+    {
+      "formFactor": "PcUltrawide",
+      "scenarioId": "accessibility_stress",
+      "referenceResolution": {
+        "x": 3440,
+        "y": 1440
+      },
+      "safeAreaNormalized": {
+        "x": 0.055,
+        "y": 0.035,
+        "width": 0.89,
+        "height": 0.93
+      },
+      "textScale": 2.0,
+      "reducedMotion": true,
+      "reducedFlash": true,
+      "reducedVfx": true,
+      "mapAuthorityAgreement": false,
+      "inputModes": [],
+      "artifact": "AL_GS04_PcUltrawide_accessibility_stress.svg",
+      "sha256": "bb1a0386ddededaf126e79200315dd27c1de924c506191a28ba9ffa2680d1b11"
+    },
+    {
+      "formFactor": "PcUltrawide",
+      "scenarioId": "expanded_map",
+      "referenceResolution": {
+        "x": 3440,
+        "y": 1440
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": true,
+      "inputModes": [],
+      "artifact": "AL_GS04_PcUltrawide_expanded_map.svg",
+      "sha256": "c45369088d113e2c255147c750564e362083e62fa266d3bd5fbe6b0edc6c2a7e"
+    },
+    {
+      "formFactor": "PcUltrawide",
+      "scenarioId": "input_focus_paths",
+      "referenceResolution": {
+        "x": 3440,
+        "y": 1440
+      },
+      "safeAreaNormalized": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "textScale": 1.0,
+      "reducedMotion": false,
+      "reducedFlash": false,
+      "reducedVfx": false,
+      "mapAuthorityAgreement": false,
+      "inputModes": [
+        "touch",
+        "controller",
+        "keyboard"
+      ],
+      "artifact": "AL_GS04_PcUltrawide_input_focus_paths.svg",
+      "sha256": "f071124385c62c733b3d51328bc3861e793b149b9b2b042ed1bb2af12568fa7c"
+    }
+  ],
+  "limitations": [
+    "SVGs are deterministic layout evidence, not runtime device captures.",
+    "The commissioned production font binaries are not present.",
+    "Physical-device performance, thermal, touch, controller, keyboard, blinded-participant, and owner-creative gates remain external."
+  ]
+}
