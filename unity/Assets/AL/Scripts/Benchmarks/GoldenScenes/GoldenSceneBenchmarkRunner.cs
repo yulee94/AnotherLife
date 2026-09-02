@@ -226,6 +226,14 @@ namespace AL.Benchmarks.GoldenScenes
                 yield break;
             }
 
+            int requiredVideoFrames = (int)Math.Ceiling(
+                context.Request.VideoFrameRate * context.Request.MeasurementSeconds);
+            double frameDeadline = Time.realtimeSinceStartupAsDouble + 8d;
+            while (capture.IsCapturing &&
+                   capture.VideoFrameCount < requiredVideoFrames &&
+                   Time.realtimeSinceStartupAsDouble < frameDeadline)
+                yield return null;
+
             GoldenSceneCaptureManifest manifest;
             try
             {

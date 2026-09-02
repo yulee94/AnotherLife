@@ -662,6 +662,7 @@ namespace AL.Benchmarks.GoldenScenes
         public string OutputDirectory { get; private set; } = string.Empty;
         public string ManifestPath { get; private set; } = string.Empty;
         public bool IsActive => begun && !complete;
+        public int VideoFrameCount => videoFrameCount;
         public GoldenSceneSetup Setup => setup;
         public GoldenSceneCaptureMediaSettings MediaSettings => mediaSettings;
         public GoldenSceneCaptureManifest Manifest { get; private set; }
@@ -1236,6 +1237,7 @@ namespace AL.Benchmarks.GoldenScenes
         public event Action<string> CaptureFailed;
 
         public bool IsCapturing => session != null && session.IsActive;
+        public int VideoFrameCount => session == null ? 0 : session.VideoFrameCount;
         public bool AutoComplete { get; set; } = true;
         public GoldenSceneCaptureManifest LatestManifest { get; private set; }
         public string ManifestPath => session?.ManifestPath ?? string.Empty;
