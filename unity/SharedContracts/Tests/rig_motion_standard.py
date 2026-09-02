@@ -585,11 +585,16 @@ def _validate_manifest(
             if requirement["status"] == "available_source_candidate":
                 if clip_id is None:
                     issues.append(f"AvailableCoverageWithoutClip: {profile_id}.{key}")
-                elif (
-                    clip_id in clips_by_id
-                    and clips_by_id[clip_id]["representativeProfileId"] != profile_id
-                ):
-                    issues.append(f"CrossRepresentativeClip: {profile_id}.{key}")
+                elif clip_id in clips_by_id:
+                    clip = clips_by_id[clip_id]
+                    target_profile = standard_profiles.get(profile_id)
+                    if (
+                        target_profile is not None
+                        and clip["representativeProfileId"] != profile_id
+                        and clip["skeletonProfileId"]
+                        != target_profile["skeletonProfileId"]
+                    ):
+                        issues.append(f"CrossSkeletonClip: {profile_id}.{key}")
             elif clip_id is not None:
                 issues.append(f"UnavailableCoverageWithClip: {profile_id}.{key}")
             if (
