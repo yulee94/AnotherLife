@@ -114,6 +114,48 @@ namespace AL.Tests.EditMode.Benchmarks
         }
 
         [Test]
+        public void CommandLineAcceptsOnlyAnExistingFfmpegExecutable()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "al-gs-ffmpeg-parser-" + Guid.NewGuid().ToString("N"));
+            string ffmpegPath = Path.Combine(root, "ffmpeg.exe");
+            try
+            {
+                Directory.CreateDirectory(root);
+                File.WriteAllBytes(ffmpegPath, new byte[] { 1 });
+                string[] arguments =
+                {
+                    "AnotherLifeUnity.exe", "--al-gs-run",
+                    "--al-gs-scene", "GS-03",
+                    "--al-gs-anchor", "boss_entry",
+                    "--al-gs-quality", "pc_high_60",
+                    "--al-gs-output", Path.Combine(root, "evidence"),
+                    "--al-gs-ffmpeg", ffmpegPath
+                };
+
+                Assert.That(GoldenSceneBenchmarkRequestParser.TryParse(
+                    arguments,
+                    isEditor: false,
+                    out GoldenSceneBenchmarkRequest request,
+                    out string diagnostic), Is.True, diagnostic);
+                Assert.That(request.FfmpegPath, Is.EqualTo(Path.GetFullPath(ffmpegPath)));
+
+                arguments[arguments.Length - 1] = Path.Combine(root, "missing", "ffmpeg.exe");
+                Assert.That(GoldenSceneBenchmarkRequestParser.TryParse(
+                    arguments,
+                    isEditor: false,
+                    out _,
+                    out diagnostic), Is.False);
+                Assert.That(diagnostic, Is.EqualTo("AL-GS-RUNNER-FFMPEG-PATH-INVALID"));
+            }
+            finally
+            {
+                if (Directory.Exists(root)) Directory.Delete(root, true);
+            }
+        }
+
+        [Test]
         public void RuntimeValuesMarkEditorBuildGuidAsNotApplicable()
         {
             Assert.That(
@@ -326,6 +368,23 @@ namespace AL.Tests.EditMode.Benchmarks
         }
 
         [Test]
+        public void WindowsCertificationAcceptsExplicitUnavailableDeviceApis()
+        {
+            GoldenSceneSetup setup = Resolve("GS-03", "boss_entry", "pc_high_60");
+            GoldenSceneIdentityRecord identity = CreateIdentity(setup, "run-windows-device-policy");
+            GoldenSceneScorecardReport scorecard = GoldenSceneScorecardReport.Create(
+                identity,
+                "1234567890abcdef1234567890abcdef",
+                CreateCompleteManifest(setup, identity),
+                CreateTelemetryReport(explicitUnavailableDeviceCapabilities: true),
+                isBuiltInRenderPipeline: true,
+                requestsTargetPlatformCertification: true);
+
+            Assert.That(scorecard.CertificationStatus,
+                Is.EqualTo("target-platform-evidence-ready-for-review"));
+        }
+
+        [Test]
         public void RuntimeCaptureAllowsRunnerOwnedCompletion()
         {
             var host = new GameObject("GoldenSceneRuntimeCapture-Test");
@@ -336,6 +395,24 @@ namespace AL.Tests.EditMode.Benchmarks
                 Assert.That(runtimeCapture.AutoComplete, Is.True);
                 runtimeCapture.AutoComplete = false;
                 Assert.That(runtimeCapture.AutoComplete, Is.False);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(host);
+            }
+        }
+
+        [Test]
+        public void MissingSceneCameraUsesAHostOwnedBenchmarkCamera()
+        {
+            var host = new GameObject("GoldenSceneBenchmarkRunner-CameraHost");
+            try
+            {
+                Camera camera = GoldenSceneBenchmarkRunner.CreateFallbackBenchmarkCamera(host);
+                Assert.That(camera, Is.Not.Null);
+                Assert.That(camera.name, Is.EqualTo("AL Golden Scene Benchmark Camera"));
+                Assert.That(camera.transform.parent, Is.EqualTo(host.transform));
+                Assert.That(camera.enabled, Is.True);
             }
             finally
             {
@@ -682,10 +759,12 @@ namespace AL.Tests.EditMode.Benchmarks
                 "2026-08-31T03:00:01.0000000Z");
         }
 
-        private static GoldenSceneTelemetryReport CreateTelemetryReport()
+        private static GoldenSceneTelemetryReport CreateTelemetryReport(
+            bool explicitUnavailableDeviceCapabilities = false)
         {
-            var device = new GoldenSceneDeviceSnapshot(
-                0.80d, "discharging", 35d, "none");
+            var device = explicitUnavailableDeviceCapabilities
+                ? new GoldenSceneDeviceSnapshot(null, string.Empty, null, string.Empty)
+                : new GoldenSceneDeviceSnapshot(0.80d, "discharging", 35d, "none");
             var session = new GoldenSceneTelemetrySession(
                 new GoldenSceneTelemetryConfiguration(30, 0d, 1d),
                 "2026-08-31T03:00:00.0000000Z", true, device);
@@ -693,6 +772,25 @@ namespace AL.Tests.EditMode.Benchmarks
                 GoldenSceneTelemetryMetricIds.CpuFrameTime, "milliseconds", "test"));
             session.SetCapability(TelemetryCapability.Supported(
                 GoldenSceneTelemetryMetricIds.GpuFrameTime, "milliseconds", "test"));
+            if (explicitUnavailableDeviceCapabilities)
+            {
+                const string reason = "Windows does not expose this metric through Unity SystemInfo.";
+                session.SetCapability(TelemetryCapability.Unsupported(
+                    GoldenSceneTelemetryMetricIds.BatteryLevel,
+                    "ratio",
+                    "unity-systeminfo",
+                    reason));
+                session.SetCapability(TelemetryCapability.Unsupported(
+                    GoldenSceneTelemetryMetricIds.DeviceTemperature,
+                    "celsius",
+                    "unity-systeminfo",
+                    reason));
+                session.SetCapability(TelemetryCapability.Unsupported(
+                    GoldenSceneTelemetryMetricIds.DeviceThermalState,
+                    "state",
+                    "unity-systeminfo",
+                    reason));
+            }
             session.RecordFrame(new GoldenSceneFrameObservation(
                 1, 1d, 30d, 10d, 11d,
                 new Dictionary<string, double?>
@@ -701,7 +799,9 @@ namespace AL.Tests.EditMode.Benchmarks
                 }));
             return session.Complete(
                 "2026-08-31T03:00:01.0000000Z",
-                new GoldenSceneDeviceSnapshot(0.79d, "discharging", 36d, "none"));
+                explicitUnavailableDeviceCapabilities
+                    ? new GoldenSceneDeviceSnapshot(null, string.Empty, null, string.Empty)
+                    : new GoldenSceneDeviceSnapshot(0.79d, "discharging", 36d, "none"));
         }
 
         private static GoldenSceneIdentityRecord CreateIdentity(

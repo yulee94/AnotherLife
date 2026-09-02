@@ -45,15 +45,10 @@ namespace AL.Tests.EditMode.ProductionScenes
             FieldInfo destination = processor.GetField(
                 "DestinationPath",
                 BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            FieldInfo maximumCatalogCount = processor.GetField(
-                "MaximumCatalogCount",
-                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.That(resolveSource, Is.Not.Null);
             Assert.That(resolveCatalogs, Is.Not.Null);
             Assert.That(resolveRegistrations, Is.Not.Null);
             Assert.That(destination, Is.Not.Null);
-            Assert.That(maximumCatalogCount, Is.Not.Null);
-            Assert.That(maximumCatalogCount.GetRawConstantValue(), Is.EqualTo(64));
 
             string source = (string)resolveSource.Invoke(null, new object[] { Application.dataPath });
             Assert.That(
@@ -97,7 +92,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
-        public void SharedGameDataBuildProcessorRejectsMissingDuplicateEmptyAndOver64Sources()
+        public void SharedGameDataBuildProcessorRejectsMissingDuplicateEmptyAndOverBoundedSources()
         {
             Type processor = Runtime("AL.EditorTools.SharedGameDataStreamingAssetsBuildProcessor");
             MethodInfo resolveCatalogs = processor.GetMethod(
@@ -115,20 +110,23 @@ namespace AL.Tests.EditMode.ProductionScenes
                 AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "source directory is missing");
 
                 Directory.CreateDirectory(source);
-                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..64");
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..128");
 
                 File.WriteAllText(Path.Combine(source, "catalog-00.json"), "{}");
                 Directory.CreateDirectory(duplicate);
                 AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "Duplicate GameData");
 
                 Directory.Delete(duplicate, true);
-                for (int i = 1; i < 65; i++)
+                for (int i = 1; i < 128; i++)
                 {
                     File.WriteAllText(
                         Path.Combine(source, "catalog-" + i.ToString("00", CultureInfo.InvariantCulture) + ".json"),
                         "{}");
                 }
-                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..64");
+                var boundedCatalogs = (string[])resolveCatalogs.Invoke(null, new object[] { assetsRoot });
+                Assert.That(boundedCatalogs, Has.Length.EqualTo(128));
+                File.WriteAllText(Path.Combine(source, "catalog-128.json"), "{}");
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..128");
             }
             finally
             {
@@ -149,9 +147,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.IsTrue(PropBool(plan, "IsValid"), Failures(plan));
             var options = (BuildPlayerOptions)Invoke(plan, "CreateBuildPlayerOptions");
             Assert.AreEqual(BuildTarget.StandaloneWindows64, options.target);
-            Assert.AreEqual(
-                BuildOptions.Development | BuildOptions.NoUniqueIdentifier,
-                options.options);
+            Assert.AreEqual(BuildOptions.Development, options.options);
             Assert.AreEqual(ExpectedExecutable(root), options.locationPathName);
             Assert.That(options.extraScriptingDefines, Is.Empty,
                 "The normal Player must remain structurally unflavored.");
@@ -166,9 +162,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.That(options.scenes, Has.None.EqualTo("Assets/Test.unity"));
             Assert.That(options.scenes, Has.Some.EqualTo("Assets/AL/Scenes/ChampionArena.unity"));
             Assert.AreEqual("StandaloneWindows64", Prop(plan, "Target").ToString());
-            Assert.AreEqual(
-                BuildOptions.Development | BuildOptions.NoUniqueIdentifier,
-                (BuildOptions)Prop(plan, "Options"));
+            Assert.AreEqual(BuildOptions.Development, (BuildOptions)Prop(plan, "Options"));
         }
 
         [Test]
@@ -287,9 +281,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             CollectionAssert.AreEqual(new[] { ExpectedOutputDirectory(state.ProjectRoot) }, state.DeletedPaths);
             Assert.NotNull(state.CapturedOptions);
             Assert.AreEqual(BuildTarget.StandaloneWindows64, state.CapturedOptions.Value.target);
-            Assert.AreEqual(
-                BuildOptions.Development | BuildOptions.NoUniqueIdentifier,
-                state.CapturedOptions.Value.options);
+            Assert.AreEqual(BuildOptions.Development, state.CapturedOptions.Value.options);
             Assert.AreEqual(ExpectedExecutable(state.ProjectRoot), state.CapturedOptions.Value.locationPathName);
             Assert.AreEqual(ExpectedSummaryPath(state.ProjectRoot), state.WrittenPath);
             Assert.That(state.WrittenContents, Does.Contain("\"status\": \"Succeeded\""));

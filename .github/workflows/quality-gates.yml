@@ -80,23 +80,16 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
-      - name: Reproducible build contract
+      - name: Golden-scene evidence validator fixtures
         shell: pwsh
-        timeout-minutes: 10
+        timeout-minutes: 5
         run: |
-          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
-          $transcript = "artifacts/reproducible-build-contract.txt"
+          $transcript = "artifacts/golden-scene-evidence-validator.txt"
           try {
-            python -m unittest tools.tests.test_reproducible_build tools.tests.test_android_unity_package *>&1 |
+            & python ./tools/benchmarks/test_validate_golden_scene_evidence.py *>&1 |
               Tee-Object -FilePath $transcript
             if ($LASTEXITCODE -ne 0) {
-              throw "Reproducible build contract tests exited with code $LASTEXITCODE."
-            }
-            python tools/reproducible_build.py --repo-root . inventory `
-              --output artifacts/reproducible-build-inventory.json *>&1 |
-              Tee-Object -FilePath $transcript -Append
-            if ($LASTEXITCODE -ne 0) {
-              throw "Reproducible build inventory exited with code $LASTEXITCODE."
+              throw "Golden-scene evidence validator fixtures exited with code $LASTEXITCODE."
             }
           } catch {
             $_ | Out-String | Add-Content -LiteralPath $transcript
@@ -112,9 +105,7 @@ jobs:
             artifacts/repository-hygiene.txt
             artifacts/android-unity-package-tests.txt
             artifacts/quality-gate-fixtures.txt
-            artifacts/reproducible-build-contract.txt
-            artifacts/reproducible-build-inventory.json
-            artifacts/reproducible-build-inventory.json.sha256
+            artifacts/golden-scene-evidence-validator.txt
           if-no-files-found: error
           retention-days: 90
 
