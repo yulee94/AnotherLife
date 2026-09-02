@@ -27,6 +27,7 @@ namespace AL.Benchmarks.GoldenScenes
             int height,
             int videoFrameRate,
             GoldenSceneUiCaptureMode uiCaptureMode,
+            string ffmpegPath,
             string operatorId,
             bool requestsTargetPlatformCertification)
         {
@@ -42,6 +43,7 @@ namespace AL.Benchmarks.GoldenScenes
             Height = height;
             VideoFrameRate = videoFrameRate;
             UiCaptureMode = uiCaptureMode;
+            FfmpegPath = ffmpegPath ?? string.Empty;
             OperatorId = operatorId;
             RequestsTargetPlatformCertification = requestsTargetPlatformCertification;
         }
@@ -59,6 +61,7 @@ namespace AL.Benchmarks.GoldenScenes
         public int Height { get; }
         public int VideoFrameRate { get; }
         public GoldenSceneUiCaptureMode UiCaptureMode { get; }
+        public string FfmpegPath { get; }
         public string OperatorId { get; }
         public bool RequestsTargetPlatformCertification { get; }
     }
@@ -200,7 +203,7 @@ namespace AL.Benchmarks.GoldenScenes
                 "--al-gs-warmup-seconds", "--al-gs-measurement-seconds",
                 "--al-gs-output", "--al-gs-run-id", "--al-gs-width", "--al-gs-height",
                 "--al-gs-video-fps", "--al-gs-ui", "--al-gs-operator",
-                "--al-gs-certification"
+                "--al-gs-certification", "--al-gs-ffmpeg"
             },
             StringComparer.Ordinal);
 
@@ -297,6 +300,25 @@ namespace AL.Benchmarks.GoldenScenes
             else
                 return Fail("AL-GS-RUNNER-UI-MODE-INVALID", out diagnosticCode);
 
+            string ffmpegPath = Value(values, "--al-gs-ffmpeg");
+            if (!string.IsNullOrWhiteSpace(ffmpegPath))
+            {
+                try
+                {
+                    ffmpegPath = Path.GetFullPath(ffmpegPath);
+                }
+                catch (Exception)
+                {
+                    return Fail("AL-GS-RUNNER-FFMPEG-PATH-INVALID", out diagnosticCode);
+                }
+                if (!string.Equals(
+                        Path.GetFileName(ffmpegPath),
+                        "ffmpeg.exe",
+                        StringComparison.OrdinalIgnoreCase) ||
+                    !File.Exists(ffmpegPath))
+                    return Fail("AL-GS-RUNNER-FFMPEG-PATH-INVALID", out diagnosticCode);
+            }
+
             string fullOutput;
             try
             {
@@ -320,6 +342,7 @@ namespace AL.Benchmarks.GoldenScenes
                 height,
                 frameRate,
                 uiMode,
+                ffmpegPath,
                 operatorId,
                 requestsCertification);
             diagnosticCode = "AL-GS-RUNNER-REQUEST-READY";
@@ -671,8 +694,10 @@ namespace AL.Benchmarks.GoldenScenes
                 "capture-" + request.RunId,
                 capturedAtUtc,
                 request.OperatorId,
-                "al-golden-scene-benchmark-runner",
-                "1.0.0",
+                string.IsNullOrEmpty(request.FfmpegPath)
+                    ? "al-golden-scene-benchmark-runner"
+                    : "al-golden-scene-benchmark-runner+ffmpeg-gdigrab",
+                "1.1.0",
                 !isEditor,
                 request.MeasurementSeconds);
             if (!GoldenSceneRuntimeIdentityCollector.TryCollect(
@@ -1071,7 +1096,7 @@ namespace AL.Benchmarks.GoldenScenes
             else if (!requestsTargetPlatformCertification)
                 certificationStatus = "player-build-development-evidence-not-certifying";
             else if (manifest.IsComplete && telemetry.IsPlayerBuild && isBuiltInRenderPipeline &&
-                     SupportsDeviceCertificationTelemetry(telemetry))
+                     SupportsDeviceCertificationTelemetry(identity, telemetry))
                 certificationStatus = "target-platform-evidence-ready-for-review";
             else
                 certificationStatus = "target-platform-evidence-incomplete";
@@ -1079,6 +1104,7 @@ namespace AL.Benchmarks.GoldenScenes
         }
 
         private static bool SupportsDeviceCertificationTelemetry(
+            GoldenSceneIdentityRecord identity,
             GoldenSceneTelemetryReport telemetry)
         {
             string[] requiredMetricIds =
@@ -1087,6 +1113,16 @@ namespace AL.Benchmarks.GoldenScenes
                 GoldenSceneTelemetryMetricIds.DeviceTemperature,
                 GoldenSceneTelemetryMetricIds.DeviceThermalState
             };
+            if (string.Equals(identity.Platform, "WindowsPlayer", StringComparison.Ordinal))
+            {
+                return requiredMetricIds.All(metricId => telemetry.Capabilities.Any(capability =>
+                    string.Equals(capability.MetricId, metricId, StringComparison.Ordinal) &&
+                    ((capability.Status == TelemetryCapabilityStatus.Supported &&
+                      capability.SampleCount > 0) ||
+                     (capability.Status == TelemetryCapabilityStatus.Unsupported &&
+                      capability.SampleCount == 0 &&
+                      !string.IsNullOrWhiteSpace(capability.Reason)))));
+            }
             return requiredMetricIds.All(metricId => telemetry.Capabilities.Any(capability =>
                 string.Equals(capability.MetricId, metricId, StringComparison.Ordinal) &&
                 capability.Status == TelemetryCapabilityStatus.Supported &&

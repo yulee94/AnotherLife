@@ -110,20 +110,23 @@ namespace AL.Tests.EditMode.ProductionScenes
                 AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "source directory is missing");
 
                 Directory.CreateDirectory(source);
-                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..32");
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..128");
 
                 File.WriteAllText(Path.Combine(source, "catalog-00.json"), "{}");
                 Directory.CreateDirectory(duplicate);
                 AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "Duplicate GameData");
 
                 Directory.Delete(duplicate, true);
-                for (int i = 1; i < 33; i++)
+                for (int i = 1; i < 128; i++)
                 {
                     File.WriteAllText(
                         Path.Combine(source, "catalog-" + i.ToString("00", CultureInfo.InvariantCulture) + ".json"),
                         "{}");
                 }
-                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..32");
+                var boundedCatalogs = (string[])resolveCatalogs.Invoke(null, new object[] { assetsRoot });
+                Assert.That(boundedCatalogs, Has.Length.EqualTo(128));
+                File.WriteAllText(Path.Combine(source, "catalog-128.json"), "{}");
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..128");
             }
             finally
             {

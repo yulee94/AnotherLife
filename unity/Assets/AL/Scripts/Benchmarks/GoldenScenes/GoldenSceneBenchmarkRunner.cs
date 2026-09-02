@@ -29,6 +29,7 @@ namespace AL.Benchmarks.GoldenScenes
         {
             string[] arguments = Environment.GetCommandLineArgs();
             if (!GoldenSceneBenchmarkRequestParser.IsRequested(arguments)) return;
+            Application.runInBackground = true;
             var host = new GameObject("AL Golden Scene Benchmark Runner");
             DontDestroyOnLoad(host);
             host.AddComponent<GoldenSceneBenchmarkRunner>();
@@ -126,11 +127,7 @@ namespace AL.Benchmarks.GoldenScenes
 
             Camera benchmarkCamera = Camera.main;
             if (benchmarkCamera == null) benchmarkCamera = FindAnyObjectByType<Camera>();
-            if (benchmarkCamera == null)
-            {
-                Fail("AL-GS-BENCHMARK-CAMERA-MISSING", context.Setup.UnitySceneName);
-                yield break;
-            }
+            if (benchmarkCamera == null) benchmarkCamera = CreateFallbackBenchmarkCamera(gameObject);
 
             if (!GoldenSceneBenchmarkRuntimeActions.TryInvoke(
                     () =>
@@ -196,12 +193,20 @@ namespace AL.Benchmarks.GoldenScenes
 
             try
             {
+                IGoldenSceneVideoCaptureFacility videoFacility =
+                    string.IsNullOrEmpty(context.Request.FfmpegPath)
+                        ? null
+                        : new GoldenSceneFfmpegVideoCaptureFacility(
+                            context.Request.FfmpegPath,
+                            Application.productName,
+                            Application.platform == RuntimePlatform.WindowsPlayer);
                 capture.BeginCapture(
                     benchmarkCamera,
                     context.Setup,
                     context.Identity,
                     mediaSettings,
                     stagingRoot,
+                    videoFacility,
                     telemetry: telemetry);
             }
             catch (Exception exception)
@@ -220,6 +225,14 @@ namespace AL.Benchmarks.GoldenScenes
                 Fail("AL-GS-BENCHMARK-TELEMETRY-TIMEOUT", "Telemetry did not complete.");
                 yield break;
             }
+
+            int requiredVideoFrames = (int)Math.Ceiling(
+                context.Request.VideoFrameRate * context.Request.MeasurementSeconds);
+            double frameDeadline = Time.realtimeSinceStartupAsDouble + 8d;
+            while (capture.IsCapturing &&
+                   capture.VideoFrameCount < requiredVideoFrames &&
+                   Time.realtimeSinceStartupAsDouble < frameDeadline)
+                yield return null;
 
             GoldenSceneCaptureManifest manifest;
             try
@@ -286,6 +299,14 @@ namespace AL.Benchmarks.GoldenScenes
             return GoldenSceneBenchmarkInputLoader.CombinePath(
                 Application.streamingAssetsPath,
                 "GameData");
+        }
+
+        internal static Camera CreateFallbackBenchmarkCamera(GameObject host)
+        {
+            if (host == null) throw new ArgumentNullException(nameof(host));
+            var cameraObject = new GameObject("AL Golden Scene Benchmark Camera");
+            cameraObject.transform.SetParent(host.transform, false);
+            return cameraObject.AddComponent<Camera>();
         }
 
         private void Fail(string diagnosticCode, string detail)
