@@ -95,6 +95,214 @@ namespace AL.Benchmarks.GoldenScenes
         }
     }
 
+    public sealed class GoldenSceneFfmpegVideoCaptureFacility : IGoldenSceneVideoCaptureFacility
+    {
+        private const int FinalizationTimeoutMilliseconds = 30000;
+        private readonly string executablePath;
+        private readonly string windowTitle;
+        private readonly bool isWindowsPlayer;
+        private System.Diagnostics.Process process;
+
+        public GoldenSceneFfmpegVideoCaptureFacility(
+            string executablePath,
+            string windowTitle,
+            bool isWindowsPlayer)
+        {
+            this.executablePath = executablePath ?? string.Empty;
+            this.windowTitle = windowTitle ?? string.Empty;
+            this.isWindowsPlayer = isWindowsPlayer;
+        }
+
+        public bool IsSupported =>
+            isWindowsPlayer &&
+            File.Exists(executablePath) &&
+            string.Equals(Path.GetFileName(executablePath), "ffmpeg.exe", StringComparison.OrdinalIgnoreCase) &&
+            IsSafeValue(windowTitle);
+        public string Format => "video/mp4";
+        public string Extension => "mp4";
+        public string UnsupportedReason => IsSupported
+            ? string.Empty
+            : "Windows Player capture requires an explicit existing ffmpeg.exe path and a safe Player window title.";
+
+        public bool TryBegin(
+            string outputPath,
+            Camera camera,
+            GoldenSceneSetup setup,
+            GoldenSceneCaptureMediaSettings mediaSettings,
+            out string failureReason)
+        {
+            failureReason = string.Empty;
+            if (!IsSupported)
+            {
+                failureReason = UnsupportedReason;
+                return false;
+            }
+            if (process != null)
+            {
+                failureReason = "An FFmpeg capture process is already assigned to this facility.";
+                return false;
+            }
+            if (camera == null || setup == null || mediaSettings == null)
+            {
+                failureReason = "Camera, golden-scene setup, and media settings are required.";
+                return false;
+            }
+            if (!string.Equals(Path.GetExtension(outputPath), ".mp4", StringComparison.OrdinalIgnoreCase) ||
+                !IsSafeValue(outputPath))
+            {
+                failureReason = "FFmpeg output must be a safe MP4 path.";
+                return false;
+            }
+
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = executablePath,
+                    Arguments = BuildArguments(outputPath, windowTitle, mediaSettings),
+                    WorkingDirectory = Path.GetDirectoryName(outputPath) ?? string.Empty,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardError = true
+                };
+                process = new System.Diagnostics.Process { StartInfo = startInfo };
+                if (!process.Start())
+                {
+                    process.Dispose();
+                    process = null;
+                    failureReason = "FFmpeg did not start.";
+                    return false;
+                }
+                if (process.HasExited)
+                {
+                    failureReason = ProcessFailure(process, "FFmpeg exited during startup.");
+                    process.Dispose();
+                    process = null;
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception exception)
+            {
+                process?.Dispose();
+                process = null;
+                failureReason = exception.GetType().Name + ": " + exception.Message;
+                return false;
+            }
+        }
+
+        public bool TryCaptureFrame(Camera camera, out string failureReason)
+        {
+            failureReason = string.Empty;
+            if (camera == null)
+            {
+                failureReason = "Capture camera is missing.";
+                return false;
+            }
+            if (process == null)
+            {
+                failureReason = "FFmpeg capture was not started.";
+                return false;
+            }
+            try
+            {
+                if (!process.HasExited) return true;
+                failureReason = ProcessFailure(process, "FFmpeg exited before capture completed.");
+                return false;
+            }
+            catch (Exception exception)
+            {
+                failureReason = exception.GetType().Name + ": " + exception.Message;
+                return false;
+            }
+        }
+
+        public bool TryEnd(out string failureReason)
+        {
+            failureReason = string.Empty;
+            if (process == null)
+            {
+                failureReason = "FFmpeg capture was not started.";
+                return false;
+            }
+
+            try
+            {
+                if (!process.HasExited)
+                {
+                    process.StandardInput.WriteLine("q");
+                    process.StandardInput.Flush();
+                    if (!process.WaitForExit(FinalizationTimeoutMilliseconds))
+                    {
+                        process.Kill();
+                        process.WaitForExit();
+                        failureReason = "FFmpeg did not finalize within 30 seconds and was terminated.";
+                        return false;
+                    }
+                }
+                if (process.ExitCode != 0)
+                {
+                    failureReason = ProcessFailure(process, "FFmpeg returned a non-zero exit code.");
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception exception)
+            {
+                failureReason = exception.GetType().Name + ": " + exception.Message;
+                return false;
+            }
+            finally
+            {
+                process.Dispose();
+                process = null;
+            }
+        }
+
+        internal static string BuildArguments(
+            string outputPath,
+            string windowTitle,
+            GoldenSceneCaptureMediaSettings mediaSettings)
+        {
+            if (!IsSafeValue(outputPath) || !IsSafeValue(windowTitle))
+                throw new ArgumentException("FFmpeg paths and window titles cannot contain quotes or line breaks.");
+            if (mediaSettings == null) throw new ArgumentNullException(nameof(mediaSettings));
+            string frameRate = mediaSettings.VideoFrameRate.ToString(CultureInfo.InvariantCulture);
+            string scale = "scale=" +
+                           mediaSettings.Width.ToString(CultureInfo.InvariantCulture) + ":" +
+                           mediaSettings.Height.ToString(CultureInfo.InvariantCulture) +
+                           ":flags=lanczos,setsar=1";
+            return "-hide_banner -loglevel error -y -f gdigrab -framerate " + frameRate +
+                   " -draw_mouse 0 -i " + Quote("title=" + windowTitle) +
+                   " -vf " + Quote(scale) +
+                   " -an -c:v mpeg4 -q:v 3 -pix_fmt yuv420p -movflags +faststart " +
+                   Quote(outputPath);
+        }
+
+        private static string ProcessFailure(System.Diagnostics.Process value, string fallback)
+        {
+            string stderr = string.Empty;
+            try { stderr = value.StandardError.ReadToEnd().Trim(); }
+            catch (Exception) { }
+            return string.IsNullOrWhiteSpace(stderr)
+                ? fallback + " exitCode=" + value.ExitCode.ToString(CultureInfo.InvariantCulture)
+                : stderr;
+        }
+
+        private static string Quote(string value)
+        {
+            return "\"" + value + "\"";
+        }
+
+        private static bool IsSafeValue(string value)
+        {
+            return !string.IsNullOrWhiteSpace(value) &&
+                   value.IndexOfAny(new[] { '\"', '\r', '\n' }) < 0;
+        }
+    }
+
     public sealed class GoldenSceneUnsupportedProfilerCaptureFacility : IGoldenSceneProfilerCaptureFacility
     {
         public GoldenSceneUnsupportedProfilerCaptureFacility(string reason)
@@ -411,6 +619,7 @@ namespace AL.Benchmarks.GoldenScenes
         private bool complete;
         private bool videoActive;
         private bool profilerActive;
+        private IDisposable videoCanvasScope;
         private string videoFailureReason = string.Empty;
         private string videoFailureCode = string.Empty;
         private int stillCaptureCount;
@@ -453,6 +662,7 @@ namespace AL.Benchmarks.GoldenScenes
         public string OutputDirectory { get; private set; } = string.Empty;
         public string ManifestPath { get; private set; } = string.Empty;
         public bool IsActive => begun && !complete;
+        public int VideoFrameCount => videoFrameCount;
         public GoldenSceneSetup Setup => setup;
         public GoldenSceneCaptureMediaSettings MediaSettings => mediaSettings;
         public GoldenSceneCaptureManifest Manifest { get; private set; }
@@ -495,19 +705,14 @@ namespace AL.Benchmarks.GoldenScenes
             videoFrameCount++;
             bool captured;
             string failureReason;
-            using (GoldenScenePngStillCaptureFacility.PrepareCanvases(
-                       camera,
-                       mediaSettings.IncludesUi))
+            try
             {
-                try
-                {
-                    captured = videoFacility.TryCaptureFrame(camera, out failureReason);
-                }
-                catch (Exception exception)
-                {
-                    captured = false;
-                    failureReason = exception.GetType().Name + ": " + exception.Message;
-                }
+                captured = videoFacility.TryCaptureFrame(camera, out failureReason);
+            }
+            catch (Exception exception)
+            {
+                captured = false;
+                failureReason = exception.GetType().Name + ": " + exception.Message;
             }
             if (!captured)
             {
@@ -657,27 +862,26 @@ namespace AL.Benchmarks.GoldenScenes
                 videoFacility.Extension);
             videoPath = Path.Combine(OutputDirectory, relativePath);
             string failureReason;
-            using (GoldenScenePngStillCaptureFacility.PrepareCanvases(
-                       camera,
-                       mediaSettings.IncludesUi))
+            videoCanvasScope = GoldenScenePngStillCaptureFacility.PrepareCanvases(
+                camera,
+                mediaSettings.IncludesUi);
+            try
             {
-                try
-                {
-                    videoActive = videoFacility.TryBegin(
-                        videoPath,
-                        camera,
-                        setup,
-                        mediaSettings,
-                        out failureReason);
-                }
-                catch (Exception exception)
-                {
-                    videoActive = false;
-                    failureReason = exception.GetType().Name + ": " + exception.Message;
-                }
+                videoActive = videoFacility.TryBegin(
+                    videoPath,
+                    camera,
+                    setup,
+                    mediaSettings,
+                    out failureReason);
+            }
+            catch (Exception exception)
+            {
+                videoActive = false;
+                failureReason = exception.GetType().Name + ": " + exception.Message;
             }
             if (!videoActive)
             {
+                DisposeVideoCanvasScope();
                 artifacts.Add(GoldenSceneArtifactRecord.Unavailable(
                     setup,
                     identity.RunId,
@@ -707,6 +911,7 @@ namespace AL.Benchmarks.GoldenScenes
                 failureReason = exception.GetType().Name + ": " + exception.Message;
             }
             videoActive = false;
+            DisposeVideoCanvasScope();
             string endedAtUtc = UtcNow();
             if (!ended)
             {
@@ -911,6 +1116,13 @@ namespace AL.Benchmarks.GoldenScenes
             }
         }
 
+        private void DisposeVideoCanvasScope()
+        {
+            if (videoCanvasScope == null) return;
+            videoCanvasScope.Dispose();
+            videoCanvasScope = null;
+        }
+
         private bool MatchesIdentity()
         {
             return string.Equals(identity.SceneId, setup.Scene.Id, StringComparison.Ordinal) &&
@@ -983,6 +1195,34 @@ namespace AL.Benchmarks.GoldenScenes
         }
     }
 
+    internal static class GoldenSceneVideoFrameScheduler
+    {
+        public static int CountDueFrames(
+            double elapsedSeconds,
+            ref double nextFrameAtSeconds,
+            double intervalSeconds,
+            int maxFrames = 120)
+        {
+            if (double.IsNaN(elapsedSeconds) || double.IsInfinity(elapsedSeconds) || elapsedSeconds < 0d)
+                throw new ArgumentOutOfRangeException(nameof(elapsedSeconds));
+            if (double.IsNaN(nextFrameAtSeconds) || double.IsInfinity(nextFrameAtSeconds) || nextFrameAtSeconds < 0d)
+                throw new ArgumentOutOfRangeException(nameof(nextFrameAtSeconds));
+            if (double.IsNaN(intervalSeconds) || double.IsInfinity(intervalSeconds) || intervalSeconds <= 0d)
+                throw new ArgumentOutOfRangeException(nameof(intervalSeconds));
+            if (maxFrames <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maxFrames));
+
+            int count = 0;
+            while (elapsedSeconds >= nextFrameAtSeconds && count < maxFrames)
+            {
+                count++;
+                nextFrameAtSeconds += intervalSeconds;
+            }
+
+            return count;
+        }
+    }
+
     [DefaultExecutionOrder(32000)]
     [DisallowMultipleComponent]
     public sealed class GoldenSceneRuntimeCapture : MonoBehaviour
@@ -997,6 +1237,7 @@ namespace AL.Benchmarks.GoldenScenes
         public event Action<string> CaptureFailed;
 
         public bool IsCapturing => session != null && session.IsActive;
+        public int VideoFrameCount => session == null ? 0 : session.VideoFrameCount;
         public bool AutoComplete { get; set; } = true;
         public GoldenSceneCaptureManifest LatestManifest { get; private set; }
         public string ManifestPath => session?.ManifestPath ?? string.Empty;
@@ -1057,11 +1298,13 @@ namespace AL.Benchmarks.GoldenScenes
             if (!IsCapturing) return;
             double elapsed = Time.realtimeSinceStartupAsDouble - startedAtRealtime;
             GoldenSceneCameraState.Apply(captureCamera, session.Setup);
-            if (elapsed >= nextVideoFrameAt)
-            {
+            double interval = 1d / Math.Max(1, session.MediaSettings.VideoFrameRate);
+            int dueFrames = GoldenSceneVideoFrameScheduler.CountDueFrames(
+                elapsed,
+                ref nextVideoFrameAt,
+                interval);
+            for (int index = 0; index < dueFrames; index++)
                 session.CaptureVideoFrame(captureCamera);
-                nextVideoFrameAt += 1d / Math.Max(1, session.MediaSettings.VideoFrameRate);
-            }
             if (AutoComplete && elapsed >= session.MediaSettings.VideoDurationSeconds)
                 CompleteCapture();
         }

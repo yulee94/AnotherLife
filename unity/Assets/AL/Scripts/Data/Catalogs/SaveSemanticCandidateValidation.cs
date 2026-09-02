@@ -788,6 +788,7 @@ namespace AL.Data.Catalogs
                     "AppliedBossLootRewards",
                     "Nvs01Progress",
                     "FirstWorldProgress",
+                    "MapDisclosure",
                     "WarzoneCredits",
                     "LastSavedTimestamp"
                 },
@@ -991,6 +992,19 @@ namespace AL.Data.Catalogs
                 "ProofOmenAccepted",
                 "ProofAutoAccept",
                 "LastOperationId");
+
+        private static readonly HashSet<string> MapDisclosureFields =
+            Fields(
+                "Version",
+                "AuthorityEpoch",
+                "AuthorityRevision",
+                "CatalogVersion",
+                "CatalogSha256",
+                "StateDigest",
+                "DiscoveredFeatureIds",
+                "VisibleRouteIds",
+                "VisibleObjectiveIds",
+                "VisibleAllegianceMarkerIds");
 
         private static readonly HashSet<string> Nvs01EncounterFields =
             Fields(
@@ -1363,6 +1377,7 @@ namespace AL.Data.Catalogs
             ValidateAppliedBossLootRewardRows(root, policy.Authority, collector, state);
             ValidateNvs01Progress(root, policy.Nvs01Rule, collector, state);
             ValidateFirstWorldProgress(root, collector, state);
+            ValidateMapDisclosure(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
@@ -1416,8 +1431,7 @@ namespace AL.Data.Catalogs
             for (var index = 0; index < root.Properties.Count; index++)
             {
                 var property = root.Properties[index];
-                if (RecognizedTopLevelFields.Contains(property.Name) ||
-                    IsNeutralMapDisclosurePlaceholder(property))
+                if (RecognizedTopLevelFields.Contains(property.Name))
                 {
                     continue;
                 }
@@ -1433,67 +1447,73 @@ namespace AL.Data.Catalogs
             }
         }
 
-        private static bool IsNeutralMapDisclosurePlaceholder(
-            StrictJsonProperty property)
+        private static void ValidateMapDisclosure(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
         {
-            if (!string.Equals(
-                    property.Name,
-                    "MapDisclosure",
-                    StringComparison.Ordinal))
+            const string path = "$.MapDisclosure";
+            StrictJsonValue value;
+            if (!root.TryGet("MapDisclosure", out value) || value is StrictJsonNull)
             {
-                return false;
+                // Optional schema-v1 extension. Missing legacy state is admitted.
+                return;
             }
 
-            if (property.Value is StrictJsonNull)
+            var disclosure = value as StrictJsonObject;
+            if (disclosure == null)
             {
-                return true;
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_MAP_DISCLOSURE_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
             }
 
-            // Unity 6 materializes a missing serializable class as its all-default
-            // object during JsonUtility rewrites. Admit only that exact placeholder;
-            // non-neutral or extended state remains byte-preserved and read-only.
-            var value = property.Value as StrictJsonObject;
-            return value != null &&
-                   value.Properties.Count == 10 &&
-                   HasZeroNumber(value, "Version") &&
-                   HasZeroNumber(value, "AuthorityEpoch") &&
-                   HasZeroNumber(value, "AuthorityRevision") &&
-                   HasEmptyString(value, "CatalogVersion") &&
-                   HasEmptyString(value, "CatalogSha256") &&
-                   HasEmptyString(value, "StateDigest") &&
-                   HasEmptyArray(value, "DiscoveredFeatureIds") &&
-                   HasEmptyArray(value, "VisibleRouteIds") &&
-                   HasEmptyArray(value, "VisibleObjectiveIds") &&
-                   HasEmptyArray(value, "VisibleAllegianceMarkerIds");
-        }
+            InspectUnexpectedProperties(
+                disclosure,
+                MapDisclosureFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
 
-        private static bool HasZeroNumber(StrictJsonObject root, string name)
-        {
-            StrictJsonValue value;
-            var number = root.TryGet(name, out value)
-                ? value as StrictJsonNumber
-                : null;
-            return number != null &&
-                   number.HasFiniteDoubleValue &&
-                   !number.HasNonZeroSignificand;
-        }
+            int version;
+            if (!TryReadRequiredInt32(
+                    disclosure,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
 
-        private static bool HasEmptyString(StrictJsonObject root, string name)
-        {
-            StrictJsonValue value;
-            var text = root.TryGet(name, out value)
-                ? value as StrictJsonString
-                : null;
-            return text != null && text.Value.Length == 0;
-        }
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_MAP_DISCLOSURE_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
 
-        private static bool HasEmptyArray(StrictJsonObject root, string name)
-        {
-            StrictJsonValue value;
-            var rows = root.TryGet(name, out value)
-                ? value as StrictJsonArray
-                : null;
-            return rows != null && rows.Items.Count == 0;
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_MAP_DISCLOSURE_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+            }
         }
 
         private static bool HasLegacyFingerprint(StrictJsonObject root)

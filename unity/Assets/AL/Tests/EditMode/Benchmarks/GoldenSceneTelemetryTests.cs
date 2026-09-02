@@ -338,6 +338,65 @@ namespace AL.Tests.EditMode.Benchmarks
         }
 
         [Test]
+        public void RuntimeFallbackProbesPublishMeasuredSceneDensityAndStreamingMetrics()
+        {
+            var actor = new GameObject("FullActor");
+            actor.AddComponent<Animator>();
+            var nameplate = new GameObject("ChampionNameplate");
+            nameplate.AddComponent<Canvas>();
+            var effect = new GameObject("ParticleEffect");
+            effect.AddComponent<ParticleSystem>();
+            var source = new GoldenSceneUnityTelemetrySource();
+            try
+            {
+                source.Start();
+                source.EnqueueFrame(0, 1d, 16d, true);
+                Assert.That(source.TryResolveOldestFrameTiming(true, out GoldenSceneFrameObservation observation),
+                    Is.True);
+
+                var session = new GoldenSceneTelemetrySession(
+                    new GoldenSceneTelemetryConfiguration(60, 0d, 1d),
+                    "2026-08-31T03:00:00.0000000Z",
+                    true,
+                    new GoldenSceneDeviceSnapshot(null, string.Empty, null, string.Empty));
+                session.RecordFrame(observation);
+                source.ApplyCapabilities(session, false);
+                GoldenSceneTelemetryReport report = session.Complete(
+                    "2026-08-31T03:00:01.0000000Z",
+                    new GoldenSceneDeviceSnapshot(null, string.Empty, null, string.Empty));
+
+                Assert.That(
+                    report.MetricSummaries[GoldenSceneTelemetryMetricIds.FullActors].Distribution.Maximum,
+                    Is.GreaterThanOrEqualTo(1d));
+                Assert.That(
+                    report.MetricSummaries[GoldenSceneTelemetryMetricIds.NameplateActors].Distribution.Maximum,
+                    Is.GreaterThanOrEqualTo(1d));
+                Assert.That(
+                    report.MetricSummaries[GoldenSceneTelemetryMetricIds.VfxSources].Distribution.Maximum,
+                    Is.GreaterThanOrEqualTo(1d));
+                Assert.That(report.MetricSummaries.ContainsKey(
+                    GoldenSceneTelemetryMetricIds.TextureStreamingRequests), Is.True);
+                Assert.That(report.MetricSummaries.ContainsKey(
+                    GoldenSceneTelemetryMetricIds.TextureStreamingBytes), Is.True);
+                Assert.That(report.MetricSummaries.ContainsKey(
+                    GoldenSceneTelemetryMetricIds.GarbageCollectionCount), Is.True);
+                Assert.That(report.MetricSummaries.ContainsKey(
+                    GoldenSceneTelemetryMetricIds.NativeAllocationCount), Is.True);
+                Assert.That(report.MetricSummaries.ContainsKey(
+                    GoldenSceneTelemetryMetricIds.AssetStreamingStalls), Is.True);
+                Assert.That(report.MetricSummaries.ContainsKey(
+                    GoldenSceneTelemetryMetricIds.ShaderCompilationEvents), Is.True);
+            }
+            finally
+            {
+                source.Dispose();
+                UnityEngine.Object.DestroyImmediate(actor);
+                UnityEngine.Object.DestroyImmediate(nameplate);
+                UnityEngine.Object.DestroyImmediate(effect);
+            }
+        }
+
+        [Test]
         public void EditorSessionIsExplicitlyDevelopmentOnlyAndCannotCertify()
         {
             var session = new GoldenSceneTelemetrySession(

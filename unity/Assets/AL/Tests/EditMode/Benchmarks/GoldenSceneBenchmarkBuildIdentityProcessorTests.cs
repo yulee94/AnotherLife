@@ -28,7 +28,7 @@ namespace AL.Tests.EditMode.Benchmarks
                 Is.True,
                 "Build identity must be generated before shared GameData paths are registered.");
             MethodInfo create = processor.GetMethod(
-                "CreateMetadataForBuild",
+                "CreateMetadataForBuildAtTimestamp",
                 BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.That(create, Is.Not.Null);
 
@@ -63,6 +63,40 @@ namespace AL.Tests.EditMode.Benchmarks
                 out GoldenSceneBuildIdentityMetadata parsed,
                 out string diagnostic), Is.True, diagnostic);
             Assert.That(parsed.BuildId, Is.EqualTo(metadata.BuildId));
+        }
+
+        [Test]
+        public void BuildProcessorCreatesByteStableMetadataForHead()
+        {
+            Type processor = AppDomain.CurrentDomain.GetAssemblies()
+                .Select(assembly => assembly.GetType(
+                    "AL.EditorTools.GoldenSceneBenchmarkBuildIdentityProcessor",
+                    throwOnError: false))
+                .FirstOrDefault(type => type != null);
+            Assert.That(processor, Is.Not.Null);
+            MethodInfo resolveCommit = processor.GetMethod(
+                "ResolveSourceCommit",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            MethodInfo create = processor.GetMethod(
+                "CreateMetadataForBuild",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.That(resolveCommit, Is.Not.Null);
+            Assert.That(create, Is.Not.Null);
+
+            string sourceCommit = (string)resolveCommit.Invoke(null, null);
+            object[] inputs =
+            {
+                Application.dataPath,
+                sourceCommit,
+                "StandaloneWindows64",
+                "6000.3.22f1"
+            };
+            var first = (GoldenSceneBuildIdentityMetadata)create.Invoke(null, inputs);
+            var second = (GoldenSceneBuildIdentityMetadata)create.Invoke(null, inputs);
+
+            Assert.That(first.ToJson(), Is.EqualTo(second.ToJson()));
+            Assert.That(first.SourceCommit, Is.EqualTo(sourceCommit));
+            Assert.That(first.BuildId, Does.Contain(sourceCommit.Substring(0, 12)));
         }
 
         [Test]
