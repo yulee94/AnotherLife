@@ -254,17 +254,26 @@ namespace AL.Benchmarks.GoldenScenes
 
     internal sealed class GoldenSceneUnityTelemetrySource : IDisposable
     {
+        private enum CounterReadMode
+        {
+            LastValue,
+            LastValueOrZero,
+            SampleCount
+        }
+
         private sealed class Counter : IDisposable
         {
             public Counter(
                 string metricId,
                 string unit,
                 ProfilerCategory category,
-                string profilerName)
+                string profilerName,
+                CounterReadMode readMode)
             {
                 MetricId = metricId;
                 Unit = unit;
                 ProfilerName = profilerName;
+                ReadMode = readMode;
                 try
                 {
                     Recorder = ProfilerRecorder.StartNew(category, profilerName, 1);
@@ -284,6 +293,7 @@ namespace AL.Benchmarks.GoldenScenes
             public string MetricId { get; }
             public string Unit { get; }
             public string ProfilerName { get; }
+            public CounterReadMode ReadMode { get; }
             public ProfilerRecorder Recorder { get; private set; }
             public bool IsSupported { get; }
             public bool HasError { get; private set; }
@@ -293,7 +303,12 @@ namespace AL.Benchmarks.GoldenScenes
             public double? Read()
             {
                 if (!IsSupported) return null;
-                double? value = NormalizeProfilerCounterSample(Recorder.Count, Recorder.LastValue);
+                double? value = ReadMode switch
+                {
+                    CounterReadMode.LastValueOrZero => Recorder.Count > 0 ? Recorder.LastValue : 0d,
+                    CounterReadMode.SampleCount => Recorder.Count,
+                    _ => NormalizeProfilerCounterSample(Recorder.Count, Recorder.LastValue)
+                };
                 if (value.HasValue) ObservedSample = true;
                 return value;
             }
@@ -319,11 +334,16 @@ namespace AL.Benchmarks.GoldenScenes
             GoldenSceneTelemetryMetricIds.FallbackActors,
             GoldenSceneTelemetryMetricIds.NameplateActors
         };
+        private static readonly Type VisualEffectType =
+            Type.GetType("UnityEngine.VFX.VisualEffect, Unity.VisualEffectGraph.Runtime") ??
+            Type.GetType("UnityEngine.VFX.VisualEffect, UnityEngine.VFXModule");
         private readonly List<Counter> counters = new List<Counter>();
         private readonly SortedDictionary<string, TelemetryCapability> capabilities =
             new SortedDictionary<string, TelemetryCapability>(StringComparer.Ordinal);
         private readonly Dictionary<string, int> frameMetricIndices =
             new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly Dictionary<int, int> lodGroupRendererSignatures =
+            new Dictionary<int, int>();
         private readonly GoldenSceneFrameTimingAlignment frameTimingAlignment =
             new GoldenSceneFrameTimingAlignment(8);
         private string[] frameMetricIds = Array.Empty<string>();
@@ -332,6 +352,8 @@ namespace AL.Benchmarks.GoldenScenes
         private bool hasFrameTimingTimestamp;
         private bool cpuTimingObserved;
         private bool gpuTimingObserved;
+        private long observedLodTransitions;
+        private int initialGarbageCollectionCount;
         private bool started;
 
         public void Start()
@@ -339,8 +361,12 @@ namespace AL.Benchmarks.GoldenScenes
             if (started) throw new InvalidOperationException("Telemetry source is already started.");
             started = true;
             GoldenSceneTelemetryGaugeRegistry.BeginCollectionWindow();
+            lodGroupRendererSignatures.Clear();
+            observedLodTransitions = 0L;
+            initialGarbageCollectionCount = TotalGarbageCollectionCount();
 
             DeclareUnsupportedMetrics();
+            DeclareRuntimeFallbackMetrics();
             capabilities[GoldenSceneTelemetryMetricIds.UnityUsedMemory] =
                 Supported(GoldenSceneTelemetryMetricIds.UnityUsedMemory, "bytes", "UnityEngine.Profiling.Profiler");
             capabilities[GoldenSceneTelemetryMetricIds.UnityReservedMemory] =
@@ -361,21 +387,28 @@ namespace AL.Benchmarks.GoldenScenes
             AddCounter(GoldenSceneTelemetryMetricIds.SystemUsedMemory, "bytes", ProfilerCategory.Memory, "System Used Memory");
             AddCounter(GoldenSceneTelemetryMetricIds.GraphicsUsedMemory, "bytes", ProfilerCategory.Memory, "Gfx Used Memory");
             AddCounter(GoldenSceneTelemetryMetricIds.ManagedAllocatedInFrame, "bytes", ProfilerCategory.Memory, "GC Allocated In Frame");
-            AddCounter(GoldenSceneTelemetryMetricIds.NativeAllocationCount, "count", ProfilerCategory.Memory, "Native Allocations Count");
-            AddCounter(GoldenSceneTelemetryMetricIds.GarbageCollectionCount, "count", ProfilerCategory.Memory, "GC Collection Count");
+            AddCounter(
+                GoldenSceneTelemetryMetricIds.NativeAllocationCount,
+                "count",
+                ProfilerCategory.Memory,
+                "UnsafeUtility.Malloc",
+                CounterReadMode.SampleCount);
             AddCounter(GoldenSceneTelemetryMetricIds.DrawCalls, "count", ProfilerCategory.Render, "Draw Calls Count");
             AddCounter(GoldenSceneTelemetryMetricIds.Batches, "count", ProfilerCategory.Render, "Batches Count");
             AddCounter(GoldenSceneTelemetryMetricIds.Triangles, "count", ProfilerCategory.Render, "Triangles Count");
             AddCounter(GoldenSceneTelemetryMetricIds.Vertices, "count", ProfilerCategory.Render, "Vertices Count");
-            AddCounter(GoldenSceneTelemetryMetricIds.ActiveRenderers, "count", ProfilerCategory.Render, "Visible Renderers");
-            AddCounter(GoldenSceneTelemetryMetricIds.TextureStreamingRequests, "count", ProfilerCategory.Render, "Texture Streaming Requests");
-            AddCounter(GoldenSceneTelemetryMetricIds.TextureStreamingBytes, "bytes", ProfilerCategory.Render, "Texture Streaming Memory");
-            AddCounter(GoldenSceneTelemetryMetricIds.AssetStreamingStalls, "nanoseconds", ProfilerCategory.Loading, "Async Upload Time");
-            AddCounter(GoldenSceneTelemetryMetricIds.ShaderCompilationEvents, "count", ProfilerCategory.Render, "Shader Compilations");
-            AddCounter(GoldenSceneTelemetryMetricIds.LodGroups, "count", ProfilerCategory.Render, "LOD Group Count");
-            AddCounter(GoldenSceneTelemetryMetricIds.LodTransitions, "count", ProfilerCategory.Render, "LOD Transitions");
-            AddCounter(GoldenSceneTelemetryMetricIds.VfxSources, "count", ProfilerCategory.Particles, "Particle System Count");
-            AddCounter(GoldenSceneTelemetryMetricIds.ParticleCount, "count", ProfilerCategory.Particles, "Particle Count");
+            AddCounter(
+                GoldenSceneTelemetryMetricIds.AssetStreamingStalls,
+                "nanoseconds",
+                ProfilerCategory.Loading,
+                "Application.WaitForAsyncOperationToComplete",
+                CounterReadMode.LastValueOrZero);
+            AddCounter(
+                GoldenSceneTelemetryMetricIds.ShaderCompilationEvents,
+                "count",
+                ProfilerCategory.Render,
+                "Shader.CompileGPUProgram",
+                CounterReadMode.SampleCount);
             BuildFrameMetricLayout();
             cpuTimerFrequency = FrameTimingManager.GetCpuTimerFrequency();
             if (FrameTimingManager.GetLatestTimings(1, frameTimings) > 0)
@@ -422,6 +455,7 @@ namespace AL.Benchmarks.GoldenScenes
                 SetValue(values, GoldenSceneTelemetryMetricIds.RenderScale, ScalableBufferManager.widthScaleFactor);
                 SetValue(values, GoldenSceneTelemetryMetricIds.LodBias, QualitySettings.lodBias);
                 SetValue(values, GoldenSceneTelemetryMetricIds.VfxDensity, GoldenSceneRuntimeSetup.AppliedVfxDensity);
+                CaptureRuntimeFallbackMetrics(values);
                 foreach (string metricId in GaugeMetricIds)
                 {
                     if (!GoldenSceneTelemetryGaugeRegistry.TryRead(
@@ -580,14 +614,19 @@ namespace AL.Benchmarks.GoldenScenes
             string metricId,
             string unit,
             ProfilerCategory category,
-            string profilerName)
+            string profilerName,
+            CounterReadMode readMode = CounterReadMode.LastValue)
         {
-            var counter = new Counter(metricId, unit, category, profilerName);
+            var counter = new Counter(metricId, unit, category, profilerName, readMode);
             counters.Add(counter);
             if (counter.IsSupported)
             {
                 capabilities[metricId] = Supported(
                     metricId, unit, "Unity.Profiling.ProfilerRecorder:" + profilerName);
+            }
+            else if (HasSupportedFallback(metricId))
+            {
+                return;
             }
             else if (counter.HasError)
             {
@@ -634,6 +673,217 @@ namespace AL.Benchmarks.GoldenScenes
         {
             if (frameMetricIndices.TryGetValue(metricId, out int index))
                 values[index] = value;
+        }
+
+        private void SetValueIfAbsent(double?[] values, string metricId, double? value)
+        {
+            if (frameMetricIndices.TryGetValue(metricId, out int index) && !values[index].HasValue)
+                values[index] = value;
+        }
+
+        private bool HasSupportedFallback(string metricId)
+        {
+            return capabilities.TryGetValue(metricId, out TelemetryCapability capability) &&
+                   capability.Status == TelemetryCapabilityStatus.Supported;
+        }
+
+        private void DeclareRuntimeFallbackMetrics()
+        {
+            capabilities[GoldenSceneTelemetryMetricIds.GarbageCollectionCount] = Supported(
+                GoldenSceneTelemetryMetricIds.GarbageCollectionCount,
+                "count",
+                "System.GC.CollectionCount");
+            capabilities[GoldenSceneTelemetryMetricIds.ActiveRenderers] = Supported(
+                GoldenSceneTelemetryMetricIds.ActiveRenderers,
+                "count",
+                "active-hierarchy-renderer-scan");
+            capabilities[GoldenSceneTelemetryMetricIds.TextureStreamingRequests] = Supported(
+                GoldenSceneTelemetryMetricIds.TextureStreamingRequests,
+                "count",
+                "UnityEngine.Texture.streamingTexturePendingLoadCount");
+            capabilities[GoldenSceneTelemetryMetricIds.TextureStreamingBytes] = Supported(
+                GoldenSceneTelemetryMetricIds.TextureStreamingBytes,
+                "bytes",
+                "UnityEngine.Texture.desired-minus-current-memory");
+            capabilities[GoldenSceneTelemetryMetricIds.LodGroups] = Supported(
+                GoldenSceneTelemetryMetricIds.LodGroups,
+                "count",
+                "active-hierarchy-lod-group-scan");
+            capabilities[GoldenSceneTelemetryMetricIds.LodTransitions] = Supported(
+                GoldenSceneTelemetryMetricIds.LodTransitions,
+                "count",
+                "lod-renderer-visibility-transition-scan");
+            capabilities[GoldenSceneTelemetryMetricIds.VfxSources] = Supported(
+                GoldenSceneTelemetryMetricIds.VfxSources,
+                "count",
+                "active-hierarchy-particle-and-visual-effect-scan");
+            capabilities[GoldenSceneTelemetryMetricIds.ParticleCount] = Supported(
+                GoldenSceneTelemetryMetricIds.ParticleCount,
+                "count",
+                "UnityEngine.ParticleSystem.particleCount");
+            capabilities[GoldenSceneTelemetryMetricIds.FullActors] = Supported(
+                GoldenSceneTelemetryMetricIds.FullActors,
+                "count",
+                "active-hierarchy-animator-scan");
+            capabilities[GoldenSceneTelemetryMetricIds.FallbackActors] = Supported(
+                GoldenSceneTelemetryMetricIds.FallbackActors,
+                "count",
+                "active-hierarchy-fallback-actor-name-scan");
+            capabilities[GoldenSceneTelemetryMetricIds.NameplateActors] = Supported(
+                GoldenSceneTelemetryMetricIds.NameplateActors,
+                "count",
+                "active-hierarchy-nameplate-canvas-scan");
+            capabilities[GoldenSceneTelemetryMetricIds.NativeAllocationCount] = Supported(
+                GoldenSceneTelemetryMetricIds.NativeAllocationCount,
+                "count",
+                "Unity.Profiling.ProfilerRecorder:UnsafeUtility.Malloc-or-zero");
+            capabilities[GoldenSceneTelemetryMetricIds.AssetStreamingStalls] = Supported(
+                GoldenSceneTelemetryMetricIds.AssetStreamingStalls,
+                "nanoseconds",
+                "Unity.Profiling.ProfilerRecorder:Application.WaitForAsyncOperationToComplete-or-zero");
+            capabilities[GoldenSceneTelemetryMetricIds.ShaderCompilationEvents] = Supported(
+                GoldenSceneTelemetryMetricIds.ShaderCompilationEvents,
+                "count",
+                "Unity.Profiling.ProfilerRecorder:Shader.CompileGPUProgram-or-zero");
+        }
+
+        private void CaptureRuntimeFallbackMetrics(double?[] values)
+        {
+            int currentCollectionCount = TotalGarbageCollectionCount();
+            SetValue(
+                values,
+                GoldenSceneTelemetryMetricIds.GarbageCollectionCount,
+                Math.Max(0, currentCollectionCount - initialGarbageCollectionCount));
+
+            Renderer[] renderers = UnityEngine.Object.FindObjectsByType<Renderer>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            int activeRenderers = 0;
+            foreach (Renderer renderer in renderers)
+            {
+                if (renderer != null && renderer.enabled && renderer.gameObject.activeInHierarchy)
+                    activeRenderers++;
+            }
+            SetValue(values, GoldenSceneTelemetryMetricIds.ActiveRenderers, activeRenderers);
+
+            SetValue(
+                values,
+                GoldenSceneTelemetryMetricIds.TextureStreamingRequests,
+                Texture.streamingTexturePendingLoadCount);
+            double desiredTextureMemory = Texture.desiredTextureMemory;
+            double currentTextureMemory = Texture.currentTextureMemory;
+            SetValue(
+                values,
+                GoldenSceneTelemetryMetricIds.TextureStreamingBytes,
+                Math.Max(0d, desiredTextureMemory - currentTextureMemory));
+
+            LODGroup[] lodGroups = UnityEngine.Object.FindObjectsByType<LODGroup>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            foreach (LODGroup lodGroup in lodGroups)
+            {
+                int signature = CalculateLodRendererSignature(lodGroup);
+                int instanceId = lodGroup.GetInstanceID();
+                if (lodGroupRendererSignatures.TryGetValue(instanceId, out int previousSignature) &&
+                    previousSignature != signature)
+                    observedLodTransitions++;
+                lodGroupRendererSignatures[instanceId] = signature;
+            }
+            SetValue(values, GoldenSceneTelemetryMetricIds.LodGroups, lodGroups.Length);
+            SetValue(values, GoldenSceneTelemetryMetricIds.LodTransitions, observedLodTransitions);
+
+            ParticleSystem[] particleSystems = UnityEngine.Object.FindObjectsByType<ParticleSystem>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            long particleCount = 0L;
+            foreach (ParticleSystem particleSystem in particleSystems)
+                particleCount += particleSystem == null ? 0 : particleSystem.particleCount;
+
+            int visualEffectCount = 0;
+            if (VisualEffectType != null)
+            {
+                UnityEngine.Object[] visualEffects = UnityEngine.Object.FindObjectsByType(
+                    VisualEffectType,
+                    FindObjectsInactive.Exclude,
+                    FindObjectsSortMode.None);
+                visualEffectCount = visualEffects == null ? 0 : visualEffects.Length;
+            }
+
+            SetValueIfAbsent(values, GoldenSceneTelemetryMetricIds.NativeAllocationCount, 0d);
+            SetValueIfAbsent(values, GoldenSceneTelemetryMetricIds.AssetStreamingStalls, 0d);
+            SetValueIfAbsent(values, GoldenSceneTelemetryMetricIds.ShaderCompilationEvents, 0d);
+            SetValue(
+                values,
+                GoldenSceneTelemetryMetricIds.VfxSources,
+                particleSystems.Length + visualEffectCount);
+            SetValue(values, GoldenSceneTelemetryMetricIds.ParticleCount, particleCount);
+
+            Animator[] animators = UnityEngine.Object.FindObjectsByType<Animator>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            int fallbackActors = 0;
+            foreach (Animator animator in animators)
+            {
+                if (animator != null &&
+                    (ContainsOrdinalIgnoreCase(animator.name, "fallback") ||
+                     ContainsOrdinalIgnoreCase(animator.name, "impostor")))
+                    fallbackActors++;
+            }
+            SetValue(
+                values,
+                GoldenSceneTelemetryMetricIds.FullActors,
+                Math.Max(0, animators.Length - fallbackActors));
+            SetValue(values, GoldenSceneTelemetryMetricIds.FallbackActors, fallbackActors);
+
+            Canvas[] canvases = UnityEngine.Object.FindObjectsByType<Canvas>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            int nameplateActors = 0;
+            foreach (Canvas canvas in canvases)
+            {
+                if (canvas != null && ContainsNameplateInHierarchy(canvas.transform))
+                    nameplateActors++;
+            }
+            SetValue(values, GoldenSceneTelemetryMetricIds.NameplateActors, nameplateActors);
+        }
+
+        private static int CalculateLodRendererSignature(LODGroup lodGroup)
+        {
+            unchecked
+            {
+                int signature = 17;
+                foreach (LOD lod in lodGroup.GetLODs())
+                {
+                    foreach (Renderer renderer in lod.renderers)
+                    {
+                        int rendererSignature = renderer == null
+                            ? 0
+                            : renderer.GetInstanceID() * 2 + (renderer.isVisible ? 1 : 0);
+                        signature = signature * 31 + rendererSignature;
+                    }
+                }
+                return signature;
+            }
+        }
+
+        private static bool ContainsNameplateInHierarchy(Transform transform)
+        {
+            for (Transform current = transform; current != null; current = current.parent)
+            {
+                if (ContainsOrdinalIgnoreCase(current.name, "nameplate")) return true;
+            }
+            return false;
+        }
+
+        private static bool ContainsOrdinalIgnoreCase(string value, string token)
+        {
+            return !string.IsNullOrEmpty(value) &&
+                   value.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static int TotalGarbageCollectionCount()
+        {
+            return GC.CollectionCount(0) + GC.CollectionCount(1) + GC.CollectionCount(2);
         }
 
         private void DeclareUnsupportedMetrics()

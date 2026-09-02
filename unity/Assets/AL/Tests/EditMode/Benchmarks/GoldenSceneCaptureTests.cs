@@ -38,6 +38,23 @@ namespace AL.Tests.EditMode.Benchmarks
         }
 
         [Test]
+        public void VideoFrameSchedulerCatchesUpMissedTicksWithoutUnboundedSpiral()
+        {
+            double interval = 1d / 30d;
+            double nextFrameAt = 0d;
+            Assert.That(
+                GoldenSceneVideoFrameScheduler.CountDueFrames(interval * 2.5d, ref nextFrameAt, interval),
+                Is.EqualTo(3));
+            Assert.That(nextFrameAt, Is.EqualTo(interval * 3d).Within(1e-9));
+
+            nextFrameAt = 0d;
+            Assert.That(
+                GoldenSceneVideoFrameScheduler.CountDueFrames(10d, ref nextFrameAt, interval, 8),
+                Is.EqualTo(8));
+            Assert.That(nextFrameAt, Is.EqualTo(interval * 8d).Within(1e-9));
+        }
+
+        [Test]
         public void ManifestLinksEveryArtifactToTheExactRunConfiguration()
         {
             GoldenSceneSetup setup = Resolve("GS-05", "city_overview", "pc_high_60");

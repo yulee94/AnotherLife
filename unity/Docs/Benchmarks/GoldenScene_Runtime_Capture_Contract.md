@@ -50,7 +50,9 @@ FFmpeg `gdigrab` against the Player window, writes MP4 `yuv420p` media, and neve
 executable to the evidence package. The path must identify an existing file named `ffmpeg.exe`;
 all other platforms remain unsupported through this CLI integration. The session still owns
 anchor reapplication, drift checks, UI exclusion or benchmark-required routing across the entire
-external capture interval, naming, hashing, and manifest linkage.
+external capture interval, naming, hashing, and manifest linkage. The capture scheduler catches up
+missed video-frame ticks so a slower Player loop still meets `videoFrameRate * duration` instead of
+failing closed on hitch-induced under-counting.
 
 `GoldenSceneNativeProfilerCaptureFacility` uses Unity native binary profiler logging and
 writes the Unity-assigned raw `.raw` artifact required for Unity Profiler review. If `Profiler.supported`
@@ -61,6 +63,16 @@ capture claim. Deep Profiling is never enabled.
 A completed `GoldenSceneTelemetryReport` may be supplied at finalization to retain the raw
 project telemetry JSON. If none is supplied, the manifest records
 `AL-GS-TELEMETRY-NOT-PROVIDED` and remains incomplete.
+
+The runtime telemetry source uses Unity profiler counters where Unity exposes an authoritative
+counter. It derives GC events from `System.GC.CollectionCount`, texture backlog from Unity's
+streaming texture APIs, and scene-density values from one-second active-hierarchy snapshots.
+Native allocation and shader-compilation event counts come from the `UnsafeUtility.Malloc` and
+`Shader.CompileGPUProgram` profiler markers. LOD-transition counts compare each active LOD group's
+renderer-visibility signature between snapshots. Scene systems may publish a more specialized
+value through `GoldenSceneTelemetryGaugeRegistry`; a published value replaces the corresponding
+generic snapshot and records its own source. Zero remains a measured value (for example, no
+particles or streaming backlog), while unavailable APIs remain explicit `unsupported` capabilities.
 
 ## Provenance boundary
 

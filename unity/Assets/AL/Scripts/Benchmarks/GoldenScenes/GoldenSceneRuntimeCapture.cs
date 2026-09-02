@@ -1194,6 +1194,34 @@ namespace AL.Benchmarks.GoldenScenes
         }
     }
 
+    internal static class GoldenSceneVideoFrameScheduler
+    {
+        public static int CountDueFrames(
+            double elapsedSeconds,
+            ref double nextFrameAtSeconds,
+            double intervalSeconds,
+            int maxFrames = 120)
+        {
+            if (double.IsNaN(elapsedSeconds) || double.IsInfinity(elapsedSeconds) || elapsedSeconds < 0d)
+                throw new ArgumentOutOfRangeException(nameof(elapsedSeconds));
+            if (double.IsNaN(nextFrameAtSeconds) || double.IsInfinity(nextFrameAtSeconds) || nextFrameAtSeconds < 0d)
+                throw new ArgumentOutOfRangeException(nameof(nextFrameAtSeconds));
+            if (double.IsNaN(intervalSeconds) || double.IsInfinity(intervalSeconds) || intervalSeconds <= 0d)
+                throw new ArgumentOutOfRangeException(nameof(intervalSeconds));
+            if (maxFrames <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maxFrames));
+
+            int count = 0;
+            while (elapsedSeconds >= nextFrameAtSeconds && count < maxFrames)
+            {
+                count++;
+                nextFrameAtSeconds += intervalSeconds;
+            }
+
+            return count;
+        }
+    }
+
     [DefaultExecutionOrder(32000)]
     [DisallowMultipleComponent]
     public sealed class GoldenSceneRuntimeCapture : MonoBehaviour
@@ -1268,11 +1296,13 @@ namespace AL.Benchmarks.GoldenScenes
             if (!IsCapturing) return;
             double elapsed = Time.realtimeSinceStartupAsDouble - startedAtRealtime;
             GoldenSceneCameraState.Apply(captureCamera, session.Setup);
-            if (elapsed >= nextVideoFrameAt)
-            {
+            double interval = 1d / Math.Max(1, session.MediaSettings.VideoFrameRate);
+            int dueFrames = GoldenSceneVideoFrameScheduler.CountDueFrames(
+                elapsed,
+                ref nextVideoFrameAt,
+                interval);
+            for (int index = 0; index < dueFrames; index++)
                 session.CaptureVideoFrame(captureCamera);
-                nextVideoFrameAt += 1d / Math.Max(1, session.MediaSettings.VideoFrameRate);
-            }
             if (AutoComplete && elapsed >= session.MediaSettings.VideoDurationSeconds)
                 CompleteCapture();
         }
