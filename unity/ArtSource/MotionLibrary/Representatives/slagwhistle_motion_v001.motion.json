@@ -1,0 +1,407 @@
+{
+  "schemaVersion": 1,
+  "libraryId": "rmc_motion_library_representative_v001",
+  "assetId": "rmc_motion_asset_slagwhistle_v001",
+  "representativeProfileId": "rmc_representative_beast_slagwhistle_v001",
+  "skeletonProfileId": "rmc_skeleton_nonhumanoid_grounded_v001",
+  "authorityState": "bounded_engineering",
+  "sourceBlendPath": "unity/ArtSource/RigPipeline/Representatives/slagwhistle_burrower_rig_clean_v002.blend",
+  "blendPath": "unity/ArtSource/MotionLibrary/Representatives/slagwhistle_motion_v001.blend",
+  "fbxPath": "unity/ArtSource/MotionLibrary/Exports/slagwhistle_motion_v001.fbx",
+  "sourcePlanSha256": "9512bf6e7a6419561883d45d3f4428f740f3c5f4196f4567ab519037d8f1b6fb",
+  "sourceBlendSha256": "3ab5a3db6533aa19f35185b159bda81c8e32789fc5dcb35b3c8dd2c365fca90f",
+  "blendSha256": "ab082c1774cbf5e705a7ea4bb027a435f60b7d278a927cf6ff75d926a34c2b4c",
+  "fbxSha256": "89995413f73d88194ff77d488aaca7879da17042227a81912586a7b4f814d4aa",
+  "skeletonSignature": "4a6c46ae8b4d4803e3346e8a8e4ca2c3948ca6ce8c6ec1167132cc8c663e94fd",
+  "actionSignature": "a230ad5fc82ea69f810cae6608cd3638b2d474c46b718b3210ba68fcb5e1017b",
+  "semanticSignature": "3e60535e2a7af4d2c83f219f62d52b42c304c25e93da6886fc9bde3545c8734d",
+  "sampleRateHz": 30,
+  "contactBones": [
+    "contact_front_l",
+    "contact_front_r",
+    "contact_rear_l",
+    "contact_rear_r"
+  ],
+  "licensingEvidence": [
+    "unity/ArtSource/RigPipeline/al_rig_source_provenance.v1.json",
+    "unity/ArtSource/RigPipeline/Representatives/slagwhistle_burrower_rig_clean_v002.rig.json"
+  ],
+  "sourceRightsState": "project_authored_motion_with_source_bounded_authority",
+  "knownRestrictions": [
+    "Exactly six source-authorized presentation slots are authored; attack, special attack, defeat, burrow, standing rest, and any seventh clip remain blocked pending owner authorization.",
+    "Slagwhistle is a fantasy beast with exact-rig anatomy-specific motion; it is not humanoid-retargetable."
+  ],
+  "cleanupThresholds": {
+    "maximumLoopPositionErrorMeters": 0.01,
+    "maximumLoopRotationErrorDegrees": 1.0,
+    "maximumContactDriftMeters": 0.02,
+    "maximumTransitionPositionDeltaMeters": 0.03,
+    "maximumTransitionRotationDeltaDegrees": 6.0
+  },
+  "actions": [
+    {
+      "clipId": "rmc_clip_slagwhistle_idle_neutral_v001",
+      "motionKey": "idle.neutral",
+      "actionName": "ANIM_rmc_clip_slagwhistle_idle_neutral_v001",
+      "frameCount": 61,
+      "sampleRateHz": 30,
+      "durationSeconds": 2.0,
+      "loop": true,
+      "rootTreatment": "in_place_motor_owned",
+      "generatorRuleId": "rmc_motion_rule_idle_cycle_v001",
+      "generatorStyle": "idle_cycle",
+      "events": [
+        {
+          "eventName": "al.motion.phase.enter",
+          "frame": 1,
+          "normalizedTime": 0.0,
+          "eventOrdinal": 0,
+          "phase": "idle.neutral"
+        },
+        {
+          "eventName": "al.motion.contact.begin",
+          "frame": 13,
+          "normalizedTime": 0.2,
+          "eventOrdinal": 1,
+          "phase": "idle.neutral"
+        },
+        {
+          "eventName": "al.motion.phase.exit",
+          "frame": 61,
+          "normalizedTime": 1.0,
+          "eventOrdinal": 2,
+          "phase": "idle.neutral"
+        }
+      ],
+      "hitboxWindows": [],
+      "clipSignature": "f358b9fb35b3c28c610bf0c26d64b0d691b89216553e5205d85d21363b884a50",
+      "measuredCleanup": {
+        "loopPositionErrorMeters": 0.0,
+        "loopRotationErrorDegrees": 0.0,
+        "contactDriftMeters": 0.0,
+        "transitionPositionDeltaMeters": 0.0,
+        "transitionRotationDeltaDegrees": 0.2093566,
+        "poseContinuity": "closed",
+        "finiteTransforms": true
+      }
+    },
+    {
+      "clipId": "rmc_clip_slagwhistle_interaction_cut_v001",
+      "motionKey": "interaction.cut",
+      "actionName": "ANIM_rmc_clip_slagwhistle_interaction_cut_v001",
+      "frameCount": 31,
+      "sampleRateHz": 30,
+      "durationSeconds": 1.0,
+      "loop": false,
+      "rootTreatment": "in_place_motor_owned",
+      "generatorRuleId": "rmc_motion_rule_attack_v001",
+      "generatorStyle": "attack_action",
+      "events": [
+        {
+          "eventName": "al.motion.phase.enter",
+          "frame": 1,
+          "normalizedTime": 0.0,
+          "eventOrdinal": 0,
+          "phase": "interaction.cut"
+        },
+        {
+          "eventName": "al.motion.hitbox.request_begin",
+          "windowId": "primary",
+          "frame": 12,
+          "normalizedTime": 0.36,
+          "eventOrdinal": 1,
+          "phase": "interaction.cut"
+        },
+        {
+          "eventName": "al.motion.hitbox.request_end",
+          "windowId": "primary",
+          "frame": 20,
+          "normalizedTime": 0.62,
+          "eventOrdinal": 2,
+          "phase": "interaction.cut"
+        },
+        {
+          "eventName": "al.motion.interruptible.begin",
+          "windowId": "recovery",
+          "frame": 23,
+          "normalizedTime": 0.72,
+          "eventOrdinal": 3,
+          "phase": "interaction.cut"
+        },
+        {
+          "eventName": "al.motion.phase.exit",
+          "frame": 31,
+          "normalizedTime": 1.0,
+          "eventOrdinal": 4,
+          "phase": "interaction.cut"
+        }
+      ],
+      "hitboxWindows": [
+        {
+          "windowId": "primary",
+          "openFrame": 12,
+          "closeFrame": 20
+        }
+      ],
+      "clipSignature": "9adb97ce013eddd6511a16173705c9c50a0319eae6fde42adc0ee19d92eddd21",
+      "measuredCleanup": {
+        "loopPositionErrorMeters": 0.0,
+        "loopRotationErrorDegrees": 0.0,
+        "contactDriftMeters": 0.0,
+        "transitionPositionDeltaMeters": 0.0,
+        "transitionRotationDeltaDegrees": 4.9896245,
+        "poseContinuity": "declared_transition",
+        "finiteTransforms": true
+      }
+    },
+    {
+      "clipId": "rmc_clip_slagwhistle_locomotion_stop_v001",
+      "motionKey": "locomotion.stop",
+      "actionName": "ANIM_rmc_clip_slagwhistle_locomotion_stop_v001",
+      "frameCount": 31,
+      "sampleRateHz": 30,
+      "durationSeconds": 1.0,
+      "loop": false,
+      "rootTreatment": "in_place_motor_owned",
+      "generatorRuleId": "rmc_motion_rule_generic_v001",
+      "generatorStyle": "gesture_action",
+      "events": [
+        {
+          "eventName": "al.motion.phase.enter",
+          "frame": 1,
+          "normalizedTime": 0.0,
+          "eventOrdinal": 0,
+          "phase": "locomotion.stop"
+        },
+        {
+          "eventName": "al.motion.contact.begin",
+          "frame": 7,
+          "normalizedTime": 0.2,
+          "eventOrdinal": 1,
+          "phase": "locomotion.stop"
+        },
+        {
+          "eventName": "al.motion.interruptible.begin",
+          "frame": 22,
+          "normalizedTime": 0.7,
+          "eventOrdinal": 2,
+          "phase": "locomotion.stop"
+        },
+        {
+          "eventName": "al.motion.phase.exit",
+          "frame": 31,
+          "normalizedTime": 1.0,
+          "eventOrdinal": 3,
+          "phase": "locomotion.stop"
+        }
+      ],
+      "hitboxWindows": [],
+      "clipSignature": "bd92ef3991bb15b91a76844cfe83bfe3b2f36b35f7b09d7d6c74e08654afe9e5",
+      "measuredCleanup": {
+        "loopPositionErrorMeters": 0.0,
+        "loopRotationErrorDegrees": 0.0,
+        "contactDriftMeters": 0.0,
+        "transitionPositionDeltaMeters": 0.0,
+        "transitionRotationDeltaDegrees": 1.9306009,
+        "poseContinuity": "declared_transition",
+        "finiteTransforms": true
+      }
+    },
+    {
+      "clipId": "rmc_clip_slagwhistle_locomotion_turn_v001",
+      "motionKey": "locomotion.turn",
+      "actionName": "ANIM_rmc_clip_slagwhistle_locomotion_turn_v001",
+      "frameCount": 25,
+      "sampleRateHz": 30,
+      "durationSeconds": 0.8,
+      "loop": true,
+      "rootTreatment": "in_place_motor_owned",
+      "generatorRuleId": "rmc_motion_rule_locomotion_cycle_v001",
+      "generatorStyle": "locomotion_cycle",
+      "events": [
+        {
+          "eventName": "al.motion.phase.enter",
+          "frame": 1,
+          "normalizedTime": 0.0,
+          "eventOrdinal": 0,
+          "phase": "locomotion.turn"
+        },
+        {
+          "eventName": "al.motion.contact.begin",
+          "frame": 6,
+          "normalizedTime": 0.2,
+          "eventOrdinal": 1,
+          "contactId": "contact_front_l",
+          "phase": "locomotion.turn"
+        },
+        {
+          "eventName": "al.motion.contact.end",
+          "frame": 8,
+          "normalizedTime": 0.3,
+          "eventOrdinal": 2,
+          "contactId": "contact_front_l",
+          "phase": "locomotion.turn"
+        },
+        {
+          "eventName": "al.motion.contact.begin",
+          "frame": 18,
+          "normalizedTime": 0.7,
+          "eventOrdinal": 3,
+          "contactId": "contact_front_r",
+          "phase": "locomotion.turn"
+        },
+        {
+          "eventName": "al.motion.contact.end",
+          "frame": 20,
+          "normalizedTime": 0.8,
+          "eventOrdinal": 4,
+          "contactId": "contact_front_r",
+          "phase": "locomotion.turn"
+        },
+        {
+          "eventName": "al.motion.phase.exit",
+          "frame": 25,
+          "normalizedTime": 1.0,
+          "eventOrdinal": 5,
+          "phase": "locomotion.turn"
+        }
+      ],
+      "hitboxWindows": [],
+      "clipSignature": "7ea22ad557729d99877ff5fe1263bc68604db037c3808fdf641fc0db504b949f",
+      "measuredCleanup": {
+        "loopPositionErrorMeters": 0.0,
+        "loopRotationErrorDegrees": 0.0,
+        "contactDriftMeters": 0.0,
+        "transitionPositionDeltaMeters": 0.0,
+        "transitionRotationDeltaDegrees": 3.3768235,
+        "poseContinuity": "closed",
+        "finiteTransforms": true
+      }
+    },
+    {
+      "clipId": "rmc_clip_slagwhistle_locomotion_walk_v001",
+      "motionKey": "locomotion.walk",
+      "actionName": "ANIM_rmc_clip_slagwhistle_locomotion_walk_v001",
+      "frameCount": 25,
+      "sampleRateHz": 30,
+      "durationSeconds": 0.8,
+      "loop": true,
+      "rootTreatment": "in_place_motor_owned",
+      "generatorRuleId": "rmc_motion_rule_locomotion_cycle_v001",
+      "generatorStyle": "locomotion_cycle",
+      "events": [
+        {
+          "eventName": "al.motion.phase.enter",
+          "frame": 1,
+          "normalizedTime": 0.0,
+          "eventOrdinal": 0,
+          "phase": "locomotion.walk"
+        },
+        {
+          "eventName": "al.motion.contact.begin",
+          "frame": 6,
+          "normalizedTime": 0.2,
+          "eventOrdinal": 1,
+          "contactId": "contact_front_l",
+          "phase": "locomotion.walk"
+        },
+        {
+          "eventName": "al.motion.contact.end",
+          "frame": 8,
+          "normalizedTime": 0.3,
+          "eventOrdinal": 2,
+          "contactId": "contact_front_l",
+          "phase": "locomotion.walk"
+        },
+        {
+          "eventName": "al.motion.contact.begin",
+          "frame": 18,
+          "normalizedTime": 0.7,
+          "eventOrdinal": 3,
+          "contactId": "contact_front_r",
+          "phase": "locomotion.walk"
+        },
+        {
+          "eventName": "al.motion.contact.end",
+          "frame": 20,
+          "normalizedTime": 0.8,
+          "eventOrdinal": 4,
+          "contactId": "contact_front_r",
+          "phase": "locomotion.walk"
+        },
+        {
+          "eventName": "al.motion.phase.exit",
+          "frame": 25,
+          "normalizedTime": 1.0,
+          "eventOrdinal": 5,
+          "phase": "locomotion.walk"
+        }
+      ],
+      "hitboxWindows": [],
+      "clipSignature": "b63c474409d1f4e24f1b19fac6b98703e88cc665d208a1a31bb8490635235acf",
+      "measuredCleanup": {
+        "loopPositionErrorMeters": 0.0,
+        "loopRotationErrorDegrees": 0.0,
+        "contactDriftMeters": 0.0,
+        "transitionPositionDeltaMeters": 0.0,
+        "transitionRotationDeltaDegrees": 2.6691373,
+        "poseContinuity": "closed",
+        "finiteTransforms": true
+      }
+    },
+    {
+      "clipId": "rmc_clip_slagwhistle_reaction_spoil_push_v001",
+      "motionKey": "reaction.spoil_push",
+      "actionName": "ANIM_rmc_clip_slagwhistle_reaction_spoil_push_v001",
+      "frameCount": 31,
+      "sampleRateHz": 30,
+      "durationSeconds": 1.0,
+      "loop": false,
+      "rootTreatment": "in_place_motor_owned",
+      "generatorRuleId": "rmc_motion_rule_generic_v001",
+      "generatorStyle": "gesture_action",
+      "events": [
+        {
+          "eventName": "al.motion.phase.enter",
+          "frame": 1,
+          "normalizedTime": 0.0,
+          "eventOrdinal": 0,
+          "phase": "reaction.spoil_push"
+        },
+        {
+          "eventName": "al.motion.interruptible.begin",
+          "frame": 22,
+          "normalizedTime": 0.7,
+          "eventOrdinal": 1,
+          "phase": "reaction.spoil_push"
+        },
+        {
+          "eventName": "al.motion.phase.exit",
+          "frame": 31,
+          "normalizedTime": 1.0,
+          "eventOrdinal": 2,
+          "phase": "reaction.spoil_push"
+        }
+      ],
+      "hitboxWindows": [],
+      "clipSignature": "efbbf80c859879dfbfa6bb87ed26e9083c832f04f2dd8307bad09b4c0cf83d29",
+      "measuredCleanup": {
+        "loopPositionErrorMeters": 0.0,
+        "loopRotationErrorDegrees": 0.0,
+        "contactDriftMeters": 0.0,
+        "transitionPositionDeltaMeters": 0.0,
+        "transitionRotationDeltaDegrees": 1.9306009,
+        "poseContinuity": "declared_transition",
+        "finiteTransforms": true
+      }
+    }
+  ],
+  "roundTrip": {
+    "status": "passed",
+    "armatureCount": 1,
+    "boneCount": 47,
+    "expectedActionCount": 6,
+    "importedActionCount": 6,
+    "missingActionCount": 0
+  }
+}
