@@ -67,21 +67,25 @@ namespace AL.Editor.Motion
             importer.animationType = preset.RigClassification == MotionRigClassification.Humanoid
                 ? ModelImporterAnimationType.Human
                 : ModelImporterAnimationType.Generic;
+            ApplyHumanoidMapping(importer);
 
             MotionImportClip[] clips = binding.Clips
                 .Where(value => value != null)
                 .OrderBy(value => value.ClipId, StringComparer.Ordinal)
                 .ToArray();
             var importedClips = new ModelImporterClipAnimation[clips.Length];
+            ModelImporterClipAnimation[] sourceTakes = importer.defaultClipAnimations;
             for (int index = 0; index < clips.Length; index++)
             {
-                importedClips[index] = BuildClip(clips[index]);
+                importedClips[index] = BuildClip(clips[index], sourceTakes);
             }
 
             importer.clipAnimations = importedClips;
         }
 
-        private static ModelImporterClipAnimation BuildClip(MotionImportClip source)
+        private static ModelImporterClipAnimation BuildClip(
+            MotionImportClip source,
+            ModelImporterClipAnimation[] sourceTakes)
         {
             if (string.IsNullOrWhiteSpace(source.ClipId) ||
                 string.IsNullOrWhiteSpace(source.MotionKey) ||
@@ -96,7 +100,7 @@ namespace AL.Editor.Motion
             var clip = new ModelImporterClipAnimation
             {
                 name = source.ClipId,
-                takeName = source.SourceTake,
+                takeName = ResolveTakeName(source.SourceTake, sourceTakes),
                 firstFrame = source.FirstFrameInclusive,
                 lastFrame = source.LastFrameInclusive,
                 loopTime = source.Loop,
@@ -142,6 +146,76 @@ namespace AL.Editor.Motion
                 })
                 .ToArray();
             return clip;
+        }
+
+        private static string ResolveTakeName(
+            string configuredTake,
+            ModelImporterClipAnimation[] sourceTakes)
+        {
+            ModelImporterClipAnimation[] candidates = (sourceTakes ??
+                    Array.Empty<ModelImporterClipAnimation>())
+                .Where(value => value != null &&
+                                (string.Equals(
+                                     value.takeName,
+                                     configuredTake,
+                                     StringComparison.Ordinal) ||
+                                 value.takeName.EndsWith(
+                                     "|" + configuredTake,
+                                     StringComparison.Ordinal)))
+                .ToArray();
+            if (candidates.Length > 1)
+            {
+                throw new InvalidOperationException(
+                    "Motion source take is ambiguous: " + configuredTake);
+            }
+
+            return candidates.Length == 1 ? candidates[0].takeName : configuredTake;
+        }
+
+        internal static void ApplyHumanoidMapping(ModelImporter importer)
+        {
+            if (importer == null || importer.animationType != ModelImporterAnimationType.Human)
+            {
+                return;
+            }
+
+            HumanDescription description = importer.humanDescription;
+            description.human = new[]
+            {
+                CreateHumanBone("pelvis", "Hips"),
+                CreateHumanBone("spine_01", "Spine"),
+                CreateHumanBone("spine_02", "Chest"),
+                CreateHumanBone("chest", "UpperChest"),
+                CreateHumanBone("neck_01", "Neck"),
+                CreateHumanBone("head", "Head"),
+                CreateHumanBone("clavicle_l", "LeftShoulder"),
+                CreateHumanBone("upper_arm_l", "LeftUpperArm"),
+                CreateHumanBone("lower_arm_l", "LeftLowerArm"),
+                CreateHumanBone("hand_l", "LeftHand"),
+                CreateHumanBone("clavicle_r", "RightShoulder"),
+                CreateHumanBone("upper_arm_r", "RightUpperArm"),
+                CreateHumanBone("lower_arm_r", "RightLowerArm"),
+                CreateHumanBone("hand_r", "RightHand"),
+                CreateHumanBone("upper_leg_l", "LeftUpperLeg"),
+                CreateHumanBone("lower_leg_l", "LeftLowerLeg"),
+                CreateHumanBone("foot_l", "LeftFoot"),
+                CreateHumanBone("toe_l", "LeftToes"),
+                CreateHumanBone("upper_leg_r", "RightUpperLeg"),
+                CreateHumanBone("lower_leg_r", "RightLowerLeg"),
+                CreateHumanBone("foot_r", "RightFoot"),
+                CreateHumanBone("toe_r", "RightToes")
+            };
+            importer.humanDescription = description;
+        }
+
+        private static HumanBone CreateHumanBone(string boneName, string humanName)
+        {
+            return new HumanBone
+            {
+                boneName = boneName,
+                humanName = humanName,
+                limit = new HumanLimit { useDefaultValues = true }
+            };
         }
     }
 }

@@ -1,0 +1,457 @@
+{
+  "schemaVersion": 1,
+  "documentKind": "anotherlife.creature-2d-approved-source.v2",
+  "scope": "4 realm dragons, Vaeloryn, 4 realm bosses, 12 elites",
+  "rosterCount": 21,
+  "approvedCount": 21,
+  "blockedCount": 0,
+  "authority": "User accepted all assistant-recommended 2D decisions without per-item questions.",
+  "modelRule": "Only clean geometry, deliberate material masks/sockets, and effect anchors may derive from these sheets. Runtime VFX remains separate.",
+  "entries": [
+    {
+      "id": "tdf_boss_stonehold_fault_crowned_colossus",
+      "decision": "approved_with_required_sculpt_corrections",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_stonehold_fault_crowned_colossus_concept_sheet_v001.png",
+          "sha256": "c949d4c95e00ca665f3b4e3e56cbc949810113ac4c2c936ff815af23e3519b50",
+          "bytes": 2792951,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Preserve three distinct limb-pair attachment zones.",
+        "Redesign the nasal growth bed and skull so the identity does not collapse into an enlarged rhinoceros."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_stonehold_oreblind_delver",
+      "decision": "approved",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_stonehold_oreblind_delver_concept_sheet_v001.png",
+          "sha256": "86ef99a99539d6d8fdce1dbac410e0dae4b7ab0e6735dab39f37805d624c0f23",
+          "bytes": 2609153,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Lock six-limb skeletal spacing before retopology.",
+        "Keep sensory plates separate from armor and VFX authority."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_stonehold_rimehorn_breaker",
+      "decision": "approved",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_stonehold_rimehorn_breaker_concept_sheet_v001.png",
+          "sha256": "f05cb4102528f430ccf1173f6dee5d0824cfcbcb9e1c858b20b731cc2ecc3bf3",
+          "bytes": 2694431,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Lock horn root and central notch.",
+        "Verify braking-load anatomy in the production turnaround."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_stonehold_slaghide_gorer",
+      "decision": "approved_revised_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/slaghide_gorer_v003.png",
+          "sha256": "caaa7a991760e2222b53e060497e0420ab840b16a9155f9a6f720399e2eea53d",
+          "bytes": 1549802,
+          "dimensions": [
+            1024,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Preserve the fused vitrified dorsal shield and asymmetric tusks.",
+        "Change skull, shoulder, and gait proportions so the creature no longer reads as a normal boar."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_boss_eldergrove_mere_root_leviathan",
+      "decision": "approved_revised_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/mere_root_leviathan_v003.png",
+          "sha256": "5140a3348d9660d4f0b98db8b45bc1283c44308141f298fb65b93350f7896201",
+          "bytes": 1704526,
+          "dimensions": [
+            1024,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Preserve the low aquatic axis, dominant forelimbs, long rudder tail, and exactly seven cervical vanes.",
+        "Deepen the jaw-hinge, vent, and forelimb-root identity so the head no longer reads as a normal salamander."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_eldergrove_hollowbark_stalker",
+      "decision": "approved",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_eldergrove_hollowbark_stalker_concept_sheet_v001.png",
+          "sha256": "8aa0e974fac00a2f6a0ea7d23eb8056c75e8a20f69dba6cb2153ba6501fbe6cb",
+          "bytes": 2658021,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Lock the tail-fan blade count.",
+        "Verify plate-root deformation across the rig."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_eldergrove_mirrorfin_lurker",
+      "decision": "approved",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_eldergrove_mirrorfin_lurker_concept_sheet_v001.png",
+          "sha256": "693e7c9d62322082ac7b5375668b5f9da83cd19fb45a883be39130fe5f393f8c",
+          "bytes": 3149583,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Standardize mantle scallop count and flare range in the production turnaround and rig."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_eldergrove_sunmane_thornstag",
+      "decision": "approved_revised_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/sunmane_thornstag_v003.png",
+          "sha256": "b095125c8c4d1443fdb3d1a01ad06386bf221e9a5514c509093b51eca61f6b60",
+          "bytes": 1832349,
+          "dimensions": [
+            1024,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Preserve the deep chest, long lower-leg negative space, dorsal mane, and one left antler break.",
+        "Lock a single rear-facing antler tine order and push the anatomy farther from a familiar stag."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_boss_crownlands_meridian_tempest_roc",
+      "decision": "approved",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_crownlands_meridian_tempest_roc_concept_sheet_v002.png",
+          "sha256": "99d2bc5afed49937cf86cb56b5c7318e4a7f54ff4003efa0dc21148546d1af21",
+          "bytes": 2648116,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Lock exactly seven separated outer primaries, left-wing damage, the low shield-skull plane, and two readable rudder-fan roots."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_crownlands_crownstep_lion",
+      "decision": "approved_revised_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/crownstep_lion_v005.png",
+          "sha256": "a73f84f979ac2f349aeba37333daed7dfd70bde547d40c9909d6fc32e732c432",
+          "bytes": 1896114,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Preserve the three asymmetric rows of biologically rooted mane plates and heavy tuftless tail.",
+        "Redesign skull, shoulders, and forequarter loading so the identity no longer reads as a normal lion."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_crownlands_galeclaw_courser",
+      "decision": "approved_revised_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/galeclaw_courser_v002.png",
+          "sha256": "f0d67d74bc5db49d19cdea274c697e6d6fbdc4c058535307f3b042d69b1c278b",
+          "bytes": 1617477,
+          "dimensions": [
+            1024,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Preserve a flightless-bird body plan with two short balancing forewings, four-toed bird feet, a spear skull, and short pygostyle fan.",
+        "Push the anatomy away from terror-bird and theropod silhouettes."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_crownlands_reliquary_basilisk",
+      "decision": "approved",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_crownlands_reliquary_basilisk_concept_sheet_v001.png",
+          "sha256": "a4c4385a7ad444ccb1926163b6ca9ff663cca9563cb5773fd0a245aef5c6a6d1",
+          "bytes": 2640177,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Lock all three limb girdles and the tail-brace contact system in orthographic topology."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_boss_umbral_ashvein_triarch",
+      "decision": "approved",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_umbral_ashvein_triarch_concept_sheet_v002.png",
+          "sha256": "c627ff27abc62a8d52720a6beb20e3031a03d36cc6060c3c13f95fdc6a05b72a",
+          "bytes": 2601404,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Lock three separate neck roots, central shield width, left sealed-eye damage, right hook profile, and exactly one wing pair."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_umbral_cindermaw_salamander",
+      "decision": "approved",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_cindermaw_salamander_concept_sheet_v001.png",
+          "sha256": "61a5ea43950826a19dc344c3e8f0413cd78457b33cb85c0aeff52a2e9eb872ee",
+          "bytes": 2804083,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Lock dorsal fin count and root order; treat heat and contact steam as separate runtime VFX."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_umbral_gravewing_siphon",
+      "decision": "approved_revised_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/gravewing_siphon_v002.png",
+          "sha256": "30dcc7a02c290c4536e0d744d15878dffdba092b157a61cd796557fc52a42dda",
+          "bytes": 1627485,
+          "dimensions": [
+            1024,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Preserve non-humanoid horizontal quadrupedal bat anatomy with one wing pair and two hind limbs.",
+        "Lock keel, pelvis, nose leaf, thumb claws, and membrane-tab count across folded and spread views."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "tdf_elite_umbral_veilspine_widow",
+      "decision": "approved",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_veilspine_widow_concept_sheet_v001.png",
+          "sha256": "8432d1b562689dbe55258b7213ee3ccc1baa01fbe83937c7c7ddd6ff1170590d",
+          "bytes": 2285521,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Preserve exact eight-leg hierarchy and vertical spine order; webbing and sensory color remain supplemental runtime treatment."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "dragon_crownlands_dawn_regent",
+      "decision": "approved_new_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/dragon_crownlands_dawn_regent_v001.png",
+          "sha256": "74464e17b6884191b79a666f592f703f7b8d4d78a8c1a66fc88fec8278ab8b47",
+          "bytes": 2118532,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Create a new Crownlands-specific approval sheet with a structurally regal dawn identity rather than a generic gold western dragon.",
+        "Keep magic readable through emissive-mask intent only; all atmospheric and attack VFX remain separate."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "dragon_stonehold_iron_wyrm",
+      "decision": "approved_new_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/dragon_stonehold_iron_wyrm_v001.png",
+          "sha256": "73d5c8e3c38487bb7fa5cbad28cfa026d7e0d97a023ba8f5b2384fce5e0791e7",
+          "bytes": 2179071,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Create a new Stonehold-specific approval sheet with fault-forged load anatomy rather than a generic armored dragon.",
+        "Keep forge glow limited to deliberate material channels; dust, sparks, heat, and attacks remain separate runtime VFX."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "dragon_eldergrove_moonbough",
+      "decision": "approved_new_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/dragon_eldergrove_moonbough_v001.png",
+          "sha256": "93c53fa05e177ae88e74832f0fc86365f2c41d9dbb0850acd5c8c10e7a410967",
+          "bytes": 2280782,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Create a new Eldergrove-specific approval sheet with original moon-root anatomy rather than a familiar antlered nature dragon.",
+        "No literal foliage clutter; moonlight, spores, pollen, and attacks remain separate runtime VFX."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "dragon_umbral_void_seraph",
+      "decision": "approved_new_2d",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/dragon_umbral_void_seraph_v001.png",
+          "sha256": "7e75c76212a41e0f45d545ebb319c14044f2475f32c6237534ffe48b02b865b9",
+          "bytes": 2220222,
+          "dimensions": [
+            1536,
+            1024
+          ]
+        }
+      ],
+      "requirements": [
+        "Create a new Umbral-specific approval sheet with a four-leg/two-wing void-seraph body plan rather than a generic dark dragon.",
+        "Keep void seams as controlled emissive-mask intent; smoke, distortion, cinders, and attacks remain separate runtime VFX."
+      ],
+      "source_note": null
+    },
+    {
+      "id": "NPC_VAELORYN",
+      "decision": "approved_existing_2d_identity",
+      "status": "APPROVED_2D",
+      "sources": [
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/55_vaeloryn_multiview_01_v001.png",
+          "sha256": "b3453b1e23b6ab911fe33fb0820c05e2f9b5d9db0e34ef89875edad83a8f8b55",
+          "bytes": 265475,
+          "dimensions": [
+            399,
+            768
+          ]
+        },
+        {
+          "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/56_vaeloryn_multiview_02_v001.png",
+          "sha256": "ccdb03cd2e4bc2547e95497e251bbd698d52b4c19a1b179b0707993709bd897d",
+          "bytes": 669400,
+          "dimensions": [
+            1062,
+            768
+          ]
+        }
+      ],
+      "requirements": [
+        "Preserve the previously approved exact 2D identity: adult dark fantasy, celestial material hierarchy, crown/thorn system, broad translucent wings, four legs, and one wing pair.",
+        "The rejected old 3D model grants no derivative authority; build a new clean model only from approved 2D source evidence.",
+        "Gems, portal, wish-space, atmospheric magic, and attack effects remain separate runtime VFX."
+      ],
+      "source_note": "approval recorded; exact original PNG not recovered locally during this audit"
+    }
+  ]
+}
