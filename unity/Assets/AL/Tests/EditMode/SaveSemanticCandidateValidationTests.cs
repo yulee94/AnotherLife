@@ -77,6 +77,11 @@ namespace AL.Tests.EditMode
             "\"PrimaryG\":0.4,\"PrimaryB\":1.0,\"HairR\":0.08," +
             "\"HairG\":0.06,\"HairB\":0.04,\"CapeEnabled\":true," +
             "\"HelmetEnabled\":false}";
+        private const string NeutralMapDisclosureJson =
+            "{\"Version\":0,\"AuthorityEpoch\":0,\"AuthorityRevision\":0," +
+            "\"CatalogVersion\":\"\",\"CatalogSha256\":\"\",\"StateDigest\":\"\"," +
+            "\"DiscoveredFeatureIds\":[],\"VisibleRouteIds\":[]," +
+            "\"VisibleObjectiveIds\":[],\"VisibleAllegianceMarkerIds\":[]}";
         private const string NeutralNvs01ProgressJson =
             "{\"Version\":0,\"PacketVersion\":\"\",\"PacketSha256\":\"\"," +
             "\"QuestId\":\"\",\"Revision\":0,\"StateId\":\"\",\"Objectives\":[]," +
@@ -124,6 +129,38 @@ namespace AL.Tests.EditMode
             byte[] firstCopy = candidate.CopyRawBytes();
             firstCopy[0] = (byte)'[';
             CollectionAssert.AreEqual(expected, candidate.CopyRawBytes());
+        }
+
+        [Test]
+        public void JsonUtilityMapDisclosurePlaceholderOnCurrentSaveIsWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"MapDisclosure\":" + NeutralMapDisclosureJson),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
+        public void MapDisclosureWithUnknownNestedFieldStaysPreservedReadOnly()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"MapDisclosure\":" + NeutralMapDisclosureJson.TrimEnd('}') + ",\"FutureField\":true}"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_UNKNOWN_NESTED_FIELD"));
         }
 
         [Test]
