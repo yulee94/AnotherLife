@@ -1,0 +1,2578 @@
+{
+  "schemaVersion": 1,
+  "packetId": "anotherlife-realm-creature-production-source",
+  "sourceVersion": "al-rcreature-2026-09-02-v001",
+  "createdAtUtc": "2026-09-02T06:07:11Z",
+  "authority": {
+    "finalCreativeApprover": "user",
+    "approved2DSourceVersion": "anotherlife.creature-2d-approved-source.v2",
+    "runtimeAuthority": false,
+    "gameplayAuthority": false,
+    "narrativeAuthority": false
+  },
+  "readiness": {
+    "technicalPacketState": "TechnicalReviewReady",
+    "userCreativeState": "ApprovedSourceVersion",
+    "runtimeIntegrationState": "Blocked",
+    "narrativeNamingState": "WorkingLabelsOnly"
+  },
+  "qualityBar": {
+    "style": "mystical medieval naturalism",
+    "authoringTextureIntent": "8192x8192 native base color and 4096x4096 native normal/roughness/metallic for approved hero/elite production sources; 2048x2048 runtime maps are derivatives",
+    "ownerTierTexturePackets": 3,
+    "belowOwnerTierTexturePackets": 18,
+    "coverageDisposition": "Only Hollowbark Stalker, Reliquary Basilisk, and Cindermaw Salamander currently carry the 8K/4K authoring dimensions. Cindermaw remains UV/bake-blocked. All lower-resolution packets are retained as review/cleanup sources, not owner-tier production textures.",
+    "runtimeVfxSeparate": true
+  },
+  "provenance": {
+    "generatorProduct": "Meshy",
+    "generatorModel": "Meshy-7",
+    "taskBinding": "Each model records the Meshy task ID or IDs used for its selected candidate/rebuild.",
+    "exactGenerationPromptState": "not_retained_in_this_packet",
+    "promptDisposition": "Approved 2D sheets and their recorded requirements are authoritative inputs; exact Meshy 3D request payloads were not retained as a complete immutable prompt ledger, so this packet remains TechnicalReviewReady rather than TechnicalHandoffComplete.",
+    "externalInputs": [
+      {
+        "kind": "AnotherLife owner-approved 2D creature source",
+        "thirdParty": false,
+        "record": "realm_creature_2d_approval_manifest_v002.json"
+      }
+    ],
+    "editingSteps": [
+      "Meshy candidate generation from approved 2D source evidence",
+      "Blender structural inspection and candidate selection",
+      "PBR packet retention; premium procedural map rebuilds for Hollowbark, Reliquary, and Cindermaw",
+      "Fail-closed review disposition with superseded/failed outputs excluded"
+    ],
+    "licenseEvidence": "Generated through the project owner's Meshy account from AnotherLife-approved source evidence. No third-party source image is declared as an input. This is an evidence statement, not a universal legal-clearance claim.",
+    "editableSourceAvailability": "FBX and image maps are retained; native sculpt, rig, and complete editable DCC authoring files are not delivered."
+  },
+  "unityImportBoundary": {
+    "path": "outside_unity_assets",
+    "metaFilesRequired": false,
+    "importSettingsRequired": false,
+    "reason": "Models and textures are retained under unity/ArtSource and review media under unity/Docs; neither tree is imported by Unity. A separate runtime integration PR must create Unity Assets, .meta GUIDs, importer settings, LODs, rigs, and packaging evidence."
+  },
+  "lodPolicy": {
+    "sourceTierMaximumTriangles": 75000,
+    "balancedLodMaximumTriangles": 45000,
+    "lowMobileLodMaximumTriangles": 22000,
+    "requiredDerivatives": [
+      "LOD1",
+      "LOD2"
+    ],
+    "deliveryState": "Blocked_not_generated_or_validated"
+  },
+  "summary": {
+    "approved2D": 21,
+    "structuralPass": 17,
+    "blocked3D": 5,
+    "runtimeIntegrationState": "Blocked",
+    "ownerTierTexturePackets": 3,
+    "belowOwnerTierTexturePackets": 18
+  },
+  "models": [
+    {
+      "source2dId": "tdf_boss_stonehold_fault_crowned_colossus",
+      "modelId": "boss_stonehold_fault_crowned_colossus",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/boss_stonehold_fault_crowned_colossus/boss_stonehold_fault_crowned_colossus_source_v001.fbx",
+        "bytes": 14532732,
+        "sha256": "c06b9fc23316f6d40ff747e1bdf12b4a055633530d6dd036909a3bc2f83d70f6"
+      },
+      "textures": [
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/base_color.png",
+          "bytes": 5453047,
+          "sha256": "3b15b1ef953f8f60b860ccc87ac62a710cbe0f40f6e460cb5bd9d3696f37adbc",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/metallic.png",
+          "bytes": 1079210,
+          "sha256": "9e72ec30c011abfc4e97ec6bd2d55ca0342f23325a1f624a66b0dd6247ee358e",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/metallic_smoothness.png",
+          "bytes": 2512741,
+          "sha256": "21b91134b60acef939bec009733692bd08faa621dc2f4517e388f98aa0b37857",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/normal.png",
+          "bytes": 5116058,
+          "sha256": "712aef099a1a1f6231aa5b396ad99f650cd4170119fd96f997b26b9ede48cc6d",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/roughness.png",
+          "bytes": 1125885,
+          "sha256": "7f3d58ced707e3f440b084371efd44a67641c2d58d104918980d471bb500ba8a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/runtime_2k/base_color.png",
+          "bytes": 5466121,
+          "sha256": "5493c23d9b71fe25102934663a6e448c888dc1ca4b2d3613b0fe6e2e793eea8c",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/runtime_2k/metallic_smoothness.png",
+          "bytes": 2512741,
+          "sha256": "21b91134b60acef939bec009733692bd08faa621dc2f4517e388f98aa0b37857",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_stonehold_fault_crowned_colossus/runtime_2k/normal.png",
+          "bytes": 4098364,
+          "sha256": "af0590568b4c319722bb5e7479899759716687600ecd888060f3ccb6779e7a28",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/boss_stonehold_fault_crowned_colossus_threequarter.png",
+        "bytes": 221467,
+        "sha256": "fa17bd3703b705fd269cb37c0c4d361fe0fc3715da7a2d6de95fccacfe108cc2",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b45-c3f7-73cc-91dc-dd5b775afa7f"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_stonehold_oreblind_delver",
+      "modelId": "elite_stonehold_oreblind_delver",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/elite_stonehold_oreblind_delver/elite_stonehold_oreblind_delver_source_v001.fbx",
+        "bytes": 13729612,
+        "sha256": "df10a1ed7b48d3ccc0c87c0fd7c163f14be25f5e71c0c3a32de624a931534b2b"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/base_color.png",
+          "bytes": 5714313,
+          "sha256": "f5fd986d860ae85370bccc3400cd72f87d0508a993341bdf0ff7d11fd8c0c01c",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/metallic.png",
+          "bytes": 13622,
+          "sha256": "0f0239a1289428d34358f5e597fe114ab09da3f7d0e0a8a6bec5174a95b28cd5",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/metallic_smoothness.png",
+          "bytes": 1336720,
+          "sha256": "cf535f27c48e2236d3a957aca5ca2146454f3d0042c1a0f215d9543119ae240e",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/normal.png",
+          "bytes": 5598035,
+          "sha256": "4e377a26640edab429054a8708f7cdc204fd8c0b06456be3ab192615fefd922e",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/roughness.png",
+          "bytes": 1078192,
+          "sha256": "39f1fd745a078af417112e1aff6448621962a14cedcce436fec33a6b5e541270",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/runtime_2k/base_color.png",
+          "bytes": 5746950,
+          "sha256": "c874fd3be3795be2c27bfdcceb5f655c1b0cfd122a5e904a1ee513ccec1812d2",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/runtime_2k/metallic_smoothness.png",
+          "bytes": 1336720,
+          "sha256": "cf535f27c48e2236d3a957aca5ca2146454f3d0042c1a0f215d9543119ae240e",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_oreblind_delver/runtime_2k/normal.png",
+          "bytes": 4513332,
+          "sha256": "6308123233c7a7db9a93d54b004ce7e93ca24f1fc240e0d46b8a630a7976aac7",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_stonehold_oreblind_delver_threequarter.png",
+        "bytes": 227162,
+        "sha256": "d8033bc8cc9058ace576736996ce52f3209229077c4db318e450569264786986",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b59-7f34-72c3-8923-a917e686a496"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_stonehold_rimehorn_breaker",
+      "modelId": "elite_stonehold_rimehorn_breaker",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/elite_stonehold_rimehorn_breaker/elite_stonehold_rimehorn_breaker_source_v001.fbx",
+        "bytes": 16106268,
+        "sha256": "24307fb741d67c61a64ad6286757a1374aaef5f4f44443c10ea52a62c1c61eec"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/base_color.png",
+          "bytes": 6489799,
+          "sha256": "466842982500b3ab745c2483a4b59c24cf1db3f49e63f5e7e1b3a4a4822bb839",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/metallic.png",
+          "bytes": 659660,
+          "sha256": "79769be86450625c659222e6eb37385c27b725814a25bdeeded7e9c4fa46e050",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/metallic_smoothness.png",
+          "bytes": 2553432,
+          "sha256": "6c05717bdd76596eebc704591bac8d7b181f08f6ad02864e048a71f5083e5e31",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/normal.png",
+          "bytes": 6311223,
+          "sha256": "79eb1a7a714d263c6ce670c5f422e8947f6db00fed461138085dce51f1d08042",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/roughness.png",
+          "bytes": 1366731,
+          "sha256": "dde7e3c2f93db82023f27abd057f7f739438ca1bedcd8a7deee947c8b670155e",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/runtime_2k/base_color.png",
+          "bytes": 6547984,
+          "sha256": "7c452f0a22e91e696a0adfe8865d5cc9dbf07d438114fa03b7bb157e2297e54f",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/runtime_2k/metallic_smoothness.png",
+          "bytes": 2553432,
+          "sha256": "6c05717bdd76596eebc704591bac8d7b181f08f6ad02864e048a71f5083e5e31",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_rimehorn_breaker/runtime_2k/normal.png",
+          "bytes": 5228716,
+          "sha256": "bce3cf5ee022192c6016555dbd858a245e20b364da9c6e33f1c5d2c3ca12ed6a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_stonehold_rimehorn_breaker_threequarter.png",
+        "bytes": 270578,
+        "sha256": "19e006e37f632d603bb71be1cd6ee94022f83f9b536a9ec7ce5cb8810131cf9c",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b41-cbfd-7600-805a-66c8a290e6ec"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_stonehold_slaghide_gorer",
+      "modelId": "elite_stonehold_slaghide_gorer",
+      "status": "clean_textured_base_pass_manual_tusks",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/elite_stonehold_slaghide_gorer/elite_stonehold_slaghide_gorer_source_v001.fbx",
+        "bytes": 1363724,
+        "sha256": "6894fa65bb41e0a0b36ad28a3afe274d908908c56a2d46c4393b9854ad09ece7"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/base_color.png",
+          "bytes": 4959015,
+          "sha256": "02ac253d376af907dea871d275fbcc510061d6b31efa95c0052a7a5f538655e5",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/metallic.png",
+          "bytes": 8818,
+          "sha256": "2fa342e30e55468d1f216267d06e9326c89249280680f437258dd80c84d31286",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/metallic_smoothness.png",
+          "bytes": 1080500,
+          "sha256": "18fec11516e8f55291750b808070fdb10544c039dce5c5ff7e2fdfded24aea29",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/normal.png",
+          "bytes": 4725531,
+          "sha256": "89a7756089989b3de630e0c402e3f841b4e6af5ec9f59312bb91d6f62b26f67b",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/roughness.png",
+          "bytes": 881243,
+          "sha256": "a82dd1c8b779ba62f7c4e72d015e46ccad0e0278f1a7e6d30aa318145d8822f9",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/runtime_2k/base_color.png",
+          "bytes": 4926847,
+          "sha256": "72c43966a254afd9854c1a732ef6caee9fad0379a0186a266393b2386ef1b509",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/runtime_2k/metallic_smoothness.png",
+          "bytes": 1080500,
+          "sha256": "18fec11516e8f55291750b808070fdb10544c039dce5c5ff7e2fdfded24aea29",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_stonehold_slaghide_gorer/runtime_2k/normal.png",
+          "bytes": 3736710,
+          "sha256": "40b287a61f9fa9deba39500777fe07b828b76975bcb32fe8a483c8627b2ea626",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_stonehold_slaghide_gorer_threequarter.png",
+        "bytes": 188510,
+        "sha256": "3909734abe6753d5abd64d9a80ffe04449aeb9a289abe43a061ecdc965a51cee",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b59-8a11-7369-8614-53c2cba364b7"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_boss_eldergrove_mere_root_leviathan",
+      "modelId": "boss_eldergrove_mere_root_leviathan",
+      "status": "manual_dcc_required",
+      "blocker": "AI output has five rather than seven cervical vanes and insufficient shield-skull definition",
+      "selectedSource": {
+        "path": "Models/boss_eldergrove_mere_root_leviathan/boss_eldergrove_mere_root_leviathan_source_v001.fbx",
+        "bytes": 10216588,
+        "sha256": "3e5240324caef4edb2fdeb06628a00b5664fb070f4848acd5e7d027749e86d30"
+      },
+      "textures": [
+        {
+          "path": "Textures/boss_eldergrove_mere_root_leviathan/base_color.png",
+          "bytes": 3897720,
+          "sha256": "81e0889056b97835422a8cb62c12c66c508cf5b2ee95099c7b022273a8c64c7f",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_eldergrove_mere_root_leviathan/metallic.png",
+          "bytes": 7425,
+          "sha256": "1dd1605b6052f9e4a73609288c1f6cd1d6b44f31ffe724477b4c307d0392d1ba",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_eldergrove_mere_root_leviathan/normal.png",
+          "bytes": 3861654,
+          "sha256": "2b89e210e56124a01ee32551fa9133e97aafe88f8e1fc22d21afc72f29962227",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_eldergrove_mere_root_leviathan/roughness.png",
+          "bytes": 686343,
+          "sha256": "4e6bfad6dcd6702de7c6b98f5d38dc163dc1f99f40307e80a683191a3b329aea",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/boss_eldergrove_mere_root_leviathan_threequarter.png",
+        "bytes": 404134,
+        "sha256": "923375b08f69be6130a8aac354f47b1966b21e0dff5ace7f26a4d5dfab5561bd",
+        "dimensions": [
+          640,
+          640
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b45-caf4-7239-991b-3f3f940abc39"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_eldergrove_hollowbark_stalker",
+      "modelId": "elite_eldergrove_hollowbark_stalker",
+      "status": "clean_textured_base_pass_quality_bar_8k",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/elite_eldergrove_hollowbark_stalker/elite_eldergrove_hollowbark_stalker_source_v001.fbx",
+        "bytes": 1570252,
+        "sha256": "c41ea687d9e913705e05ff8911cdad18b65718ffb33ba2649756d05b26888c7c"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/ao.png",
+          "bytes": 22519,
+          "sha256": "549458715a7bafb51bae3773abcf773ea2bf583684c7587cee21297e8dd777f2",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/base_color.png",
+          "bytes": 43307628,
+          "sha256": "539afb4d94a55abc5553f9fa7e86a06b9058dbbb74c936aa4ade020517e11a7c",
+          "dimensions": [
+            8192,
+            8192
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/metallic.png",
+          "bytes": 196791,
+          "sha256": "882611fb62ce02397ec1c37743c17773dbaa3ed248a4d6c7470f1680b81d9f4e",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/metallic_smoothness.png",
+          "bytes": 2216148,
+          "sha256": "869466180b3068ca7cc9848f320a1653de08a280a1c34d62c9f83f247cc7e033",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/normal.png",
+          "bytes": 11137795,
+          "sha256": "6fbb990c1a14b4e2e36125fb553db5844efb18baf69ac39e90c67acc521c13d4",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/roughness.png",
+          "bytes": 1761094,
+          "sha256": "31e4951692ae497b36185582e9442c0ce79cccad825e471c46185c07594c0c5a",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/runtime_2k/base_color.png",
+          "bytes": 4285189,
+          "sha256": "51f76436a285887c98d7af0044dc6effc9050009b16bf22a079de4a461b90716",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/runtime_2k/metallic_smoothness.png",
+          "bytes": 762055,
+          "sha256": "c006cf45e641badcd8e3ebcd5ee3df370661c85dec7dcf091f96561c5f136c67",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_hollowbark_stalker/runtime_2k/normal.png",
+          "bytes": 3200502,
+          "sha256": "7ce95329dd549dd6d23b4a86b0b3d8d2d05a1a7abc4c8741a7410273603b9a55",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_eldergrove_hollowbark_stalker_threequarter.png",
+        "bytes": 211701,
+        "sha256": "d831aa091822678b7f9aa3316d7c61d3288d6d8e0f41a9ac4dda75042b6afc28",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05c27-845a-7534-b4c5-f5774948b37b",
+        "01a05fa3-0969-73cd-98fb-2a9c09ac865b"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_eldergrove_mirrorfin_lurker",
+      "modelId": "elite_eldergrove_mirrorfin_lurker",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/elite_eldergrove_mirrorfin_lurker/elite_eldergrove_mirrorfin_lurker_source_v001.fbx",
+        "bytes": 15934220,
+        "sha256": "655964b281e443f9f5e8219c8b2792e182b61f4806ded9ff818439edfcafd108"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/base_color.png",
+          "bytes": 7497542,
+          "sha256": "9e71925cbe3d4a52073f43770386afa4158f90eccf8a5cbdc1b332295c764a0c",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/emission.png",
+          "bytes": 151670,
+          "sha256": "0e2e8617a96f0e1c41e4c5515ff336d2acfae86be6de71205fdc7dce73b55498",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/metallic.png",
+          "bytes": 24703,
+          "sha256": "42026d1195c8f0c038d844260d354eebfdd7844811b2a6851acbd611f49af34f",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/metallic_smoothness.png",
+          "bytes": 992958,
+          "sha256": "883d26b123f00c0c9b3923d232fc04c6f12570810425c57fd58b11f003e613d7",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/normal.png",
+          "bytes": 5907810,
+          "sha256": "653a8c05501db533134dba6b4e6facd962f6a65179b64bef2eacc598965dbcd8",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/roughness.png",
+          "bytes": 1023908,
+          "sha256": "a652749c215c44ca668e5159b795968ec836c4b856d6bb62c8426d370ee5fa89",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/runtime_2k/base_color.png",
+          "bytes": 6679174,
+          "sha256": "abe24dae9057aa27274f391c6294b79ad66fcf41c647ed22a5a0fe04fd64e7c7",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/runtime_2k/metallic_smoothness.png",
+          "bytes": 992958,
+          "sha256": "883d26b123f00c0c9b3923d232fc04c6f12570810425c57fd58b11f003e613d7",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_mirrorfin_lurker/runtime_2k/normal.png",
+          "bytes": 4775899,
+          "sha256": "b0aa141d75b0de2eeadb63373ed0ca3a26bd37395145b01a8b1e98698265f897",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_eldergrove_mirrorfin_lurker_threequarter.png",
+        "bytes": 185789,
+        "sha256": "f42ec9e6f8c516fca80b961c2134124c72d47e43722b403b5ab0e3c3a94478cf",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b36-338c-72d6-a650-bb5adc18da9d"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_eldergrove_sunmane_thornstag",
+      "modelId": "elite_eldergrove_sunmane_thornstag",
+      "status": "manual_dcc_required",
+      "blocker": "paired neck-hugging keratin rails and broad three-toed feet were lost",
+      "selectedSource": {
+        "path": "Models/elite_eldergrove_sunmane_thornstag/elite_eldergrove_sunmane_thornstag_source_v001.fbx",
+        "bytes": 13625052,
+        "sha256": "360fa5f2696d41840ee3c6735318c118eae15cc19726147ba36acb0363a37c42"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_eldergrove_sunmane_thornstag/base_color.png",
+          "bytes": 4992312,
+          "sha256": "b2c8d2dff2ca5271207bc1250dbdf691c0baaa161ca76bed88e09afbd6996915",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_sunmane_thornstag/metallic.png",
+          "bytes": 974261,
+          "sha256": "69f36403333cce18204a57e4db2fcea754b986ee06c4a1ba7345f9a6bd68f6c5",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_sunmane_thornstag/normal.png",
+          "bytes": 4946608,
+          "sha256": "4a86d9d7bde54562252cc190bb50bdce0479a0afa5ae37819715fcdf43bf4b89",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_eldergrove_sunmane_thornstag/roughness.png",
+          "bytes": 1099758,
+          "sha256": "471b013d109eae42a628f51358a9764402eacc83ce0ed81290e565672fd5af00",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_eldergrove_sunmane_thornstag_threequarter.png",
+        "bytes": 432320,
+        "sha256": "1842cee1f4d147ac548c846ed925f4496427b082b1858cc786c6af66bff78344",
+        "dimensions": [
+          640,
+          640
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b41-d430-7509-a8d4-21b3f6048d75"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_boss_crownlands_meridian_tempest_roc",
+      "modelId": "boss_crownlands_meridian_tempest_roc",
+      "status": "manual_dcc_required",
+      "blocker": "AI output does not preserve exactly seven outer blades per wing plus the fixed left break and two tail rudders",
+      "selectedSource": {
+        "path": "Models/boss_crownlands_meridian_tempest_roc/boss_crownlands_meridian_tempest_roc_source_v001.fbx",
+        "bytes": 10373900,
+        "sha256": "b85e97ddbd3f36b6bbfdb0d28820c31904d49532b1bfc5aac9199ad6be253c12"
+      },
+      "textures": [
+        {
+          "path": "Textures/boss_crownlands_meridian_tempest_roc/base_color.png",
+          "bytes": 3402310,
+          "sha256": "9730d5585296cfb2310316f466e2fc89295b499954dff87b8d7e505a508858af",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_crownlands_meridian_tempest_roc/metallic.png",
+          "bytes": 385961,
+          "sha256": "c85cd512ac4a05e2c6668fff24de457a141d220d471239d1efc62bfc9a1c0355",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_crownlands_meridian_tempest_roc/normal.png",
+          "bytes": 3794937,
+          "sha256": "5e6ab5991b759e6158739c223f4b66b0835b52ca93024915be7454e7c2070009",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_crownlands_meridian_tempest_roc/roughness.png",
+          "bytes": 768538,
+          "sha256": "94182a7b7209f9f7198d96f5137b673664860627642f6faa1311c48555ddc1ab",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/boss_crownlands_meridian_tempest_roc_threequarter.png",
+        "bytes": 419575,
+        "sha256": "87087384902bfa29ae900619bac5ed78e71b8029f7bebd93d605e9e537f0ee46",
+        "dimensions": [
+          640,
+          640
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b56-8881-72f3-8860-6aec86577692"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_crownlands_crownstep_lion",
+      "modelId": "elite_crownlands_crownstep",
+      "status": "manual_dcc_required",
+      "blocker": "three sparse rooted neck/shoulder plate rows and five-digit paws were lost",
+      "selectedSource": {
+        "path": "Models/elite_crownlands_crownstep/elite_crownlands_crownstep_source_v001.fbx",
+        "bytes": 11175372,
+        "sha256": "e83952a8ee8b112c288657bf5728456ccf7adb3a7c5332974275f58580c836b0"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_crownlands_crownstep/base_color.png",
+          "bytes": 4187380,
+          "sha256": "1dddf54aa42e362af544133f17a3dd356c02f3bb9a55d3a313493b1b420af847",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_crownstep/metallic.png",
+          "bytes": 801528,
+          "sha256": "58c6dba77bafca237bcaa191e93e8ed6c925d304d3f5d60cf63c277ac0439def",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_crownstep/normal.png",
+          "bytes": 4097407,
+          "sha256": "8a04414fff852f152a3e2f7cf6d91f4ff6d542ac6e120cff28e996e185f19a6a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_crownstep/roughness.png",
+          "bytes": 847109,
+          "sha256": "a23fdbe89d628d4e0e16afd824104683ef7b446f14fcb11754c73bacef96993a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_crownlands_crownstep_threequarter.png",
+        "bytes": 413156,
+        "sha256": "94667b658217837ef0cdda5946c373acd635de707c5ae02bbfa069541c2d5e32",
+        "dimensions": [
+          640,
+          640
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b41-dd68-757c-a4c3-2f5dbd67a16e"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_crownlands_galeclaw_courser",
+      "modelId": "elite_crownlands_galeclaw_courser",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/elite_crownlands_galeclaw_courser/elite_crownlands_galeclaw_courser_source_v001.fbx",
+        "bytes": 13312444,
+        "sha256": "ac33cc2f1080dfbe0dd28b158efbd61e3e799ae6e185397ed87513198201e3db"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/base_color.png",
+          "bytes": 5245966,
+          "sha256": "7444d23c07333d97b4f6fbf52aafba758d479dcd47da70f146e095d37333d886",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/metallic.png",
+          "bytes": 355557,
+          "sha256": "6808fb8827856c941d5795c4a008c8dbcc40096d8d2701333078b3302c7653eb",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/metallic_smoothness.png",
+          "bytes": 1710452,
+          "sha256": "f81e7ca1af4f418780803a980f7524553165ae02c5cbed375add310848d047f8",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/normal.png",
+          "bytes": 5238106,
+          "sha256": "ade1ed13d0cbfb39d13e93447a3df4c5d78853d89accb76a90adfa86352dc08f",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/roughness.png",
+          "bytes": 1024736,
+          "sha256": "502c0142d4bfd4af13090eb8a182e4239ea81edd5a6fabed09873ef2b88a7e81",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/runtime_2k/base_color.png",
+          "bytes": 5193336,
+          "sha256": "05c035a351a83d7d6a54ecd9aaa2a4b022d1c51cd14a2cbf1da8102ef2f7caea",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/runtime_2k/metallic_smoothness.png",
+          "bytes": 1710452,
+          "sha256": "f81e7ca1af4f418780803a980f7524553165ae02c5cbed375add310848d047f8",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_galeclaw_courser/runtime_2k/normal.png",
+          "bytes": 4170213,
+          "sha256": "bfc27019728ea5b4640e6b168f63edaca0af1cdc6cefacd85353a52440ffbc28",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_crownlands_galeclaw_courser_threequarter.png",
+        "bytes": 206252,
+        "sha256": "34f4790aa091ce56c21e0aab0892ba702b62dba9bcddb4aa511a42f1be273180",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b41-e560-7087-bfdf-1c882e85a933"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_crownlands_reliquary_basilisk",
+      "modelId": "elite_crownlands_reliquary_basilisk",
+      "status": "clean_textured_base_pass_quality_bar_8k",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/elite_crownlands_reliquary_basilisk/elite_crownlands_reliquary_basilisk_source_v001.fbx",
+        "bytes": 1555404,
+        "sha256": "67bbf05be87fef78ba684d202621db4e0ff9984b464b08347840424817b43ff4"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/ao.png",
+          "bytes": 22519,
+          "sha256": "549458715a7bafb51bae3773abcf773ea2bf583684c7587cee21297e8dd777f2",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/base_color.png",
+          "bytes": 63745279,
+          "sha256": "3ca64c158005317d017c3d9a4ba2ab95e559b6456250aec2b3c97c712c39dcb3",
+          "dimensions": [
+            8192,
+            8192
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/metallic.png",
+          "bytes": 124417,
+          "sha256": "9e3852e793cbc4dc3e5d3779e5712c17e5d2d5e149cc933bb1f67b6365ce16fb",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/metallic_smoothness.png",
+          "bytes": 1900967,
+          "sha256": "1573e236e82d51f6650d84065778a873cb608b7864cedd377d7dd44bf88bb7b9",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/normal.png",
+          "bytes": 19392592,
+          "sha256": "c45c196a778544c0ad36e21953f93f94a55e1fcd6934b8bd5f86314b08660553",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/roughness.png",
+          "bytes": 1607823,
+          "sha256": "98fc1e65c28e1a3dcea24dc37f09066c81d0f0a7862fea74bd5e462171540053",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/runtime_2k/base_color.png",
+          "bytes": 7604405,
+          "sha256": "71232193f21b48484a52e52fb1fdde1cc565f7f5fb1ad3a7d06c901ecc167503",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/runtime_2k/metallic_smoothness.png",
+          "bytes": 659253,
+          "sha256": "f889da4daac0679a5fe2f76f0c3916b0ad5aba2dec20416992f6ad1b473756b2",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_crownlands_reliquary_basilisk/runtime_2k/normal.png",
+          "bytes": 5845839,
+          "sha256": "679420c7479e560200883d53bf1e4969cf4a417b2dd60ca17a787a2b31e1f10f",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_crownlands_reliquary_basilisk_threequarter.png",
+        "bytes": 196325,
+        "sha256": "e3258f0ca64b70479dd1f4d7b455047a2eac4b7bde8e32dcd2cb26fd31babad2",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05c27-e53f-708a-9cf4-7fdd94a8fa25",
+        "01a05fa3-1012-76a6-829d-fc2299233cbe"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_boss_umbral_ashvein_triarch",
+      "modelId": "boss_umbral_ashvein_triarch",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/boss_umbral_ashvein_triarch/boss_umbral_ashvein_triarch_source_v001.fbx",
+        "bytes": 12492572,
+        "sha256": "794d603ae206c9a18a8f68b79f42e88e75c0163f90fa04216b3869d5da154f83"
+      },
+      "textures": [
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/base_color.png",
+          "bytes": 4800252,
+          "sha256": "e7cd9c26bb05cd00447619834f60c73a1bce0f28f5c884a846de49dc21b8200d",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/metallic.png",
+          "bytes": 9417,
+          "sha256": "f7e519837d5dec320ad21eb70cc64f20a8ee1217e844199d9f025d715190534a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/metallic_smoothness.png",
+          "bytes": 1228364,
+          "sha256": "05b850cce39e3bb15b59f123b723a6beb6b2842725a52c984cf1dc4b9c3bc2fc",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/normal.png",
+          "bytes": 4842910,
+          "sha256": "2657bb8251192891c9ab353e7805ecaf68f666b168085592ef957bed7fcc4922",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/roughness.png",
+          "bytes": 988582,
+          "sha256": "ff449e7b1f78b387dcf27f2275bf04eedff5a07cfec97a7bf9f63b68f2bc5ca1",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/runtime_2k/base_color.png",
+          "bytes": 4792298,
+          "sha256": "7e3bf63b902a5c617d425d65606d69872e6214f36d9412b52152ecc5c938e420",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/runtime_2k/metallic_smoothness.png",
+          "bytes": 1228364,
+          "sha256": "05b850cce39e3bb15b59f123b723a6beb6b2842725a52c984cf1dc4b9c3bc2fc",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/boss_umbral_ashvein_triarch/runtime_2k/normal.png",
+          "bytes": 3777855,
+          "sha256": "aea452df302a58fe74496a0151929a5fe64cbe721db716d0a6d43d35cd9b4ef0",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/boss_umbral_ashvein_triarch_threequarter.png",
+        "bytes": 203782,
+        "sha256": "b060ebe1e39f36ded0c63eb9ae6724de6ccda052d4c2cb067cdeb577b8c2a21d",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b2c-8cd0-7699-9429-289c1dc1de69"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_umbral_cindermaw_salamander",
+      "modelId": "elite_umbral_cindermaw_salamander",
+      "status": "clean_geometry_pass_8k_texture_manual_uv_bake_required",
+      "blocker": "Silhouette and Umbral palette fit, but close-up UV projection remains polygonal; requires manual unwrap and texture bake before cinematic approval",
+      "selectedSource": {
+        "path": "Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v001.fbx",
+        "bytes": 1587292,
+        "sha256": "05a5cf925cdcf8f32a6dd305f29fb507783ad6bf00cfcfe9f7ed3612e05433b3"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/ao.png",
+          "bytes": 22519,
+          "sha256": "549458715a7bafb51bae3773abcf773ea2bf583684c7587cee21297e8dd777f2",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/base_color.png",
+          "bytes": 37023327,
+          "sha256": "fd8c62e09ec7e940e0d2196606ba6a2d3d9d7f5af565a4fa2d51fc4af8011c46",
+          "dimensions": [
+            8192,
+            8192
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/metallic.png",
+          "bytes": 609449,
+          "sha256": "b74d2dd9c63a9e1f48d1a5861ccc6e36d506d90a1c6c1acfdd5a33bcde7c0489",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/metallic_smoothness.png",
+          "bytes": 2771735,
+          "sha256": "815f48defafc55bc0e38a8d008cd54b22d53cd07db8f79390cb33654d5ab7e86",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/normal.png",
+          "bytes": 9488873,
+          "sha256": "767165c5da1b48d74ad5a9fc41da24be386e272be07437d909d268849146685c",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/roughness.png",
+          "bytes": 1779507,
+          "sha256": "bfe7b69d404c49efd5b63f3c15804de623b3ef38b38e6a72d60f9fa51df7719a",
+          "dimensions": [
+            4096,
+            4096
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/runtime_2k/base_color.png",
+          "bytes": 3722552,
+          "sha256": "d46d95e0916ac22a5c7f41d0405b5931e748821e06e4e927f8be2c82495918d6",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/runtime_2k/metallic_smoothness.png",
+          "bytes": 1043966,
+          "sha256": "3cc1a3229c2b486363eaf9df26bfe337473909351479bf25a34de5d68c66aa25",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_cindermaw_salamander/runtime_2k/normal.png",
+          "bytes": 2670353,
+          "sha256": "782381aa9232638ca4ff85b3a0daf05a382153403488662189bd18fc5a1e953a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_umbral_cindermaw_salamander_threequarter.png",
+        "bytes": 185561,
+        "sha256": "e2a521b9fc73e3e33a2868b75b339438fee421c5396ca7634f8616ffc77962ee",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05c28-150e-7126-a408-5140a978d549",
+        "01a05fa3-16b8-70f5-a0bd-cca9f316e455"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_umbral_gravewing_siphon",
+      "modelId": "elite_umbral_gravewing_siphon",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/elite_umbral_gravewing_siphon/elite_umbral_gravewing_siphon_source_v001.fbx",
+        "bytes": 11267660,
+        "sha256": "370d42a5cda78561803d955629284511b67e69b5dd1f8f335f9883d48b04adfa"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/base_color.png",
+          "bytes": 4361528,
+          "sha256": "5cb079543a17c558f4f53beba34a870eaea9d36f1c4f279e11532684d5a720ae",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/metallic.png",
+          "bytes": 31593,
+          "sha256": "7d94dab99439cde238bba078070b4700387a6e5bb1d46a3e4dae76a797734734",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/metallic_smoothness.png",
+          "bytes": 1219037,
+          "sha256": "b7231c40fdb3df2e0f304499552a548411c6cfeb0a30216bafee11170931c11c",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/normal.png",
+          "bytes": 4462926,
+          "sha256": "51b97cc362cc7de2ebc652dbaf64c91daa484f936df0990a9aecacc7f17ab8f9",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/roughness.png",
+          "bytes": 947083,
+          "sha256": "d6db0d25d74b5f80dd9eb3c7f4eff725990da38d853f772bb6e7b9002a9a85f5",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/runtime_2k/base_color.png",
+          "bytes": 4332941,
+          "sha256": "67a46f6b3a7a93bd8209cfadf2464ff748ec2ccc250b1e054c28fc2c40a66066",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/runtime_2k/metallic_smoothness.png",
+          "bytes": 1219037,
+          "sha256": "b7231c40fdb3df2e0f304499552a548411c6cfeb0a30216bafee11170931c11c",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_gravewing_siphon/runtime_2k/normal.png",
+          "bytes": 3391109,
+          "sha256": "57ff31c2ec46a857df06016db7cbe5eaf50d85256b4a64866be756e04d3364f7",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_umbral_gravewing_siphon_threequarter.png",
+        "bytes": 198448,
+        "sha256": "05627f7d3fa776cb03ae8be909eb3a3e0ccc3d0818c77b67b33a4695e4744007",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b59-9221-7660-a413-4342aeda8048"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "tdf_elite_umbral_veilspine_widow",
+      "modelId": "elite_umbral_veilspine_widow",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/elite_umbral_veilspine_widow/elite_umbral_veilspine_widow_source_v001.fbx",
+        "bytes": 11675228,
+        "sha256": "2119214bc0b1572b77309c9e759aee39a8a0bea0ceddb58bf63395581fc22ab8"
+      },
+      "textures": [
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/base_color.png",
+          "bytes": 3644235,
+          "sha256": "90cd904241e2858a92d0feeda5e16ba028cdc252bc4b5370d5f4d5963c0f24b2",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/metallic.png",
+          "bytes": 1029297,
+          "sha256": "95fb0c619ff5ba1d685018ecbd5bbec5ec2d3dad5e11a028846a26ee70906197",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/metallic_smoothness.png",
+          "bytes": 2340465,
+          "sha256": "04136b1ba11a7e43731b3f0f665c1b7a7009851636bc0e246840b7236c20352c",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/normal.png",
+          "bytes": 4492215,
+          "sha256": "eae1d8f7ce303949d2077e2e3d23889c3d701a4d3e7c223551f9890d56f28861",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/roughness.png",
+          "bytes": 989593,
+          "sha256": "b75a979290260c948531948579c4809821eed70af67087758c1e1c4ca79d6a0e",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/runtime_2k/base_color.png",
+          "bytes": 3579746,
+          "sha256": "0d48e1e225dda5b09d8ce89392e07548ed634d2a7328767da8b4739e791494dd",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/runtime_2k/metallic_smoothness.png",
+          "bytes": 2340465,
+          "sha256": "04136b1ba11a7e43731b3f0f665c1b7a7009851636bc0e246840b7236c20352c",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/elite_umbral_veilspine_widow/runtime_2k/normal.png",
+          "bytes": 3363153,
+          "sha256": "47c238870e22a8530d5888b915242593f4bb83b4e7958a07b023827ec25f96a2",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/elite_umbral_veilspine_widow_threequarter.png",
+        "bytes": 224970,
+        "sha256": "115c978d1ee217c70cef6cac293cc45d8287f8be43061ed29afeaa8455001c5e",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b50-9679-7402-886c-eb0c4508cb11"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "dragon_crownlands_dawn_regent",
+      "modelId": "dragon_crownlands_dawn_regent",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/dragon_crownlands_dawn_regent/dragon_crownlands_dawn_regent_source_v001.fbx",
+        "bytes": 10620316,
+        "sha256": "962d48d67000c6b099288c3f2e87e324cfef539929f9f0daab9a27026442ac89"
+      },
+      "textures": [
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/base_color.png",
+          "bytes": 3816553,
+          "sha256": "ae5d7f82a157239ab020e9a7c62240345043ca2a4fdbb0c0a22e6720af144307",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/metallic.png",
+          "bytes": 22901,
+          "sha256": "eeed8a07fde9494d977eb55c9b5232dbd1513adfc4a82b7f5d9dbc68422e3cdb",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/metallic_smoothness.png",
+          "bytes": 1064504,
+          "sha256": "97ccd8a8355e90b1d4655008c42f0b2bf5667548ac7e792df193bce23e26dc36",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/normal.png",
+          "bytes": 4201913,
+          "sha256": "2ac34673461f5c99f397177557cd38060c2bcd576a379be34918ce53ebab6d4b",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/roughness.png",
+          "bytes": 828383,
+          "sha256": "0da0ca0fe394bf2ff7932d60822ee85531674c573f253dabd578c2dacabd9623",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/runtime_2k/base_color.png",
+          "bytes": 3804034,
+          "sha256": "54f4a3654909da65d0f818a17df73d2f47ce17127dd5cbc64842245b7ecf49c1",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/runtime_2k/metallic_smoothness.png",
+          "bytes": 1064504,
+          "sha256": "97ccd8a8355e90b1d4655008c42f0b2bf5667548ac7e792df193bce23e26dc36",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_crownlands_dawn_regent/runtime_2k/normal.png",
+          "bytes": 3217788,
+          "sha256": "4d5272fd545928333af37dab3590f36e4c04b77053e230bd01ab4b5ae9314595",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/dragon_crownlands_dawn_regent_threequarter.png",
+        "bytes": 206502,
+        "sha256": "6b489331212c05aaabb787ec3c0cd590c2bd6ee844528be0b307420c2ae07710",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b49-b07c-7198-b593-1168cb7a303b"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "dragon_stonehold_iron_wyrm",
+      "modelId": "dragon_stonehold_iron_wyrm",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/dragon_stonehold_iron_wyrm/dragon_stonehold_iron_wyrm_source_v001.fbx",
+        "bytes": 18825564,
+        "sha256": "7bdc970e8972bbefa75c09667ad1a8a00c011fe8e5d591510217d8adb1db6002"
+      },
+      "textures": [
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/base_color.png",
+          "bytes": 7021998,
+          "sha256": "20f76575790544ad35ae30f1003a6c18b9c210b6e49107f3525aa3880338e4bd",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/emission.png",
+          "bytes": 175729,
+          "sha256": "51b9ebfe4cc4417be8bc949cfb55ca3f77859b9cdc4b2b747c630deca9056513",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/metallic.png",
+          "bytes": 250094,
+          "sha256": "a8583d756cd190dff6769582f74c84cc0423c7c9ad0b410a8fab5eb11f3bf599",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/metallic_smoothness.png",
+          "bytes": 1754378,
+          "sha256": "1d8be0e51fdd23fef80eac02659fbb92a66d7275dd271704c51b5f5c31b2ad0f",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/normal.png",
+          "bytes": 5044804,
+          "sha256": "c442c478a5adb03a521f094b0ba400b2a950dc80bef6b60bc6a94c8b875feb35",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/roughness.png",
+          "bytes": 1386597,
+          "sha256": "5b05f34646b243beaad99e29266353b9c85279aa966d52ca4e3cd7cab26fe192",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/runtime_2k/base_color.png",
+          "bytes": 6142807,
+          "sha256": "4884730798950d753d0ab67b4cd6e91b36ac6e5ac055a8d023409d24872a8ba2",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/runtime_2k/metallic_smoothness.png",
+          "bytes": 1754378,
+          "sha256": "1d8be0e51fdd23fef80eac02659fbb92a66d7275dd271704c51b5f5c31b2ad0f",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_stonehold_iron_wyrm/runtime_2k/normal.png",
+          "bytes": 3926276,
+          "sha256": "0288f03464d00a303bb8c3a3b270ad52e16947d9ab9b874a63decb4eb51abc70",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/dragon_stonehold_iron_wyrm_threequarter.png",
+        "bytes": 209232,
+        "sha256": "cf05503ccfed595942d886619cbeb84bd7902cd5f7045c2edc6e1708b4b34b69",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b1b-b1f8-735f-88c6-4727256a1d8f"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "dragon_eldergrove_moonbough",
+      "modelId": "dragon_eldergrove_moonbough",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/dragon_eldergrove_moonbough/dragon_eldergrove_moonbough_source_v001.fbx",
+        "bytes": 13266812,
+        "sha256": "19afa167d8268a04f589999f953647a789d8f08247358c5a9bf35818450829da"
+      },
+      "textures": [
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/base_color.png",
+          "bytes": 4516864,
+          "sha256": "67af82e7af1308c16ed0d8427724d37add9ae2446d8a0b226093b8db0cde17bc",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/metallic.png",
+          "bytes": 1050877,
+          "sha256": "61962545280e4e0cfbfb4223e82bf1ea28677204702831d5631d09dcc3e701a7",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/metallic_smoothness.png",
+          "bytes": 2503116,
+          "sha256": "4434fa3c202857da5fe5f53841dfcecfc03378f1c9ce19223250b9d0cc09dd27",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/normal.png",
+          "bytes": 4746355,
+          "sha256": "964df951964276fe7de941b2ecbeebd17d3d992899beab2fee00229b9cacd0c1",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/roughness.png",
+          "bytes": 1091995,
+          "sha256": "d1b4306d25a5ef08be03e354aa27c6bf067ab2b7a59615bab5b8643f0ea7b14c",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/runtime_2k/base_color.png",
+          "bytes": 4510078,
+          "sha256": "a0671f2e3a77d77b652d63edb168d59ba2a1e29f33796e80225d0e7d2b9ed13a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/runtime_2k/metallic_smoothness.png",
+          "bytes": 2503116,
+          "sha256": "4434fa3c202857da5fe5f53841dfcecfc03378f1c9ce19223250b9d0cc09dd27",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_eldergrove_moonbough/runtime_2k/normal.png",
+          "bytes": 3709371,
+          "sha256": "25f13d9b00b69818067231fb2b9e09b15366dbc4f7d81461b2cd6c1ece33e4a2",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/dragon_eldergrove_moonbough_threequarter.png",
+        "bytes": 225707,
+        "sha256": "1613168c19e156cbb757baf04cf952533e8430cc593291fd8341d5ec435cd8c1",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b45-bb84-76ca-95e5-1714cfe5ce39"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "dragon_umbral_void_seraph",
+      "modelId": "dragon_umbral_void_seraph",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/dragon_umbral_void_seraph/dragon_umbral_void_seraph_source_v001.fbx",
+        "bytes": 19608508,
+        "sha256": "e112761cb5378a21884543b718767559b077b11bfb78db16f856add51ea9d3f9"
+      },
+      "textures": [
+        {
+          "path": "Textures/dragon_umbral_void_seraph/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/base_color.png",
+          "bytes": 6917247,
+          "sha256": "c232644e7ac6419945af21963adac83139d915e301cd6caa4a1457bd267dba40",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/emission.png",
+          "bytes": 130060,
+          "sha256": "74f8ee1859b6dd18e329009a0606cd736cf448e7267b672010421e3d5b028e74",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/metallic.png",
+          "bytes": 1333032,
+          "sha256": "b813468fa19e4dc2434334fdf5719a0dfb74cadd7c0f1902bb8261769482d04d",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/metallic_smoothness.png",
+          "bytes": 2623969,
+          "sha256": "fb6329f5721a50e51f3d57fba90679eff97333737556a68ddeae008aa7cc8bd8",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/normal.png",
+          "bytes": 4945029,
+          "sha256": "9095ac2d51d904fcdc72925aeec9ac8021f8e93c0a532c8cfbe49353022cce0a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/roughness.png",
+          "bytes": 1382314,
+          "sha256": "0eab91ef1e28e4bd82e5ed43b730f4c4c6a2d60b7fa377fa5d4e0c9a8fc3103d",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/runtime_2k/base_color.png",
+          "bytes": 5993054,
+          "sha256": "9eca5a458385202c072af0fa722bdb1f120f121908138a226f4f6a3dda13b736",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/runtime_2k/metallic_smoothness.png",
+          "bytes": 2623969,
+          "sha256": "fb6329f5721a50e51f3d57fba90679eff97333737556a68ddeae008aa7cc8bd8",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/dragon_umbral_void_seraph/runtime_2k/normal.png",
+          "bytes": 3782957,
+          "sha256": "04d80b52d3ec6fedf68a12cf97140b9ccd4f18c7dea835215753bfd6e911e70a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/dragon_umbral_void_seraph_threequarter.png",
+        "bytes": 243193,
+        "sha256": "ac3bd5aebf695cb1dffac2f254e0512535f3c41928e15f801394c3736e65f938",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b1b-bece-767e-bbba-48a1cfe6f40c"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    },
+    {
+      "source2dId": "NPC_VAELORYN",
+      "modelId": "wish_dragon_vaeloryn",
+      "status": "clean_textured_base_pass",
+      "blocker": null,
+      "selectedSource": {
+        "path": "Models/wish_dragon_vaeloryn/wish_dragon_vaeloryn_source_v001.fbx",
+        "bytes": 10134764,
+        "sha256": "80bcc74a2cf95cb2626437bba3d3ba805d6087f1498e64b1603cb256f43e68cb"
+      },
+      "textures": [
+        {
+          "path": "Textures/wish_dragon_vaeloryn/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/wish_dragon_vaeloryn/base_color.png",
+          "bytes": 3421009,
+          "sha256": "18889f0dcadefdb9f2ec761923ba40b43431604f8f3bc7c929662dad6554968b",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/wish_dragon_vaeloryn/metallic.png",
+          "bytes": 351548,
+          "sha256": "7a0121bb0875c5f5ba57617889c8d8bf5dd98e5ab5249419fa9079cf0239194a",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/wish_dragon_vaeloryn/metallic_smoothness.png",
+          "bytes": 1468556,
+          "sha256": "3e442cca78db9a6f8d303181ed643cc4533700f643c9708e5fc8f93182b84c15",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/wish_dragon_vaeloryn/normal.png",
+          "bytes": 3770314,
+          "sha256": "bf931791f799a1b0c10ebdbe556c1dbab42071afbd801b505e488d9f8a3a795f",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/wish_dragon_vaeloryn/roughness.png",
+          "bytes": 742814,
+          "sha256": "3dfc150cec001d72ae4244f59500aa698168413917cb8fbbc2a6b447f1db3e28",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/wish_dragon_vaeloryn/runtime_2k/ao.png",
+          "bytes": 6988,
+          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/wish_dragon_vaeloryn/runtime_2k/base_color.png",
+          "bytes": 3412508,
+          "sha256": "cacb8f0d3313f5c330cf58854db7689ba317ef34aaaaa60b89f46324f30522ed",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/wish_dragon_vaeloryn/runtime_2k/metallic_smoothness.png",
+          "bytes": 1468556,
+          "sha256": "3e442cca78db9a6f8d303181ed643cc4533700f643c9708e5fc8f93182b84c15",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        },
+        {
+          "path": "Textures/wish_dragon_vaeloryn/runtime_2k/normal.png",
+          "bytes": 2897643,
+          "sha256": "0184f2250cf39d595791f4c2265280afae385429d3264f1b07e69754e88ca18c",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "mediaType": "image/png"
+        }
+      ],
+      "review": {
+        "path": "Review/wish_dragon_vaeloryn_threequarter.png",
+        "bytes": 251106,
+        "sha256": "10e2f88ba7c0f9cac5b1f0d3ab6d6800c49fae2b439e2b96bda064bc9a85d4e2",
+        "dimensions": [
+          512,
+          512
+        ],
+        "mediaType": "image/png"
+      },
+      "meshyTaskIds": [
+        "01a05b2c-92c6-7329-939f-a538fdaa859b"
+      ],
+      "rigged": false,
+      "runtimeIntegrationState": "Blocked",
+      "productionReady": false
+    }
+  ],
+  "excludedSupersededOutputs": true
+}
