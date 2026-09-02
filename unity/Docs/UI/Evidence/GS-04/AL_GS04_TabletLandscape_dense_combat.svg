@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2048" role="img">
+<title>AnotherLife GS-04 TabletLandscape dense_combat</title>
+<rect width="2732" height="2048" fill="#0b0c10"/>
+<rect x="0.0" y="0.0" width="2732.0" height="2048.0" fill="none" stroke="#b8a988" stroke-width="2" stroke-dasharray="12 10" opacity="0.65"/>
+<rect x="82.0" y="1740.8" width="601.0" height="245.8" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#a5a49c" stroke-width="3"/>
+<text x="98.0" y="1824.4" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="18.0" font-weight="700">— PLAYER READY</text>
+<text x="98.0" y="1907.9" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="12.6" font-weight="500">Health 84% · Resolve 62%</text>
+<rect x="928.9" y="61.4" width="874.2" height="225.3" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#d9c997" stroke-width="3"/>
+<text x="944.9" y="138.0" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="18.0" font-weight="700">⌜⌟ HOSTILE CAST</text>
+<text x="944.9" y="214.6" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="12.6" font-weight="500">Break vulnerable · 1.2 s</text>
+<path d="M1038.2 1330.4 L1366.0 689.8 L1693.8 1330.4 Z" fill="none" stroke="#d36d66" stroke-width="5" stroke-dasharray="16 10"/>
+<text x="1366.0" y="1065.8" text-anchor="middle" fill="#d36d66" font-family="sans-serif" font-size="18.0" font-weight="700">!! DODGE</text>
+<text x="1366.0" y="1149.3" text-anchor="middle" fill="#f0ebdd" font-family="sans-serif" font-size="13.0" font-weight="600">Forward cleave · impact 0.8 s</text>
+<rect x="82.0" y="348.2" width="546.4" height="614.4" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#6ab6b4" stroke-width="3"/>
+<text x="98.0" y="557.1" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="18.0" font-weight="700">◇ PARTY</text>
+<text x="98.0" y="766.0" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="12.6" font-weight="500">Revive priority · +5 aggregated</text>
+<rect x="2103.6" y="348.2" width="546.4" height="471.0" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#d7a84d" stroke-width="3"/>
+<text x="2119.6" y="508.3" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="18.0" font-weight="700">△ CONTESTED</text>
+<text x="2119.6" y="668.5" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="12.6" font-weight="500">Reliquary 62% · 00:48</text>
+<rect x="2103.6" y="901.1" width="546.4" height="286.7" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#a5a49c" stroke-width="3"/>
+<text x="2119.6" y="998.6" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="18.0" font-weight="700">— ROUTE</text>
+<text x="2119.6" y="1096.1" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="12.6" font-weight="500">North bridge · confirmed</text>
+<rect x="82.0" y="81.9" width="546.4" height="204.8" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#6ab6b4" stroke-width="3"/>
+<text x="98.0" y="151.6" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="18.0" font-weight="700">◇ ALLEGIANCE</text>
+<text x="98.0" y="221.2" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="12.6" font-weight="500">Stonehold · commander nearby</text>
+<text x="1366.0" y="2034.0" text-anchor="middle" fill="#f0ebdd" font-family="sans-serif" font-size="13.0" font-weight="700">DENSE COMBAT · HOSTILE TELEGRAPH · CENTRAL SCAN PATH CLEAR</text>
+<text x="1366.0" y="2012.0" text-anchor="middle" fill="#b8a988" font-family="sans-serif" font-size="11.0" font-weight="500">DETERMINISTIC LAYOUT EVIDENCE · NOT DEVICE, PERFORMANCE, FONT, OR OWNER APPROVAL</text>
+</svg>
