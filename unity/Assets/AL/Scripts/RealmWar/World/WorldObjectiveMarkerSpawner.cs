@@ -30,8 +30,18 @@ namespace AL.RealmWar.World
             try
             {
                 var atlas = ServiceLocator.Get<IWorldAtlasService>();
-                var objectives = new List<WorldObjectiveData>(atlas.GetObjectivesForRealm(viewerRealm));
-                objectives.Sort((left, right) => right.PassiveCreditWeight.CompareTo(left.PassiveCreditWeight));
+                WorldAtlasServiceQueryResult<IReadOnlyList<WorldObjectiveData>> result =
+                    atlas.GetObjectivesForRealm(viewerRealm);
+                if (!result.IsAvailable || result.Value == null)
+                {
+                    string diagnostic = result.Diagnostics.Count == 0
+                        ? result.Status.ToString()
+                        : result.Diagnostics[0].Code;
+                    Debug.LogWarning($"World objective markers unavailable: {diagnostic}");
+                    return;
+                }
+
+                var objectives = new List<WorldObjectiveData>(result.Value);
 
                 int count = Mathf.Min(_maxMarkers, objectives.Count);
                 for (int index = 0; index < count; index++)

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img">
+<title>AnotherLife GS-04 Pc16By9 accessibility_stress</title>
+<rect width="1920" height="1080" fill="#0b0c10"/>
+<rect x="67.2" y="37.8" width="1785.6" height="1004.4" fill="none" stroke="#b8a988" stroke-width="2" stroke-dasharray="12 10" opacity="0.65"/>
+<rect x="102.9" y="881.5" width="428.5" height="130.6" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#a5a49c" stroke-width="3"/>
+<text x="118.9" y="925.9" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="26.6" font-weight="700">— PLAYER READY</text>
+<text x="118.9" y="970.3" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="20.0" font-weight="500">Health 84% · Resolve 62%</text>
+<rect x="692.2" y="78.0" width="535.7" height="110.5" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#d9c997" stroke-width="3"/>
+<text x="708.2" y="122.0" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="22.6" font-weight="700">⌜⌟ HOSTILE CAST</text>
+<text x="708.2" y="158.0" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="20.0" font-weight="500">Break vulnerable · 1.2 s</text>
+<path d="M754.7 681.4 L960.0 385.7 L1165.3 681.4 Z" fill="none" stroke="#d36d66" stroke-width="5" stroke-dasharray="16 10"/>
+<text x="960.0" y="559.3" text-anchor="middle" fill="#d36d66" font-family="sans-serif" font-size="36.0" font-weight="700">!! DODGE</text>
+<text x="960.0" y="597.9" text-anchor="middle" fill="#f0ebdd" font-family="sans-serif" font-size="26.0" font-weight="600">Forward cleave · impact 0.8 s</text>
+<rect x="102.9" y="208.5" width="375.0" height="281.2" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#6ab6b4" stroke-width="3"/>
+<text x="118.9" y="304.2" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="36.0" font-weight="700">◇ PARTY</text>
+<text x="118.9" y="399.8" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="25.2" font-weight="500">Revive priority · +5 aggregated</text>
+<rect x="1442.1" y="208.5" width="375.0" height="221.0" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#d7a84d" stroke-width="3"/>
+<text x="1458.1" y="283.7" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="36.0" font-weight="700">△ CONTESTED</text>
+<text x="1458.1" y="358.8" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="25.2" font-weight="500">Reliquary 62% · 00:48</text>
+<rect x="1442.1" y="469.7" width="375.0" height="140.6" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#a5a49c" stroke-width="3"/>
+<text x="1458.1" y="517.5" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="28.8" font-weight="700">— ROUTE</text>
+<text x="1458.1" y="565.3" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="20.2" font-weight="500">North bridge · confirmed</text>
+<rect x="102.9" y="78.0" width="375.0" height="100.4" rx="4" fill="#15161b" fill-opacity="0.92" stroke="#6ab6b4" stroke-width="3"/>
+<text x="118.9" y="122.0" text-anchor="start" fill="#f0ebdd" font-family="sans-serif" font-size="22.0" font-weight="700">◇ ALLEGIANCE</text>
+<text x="118.9" y="158.0" text-anchor="start" fill="#b9b4a9" font-family="sans-serif" font-size="20.0" font-weight="500">Stonehold · commander nearby</text>
+<text x="960.0" y="1066.0" text-anchor="middle" fill="#f0ebdd" font-family="sans-serif" font-size="13.0" font-weight="700">200% TEXT · EXTREME SAFE AREA · REDUCED MOTION/FLASH/VFX</text>
+<text x="960.0" y="1044.0" text-anchor="middle" fill="#b8a988" font-family="sans-serif" font-size="11.0" font-weight="500">DETERMINISTIC LAYOUT EVIDENCE · NOT DEVICE, PERFORMANCE, FONT, OR OWNER APPROVAL</text>
+</svg>

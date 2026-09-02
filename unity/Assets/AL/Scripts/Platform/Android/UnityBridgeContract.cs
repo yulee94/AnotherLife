@@ -46,7 +46,9 @@ namespace AL.Platform.Android
         RouteMismatch = 22,
         DuplicateOutcome = 23,
         SessionClosed = 24,
-        SendUnavailable = 25
+        SendUnavailable = 25,
+        DuplicateReady = 26,
+        ReadyAfterOutcome = 27
     }
 
     public sealed class UnityBridgeProtocolError
@@ -137,6 +139,23 @@ namespace AL.Platform.Android
         public string Payload { get; }
     }
 
+    public sealed class UnityRouteReady
+    {
+        public UnityRouteReady(
+            int contractVersion,
+            string requestId,
+            string routeId)
+        {
+            ContractVersion = contractVersion;
+            RequestId = requestId;
+            RouteId = routeId;
+        }
+
+        public int ContractVersion { get; }
+        public string RequestId { get; }
+        public string RouteId { get; }
+    }
+
     public sealed class UnityBridgeRequestResult
     {
         private UnityBridgeRequestResult(
@@ -196,6 +215,80 @@ namespace AL.Platform.Android
             string field = null)
         {
             return new UnityBridgeOutcomeValidationResult(
+                null,
+                new UnityBridgeProtocolError(code, field));
+        }
+    }
+
+    public sealed class UnityBridgeReadyValidationResult
+    {
+        private UnityBridgeReadyValidationResult(
+            UnityRouteReady ready,
+            UnityBridgeProtocolError error)
+        {
+            Ready = ready;
+            Error = error;
+        }
+
+        public bool IsAccepted => Ready != null && Error == null;
+        public UnityRouteReady Ready { get; }
+        public UnityBridgeProtocolError Error { get; }
+
+        internal static UnityBridgeReadyValidationResult Accepted(
+            UnityRouteReady ready)
+        {
+            return new UnityBridgeReadyValidationResult(
+                ready ?? throw new ArgumentNullException(nameof(ready)),
+                null);
+        }
+
+        internal static UnityBridgeReadyValidationResult Rejected(
+            UnityBridgeProtocolErrorCode code,
+            string field = null)
+        {
+            return new UnityBridgeReadyValidationResult(
+                null,
+                new UnityBridgeProtocolError(code, field));
+        }
+    }
+
+    public sealed class UnityBridgeReadyEncodingResult
+    {
+        private UnityBridgeReadyEncodingResult(
+            UnityRouteReady ready,
+            string encodedJson,
+            UnityBridgeProtocolError error)
+        {
+            Ready = ready;
+            EncodedJson = encodedJson;
+            Error = error;
+        }
+
+        public bool IsEncoded =>
+            Ready != null &&
+            EncodedJson != null &&
+            Error == null;
+        public UnityRouteReady Ready { get; }
+        public string EncodedJson { get; }
+        public UnityBridgeProtocolError Error { get; }
+
+        internal static UnityBridgeReadyEncodingResult Encoded(
+            UnityRouteReady ready,
+            string encodedJson)
+        {
+            return new UnityBridgeReadyEncodingResult(
+                ready ?? throw new ArgumentNullException(nameof(ready)),
+                encodedJson ??
+                throw new ArgumentNullException(nameof(encodedJson)),
+                null);
+        }
+
+        internal static UnityBridgeReadyEncodingResult Rejected(
+            UnityBridgeProtocolErrorCode code,
+            string field = null)
+        {
+            return new UnityBridgeReadyEncodingResult(
+                null,
                 null,
                 new UnityBridgeProtocolError(code, field));
         }
@@ -555,6 +648,134 @@ namespace AL.Platform.Android
                     outcome.Payload));
         }
 
+        public static UnityBridgeReadyValidationResult ValidateReady(
+            UnityRouteReady ready)
+        {
+            if (ready == null)
+            {
+                return UnityBridgeReadyValidationResult.Rejected(
+                    UnityBridgeProtocolErrorCode.NullMessage);
+            }
+
+            if (ready.ContractVersion != ContractVersion)
+            {
+                return UnityBridgeReadyValidationResult.Rejected(
+                    UnityBridgeProtocolErrorCode.InvalidContractVersion,
+                    "contractVersion");
+            }
+
+            if (!IsCorrelationId(
+                    ready.RequestId,
+                    MaximumRequestIdLength))
+            {
+                return UnityBridgeReadyValidationResult.Rejected(
+                    UnityBridgeProtocolErrorCode.InvalidRequestId,
+                    "requestId");
+            }
+
+            if (!IsRouteId(ready.RouteId, MaximumRouteIdLength))
+            {
+                return UnityBridgeReadyValidationResult.Rejected(
+                    UnityBridgeProtocolErrorCode.InvalidRouteId,
+                    "routeId");
+            }
+
+            return UnityBridgeReadyValidationResult.Accepted(
+                new UnityRouteReady(
+                    ready.ContractVersion,
+                    ready.RequestId,
+                    ready.RouteId));
+        }
+
+        public static UnityBridgeReadyEncodingResult EncodeReady(
+            UnityRouteReady ready)
+        {
+            var validation = ValidateReady(ready);
+            if (!validation.IsAccepted)
+            {
+                return UnityBridgeReadyEncodingResult.Rejected(
+                    validation.Error.Code,
+                    validation.Error.Field);
+            }
+
+            var validReady = validation.Ready;
+            var expectedByteCount = GetEncodedReadyByteCount(validReady);
+            if (expectedByteCount > MaximumMessageBytes)
+            {
+                return UnityBridgeReadyEncodingResult.Rejected(
+                    UnityBridgeProtocolErrorCode.MessageTooLarge);
+            }
+
+            var encoded = new StringBuilder(expectedByteCount);
+            encoded.Append("{\"contractVersion\":2,\"requestId\":");
+            AppendJsonString(encoded, validReady.RequestId);
+            encoded.Append(",\"routeId\":");
+            AppendJsonString(encoded, validReady.RouteId);
+            encoded.Append('}');
+
+            var encodedJson = encoded.ToString();
+            if (StrictUtf8.GetByteCount(encodedJson) >
+                MaximumMessageBytes)
+            {
+                return UnityBridgeReadyEncodingResult.Rejected(
+                    UnityBridgeProtocolErrorCode.MessageTooLarge);
+            }
+
+            return UnityBridgeReadyEncodingResult.Encoded(
+                validReady,
+                encodedJson);
+        }
+
+        public static UnityBridgeReadyValidationResult
+            ValidateReadyForRequest(
+                UnityRouteReady ready,
+                UnityRouteRequest request)
+        {
+            if (request == null)
+            {
+                return UnityBridgeReadyValidationResult.Rejected(
+                    UnityBridgeProtocolErrorCode.NoActiveRequest);
+            }
+
+            var requestValidation = ValidateRequest(request);
+            if (!requestValidation.IsAccepted)
+            {
+                return UnityBridgeReadyValidationResult.Rejected(
+                    requestValidation.Error.Code,
+                    requestValidation.Error.Field);
+            }
+
+            var readyValidation = ValidateReady(ready);
+            if (!readyValidation.IsAccepted)
+            {
+                return readyValidation;
+            }
+
+            var validRequest = requestValidation.Request;
+            var validReady = readyValidation.Ready;
+            if (!string.Equals(
+                    validReady.RequestId,
+                    validRequest.RequestId,
+                    StringComparison.Ordinal))
+            {
+                return UnityBridgeReadyValidationResult.Rejected(
+                    UnityBridgeProtocolErrorCode.RequestMismatch,
+                    "requestId");
+            }
+
+            if (!string.Equals(
+                    validReady.RouteId,
+                    validRequest.RouteId,
+                    StringComparison.Ordinal))
+            {
+                return UnityBridgeReadyValidationResult.Rejected(
+                    UnityBridgeProtocolErrorCode.RouteMismatch,
+                    "routeId");
+            }
+
+            return readyValidation;
+        }
+
         public static UnityBridgeOutcomeEncodingResult EncodeOutcome(
             UnityRouteOutcome outcome)
         {
@@ -777,6 +998,10 @@ namespace AL.Platform.Android
                     return "bridge.session_closed";
                 case UnityBridgeProtocolErrorCode.SendUnavailable:
                     return "bridge.send_unavailable";
+                case UnityBridgeProtocolErrorCode.DuplicateReady:
+                    return "bridge.duplicate_ready";
+                case UnityBridgeProtocolErrorCode.ReadyAfterOutcome:
+                    return "bridge.ready_after_outcome";
                 default:
                     return string.Empty;
             }
@@ -1149,6 +1374,20 @@ namespace AL.Platform.Android
                 count += 1;
             }
 
+            return count + 1;
+        }
+
+        private static int GetEncodedReadyByteCount(
+            UnityRouteReady ready)
+        {
+            var count = 1;
+            count += "\"contractVersion\":2".Length;
+            count += ",\"requestId\":\"".Length;
+            count += GetEscapedStringByteCount(ready.RequestId);
+            count += 1;
+            count += ",\"routeId\":\"".Length;
+            count += GetEscapedStringByteCount(ready.RouteId);
+            count += 1;
             return count + 1;
         }
 
