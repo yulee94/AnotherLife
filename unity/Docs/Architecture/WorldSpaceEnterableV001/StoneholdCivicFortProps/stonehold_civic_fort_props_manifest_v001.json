@@ -1,0 +1,128 @@
+{
+  "schema": "anotherlife.stonehold-civic-fort-props-manifest.v1",
+  "status": "candidate_owner_review_required",
+  "generatedAt": "2026-09-02T16:57:54+09:00",
+  "assetFamilyCount": 16,
+  "selectedArtifactCount": 13,
+  "selectedPngCount": 9,
+  "masterHashAlgorithm": "sha256 of UTF-8 lines locator<TAB>byteLength<TAB>sha256<LF> in listed order",
+  "masterSha256": "55a66eb2e93315c1b7650dc3c537833cb8da751703a19b73c2424725f08dd08e",
+  "files": [
+    {
+      "locator": ".gitattributes",
+      "bytes": 105,
+      "sha256": "d3c4da8cde7c324f1fe511a3477fbdf4bbfc6225ce37ccef8b10d0d832f1610d"
+    },
+    {
+      "locator": "README.md",
+      "bytes": 9022,
+      "sha256": "761bb09c9d983fcc3a56660d5a37b0148e55df1d5e7e344a65dbdc2885e04ee3"
+    },
+    {
+      "locator": "stonehold_civic_fort_props_spec_v001.json",
+      "bytes": 41211,
+      "sha256": "7650c608b4af64b298e11c3ce5f169e9ab087983bfd800fdf3aabc8e5eacacaa"
+    },
+    {
+      "locator": "validation_report_v001.json",
+      "bytes": 3251,
+      "sha256": "be661bd4d000ac6fc64a26029d38a9788ae107151d59f996cd20f0cbd680f9d0"
+    },
+    {
+      "locator": "generation/stonehold_civic_furnishing_concept_raw_v001.png",
+      "bytes": 1162521,
+      "sha256": "d6ebae943d7fa26d10b1c058be382af950e982dd6b0ccf04c60173237f8a8743",
+      "width": 1376,
+      "height": 768,
+      "mode": "RGB"
+    },
+    {
+      "locator": "generation/stonehold_fort_furnishing_concept_raw_v001.png",
+      "bytes": 1346779,
+      "sha256": "8fd5d56ed16ebbbb167329f9ce051e8213f32a2cdc28b2705440d77ff2d89752",
+      "width": 1376,
+      "height": 768,
+      "mode": "RGB"
+    },
+    {
+      "locator": "generation/stonehold_single_cot_concept_raw_v002.png",
+      "bytes": 1348684,
+      "sha256": "63dfba664a2768444ba865497f84dbe34ac1af136e8131422b8ba3307f997612",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB"
+    },
+    {
+      "locator": "review/stonehold_civic_props_visual_source_v001.png",
+      "bytes": 1243332,
+      "sha256": "7b7446e47a58fdbce9fefec66df27385023be6075a9a9133da27ea42891150d2",
+      "width": 2400,
+      "height": 1580,
+      "mode": "RGB"
+    },
+    {
+      "locator": "review/stonehold_fort_props_visual_source_v001.png",
+      "bytes": 1380963,
+      "sha256": "f483c05c7a7daf3e4f1fab2c62aa440c5f26be69b49edc824aefc175671bbd0e",
+      "width": 2400,
+      "height": 1580,
+      "mode": "RGB"
+    },
+    {
+      "locator": "review/stonehold_civic_fort_props_measured_sheet_v001.png",
+      "bytes": 171557,
+      "sha256": "811826b4eca422d1cd3a7bd446d3c80c8918fb9a0fdc35b01f1f131d5a8e7c8d",
+      "width": 2800,
+      "height": 2240,
+      "mode": "RGB"
+    },
+    {
+      "locator": "review/stonehold_civic_fort_props_room_fit_v001.png",
+      "bytes": 121163,
+      "sha256": "47dedb6a967274de13c67bcae7162a76d853907cbb905324ebd081eac6c5d458",
+      "width": 3000,
+      "height": 2200,
+      "mode": "RGB"
+    },
+    {
+      "locator": "review/stonehold_civic_fort_props_material_runtime_v001.png",
+      "bytes": 130607,
+      "sha256": "92e135a336d53b81518f7e2a3af5364076dab97a0e6c6cc144e180bfa288d2f6",
+      "width": 2600,
+      "height": 1720,
+      "mode": "RGB"
+    },
+    {
+      "locator": "review/stonehold_civic_fort_props_review_contact_sheet_v001.png",
+      "bytes": 1402779,
+      "sha256": "981fefe3fc807c358322fa1019ae5bcb3c26a28a9dcf969be76982a2dfb0722b",
+      "width": 3000,
+      "height": 2200,
+      "mode": "RGB"
+    }
+  ],
+  "sourceTaskDispositions": [
+    {
+      "taskId": "01a0611b-c7cb-7351-ac34-0de5aa8e1423",
+      "disposition": "accepted_all_eight_civic_cells"
+    },
+    {
+      "taskId": "01a0611c-0844-7512-9238-063ac7b2c0c0",
+      "disposition": "accepted_seven_fort_cells; rejected_r1c1_double_bunk"
+    },
+    {
+      "taskId": "01a0611e-8ffb-71a2-822d-cde3d7ef207c",
+      "disposition": "rejected_double_bunk; not_selected"
+    },
+    {
+      "taskId": "01a06120-aa06-70e0-8910-491a69b56cf3",
+      "disposition": "accepted_single_cot"
+    }
+  ],
+  "excludedScratch": [
+    "generation/stonehold_single_bunk_concept_raw_v001.png",
+    "render_stonehold_civic_fort_prop_packet.py",
+    "validate_stonehold_civic_fort_prop_packet.py"
+  ],
+  "authorityBoundary": "Manifest integrity does not equal owner approval. Explicit owner APPROVE is required before downstream 3D generation."
+}
