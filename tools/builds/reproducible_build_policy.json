@@ -25,10 +25,13 @@
       "settings.gradle.kts",
       "tools/android_unity_package.py",
       "tools/builds/reproducible_build_policy.json",
+      "tools/qa/assemble_release_evidence.py",
       "tools/qa/deterministic_qa_policy.json",
       "tools/qa/manual_results.v1.json",
+      "tools/qa/release_evidence_policy.v1.json",
       "tools/qa/run_deterministic_qa.py",
       "unity/SharedContracts/integrated-qa-evidence.schema.json",
+      "unity/SharedContracts/release-evidence-package.schema.json",
       "tools/reproducible_build.py"
     ],
     "contentRoots": [

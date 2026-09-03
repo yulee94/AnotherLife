@@ -677,6 +677,15 @@ def verify_report(path: Path) -> dict[str, Any]:
     return report
 
 
+def contract_execution_order(profile_name: str, profile: list[str]) -> list[str]:
+    """Run the clean-tree build preflight before Unity can normalize tracked settings."""
+    ordered = list(profile)
+    if profile_name == "full":
+        ordered.remove("build-smoke")
+        ordered.insert(ordered.index("play-mode"), "build-smoke")
+    return ordered
+
+
 def run_suite(
     repo_root: Path,
     policy: dict[str, Any],
@@ -700,7 +709,7 @@ def run_suite(
     results: list[dict[str, Any]] = []
     log_paths: list[str] = []
 
-    for contract_id in profile:
+    for contract_id in contract_execution_order(profile_name, profile):
         contract = contract_index[contract_id]
         attempts: list[dict[str, Any]] = []
         for attempt_index in range(1, int(contract["repeat"]) + 1):
@@ -757,6 +766,9 @@ def run_suite(
             for attempt in attempts
         ]
         results.append(result)
+
+    result_index = {result["id"]: result for result in results}
+    results = [result_index[contract_id] for contract_id in profile]
 
     build_result = next(
         (result for result in results if result["id"] == "build-smoke"),

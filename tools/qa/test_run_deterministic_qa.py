@@ -4,8 +4,11 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import json
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,10 +18,20 @@ SCRIPT = Path(__file__).with_name("run_deterministic_qa.py")
 POLICY = Path(__file__).with_name("deterministic_qa_policy.json")
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE_SCHEMA = REPO_ROOT / "unity/SharedContracts/integrated-qa-evidence.schema.json"
+RELEASE_SCRIPT = REPO_ROOT / "tools/qa/assemble_release_evidence.py"
+RELEASE_POLICY = REPO_ROOT / "tools/qa/release_evidence_policy.v1.json"
+RELEASE_SCHEMA = REPO_ROOT / "unity/SharedContracts/release-evidence-package.schema.json"
 
 
 def load_module():
     spec = importlib.util.spec_from_file_location("run_deterministic_qa", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_release_module():
+    spec = importlib.util.spec_from_file_location("assemble_release_evidence", RELEASE_SCRIPT)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -52,6 +65,12 @@ class DeterministicQaTests(unittest.TestCase):
         self.assertEqual(
             list(module.REQUIRED_CONTRACTS),
             policy["profiles"]["full"],
+        )
+        execution = module.contract_execution_order("full", policy["profiles"]["full"])
+        self.assertLess(
+            execution.index("build-smoke"),
+            execution.index("play-mode"),
+            "build preflight must run before Unity tests can normalize tracked project settings",
         )
         for contract in policy["contracts"]:
             self.assertRegex(contract["failureCode"], r"^QA_[A-Z0-9_]+$")
@@ -266,6 +285,243 @@ class DeterministicQaTests(unittest.TestCase):
             violated = next(item for item in report["contracts"] if item["id"] == "scene-manifest")
             self.assertEqual(violated["failureCode"], "QA_SCENE_MANIFEST")
             self.assertEqual(violated["reasonCode"], "intentional_failure_fixture")
+
+
+class ReleaseEvidencePackageTests(unittest.TestCase):
+    def test_policy_maps_every_stop_ship_condition_and_reopen_trigger(self):
+        module = load_release_module()
+        policy = module.load_policy(RELEASE_POLICY)
+
+        self.assertEqual(policy["authorityReferences"], {
+            "approvalDependencyTask": "t_0648ce23",
+            "releaseCriteriaTask": "t_4a5b066c",
+            "capacityCriteriaTask": "t_7f6be100",
+        })
+        self.assertEqual(
+            {item["id"] for item in policy["stopShipConditions"]},
+            {
+                "unreproducible_build",
+                "editor_exporter_incompatibility",
+                "save_loss_or_silent_downgrade",
+                "missing_required_scene",
+                "nondeterministic_content_manifest",
+                "narrative_runtime_disconnected",
+                "automated_manual_divergence",
+                "missing_or_malformed_evidence",
+            },
+        )
+        self.assertEqual(
+            {item["id"] for item in policy["reopenTriggers"]},
+            {
+                "editor_or_exporter_change",
+                "save_schema_change",
+                "scene_or_catalog_addition",
+                "narrative_runtime_change",
+                "failed_migration_telemetry",
+            },
+        )
+        self.assertTrue(all(
+            item.get("automatedContracts") or item.get("manualOwnerGates")
+            for item in policy["stopShipConditions"]
+        ))
+        self.assertNotIn("thresholds", json.dumps(policy).lower())
+        schema = json.loads(RELEASE_SCHEMA.read_text(encoding="utf-8"))
+        self.assertFalse(schema["additionalProperties"])
+        self.assertIn("packageSha256", schema["required"])
+
+    def _write_full_qa_fixture(self, qa_root: Path) -> None:
+        shutil.copytree(
+            REPO_ROOT / "tools/qa/evidence/representative-green",
+            qa_root,
+        )
+        qa_module = load_module()
+        report = qa_module.verify_report(qa_root / "report.json")
+        source_revision = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=REPO_ROOT,
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+        ).stdout.strip()
+        build = {
+            "schemaVersion": 1,
+            "target": "windows64-development",
+            "status": "succeeded",
+            "source": {
+                "sourceRevision": source_revision,
+                "sourceTreeSha256": "a" * 64,
+            },
+            "artifacts": {
+                "reproducibleTreeSha256": "b" * 64,
+                "smoke": {"status": "passed", "failures": []},
+            },
+        }
+        build["manifestSha256"] = hashlib.sha256(
+            qa_module.canonical_json(build)
+        ).hexdigest()
+        build_path = qa_root / "build/windows64-development.json"
+        build_path.parent.mkdir(parents=True)
+        build_path.write_bytes(qa_module.canonical_json(build))
+
+        narrative = {
+            "schemaVersion": 1,
+            "status": "passed",
+            "reasonCode": "narrative_representative_path",
+            "applicationIsEditor": False,
+            "unityVersion": report["provenance"]["unity"]["version"],
+            "buildGuid": "fixture-player-guid",
+            "enabledSceneManifestSha256": report["provenance"]["scene"]["enabledManifestSha256"],
+            "generatedSceneManifestSha256": report["provenance"]["scene"]["generatedManifestSha256"],
+            "narrativeCatalogSha256": report["provenance"]["content"]["narrativeCatalogSha256"],
+            "narrativePacketVersion": "anotherlife-main-quest-line-2026-07-23-v001",
+            "entryChapterId": "CH00_FIRST_SIGNAL",
+            "entryQuestId": "OMEN_1",
+            "progressedQuestStateId": "TALK_TO_VALERIUS",
+            "resumedQuestStateId": "TALK_TO_VALERIUS",
+            "sceneSequence": ["Boot", "Kingdom"],
+            "isolatedSaveClaimed": False,
+        }
+        narrative_path = qa_root / "narrative/packaged-evidence.json"
+        narrative_path.parent.mkdir(parents=True)
+        narrative_path.write_bytes(qa_module.canonical_json(narrative))
+
+        report["profile"] = "full"
+        report["provenance"]["sourceRevision"] = source_revision
+        report["provenance"]["sourceDirty"] = False
+        report["provenance"]["build"] = {
+            "version": report["provenance"]["build"]["version"],
+            "manifestSha256": build["manifestSha256"],
+            "artifactTreeSha256": "b" * 64,
+        }
+        build_contract = next(item for item in report["contracts"] if item["id"] == "build-smoke")
+        build_contract["evidence"] = {
+            "status": "succeeded",
+            "manifestSha256": build["manifestSha256"],
+            "artifactTreeSha256": "b" * 64,
+        }
+        narrative_contract = next(
+            item for item in report["contracts"] if item["id"] == "packaged-narrative"
+        )
+        narrative_contract["evidence"] = {
+            "status": "passed",
+            "reasonCode": "narrative_representative_path",
+            "enabledSceneManifestSha256": narrative["enabledSceneManifestSha256"],
+            "generatedSceneManifestSha256": narrative["generatedSceneManifestSha256"],
+            "narrativeCatalogSha256": narrative["narrativeCatalogSha256"],
+            "entryQuestId": "OMEN_1",
+            "resumedQuestStateId": "TALK_TO_VALERIUS",
+        }
+        for contract in report["contracts"]:
+            for attempt in contract["attempts"]:
+                attempt["logSha256"] = qa_module.sha256_file(qa_root / attempt["log"])
+        qa_module._write_report(report, qa_root / "report.json")
+
+    def test_assembler_emits_verified_traceable_package(self):
+        module = load_release_module()
+        policy = module.load_policy(RELEASE_POLICY)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            qa_root = root / "qa"
+            package_root = root / "package"
+            self._write_full_qa_fixture(qa_root)
+
+            package = module.assemble_package(REPO_ROOT, policy, qa_root, package_root)
+            verified = module.verify_package(package_root, policy)
+
+            self.assertEqual(package["promotionStatus"], "awaiting_release_owner_approval")
+            self.assertEqual(verified["packageSha256"], package["packageSha256"])
+            self.assertEqual(len(package["qaContracts"]), 12)
+            self.assertTrue(all(item["status"] == "passed" for item in package["qaContracts"]))
+            self.assertTrue(all(
+                len(item["gitBlob"]) == 40 and len(item["sha256"]) == 64
+                for item in package["sourceAuthorities"]
+            ))
+            self.assertTrue((package_root / "evidence/qa/report.json").is_file())
+            self.assertTrue((package_root / "evidence/build/windows64-development.json").is_file())
+            self.assertTrue((package_root / "evidence/narrative/packaged-evidence.json").is_file())
+            self.assertTrue((package_root / "release-evidence.json.sha256").is_file())
+
+    def test_assembler_rejects_tampered_narrative_evidence(self):
+        module = load_release_module()
+        policy = module.load_policy(RELEASE_POLICY)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            qa_root = root / "qa"
+            self._write_full_qa_fixture(qa_root)
+            narrative_path = qa_root / "narrative/packaged-evidence.json"
+            narrative = json.loads(narrative_path.read_text(encoding="utf-8"))
+            narrative["narrativeCatalogSha256"] = "0" * 64
+            narrative_path.write_text(json.dumps(narrative), encoding="utf-8")
+
+            with self.assertRaisesRegex(module.ReleaseEvidenceError, "narrative"):
+                module.assemble_package(REPO_ROOT, policy, qa_root, root / "package")
+
+    def test_assembler_rejects_output_overlapping_input_evidence(self):
+        module = load_release_module()
+        policy = module.load_policy(RELEASE_POLICY)
+        with tempfile.TemporaryDirectory() as temporary:
+            qa_root = Path(temporary) / "qa"
+            self._write_full_qa_fixture(qa_root)
+
+            with self.assertRaisesRegex(module.ReleaseEvidenceError, "unsafe package output"):
+                module.assemble_package(REPO_ROOT, policy, qa_root, qa_root)
+
+            self.assertTrue((qa_root / "report.json").is_file())
+
+    def test_assembler_preserves_existing_output_instead_of_deleting_it(self):
+        module = load_release_module()
+        policy = module.load_policy(RELEASE_POLICY)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            qa_root = root / "qa"
+            package_root = root / "package"
+            self._write_full_qa_fixture(qa_root)
+            package_root.mkdir()
+            sentinel = package_root / "retain-me.txt"
+            sentinel.write_text("operator-owned", encoding="utf-8")
+
+            with self.assertRaisesRegex(module.ReleaseEvidenceError, "output already exists"):
+                module.assemble_package(REPO_ROOT, policy, qa_root, package_root)
+
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), "operator-owned")
+
+    def test_assembler_rejects_qa_provenance_not_matching_source_commit(self):
+        module = load_release_module()
+        policy = module.load_policy(RELEASE_POLICY)
+        qa_module = load_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            qa_root = root / "qa"
+            self._write_full_qa_fixture(qa_root)
+            report = qa_module.verify_report(qa_root / "report.json")
+            report["provenance"]["suite"]["runnerSha256"] = "0" * 64
+            qa_module._write_report(report, qa_root / "report.json")
+
+            with self.assertRaisesRegex(module.ReleaseEvidenceError, "source provenance"):
+                module.assemble_package(REPO_ROOT, policy, qa_root, root / "package")
+
+    def test_package_verifier_rejects_a_resigned_missing_artifact_catalog(self):
+        module = load_release_module()
+        policy = module.load_policy(RELEASE_POLICY)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            qa_root = root / "qa"
+            package_root = root / "package"
+            self._write_full_qa_fixture(qa_root)
+            package = module.assemble_package(REPO_ROOT, policy, qa_root, package_root)
+            package["artifacts"] = []
+            unsigned = copy.deepcopy(package)
+            unsigned.pop("packageSha256")
+            package["packageSha256"] = module.sha256_bytes(module.canonical_json(unsigned))
+            manifest = package_root / "release-evidence.json"
+            manifest.write_bytes(module.canonical_json(package))
+            manifest.with_suffix(".json.sha256").write_text(
+                f"{package['packageSha256']}  release-evidence.json\n",
+                encoding="ascii",
+            )
+
+            with self.assertRaisesRegex(module.ReleaseEvidenceError, "artifact catalog"):
+                module.verify_package(package_root, policy)
 
 
 if __name__ == "__main__":
