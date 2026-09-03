@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "packageId": "anotherlife-release-evidence",
+  "promotionStatus": "awaiting_release_owner_approval",
+  "authorityReferences": {
+    "approvalDependencyTask": "t_0648ce23",
+    "releaseCriteriaTask": "t_4a5b066c",
+    "capacityCriteriaTask": "t_7f6be100"
+  },
+  "requiredQaProfile": "full",
+  "requiredQaContracts": [
+    "unit",
+    "integration",
+    "play-mode",
+    "build-smoke",
+    "scene-manifest",
+    "content-manifest",
+    "save-round-trip",
+    "save-migration",
+    "save-downgrade-rejection",
+    "save-corruption-recovery",
+    "save-crash-recovery",
+    "packaged-narrative"
+  ],
+  "sourceAuthorities": [
+    {"role": "qa_runner", "path": "tools/qa/run_deterministic_qa.py"},
+    {"role": "qa_policy", "path": "tools/qa/deterministic_qa_policy.json"},
+    {"role": "qa_manual_baseline", "path": "tools/qa/manual_results.v1.json"},
+    {"role": "qa_evidence_contract", "path": "unity/SharedContracts/integrated-qa-evidence.schema.json"},
+    {"role": "build_runner", "path": "tools/reproducible_build.py"},
+    {"role": "build_policy", "path": "tools/builds/reproducible_build_policy.json"},
+    {"role": "scene_decision", "path": "unity/Docs/Architecture/Deterministic_Scene_Content_Delivery_Decision.md"},
+    {"role": "enabled_scene_manifest", "path": "unity/Assets/AL/StreamingAssets/GameData/al_enabled_scene_manifest.v1.json"},
+    {"role": "generated_scene_manifest", "path": "unity/Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json"},
+    {"role": "world_catalog", "path": "unity/Assets/AL/StreamingAssets/GameData/al_world_streaming_catalog.json"},
+    {"role": "save_policy", "path": "unity/Docs/Schema1_Save_Migration_And_Recovery_Policy.md"},
+    {"role": "save_fixture_manifest", "path": "unity/Assets/AL/Tests/EditMode/Fixtures/SaveSchema1/manifest.json"},
+    {"role": "narrative_catalog", "path": "unity/Assets/AL/StreamingAssets/GameData/al_main_quest_line_runtime.v1.json"},
+    {"role": "narrative_player_validator", "path": "tools/narrative/packaged_narrative_smoke.py"}
+  ],
+  "upstreamEvidence": [
+    {
+      "task": "t_1ad7a8d5",
+      "role": "approved_gate0_authority",
+      "mergeCommit": "a18de3698f85130c1dcdbf7aac652cdb2adfc6a6",
+      "pullRequest": "https://github.com/yulee94/AnotherLife/pull/640",
+      "result": "owner_approved_gate0_authority_lock_and_integrated_roadmap"
+    },
+    {
+      "task": "t_1e5413da",
+      "role": "reproducible_build_foundation",
+      "mergeCommit": "23ff171090b4dd24c5c7d82a9c5ef78318d08c54",
+      "pullRequest": "https://github.com/yulee94/AnotherLife/pull/691",
+      "result": "normalized_equivalent_windows_build_pair_and_current_user_launch"
+    },
+    {
+      "task": "t_09edaa94",
+      "role": "scene_content_authority",
+      "mergeCommit": "0d3453fc2ec8a68214873357f7e6ad5261522dee",
+      "pullRequest": "https://github.com/yulee94/AnotherLife/pull/667",
+      "result": "five_direct_78_local_addressable_21_non_shipping"
+    },
+    {
+      "task": "t_6714131d",
+      "role": "save_migration_fixtures",
+      "mergeCommit": "2b1650c228d4ff6a3583ff428e18cbd9627e9057",
+      "pullRequest": "https://github.com/yulee94/AnotherLife/pull/665",
+      "result": "schema_1_golden_migration_recovery_and_downgrade_rejection"
+    },
+    {
+      "task": "t_24caee51",
+      "role": "packaged_narrative_proof",
+      "mergeCommit": "78dce10de8928f499a916b4a912fb712735f588e",
+      "pullRequest": "https://github.com/yulee94/AnotherLife/pull/696",
+      "result": "windows_player_ch00_omen_1_persist_and_resume"
+    },
+    {
+      "task": "t_785fe77c",
+      "role": "integrated_deterministic_qa",
+      "mergeCommit": "80f9915257e5e0d3f10717ea5afa6ebf39d3561d",
+      "pullRequest": "https://github.com/yulee94/AnotherLife/pull/698",
+      "result": "fail_closed_evidence_api_green_and_intentional_failure_fixtures"
+    }
+  ],
+  "ownerDecisions": [
+    {
+      "id": "AP-GR-GT-00-RC-20260828-002-003-001",
+      "status": "approved",
+      "record": "Gate 0 integrated roadmap approval for RC-20260828-002 with retained rollback baseline RB-20260828-002",
+      "owner": "game-owner"
+    },
+    {
+      "id": "DEC-SCENE-DELIVERY-001",
+      "status": "approved",
+      "record": "APPROVE DEC-SCENE-DELIVERY-001 HYBRID-LOCAL-ADDRESSABLES",
+      "owner": "game-owner"
+    },
+    {
+      "id": "DEC-SCENE-DELIVERY-002",
+      "status": "approved",
+      "record": "APPROVE DEC-SCENE-DELIVERY-002 ADD SLAGFALL-ENVIRONMENT-REVIEW NON-SHIPPING",
+      "owner": "game-owner"
+    },
+    {
+      "id": "SCHEMA-1-MIGRATION-POLICY",
+      "status": "approved",
+      "record": "owner-approved 2026-09-01 for schema-1-only scope",
+      "owner": "game-owner"
+    },
+    {
+      "id": "PC-FIRST-CURRENT-USER-LAUNCH",
+      "status": "approved_scope_exception",
+      "record": "owner decision 2026-09-02; isolated-profile and Android readiness not claimed",
+      "owner": "game-owner"
+    }
+  ],
+  "compatibilityExceptions": [
+    {
+      "id": "ANDROID-DEFERRED-PC-FIRST",
+      "status": "accepted_deferred",
+      "ownerDecision": "PC-FIRST-CURRENT-USER-LAUNCH",
+      "scope": "Android build, packaged narrative, physical-device, and mobile readiness",
+      "action": "Do not promote Android; resume t_7b530af7 before any Android claim."
+    },
+    {
+      "id": "LEGACY-UNITY-EXPORTER-REJECTED",
+      "status": "rejected_incompatible",
+      "ownerDecision": "PC-FIRST-CURRENT-USER-LAUNCH",
+      "scope": "Unity 2022.3.62f3 exporter against the Unity 6000.3.22f1 project",
+      "action": "Reject the exporter; never open or export the project cross-version."
+    },
+    {
+      "id": "CURRENT-USER-LAUNCH-ONLY",
+      "status": "accepted_limited_claim",
+      "ownerDecision": "PC-FIRST-CURRENT-USER-LAUNCH",
+      "scope": "Windows launch smoke",
+      "action": "Record isolatedProfileClaimed=false; do not infer isolated-profile acceptance."
+    },
+    {
+      "id": "FUTURE-SAVE-SCHEMA-READ-ONLY",
+      "status": "fail_closed",
+      "ownerDecision": "SCHEMA-1-MIGRATION-POLICY",
+      "scope": "Save schema greater than 1",
+      "action": "Preserve bytes, reject writes and downgrade, and require a new migration policy."
+    },
+    {
+      "id": "DRAGON-CAVE-ACCESS-AUTHORITY-DISCREPANCY",
+      "status": "recorded_unresolved",
+      "ownerDecision": "DEC-SCENE-DELIVERY-002",
+      "scope": "Four dragon-cave catalog access policies",
+      "action": "Preserve the source value; do not silently rewrite gameplay access authority."
+    },
+    {
+      "id": "HOSTED-CI-NOT-RUNTIME-EVIDENCE",
+      "status": "accepted_evidence_boundary",
+      "ownerDecision": "t_785fe77c",
+      "scope": "Hosted CI without Unity license/editor and Git LFS scene bytes",
+      "action": "Never relabel contract fixtures as Unity, Player, save-runtime, or scene-hash evidence."
+    }
+  ],
+  "manualOwnerGates": [
+    {
+      "id": "BUILD-PAIR-EQUIVALENCE",
+      "owner": "release-owner",
+      "requiredFor": "candidate_promotion",
+      "evidence": "Two clean manifests compared by tools/reproducible_build.py with identical or normalized_equivalent status."
+    },
+    {
+      "id": "COMPATIBILITY-EXCEPTION-APPROVAL",
+      "owner": "game-owner",
+      "requiredFor": "any_new_or_changed_compatibility_exception",
+      "evidence": "Explicit owner decision, bounded scope, rollback action, and test evidence."
+    },
+    {
+      "id": "SCENE-CONTENT-TRUTH-APPROVAL",
+      "owner": "game-owner",
+      "requiredFor": "scene_or_catalog_authority_change",
+      "evidence": "Superseding decision record and regenerated canonical manifests."
+    },
+    {
+      "id": "MIGRATION-POLICY-APPROVAL",
+      "owner": "game-owner",
+      "requiredFor": "save_schema_or_supported_path_change",
+      "evidence": "Backward-compatible migration, old-save fixture, atomic failure recovery, and downgrade behavior."
+    },
+    {
+      "id": "RELEASE-CANDIDATE-PROMOTION",
+      "owner": "game-owner",
+      "requiredFor": "release",
+      "evidence": "Full evidence package plus release and capacity decisions from referenced authority tasks."
+    }
+  ],
+  "stopShipConditions": [
+    {
+      "id": "unreproducible_build",
+      "automatedContracts": ["build-smoke"],
+      "manualOwnerGates": ["BUILD-PAIR-EQUIVALENCE"],
+      "failureCodes": ["QA_BUILD_SMOKE"]
+    },
+    {
+      "id": "editor_exporter_incompatibility",
+      "automatedContracts": ["build-smoke"],
+      "manualOwnerGates": ["COMPATIBILITY-EXCEPTION-APPROVAL"],
+      "failureCodes": ["QA_BUILD_SMOKE"]
+    },
+    {
+      "id": "save_loss_or_silent_downgrade",
+      "automatedContracts": ["save-round-trip", "save-migration", "save-downgrade-rejection", "save-corruption-recovery", "save-crash-recovery"],
+      "manualOwnerGates": ["MIGRATION-POLICY-APPROVAL"],
+      "failureCodes": ["QA_SAVE_ROUND_TRIP", "QA_SAVE_MIGRATION", "QA_SAVE_DOWNGRADE_REJECTION", "QA_SAVE_CORRUPTION_RECOVERY", "QA_SAVE_CRASH_RECOVERY"]
+    },
+    {
+      "id": "missing_required_scene",
+      "automatedContracts": ["scene-manifest"],
+      "manualOwnerGates": ["SCENE-CONTENT-TRUTH-APPROVAL"],
+      "failureCodes": ["QA_SCENE_MANIFEST"]
+    },
+    {
+      "id": "nondeterministic_content_manifest",
+      "automatedContracts": ["scene-manifest", "content-manifest"],
+      "manualOwnerGates": ["SCENE-CONTENT-TRUTH-APPROVAL"],
+      "failureCodes": ["QA_SCENE_MANIFEST", "QA_CONTENT_MANIFEST"]
+    },
+    {
+      "id": "narrative_runtime_disconnected",
+      "automatedContracts": ["play-mode", "packaged-narrative"],
+      "manualOwnerGates": [],
+      "failureCodes": ["QA_PLAY_MODE", "QA_PACKAGED_NARRATIVE"]
+    },
+    {
+      "id": "automated_manual_divergence",
+      "automatedContracts": ["unit", "integration", "play-mode", "build-smoke", "scene-manifest", "content-manifest", "save-round-trip", "save-migration", "save-downgrade-rejection", "save-corruption-recovery", "save-crash-recovery", "packaged-narrative"],
+      "manualOwnerGates": ["RELEASE-CANDIDATE-PROMOTION"],
+      "failureCodes": ["QA_MANUAL_COMPARISON"]
+    },
+    {
+      "id": "missing_or_malformed_evidence",
+      "automatedContracts": ["unit", "integration", "play-mode", "build-smoke", "scene-manifest", "content-manifest", "save-round-trip", "save-migration", "save-downgrade-rejection", "save-corruption-recovery", "save-crash-recovery", "packaged-narrative"],
+      "manualOwnerGates": [],
+      "failureCodes": ["QA_REPORT_HASH", "QA_PROVENANCE_MISSING", "QA_CONFIG_INVALID"]
+    }
+  ],
+  "reopenTriggers": [
+    {
+      "id": "editor_or_exporter_change",
+      "action": "Reopen build compatibility; rerun two clean builds, comparison, full QA, and owner review of any exception."
+    },
+    {
+      "id": "save_schema_change",
+      "action": "Reopen migration policy; add old-save fixtures and prove upgrade, atomic failure recovery, idempotence, corruption recovery, and downgrade rejection."
+    },
+    {
+      "id": "scene_or_catalog_addition",
+      "action": "Stop ship with SCENE_SET_REVIEW_REQUIRED; obtain scene/content truth approval before regenerating manifests."
+    },
+    {
+      "id": "narrative_runtime_change",
+      "action": "Rerun editor, PlayMode, packaged Player, persistence/resume, and editor/package material comparison evidence."
+    },
+    {
+      "id": "failed_migration_telemetry",
+      "action": "Freeze promotion, preserve affected generations and bounded diagnostics, classify failure, add a deterministic fixture, and reopen migration policy."
+    }
+  ]
+}
