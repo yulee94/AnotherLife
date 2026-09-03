@@ -40,6 +40,7 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 | `al_four_realm_production_taxonomy.json` | `al-four-realm-production-taxonomy.schema.json` | — |
 | `al_rig_motion_standard.json` | `al-rig-motion-standard.schema.json` | — |
 | `al_required_motion_manifest.json` | `al-required-motion-manifest.schema.json` | — |
+| `al_model_motion_skill_vfx_harness.v1.json` | `al-model-motion-skill-vfx-harness.schema.json` | — |
 
 `al-world-asset-inventory.schema.json` defines the held post-MVP world-asset logical
 family, production identity, binding, provenance, standards, budget-measurement, and
@@ -141,6 +142,11 @@ families (realms, buildings, research, troops, champions, skills):
 - `test_rig_motion_standard.py` — proves the committed contracts have zero acceptance
   gaps and adversarial root, parent, identifier, motion, event, budget, source,
   signature, and Slagwhistle-authorization changes fail closed.
+- `model_motion_skill_vfx_harness.py` — fail-closed PASS/FAIL/BLOCKED evaluator for
+  Champion, NPC, beast, and monster models plus per-skill motion/VFX axes.
+- `test_model_motion_skill_vfx_harness.py` — proves missing walk/run/attack/special/
+  cast-use motion or effect, omitted monster representatives, and weighted scores
+  fail closed, while absent player-build evidence is BLOCKED.
 
 Run it with:
 
@@ -152,6 +158,7 @@ uv run --with jsonschema python -m unittest test_realm_character_taxonomy.py -v
 uv run --with jsonschema python four_realm_production_taxonomy.py --check
 uv run --with jsonschema python -m unittest test_four_realm_production_taxonomy.py -v
 uv run --with jsonschema python -m unittest test_rig_motion_standard.py -v
+uv run --with jsonschema python -m unittest test_model_motion_skill_vfx_harness.py -v
 ```
 
 The real `al_world_event_content_catalog.json` currently fails validation on its

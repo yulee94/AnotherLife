@@ -1,0 +1,132 @@
+{
+  "modelId": "elite_umbral_cindermaw_salamander",
+  "sourceTaskIds": [
+    "01a06569-2956-73a2-a51e-bade35802fba"
+  ],
+  "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/Inputs/elite_umbral_cindermaw_salamander_meshy7_retexture_raw_v002.fbx",
+  "inputSha256": "977ad01305c1ec38b538d3089fb0c5ebabdeca2e17d64219289e9723f410c54f",
+  "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v002.fbx",
+  "outputSha256": "977ad01305c1ec38b538d3089fb0c5ebabdeca2e17d64219289e9723f410c54f",
+  "status": "intermediate_retexture_uv_overlap_repair_required",
+  "productionReady": false,
+  "rigged": false,
+  "runtimeIntegrationState": "Blocked",
+  "operations": [
+    "retained the Meshy-7 retexture as an intermediate after the independent triangulated audit found 259 overlapping UV faces",
+    "graded cyan source albedo to approved charcoal/obsidian Umbral palette while retaining controlled ember accents",
+    "retained 8K base color and 4K normal/roughness/metallic authoring maps",
+    "generated neutral 4K AO fallback, Unity metallic-smoothness packing, and 2K runtime derivatives"
+  ],
+  "uvValidation": {
+    "uvLayer": "UVMap",
+    "uvFacesOutsideUnit": 0,
+    "uvZeroAreaFaces": 0,
+    "uvOverlappingFaces": 259
+  },
+  "aoProvenance": "neutral white fallback; geometry AO bake remains optional material enhancement, not a UV blocker",
+  "textures": [
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/base_color.png",
+      "bytes": 18168401,
+      "sha256": "eb64fd57727f17d2011332910df47a96fe8072e49f39da9b3e670ed13857d82f",
+      "dimensions": [
+        8192,
+        8192
+      ],
+      "mediaType": "image/png"
+    },
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/normal.png",
+      "bytes": 11778521,
+      "sha256": "f2ba2b82daabfc2372db8b44f73f893d07c3a68bfb76b635f4c6c34262f32b43",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "mediaType": "image/png"
+    },
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/roughness.png",
+      "bytes": 1802665,
+      "sha256": "1489b55e87c68975ae8afb56e174bfae943d4f203f212637711e15420913daf8",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "mediaType": "image/png"
+    },
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/metallic.png",
+      "bytes": 335747,
+      "sha256": "db330e334fc0b79465a313cb668ef586a01c9874509026158fa6a9c06e158b8e",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "mediaType": "image/png"
+    },
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/ao.png",
+      "bytes": 22519,
+      "sha256": "549458715a7bafb51bae3773abcf773ea2bf583684c7587cee21297e8dd777f2",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "mediaType": "image/png"
+    },
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/metallic_smoothness.png",
+      "bytes": 2296609,
+      "sha256": "983949697e95bfa1151e783f99769f141640ec6e4e8758a3392e9c25fc790290",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "mediaType": "image/png"
+    },
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/runtime_2k/base_color.png",
+      "bytes": 2114823,
+      "sha256": "c79cddc03c34721eebc47920e1dfe32e25e19398152299e1635c703690b8464b",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "mediaType": "image/png"
+    },
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/runtime_2k/normal.png",
+      "bytes": 3476007,
+      "sha256": "097a6ff6748d6bc9abc0d98e7ff1b055fc023069a47045c8508879bb7304429c",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "mediaType": "image/png"
+    },
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/runtime_2k/ao.png",
+      "bytes": 6988,
+      "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "mediaType": "image/png"
+    },
+    {
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_v002/runtime_2k/metallic_smoothness.png",
+      "bytes": 843181,
+      "sha256": "4269eb930e7b1e3cc4d27d89810282b44820349571a702ab3de84c0bc5f90204",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "mediaType": "image/png"
+    }
+  ],
+  "diagnostics": [
+    "UV atlas contains 259 overlapping faces; do not use this intermediate directly"
+  ]
+}

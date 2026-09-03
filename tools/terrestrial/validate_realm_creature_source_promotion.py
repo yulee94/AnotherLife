@@ -115,7 +115,8 @@ def validate_packet(packet: dict[str, Any], art_root: Path) -> list[str]:
     if summary.get("blocked3D") != blocked:
         diagnostics.append("summary.blocked3D does not match model blockers")
     owner_tier_texture_packets = sum(
-        has_owner_tier_texture_packet(
+        "normal_detail_rebuild_required" not in model.get("status", "")
+        and has_owner_tier_texture_packet(
             [texture for texture in model.get("textures", []) if isinstance(texture, dict)]
         )
         for model in models
@@ -138,7 +139,10 @@ def validate_packet(packet: dict[str, Any], art_root: Path) -> list[str]:
             diagnostics.append(f"{model_id}: productionReady must be false")
         if model.get("rigged") is not False:
             diagnostics.append(f"{model_id}: rigged must be false in this packet")
-        if not isinstance(model.get("textures"), list) or not model["textures"]:
+        textures = model.get("textures")
+        if not isinstance(textures, list):
+            diagnostics.append(f"{model_id}: at least one texture record is required")
+        elif not textures and "texture_rebuild_required" not in model.get("status", ""):
             diagnostics.append(f"{model_id}: at least one texture record is required")
         if not isinstance(model.get("meshyTaskIds"), list) or not model["meshyTaskIds"]:
             diagnostics.append(f"{model_id}: at least one Meshy task ID is required")

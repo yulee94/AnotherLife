@@ -65,6 +65,25 @@ class RealmCreatureSourcePromotionValidationTests(unittest.TestCase):
             root = Path(tmp)
             self.assertEqual(validate_packet(self.make_packet(root), root), [])
 
+    def test_accepts_textureless_replacement_when_status_requires_texture_rebuild(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = self.make_packet(root)
+            packet["models"][0]["status"] = "clean_geometry_pass_texture_rebuild_required"
+            packet["models"][0]["textures"] = []
+            packet["summary"]["ownerTierTexturePackets"] = 20
+            packet["summary"]["belowOwnerTierTexturePackets"] = 1
+            self.assertEqual(validate_packet(packet, root), [])
+
+    def test_neutral_normal_rebuild_status_excludes_dimension_complete_packet_from_owner_tier(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = self.make_packet(root)
+            packet["models"][0]["status"] = "clean_geometry_pass_uv_bake_complete_normal_detail_rebuild_required"
+            packet["summary"]["ownerTierTexturePackets"] = 20
+            packet["summary"]["belowOwnerTierTexturePackets"] = 1
+            self.assertEqual(validate_packet(packet, root), [])
+
     def test_accepts_complete_hash_verified_2d_approval_packet(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
