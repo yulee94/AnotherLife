@@ -12,6 +12,11 @@
 # Canonical scene manifests are byte-compared by the fail-closed validator.
 /unity/Assets/AL/StreamingAssets/GameData/al_enabled_scene_manifest.v1.json   text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json text eol=lf
+/unity/Packages/packages-lock.json                                            text eol=lf
+
+# Deterministic QA policy, baseline, evidence schema, and captured reports.
+/tools/qa/**/*.json                                                           text eol=lf
+/unity/SharedContracts/integrated-qa-evidence.schema.json                     text eol=lf
 
 # Hash-bound Slagfall provenance. Recorded SHA-256 values require raw LF bytes.
 /unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/slagfall_environment_meshy_cleanup_v001.json text eol=lf

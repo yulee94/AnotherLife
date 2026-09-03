@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "anotherlife-deterministic-qa",
+  "fixtureVersion": "qa-fixtures-v1",
+  "seed": 1618033988,
+  "clockUtc": "2026-01-01T00:00:00Z",
+  "artifactRoot": "unity/Logs/DeterministicQA",
+  "manualBaseline": "tools/qa/manual_results.v1.json",
+  "authorityReferences": {
+    "releaseCriteriaTask": "t_4a5b066c",
+    "capacityCriteriaTask": "t_7f6be100",
+    "sceneDecision": "DEC-SCENE-DELIVERY-002",
+    "savePolicy": "unity/Docs/Schema1_Save_Migration_And_Recovery_Policy.md"
+  },
+  "provenance": {
+    "runner": "tools/qa/run_deterministic_qa.py",
+    "evidenceSchema": "unity/SharedContracts/integrated-qa-evidence.schema.json",
+    "projectVersion": "unity/ProjectSettings/ProjectVersion.txt",
+    "projectSettings": "unity/ProjectSettings/ProjectSettings.asset",
+    "enabledSceneManifest": "unity/Assets/AL/StreamingAssets/GameData/al_enabled_scene_manifest.v1.json",
+    "generatedSceneManifest": "unity/Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json",
+    "worldCatalog": "unity/Assets/AL/StreamingAssets/GameData/al_world_streaming_catalog.json",
+    "narrativeCatalog": "unity/Assets/AL/StreamingAssets/GameData/al_main_quest_line_runtime.v1.json",
+    "saveFixtureManifest": "unity/Assets/AL/Tests/EditMode/Fixtures/SaveSchema1/manifest.json"
+  },
+  "profiles": {
+    "full": [
+      "unit",
+      "integration",
+      "play-mode",
+      "build-smoke",
+      "scene-manifest",
+      "content-manifest",
+      "save-round-trip",
+      "save-migration",
+      "save-downgrade-rejection",
+      "save-corruption-recovery",
+      "save-crash-recovery",
+      "packaged-narrative"
+    ],
+    "contract": [
+      "unit",
+      "integration",
+      "play-mode",
+      "build-smoke",
+      "scene-manifest",
+      "content-manifest",
+      "save-round-trip",
+      "save-migration",
+      "save-downgrade-rejection",
+      "save-corruption-recovery",
+      "save-crash-recovery",
+      "packaged-narrative"
+    ],
+    "ci": [
+      "unit",
+      "integration",
+      "scene-manifest",
+      "content-manifest"
+    ]
+  },
+  "contracts": [
+    {
+      "id": "unit",
+      "kind": "subprocess",
+      "failureCode": "QA_UNIT",
+      "repeat": 1,
+      "command": ["{python}", "-m", "unittest", "-v", "tools.tests.test_reproducible_build", "tools.tests.test_android_unity_package"],
+      "evidencePattern": "Ran (?P<tests>[0-9]+) tests?"
+    },
+    {
+      "id": "integration",
+      "kind": "subprocess",
+      "failureCode": "QA_INTEGRATION",
+      "repeat": 1,
+      "command": ["{python}", "tools/scenes/test_scene_content_manifest.py"],
+      "evidencePattern": "Ran (?P<tests>[0-9]+) tests?"
+    },
+    {
+      "id": "play-mode",
+      "kind": "unity-test",
+      "failureCode": "QA_PLAY_MODE",
+      "repeat": 1,
+      "platform": "PlayMode",
+      "assembly": "AL.PlayMode.Tests",
+      "filter": "AL.Tests.PlayMode.MainQuestLinePlayModeTests"
+    },
+    {
+      "id": "build-smoke",
+      "kind": "build-smoke",
+      "failureCode": "QA_BUILD_SMOKE",
+      "repeat": 1
+    },
+    {
+      "id": "scene-manifest",
+      "kind": "subprocess",
+      "failureCode": "QA_SCENE_MANIFEST",
+      "repeat": 2,
+      "command": ["{python}", "tools/scenes/scene_content_manifest.py", "--check", "--root", "{repo}"],
+      "evidencePattern": "enabled=(?P<enabled>[0-9]+) generated=(?P<generated>[0-9]+) excluded=(?P<excluded>[0-9]+) accounted=(?P<accounted>[0-9]+) enabled_sha256=(?P<enabledSha256>[0-9a-f]{64}) generated_sha256=(?P<generatedSha256>[0-9a-f]{64})"
+    },
+    {
+      "id": "content-manifest",
+      "kind": "subprocess",
+      "failureCode": "QA_CONTENT_MANIFEST",
+      "repeat": 2,
+      "command": ["{python}", "tools/scenes/scene_content_manifest.py", "--check", "--root", "{repo}"],
+      "evidencePattern": "generated=(?P<generated>[0-9]+).*generated_sha256=(?P<generatedSha256>[0-9a-f]{64})"
+    },
+    {
+      "id": "save-round-trip",
+      "kind": "unity-test",
+      "failureCode": "QA_SAVE_ROUND_TRIP",
+      "repeat": 1,
+      "platform": "EditMode",
+      "assembly": "AL.EditMode.Tests",
+      "filter": "AL.Tests.EditMode.SaveSchema1GoldenFixtureTests.Schema1GoldenRoundTripPreservesProfileData"
+    },
+    {
+      "id": "save-migration",
+      "kind": "unity-test",
+      "failureCode": "QA_SAVE_MIGRATION",
+      "repeat": 1,
+      "platform": "EditMode",
+      "assembly": "AL.EditMode.Tests",
+      "filter": "AL.Tests.EditMode.SaveSchema1GoldenFixtureTests.PreSchemaGoldenMigratesWithoutLosingApprovedProgress;AL.Tests.EditMode.SaveSchema1GoldenFixtureTests.MigratedGoldenRetryIsIdempotentAndByteStable"
+    },
+    {
+      "id": "save-downgrade-rejection",
+      "kind": "unity-test",
+      "failureCode": "QA_SAVE_DOWNGRADE_REJECTION",
+      "repeat": 1,
+      "platform": "EditMode",
+      "assembly": "AL.EditMode.Tests",
+      "filter": "AL.Tests.EditMode.SaveSchema1GoldenFixtureTests.FutureSchemaGoldenRemainsAuthoritativeReadOnlyWithoutDowngrade;AL.Tests.EditMode.SaveSchema1GoldenFixtureTests.FutureMapDisclosureExtensionRemainsReadOnlyAndByteExact"
+    },
+    {
+      "id": "save-corruption-recovery",
+      "kind": "unity-test",
+      "failureCode": "QA_SAVE_CORRUPTION_RECOVERY",
+      "repeat": 1,
+      "platform": "EditMode",
+      "assembly": "AL.EditMode.Tests",
+      "filter": "AL.Tests.EditMode.SaveSchema1GoldenFixtureTests.TruncatedPrimaryRecoversFromGoldenBackupAndPreservesExactEvidence;AL.Tests.EditMode.SaveSchema1GoldenFixtureTests.RecoveryMarkerChecksumMismatchFailsClosedWithoutMutation;AL.Tests.EditMode.SavePersistenceRegressionTests.BothInvalidSaveFilesArePreservedForExplicitRecovery"
+    },
+    {
+      "id": "save-crash-recovery",
+      "kind": "unity-test",
+      "failureCode": "QA_SAVE_CRASH_RECOVERY",
+      "repeat": 1,
+      "platform": "EditMode",
+      "assembly": "AL.EditMode.Tests",
+      "filter": "AL.Tests.EditMode.SavePersistenceRegressionTests.QuarantinedRecoveryResumesExactIntermediateLedgerWithoutRepeatingSteps;AL.Tests.EditMode.SavePersistenceRegressionTests.RecoveryStageWriteFailureBeforeMutationCanRetrySafely;AL.Tests.EditMode.SavePersistenceRegressionTests.AtomicReplaceAfterMutationWithUnverifiedRollbackIsCommitUncertain;AL.Tests.EditMode.SavePersistenceRegressionTests.MoveFallbackWindowClaimsPreviousPreservedOnlyAfterVerifiedRollback"
+    },
+    {
+      "id": "packaged-narrative",
+      "kind": "packaged-narrative",
+      "failureCode": "QA_PACKAGED_NARRATIVE",
+      "repeat": 1
+    }
+  ]
+}

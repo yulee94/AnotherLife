@@ -48,6 +48,14 @@ class ReproducibleBuildTests(unittest.TestCase):
         self.assertEqual(android["legacyExporterEditor"], "2022.3.62f3")
         self.assertFalse(android["legacyCrossVersionProjectAuthorized"])
         self.assertFalse(android["androidModuleAvailable"])
+        self.assertTrue(
+            {
+                "tools/qa/run_deterministic_qa.py",
+                "tools/qa/deterministic_qa_policy.json",
+                "tools/qa/manual_results.v1.json",
+                "unity/SharedContracts/integrated-qa-evidence.schema.json",
+            }.issubset(policy["sourceInputs"]["explicitFiles"])
+        )
 
     def test_legacy_android_editor_cannot_open_the_unity6_project(self):
         module = load_module()
@@ -562,6 +570,18 @@ class ReproducibleBuildTests(unittest.TestCase):
             workflow,
         )
         self.assertIn("reproducible_build.py --repo-root . inventory", workflow)
+
+    def test_repository_hygiene_runs_integrated_qa_contract(self):
+        workflow = (REPO_ROOT / ".github/workflows/quality-gates.yml").read_text(encoding="utf-8")
+        self.assertIn(
+            "python tools/qa/test_run_deterministic_qa.py",
+            workflow,
+        )
+        self.assertIn(
+            "python tools/qa/run_deterministic_qa.py --repo-root . --profile contract",
+            workflow,
+        )
+        self.assertIn("artifacts/deterministic-qa/report.json", workflow)
 
 
 if __name__ == "__main__":
