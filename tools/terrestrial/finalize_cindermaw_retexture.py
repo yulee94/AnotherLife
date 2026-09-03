@@ -62,12 +62,45 @@ def file_record(path: Path, root: Path) -> dict[str, object]:
     with Image.open(path) as image:
         dimensions = list(image.size)
     return {
-        "path": path.relative_to(root).as_posix(),
+        "path": portable_report_path(path, root),
         "bytes": path.stat().st_size,
         "sha256": _sha256(path),
         "dimensions": dimensions,
         "mediaType": "image/png",
     }
+
+
+def _require_contained(path: Path, root: Path, label: str, root_label: str) -> None:
+    try:
+        portable_report_path(path, root)
+    except ValueError as exc:
+        raise ValueError(f"{label} escapes {root_label}: {path}") from exc
+
+
+def validate_retexture_paths(
+    *,
+    packet_root: Path,
+    repo_root: Path,
+    input_fbx: Path,
+    input_texture_dir: Path,
+    output_fbx: Path,
+    output_texture_dir: Path,
+    uv_validation: Path,
+    report: Path,
+) -> None:
+    _require_contained(packet_root, repo_root, "packet root", "repository")
+    for path, label in (
+        (output_fbx, "output FBX"),
+        (output_texture_dir, "output texture directory"),
+    ):
+        _require_contained(path, packet_root, label, "packet root")
+    for path, label in (
+        (input_fbx, "input FBX"),
+        (input_texture_dir, "input texture directory"),
+        (uv_validation, "UV validation"),
+        (report, "report"),
+    ):
+        _require_contained(path, repo_root, label, "repository")
 
 
 def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
@@ -86,7 +119,16 @@ def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parse_args(argv or [])
-    portable_report_path(args.output_texture_dir, args.packet_root)
+    validate_retexture_paths(
+        packet_root=args.packet_root,
+        repo_root=args.repo_root,
+        input_fbx=args.input_fbx,
+        input_texture_dir=args.input_texture_dir,
+        output_fbx=args.output_fbx,
+        output_texture_dir=args.output_texture_dir,
+        uv_validation=args.uv_validation,
+        report=args.report,
+    )
     uv_validation = json.loads(args.uv_validation.read_text(encoding="utf-8"))
     expected_uv = {
         "uvFacesOutsideUnit": 0,

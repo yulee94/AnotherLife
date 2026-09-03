@@ -64,7 +64,7 @@ class RealmCreatureGeometryRepairTests(unittest.TestCase):
             "sourceTaskIds": ["task-v001", "task-v002"],
             "inputSha256": "a" * 64,
             "outputSha256": "b" * 64,
-            "status": "clean_geometry_pass_texture_uplift_required",
+            "status": "clean_geometry_pass_texture_rebuild_required",
             "productionReady": False,
             "rigged": False,
             "runtimeIntegrationState": "Blocked",
@@ -147,6 +147,7 @@ class RealmCreatureGeometryRepairTests(unittest.TestCase):
     def test_accepts_complete_crownstep_repair_report(self):
         report = self._valid_report()
         report["modelId"] = "elite_crownlands_crownstep"
+        report["status"] = "clean_geometry_pass_texture_rebuild_required"
         report["metrics"] = {
             "manePlateRows": 3,
             "pawDigits": 5,
@@ -158,6 +159,35 @@ class RealmCreatureGeometryRepairTests(unittest.TestCase):
         }
 
         self.assertEqual([], validate_repair_report(report))
+
+    def test_rejects_uplift_status_for_retopologized_sources(self):
+        for model_id in (
+            "boss_eldergrove_mere_root_leviathan",
+            "elite_crownlands_crownstep",
+        ):
+            with self.subTest(model_id=model_id):
+                report = self._valid_report()
+                report["modelId"] = model_id
+                report["metrics"] = (
+                    {
+                        "cervicalVanes": 7,
+                        "shieldSkullToNeckWidthRatio": 1.2,
+                        "nonManifoldEdgesBefore": 1,
+                        "nonManifoldEdgesAfter": 1,
+                    }
+                    if model_id.startswith("boss_")
+                    else {
+                        "manePlateRows": 3,
+                        "pawDigits": 5,
+                        "tailTufted": False,
+                        "tailBaseToTipWidthRatio": 2.2,
+                        "forequarterToHindquarterWidthRatio": 1.1,
+                        "nonManifoldEdgesBefore": 1,
+                        "nonManifoldEdgesAfter": 1,
+                    }
+                )
+                diagnostics = validate_repair_report(report)
+                self.assertTrue(any("texture-rebuild" in item for item in diagnostics))
 
     def test_rejects_generic_crownstep_structure(self):
         report = self._valid_report()

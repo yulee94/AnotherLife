@@ -3,11 +3,18 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import sys
 from pathlib import Path
 from typing import Any, Sequence
+
+if __package__:
+    from tools.terrestrial.repair_realm_creature_geometry import portable_report_path
+else:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from tools.terrestrial.repair_realm_creature_geometry import portable_report_path
 
 Point2 = tuple[float, float]
 Triangle2 = tuple[Point2, Point2, Point2]
@@ -80,6 +87,30 @@ def validate_uv_metrics(metrics: dict[str, Any]) -> list[str]:
     return diagnostics
 
 
+def build_uv_validation_record(
+    *,
+    model_id: str,
+    input_path: str,
+    input_sha: str,
+    metrics: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "modelId": model_id,
+        "input": input_path,
+        "inputSha256": input_sha,
+        **metrics,
+        "diagnostics": validate_uv_metrics(metrics),
+    }
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def calculate_uv_metrics(mesh: Any, layer_name: str) -> dict[str, Any]:
     uv_data = mesh.uv_layers[layer_name].data
     triangles: list[Triangle2] = []
@@ -147,6 +178,8 @@ def main(argv: Sequence[str]) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("input", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--model-id", required=True)
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     args = parser.parse_args(argv)
     import bpy
 
@@ -157,11 +190,16 @@ def main(argv: Sequence[str]) -> int:
         raise RuntimeError("expected exactly one mesh with an active UV layer")
     obj = meshes[0]
     metrics = calculate_uv_metrics(obj.data, obj.data.uv_layers.active.name)
-    metrics["diagnostics"] = validate_uv_metrics(metrics)
+    record = build_uv_validation_record(
+        model_id=args.model_id,
+        input_path=portable_report_path(args.input, args.repo_root),
+        input_sha=_sha256(args.input),
+        metrics=metrics,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(metrics))
-    return 1 if metrics["diagnostics"] else 0
+    args.output.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(record))
+    return 1 if record["diagnostics"] else 0
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from tools.terrestrial.apply_realm_creature_dcc_repairs import (
     REPAIRS,
@@ -6,10 +7,147 @@ from tools.terrestrial.apply_realm_creature_dcc_repairs import (
     apply_packet_revision,
     recompute_summary,
     update_repaired_source_record,
+    validate_baked_map_bindings,
+    validate_repair_evidence,
 )
 
 
 class ApplyRealmCreatureDccRepairsTests(unittest.TestCase):
+    def test_rejects_normal_map_without_neutral_tangent_provenance(self):
+        path = "unity/packet/normal.png"
+        reported = {
+            "name": "normal",
+            "path": path,
+            "sha256": "a" * 64,
+            "dimensions": [4096, 4096],
+        }
+        diagnostics = validate_baked_map_bindings(
+            [reported],
+            {path: {"sha256": "a" * 64, "dimensions": [4096, 4096]}},
+        )
+        self.assertIn("normal baked-map provenance must be neutral_tangent", diagnostics)
+
+    def test_rejects_malformed_extra_baked_map_records(self):
+        path = "unity/packet/normal.png"
+        valid = {
+            "name": "normal",
+            "path": path,
+            "sha256": "a" * 64,
+            "dimensions": [4096, 4096],
+        }
+        diagnostics = validate_baked_map_bindings(
+            [valid, {}],
+            {path: {"sha256": "a" * 64, "dimensions": [4096, 4096]}},
+        )
+        self.assertIn("malformed baked-map record: index 1", diagnostics)
+
+    def test_rejects_duplicate_baked_map_names_and_paths(self):
+        path = "unity/packet/normal.png"
+        entry = {
+            "name": "normal",
+            "path": path,
+            "sha256": "a" * 64,
+            "dimensions": [4096, 4096],
+        }
+        diagnostics = validate_baked_map_bindings(
+            [entry, dict(entry)],
+            {path: {"sha256": "a" * 64, "dimensions": [4096, 4096]}},
+        )
+        self.assertIn(f"duplicate baked-map path: {path}", diagnostics)
+        self.assertIn("duplicate baked-map name: normal", diagnostics)
+
+    def test_rejects_swapped_baked_map_names_with_valid_paths_and_hashes(self):
+        normal_path = "unity/packet/normal.png"
+        roughness_path = "unity/packet/roughness.png"
+        expected = {
+            normal_path: {"sha256": "a" * 64, "dimensions": [4096, 4096]},
+            roughness_path: {"sha256": "b" * 64, "dimensions": [4096, 4096]},
+        }
+        reported = [
+            {
+                "name": "roughness",
+                "path": normal_path,
+                "sha256": "a" * 64,
+                "dimensions": [4096, 4096],
+            },
+            {
+                "name": "normal",
+                "path": roughness_path,
+                "sha256": "b" * 64,
+                "dimensions": [4096, 4096],
+            },
+        ]
+        diagnostics = validate_baked_map_bindings(reported, expected)
+        self.assertIn(f"baked-map name mismatch: {normal_path}", diagnostics)
+        self.assertIn(f"baked-map name mismatch: {roughness_path}", diagnostics)
+
+    def test_rejects_report_with_only_matching_output_hash(self):
+        repair = REPAIRS["boss_eldergrove_mere_root_leviathan"]
+        diagnostics = validate_repair_evidence(
+            model_id="boss_eldergrove_mere_root_leviathan",
+            repair=repair,
+            report={"outputSha256": "a" * 64},
+            selected_source={"path": repair["model"], "sha256": "a" * 64},
+            textures=[],
+            packet_root=Path("unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001"),
+            repo_root=Path("."),
+        )
+        self.assertIn("report modelId mismatch", diagnostics)
+        self.assertIn("report status mismatch", diagnostics)
+        self.assertIn("report diagnostics must be an explicit empty list", diagnostics)
+        self.assertIn("report productionReady must remain false", diagnostics)
+
+    def test_rejects_cindermaw_bad_uv_metrics_and_map_checksum(self):
+        repair = REPAIRS["elite_umbral_cindermaw_salamander"]
+        report = {
+            "modelId": "elite_umbral_cindermaw_salamander",
+            "sourceTaskIds": repair["tasks"],
+            "input": "missing-input.fbx",
+            "inputSha256": "a" * 64,
+            "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/cinder.fbx",
+            "outputSha256": "b" * 64,
+            "editableBlend": "missing.blend",
+            "status": repair["status"],
+            "productionReady": False,
+            "rigged": False,
+            "runtimeIntegrationState": "Blocked",
+            "metrics": {
+                "uvLayer": "UVMap_Clean",
+                "uvFacesOutsideUnit": 0,
+                "uvZeroAreaFaces": 0,
+                "uvOverlappingFaces": 4,
+                "polygonalProjectionBlockerResolved": True,
+                "nonManifoldEdgesBefore": 1,
+                "nonManifoldEdgesAfter": 1,
+            },
+            "bakedMaps": [
+                {
+                    "name": "base_color",
+                    "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/base_color.png",
+                    "dimensions": [8192, 8192],
+                    "sha256": "c" * 64,
+                }
+            ],
+            "diagnostics": [],
+        }
+        diagnostics = validate_repair_evidence(
+            model_id="elite_umbral_cindermaw_salamander",
+            repair=repair,
+            report=report,
+            selected_source={"path": repair["model"], "sha256": "b" * 64},
+            textures=[
+                {
+                    "path": repair["textures"][0],
+                    "sha256": "d" * 64,
+                    "dimensions": [4096, 4096],
+                }
+            ],
+            packet_root=Path("unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001"),
+            repo_root=Path("."),
+        )
+        self.assertTrue(any("uvOverlappingFaces" in item for item in diagnostics))
+        self.assertTrue(any("baked-map" in item for item in diagnostics))
+
     def test_applies_v002_packet_revision_and_honest_texture_disposition(self):
         manifest = {
             "sourceVersion": "al-rcreature-2026-09-02-v001",

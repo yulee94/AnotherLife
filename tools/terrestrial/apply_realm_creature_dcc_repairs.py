@@ -10,6 +10,9 @@ from typing import Any, Sequence
 
 from PIL import Image
 
+from tools.terrestrial.repair_cindermaw_uv_bake import validate_uv_bake_report
+from tools.terrestrial.repair_realm_creature_geometry import portable_report_path, validate_repair_report
+
 
 def update_repaired_source_record(
     record: dict[str, Any],
@@ -116,6 +119,139 @@ def _file_record(root: Path, relative: str, image: bool = False) -> dict[str, An
     return record
 
 
+def _reported_repo_file(
+    report: dict[str, Any],
+    *,
+    path_field: str,
+    sha_field: str | None,
+    repo_root: Path,
+    diagnostics: list[str],
+) -> None:
+    value = report.get(path_field)
+    if not isinstance(value, str) or not value or Path(value).is_absolute():
+        diagnostics.append(f"report {path_field} must be a repo-relative path")
+        return
+    path = repo_root / value
+    try:
+        portable_report_path(path, repo_root)
+    except ValueError:
+        diagnostics.append(f"report {path_field} escapes repository")
+        return
+    if not path.is_file():
+        diagnostics.append(f"report {path_field} does not exist: {value}")
+        return
+    if sha_field is not None and report.get(sha_field) != _sha256(path):
+        diagnostics.append(f"report {sha_field} does not match {path_field}")
+
+
+def validate_baked_map_bindings(
+    reported: Sequence[dict[str, Any]],
+    expected_by_path: dict[str, dict[str, Any]],
+) -> list[str]:
+    diagnostics: list[str] = []
+    seen_paths: set[str] = set()
+    duplicate_paths: set[str] = set()
+    seen_names: set[str] = set()
+    duplicate_names: set[str] = set()
+    for index, entry in enumerate(reported):
+        if (
+            not isinstance(entry, dict)
+            or not isinstance(entry.get("path"), str)
+            or not isinstance(entry.get("name"), str)
+        ):
+            diagnostics.append(f"malformed baked-map record: index {index}")
+            continue
+        path = entry.get("path")
+        if isinstance(path, str):
+            (duplicate_paths if path in seen_paths else seen_paths).add(path)
+        name = entry.get("name")
+        if isinstance(name, str):
+            (duplicate_names if name in seen_names else seen_names).add(name)
+    diagnostics.extend(f"duplicate baked-map path: {path}" for path in sorted(duplicate_paths))
+    diagnostics.extend(f"duplicate baked-map name: {name}" for name in sorted(duplicate_names))
+    reported_by_path = {
+        entry.get("path"): entry
+        for entry in reported
+        if isinstance(entry, dict) and isinstance(entry.get("path"), str)
+    }
+    if set(reported_by_path) != set(expected_by_path):
+        diagnostics.append("baked-map path set does not match promoted textures")
+    for path, expected in expected_by_path.items():
+        actual = reported_by_path.get(path)
+        if actual is None:
+            continue
+        expected_name = Path(path).stem
+        if actual.get("name") != expected_name:
+            diagnostics.append(f"baked-map name mismatch: {path}")
+        if expected_name == "normal" and actual.get("provenance") != "neutral_tangent":
+            diagnostics.append("normal baked-map provenance must be neutral_tangent")
+        if actual.get("sha256") != expected.get("sha256"):
+            diagnostics.append(f"baked-map SHA-256 mismatch: {path}")
+        if actual.get("dimensions") != expected.get("dimensions"):
+            diagnostics.append(f"baked-map dimensions mismatch: {path}")
+    return diagnostics
+
+
+def validate_repair_evidence(
+    *,
+    model_id: str,
+    repair: dict[str, Any],
+    report: dict[str, Any],
+    selected_source: dict[str, Any],
+    textures: list[dict[str, Any]] | None,
+    packet_root: Path,
+    repo_root: Path,
+) -> list[str]:
+    diagnostics: list[str] = []
+    if report.get("modelId") != model_id:
+        diagnostics.append("report modelId mismatch")
+    if report.get("status") != repair["status"]:
+        diagnostics.append("report status mismatch")
+    if report.get("diagnostics") != []:
+        diagnostics.append("report diagnostics must be an explicit empty list")
+    if report.get("productionReady") is not False:
+        diagnostics.append("report productionReady must remain false")
+    if report.get("rigged") is not False:
+        diagnostics.append("report rigged must remain false")
+    if report.get("runtimeIntegrationState") != "Blocked":
+        diagnostics.append("report runtimeIntegrationState must remain Blocked")
+    source_task_ids = report.get("sourceTaskIds")
+    if not isinstance(source_task_ids, list) or not source_task_ids:
+        diagnostics.append("report sourceTaskIds must be a non-empty list")
+    elif set(repair["tasks"]) - set(source_task_ids):
+        diagnostics.append("report sourceTaskIds omit required repair tasks")
+
+    expected_output = portable_report_path(packet_root / repair["model"], repo_root)
+    if report.get("output") != expected_output:
+        diagnostics.append("report output path mismatch")
+    if report.get("outputSha256") != selected_source.get("sha256"):
+        diagnostics.append("report output SHA-256 mismatch")
+    _reported_repo_file(
+        report,
+        path_field="input",
+        sha_field="inputSha256",
+        repo_root=repo_root,
+        diagnostics=diagnostics,
+    )
+    _reported_repo_file(
+        report,
+        path_field="editableBlend",
+        sha_field=None,
+        repo_root=repo_root,
+        diagnostics=diagnostics,
+    )
+
+    if model_id == "elite_umbral_cindermaw_salamander":
+        diagnostics.extend(validate_uv_bake_report(report))
+        expected_maps: dict[str, dict[str, Any]] = {}
+        for record in textures or []:
+            expected_maps[portable_report_path(packet_root / record["path"], repo_root)] = record
+        diagnostics.extend(validate_baked_map_bindings(report.get("bakedMaps", []), expected_maps))
+    else:
+        diagnostics.extend(validate_repair_report(report))
+    return list(dict.fromkeys(diagnostics))
+
+
 REPAIRS: dict[str, dict[str, Any]] = {
     "boss_eldergrove_mere_root_leviathan": {
         "model": "Models/boss_eldergrove_mere_root_leviathan/boss_eldergrove_mere_root_leviathan_source_v002.fbx",
@@ -171,6 +307,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--packet-root", type=Path, required=True)
     parser.add_argument("--docs-root", type=Path, required=True)
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--created-at-utc", default="2026-09-03T05:06:40Z")
     args = parser.parse_args(argv)
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
@@ -181,14 +318,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     for model_id, repair in REPAIRS.items():
         report_path = args.docs_root / repair["report"]
         report = json.loads(report_path.read_text(encoding="utf-8"))
-        if report.get("diagnostics"):
-            raise RuntimeError(f"{model_id} DCC report has diagnostics: {report['diagnostics']}")
         selected = _file_record(args.packet_root, repair["model"])
-        if report.get("outputSha256") != selected["sha256"]:
-            raise RuntimeError(f"{model_id} report/output SHA-256 mismatch")
         texture_spec = repair["textures"]
         textures = None if texture_spec is None else [_file_record(args.packet_root, path, image=True) for path in texture_spec]
         review = _file_record(args.packet_root, repair["review"], image=True)
+        evidence_diagnostics = validate_repair_evidence(
+            model_id=model_id,
+            repair=repair,
+            report=report,
+            selected_source=selected,
+            textures=textures,
+            packet_root=args.packet_root,
+            repo_root=args.repo_root,
+        )
+        if evidence_diagnostics:
+            raise RuntimeError(f"{model_id} DCC evidence failed: {evidence_diagnostics}")
         update_repaired_source_record(
             by_id[model_id],
             selected_source=selected,

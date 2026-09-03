@@ -9,10 +9,57 @@ from tools.terrestrial.finalize_cindermaw_retexture import (
     file_record,
     grade_cindermaw_base_color,
     portable_report_path,
+    validate_retexture_paths,
 )
 
 
 class FinalizeCindermawRetextureTests(unittest.TestCase):
+    def test_rejects_packet_root_outside_repository(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repo_root = Path(directory) / "repo"
+            repo_root.mkdir()
+            packet_root = repo_root / ".." / "outside-packet"
+            with self.assertRaisesRegex(ValueError, "packet root escapes repository"):
+                validate_retexture_paths(
+                    packet_root=packet_root,
+                    repo_root=repo_root,
+                    input_fbx=repo_root / "input.fbx",
+                    input_texture_dir=repo_root / "input_textures",
+                    output_fbx=packet_root / "model.fbx",
+                    output_texture_dir=packet_root / "textures",
+                    uv_validation=repo_root / "uv.json",
+                    report=repo_root / "report.json",
+                )
+
+    def test_rejects_output_fbx_that_lexically_traverses_outside_packet_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repo_root = Path(directory)
+            packet_root = repo_root / "packet"
+            packet_root.mkdir()
+            outside = packet_root / ".." / "outside" / "model.fbx"
+            with self.assertRaisesRegex(ValueError, "output FBX escapes packet root"):
+                validate_retexture_paths(
+                    packet_root=packet_root,
+                    repo_root=repo_root,
+                    input_fbx=packet_root / "input.fbx",
+                    input_texture_dir=packet_root / "input_textures",
+                    output_fbx=outside,
+                    output_texture_dir=packet_root / "textures",
+                    uv_validation=repo_root / "uv.json",
+                    report=repo_root / "report.json",
+                )
+
+    def test_file_record_rejects_lexical_parent_escape(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            outside = root / ".." / f"{root.name}_outside" / "map.png"
+            outside.parent.mkdir(exist_ok=True)
+            Image.new("RGB", (2, 2), (1, 2, 3)).save(outside)
+            self.addCleanup(outside.parent.rmdir)
+            self.addCleanup(outside.unlink)
+            with self.assertRaisesRegex(ValueError, "escapes repository"):
+                file_record(outside, root)
+
     def test_file_records_use_repo_relative_paths(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

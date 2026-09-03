@@ -59,8 +59,14 @@ def validate_repair_report(report: dict[str, Any]) -> list[str]:
     for field in ("inputSha256", "outputSha256"):
         if not _is_sha256(report.get(field)):
             diagnostics.append(f"{field} must be a lowercase SHA-256 digest")
-    if report.get("status") != "clean_geometry_pass_texture_uplift_required":
-        diagnostics.append("status must remain a texture-uplift-blocked geometry pass")
+    expected_status = (
+        "clean_geometry_pass_texture_rebuild_required"
+        if model_id in {"boss_eldergrove_mere_root_leviathan", "elite_crownlands_crownstep"}
+        else "clean_geometry_pass_texture_uplift_required"
+    )
+    if report.get("status") != expected_status:
+        disposition = "texture-rebuild" if "rebuild" in expected_status else "texture-uplift"
+        diagnostics.append(f"status must remain a {disposition}-blocked geometry pass")
     if report.get("productionReady") is not False:
         diagnostics.append("productionReady must remain false")
     if report.get("rigged") is not False:
@@ -241,7 +247,7 @@ def _repair_mere_root(args: argparse.Namespace) -> dict[str, Any]:
         "output": str(args.output),
         "outputSha256": _sha256(args.output),
         "editableBlend": str(args.blend),
-        "status": "clean_geometry_pass_texture_uplift_required",
+        "status": "clean_geometry_pass_texture_rebuild_required",
         "productionReady": False,
         "rigged": False,
         "runtimeIntegrationState": "Blocked",
@@ -548,7 +554,7 @@ def _repair_crownstep(args: argparse.Namespace) -> dict[str, Any]:
         "output": str(args.output),
         "outputSha256": _sha256(args.output),
         "editableBlend": str(args.blend),
-        "status": "clean_geometry_pass_texture_uplift_required",
+        "status": "clean_geometry_pass_texture_rebuild_required",
         "productionReady": False,
         "rigged": False,
         "runtimeIntegrationState": "Blocked",
