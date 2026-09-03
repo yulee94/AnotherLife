@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.UI;
 using AL.Input;
 using UnityEngine;
 
@@ -12,8 +13,10 @@ namespace AL.ChampionMode.Interaction
 
         private readonly List<WorldInteractable> _targets = new List<WorldInteractable>(8);
         private readonly List<WorldInteractionCandidate> _candidates = new List<WorldInteractionCandidate>(8);
+        private readonly List<WorldInteractable> _candidateTargets = new List<WorldInteractable>(8);
         private Transform _actor;
         private ChampionCombat _combat;
+        private ChampionController _controller;
         private UnityEngine.Camera _camera;
         private WorldInteractionPromptView _prompt;
         private WorldInteractable _focused;
@@ -26,10 +29,16 @@ namespace AL.ChampionMode.Interaction
 
         public void Configure(Transform actor, UnityEngine.Camera camera, WorldInteractionPromptView prompt)
         {
+            _prompt?.Hide();
+            _focused = null;
+            LastFeedback = string.Empty;
+            _feedbackVisibleUntil = 0f;
             _actor = actor;
             _combat = actor != null ? actor.GetComponent<ChampionCombat>() : null;
+            _controller = actor != null ? actor.GetComponent<ChampionController>() : null;
             _camera = camera;
             _prompt = prompt;
+            _prompt?.Hide();
         }
 
         public void Register(WorldInteractable target)
@@ -42,24 +51,32 @@ namespace AL.ChampionMode.Interaction
 
         public bool TryConfirmFocused()
         {
-            if (_focused == null)
+            WorldInteractable offeredTarget = _focused;
+            RefreshFocus();
+            // UI callbacks may arrive after movement, modal changes, or disablement.
+            // A stale tap must not silently confirm a different newly focused object.
+            if (offeredTarget == null || offeredTarget != _focused)
             {
                 return false;
             }
 
-            bool actorAvailable = _combat == null || !_combat.IsDead;
-            WorldInteractionResult result = _focused.Confirm(actorAvailable);
+            WorldInteractionResult result = offeredTarget.Confirm(actorAvailable: true);
             if (!result.Accepted)
             {
                 return false;
             }
 
+            _focused = null;
             LastFeedback = result.Feedback ?? string.Empty;
             if (!string.IsNullOrEmpty(LastFeedback))
             {
                 _feedbackVisibleUntil = Time.unscaledTime +
                                         ConfirmationFeedbackSeconds;
                 _prompt?.ShowFeedback(LastFeedback);
+            }
+            else
+            {
+                _prompt?.Hide();
             }
             Confirmed?.Invoke(result);
             return true;
@@ -78,7 +95,14 @@ namespace AL.ChampionMode.Interaction
         {
             _focused = null;
             _candidates.Clear();
-            if (_actor == null)
+            _candidateTargets.Clear();
+            if (!isActiveAndEnabled ||
+                _actor == null || !_actor.gameObject.activeInHierarchy ||
+                GameInput.GameplaySuppressed ||
+                ChampionHudCameraGate.BlocksGameplay ||
+                ChampionHudCameraGate.MenuOpen || ChampionHudCameraGate.RecapOpen ||
+                (_controller != null && _controller.BlocksGameplayEntry) ||
+                (_combat != null && (!_combat.isActiveAndEnabled || _combat.IsDead)))
             {
                 _prompt?.Hide();
                 return;
@@ -96,12 +120,13 @@ namespace AL.ChampionMode.Interaction
             for (int i = 0; i < _targets.Count; i++)
             {
                 WorldInteractable target = _targets[i];
-                if (target == null)
+                if (target == null || !target.isActiveAndEnabled)
                 {
                     continue;
                 }
 
                 _candidates.Add(target.ToCandidate());
+                _candidateTargets.Add(target);
             }
 
             if (!WorldInteractionFocus.TrySelect(origin, forward, _candidates, out int index))
@@ -110,28 +135,19 @@ namespace AL.ChampionMode.Interaction
                 return;
             }
 
-            string catalogId = _candidates[index].CatalogId;
-            for (int i = 0; i < _targets.Count; i++)
-            {
-                WorldInteractable target = _targets[i];
-                if (target != null && target.CatalogId == catalogId)
-                {
-                    _focused = target;
-                    break;
-                }
-            }
-
-            if (_focused == null)
-            {
-                _prompt?.Hide();
-                return;
-            }
+            _focused = _candidateTargets[index];
 
             _prompt?.Show(
                 WorldInteractionPromptCopy.Compose(
                     WorldInteractionPromptCopy.InteractGlyph,
                     _focused.Kind,
                     _focused.CatalogId));
+        }
+
+        private void OnDisable()
+        {
+            _focused = null;
+            _prompt?.Hide();
         }
     }
 }
