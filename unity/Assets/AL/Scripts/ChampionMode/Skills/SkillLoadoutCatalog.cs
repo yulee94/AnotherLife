@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using AL.ChampionMode.Control;
 using AL.Data.Catalogs;
 using AL.Services.Local;
 using UnityEngine;
@@ -30,6 +31,11 @@ namespace AL.ChampionMode.Skills
         public float rangeMeters;
         public float power;
         public float botDamageMultiplier;
+        public CrowdControlKind controlKind;
+        public float controlDurationSeconds;
+        public float controlSeverity;
+        public bool cleanseSoftControl;
+        public float controlWardSeconds;
     }
 
     internal enum MvpSkillIdentity
@@ -59,6 +65,11 @@ namespace AL.ChampionMode.Skills
             RangeMeters = source.rangeMeters;
             Power = source.power;
             BotDamageMultiplier = source.botDamageMultiplier;
+            ControlKind = source.controlKind;
+            ControlDurationSeconds = source.controlDurationSeconds;
+            ControlSeverity = source.controlSeverity;
+            CleanseSoftControl = source.cleanseSoftControl;
+            ControlWardSeconds = source.controlWardSeconds;
             Identity = identity;
         }
 
@@ -73,6 +84,11 @@ namespace AL.ChampionMode.Skills
         public float RangeMeters { get; }
         public float Power { get; }
         public float BotDamageMultiplier { get; }
+        public CrowdControlKind ControlKind { get; }
+        public float ControlDurationSeconds { get; }
+        public float ControlSeverity { get; }
+        public bool CleanseSoftControl { get; }
+        public float ControlWardSeconds { get; }
         internal MvpSkillIdentity Identity { get; }
 
         internal SkillLoadoutData ToData()
@@ -89,7 +105,12 @@ namespace AL.ChampionMode.Skills
                 castTimeSeconds = CastTimeSeconds,
                 rangeMeters = RangeMeters,
                 power = Power,
-                botDamageMultiplier = BotDamageMultiplier
+                botDamageMultiplier = BotDamageMultiplier,
+                controlKind = ControlKind,
+                controlDurationSeconds = ControlDurationSeconds,
+                controlSeverity = ControlSeverity,
+                cleanseSoftControl = CleanseSoftControl,
+                controlWardSeconds = ControlWardSeconds
             };
         }
     }
@@ -303,6 +324,23 @@ namespace AL.ChampionMode.Skills
                     return false;
                 }
 
+                CrowdControlKind controlKind = CrowdControlKind.None;
+                string controlKindValue;
+                if (WireFamilyCatalogLoader.TryGetString(record, "control_kind", out controlKindValue) &&
+                    !Enum.TryParse(controlKindValue, true, out controlKind))
+                {
+                    return false;
+                }
+
+                float controlDurationSeconds;
+                float controlSeverity;
+                bool cleanseSoftControl;
+                float controlWardSeconds;
+                WireFamilyCatalogLoader.TryGetFloat(record, "control_duration_seconds", out controlDurationSeconds);
+                WireFamilyCatalogLoader.TryGetFloat(record, "control_severity", out controlSeverity);
+                WireFamilyCatalogLoader.TryGetBool(record, "cleanse_soft_control", out cleanseSoftControl);
+                WireFamilyCatalogLoader.TryGetFloat(record, "control_ward_seconds", out controlWardSeconds);
+
                 if (slot < 0 || slot >= loadouts.Length || loadouts[slot] != null)
                 {
                     return false;
@@ -320,7 +358,12 @@ namespace AL.ChampionMode.Skills
                     castTimeSeconds = castTimeSeconds,
                     rangeMeters = rangeMeters,
                     power = power,
-                    botDamageMultiplier = botDamageMultiplier
+                    botDamageMultiplier = botDamageMultiplier,
+                    controlKind = controlKind,
+                    controlDurationSeconds = controlDurationSeconds,
+                    controlSeverity = controlSeverity,
+                    cleanseSoftControl = cleanseSoftControl,
+                    controlWardSeconds = controlWardSeconds
                 };
             }
 

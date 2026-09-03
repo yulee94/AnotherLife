@@ -197,5 +197,17 @@ namespace AL.ChampionMode.Skills
             UnityEngine.Object.DontDestroyOnLoad(host);
             _instance = host.AddComponent<RuntimeVfxPool>();
         }
+
+        private void OnDestroy()
+        {
+            if (_instance != this)
+            {
+                return;
+            }
+
+            Pools.Clear();
+            ActiveCounts.Clear();
+            _instance = null;
+        }
     }
 }
