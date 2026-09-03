@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using AL.Core;
+using AL.ChampionMode.Presentation;
 using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Input;
@@ -152,6 +153,9 @@ namespace AL.ChampionMode.Control
         private Vector2 _externalMoveInput;
         private SkillCaster _skillCaster;
         private ChampionCombat _combat;
+        private ChampionCrowdControl _crowdControl;
+        private ChampionActionPresentation _actionPresentation;
+        private CombatControlProfile _controlProfile;
         private RealmId _realmId = RealmId.None;
         private float _rotationVelocity;
         private uint _movementSequence;
@@ -162,6 +166,9 @@ namespace AL.ChampionMode.Control
         private bool _terrainSafetyConfigured;
         private bool _terrainSafetySupportBlocked;
         private int _terrainSafetyRecoveryCount;
+        private float _coyoteRemaining;
+        private float _jumpBufferRemaining;
+        private bool _wasAirborne;
 
         public ChampionMovementReceipt LastMovementReceipt { get; private set; }
         public ChampionBasicAttackReceipt LastBasicAttackReceipt { get; private set; }
@@ -226,6 +233,11 @@ namespace AL.ChampionMode.Control
 
             _combat = GetComponent<ChampionCombat>() ?? gameObject.AddComponent<ChampionCombat>();
             _skillCaster = GetComponent<SkillCaster>() ?? gameObject.AddComponent<SkillCaster>();
+            _crowdControl = GetComponent<ChampionCrowdControl>();
+            _actionPresentation =
+                GetComponent<ChampionActionPresentation>() ??
+                gameObject.AddComponent<ChampionActionPresentation>();
+            CombatControlCatalog.TryLoad(out _controlProfile);
         }
 
         private void Start()
@@ -292,8 +304,11 @@ namespace AL.ChampionMode.Control
 
             if (_isDodging) return;
 
+            UpdateJumpTimers(wasGrounded);
             requestedInput = ReadMoveInput();
+            TryConsumeJump();
             collisionFlags = ApplyMovement(requestedInput);
+            PublishLocomotionPhases(wasGrounded, collisionFlags);
             if (TryRecoverTerrainSafety())
             {
                 collisionFlags |= CollisionFlags.Below;
@@ -308,6 +323,12 @@ namespace AL.ChampionMode.Control
 
         private Vector2 ReadMoveInput()
         {
+            _crowdControl ??= GetComponent<ChampionCrowdControl>();
+            if (_crowdControl != null && _crowdControl.BlocksMovement)
+            {
+                return Vector2.zero;
+            }
+
             Vector2 move = GameInput.ReadMove();
             float horizontal = Mathf.Abs(_externalMoveInput.x) > 0.01f
                 ? _externalMoveInput.x
@@ -352,12 +373,20 @@ namespace AL.ChampionMode.Control
                 planarVelocity = moveDir.normalized * (_moveSpeed * inputMagnitude);
             }
 
+            if (!_controller.isGrounded && _controlProfile != null)
+            {
+                planarVelocity *= _controlProfile.AirControlMultiplier;
+            }
+
             if (_controller.isGrounded && _velocity.y < 0)
             {
                 _velocity.y = -2f;
             }
 
-            _velocity.y += _gravity * Time.deltaTime;
+            float gravity = _controlProfile != null
+                ? _controlProfile.GravityMetersPerSecondSquared
+                : _gravity;
+            _velocity.y += gravity * Time.deltaTime;
             Vector3 frameVelocity = planarVelocity + Vector3.up * _velocity.y;
             return MoveWithinTerrainSupport(frameVelocity * Time.deltaTime);
         }
@@ -446,10 +475,17 @@ namespace AL.ChampionMode.Control
                 return;
             }
 
-            if (GameInput.DodgePressed()) StartCoroutine(Dodge());
+            _crowdControl ??= GetComponent<ChampionCrowdControl>();
+            if ((_crowdControl == null || !_crowdControl.BlocksMovement) &&
+                GameInput.DodgePressed())
+            {
+                StartCoroutine(Dodge());
+            }
+
             _isBlocking = _touchBlockHeld || GameInput.BlockHeld();
 
-            if (GameInput.AttackPressed() &&
+            if ((_crowdControl == null || !_crowdControl.BlocksBasicAttack) &&
+                GameInput.AttackPressed() &&
                 !ChampionCombatInputPolicy.ShouldSuppressBasicAttack(
                     ChampionHudCameraGate.IsPointerOverUi(),
                     GameInput.Attack.activeControl?.device is Mouse))
@@ -457,10 +493,13 @@ namespace AL.ChampionMode.Control
                 RequestBasicAttack();
             }
 
-            if (GameInput.SkillPressed(0)) RequestSkill(0);
-            if (GameInput.SkillPressed(1)) RequestSkill(1);
-            if (GameInput.SkillPressed(2)) RequestSkill(2);
-            if (GameInput.SkillPressed(3)) RequestSkill(3);
+            if (_crowdControl == null || !_crowdControl.BlocksSkillCasting)
+            {
+                if (GameInput.SkillPressed(0)) RequestSkill(0);
+                if (GameInput.SkillPressed(1)) RequestSkill(1);
+                if (GameInput.SkillPressed(2)) RequestSkill(2);
+                if (GameInput.SkillPressed(3)) RequestSkill(3);
+            }
         }
 
         private IEnumerator PerformAttack()
@@ -707,7 +746,9 @@ namespace AL.ChampionMode.Control
 
         private IEnumerator Dodge()
         {
-            if (GameplayEntryBlocked || _realmId == RealmId.None)
+            if (GameplayEntryBlocked ||
+                _realmId == RealmId.None ||
+                (_crowdControl != null && _crowdControl.BlocksMovement))
             {
                 yield break;
             }
@@ -752,7 +793,8 @@ namespace AL.ChampionMode.Control
         {
             if (GameplayEntryBlocked ||
                 _isAttacking ||
-                _realmId == RealmId.None)
+                _realmId == RealmId.None ||
+                (_crowdControl != null && _crowdControl.BlocksBasicAttack))
             {
                 return false;
             }
@@ -772,7 +814,10 @@ namespace AL.ChampionMode.Control
 
         public void RequestDodge()
         {
-            if (!GameplayEntryBlocked && !_isDodging && _realmId != RealmId.None)
+            if (!GameplayEntryBlocked &&
+                !_isDodging &&
+                _realmId != RealmId.None &&
+                (_crowdControl == null || !_crowdControl.BlocksMovement))
             {
                 StartCoroutine(Dodge());
             }
@@ -780,7 +825,9 @@ namespace AL.ChampionMode.Control
 
         public void RequestSkill(int index)
         {
-            if (GameplayEntryBlocked || _realmId == RealmId.None)
+            if (GameplayEntryBlocked ||
+                _realmId == RealmId.None ||
+                (_crowdControl != null && _crowdControl.BlocksSkillCasting))
             {
                 return;
             }
@@ -956,6 +1003,107 @@ namespace AL.ChampionMode.Control
             return !float.IsNaN(value.x) && !float.IsInfinity(value.x) &&
                    !float.IsNaN(value.y) && !float.IsInfinity(value.y) &&
                    !float.IsNaN(value.z) && !float.IsInfinity(value.z);
+        }
+
+        public void InterruptCurrentActions()
+        {
+            _skillCaster ??= GetComponent<SkillCaster>();
+            _skillCaster?.CancelCurrentSkill();
+            StopAllCoroutines();
+            _isAttacking = false;
+            _isDodging = false;
+            _actionPresentation?.Emit(
+                ChampionActionKind.Control,
+                ChampionActionPhase.Interrupted);
+        }
+
+        public void RequestJump()
+        {
+            if (GameplayEntryBlocked || _realmId == RealmId.None)
+            {
+                return;
+            }
+
+            float buffer = _controlProfile != null ? _controlProfile.JumpBufferSeconds : 0.12f;
+            _jumpBufferRemaining = buffer;
+            TryConsumeJump();
+        }
+
+        private void UpdateJumpTimers(bool wasGrounded)
+        {
+            float coyote = _controlProfile != null ? _controlProfile.CoyoteTimeSeconds : 0f;
+            float buffer = _controlProfile != null ? _controlProfile.JumpBufferSeconds : 0f;
+            if (wasGrounded || _controller.isGrounded)
+            {
+                _coyoteRemaining = coyote;
+            }
+            else
+            {
+                _coyoteRemaining = Mathf.Max(0f, _coyoteRemaining - Time.deltaTime);
+            }
+
+            if (GameInput.JumpPressed())
+            {
+                _jumpBufferRemaining = buffer;
+            }
+            else
+            {
+                _jumpBufferRemaining = Mathf.Max(0f, _jumpBufferRemaining - Time.deltaTime);
+            }
+        }
+
+        private void TryConsumeJump()
+        {
+            _crowdControl ??= GetComponent<ChampionCrowdControl>();
+            if (_crowdControl != null && _crowdControl.BlocksJump)
+            {
+                return;
+            }
+
+            if (_jumpBufferRemaining <= 0f || _coyoteRemaining <= 0f)
+            {
+                return;
+            }
+
+            float gravity = _controlProfile != null
+                ? Mathf.Abs(_controlProfile.GravityMetersPerSecondSquared)
+                : Mathf.Abs(_gravity);
+            float height = _controlProfile != null ? _controlProfile.JumpHeightMeters : 1.25f;
+            if (gravity <= 0f || height <= 0f)
+            {
+                return;
+            }
+
+            _velocity.y = Mathf.Sqrt(2f * height * gravity);
+            _jumpBufferRemaining = 0f;
+            _coyoteRemaining = 0f;
+            _actionPresentation?.Emit(
+                ChampionActionKind.Locomotion,
+                ChampionActionPhase.JumpStart);
+        }
+
+        private void PublishLocomotionPhases(bool wasGrounded, CollisionFlags collisionFlags)
+        {
+            bool grounded = _controller.isGrounded ||
+                            (collisionFlags & CollisionFlags.Below) != 0;
+            if (!wasGrounded && grounded && _wasAirborne)
+            {
+                _actionPresentation?.Emit(
+                    ChampionActionKind.Locomotion,
+                    ChampionActionPhase.Landing);
+                _wasAirborne = false;
+            }
+            else if (wasGrounded && !grounded && _velocity.y < 0f)
+            {
+                _actionPresentation?.Emit(
+                    ChampionActionKind.Locomotion,
+                    ChampionActionPhase.Falling);
+                _wasAirborne = true;
+            }
+            else if (!grounded)
+            {
+                _wasAirborne = true;
+            }
         }
 
         public void SetBlocking(bool isBlocking)

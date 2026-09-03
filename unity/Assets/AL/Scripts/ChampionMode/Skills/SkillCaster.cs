@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.Presentation;
 using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Input;
@@ -27,6 +28,8 @@ namespace AL.ChampionMode.Skills
         private SkillLoadoutSnapshot _loadout;
         private ChampionCombat _combat;
         private ChampionController _controller;
+        private ChampionCrowdControl _crowdControl;
+        private ChampionActionPresentation _actionPresentation;
         private Coroutine _loadRoutine;
         private Coroutine _castRoutine;
         private int _activeSlot = -1;
@@ -69,6 +72,10 @@ namespace AL.ChampionMode.Skills
             _hasAwakened = true;
             _combat = GetComponent<ChampionCombat>();
             _controller = GetComponent<ChampionController>();
+            _crowdControl = GetComponent<ChampionCrowdControl>();
+            _actionPresentation =
+                GetComponent<ChampionActionPresentation>() ??
+                gameObject.AddComponent<ChampionActionPresentation>();
             BeginLoadoutLoad();
         }
 
@@ -124,6 +131,12 @@ namespace AL.ChampionMode.Skills
                 return false;
             }
 
+            _crowdControl ??= GetComponent<ChampionCrowdControl>();
+            if (_crowdControl != null && _crowdControl.BlocksSkillCasting)
+            {
+                return false;
+            }
+
             if (!TryGetSkill(slotIndex, out var skill))
             {
                 return false;
@@ -147,7 +160,7 @@ namespace AL.ChampionMode.Skills
                 return false;
             }
 
-            if (_combat != null && !_combat.TrySpendMana(skill.ManaCost))
+            if (_combat != null && _combat.CurrentMana + 0.001f < skill.ManaCost)
             {
                 GameDebug.Log($"Not enough mana for {skill.DisplayName}.");
                 ShowDeniedFeedback("NO MANA", new Color(0.42f, 0.72f, 1f));
@@ -231,55 +244,95 @@ namespace AL.ChampionMode.Skills
         private IEnumerator CastRoutine(SkillLoadoutSlot skill, RealmId realmId)
         {
             GameDebug.Log($"Casting {skill.DisplayName}.");
+            SkillCastBinding binding = ResolveBinding(skill);
+            _actionPresentation?.Emit(
+                ChampionActionKind.Skill,
+                ChampionActionPhase.Anticipation,
+                skill.Slot,
+                skill.Id);
+            _actionPresentation?.Emit(
+                ChampionActionKind.Skill,
+                ChampionActionPhase.Casting,
+                skill.Slot,
+                skill.Id);
             _activeCastStartTime = Time.time;
             _activeCastDuration = skill.CastTimeSeconds;
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
             Vector3 previewCenter = GetSkillGroundCenter(skill, forward);
             using (CombatEffectOwnership.Begin(gameObject))
             {
-                SkillEffectFactory.SpawnSkillCastRing(
+                SkillCastEffectRouter.PlayTelegraph(
+                    binding,
                     transform.position,
+                    previewCenter,
+                    forward,
                     realmId,
                     GetSkillPreviewRadius(skill),
-                    skill.CastTimeSeconds + 0.15f);
-                if (skill.Identity != MvpSkillIdentity.RenewingGuard)
-                {
-                    SkillEffectFactory.SpawnSkillTargetPreview(
-                        transform.position,
-                        previewCenter,
-                        forward,
-                        realmId,
-                        skill.RangeMeters,
-                        skill.CastTimeSeconds + 0.18f);
-                }
+                    skill.CastTimeSeconds + 0.18f);
             }
 
             float remainingCastTime = Mathf.Max(0f, skill.CastTimeSeconds);
+            bool channelingEmitted = false;
             while (remainingCastTime > 0f)
             {
                 if (GameplaySuppressed)
                 {
+                    EmitInterrupted(skill);
                     _castRoutine = null;
                     ClearActiveCast();
                     yield break;
                 }
 
                 remainingCastTime -= Time.deltaTime;
+                if (!channelingEmitted &&
+                    _activeCastDuration >= 0.10f &&
+                    remainingCastTime <= _activeCastDuration * 0.5f)
+                {
+                    channelingEmitted = true;
+                    _actionPresentation?.Emit(
+                        ChampionActionKind.Skill,
+                        ChampionActionPhase.Channeling,
+                        skill.Slot,
+                        skill.Id);
+                }
+
                 yield return null;
             }
 
             if (GameplaySuppressed)
             {
+                EmitInterrupted(skill);
                 _castRoutine = null;
                 ClearActiveCast();
                 yield break;
             }
 
+            if (_combat != null && !_combat.TrySpendMana(skill.ManaCost))
+            {
+                ShowDeniedFeedback("NO MANA", new Color(0.42f, 0.72f, 1f));
+                EmitInterrupted(skill);
+                _castRoutine = null;
+                ClearActiveCast();
+                yield break;
+            }
+
+            _actionPresentation?.Emit(
+                ChampionActionKind.Skill,
+                ChampionActionPhase.Commit,
+                skill.Slot,
+                skill.Id);
             using (CombatEffectOwnership.Begin(gameObject))
             {
-                ResolveSkill(skill, realmId);
+                ResolveSkill(skill, binding, realmId);
             }
+
             _nextReadyTimes[skill.Slot] = Time.time + skill.CooldownSeconds;
+            _actionPresentation?.Emit(
+                ChampionActionKind.Skill,
+                ChampionActionPhase.Recovery,
+                skill.Slot,
+                skill.Id);
+            SkillCastEffectRouter.PlayCleanup(binding, transform.position, realmId);
             _castRoutine = null;
             ClearActiveCast();
         }
@@ -306,62 +359,95 @@ namespace AL.ChampionMode.Skills
             _activeCastDuration = 0f;
         }
 
-        private void ResolveSkill(SkillLoadoutSlot skill, RealmId realmId)
+        private void ResolveSkill(SkillLoadoutSlot skill, SkillCastBinding binding, RealmId realmId)
         {
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
             Vector3 groundCenter = GetSkillGroundCenter(skill, forward);
             Vector3 hitCenter = groundCenter + Vector3.up;
+            bool committedHit = false;
 
             switch (skill.Identity)
             {
                 case MvpSkillIdentity.RealmStrike:
-                    DamageTargets(
+                    committedHit = DamageTargets(
+                        skill,
+                        binding,
                         hitCenter,
                         skill.RangeMeters,
                         skill.Power,
                         realmId,
                         skill.BotDamageMultiplier);
-                    SkillEffectFactory.SpawnRealmSlash(groundCenter, forward, realmId);
-                    SkillEffectFactory.ShakeCamera(0.12f, 0.10f);
                     RuntimeCombatAudio.PlaySkillCast();
                     break;
                 case MvpSkillIdentity.RenewingGuard:
                     _combat?.Heal(skill.Power);
-                    SkillEffectFactory.SpawnRenewingGuard(transform.position, realmId);
+                    if (skill.CleanseSoftControl)
+                    {
+                        _crowdControl ??= GetComponent<ChampionCrowdControl>();
+                        _crowdControl?.CleanseSoftControl(skill.ControlWardSeconds);
+                    }
+
+                    SkillCastEffectRouter.PlayImpact(binding, transform.position, realmId);
                     SkillEffectFactory.SpawnFloatingCombatText(
                         transform.position + Vector3.up * 1.85f,
                         "+" + Mathf.CeilToInt(skill.Power),
                         new Color(0.48f, 1f, 0.62f),
                         0.28f,
                         0.95f);
-                    SkillEffectFactory.ShakeCamera(0.06f, 0.08f);
                     RuntimeCombatAudio.PlayHeal();
                     break;
                 case MvpSkillIdentity.WarzoneBurst:
-                    DamageTargets(
+                    committedHit = DamageTargets(
+                        skill,
+                        binding,
                         hitCenter,
                         skill.RangeMeters,
                         skill.Power,
                         realmId,
                         skill.BotDamageMultiplier);
-                    SkillEffectFactory.SpawnWarzoneShockwave(groundCenter, realmId, skill.RangeMeters);
-                    SkillEffectFactory.ShakeCamera(0.18f, 0.14f);
                     RuntimeCombatAudio.PlaySkillCast();
                     break;
                 case MvpSkillIdentity.WarmasterBreaker:
-                    DamageTargets(
+                    committedHit = DamageTargets(
+                        skill,
+                        binding,
                         hitCenter,
                         skill.RangeMeters,
                         skill.Power,
                         realmId,
                         skill.BotDamageMultiplier);
-                    SkillEffectFactory.SpawnWarmasterBreaker(groundCenter, realmId, skill.RangeMeters);
-                    SkillEffectFactory.ShakeCamera(0.24f, 0.18f);
                     RuntimeCombatAudio.PlayHeavySkill();
                     break;
                 default:
                     GameDebug.Log($"[SkillCaster] Rejected unresolved skill identity '{skill.Id}'.");
                     return;
+            }
+
+            SkillCastEffectRouter.PlayActive(
+                binding,
+                skill.Identity == MvpSkillIdentity.RenewingGuard ? transform.position : groundCenter,
+                forward,
+                realmId,
+                Mathf.Max(1.15f, skill.RangeMeters));
+            if (committedHit)
+            {
+                _actionPresentation?.Emit(
+                    ChampionActionKind.Skill,
+                    ChampionActionPhase.Impact,
+                    skill.Slot,
+                    skill.Id);
+            }
+
+            if (SkillCastEffectRouter.AllowsCameraImpulse())
+            {
+                float shake = skill.Identity == MvpSkillIdentity.WarmasterBreaker
+                    ? 0.24f
+                    : skill.Identity == MvpSkillIdentity.WarzoneBurst
+                        ? 0.18f
+                        : skill.Identity == MvpSkillIdentity.RenewingGuard
+                            ? 0.06f
+                            : 0.12f;
+                SkillEffectFactory.ShakeCamera(shake, shake >= 0.18f ? 0.16f : 0.10f);
             }
         }
 
@@ -390,7 +476,14 @@ namespace AL.ChampionMode.Skills
             RuntimeCombatAudio.PlayWarning();
         }
 
-        private void DamageTargets(Vector3 center, float radius, float power, RealmId attackerRealm, float botDamageMultiplier)
+        private bool DamageTargets(
+            SkillLoadoutSlot skill,
+            SkillCastBinding binding,
+            Vector3 center,
+            float radius,
+            float power,
+            RealmId attackerRealm,
+            float botDamageMultiplier)
         {
             Collider[] hitColliders = Physics.OverlapSphere(center, radius);
             int destroyedDummies = 0;
@@ -408,6 +501,7 @@ namespace AL.ChampionMode.Skills
                 if (hitCollider.gameObject.name.StartsWith("Dummy_"))
                 {
                     hitAnyTarget = true;
+                    SkillCastEffectRouter.PlayImpact(binding, hitCollider.transform.position, attackerRealm);
                     SkillEffectFactory.SpawnFloatingCombatText(hitCollider.transform.position + Vector3.up * 1.45f, "KO", new Color(1f, 0.78f, 0.22f), 0.26f, 0.8f);
                     RuntimeCombatAudio.PlayImpact();
                     Object.Destroy(hitCollider.gameObject);
@@ -420,6 +514,8 @@ namespace AL.ChampionMode.Skills
                 {
                     hitAnyTarget = true;
                     boss.TakeDamage(power);
+                    ApplyControlAtCommit(boss.transform, skill);
+                    SkillCastEffectRouter.PlayImpact(binding, boss.transform.position, attackerRealm);
                     continue;
                 }
 
@@ -429,6 +525,8 @@ namespace AL.ChampionMode.Skills
                     hitAnyTarget = true;
                     float botDamage = power * Mathf.Max(0f, botDamageMultiplier);
                     bot.TakeDamage(botDamage, attackerRealm);
+                    ApplyControlAtCommit(bot.transform, skill);
+                    SkillCastEffectRouter.PlayImpact(binding, bot.transform.position, attackerRealm);
                     SkillEffectFactory.SpawnFloatingCombatText(bot.transform.position + Vector3.up * 1.85f, Mathf.CeilToInt(botDamage).ToString(), new Color(1f, 0.62f, 0.22f), 0.24f, 0.82f);
                     RuntimeCombatAudio.PlayImpact();
                 }
@@ -445,6 +543,43 @@ namespace AL.ChampionMode.Skills
                 bool heavyImpact = power >= 200f;
                 SkillEffectFactory.RequestHitPause(heavyImpact ? 0.060f : 0.040f, heavyImpact ? 0.08f : 0.12f);
             }
+
+            return hitAnyTarget;
+        }
+
+        private void ApplyControlAtCommit(Transform target, SkillLoadoutSlot skill)
+        {
+            if (target == null || skill == null || skill.ControlKind == CrowdControlKind.None)
+            {
+                return;
+            }
+
+            ChampionCrowdControl controls = target.GetComponentInParent<ChampionCrowdControl>();
+            controls?.Apply(
+                skill.ControlKind,
+                skill.ControlDurationSeconds,
+                skill.ControlSeverity);
+        }
+
+        private static SkillCastBinding ResolveBinding(SkillLoadoutSlot skill)
+        {
+            if (skill == null ||
+                !SkillCastPresentationCatalog.TryLoad(out SkillCastPresentationSnapshot snapshot) ||
+                !snapshot.TryGetBinding(skill.Id, out SkillCastBinding binding))
+            {
+                return null;
+            }
+
+            return binding;
+        }
+
+        private void EmitInterrupted(SkillLoadoutSlot skill)
+        {
+            _actionPresentation?.Emit(
+                ChampionActionKind.Skill,
+                ChampionActionPhase.Interrupted,
+                skill != null ? skill.Slot : _activeSlot,
+                skill != null ? skill.Id : GetSkillId(_activeSlot));
         }
 
         private bool TryApplySharedSkillLoadouts()
@@ -533,13 +668,21 @@ namespace AL.ChampionMode.Skills
                 return;
             }
 
+            int slot = _activeSlot;
+            string actionId = GetSkillId(slot);
             StopCoroutine(_castRoutine);
             _castRoutine = null;
-            ClearActiveCast();
             if (reportCancellation)
             {
+                _actionPresentation?.Emit(
+                    ChampionActionKind.Skill,
+                    ChampionActionPhase.Interrupted,
+                    slot,
+                    actionId);
                 GameDebug.Log("Skill cast cancelled.");
             }
+
+            ClearActiveCast();
         }
 
         private bool TryGetSkill(int slotIndex, out SkillLoadoutSlot skill)
