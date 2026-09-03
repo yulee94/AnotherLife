@@ -4,7 +4,7 @@
 
 **Catalog families:** 34
 
-**Owner status:** `PARTIAL`
+**Owner status:** `APPROVE` (planning and concept direction, 2026-09-03)
 
 **Generation / activation:** `HELD`
 
@@ -16,6 +16,12 @@
 authority stands; Stonehold-specific exteriors, castle-keep interiors, remaining
 service buildings, and door/glass/shutter families stay unapproved and routed to
 `t_c748138b`.
+
+**Owner answer (2026-09-03):** APPROVE this packet as planning/concept direction.
+ComfyUI Local is chosen. Remaining Stonehold exteriors/interiors stay on
+`t_c748138b` and must be fully enterable (no representative shells). Perimeter
+walls stay non-enterable except defendable walltops/designated routes; gates and
+doors remain separate objects.
 
 **Already approved:**
 
@@ -32,7 +38,7 @@ service buildings, and door/glass/shutter families stay unapproved and routed to
 - Enterable castle-keep plans/interiors.
 - Remaining civic/service buildings (academy, farm, forge, market, inn, shop, mill, warehouse, quarry building, gold mine, lumber mill, embassy, religious — deferred_unapproved).
 - Separate door, glass, shutter families.
-- ComfyUI Local versus Cloud.
+- New ComfyUI Local Stonehold exterior sheets (none generated in this lane).
 
 ## 2. Required brief
 
@@ -49,7 +55,7 @@ service buildings, and door/glass/shutter families stay unapproved and routed to
 
 ## 3. Gate / wall policy (binding, not implemented here)
 
-- Perimeter walls: non-enterable, impassable.
+- Perimeter walls: non-enterable, impassable except defendable walltops and designated routes.
 - Gate/door: separate cataloged object.
 - Intact main gate: later atomic teleport between paired anchors.
 - Hostile break: reference `t_c8ea885d` only.
@@ -64,7 +70,7 @@ service buildings, and door/glass/shutter families stay unapproved and routed to
 
 **Kingdom workshop inheritance:** `waf_architecture_building_workshop`.
 
-**PENDING, no invented look:** academy, barracks, embassy, farm, forge, gold mine,
+**Concept-direction APPROVE, no invented look:** academy, barracks, embassy, farm, forge, gold mine,
 lumber mill, market, quarry, stable, storehouse, inn, mill, shop, warehouse,
 religious (deferred_unapproved), stairs/ramps/ladders/platforms/teleport pads.
 
@@ -76,5 +82,10 @@ No new 3D jobs.
 
 ## 6. Owner ruling
 
-Recommended: APPROVE the routing/split; keep Stonehold exteriors PENDING on
-`t_c748138b`. Meshy unauthorized.
+**Recorded 2026-09-03:** `APPROVE` as planning and concept direction. Shared
+civic/fort 2D and Workshop inheritance remain the only production-partial
+architecture evidence. Stonehold exteriors, castle keep, remaining buildings,
+and door/glass/shutter families stay on `t_c748138b`. Every applicable 3D
+building/civic/service/city/fort/fortress/castle must be enterable and
+traversable with a furnished interior planned with its exterior; representative
+shells are forbidden. Meshy unauthorized.
