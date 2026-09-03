@@ -343,6 +343,15 @@ class ReleaseEvidencePackageTests(unittest.TestCase):
             text=True,
             stdout=subprocess.PIPE,
         ).stdout.strip()
+        committed_runner = subprocess.run(
+            ["git", "show", f"{source_revision}:tools/qa/run_deterministic_qa.py"],
+            cwd=REPO_ROOT,
+            check=True,
+            stdout=subprocess.PIPE,
+        ).stdout
+        report["provenance"]["suite"]["runnerSha256"] = hashlib.sha256(
+            committed_runner
+        ).hexdigest()
         build = {
             "schemaVersion": 1,
             "target": "windows64-development",
