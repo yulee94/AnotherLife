@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.example/contracts/integrated-qa-evidence.schema.json",
+  "title": "AnotherLife Integrated Deterministic QA Evidence",
+  "description": "Fail-closed release evidence consumed by platform, multiplayer, commerce, security, and release automation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "suiteId",
+    "profile",
+    "status",
+    "run",
+    "environment",
+    "provenance",
+    "authorityReferences",
+    "contracts",
+    "manualComparison",
+    "stopShipPolicy",
+    "artifacts",
+    "reportSha256"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "suiteId": {"const": "anotherlife-deterministic-qa"},
+    "profile": {"type": "string", "minLength": 1},
+    "status": {"enum": ["passed", "stop_ship"]},
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "seed", "clockUtc", "fixtureVersion"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^qa-[0-9a-f]{20}$"},
+        "seed": {"type": "integer"},
+        "clockUtc": {"type": "string", "format": "date-time"},
+        "fixtureVersion": {"type": "string", "minLength": 1}
+      }
+    },
+    "environment": {"type": "object"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceRevision", "sourceDirty", "suite", "unity", "build", "scene", "content", "save"],
+      "properties": {
+        "sourceRevision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "sourceDirty": {"type": "boolean"},
+        "suite": {"type": "object"},
+        "unity": {"type": "object"},
+        "build": {"type": "object"},
+        "scene": {"type": "object"},
+        "content": {"type": "object"},
+        "save": {"type": "object"}
+      }
+    },
+    "authorityReferences": {"type": "object"},
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "failureCode",
+          "attemptCount",
+          "status",
+          "reasonCode",
+          "evidence",
+          "attempts"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "unit",
+              "integration",
+              "play-mode",
+              "build-smoke",
+              "scene-manifest",
+              "content-manifest",
+              "save-round-trip",
+              "save-migration",
+              "save-downgrade-rejection",
+              "save-corruption-recovery",
+              "save-crash-recovery",
+              "packaged-narrative"
+            ]
+          },
+          "failureCode": {"type": "string", "pattern": "^QA_[A-Z0-9_]+$"},
+          "attemptCount": {"type": "integer", "minimum": 0},
+          "status": {"enum": ["passed", "stop_ship"]},
+          "reasonCode": {"type": "string", "minLength": 1},
+          "evidence": {"type": "object"},
+          "attemptEvidence": {"type": "array", "items": {"type": "object"}},
+          "attempts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["exitCode", "log", "logSha256"],
+              "properties": {
+                "exitCode": {"type": "integer"},
+                "log": {"type": "string", "pattern": "^logs/"},
+                "logSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "manualComparison": {"type": "object"},
+    "stopShipPolicy": {"type": "object"},
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "report", "junit", "logs"],
+      "properties": {
+        "root": {"const": "."},
+        "report": {"const": "report.json"},
+        "junit": {"const": "junit.xml"},
+        "logs": {"type": "array", "items": {"type": "string", "pattern": "^logs/"}}
+      }
+    },
+    "reportSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

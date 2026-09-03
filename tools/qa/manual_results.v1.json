@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "baselineId": "QA-MANUAL-2026-09-03-001",
+  "status": "documented",
+  "sourceReferences": [
+    "t_09edaa94",
+    "t_1e5413da",
+    "t_24caee51",
+    "t_6714131d"
+  ],
+  "materialProvenance": {
+    "unityVersion": "6000.3.22f1",
+    "buildVersion": "1.0",
+    "enabledSceneManifestSha256": "010d43412345c434b5cf3f9999bd82103c286120231466e4063e701b8bcf3def",
+    "generatedSceneManifestSha256": "d4ca2d31ff9e41d8d33662cb6cde00c2dc587f9f6d92bf83082dc252bbdbf37f",
+    "worldCatalogSha256": "32d310ef5710674a1173b3d540836bbd933216accc8c0b74e735caba1afecda8",
+    "narrativeCatalogSha256": "254e60de33a3d0e5ce9b686e2ed6f35d605d056bbd714bfbc92ff3a5809a064b",
+    "saveFormatId": "anotherlife.local-save",
+    "saveSchemaVersion": 1,
+    "saveFixtureManifestSha256": "d8dc9250eb1b8599abcd205e0f2515a8bd75ea9fceaa7c66bb6d1f0cce78a939"
+  },
+  "results": [
+    {"id": "unit", "expectedStatus": "passed"},
+    {"id": "integration", "expectedStatus": "passed"},
+    {"id": "play-mode", "expectedStatus": "passed"},
+    {"id": "build-smoke", "expectedStatus": "passed"},
+    {"id": "scene-manifest", "expectedStatus": "passed"},
+    {"id": "content-manifest", "expectedStatus": "passed"},
+    {"id": "save-round-trip", "expectedStatus": "passed"},
+    {"id": "save-migration", "expectedStatus": "passed"},
+    {"id": "save-downgrade-rejection", "expectedStatus": "passed"},
+    {"id": "save-corruption-recovery", "expectedStatus": "passed"},
+    {"id": "save-crash-recovery", "expectedStatus": "passed"},
+    {"id": "packaged-narrative", "expectedStatus": "passed"}
+  ]
+}

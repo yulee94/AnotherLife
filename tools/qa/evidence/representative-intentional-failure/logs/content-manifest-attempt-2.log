@@ -1,0 +1,5 @@
+command=[]
+exitCode=0
+--- stdout ---
+fixture content-manifest passed
+--- stderr ---
