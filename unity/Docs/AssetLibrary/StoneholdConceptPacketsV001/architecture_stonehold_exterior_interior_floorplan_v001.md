@@ -4,7 +4,7 @@
 
 **Catalog families:** 21 interior modules
 
-**Owner status:** `PARTIAL`
+**Owner status:** `PENDING`
 
 **Generation / activation:** `HELD`
 
@@ -63,6 +63,6 @@ cutaway occlusion set.
 
 ## 4. Owner ruling
 
-Recommended: APPROVE civic/fort continuity as the only locked floor-plan
-authority; REVISE if the owner wants Stonehold-specific interior finish sheets
-before `t_c748138b` resumes. Meshy unauthorized.
+Recommended: keep `PENDING`. Civic/fort plans remain cited as zoning hints only,
+not family-level visual approval. REVISE if the owner wants Stonehold-specific
+interior finish sheets before `t_c748138b` resumes. Meshy unauthorized.

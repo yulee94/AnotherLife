@@ -37,7 +37,7 @@ Do not treat a packet APPROVE as Meshy, runtime, save, or release permission.
 | `architecture_stonehold_settlement_silhouettes_v001` | 6 | PENDING | Four-realm settlement/landmark sheets (directional) | Per-family world-space settlement kits |
 | `traversal_stonehold_roads_bridges_v001` | 9 | PENDING | Taxonomy widths (6 m / 4 m / 4 m spans) | Stonehold road/bridge look |
 | `architecture_stonehold_enterable_structures_v001` | 34 | PARTIAL | Shared civic-hall and fort-gatehouse 2D spatial; kingdom Workshop binding | Stonehold exteriors, castle keep, remaining buildings. Routed to `t_c748138b` |
-| `architecture_stonehold_exterior_interior_floorplan_v001` | 21 | PARTIAL | Shared civic-hall and fort-gatehouse plans/sections | Castle-keep and other building plans |
+| `architecture_stonehold_exterior_interior_floorplan_v001` | 21 | PENDING | Shared civic-hall and fort-gatehouse plans/sections exist as zoning hints, not family approval | All 21 `waf_interior_*` families; castle-keep and other building plans |
 | `prop_stonehold_interior_decor_v001` | 65 | PENDING | Civic furniture zones named, not modeled as families | Every prop/decor family |
 | `derivative_stonehold_kingdom_strategic_v001` | 15 | PENDING | Kingdom 2.5D directional sheets | Per-family 2.5D derivatives (after 3D identity) |
 | `ecosystem_stonehold_habitats_v001` | 9 | PENDING | Slagfall habitat master + four roster habitats | Non-Slagfall habitat sheets; fauna/monster production |
