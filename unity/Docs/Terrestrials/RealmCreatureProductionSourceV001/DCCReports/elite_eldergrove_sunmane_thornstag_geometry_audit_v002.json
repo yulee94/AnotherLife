@@ -1,0 +1,32 @@
+{
+  "modelId": "elite_eldergrove_sunmane_thornstag",
+  "sourceTaskIds": [
+    "01a05b41-d430-7509-a8d4-21b3f6048d75"
+  ],
+  "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_eldergrove_sunmane_thornstag/elite_eldergrove_sunmane_thornstag_source_v001.fbx",
+  "inputSha256": "360fa5f2696d41840ee3c6735318c118eae15cc19726147ba36acb0363a37c42",
+  "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_eldergrove_sunmane_thornstag/elite_eldergrove_sunmane_thornstag_source_v001.fbx",
+  "outputSha256": "360fa5f2696d41840ee3c6735318c118eae15cc19726147ba36acb0363a37c42",
+  "editableBlend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/elite_eldergrove_sunmane_thornstag_geometry_audit_v002.blend",
+  "status": "clean_geometry_pass_texture_uplift_required",
+  "productionReady": false,
+  "rigged": false,
+  "runtimeIntegrationState": "Blocked",
+  "operations": [
+    "completed a six-view DCC audit against the approved v003 concept authority",
+    "confirmed one neck-hugging keratin rail per side and broad three-digit feet",
+    "confirmed the asymmetric fixed left-antler break and preserved dorsal mane",
+    "preserved the selected FBX byte-for-byte because the prior blocker was stale"
+  ],
+  "metrics": {
+    "verticesChanged": 0,
+    "neckRails": 2,
+    "forefootDigits": 3,
+    "hindfootDigits": 3,
+    "fixedLeftAntlerBreak": true,
+    "dorsalManePreserved": true,
+    "nonManifoldEdgesBefore": 1377,
+    "nonManifoldEdgesAfter": 1377
+  },
+  "diagnostics": []
+}

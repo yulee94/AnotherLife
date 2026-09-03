@@ -1,0 +1,33 @@
+{
+  "modelId": "elite_crownlands_crownstep",
+  "sourceTaskIds": [
+    "01a05b41-dd68-757c-a4c3-2f5dbd67a16e",
+    "01a06522-f510-75a3-b779-280aa4393c34"
+  ],
+  "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/Inputs/elite_crownlands_crownstep_meshy7_multiview_raw_v002.fbx",
+  "inputSha256": "cf4cf7b8c4010ebcd6ef77a166902544ff6044a64227770e6d4263c86107cacf",
+  "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_crownlands_crownstep/elite_crownlands_crownstep_source_v002.fbx",
+  "outputSha256": "786cb1d3b2245c76b50da2baf0fcc976f2dee8e93fa195f8d9e8d8401d37e51a",
+  "editableBlend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/elite_crownlands_crownstep_geometry_v002.blend",
+  "status": "clean_geometry_pass_texture_uplift_required",
+  "productionReady": false,
+  "rigged": false,
+  "runtimeIntegrationState": "Blocked",
+  "operations": [
+    "promoted the Meshy-7 multiview replacement over the rejected v001 source",
+    "broadened skull and loaded the forequarters without changing approved plate topology",
+    "reinforced the heavy tuftless tail base with a continuous taper",
+    "preserved three asymmetric rooted mane-plate rows and five-digit paws"
+  ],
+  "metrics": {
+    "verticesChanged": 23137,
+    "manePlateRows": 3,
+    "pawDigits": 5,
+    "tailTufted": false,
+    "tailBaseToTipWidthRatio": 2.1142,
+    "forequarterToHindquarterWidthRatio": 1.103,
+    "nonManifoldEdgesBefore": 131,
+    "nonManifoldEdgesAfter": 131
+  },
+  "diagnostics": []
+}
