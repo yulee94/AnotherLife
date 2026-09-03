@@ -4,7 +4,7 @@
 
 **Catalog families:** 17
 
-**Owner status:** `PARTIAL` (Slagfall eight-family kit only)
+**Owner status:** `APPROVE` (concept direction, 2026-09-03; Slagfall eight-family kit remains production-partial)
 
 **Generation / activation:** `HELD`
 
@@ -20,6 +20,11 @@
 owner-approved Stonehold geology production candidates, and keep crystals,
 mineables, cave-tunnel modules, and non-Slagfall geology at `PENDING`.
 
+**Owner answer (2026-09-03):** APPROVE this packet as planning/concept direction.
+ComfyUI Local is chosen. Slagfall eight families stay `PARTIAL_APPROVE`
+production-partial. Crystals, mineables, and tunnels stay without invented
+looks. No Meshy.
+
 **Already approved and cannot change here:**
 
 - 2026-08-31 owner decision: Approve all eight Slagfall families as profiling-scale Unity production candidates (identity, silhouette, material read).
@@ -32,7 +37,7 @@ mineables, cave-tunnel modules, and non-Slagfall geology at `PENDING`.
 - Crystal formation vs magical crystal node look.
 - Mineable ore/stone interaction presentation.
 - Cave tunnel / cavern room modules.
-- ComfyUI Local versus Cloud for any additive 2D.
+- New ComfyUI Local additive 2D (none generated in this lane).
 
 ## 2. Required brief
 
@@ -71,7 +76,7 @@ Also tagged partial (read only, not extra meshes): `waf_geology_rock_scatter`,
 Unity lineup SHA-256:
 `4f5a554df85e1104f01c971eb3cf5c9a1f83e95ac86459e61bfe49a72130038e`
 
-## 4. Still PENDING inside this packet
+## 4. Still without invented looks inside this packet
 
 `waf_geology_cave_tunnel_module`, `waf_geology_cavern_room_landmark`,
 `waf_geology_crystal_formation`, `waf_geology_magical_crystal_node`,
@@ -97,9 +102,7 @@ No silhouettes invented for these.
 
 ## 7. Owner ruling
 
-Select `APPROVE` (accept this partial mapping), `REVISE`, `REJECT`, or keep
-`PENDING` for the non-Slagfall remainder.
-
-Recommended: APPROVE the mapping of the eight Slagfall families as
-`owner_approved_partial_slagfall_only`; keep crystals/mineables/tunnels PENDING.
-Meshy remains unauthorized.
+**Recorded 2026-09-03:** `APPROVE` as planning and concept direction. Slagfall
+eight families stay `owner_approved_partial_slagfall_only`. Crystals/mineables/
+tunnels stay without invented silhouettes. ComfyUI Local chosen. Meshy remains
+unauthorized.

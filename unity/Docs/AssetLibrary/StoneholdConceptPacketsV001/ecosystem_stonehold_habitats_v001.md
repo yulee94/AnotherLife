@@ -4,7 +4,7 @@
 
 **Catalog families:** 9 ecosystem classes + 4 Stonehold habitat roster IDs
 
-**Owner status:** `PENDING`
+**Owner status:** `APPROVE` (planning and concept direction, 2026-09-03)
 
 **Generation / activation:** `HELD`
 
@@ -43,7 +43,7 @@ trim sheet.
 - Whether habitat sheets must exist before any further geology beyond Slagfall.
 - All `waf_ecosystem_*` production (dragons deferred_unapproved; aquatic/pelagic
   deferred_unapproved; bosses/elites review-only).
-- ComfyUI Local versus Cloud.
+- New ComfyUI Local habitat sheets (none generated in this lane).
 
 ## 2. Required brief
 
@@ -62,5 +62,6 @@ approval. This packet maps families and stops.
 
 ## 4. Owner ruling
 
-Recommended: keep `PENDING` for habitats other than Slagfall environment kit
-reuse. No Meshy creatures from this card.
+**Recorded 2026-09-03:** `APPROVE` as planning and concept direction. Habitats
+other than the Slagfall environment kit stay without invented sheets. No Meshy
+creatures from this card. Fantasy beasts, never animals.

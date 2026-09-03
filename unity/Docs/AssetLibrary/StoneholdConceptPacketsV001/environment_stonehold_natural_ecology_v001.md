@@ -4,7 +4,7 @@
 
 **Catalog families:** 37 (see coverage registry)
 
-**Owner status:** `PARTIAL` (Slagfall soil/ash/water-edge only)
+**Owner status:** `APPROVE` (concept direction, 2026-09-03; Slagfall soil/ash/water-edge remain production-partial)
 
 **Generation / activation:** `HELD`
 
@@ -23,6 +23,10 @@ to owner-reviewable concept authority without inventing a realm-wide flora kit.
 Slagfall Quarry material read as a temporary production candidate, and which
 must wait for new 2D sheets after ComfyUI Local versus Cloud is chosen?
 
+**Owner answer (2026-09-03):** APPROVE this packet as planning/concept direction.
+ComfyUI Local is chosen. Missing flora sheets stay absent. Slagfall soil/ash/
+water-edge remain `PARTIAL_APPROVE` production-partial evidence only.
+
 **Already approved and cannot change here:**
 
 - DESIGN.md Stonehold grammar (defensive mass, basalt/iron/soot, restrained forge amber; no dwarf pastiche).
@@ -34,7 +38,7 @@ must wait for new 2D sheets after ComfyUI Local versus Cloud is chosen?
 - Canopy/understory tree species and silhouettes for Stonehold.
 - Grass, shrub, moss, fungi, crop, vine, and harvest-plant looks.
 - Whether snow/ice, shore, or paving families need Stonehold-specific sheets now or later.
-- ComfyUI Local versus Cloud.
+- New ComfyUI Local flora sheets (none generated in this lane).
 
 ## 2. Required brief (DESIGN.md)
 
@@ -109,7 +113,6 @@ family approval.
 
 ## 9. Owner ruling
 
-Select exactly one: `APPROVE` / `REVISE` / `REJECT` / keep `PENDING`.
-
-Recommended: keep `PENDING` for new flora sheets; retain Slagfall soil/water-edge
-partial hold. Do not generate images until Local versus Cloud is chosen.
+**Recorded 2026-09-03:** `APPROVE` as planning and concept direction. ComfyUI Local
+chosen. Slagfall soil/ash/water-edge stay `PARTIAL_APPROVE`. No Meshy. No new
+images in this lane.

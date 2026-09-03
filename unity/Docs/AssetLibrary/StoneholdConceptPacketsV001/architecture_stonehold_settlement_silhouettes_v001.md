@@ -4,7 +4,7 @@
 
 **Catalog families:** 6
 
-**Owner status:** `PENDING`
+**Owner status:** `APPROVE` (planning and concept direction, 2026-09-03)
 
 **Generation / activation:** `HELD`
 
@@ -25,7 +25,7 @@ as per-family world-space production sheets?
 
 - Per-family world-space kits for capital, village, dwelling, ruin, well/cistern.
 - Accordant Isle is event-only cherry-blossom / sealed approaches (memory + topology); this packet does not redesign it.
-- ComfyUI Local versus Cloud.
+- New ComfyUI Local per-family settlement sheets (none generated in this lane).
 
 ## 2. Required brief
 
@@ -44,8 +44,10 @@ as per-family world-space production sheets?
 
 Capital and village kits must remain enterable in later architecture work, not
 solid decorative blocks. Ruin, dwelling, and well variants (intact/worn/broken)
-are OPEN. Mobile: preserve roofline/gate/tower read at lowest LOD; drop banners
-and smoke first.
+are OPEN. Every applicable 3D city/settlement structure follows the 2026-09-03
+enterable-interior rule; perimeter walls stay non-enterable except defendable
+walltops and designated routes. Mobile: preserve roofline/gate/tower read at
+lowest LOD; drop banners and smoke first.
 
 ## 4. Provenance
 
@@ -60,5 +62,6 @@ Evidence paths exist:
 
 ## 5. Owner ruling
 
-Recommended: keep `PENDING`. Cite sheets as directional only. Do not authorize
-Meshy city/village production from this packet.
+**Recorded 2026-09-03:** `APPROVE` as planning and concept direction. Cite
+four-realm sheets as directional only. Do not authorize Meshy city/village
+production from this packet.

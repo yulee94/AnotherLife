@@ -4,7 +4,7 @@
 
 **Catalog ID:** `rct_stonehold_catalog_concept_lane_v001`
 
-**Owner status:** `PENDING`
+**Owner status:** `APPROVE` (planning and concept direction, 2026-09-03)
 
 **Final decision authority:** Project owner
 
@@ -29,7 +29,9 @@
 
 **Question:** For each Stonehold concept packet, return APPROVE, REVISE, or REJECT. Separately choose ComfyUI Local or Cloud before any new images.
 
-**Why a decision is required:** Taxonomy families cannot proceed to Meshy/model production without owner packet rulings. Missing looks must not be guessed. ComfyUI is blocked until Local versus Cloud is chosen.
+**Owner answer (2026-09-03):** APPROVE the complete packet set as planning and concept direction. Use ComfyUI Local for new concept-image development. Not blanket Meshy authorization.
+
+**Why a decision was required:** Taxonomy families cannot proceed to Meshy/model production without owner packet rulings. Missing looks must not be guessed. ComfyUI was blocked until Local versus Cloud was chosen.
 
 **Already approved and cannot change in this packet:**
 
@@ -39,12 +41,13 @@
 - Kingdom Stonehold Workshop production binding.
 - Generation and activation remain held in `al_world_asset_inventory.json`.
 
-**Still explicitly undecided:**
+**Still OPEN after concept-direction APPROVE:**
 
-- ComfyUI Local versus Cloud.
+- Family concept sheets that do not exist yet (do not invent looks).
 - Stonehold civic-hall and fort/castle exteriors; castle-keep interiors; door/glass/shutter families (`t_c748138b`).
 - Realm-wide flora, crystals, mineables, roads/bridges look, props/decor, 2.5D derivatives, non-Slagfall habitats.
 - Final Slagfall dimensions, navigation, and placement.
+- Meshy / production geometry.
 
 ## 3. Source and provenance
 
@@ -95,13 +98,14 @@ Benchmarks (BDO / Infinity Kingdom / Wuthering Waves / Throne & Liberty) are dir
 
 ## 6. Owner ruling
 
-Select exactly one of `APPROVE` / `REVISE` / `REJECT` / keep `PENDING` for this lane, **and** one ruling per packet in `README.md`.
+**Recorded 2026-09-03.**
 
-Also answer:
+- Lane: `APPROVE` as planning and concept direction.
+- Per-packet: `APPROVE` (see `README.md`).
+- ComfyUI: Local.
+- Meshy: not authorized.
+- Enterable interiors: every applicable 3D building, civic/service structure, city structure, fort, fortress, or castle must be enterable and traversable with a furnished interior planned together with its exterior. Representative-only shells are forbidden. Natural assets and freestanding props are excluded. Perimeter walls stay non-enterable and impassable except defendable walltops and designated routes; gates and doors are separate objects.
 
-1. ComfyUI: Local / Cloud / neither yet
-2. Per-packet APPROVE, REVISE, or REJECT
-
-`approvedAlternativeId`, owner response, and decision time remain null until the owner replies.
+`approvedAlternativeId`: `owner_approve_concept_direction_comfyui_local`
 
 Generation and activation remain held. Meshy remains unauthorized (`meshyAuthorized=0` in the coverage registry).
