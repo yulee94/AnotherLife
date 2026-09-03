@@ -4,14 +4,17 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using AL.Data.Catalogs;
+using AL.UI.Notifications;
 
 namespace AL.Core.Interfaces.Notifications
 {
     public sealed class NotificationContentCatalogResolver :
         INotificationDefinitionResolver,
-        INotificationLocalizationReferenceAuthority
+        INotificationLocalizationReferenceAuthority,
+        INotificationPresentationContentResolver
     {
         public const int ExpectedSourceByteLength = 11526;
         public const string ExpectedSourceSha256 =
@@ -28,6 +31,10 @@ namespace AL.Core.Interfaces.Notifications
 
         private const string DefinitionDiagnostic = "AL-NTF-DEFINITION";
         private const string UnsupportedDiagnostic = "AL-NTF-UNSUPPORTED";
+        private const string ContentUnavailableDiagnostic = "AL-NTF-CONTENT-UNAVAILABLE";
+        private const string ContentMissingDiagnostic = "AL-NTF-CONTENT-MISSING";
+        private const string ContentPlaceholderDiagnostic = "AL-NTF-CONTENT-PLACEHOLDER";
+        private const string ContentUnsafeDiagnostic = "AL-NTF-CONTENT-UNSAFE";
 
         private static readonly Regex PlaceholderPattern = new Regex(
             "\\{([a-z][a-z0-9]*(?:_[a-z0-9]+)*)\\}",
@@ -56,7 +63,9 @@ namespace AL.Core.Interfaces.Notifications
         };
 
         private readonly INotificationLocalizationReferenceAuthority localizationReferenceAuthority;
+        private readonly INotificationPresentationLocalizationResolver presentationLocalizationResolver;
         private readonly IReadOnlyDictionary<string, NotificationDefinition> definitionsById;
+        private readonly IReadOnlyDictionary<string, PresentationTemplate> presentationById;
         private readonly IReadOnlyList<string> definitionIds;
         private readonly NotificationDefinitionResolutionStatus catalogStatus;
         private readonly string diagnosticCode;
@@ -64,7 +73,9 @@ namespace AL.Core.Interfaces.Notifications
         public NotificationContentCatalogResolver()
         {
             localizationReferenceAuthority = null;
+            presentationLocalizationResolver = null;
             definitionsById = EmptyDefinitions();
+            presentationById = EmptyPresentations();
             definitionIds = EmptyStrings();
             catalogStatus = NotificationDefinitionResolutionStatus.CatalogPending;
             diagnosticCode = DefinitionDiagnostic;
@@ -75,9 +86,12 @@ namespace AL.Core.Interfaces.Notifications
             INotificationLocalizationReferenceAuthority localizationReferenceAuthority)
         {
             this.localizationReferenceAuthority = localizationReferenceAuthority;
+            presentationLocalizationResolver =
+                localizationReferenceAuthority as INotificationPresentationLocalizationResolver;
             if (sourceBytes == null)
             {
                 definitionsById = EmptyDefinitions();
+                presentationById = EmptyPresentations();
                 definitionIds = EmptyStrings();
                 catalogStatus = NotificationDefinitionResolutionStatus.CatalogUnavailable;
                 diagnosticCode = DefinitionDiagnostic;
@@ -86,6 +100,7 @@ namespace AL.Core.Interfaces.Notifications
 
             CatalogBuildResult result = TryBuild(sourceBytes);
             definitionsById = result.DefinitionsById;
+            presentationById = result.PresentationById;
             definitionIds = result.DefinitionIds;
             catalogStatus = result.Status;
             diagnosticCode = result.DiagnosticCode;
@@ -154,6 +169,176 @@ namespace AL.Core.Interfaces.Notifications
             {
                 return false;
             }
+        }
+
+        public NotificationPresentationContentResolution ResolveContent(
+            NotificationQueueRecordSnapshot record)
+        {
+            if (catalogStatus != NotificationDefinitionResolutionStatus.Found)
+            {
+                return ContentFailure(
+                    NotificationPresentationContentStatus.ContentCatalogUnavailable,
+                    ContentUnavailableDiagnostic);
+            }
+
+            if (record?.Definition == null || record.Request == null ||
+                string.IsNullOrEmpty(record.Definition.DefinitionId) ||
+                !presentationById.TryGetValue(
+                    record.Definition.DefinitionId,
+                    out PresentationTemplate template) ||
+                !string.Equals(
+                    record.Request.DefinitionId,
+                    record.Definition.DefinitionId,
+                    StringComparison.Ordinal))
+            {
+                return ContentFailure(
+                    NotificationPresentationContentStatus.MissingContentKey,
+                    ContentMissingDiagnostic);
+            }
+
+            NotificationParameter parameter = null;
+            for (int index = 0; index < record.Request.Parameters.Count; index++)
+            {
+                NotificationParameter candidate = record.Request.Parameters[index];
+                if (!string.Equals(
+                        candidate?.Name,
+                        template.ParameterName,
+                        StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                if (parameter != null)
+                {
+                    return ContentFailure(
+                        NotificationPresentationContentStatus.InvalidPlaceholderSchema,
+                        ContentPlaceholderDiagnostic);
+                }
+
+                parameter = candidate;
+            }
+
+            if (parameter?.Value == null ||
+                parameter.Value.Kind != NotificationParameterValueKind.LocalizationReference ||
+                !(parameter.Value.Value is string localizationReference) ||
+                string.IsNullOrEmpty(localizationReference))
+            {
+                return ContentFailure(
+                    NotificationPresentationContentStatus.InvalidPlaceholderSchema,
+                    ContentPlaceholderDiagnostic);
+            }
+
+            if (presentationLocalizationResolver == null ||
+                !TryPresentationResolverAvailable() ||
+                !TryResolvePresentationText(localizationReference, out string parameterText))
+            {
+                return ContentFailure(
+                    NotificationPresentationContentStatus.MissingContentKey,
+                    ContentMissingDiagnostic);
+            }
+
+            string placeholder = "{" + template.ParameterName + "}";
+            string body = template.BodyTemplate.Replace(placeholder, parameterText);
+            if (PlaceholderPattern.IsMatch(body))
+            {
+                return ContentFailure(
+                    NotificationPresentationContentStatus.InvalidPlaceholderSchema,
+                    ContentPlaceholderDiagnostic);
+            }
+
+            string acknowledgementLabel =
+                record.Definition.AcknowledgementPolicy ==
+                NotificationAcknowledgementPolicy.Required
+                    ? template.AcknowledgementLabel
+                    : string.Empty;
+            string announcement = template.Title + ". " + body;
+            if (!IsSafePresentationText(template.Title, 256, allowLineBreaks: false) ||
+                !IsSafePresentationText(body, 2048, allowLineBreaks: true) ||
+                !IsSafePresentationText(announcement, 2304, allowLineBreaks: true) ||
+                (!string.IsNullOrEmpty(acknowledgementLabel) &&
+                 !IsSafePresentationText(
+                     acknowledgementLabel,
+                     128,
+                     allowLineBreaks: false)))
+            {
+                return ContentFailure(
+                    NotificationPresentationContentStatus.UnsafeRenderedContent,
+                    ContentUnsafeDiagnostic);
+            }
+
+            var content = new NotificationPresentationContent(
+                template.Title,
+                body,
+                acknowledgementLabel,
+                string.Empty,
+                announcement);
+            return new NotificationPresentationContentResolution(
+                NotificationPresentationContentStatus.Resolved,
+                content,
+                null);
+        }
+
+        private bool TryPresentationResolverAvailable()
+        {
+            try
+            {
+                return presentationLocalizationResolver.IsAvailable;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool TryResolvePresentationText(string reference, out string text)
+        {
+            text = null;
+            try
+            {
+                return presentationLocalizationResolver.TryResolve(reference, out text) &&
+                       !string.IsNullOrWhiteSpace(text);
+            }
+            catch
+            {
+                text = null;
+                return false;
+            }
+        }
+
+        private static NotificationPresentationContentResolution ContentFailure(
+            NotificationPresentationContentStatus status,
+            string diagnosticCode)
+        {
+            return new NotificationPresentationContentResolution(
+                status,
+                null,
+                diagnosticCode);
+        }
+
+        private static bool IsSafePresentationText(
+            string value,
+            int maximumUtf8Bytes,
+            bool allowLineBreaks)
+        {
+            if (string.IsNullOrWhiteSpace(value) ||
+                !value.IsNormalized(NormalizationForm.FormC) ||
+                Encoding.UTF8.GetByteCount(value) > maximumUtf8Bytes ||
+                value.IndexOf('<') >= 0 || value.IndexOf('>') >= 0)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (char.IsControl(character) &&
+                    (!allowLineBreaks || character != '\n' && character != '\r'))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static CatalogBuildResult TryBuild(byte[] sourceBytes)
@@ -230,6 +415,9 @@ namespace AL.Core.Interfaces.Notifications
             var built = new Dictionary<string, NotificationDefinition>(
                 ExpectedDefinitionCount,
                 StringComparer.Ordinal);
+            var presentations = new Dictionary<string, PresentationTemplate>(
+                ExpectedDefinitionCount,
+                StringComparer.Ordinal);
             var orderedIds = new string[ExpectedDefinitionCount];
             var usedSourceIds = new HashSet<string>(StringComparer.Ordinal);
             for (var index = 0; index < ExpectedDefinitionIds.Length; index++)
@@ -241,6 +429,7 @@ namespace AL.Core.Interfaces.Notifications
                 }
 
                 NotificationDefinition definition;
+                PresentationTemplate presentation;
                 if (!TryBuildDefinition(
                         row,
                         ExpectedDefinitionIds[index],
@@ -248,13 +437,15 @@ namespace AL.Core.Interfaces.Notifications
                         localizationByKey,
                         usedSourceIds,
                         referencedLocalizationKeys,
-                        out definition) ||
+                        out definition,
+                        out presentation) ||
                     built.ContainsKey(definition.DefinitionId))
                 {
                     return CatalogBuildResult.Invalid();
                 }
 
                 built.Add(definition.DefinitionId, definition);
+                presentations.Add(definition.DefinitionId, presentation);
                 orderedIds[index] = definition.DefinitionId;
             }
 
@@ -266,6 +457,7 @@ namespace AL.Core.Interfaces.Notifications
 
             return CatalogBuildResult.Found(
                 new ReadOnlyDictionary<string, NotificationDefinition>(built),
+                new ReadOnlyDictionary<string, PresentationTemplate>(presentations),
                 Array.AsReadOnly(orderedIds));
         }
 
@@ -385,9 +577,11 @@ namespace AL.Core.Interfaces.Notifications
             IReadOnlyDictionary<string, string> localizationByKey,
             ISet<string> usedSourceIds,
             ISet<string> referencedLocalizationKeys,
-            out NotificationDefinition definition)
+            out NotificationDefinition definition,
+            out PresentationTemplate presentation)
         {
             definition = null;
+            presentation = null;
             if (!HasExactProperties(
                     row,
                     "id",
@@ -512,6 +706,12 @@ namespace AL.Core.Interfaces.Notifications
                 Array.Empty<NotificationActionDefinition>(),
                 Array.Empty<string>(),
                 Array.Empty<string>());
+
+            presentation = new PresentationTemplate(
+                localizationByKey[titleKey],
+                localizationByKey[bodyKey],
+                parameterName,
+                localizationByKey["notification.action.acknowledge.label"]);
 
             return NotificationValidation.ValidateDefinition(definition).IsValid;
         }
@@ -768,33 +968,64 @@ namespace AL.Core.Interfaces.Notifications
             return Array.AsReadOnly(new string[0]);
         }
 
+        private static IReadOnlyDictionary<string, PresentationTemplate> EmptyPresentations()
+        {
+            return new ReadOnlyDictionary<string, PresentationTemplate>(
+                new Dictionary<string, PresentationTemplate>(0, StringComparer.Ordinal));
+        }
+
+        private sealed class PresentationTemplate
+        {
+            internal PresentationTemplate(
+                string title,
+                string bodyTemplate,
+                string parameterName,
+                string acknowledgementLabel)
+            {
+                Title = title;
+                BodyTemplate = bodyTemplate;
+                ParameterName = parameterName;
+                AcknowledgementLabel = acknowledgementLabel;
+            }
+
+            internal string Title { get; }
+            internal string BodyTemplate { get; }
+            internal string ParameterName { get; }
+            internal string AcknowledgementLabel { get; }
+        }
+
         private sealed class CatalogBuildResult
         {
             private CatalogBuildResult(
                 NotificationDefinitionResolutionStatus status,
                 string diagnosticCode,
                 IReadOnlyDictionary<string, NotificationDefinition> definitionsById,
+                IReadOnlyDictionary<string, PresentationTemplate> presentationById,
                 IReadOnlyList<string> definitionIds)
             {
                 Status = status;
                 DiagnosticCode = diagnosticCode;
                 DefinitionsById = definitionsById;
+                PresentationById = presentationById;
                 DefinitionIds = definitionIds;
             }
 
             internal NotificationDefinitionResolutionStatus Status { get; }
             internal string DiagnosticCode { get; }
             internal IReadOnlyDictionary<string, NotificationDefinition> DefinitionsById { get; }
+            internal IReadOnlyDictionary<string, PresentationTemplate> PresentationById { get; }
             internal IReadOnlyList<string> DefinitionIds { get; }
 
             internal static CatalogBuildResult Found(
                 IReadOnlyDictionary<string, NotificationDefinition> definitionsById,
+                IReadOnlyDictionary<string, PresentationTemplate> presentationById,
                 IReadOnlyList<string> definitionIds)
             {
                 return new CatalogBuildResult(
                     NotificationDefinitionResolutionStatus.Found,
                     null,
                     definitionsById,
+                    presentationById,
                     definitionIds);
             }
 
@@ -804,6 +1035,7 @@ namespace AL.Core.Interfaces.Notifications
                     NotificationDefinitionResolutionStatus.InvalidDefinition,
                     DefinitionDiagnostic,
                     EmptyDefinitions(),
+                    EmptyPresentations(),
                     EmptyStrings());
             }
 
@@ -813,6 +1045,7 @@ namespace AL.Core.Interfaces.Notifications
                     NotificationDefinitionResolutionStatus.UnsupportedVersion,
                     UnsupportedDiagnostic,
                     EmptyDefinitions(),
+                    EmptyPresentations(),
                     EmptyStrings());
             }
         }
