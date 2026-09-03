@@ -43,6 +43,13 @@ Each manifest records repository-relative locators, byte lengths, SHA-256 hashes
 - Building modules must never create a physical route through the intact gate by themselves.
 - Fort-specific embrasure, parapet, merlon, portal frame, control beam, murder-hole ceiling, buttress, and breach-end-cap modules extend the shared civic structural kit.
 
+## Stonehold every-family expansion
+
+- [`../StoneholdEnterableStructurePacketsV001/`](../StoneholdEnterableStructurePacketsV001/) is the pending-owner-review Stonehold expansion built on these approved civic-hall and fort-gatehouse precedents.
+- It covers 27 enterable Stonehold structure packets, 11 shared traversal/gate families, all 21 interior-module families, and all 65 Stonehold prop/decor families with one event-only exclusion.
+- The Stonehold town-hall packet imports the approved `9.5 m x 8.5 m` civic room coordinates rather than replacing them with a new layout.
+- The expansion remains non-authoritative for 3D production until the owner records `APPROVE`, `REVISE`, or `REJECT` per packet; its manifest records zero new 3D jobs.
+
 ## Validation and rollback
 
 - Validate every manifest artifact by locator, byte length, SHA-256, and declared PNG dimensions.
