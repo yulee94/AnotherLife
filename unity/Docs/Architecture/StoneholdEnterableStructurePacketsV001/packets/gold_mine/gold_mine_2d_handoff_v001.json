@@ -203,9 +203,9 @@
         "id": "window_ground_muster",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
+        "side": "south",
         "x": 2.72,
-        "z": 3.3,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_muster"
       },
@@ -213,9 +213,9 @@
         "id": "window_ground_tool_issue",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
+        "side": "south",
         "x": 6.57,
-        "z": 3.3,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_tool_issue"
       },
@@ -223,9 +223,9 @@
         "id": "window_ground_assay_room",
         "kind": "window",
         "levelId": "ground",
-        "side": "west",
+        "side": "south",
         "x": 9.43,
-        "z": 3.3,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_assay_room"
       },
@@ -233,9 +233,9 @@
         "id": "window_ground_ore_sort",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
+        "side": "south",
         "x": 12.29,
-        "z": 3.3,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_ore_sort"
       },
@@ -243,29 +243,59 @@
         "id": "window_ground_warden_office",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
+        "side": "south",
         "x": 14.71,
-        "z": 3.3,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_warden_office"
       },
       {
-        "id": "window_ground_mine_portal_airlock",
+        "id": "window_ground_cut_west",
         "kind": "window",
         "levelId": "ground",
         "side": "west",
-        "x": 8.0,
-        "z": 9.0,
+        "x": 0.0,
+        "z": 8.18,
         "separateObject": true,
-        "planOpeningId": "window_ground_mine_portal_airlock"
+        "planOpeningId": "window_ground_cut_west"
+      },
+      {
+        "id": "window_ground_cut_east",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 16,
+        "z": 8.18,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_east"
+      },
+      {
+        "id": "window_ground_cut_south",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 11.08,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_south"
+      },
+      {
+        "id": "window_ground_cut_north",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 11.08,
+        "z": 12,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_north"
       },
       {
         "id": "window_upper_winch_gallery",
         "kind": "window",
         "levelId": "upper",
-        "side": "north",
+        "side": "south",
         "x": 4.15,
-        "z": 3.15,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_winch_gallery"
       },
@@ -273,9 +303,9 @@
         "id": "window_upper_records",
         "kind": "window",
         "levelId": "upper",
-        "side": "east",
+        "side": "south",
         "x": 9.575,
-        "z": 3.15,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_records"
       },
@@ -283,9 +313,9 @@
         "id": "window_upper_watch_platform",
         "kind": "window",
         "levelId": "upper",
-        "side": "west",
+        "side": "south",
         "x": 13.425,
-        "z": 3.15,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_watch_platform"
       },
@@ -295,18 +325,59 @@
         "levelId": "upper",
         "side": "north",
         "x": 8.0,
-        "z": 8.85,
+        "z": 12,
         "separateObject": true,
         "planOpeningId": "window_upper_landing"
+      },
+      {
+        "id": "window_upper_cut_west",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 0.0,
+        "z": 8.18,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_west"
+      },
+      {
+        "id": "window_upper_cut_east",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 16,
+        "z": 8.18,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_east"
+      },
+      {
+        "id": "window_upper_cut_south",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "south",
+        "x": 11.08,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_south"
+      },
+      {
+        "id": "window_upper_cut_north",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 11.08,
+        "z": 12,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_north"
       }
     ],
+    "criticalFeatures": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
       "courtyardsAndYards": [],
       "perimeterWall": null
     },
-    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable."
   },
   "floorPlans": [
     {
@@ -494,25 +565,25 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 11.36,
-            "z": 4.92,
-            "width": 1.92,
-            "depth": 3.36,
+            "x": 10.02,
+            "z": 3.98,
+            "width": 1.6,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "portal_loading_cover"
+          "locatedInRoomId": "secure_hold"
         },
         {
           "coreId": "gold_mine_industrial_lift",
           "type": "industrial_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 9.04,
-            "z": 4.92,
-            "width": 1.92,
-            "depth": 1.92,
+            "x": 9.57,
+            "z": 4.58,
+            "width": 1.6,
+            "depth": 1.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -523,29 +594,20 @@
       "furnishingLayouts": [
         {
           "roomId": "ore_receiving",
-          "layoutIntent": "guarded machine / material bay",
+          "layoutIntent": "ore bin",
           "footprints": [
             {
-              "id": "lower_staging_ore_receiving_machine_bed_1",
-              "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "lower_staging_ore_receiving_ore_bin_1",
+              "kind": "ore_bin",
+              "label": "ore bin",
+              "symbol": "ORE",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 1.0,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "lower_staging_ore_receiving_machine_bed_2",
-              "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 3.77,
-              "z": 4.95,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.2
             }
           ],
           "protectedClearances": [
@@ -575,23 +637,14 @@
               "id": "lower_staging_secure_hold_storage_rack_1",
               "kind": "storage_rack",
               "label": "racks / crates",
-              "x": 6.47,
-              "z": 0.75,
-              "width": 1.607,
-              "depth": 0.9,
+              "symbol": "RACK",
+              "x": 6.37,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "lower_staging_secure_hold_storage_rack_3",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 9.683,
-              "z": 0.75,
-              "width": 1.607,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.5
             }
           ],
           "protectedClearances": [
@@ -615,29 +668,20 @@
         },
         {
           "roomId": "pump_service",
-          "layoutIntent": "guarded machine / material bay",
+          "layoutIntent": "guarded machine",
           "footprints": [
             {
               "id": "lower_staging_pump_service_machine_bed_1",
               "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 12.19,
-              "z": 0.75,
-              "width": 1.53,
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 12.09,
+              "z": 0.65,
+              "width": 1.8,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "lower_staging_pump_service_machine_bed_2",
-              "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 13.72,
-              "z": 4.95,
-              "width": 1.53,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.3
             }
           ],
           "protectedClearances": [
@@ -661,29 +705,20 @@
         },
         {
           "roomId": "portal_loading_cover",
-          "layoutIntent": "task table + wall storage",
+          "layoutIntent": "physical loading cover",
           "footprints": [
             {
-              "id": "lower_staging_portal_loading_cover_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 4.45,
-              "z": 7.41,
+              "id": "lower_staging_portal_loading_cover_portal_cover_1",
+              "kind": "portal_cover",
+              "label": "physical loading cover",
+              "symbol": "PORTAL",
+              "x": 4.35,
+              "z": 7.31,
               "width": 1.8,
-              "depth": 0.763,
+              "depth": 1.082,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "lower_staging_portal_loading_cover_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 9.75,
-              "z": 9.827,
-              "width": 1.8,
-              "depth": 0.763,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 2.2
             }
           ],
           "protectedClearances": [
@@ -800,11 +835,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.6
+            8.18
           ],
           "to": [
             15.7,
-            6.6
+            8.18
           ],
           "cutsVerticalCoreId": "gold_mine_stair_core"
         },
@@ -812,11 +847,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            12.32,
+            11.08,
             0.3
           ],
           "to": [
-            12.32,
+            11.08,
             11.7
           ],
           "cutsVerticalCoreId": "gold_mine_stair_core"
@@ -1167,9 +1202,10 @@
           "id": "window_ground_muster",
           "separateFrameGlassShutter": true,
           "serves": "muster",
-          "side": "north",
+          "side": "south",
           "x": 2.72,
-          "z": 3.3,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1179,9 +1215,10 @@
           "id": "window_ground_tool_issue",
           "separateFrameGlassShutter": true,
           "serves": "tool_issue",
-          "side": "east",
+          "side": "south",
           "x": 6.57,
-          "z": 3.3,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1191,9 +1228,10 @@
           "id": "window_ground_assay_room",
           "separateFrameGlassShutter": true,
           "serves": "assay_room",
-          "side": "west",
+          "side": "south",
           "x": 9.43,
-          "z": 3.3,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1203,9 +1241,10 @@
           "id": "window_ground_ore_sort",
           "separateFrameGlassShutter": true,
           "serves": "ore_sort",
-          "side": "north",
+          "side": "south",
           "x": 12.29,
-          "z": 3.3,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1215,25 +1254,70 @@
           "id": "window_ground_warden_office",
           "separateFrameGlassShutter": true,
           "serves": "warden_office",
-          "side": "east",
+          "side": "south",
           "x": 14.71,
-          "z": 3.3,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
           ]
         },
         {
-          "id": "window_ground_mine_portal_airlock",
+          "id": "window_ground_cut_west",
           "separateFrameGlassShutter": true,
-          "serves": "mine_portal_airlock",
+          "serves": "muster",
           "side": "west",
-          "x": 8.0,
-          "z": 9.0,
+          "x": 0.0,
+          "z": 8.18,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
-          ]
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "warden_office",
+          "side": "east",
+          "x": 16,
+          "z": 8.18,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "ore_sort",
+          "side": "south",
+          "x": 11.08,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "mine_portal_airlock",
+          "side": "north",
+          "x": 11.08,
+          "z": 12,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -1243,10 +1327,10 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 11.36,
-            "z": 4.92,
-            "width": 1.92,
-            "depth": 3.36,
+            "x": 10.28,
+            "z": 7.08,
+            "width": 1.6,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1258,43 +1342,34 @@
           "type": "industrial_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 9.04,
-            "z": 4.92,
-            "width": 1.92,
-            "depth": 1.92,
+            "x": 9.57,
+            "z": 7.08,
+            "width": 1.6,
+            "depth": 1.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "assay_room"
+          "locatedInRoomId": "mine_portal_airlock"
         }
       ],
       "furnishingLayouts": [
         {
           "roomId": "muster",
-          "layoutIntent": "weapon rack + bench",
+          "layoutIntent": "weapon rack",
           "footprints": [
             {
               "id": "ground_muster_weapon_rack_1",
               "kind": "weapon_rack",
-              "label": "weapon rack + bench",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.5,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_muster_weapon_rack_2",
-              "kind": "weapon_rack",
-              "label": "weapon rack + bench",
-              "x": 2.89,
-              "z": 4.95,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.8
             }
           ],
           "protectedClearances": [
@@ -1324,23 +1399,14 @@
               "id": "ground_tool_issue_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 5.483,
-              "z": 0.643,
-              "width": 1.087,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 5.426,
+              "z": 0.586,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_tool_issue_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 6.57,
-              "z": 5.057,
-              "width": 1.087,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1364,18 +1430,33 @@
         },
         {
           "roomId": "assay_room",
-          "layoutIntent": "counter + display",
+          "layoutIntent": "assay furnace + assay bench",
           "footprints": [
             {
-              "id": "ground_assay_room_service_counter_1",
-              "kind": "service_counter",
-              "label": "counter + display",
-              "x": 8.343,
-              "z": 0.643,
-              "width": 1.087,
+              "id": "ground_assay_room_assay_furnace_1",
+              "kind": "assay_furnace",
+              "label": "assay furnace",
+              "symbol": "ASSAY",
+              "x": 8.286,
+              "z": 0.586,
+              "width": 1.2,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.4
+            },
+            {
+              "id": "ground_assay_room_assay_bench_2",
+              "kind": "assay_bench",
+              "label": "assay bench",
+              "symbol": "BENCH",
+              "x": 8.286,
+              "z": 5.314,
+              "width": 1.6,
+              "depth": 0.7,
+              "orientationDegrees": 180,
+              "count": 1,
+              "sectionHeightMeters": 0.9
             }
           ],
           "protectedClearances": [
@@ -1399,18 +1480,20 @@
         },
         {
           "roomId": "ore_sort",
-          "layoutIntent": "guarded machine / material bay",
+          "layoutIntent": "ore bin",
           "footprints": [
             {
-              "id": "ground_ore_sort_machine_bed_1",
-              "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 11.203,
-              "z": 0.643,
-              "width": 1.087,
-              "depth": 0.9,
+              "id": "ground_ore_sort_ore_bin_1",
+              "kind": "ore_bin",
+              "label": "ore bin",
+              "symbol": "ORE",
+              "x": 11.146,
+              "z": 0.586,
+              "width": 1.6,
+              "depth": 1.0,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.2
             }
           ],
           "protectedClearances": [
@@ -1440,23 +1523,14 @@
               "id": "ground_warden_office_desk_1",
               "kind": "desk",
               "label": "desk + chair",
-              "x": 13.958,
-              "z": 0.538,
-              "width": 0.752,
-              "depth": 0.9,
+              "symbol": "DESK",
+              "x": 13.918,
+              "z": 0.498,
+              "width": 1.14,
+              "depth": 0.7,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_warden_office_desk_2",
-              "kind": "desk",
-              "label": "desk + chair",
-              "x": 14.71,
-              "z": 5.162,
-              "width": 0.752,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1480,29 +1554,20 @@
         },
         {
           "roomId": "mine_portal_airlock",
-          "layoutIntent": "task table + wall storage",
+          "layoutIntent": "physical loading cover",
           "footprints": [
             {
-              "id": "ground_mine_portal_airlock_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 4.45,
-              "z": 7.41,
+              "id": "ground_mine_portal_airlock_portal_cover_1",
+              "kind": "portal_cover",
+              "label": "physical loading cover",
+              "symbol": "PORTAL",
+              "x": 4.35,
+              "z": 7.31,
               "width": 1.8,
-              "depth": 0.763,
+              "depth": 1.082,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_mine_portal_airlock_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 9.75,
-              "z": 9.827,
-              "width": 1.8,
-              "depth": 0.763,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 2.2
             }
           ],
           "protectedClearances": [
@@ -1647,11 +1712,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.6
+            8.18
           ],
           "to": [
             15.7,
-            6.6
+            8.18
           ],
           "cutsVerticalCoreId": "gold_mine_stair_core"
         },
@@ -1659,11 +1724,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            12.32,
+            11.08,
             0.3
           ],
           "to": [
-            12.32,
+            11.08,
             11.7
           ],
           "cutsVerticalCoreId": "gold_mine_stair_core"
@@ -1854,9 +1919,10 @@
           "id": "window_upper_winch_gallery",
           "separateFrameGlassShutter": true,
           "serves": "winch_gallery",
-          "side": "north",
+          "side": "south",
           "x": 4.15,
-          "z": 3.15,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1866,9 +1932,10 @@
           "id": "window_upper_records",
           "separateFrameGlassShutter": true,
           "serves": "records",
-          "side": "east",
+          "side": "south",
           "x": 9.575,
-          "z": 3.15,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1878,9 +1945,10 @@
           "id": "window_upper_watch_platform",
           "separateFrameGlassShutter": true,
           "serves": "watch_platform",
-          "side": "west",
+          "side": "south",
           "x": 13.425,
-          "z": 3.15,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1892,11 +1960,68 @@
           "serves": "landing",
           "side": "north",
           "x": 8.0,
-          "z": 8.85,
+          "z": 12,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_upper_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "winch_gallery",
+          "side": "west",
+          "x": 0.0,
+          "z": 8.18,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "watch_platform",
+          "side": "east",
+          "x": 16,
+          "z": 8.18,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "records",
+          "side": "south",
+          "x": 11.08,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "landing",
+          "side": "north",
+          "x": 11.08,
+          "z": 12,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -1906,10 +2031,10 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 11.36,
-            "z": 4.92,
-            "width": 1.92,
-            "depth": 3.36,
+            "x": 11.52,
+            "z": 6.12,
+            "width": 1.6,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1921,43 +2046,34 @@
           "type": "industrial_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 9.04,
-            "z": 4.92,
-            "width": 1.92,
-            "depth": 1.92,
+            "x": 9.57,
+            "z": 6.12,
+            "width": 1.6,
+            "depth": 1.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "records"
+          "locatedInRoomId": "landing"
         }
       ],
       "furnishingLayouts": [
         {
           "roomId": "winch_gallery",
-          "layoutIntent": "guarded machine / material bay",
+          "layoutIntent": "winch drum",
           "footprints": [
             {
-              "id": "upper_winch_gallery_machine_bed_1",
-              "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "upper_winch_gallery_winch_drum_1",
+              "kind": "winch_drum",
+              "label": "winch drum",
+              "symbol": "WINCH",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 1.2,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_winch_gallery_machine_bed_2",
-              "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 5.75,
-              "z": 4.65,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.4
             }
           ],
           "protectedClearances": [
@@ -1987,23 +2103,14 @@
               "id": "upper_records_shelf_bay_1",
               "kind": "shelf_bay",
               "label": "archive shelving",
-              "x": 8.378,
-              "z": 0.678,
-              "width": 0.798,
-              "depth": 0.9,
+              "symbol": "SHELF",
+              "x": 8.315,
+              "z": 0.615,
+              "width": 1.6,
+              "depth": 0.45,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_records_shelf_bay_3",
-              "kind": "shelf_bay",
-              "label": "archive shelving",
-              "x": 9.974,
-              "z": 0.678,
-              "width": 0.798,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 2.0
             }
           ],
           "protectedClearances": [
@@ -2033,23 +2140,14 @@
               "id": "upper_watch_platform_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 11.6,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 11.5,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_watch_platform_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 13.45,
-              "z": 4.65,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -2079,23 +2177,14 @@
               "id": "upper_landing_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 0.75,
-              "z": 6.45,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 0.65,
+              "z": 6.35,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_landing_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 13.45,
-              "z": 10.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -2212,11 +2301,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.6
+            8.18
           ],
           "to": [
             15.7,
-            6.6
+            8.18
           ],
           "cutsVerticalCoreId": "gold_mine_stair_core"
         },
@@ -2224,11 +2313,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            12.32,
+            11.08,
             0.3
           ],
           "to": [
-            12.32,
+            11.08,
             11.7
           ],
           "cutsVerticalCoreId": "gold_mine_stair_core"
@@ -2244,10 +2333,10 @@
       "type": "u_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 11.36,
-        "z": 4.92,
-        "width": 1.92,
-        "depth": 3.36,
+        "x": 10.28,
+        "z": 7.08,
+        "width": 1.6,
+        "depth": 2.2,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -2282,10 +2371,10 @@
       "type": "industrial_lift",
       "footprint": {
         "id": "lift_footprint",
-        "x": 9.04,
-        "z": 4.92,
-        "width": 1.92,
-        "depth": 1.92,
+        "x": 9.57,
+        "z": 5.5,
+        "width": 1.6,
+        "depth": 1.6,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -2321,7 +2410,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 6.6,
+      "cutCoordinateMeters": 8.18,
       "spanMeters": 16,
       "levels": [
         {
@@ -2366,6 +2455,7 @@
           "clearHeightMeters": 2.7
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "lower_staging",
@@ -2392,7 +2482,9 @@
             "ground",
             "upper"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 10.28,
+          "endMeters": 11.88
         },
         {
           "coreId": "gold_mine_industrial_lift",
@@ -2402,79 +2494,80 @@
             "ground",
             "upper"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 9.57,
+          "endMeters": 11.17
         }
       ],
       "apertureSlices": [
         {
-          "levelId": "lower_staging",
-          "openingId": "door_lower_staging_ore_receiving",
-          "kind": "door"
-        },
-        {
-          "levelId": "lower_staging",
-          "openingId": "door_lower_staging_secure_hold",
-          "kind": "door"
+          "levelId": "ground",
+          "openingId": "window_ground_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 8.18,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 8.18
         },
         {
           "levelId": "ground",
-          "openingId": "gold_mine_main_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "ground",
-          "openingId": "gold_mine_service_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "upper",
-          "openingId": "door_upper_winch_gallery",
-          "kind": "door"
+          "openingId": "window_ground_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 16,
+          "z": 8.18,
+          "positionMeters": 16,
+          "orthogonalMeters": 8.18
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_records",
-          "kind": "door"
+          "openingId": "window_upper_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 8.18,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 8.18
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 16,
+          "z": 8.18,
+          "positionMeters": 16,
+          "orthogonalMeters": 8.18
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "lower_staging",
           "roomId": "portal_loading_cover",
-          "kind": "utility_table",
-          "positionMeters": 4.45
-        },
-        {
-          "levelId": "lower_staging",
-          "roomId": "portal_loading_cover",
-          "kind": "utility_table",
-          "positionMeters": 9.75
+          "kind": "portal_cover",
+          "symbol": "PORTAL",
+          "positionMeters": 4.35,
+          "sectionHeightMeters": 2.2
         },
         {
           "levelId": "ground",
           "roomId": "mine_portal_airlock",
-          "kind": "utility_table",
-          "positionMeters": 4.45
-        },
-        {
-          "levelId": "ground",
-          "roomId": "mine_portal_airlock",
-          "kind": "utility_table",
-          "positionMeters": 9.75
+          "kind": "portal_cover",
+          "symbol": "PORTAL",
+          "positionMeters": 4.35,
+          "sectionHeightMeters": 2.2
         },
         {
           "levelId": "upper",
           "roomId": "landing",
           "kind": "utility_table",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "upper",
-          "roomId": "landing",
-          "kind": "utility_table",
-          "positionMeters": 13.45
+          "symbol": "UTILITY",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -3.8000000000000003,
         "thicknessMeters": 0.6,
@@ -2484,14 +2577,15 @@
         "baseElevationMeters": 6.300000000000001,
         "peakElevationMeters": 11.0,
         "structure": "Stepped iron headframe roof with low enclosed assay wing.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     },
     "cross": {
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 12.32,
+      "cutCoordinateMeters": 11.08,
       "spanMeters": 12,
       "levels": [
         {
@@ -2513,9 +2607,17 @@
       "roomSlices": [
         {
           "levelId": "lower_staging",
-          "roomId": "pump_service",
+          "roomId": "secure_hold",
           "startMeters": 0.3,
           "endMeters": 6.3,
+          "baseElevationMeters": -3.2,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "lower_staging",
+          "roomId": "portal_loading_cover",
+          "startMeters": 6.96,
+          "endMeters": 11.04,
           "baseElevationMeters": -3.2,
           "clearHeightMeters": 3.0
         },
@@ -2528,8 +2630,16 @@
           "clearHeightMeters": 3.3
         },
         {
+          "levelId": "ground",
+          "roomId": "mine_portal_airlock",
+          "startMeters": 6.96,
+          "endMeters": 11.04,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.3
+        },
+        {
           "levelId": "upper",
-          "roomId": "watch_platform",
+          "roomId": "records",
           "startMeters": 0.3,
           "endMeters": 6.0,
           "baseElevationMeters": 3.6,
@@ -2544,6 +2654,7 @@
           "clearHeightMeters": 2.7
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "lower_staging",
@@ -2570,7 +2681,9 @@
             "ground",
             "upper"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 7.08,
+          "endMeters": 9.28
         },
         {
           "coreId": "gold_mine_industrial_lift",
@@ -2580,85 +2693,104 @@
             "ground",
             "upper"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 5.5,
+          "endMeters": 7.1
         }
       ],
       "apertureSlices": [
         {
-          "levelId": "lower_staging",
-          "openingId": "door_lower_staging_ore_receiving",
-          "kind": "door"
-        },
-        {
-          "levelId": "lower_staging",
-          "openingId": "door_lower_staging_secure_hold",
-          "kind": "door"
+          "levelId": "ground",
+          "openingId": "window_ground_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 11.08,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 11.08
         },
         {
           "levelId": "ground",
-          "openingId": "gold_mine_main_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "ground",
-          "openingId": "gold_mine_service_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "upper",
-          "openingId": "door_upper_winch_gallery",
-          "kind": "door"
+          "openingId": "window_ground_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 11.08,
+          "z": 12,
+          "positionMeters": 12,
+          "orthogonalMeters": 11.08
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_records",
-          "kind": "door"
+          "openingId": "window_upper_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 11.08,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 11.08
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 11.08,
+          "z": 12,
+          "positionMeters": 12,
+          "orthogonalMeters": 11.08
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "lower_staging",
-          "roomId": "pump_service",
-          "kind": "machine_bed",
-          "positionMeters": 0.75
+          "roomId": "secure_hold",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.5
         },
         {
           "levelId": "lower_staging",
-          "roomId": "pump_service",
-          "kind": "machine_bed",
-          "positionMeters": 4.95
+          "roomId": "portal_loading_cover",
+          "kind": "portal_cover",
+          "symbol": "PORTAL",
+          "positionMeters": 7.31,
+          "sectionHeightMeters": 2.2
         },
         {
           "levelId": "ground",
           "roomId": "ore_sort",
-          "kind": "machine_bed",
-          "positionMeters": 0.643
+          "kind": "ore_bin",
+          "symbol": "ORE",
+          "positionMeters": 0.586,
+          "sectionHeightMeters": 1.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "mine_portal_airlock",
+          "kind": "portal_cover",
+          "symbol": "PORTAL",
+          "positionMeters": 7.31,
+          "sectionHeightMeters": 2.2
         },
         {
           "levelId": "upper",
-          "roomId": "watch_platform",
-          "kind": "utility_table",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "upper",
-          "roomId": "watch_platform",
-          "kind": "utility_table",
-          "positionMeters": 4.65
+          "roomId": "records",
+          "kind": "shelf_bay",
+          "symbol": "SHELF",
+          "positionMeters": 0.615,
+          "sectionHeightMeters": 2.0
         },
         {
           "levelId": "upper",
           "roomId": "landing",
           "kind": "utility_table",
-          "positionMeters": 6.45
-        },
-        {
-          "levelId": "upper",
-          "roomId": "landing",
-          "kind": "utility_table",
-          "positionMeters": 10.35
+          "symbol": "UTILITY",
+          "positionMeters": 6.35,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -3.8000000000000003,
         "thicknessMeters": 0.6,
@@ -2668,7 +2800,8 @@
         "baseElevationMeters": 6.300000000000001,
         "peakElevationMeters": 11.0,
         "structure": "Stepped iron headframe roof with low enclosed assay wing.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     }
   },

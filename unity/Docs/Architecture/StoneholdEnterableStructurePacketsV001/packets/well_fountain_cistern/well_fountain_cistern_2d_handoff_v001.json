@@ -153,9 +153,9 @@
         "id": "window_surface_pump_hall",
         "kind": "window",
         "levelId": "surface",
-        "side": "north",
+        "side": "south",
         "x": 2.94,
-        "z": 4.5,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_surface_pump_hall"
       },
@@ -164,7 +164,7 @@
         "kind": "window",
         "levelId": "surface",
         "side": "east",
-        "x": 7.14,
+        "x": 9,
         "z": 2.062,
         "separateObject": true,
         "planOpeningId": "window_surface_public_draw_zone"
@@ -173,8 +173,8 @@
         "id": "window_surface_keeper_store",
         "kind": "window",
         "levelId": "surface",
-        "side": "west",
-        "x": 7.14,
+        "side": "east",
+        "x": 9,
         "z": 5.043,
         "separateObject": true,
         "planOpeningId": "window_surface_keeper_store"
@@ -183,20 +183,51 @@
         "id": "window_surface_ramp_landing",
         "kind": "window",
         "levelId": "surface",
-        "side": "north",
-        "x": 7.14,
+        "side": "east",
+        "x": 9,
         "z": 7.481,
         "separateObject": true,
         "planOpeningId": "window_surface_ramp_landing"
+      },
+      {
+        "id": "window_surface_cut_west",
+        "kind": "window",
+        "levelId": "surface",
+        "side": "west",
+        "x": 0.0,
+        "z": 7.481,
+        "separateObject": true,
+        "planOpeningId": "window_surface_cut_west"
+      },
+      {
+        "id": "window_surface_cut_south",
+        "kind": "window",
+        "levelId": "surface",
+        "side": "south",
+        "x": 6.84,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_surface_cut_south"
+      },
+      {
+        "id": "window_surface_cut_north",
+        "kind": "window",
+        "levelId": "surface",
+        "side": "north",
+        "x": 6.84,
+        "z": 9,
+        "separateObject": true,
+        "planOpeningId": "window_surface_cut_north"
       }
     ],
+    "criticalFeatures": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
       "courtyardsAndYards": [],
       "perimeterWall": null
     },
-    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable."
   },
   "floorPlans": [
     {
@@ -376,15 +407,15 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 6.09,
-            "z": 4.9,
-            "width": 1.5,
-            "depth": 2.8,
+            "x": 5.02,
+            "z": 2.48,
+            "width": 1.4,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "water_chamber"
+          "locatedInRoomId": "valve_room"
         },
         {
           "coreId": "well_fountain_cistern_switchback_ramp",
@@ -392,9 +423,9 @@
           "footprint": {
             "id": "ramp_footprint",
             "x": 0.5,
-            "z": 1.62,
-            "width": 1.62,
-            "depth": 5.58,
+            "z": 0.63,
+            "width": 1.5,
+            "depth": 4.05,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -411,12 +442,14 @@
               "id": "cistern_maintenance_walk_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 0.674,
-              "z": 0.674,
-              "width": 1.186,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 0.612,
+              "z": 0.612,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -446,23 +479,14 @@
               "id": "cistern_valve_room_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 3.794,
-              "z": 0.674,
-              "width": 1.186,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 3.732,
+              "z": 0.612,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "cistern_valve_room_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 4.98,
-              "z": 3.526,
-              "width": 1.186,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -492,23 +516,14 @@
               "id": "cistern_dry_service_bay_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 6.799,
-              "z": 0.559,
-              "width": 0.821,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 6.756,
+              "z": 0.516,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "cistern_dry_service_bay_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 7.62,
-              "z": 3.641,
-              "width": 0.821,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -538,12 +553,14 @@
               "id": "cistern_water_chamber_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 2.617,
-              "z": 5.587,
-              "width": 1.8,
-              "depth": 0.558,
+              "symbol": "UTILITY",
+              "x": 2.556,
+              "z": 5.526,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -660,11 +677,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.3
+            7.481
           ],
           "to": [
             8.7,
-            6.3
+            7.481
           ],
           "cutsVerticalCoreId": "well_fountain_cistern_stair_core"
         },
@@ -904,9 +921,10 @@
           "id": "window_surface_pump_hall",
           "separateFrameGlassShutter": true,
           "serves": "pump_hall",
-          "side": "north",
+          "side": "south",
           "x": 2.94,
-          "z": 4.5,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -917,8 +935,9 @@
           "separateFrameGlassShutter": true,
           "serves": "public_draw_zone",
           "side": "east",
-          "x": 7.14,
+          "x": 9,
           "z": 2.062,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -928,9 +947,10 @@
           "id": "window_surface_keeper_store",
           "separateFrameGlassShutter": true,
           "serves": "keeper_store",
-          "side": "west",
-          "x": 7.14,
+          "side": "east",
+          "x": 9,
           "z": 5.043,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -940,13 +960,56 @@
           "id": "window_surface_ramp_landing",
           "separateFrameGlassShutter": true,
           "serves": "ramp_landing",
-          "side": "north",
-          "x": 7.14,
+          "side": "east",
+          "x": 9,
           "z": 7.481,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_surface_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "pump_hall",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.481,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_surface_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "public_draw_zone",
+          "side": "south",
+          "x": 6.84,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_surface_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "ramp_landing",
+          "side": "north",
+          "x": 6.84,
+          "z": 9,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -956,10 +1019,10 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 6.09,
-            "z": 4.9,
-            "width": 1.5,
-            "depth": 2.8,
+            "x": 6.14,
+            "z": 6.381,
+            "width": 1.4,
+            "depth": 2.199,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -971,32 +1034,34 @@
           "type": "switchback_ramp_1_to_12",
           "footprint": {
             "id": "ramp_footprint",
-            "x": 0.5,
-            "z": 1.62,
-            "width": 1.62,
-            "depth": 5.58,
+            "x": 5.7,
+            "z": 6.381,
+            "width": 1.5,
+            "depth": 2.199,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP with 1.5 m intermediate landing",
-          "locatedInRoomId": "pump_hall"
+          "locatedInRoomId": "ramp_landing"
         }
       ],
       "furnishingLayouts": [
         {
           "roomId": "pump_hall",
-          "layoutIntent": "guarded machine / material bay",
+          "layoutIntent": "guarded machine",
           "footprints": [
             {
-              "id": "surface_pump_hall_machine_bed_2",
+              "id": "surface_pump_hall_machine_bed_1",
               "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 3.33,
-              "z": 7.35,
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 0.65,
+              "z": 0.65,
               "width": 1.8,
               "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
             }
           ],
           "protectedClearances": [
@@ -1026,23 +1091,14 @@
               "id": "surface_public_draw_zone_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 5.954,
-              "z": 0.674,
-              "width": 1.186,
-              "depth": 0.666,
+              "symbol": "UTILITY",
+              "x": 5.892,
+              "z": 0.612,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "surface_public_draw_zone_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 7.14,
-              "z": 2.783,
-              "width": 1.186,
-              "depth": 0.666,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1072,23 +1128,14 @@
               "id": "surface_keeper_store_storage_rack_1",
               "kind": "storage_rack",
               "label": "racks / crates",
-              "x": 5.873,
-              "z": 4.116,
-              "width": 0.845,
-              "depth": 0.445,
+              "symbol": "RACK",
+              "x": 5.824,
+              "z": 4.067,
+              "width": 1.6,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "surface_keeper_store_storage_rack_3",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 7.562,
-              "z": 4.116,
-              "width": 0.845,
-              "depth": 0.445,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.5
             }
           ],
           "protectedClearances": [
@@ -1115,15 +1162,17 @@
           "layoutIntent": "task table + wall storage",
           "footprints": [
             {
-              "id": "surface_ramp_landing_utility_table_2",
+              "id": "surface_ramp_landing_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 7.14,
-              "z": 7.962,
-              "width": 1.267,
-              "depth": 0.445,
-              "orientationDegrees": 180,
-              "count": 1
+              "symbol": "UTILITY",
+              "x": 5.824,
+              "z": 6.505,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1240,11 +1289,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.3
+            7.481
           ],
           "to": [
             8.7,
-            6.3
+            7.481
           ],
           "cutsVerticalCoreId": "well_fountain_cistern_stair_core"
         },
@@ -1272,10 +1321,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 6.09,
-        "z": 4.9,
-        "width": 1.5,
-        "depth": 2.8,
+        "x": 6.14,
+        "z": 6.381,
+        "width": 1.4,
+        "depth": 2.199,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1306,8 +1355,8 @@
         "id": "ramp_footprint",
         "x": 0.5,
         "z": 1.62,
-        "width": 1.62,
-        "depth": 5.58,
+        "width": 1.5,
+        "depth": 4.05,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1337,7 +1386,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 6.3,
+      "cutCoordinateMeters": 7.481,
       "spanMeters": 9,
       "levels": [
         {
@@ -1377,6 +1426,7 @@
           "clearHeightMeters": 3.0
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "cistern",
@@ -1397,7 +1447,9 @@
             "cistern",
             "surface"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 6.14,
+          "endMeters": 7.54
         },
         {
           "coreId": "well_fountain_cistern_switchback_ramp",
@@ -1406,29 +1458,31 @@
             "cistern",
             "surface"
           ],
-          "direction": "UP with 1.5 m intermediate landing"
+          "direction": "UP with 1.5 m intermediate landing",
+          "startMeters": 0.5,
+          "endMeters": 2.0
         }
       ],
       "apertureSlices": [
         {
-          "levelId": "cistern",
-          "openingId": "door_cistern_maintenance_walk",
-          "kind": "door"
-        },
-        {
-          "levelId": "cistern",
-          "openingId": "door_cistern_valve_room",
-          "kind": "door"
+          "levelId": "surface",
+          "openingId": "window_surface_ramp_landing",
+          "kind": "window",
+          "side": "east",
+          "x": 9,
+          "z": 7.481,
+          "positionMeters": 9,
+          "orthogonalMeters": 7.481
         },
         {
           "levelId": "surface",
-          "openingId": "well_fountain_cistern_main_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "surface",
-          "openingId": "door_surface_pump_hall",
-          "kind": "door"
+          "openingId": "window_surface_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.481,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 7.481
         }
       ],
       "furnitureSlices": [
@@ -1436,21 +1490,28 @@
           "levelId": "cistern",
           "roomId": "water_chamber",
           "kind": "utility_table",
-          "positionMeters": 2.617
+          "symbol": "UTILITY",
+          "positionMeters": 2.556,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "surface",
           "roomId": "pump_hall",
           "kind": "machine_bed",
-          "positionMeters": 3.33
+          "symbol": "MACHINE",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.3
         },
         {
           "levelId": "surface",
           "roomId": "ramp_landing",
           "kind": "utility_table",
-          "positionMeters": 7.14
+          "symbol": "UTILITY",
+          "positionMeters": 5.824,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -4.6,
         "thicknessMeters": 0.6,
@@ -1460,7 +1521,8 @@
         "baseElevationMeters": 3.0,
         "peakElevationMeters": 7.0,
         "structure": "Low octagonal iron-ribbed canopy over a square basalt headhouse.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     },
     "cross": {
@@ -1515,6 +1577,7 @@
           "clearHeightMeters": 3.0
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "cistern",
@@ -1535,7 +1598,9 @@
             "cistern",
             "surface"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 6.381,
+          "endMeters": 8.58
         },
         {
           "coreId": "well_fountain_cistern_switchback_ramp",
@@ -1544,29 +1609,61 @@
             "cistern",
             "surface"
           ],
-          "direction": "UP with 1.5 m intermediate landing"
+          "direction": "UP with 1.5 m intermediate landing",
+          "startMeters": 1.62,
+          "endMeters": 5.67
         }
       ],
       "apertureSlices": [
         {
-          "levelId": "cistern",
-          "openingId": "door_cistern_maintenance_walk",
-          "kind": "door"
-        },
-        {
-          "levelId": "cistern",
-          "openingId": "door_cistern_valve_room",
-          "kind": "door"
+          "levelId": "surface",
+          "openingId": "window_surface_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 6.84,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 6.84
         },
         {
           "levelId": "surface",
-          "openingId": "well_fountain_cistern_main_entry",
-          "kind": "door"
+          "openingId": "window_surface_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 6.84,
+          "z": 9,
+          "positionMeters": 9,
+          "orthogonalMeters": 6.84
         },
         {
           "levelId": "surface",
-          "openingId": "door_surface_pump_hall",
-          "kind": "door"
+          "openingId": "door_surface_public_draw_zone",
+          "kind": "door",
+          "side": null,
+          "x": 7.14,
+          "z": 3.823,
+          "positionMeters": 3.823,
+          "orthogonalMeters": 7.14
+        },
+        {
+          "levelId": "surface",
+          "openingId": "door_surface_keeper_store",
+          "kind": "door",
+          "side": null,
+          "x": 7.14,
+          "z": 6.262,
+          "positionMeters": 6.262,
+          "orthogonalMeters": 7.14
+        },
+        {
+          "levelId": "surface",
+          "openingId": "door_surface_ramp_landing",
+          "kind": "door",
+          "side": null,
+          "x": 7.14,
+          "z": 6.261,
+          "positionMeters": 6.261,
+          "orthogonalMeters": 7.14
         }
       ],
       "furnitureSlices": [
@@ -1574,45 +1671,36 @@
           "levelId": "cistern",
           "roomId": "dry_service_bay",
           "kind": "utility_table",
-          "positionMeters": 0.559
-        },
-        {
-          "levelId": "cistern",
-          "roomId": "dry_service_bay",
-          "kind": "utility_table",
-          "positionMeters": 3.641
+          "symbol": "UTILITY",
+          "positionMeters": 0.516,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "surface",
           "roomId": "public_draw_zone",
           "kind": "utility_table",
-          "positionMeters": 0.674
-        },
-        {
-          "levelId": "surface",
-          "roomId": "public_draw_zone",
-          "kind": "utility_table",
-          "positionMeters": 2.783
+          "symbol": "UTILITY",
+          "positionMeters": 0.612,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "surface",
           "roomId": "keeper_store",
           "kind": "storage_rack",
-          "positionMeters": 4.116
-        },
-        {
-          "levelId": "surface",
-          "roomId": "keeper_store",
-          "kind": "storage_rack",
-          "positionMeters": 4.116
+          "symbol": "RACK",
+          "positionMeters": 4.067,
+          "sectionHeightMeters": 1.5
         },
         {
           "levelId": "surface",
           "roomId": "ramp_landing",
           "kind": "utility_table",
-          "positionMeters": 7.962
+          "symbol": "UTILITY",
+          "positionMeters": 6.505,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -4.6,
         "thicknessMeters": 0.6,
@@ -1622,7 +1710,8 @@
         "baseElevationMeters": 3.0,
         "peakElevationMeters": 7.0,
         "structure": "Low octagonal iron-ribbed canopy over a square basalt headhouse.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     }
   },

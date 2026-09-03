@@ -16,9 +16,21 @@ from typing import Any
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 try:
-    from tools.architecture.stonehold_packet_geometry import LAYOUT_PROFILES, build_packet_geometry
+    from tools.architecture.stonehold_packet_geometry import (
+        CUT_APERTURE_TOLERANCE,
+        FACADE_TOLERANCE,
+        LAYOUT_PROFILES,
+        build_packet_geometry,
+        contains_rect,
+    )
 except ModuleNotFoundError:  # Direct `python tools/architecture/...py` execution.
-    from stonehold_packet_geometry import LAYOUT_PROFILES, build_packet_geometry
+    from stonehold_packet_geometry import (  # type: ignore
+        CUT_APERTURE_TOLERANCE,
+        FACADE_TOLERANCE,
+        LAYOUT_PROFILES,
+        build_packet_geometry,
+        contains_rect,
+    )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_ROOT = REPO_ROOT / "unity/Docs/Architecture/StoneholdEnterableStructurePacketsV001"
@@ -449,16 +461,28 @@ def draw_floor_plan(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], l
             draw.rectangle(clear_box, outline="#417d7a", width=1)
         for furnishing in furnishing_by_room[room["id"]]["footprints"]:
             furnishing_box = scaled_rect(furnishing)
-            color = BRONZE if furnishing["kind"] in {"work_station", "machine_bed", "service_counter"} else TIMBER
-            draw.rectangle(furnishing_box, fill=color, outline="#b48552", width=1)
-            if furnishing_box[2] - furnishing_box[0] > 30 and furnishing_box[3] - furnishing_box[1] > 13:
-                symbol = {
-                    "bed_or_cot": "BED", "prep_table": "PREP", "shelf_bay": "SHELF", "storage_rack": "RACK",
-                    "work_station": "WORK", "service_counter": "COUNTER", "desk": "DESK", "weapon_rack": "ARMS",
-                    "stall_partition": "STALL", "machine_bed": "MACHINE", "secure_cot": "COT", "table_bench": "TABLE",
-                    "utility_table": "UTILITY",
-                }[furnishing["kind"]]
-                draw.text(((furnishing_box[0] + furnishing_box[2]) / 2, (furnishing_box[1] + furnishing_box[3]) / 2), symbol, font=FONTS["tiny"], fill=TEXT, anchor="mm")
+            hot = {"furnace", "anvil", "quench_trough", "hood_flue", "assay_furnace", "hearth", "hearth_range"}
+            machine = {"waterwheel", "gearing", "mill_shaft", "millstone", "race_channel", "saw_bed", "winch_drum", "cutting_frame", "crusher_bed", "machine_bed"}
+            if furnishing["kind"] in hot:
+                color = IRON
+            elif furnishing["kind"] in machine:
+                color = "#4a3a2c"
+            elif furnishing["kind"] in {"service_counter", "service_bar", "work_bench", "lab_bench"}:
+                color = BRONZE
+            else:
+                color = TIMBER
+            cx = (furnishing_box[0] + furnishing_box[2]) / 2
+            cy = (furnishing_box[1] + furnishing_box[3]) / 2
+            if furnishing["kind"] in {"waterwheel", "millstone"}:
+                radius = max(6, min(furnishing_box[2] - furnishing_box[0], furnishing_box[3] - furnishing_box[1]) / 2)
+                draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=color, outline=ACCENT, width=2)
+            elif furnishing["kind"] == "hood_flue":
+                draw.polygon([(furnishing_box[0], furnishing_box[3]), (cx, furnishing_box[1]), (furnishing_box[2], furnishing_box[3])], fill=IRON, outline=ACCENT)
+            else:
+                draw.rectangle(furnishing_box, fill=color, outline="#b48552", width=1)
+            if furnishing_box[2] - furnishing_box[0] > 28 and furnishing_box[3] - furnishing_box[1] > 12:
+                symbol = furnishing.get("symbol") or furnishing["kind"].replace("_", " ").upper()[:7]
+                draw.text((cx, cy), symbol, font=FONTS["tiny"], fill=TEXT, anchor="mm")
         if "void" in room:
             void = room["void"]
             vx0, vz0, vx1, vz1 = scaled_rect(void)
@@ -484,7 +508,10 @@ def draw_floor_plan(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], l
             draw.text((ox + 6, oz + 4), "ENTRY", font=FONTS["tiny"], fill=AMBER)
     for opening in layout["windowOpenings"]:
         ox, oz = point(opening["x"], opening["z"])
-        draw.line((ox - 8, oz, ox + 8, oz), fill="#8ecbe0", width=4)
+        if opening.get("side") in {"east", "west"} or opening.get("orientation") == "vertical":
+            draw.line((ox, oz - 10, ox, oz + 10), fill="#8ecbe0", width=4)
+        else:
+            draw.line((ox - 10, oz, ox + 10, oz), fill="#8ecbe0", width=4)
 
     for core in layout["verticalCoreFootprints"]:
         core_box = scaled_rect(core["footprint"])
@@ -666,6 +693,41 @@ def packet_shape_errors(packet: dict[str, Any]) -> list[str]:
                     geometry_ok = geometry_ok and any(route["points"][0] == [entry["x"], entry["z"]] for route in level["circulationRoutes"])
             if not geometry_ok:
                 errors.append("rooms, furnishings, 1.2 m aisles and accessible entry routes must fit their measured plan geometry")
+            facade_ok = True
+            for level in floor_plans:
+                for window in level.get("windowOpenings", []):
+                    side = window.get("side")
+                    if side == "north":
+                        facade_ok = facade_ok and abs(window["z"] - depth) <= FACADE_TOLERANCE
+                    elif side == "south":
+                        facade_ok = facade_ok and abs(window["z"] - 0.0) <= FACADE_TOLERANCE
+                    elif side == "east":
+                        facade_ok = facade_ok and abs(window["x"] - width) <= FACADE_TOLERANCE
+                    elif side == "west":
+                        facade_ok = facade_ok and abs(window["x"] - 0.0) <= FACADE_TOLERANCE
+                    else:
+                        facade_ok = False
+            if not facade_ok:
+                errors.append("every window must sit on its claimed facade")
+            core_contained = True
+            for level in floor_plans:
+                rooms_by_id = {room["id"]: room for room in level["rooms"]}
+                for core_item in level.get("verticalCoreFootprints", []):
+                    room = rooms_by_id.get(core_item.get("locatedInRoomId"))
+                    core_contained = core_contained and room is not None and contains_rect(room, core_item.get("footprint", {}))
+            if not core_contained:
+                errors.append("every vertical core must be contained by its recorded room")
+            kinds = {item["kind"] for level in floor_plans for layout in level.get("furnishingLayouts", []) for item in layout.get("footprints", [])}
+            feature_kinds = {item["kind"] for item in design.get("criticalFeatures", [])}
+            if packet.get("slug") == "forge" and not {"furnace", "anvil", "quench_trough", "hood_flue"} <= kinds | feature_kinds:
+                errors.append("forge packets must include furnace, anvil, quench trough and hood/flue geometry")
+            if packet.get("slug") == "mill_wind_water" and not {"waterwheel", "race_channel", "mill_shaft", "gearing"} <= kinds | feature_kinds:
+                errors.append("water-mill packets must include wheel, race, shaft and gearing geometry")
+            if packet.get("slug") == "academy":
+                lab = next((layout for level in floor_plans for layout in level.get("furnishingLayouts", []) if layout["roomId"] == "practice_lab"), None)
+                teaching = next((layout for level in floor_plans for layout in level.get("furnishingLayouts", []) if layout["roomId"] == "teaching_hall"), None)
+                if lab is None or teaching is None or len(lab.get("footprints", [])) < 3 or not any(item["kind"] in {"lecture_table", "chalkboard", "bench_row"} for item in teaching.get("footprints", [])):
+                    errors.append("academy packets must furnish the teaching hall and practice lab with profession-specific equipment")
         cut_line_ids = {line.get("id") for level in floor_plans for line in level.get("sectionCutLines", [])}
         sections = packet.get("sections", {})
         section_ok = set(sections) == {"longitudinal", "cross"}
@@ -690,6 +752,20 @@ def packet_shape_errors(packet: dict[str, Any]) -> list[str]:
             )
             if not section_geometry_ok:
                 errors.append("section cuts must cross the placed core and show every level, apertures and furnishings")
+            else:
+                aperture_ok = True
+                for section in sections.values():
+                    cut = section["cutCoordinateMeters"]
+                    for aperture in section.get("apertureSlices", []):
+                        orthogonal = aperture.get("orthogonalMeters")
+                        if orthogonal is None:
+                            aperture_ok = False
+                            break
+                        aperture_ok = aperture_ok and abs(orthogonal - cut) <= CUT_APERTURE_TOLERANCE
+                    if packet.get("slug") in {"castle_enterable", "fortress_enterable"}:
+                        aperture_ok = aperture_ok and any(void.get("openToSky") for void in section.get("voidSlices", []))
+                if not aperture_ok:
+                    errors.append("every section aperture slice must intersect the named cut, and castle/fortress cuts must keep the open courtyard")
         plan_opening_ids = {
             opening["id"]
             for level in floor_plans
@@ -814,39 +890,97 @@ def draw_section(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], pack
         if x_end - x_start > 58:
             draw.text(((x_start + x_end) / 2, (ceiling_y + floor_y) / 2), "\n".join(wrap(room_slice["roomId"].replace("_", " "), 13)[:2]), font=FONTS["tiny"], fill=TEXT, anchor="mm", align="center")
 
+    for void in section.get("voidSlices", []):
+        x_start = left + void["startMeters"] * horizontal_scale
+        x_end = left + void["endMeters"] * horizontal_scale
+        if void.get("openToSky"):
+            sky_top = elevation_y(section["roofProfile"]["peakElevationMeters"])
+            grade = elevation_y(void.get("baseElevationMeters", 0.0))
+            draw.rectangle((x_start, sky_top, x_end, grade), fill=BG, outline=PORTAL, width=2)
+            draw.text(((x_start + x_end) / 2, (sky_top + grade) / 2), "OPEN\nTO SKY", font=FONTS["tiny"], fill=PORTAL, anchor="mm", align="center")
+
     for slab in section["slabs"]:
         slab_y = elevation_y(slab["elevationMeters"])
         thickness = max(3, slab["thicknessMeters"] * scale)
-        draw.rectangle((left, slab_y - thickness / 2, right, slab_y + thickness / 2), fill=STONE, outline=ACCENT)
+        open_spans = [(void["startMeters"], void["endMeters"]) for void in section.get("voidSlices", []) if void.get("openToSky") and void.get("levelId") == slab["levelId"]]
+        if not open_spans:
+            draw.rectangle((left, slab_y - thickness / 2, right, slab_y + thickness / 2), fill=STONE, outline=ACCENT)
+        else:
+            cursor = 0.0
+            for start, end in sorted(open_spans):
+                if start > cursor:
+                    draw.rectangle((left + cursor * horizontal_scale, slab_y - thickness / 2, left + start * horizontal_scale, slab_y + thickness / 2), fill=STONE, outline=ACCENT)
+                cursor = max(cursor, end)
+            if cursor < section["spanMeters"]:
+                draw.rectangle((left + cursor * horizontal_scale, slab_y - thickness / 2, right, slab_y + thickness / 2), fill=STONE, outline=ACCENT)
         draw.text((left + 5, slab_y - 20), f"{slab['levelId']} {slab['elevationMeters']:+g} m", font=FONTS["tiny"], fill=MUTED)
 
     roof_base = elevation_y(section["roofProfile"]["baseElevationMeters"])
     roof_peak = elevation_y(section["roofProfile"]["peakElevationMeters"])
-    draw.polygon([(left - 5, roof_base), ((left + right) / 2, roof_peak), (right + 5, roof_base)], fill=IRON, outline=ACCENT)
-    draw.text(((left + right) / 2, roof_peak + 8), "ROOF STRUCTURE", font=FONTS["tiny"], fill=AMBER, anchor="ma")
+    open_spans = section["roofProfile"].get("openToSkySpans") or []
+    if not open_spans:
+        draw.polygon([(left - 5, roof_base), ((left + right) / 2, roof_peak), (right + 5, roof_base)], fill=IRON, outline=ACCENT)
+        draw.text(((left + right) / 2, roof_peak + 8), "ROOF STRUCTURE", font=FONTS["tiny"], fill=AMBER, anchor="ma")
+    else:
+        cursor = 0.0
+        for start, end in sorted((span["startMeters"], span["endMeters"]) for span in open_spans):
+            if start > cursor:
+                x0 = left + cursor * horizontal_scale
+                x1 = left + start * horizontal_scale
+                draw.polygon([(x0, roof_base), ((x0 + x1) / 2, roof_peak + 12), (x1, roof_base)], fill=IRON, outline=ACCENT)
+            cursor = max(cursor, end)
+        if cursor < section["spanMeters"]:
+            x0 = left + cursor * horizontal_scale
+            draw.polygon([(x0, roof_base), ((x0 + right) / 2, roof_peak + 12), (right, roof_base)], fill=IRON, outline=ACCENT)
+        draw.text(((left + right) / 2, roof_peak + 8), "ROOF BROKEN AT OPEN COURT", font=FONTS["tiny"], fill=PORTAL, anchor="ma")
 
-    for core_index, core in enumerate(section["verticalCoreSlices"]):
-        core_x = right - 80 - core_index * 55
+    for core in section["verticalCoreSlices"]:
+        core_start = left + core.get("startMeters", section["spanMeters"] - 3) * horizontal_scale
+        core_end = left + core.get("endMeters", core.get("startMeters", section["spanMeters"] - 3) + 1.6) * horizontal_scale
         core_top = elevation_y(max(level["elevationMeters"] + level["clearHeightMeters"] for level in levels))
         core_bottom = elevation_y(min(level["elevationMeters"] for level in levels))
         color = ROUTE if "stair" in core["type"] or "ramp" in core["type"] else PORTAL
-        draw.rectangle((core_x, core_top, core_x + 34, core_bottom), outline=color, width=3)
+        draw.rectangle((core_start, core_top, max(core_start + 12, core_end), core_bottom), outline=color, width=3)
         if "stair" in core["type"] or "ramp" in core["type"]:
             step_count = max(3, len(levels) * 2)
-            points = [(core_x + (i % 2) * 30, core_bottom - i * (core_bottom - core_top) / step_count) for i in range(step_count + 1)]
+            width_span = max(12, core_end - core_start)
+            points = [(core_start + (i % 2) * width_span, core_bottom - i * (core_bottom - core_top) / step_count) for i in range(step_count + 1)]
             draw.line(points, fill=color, width=3)
-        draw.text((core_x + 17, core_top - 6), core["type"].replace("_", " "), font=FONTS["tiny"], fill=color, anchor="ms")
+        draw.text(((core_start + core_end) / 2, core_top - 6), core["type"].replace("_", " "), font=FONTS["tiny"], fill=color, anchor="ms")
 
     for furnishing in section["furnitureSlices"]:
         level = next(item for item in levels if item["id"] == furnishing["levelId"])
         fx = left + max(0, min(section["spanMeters"], furnishing["positionMeters"])) * horizontal_scale
         floor_y = elevation_y(level["elevationMeters"])
-        draw.rectangle((fx - 5, floor_y - 12, fx + 5, floor_y - 2), fill=BRONZE)
-    for aperture_index, aperture in enumerate(section["apertureSlices"]):
+        height = max(10, furnishing.get("sectionHeightMeters", 0.9) * scale * 0.45)
+        kind = furnishing.get("kind", "")
+        if kind in {"waterwheel", "millstone"}:
+            radius = max(8, height / 2)
+            draw.ellipse((fx - radius, floor_y - 2 * radius, fx + radius, floor_y), outline=ACCENT, width=2)
+        elif kind in {"furnace", "hood_flue", "gearing", "anvil", "quench_trough"}:
+            draw.rectangle((fx - 8, floor_y - height, fx + 8, floor_y), fill=IRON, outline=ACCENT, width=2)
+        else:
+            draw.rectangle((fx - 5, floor_y - height, fx + 5, floor_y - 2), fill=BRONZE)
+        if furnishing.get("symbol"):
+            draw.text((fx, floor_y - height - 8), furnishing["symbol"], font=FONTS["tiny"], fill=AMBER, anchor="ms")
+    for feature in section.get("featureSlices", []):
+        fx = left + max(0, min(section["spanMeters"], feature["positionMeters"])) * horizontal_scale
+        floor_y = elevation_y(0.0)
+        height = max(14, feature.get("sectionHeightMeters", 1.2) * scale * 0.35)
+        if feature.get("openToSky"):
+            continue
+        if feature["kind"] in {"waterwheel"}:
+            radius = max(16, height / 2)
+            draw.ellipse((fx - radius, floor_y - radius, fx + radius, floor_y + radius * 0.2), outline=ACCENT, width=3)
+        else:
+            draw.rectangle((fx - 7, floor_y - height, fx + 7, floor_y), fill=IRON, outline=ACCENT)
+        draw.text((fx, floor_y - height - 10), feature.get("symbol", feature["kind"]), font=FONTS["tiny"], fill=AMBER, anchor="ms")
+    for aperture in section["apertureSlices"]:
         level = next(item for item in levels if item["id"] == aperture["levelId"])
         floor_y = elevation_y(level["elevationMeters"])
-        ax = left + 20 + (aperture_index * 37) % max(40, int(right - left - 40))
-        draw.line((ax, floor_y, ax, floor_y - 25), fill=AMBER, width=5)
+        ax = left + max(0, min(section["spanMeters"], aperture["positionMeters"])) * horizontal_scale
+        color = "#8ecbe0" if aperture.get("kind") == "window" else AMBER
+        draw.line((ax, floor_y, ax, floor_y - 28), fill=color, width=5)
 
     if minimum_elevation < 0:
         draw.text((right - 12, base - 20), "BELOW GRADE / FOUNDATION CUT", font=FONTS["tiny"], fill=PORTAL, anchor="ra")

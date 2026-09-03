@@ -232,6 +232,87 @@ class StoneholdEnterablePacketTests(unittest.TestCase):
             packet_shape_errors(packet),
         )
 
+    def test_windows_lie_on_claimed_facade(self) -> None:
+        from tools.architecture.stonehold_packet_geometry import FACADE_TOLERANCE
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            width = packet["envelopeMeters"]["width"]
+            depth = packet["envelopeMeters"]["depth"]
+            for floor in packet["floorPlans"]:
+                for window in floor["windowOpenings"]:
+                    side = window["side"]
+                    if side == "north":
+                        self.assertAlmostEqual(window["z"], depth, delta=FACADE_TOLERANCE, msg=packet["packetId"])
+                    elif side == "south":
+                        self.assertAlmostEqual(window["z"], 0.0, delta=FACADE_TOLERANCE, msg=packet["packetId"])
+                    elif side == "east":
+                        self.assertAlmostEqual(window["x"], width, delta=FACADE_TOLERANCE, msg=packet["packetId"])
+                    elif side == "west":
+                        self.assertAlmostEqual(window["x"], 0.0, delta=FACADE_TOLERANCE, msg=packet["packetId"])
+                    else:
+                        self.fail(f"{packet['packetId']} window {window['id']} has no facade side")
+
+    def test_vertical_cores_are_contained_by_recorded_room(self) -> None:
+        from tools.architecture.stonehold_packet_geometry import contains_rect
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            for floor in packet["floorPlans"]:
+                rooms = {room["id"]: room for room in floor["rooms"]}
+                self.assertTrue(floor["verticalCoreFootprints"], packet["packetId"])
+                for core in floor["verticalCoreFootprints"]:
+                    room = rooms[core["locatedInRoomId"]]
+                    self.assertTrue(contains_rect(room, core["footprint"]), f"{packet['packetId']} {floor['id']} {core['coreId']}")
+
+    def test_section_apertures_intersect_named_cut(self) -> None:
+        from tools.architecture.stonehold_packet_geometry import CUT_APERTURE_TOLERANCE
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            for name, section in packet["sections"].items():
+                self.assertTrue(section["apertureSlices"], f"{packet['packetId']} {name}")
+                for aperture in section["apertureSlices"]:
+                    self.assertLessEqual(
+                        abs(aperture["orthogonalMeters"] - section["cutCoordinateMeters"]),
+                        CUT_APERTURE_TOLERANCE,
+                        f"{packet['packetId']} {name} {aperture['openingId']}",
+                    )
+
+    def test_forge_academy_mill_and_castle_have_profession_geometry(self) -> None:
+        forge = packet_document(next(item for item in STRUCTURES if item["slug"] == "forge"), self.prop_ids)
+        mill = packet_document(next(item for item in STRUCTURES if item["slug"] == "mill_wind_water"), self.prop_ids)
+        academy = packet_document(next(item for item in STRUCTURES if item["slug"] == "academy"), self.prop_ids)
+        castle = packet_document(next(item for item in STRUCTURES if item["slug"] == "castle_enterable"), self.prop_ids)
+        forge_kinds = {item["kind"] for floor in forge["floorPlans"] for layout in floor["furnishingLayouts"] for item in layout["footprints"]} | {item["kind"] for item in forge["architecturalDesign"]["criticalFeatures"]}
+        mill_kinds = {item["kind"] for floor in mill["floorPlans"] for layout in floor["furnishingLayouts"] for item in layout["footprints"]} | {item["kind"] for item in mill["architecturalDesign"]["criticalFeatures"]}
+        self.assertTrue({"furnace", "anvil", "quench_trough", "hood_flue"} <= forge_kinds)
+        self.assertTrue({"waterwheel", "race_channel", "mill_shaft", "gearing"} <= mill_kinds)
+        lab = next(layout for floor in academy["floorPlans"] for layout in floor["furnishingLayouts"] if layout["roomId"] == "practice_lab")
+        teaching = next(layout for floor in academy["floorPlans"] for layout in floor["furnishingLayouts"] if layout["roomId"] == "teaching_hall")
+        self.assertGreaterEqual(len(lab["footprints"]), 3)
+        self.assertTrue(any(item["kind"] in {"lecture_table", "chalkboard", "bench_row"} for item in teaching["footprints"]))
+        for section in castle["sections"].values():
+            self.assertTrue(any(void.get("openToSky") for void in section["voidSlices"]), section["cutLineId"])
+
+    def test_fail_closed_when_window_leaves_its_facade(self) -> None:
+        packet = packet_document(STRUCTURES[0], self.prop_ids)
+        window = next(item for floor in packet["floorPlans"] for item in floor["windowOpenings"])
+        window["x"] = packet["envelopeMeters"]["width"] / 2
+        window["z"] = packet["envelopeMeters"]["depth"] / 2
+        self.assertIn("every window must sit on its claimed facade", packet_shape_errors(packet))
+
+    def test_fail_closed_when_core_escapes_recorded_room(self) -> None:
+        packet = packet_document(STRUCTURES[0], self.prop_ids)
+        core = packet["floorPlans"][0]["verticalCoreFootprints"][0]
+        core["footprint"] = {**core["footprint"], "x": 0.0, "z": 0.0, "width": packet["envelopeMeters"]["width"], "depth": packet["envelopeMeters"]["depth"]}
+        self.assertIn("every vertical core must be contained by its recorded room", packet_shape_errors(packet))
+
+    def test_fail_closed_when_section_aperture_misses_cut(self) -> None:
+        packet = packet_document(STRUCTURES[0], self.prop_ids)
+        packet["sections"]["longitudinal"]["apertureSlices"][0]["orthogonalMeters"] = 999.0
+        self.assertIn(
+            "every section aperture slice must intersect the named cut, and castle/fortress cuts must keep the open courtyard",
+            packet_shape_errors(packet),
+        )
+
     def test_output_contains_no_3d_asset_files(self) -> None:
         prohibited = {".fbx", ".blend", ".obj", ".glb", ".gltf"}
         found = [path for path in OUTPUT_ROOT.rglob("*") if path.suffix.lower() in prohibited]

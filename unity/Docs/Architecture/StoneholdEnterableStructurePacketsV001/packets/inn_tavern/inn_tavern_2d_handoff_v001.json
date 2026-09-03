@@ -205,9 +205,9 @@
         "id": "window_ground_entry",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
+        "side": "south",
         "x": 2.17,
-        "z": 3.51,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_entry"
       },
@@ -215,9 +215,9 @@
         "id": "window_ground_common_room",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
+        "side": "south",
         "x": 7.205,
-        "z": 3.51,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_common_room"
       },
@@ -225,9 +225,9 @@
         "id": "window_ground_service_bar",
         "kind": "window",
         "levelId": "ground",
-        "side": "west",
+        "side": "south",
         "x": 11.664,
-        "z": 3.51,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_service_bar"
       },
@@ -235,8 +235,8 @@
         "id": "window_ground_kitchen",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
-        "x": 14.83,
+        "side": "east",
+        "x": 17,
         "z": 3.51,
         "separateObject": true,
         "planOpeningId": "window_ground_kitchen"
@@ -245,9 +245,9 @@
         "id": "window_ground_accessible_guest_room",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
+        "side": "north",
         "x": 5.146,
-        "z": 9.21,
+        "z": 12,
         "separateObject": true,
         "planOpeningId": "window_ground_accessible_guest_room"
       },
@@ -255,19 +255,59 @@
         "id": "window_ground_rear_service",
         "kind": "window",
         "levelId": "ground",
-        "side": "west",
-        "x": 13.345,
+        "side": "east",
+        "x": 17,
         "z": 9.21,
         "separateObject": true,
         "planOpeningId": "window_ground_rear_service"
       },
       {
+        "id": "window_ground_cut_west",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 0.0,
+        "z": 7.94,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_west"
+      },
+      {
+        "id": "window_ground_cut_east",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 17,
+        "z": 7.94,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_east"
+      },
+      {
+        "id": "window_ground_cut_south",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 9.021,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_south"
+      },
+      {
+        "id": "window_ground_cut_north",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 9.021,
+        "z": 12,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_north"
+      },
+      {
         "id": "window_upper_guest_room_a",
         "kind": "window",
         "levelId": "upper",
-        "side": "north",
+        "side": "south",
         "x": 3.033,
-        "z": 3.51,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_guest_room_a"
       },
@@ -275,9 +315,9 @@
         "id": "window_upper_guest_room_b",
         "kind": "window",
         "levelId": "upper",
-        "side": "east",
+        "side": "south",
         "x": 8.501,
-        "z": 3.51,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_guest_room_b"
       },
@@ -285,9 +325,9 @@
         "id": "window_upper_guest_room_c",
         "kind": "window",
         "levelId": "upper",
-        "side": "west",
+        "side": "south",
         "x": 13.966,
-        "z": 3.51,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_guest_room_c"
       },
@@ -295,8 +335,8 @@
         "id": "window_upper_wash_room",
         "kind": "window",
         "levelId": "upper",
-        "side": "north",
-        "x": 4.4,
+        "side": "west",
+        "x": 0.0,
         "z": 9.21,
         "separateObject": true,
         "planOpeningId": "window_upper_wash_room"
@@ -305,20 +345,61 @@
         "id": "window_upper_landing_lounge",
         "kind": "window",
         "levelId": "upper",
-        "side": "east",
+        "side": "north",
         "x": 12.6,
-        "z": 9.21,
+        "z": 12,
         "separateObject": true,
         "planOpeningId": "window_upper_landing_lounge"
+      },
+      {
+        "id": "window_upper_cut_west",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 0.0,
+        "z": 7.94,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_west"
+      },
+      {
+        "id": "window_upper_cut_east",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 17,
+        "z": 7.94,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_east"
+      },
+      {
+        "id": "window_upper_cut_south",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "south",
+        "x": 9.021,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_south"
+      },
+      {
+        "id": "window_upper_cut_north",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 9.021,
+        "z": 12,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_north"
       }
     ],
+    "criticalFeatures": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
       "courtyardsAndYards": [],
       "perimeterWall": null
     },
-    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable."
   },
   "floorPlans": [
     {
@@ -536,58 +617,49 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 12.94,
-            "z": 5.76,
-            "width": 2.0,
-            "depth": 3.36,
+            "x": 13.13,
+            "z": 3.98,
+            "width": 1.7,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "loading_cover"
+          "locatedInRoomId": "service_stair"
         },
         {
           "coreId": "inn_tavern_guest_lift",
           "type": "guest_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 10.5,
-            "z": 5.76,
-            "width": 2.04,
-            "depth": 1.92,
+            "x": 13.13,
+            "z": 4.58,
+            "width": 1.7,
+            "depth": 1.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "loading_cover"
+          "locatedInRoomId": "service_stair"
         }
       ],
       "furnishingLayouts": [
         {
           "roomId": "drink_store",
-          "layoutIntent": "prep table + storage",
+          "layoutIntent": "prep table",
           "footprints": [
             {
               "id": "cellar_drink_store_prep_table_1",
               "kind": "prep_table",
-              "label": "prep table + storage",
-              "x": 0.743,
-              "z": 0.743,
-              "width": 1.402,
-              "depth": 0.9,
+              "label": "prep table",
+              "symbol": "PREP",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.7,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "cellar_drink_store_prep_table_2",
-              "kind": "prep_table",
-              "label": "prep table + storage",
-              "x": 2.145,
-              "z": 4.957,
-              "width": 1.402,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.9
             }
           ],
           "protectedClearances": [
@@ -611,29 +683,20 @@
         },
         {
           "roomId": "food_store",
-          "layoutIntent": "prep table + storage",
+          "layoutIntent": "prep table",
           "footprints": [
             {
               "id": "cellar_food_store_prep_table_1",
               "kind": "prep_table",
-              "label": "prep table + storage",
-              "x": 4.433,
-              "z": 0.743,
-              "width": 1.402,
-              "depth": 0.9,
+              "label": "prep table",
+              "symbol": "PREP",
+              "x": 4.34,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.7,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "cellar_food_store_prep_table_2",
-              "kind": "prep_table",
-              "label": "prep table + storage",
-              "x": 5.835,
-              "z": 4.957,
-              "width": 1.402,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.9
             }
           ],
           "protectedClearances": [
@@ -663,12 +726,14 @@
               "id": "cellar_cold_room_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 8.13,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 8.03,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -698,12 +763,14 @@
               "id": "cellar_service_stair_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 13.453,
-              "z": 0.743,
-              "width": 1.402,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 13.36,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -727,29 +794,20 @@
         },
         {
           "roomId": "loading_cover",
-          "layoutIntent": "task table + wall storage",
+          "layoutIntent": "physical portal cover",
           "footprints": [
             {
-              "id": "cellar_loading_cover_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 4.7,
-              "z": 7.41,
-              "width": 1.8,
-              "depth": 0.763,
+              "id": "cellar_loading_cover_portal_cover_1",
+              "kind": "portal_cover",
+              "label": "physical portal cover",
+              "symbol": "PORTAL",
+              "x": 4.6,
+              "z": 7.31,
+              "width": 1.6,
+              "depth": 1.082,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "cellar_loading_cover_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 10.5,
-              "z": 9.827,
-              "width": 1.8,
-              "depth": 0.763,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 2.2
             }
           ],
           "protectedClearances": [
@@ -880,11 +938,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            7.44
+            7.94
           ],
           "to": [
             16.7,
-            7.44
+            7.94
           ],
           "cutsVerticalCoreId": "inn_tavern_stair_core"
         },
@@ -892,11 +950,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            13.94,
+            9.021,
             0.3
           ],
           "to": [
-            13.94,
+            9.021,
             11.7
           ],
           "cutsVerticalCoreId": "inn_tavern_stair_core"
@@ -1247,9 +1305,10 @@
           "id": "window_ground_entry",
           "separateFrameGlassShutter": true,
           "serves": "entry",
-          "side": "north",
+          "side": "south",
           "x": 2.17,
-          "z": 3.51,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1259,9 +1318,10 @@
           "id": "window_ground_common_room",
           "separateFrameGlassShutter": true,
           "serves": "common_room",
-          "side": "east",
+          "side": "south",
           "x": 7.205,
-          "z": 3.51,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1271,9 +1331,10 @@
           "id": "window_ground_service_bar",
           "separateFrameGlassShutter": true,
           "serves": "service_bar",
-          "side": "west",
+          "side": "south",
           "x": 11.664,
-          "z": 3.51,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1283,9 +1344,10 @@
           "id": "window_ground_kitchen",
           "separateFrameGlassShutter": true,
           "serves": "kitchen",
-          "side": "north",
-          "x": 14.83,
+          "side": "east",
+          "x": 17,
           "z": 3.51,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -1295,9 +1357,10 @@
           "id": "window_ground_accessible_guest_room",
           "separateFrameGlassShutter": true,
           "serves": "accessible_guest_room",
-          "side": "east",
+          "side": "north",
           "x": 5.146,
-          "z": 9.21,
+          "z": 12,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1307,13 +1370,70 @@
           "id": "window_ground_rear_service",
           "separateFrameGlassShutter": true,
           "serves": "rear_service",
-          "side": "west",
-          "x": 13.345,
+          "side": "east",
+          "x": 17,
           "z": 9.21,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_ground_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "entry",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.94,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "rear_service",
+          "side": "east",
+          "x": 17,
+          "z": 7.94,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "common_room",
+          "side": "south",
+          "x": 9.021,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "accessible_guest_room",
+          "side": "north",
+          "x": 9.021,
+          "z": 12,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -1323,30 +1443,30 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 12.94,
-            "z": 5.76,
-            "width": 2.0,
-            "depth": 3.36,
+            "x": 8.171,
+            "z": 6.84,
+            "width": 1.7,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "rear_service"
+          "locatedInRoomId": "accessible_guest_room"
         },
         {
           "coreId": "inn_tavern_guest_lift",
           "type": "guest_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 10.5,
-            "z": 5.76,
-            "width": 2.04,
-            "depth": 1.92,
+            "x": 8.171,
+            "z": 6.84,
+            "width": 1.7,
+            "depth": 1.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "service_bar"
+          "locatedInRoomId": "accessible_guest_room"
         }
       ],
       "furnishingLayouts": [
@@ -1358,23 +1478,14 @@
               "id": "ground_entry_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 0.749,
-              "z": 0.749,
-              "width": 1.421,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_entry_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 2.17,
-              "z": 5.371,
-              "width": 1.421,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1398,40 +1509,33 @@
         },
         {
           "roomId": "common_room",
-          "layoutIntent": "table / benches",
+          "layoutIntent": "common tables + benches",
           "footprints": [
             {
               "id": "ground_common_room_table_bench_1",
               "kind": "table_bench",
-              "label": "table / benches",
-              "x": 4.49,
-              "z": 0.75,
-              "width": 1.8,
+              "label": "common tables",
+              "symbol": "TABLE",
+              "x": 4.39,
+              "z": 0.65,
+              "width": 1.6,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             },
             {
-              "id": "ground_common_room_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 6.305,
-              "z": 5.37,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "ground_common_room_bench_row_2",
+              "kind": "bench_row",
+              "label": "benches",
+              "symbol": "BENCH",
+              "x": 4.39,
+              "z": 5.92,
+              "width": 2.0,
+              "depth": 0.45,
               "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "ground_common_room_table_bench_3",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 8.12,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.5
             }
           ],
           "protectedClearances": [
@@ -1455,18 +1559,20 @@
         },
         {
           "roomId": "service_bar",
-          "layoutIntent": "task table + wall storage",
+          "layoutIntent": "service bar",
           "footprints": [
             {
-              "id": "ground_service_bar_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 10.681,
-              "z": 0.611,
-              "width": 0.984,
-              "depth": 0.9,
+              "id": "ground_service_bar_service_bar_1",
+              "kind": "service_bar",
+              "label": "service bar",
+              "symbol": "BAR",
+              "x": 10.629,
+              "z": 0.559,
+              "width": 1.491,
+              "depth": 0.7,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.1
             }
           ],
           "protectedClearances": [
@@ -1490,18 +1596,33 @@
         },
         {
           "roomId": "kitchen",
-          "layoutIntent": "prep table + storage",
+          "layoutIntent": "kitchen prep + cooking range",
           "footprints": [
             {
               "id": "ground_kitchen_prep_table_1",
               "kind": "prep_table",
-              "label": "prep table + storage",
-              "x": 13.409,
-              "z": 0.749,
-              "width": 1.421,
-              "depth": 0.9,
+              "label": "kitchen prep",
+              "symbol": "PREP",
+              "x": 13.31,
+              "z": 0.65,
+              "width": 1.8,
+              "depth": 0.8,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.9
+            },
+            {
+              "id": "ground_kitchen_hearth_range_2",
+              "kind": "hearth_range",
+              "label": "cooking range",
+              "symbol": "RANGE",
+              "x": 13.31,
+              "z": 5.57,
+              "width": 1.6,
+              "depth": 0.8,
+              "orientationDegrees": 180,
+              "count": 1,
+              "sectionHeightMeters": 1.2
             }
           ],
           "protectedClearances": [
@@ -1525,29 +1646,20 @@
         },
         {
           "roomId": "accessible_guest_room",
-          "layoutIntent": "sleeping furniture",
+          "layoutIntent": "guest bed",
           "footprints": [
             {
               "id": "ground_accessible_guest_room_bed_or_cot_1",
               "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 0.75,
-              "z": 7.17,
-              "width": 1.8,
-              "depth": 0.9,
+              "label": "guest bed",
+              "symbol": "BED",
+              "x": 0.65,
+              "z": 7.07,
+              "width": 2.0,
+              "depth": 1.0,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_accessible_guest_room_bed_or_cot_2",
-              "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 7.741,
-              "z": 10.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.7
             }
           ],
           "protectedClearances": [
@@ -1574,15 +1686,17 @@
           "layoutIntent": "task table + wall storage",
           "footprints": [
             {
-              "id": "ground_rear_service_utility_table_2",
+              "id": "ground_rear_service_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 14.45,
-              "z": 10.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "symbol": "UTILITY",
+              "x": 10.341,
+              "z": 7.07,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1727,11 +1841,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            7.44
+            7.94
           ],
           "to": [
             16.7,
-            7.44
+            7.94
           ],
           "cutsVerticalCoreId": "inn_tavern_stair_core"
         },
@@ -1739,11 +1853,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            13.94,
+            9.021,
             0.3
           ],
           "to": [
-            13.94,
+            9.021,
             11.7
           ],
           "cutsVerticalCoreId": "inn_tavern_stair_core"
@@ -1964,9 +2078,10 @@
           "id": "window_upper_guest_room_a",
           "separateFrameGlassShutter": true,
           "serves": "guest_room_a",
-          "side": "north",
+          "side": "south",
           "x": 3.033,
-          "z": 3.51,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1976,9 +2091,10 @@
           "id": "window_upper_guest_room_b",
           "separateFrameGlassShutter": true,
           "serves": "guest_room_b",
-          "side": "east",
+          "side": "south",
           "x": 8.501,
-          "z": 3.51,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1988,9 +2104,10 @@
           "id": "window_upper_guest_room_c",
           "separateFrameGlassShutter": true,
           "serves": "guest_room_c",
-          "side": "west",
+          "side": "south",
           "x": 13.966,
-          "z": 3.51,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -2000,9 +2117,10 @@
           "id": "window_upper_wash_room",
           "separateFrameGlassShutter": true,
           "serves": "wash_room",
-          "side": "north",
-          "x": 4.4,
+          "side": "west",
+          "x": 0.0,
           "z": 9.21,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -2012,13 +2130,70 @@
           "id": "window_upper_landing_lounge",
           "separateFrameGlassShutter": true,
           "serves": "landing_lounge",
-          "side": "east",
+          "side": "north",
           "x": 12.6,
-          "z": 9.21,
+          "z": 12,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_upper_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "wash_room",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.94,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "landing_lounge",
+          "side": "east",
+          "x": 17,
+          "z": 7.94,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "guest_room_b",
+          "side": "south",
+          "x": 9.021,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "landing_lounge",
+          "side": "north",
+          "x": 9.021,
+          "z": 12,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -2028,10 +2203,10 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 12.94,
-            "z": 5.76,
-            "width": 2.0,
-            "depth": 3.36,
+            "x": 13.09,
+            "z": 6.84,
+            "width": 1.7,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -2043,43 +2218,34 @@
           "type": "guest_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 10.5,
-            "z": 5.76,
-            "width": 2.04,
-            "depth": 1.92,
+            "x": 11.04,
+            "z": 6.84,
+            "width": 1.7,
+            "depth": 1.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "guest_room_c"
+          "locatedInRoomId": "landing_lounge"
         }
       ],
       "furnishingLayouts": [
         {
           "roomId": "guest_room_a",
-          "layoutIntent": "sleeping furniture",
+          "layoutIntent": "guest bed",
           "footprints": [
             {
               "id": "upper_guest_room_a_bed_or_cot_1",
               "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "label": "guest bed",
+              "symbol": "BED",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 2.0,
+              "depth": 1.0,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_guest_room_a_bed_or_cot_2",
-              "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 3.517,
-              "z": 5.37,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.7
             }
           ],
           "protectedClearances": [
@@ -2103,18 +2269,20 @@
         },
         {
           "roomId": "guest_room_b",
-          "layoutIntent": "sleeping furniture",
+          "layoutIntent": "guest bed",
           "footprints": [
             {
               "id": "upper_guest_room_b_bed_or_cot_1",
               "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 6.217,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "label": "guest bed",
+              "symbol": "BED",
+              "x": 6.117,
+              "z": 0.65,
+              "width": 2.0,
+              "depth": 1.0,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.7
             }
           ],
           "protectedClearances": [
@@ -2138,18 +2306,20 @@
         },
         {
           "roomId": "guest_room_c",
-          "layoutIntent": "sleeping furniture",
+          "layoutIntent": "guest bed",
           "footprints": [
             {
               "id": "upper_guest_room_c_bed_or_cot_1",
               "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 11.683,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "label": "guest bed",
+              "symbol": "BED",
+              "x": 11.583,
+              "z": 0.65,
+              "width": 2.0,
+              "depth": 1.0,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.7
             }
           ],
           "protectedClearances": [
@@ -2173,29 +2343,20 @@
         },
         {
           "roomId": "wash_room",
-          "layoutIntent": "task table + wall storage",
+          "layoutIntent": "wash trough",
           "footprints": [
             {
-              "id": "upper_wash_room_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 0.75,
-              "z": 7.17,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "upper_wash_room_wash_trough_1",
+              "kind": "wash_trough",
+              "label": "wash trough",
+              "symbol": "WASH",
+              "x": 0.65,
+              "z": 7.07,
+              "width": 1.4,
+              "depth": 0.55,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_wash_room_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 6.25,
-              "z": 10.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -2222,15 +2383,17 @@
           "layoutIntent": "task table + wall storage",
           "footprints": [
             {
-              "id": "upper_landing_lounge_utility_table_2",
+              "id": "upper_landing_lounge_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 14.45,
-              "z": 10.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "symbol": "UTILITY",
+              "x": 8.85,
+              "z": 7.07,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -2361,11 +2524,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            7.44
+            7.94
           ],
           "to": [
             16.7,
-            7.44
+            7.94
           ],
           "cutsVerticalCoreId": "inn_tavern_stair_core"
         },
@@ -2373,11 +2536,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            13.94,
+            9.021,
             0.3
           ],
           "to": [
-            13.94,
+            9.021,
             11.7
           ],
           "cutsVerticalCoreId": "inn_tavern_stair_core"
@@ -2393,10 +2556,10 @@
       "type": "u_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 12.94,
-        "z": 5.76,
-        "width": 2.0,
-        "depth": 3.36,
+        "x": 8.171,
+        "z": 6.84,
+        "width": 1.7,
+        "depth": 2.2,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -2431,10 +2594,10 @@
       "type": "guest_lift",
       "footprint": {
         "id": "lift_footprint",
-        "x": 10.5,
-        "z": 5.76,
-        "width": 2.04,
-        "depth": 1.92,
+        "x": 11.04,
+        "z": 6.34,
+        "width": 1.7,
+        "depth": 1.6,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -2470,7 +2633,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 7.44,
+      "cutCoordinateMeters": 7.94,
       "spanMeters": 17,
       "levels": [
         {
@@ -2531,6 +2694,7 @@
           "clearHeightMeters": 2.7
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "cellar",
@@ -2557,7 +2721,9 @@
             "ground",
             "upper"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 8.171,
+          "endMeters": 9.871
         },
         {
           "coreId": "inn_tavern_guest_lift",
@@ -2567,91 +2733,96 @@
             "ground",
             "upper"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 11.04,
+          "endMeters": 12.74
         }
       ],
       "apertureSlices": [
         {
-          "levelId": "cellar",
-          "openingId": "door_cellar_drink_store",
-          "kind": "door"
-        },
-        {
-          "levelId": "cellar",
-          "openingId": "door_cellar_food_store",
-          "kind": "door"
+          "levelId": "ground",
+          "openingId": "window_ground_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.94,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 7.94
         },
         {
           "levelId": "ground",
-          "openingId": "inn_tavern_main_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "ground",
-          "openingId": "inn_tavern_service_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "upper",
-          "openingId": "door_upper_guest_room_a",
-          "kind": "door"
+          "openingId": "window_ground_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 17,
+          "z": 7.94,
+          "positionMeters": 17,
+          "orthogonalMeters": 7.94
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_guest_room_b",
-          "kind": "door"
+          "openingId": "window_upper_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.94,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 7.94
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 17,
+          "z": 7.94,
+          "positionMeters": 17,
+          "orthogonalMeters": 7.94
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "cellar",
           "roomId": "loading_cover",
-          "kind": "utility_table",
-          "positionMeters": 4.7
-        },
-        {
-          "levelId": "cellar",
-          "roomId": "loading_cover",
-          "kind": "utility_table",
-          "positionMeters": 10.5
+          "kind": "portal_cover",
+          "symbol": "PORTAL",
+          "positionMeters": 4.6,
+          "sectionHeightMeters": 2.2
         },
         {
           "levelId": "ground",
           "roomId": "accessible_guest_room",
           "kind": "bed_or_cot",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "ground",
-          "roomId": "accessible_guest_room",
-          "kind": "bed_or_cot",
-          "positionMeters": 7.741
+          "symbol": "BED",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.7
         },
         {
           "levelId": "ground",
           "roomId": "rear_service",
           "kind": "utility_table",
-          "positionMeters": 14.45
+          "symbol": "UTILITY",
+          "positionMeters": 10.341,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "upper",
           "roomId": "wash_room",
-          "kind": "utility_table",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "upper",
-          "roomId": "wash_room",
-          "kind": "utility_table",
-          "positionMeters": 6.25
+          "kind": "wash_trough",
+          "symbol": "WASH",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "upper",
           "roomId": "landing_lounge",
           "kind": "utility_table",
-          "positionMeters": 14.45
+          "symbol": "UTILITY",
+          "positionMeters": 8.85,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -3.6,
         "thicknessMeters": 0.6,
@@ -2661,14 +2832,15 @@
         "baseElevationMeters": 6.2,
         "peakElevationMeters": 10.0,
         "structure": "Broad clipped gable with offset kitchen chimney and recessed sign beam.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     },
     "cross": {
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 13.94,
+      "cutCoordinateMeters": 9.021,
       "spanMeters": 12,
       "levels": [
         {
@@ -2690,15 +2862,23 @@
       "roomSlices": [
         {
           "levelId": "cellar",
-          "roomId": "service_stair",
+          "roomId": "cold_room",
           "startMeters": 0.3,
           "endMeters": 6.3,
           "baseElevationMeters": -3.0,
           "clearHeightMeters": 2.7
         },
         {
+          "levelId": "cellar",
+          "roomId": "loading_cover",
+          "startMeters": 6.96,
+          "endMeters": 11.04,
+          "baseElevationMeters": -3.0,
+          "clearHeightMeters": 2.7
+        },
+        {
           "levelId": "ground",
-          "roomId": "kitchen",
+          "roomId": "common_room",
           "startMeters": 0.3,
           "endMeters": 6.72,
           "baseElevationMeters": 0,
@@ -2706,7 +2886,7 @@
         },
         {
           "levelId": "ground",
-          "roomId": "rear_service",
+          "roomId": "accessible_guest_room",
           "startMeters": 6.72,
           "endMeters": 11.7,
           "baseElevationMeters": 0,
@@ -2714,7 +2894,7 @@
         },
         {
           "levelId": "upper",
-          "roomId": "guest_room_c",
+          "roomId": "guest_room_b",
           "startMeters": 0.3,
           "endMeters": 6.72,
           "baseElevationMeters": 3.5,
@@ -2729,6 +2909,7 @@
           "clearHeightMeters": 2.7
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "cellar",
@@ -2755,7 +2936,9 @@
             "ground",
             "upper"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 6.84,
+          "endMeters": 9.04
         },
         {
           "coreId": "inn_tavern_guest_lift",
@@ -2765,73 +2948,112 @@
             "ground",
             "upper"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 6.34,
+          "endMeters": 7.94
         }
       ],
       "apertureSlices": [
         {
-          "levelId": "cellar",
-          "openingId": "door_cellar_drink_store",
-          "kind": "door"
-        },
-        {
-          "levelId": "cellar",
-          "openingId": "door_cellar_food_store",
-          "kind": "door"
+          "levelId": "ground",
+          "openingId": "window_ground_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 9.021,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 9.021
         },
         {
           "levelId": "ground",
-          "openingId": "inn_tavern_main_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "ground",
-          "openingId": "inn_tavern_service_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "upper",
-          "openingId": "door_upper_guest_room_a",
-          "kind": "door"
+          "openingId": "window_ground_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 9.021,
+          "z": 12,
+          "positionMeters": 12,
+          "orthogonalMeters": 9.021
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_guest_room_b",
-          "kind": "door"
+          "openingId": "window_upper_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 9.021,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 9.021
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 9.021,
+          "z": 12,
+          "positionMeters": 12,
+          "orthogonalMeters": 9.021
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "cellar",
-          "roomId": "service_stair",
+          "roomId": "cold_room",
           "kind": "utility_table",
-          "positionMeters": 0.743
+          "symbol": "UTILITY",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "cellar",
+          "roomId": "loading_cover",
+          "kind": "portal_cover",
+          "symbol": "PORTAL",
+          "positionMeters": 7.31,
+          "sectionHeightMeters": 2.2
         },
         {
           "levelId": "ground",
-          "roomId": "kitchen",
-          "kind": "prep_table",
-          "positionMeters": 0.749
+          "roomId": "common_room",
+          "kind": "table_bench",
+          "symbol": "TABLE",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
-          "roomId": "rear_service",
-          "kind": "utility_table",
-          "positionMeters": 10.35
+          "roomId": "common_room",
+          "kind": "bench_row",
+          "symbol": "BENCH",
+          "positionMeters": 5.92,
+          "sectionHeightMeters": 0.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_guest_room",
+          "kind": "bed_or_cot",
+          "symbol": "BED",
+          "positionMeters": 7.07,
+          "sectionHeightMeters": 0.7
         },
         {
           "levelId": "upper",
-          "roomId": "guest_room_c",
+          "roomId": "guest_room_b",
           "kind": "bed_or_cot",
-          "positionMeters": 0.75
+          "symbol": "BED",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.7
         },
         {
           "levelId": "upper",
           "roomId": "landing_lounge",
           "kind": "utility_table",
-          "positionMeters": 10.35
+          "symbol": "UTILITY",
+          "positionMeters": 7.07,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -3.6,
         "thicknessMeters": 0.6,
@@ -2841,7 +3063,8 @@
         "baseElevationMeters": 6.2,
         "peakElevationMeters": 10.0,
         "structure": "Broad clipped gable with offset kitchen chimney and recessed sign beam.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     }
   },

@@ -276,9 +276,9 @@
         "id": "window_ground_public_entry_hall",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
+        "side": "south",
         "x": 8.65,
-        "z": 5.19,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_public_entry_hall"
       },
@@ -287,7 +287,7 @@
         "kind": "window",
         "levelId": "ground",
         "side": "east",
-        "x": 17.0,
+        "x": 34,
         "z": 20.994,
         "separateObject": true,
         "planOpeningId": "window_ground_great_council_hall"
@@ -297,7 +297,7 @@
         "kind": "window",
         "levelId": "ground",
         "side": "west",
-        "x": 6.27,
+        "x": 0.0,
         "z": 14.0,
         "separateObject": true,
         "planOpeningId": "window_ground_service_kitchen"
@@ -306,8 +306,8 @@
         "id": "window_ground_guard_muster",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
-        "x": 27.73,
+        "side": "east",
+        "x": 34,
         "z": 14.0,
         "separateObject": true,
         "planOpeningId": "window_ground_guard_muster"
@@ -316,9 +316,9 @@
         "id": "window_ground_courtyard_gallery",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
+        "side": "south",
         "x": 25.35,
-        "z": 5.19,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_courtyard_gallery"
       },
@@ -326,19 +326,59 @@
         "id": "window_ground_accessible_core",
         "kind": "window",
         "levelId": "ground",
-        "side": "west",
-        "x": 17.0,
+        "side": "east",
+        "x": 34,
         "z": 25.884,
         "separateObject": true,
         "planOpeningId": "window_ground_accessible_core"
       },
       {
+        "id": "window_ground_cut_west",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 0.0,
+        "z": 15.4,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_west"
+      },
+      {
+        "id": "window_ground_cut_east",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 34,
+        "z": 15.4,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_east"
+      },
+      {
+        "id": "window_ground_cut_south",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 12.24,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_south"
+      },
+      {
+        "id": "window_ground_cut_north",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 12.24,
+        "z": 28,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_north"
+      },
+      {
         "id": "window_upper_command_chamber",
         "kind": "window",
         "levelId": "upper",
-        "side": "north",
+        "side": "south",
         "x": 5.234,
-        "z": 7.15,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_command_chamber"
       },
@@ -346,9 +386,9 @@
         "id": "window_upper_audience_hall",
         "kind": "window",
         "levelId": "upper",
-        "side": "east",
+        "side": "south",
         "x": 18.518,
-        "z": 7.15,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_audience_hall"
       },
@@ -356,9 +396,9 @@
         "id": "window_upper_library_archive",
         "kind": "window",
         "levelId": "upper",
-        "side": "west",
+        "side": "south",
         "x": 30.284,
-        "z": 7.15,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_library_archive"
       },
@@ -366,8 +406,8 @@
         "id": "window_upper_guest_suite",
         "kind": "window",
         "levelId": "upper",
-        "side": "north",
-        "x": 5.234,
+        "side": "west",
+        "x": 0.0,
         "z": 20.85,
         "separateObject": true,
         "planOpeningId": "window_upper_guest_suite"
@@ -376,9 +416,9 @@
         "id": "window_upper_staff_service",
         "kind": "window",
         "levelId": "upper",
-        "side": "east",
+        "side": "north",
         "x": 13.584,
-        "z": 20.85,
+        "z": 28,
         "separateObject": true,
         "planOpeningId": "window_upper_staff_service"
       },
@@ -386,19 +426,59 @@
         "id": "window_upper_upper_gallery",
         "kind": "window",
         "levelId": "upper",
-        "side": "west",
-        "x": 25.35,
+        "side": "east",
+        "x": 34,
         "z": 20.85,
         "separateObject": true,
         "planOpeningId": "window_upper_upper_gallery"
       },
       {
+        "id": "window_upper_cut_west",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 0.0,
+        "z": 15.4,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_west"
+      },
+      {
+        "id": "window_upper_cut_east",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 34,
+        "z": 15.4,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_east"
+      },
+      {
+        "id": "window_upper_cut_south",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "south",
+        "x": 12.24,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_south"
+      },
+      {
+        "id": "window_upper_cut_north",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 12.24,
+        "z": 28,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_north"
+      },
+      {
         "id": "window_roof_and_towers_tower_room_a",
         "kind": "window",
         "levelId": "roof_and_towers",
-        "side": "north",
+        "side": "south",
         "x": 5.866,
-        "z": 7.15,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_roof_and_towers_tower_room_a"
       },
@@ -406,9 +486,9 @@
         "id": "window_roof_and_towers_tower_room_b",
         "kind": "window",
         "levelId": "roof_and_towers",
-        "side": "east",
+        "side": "south",
         "x": 16.999,
-        "z": 7.15,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_roof_and_towers_tower_room_b"
       },
@@ -416,9 +496,9 @@
         "id": "window_roof_and_towers_signal_room",
         "kind": "window",
         "levelId": "roof_and_towers",
-        "side": "west",
+        "side": "south",
         "x": 28.133,
-        "z": 7.15,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_roof_and_towers_signal_room"
       },
@@ -426,8 +506,8 @@
         "id": "window_roof_and_towers_roof_access",
         "kind": "window",
         "levelId": "roof_and_towers",
-        "side": "north",
-        "x": 4.823,
+        "side": "west",
+        "x": 0.0,
         "z": 20.85,
         "separateObject": true,
         "planOpeningId": "window_roof_and_towers_roof_access"
@@ -436,9 +516,9 @@
         "id": "window_roof_and_towers_defensive_gallery",
         "kind": "window",
         "levelId": "roof_and_towers",
-        "side": "east",
+        "side": "north",
         "x": 17.0,
-        "z": 20.85,
+        "z": 28,
         "separateObject": true,
         "planOpeningId": "window_roof_and_towers_defensive_gallery"
       },
@@ -446,11 +526,65 @@
         "id": "window_roof_and_towers_walltop_gate_threshold",
         "kind": "window",
         "levelId": "roof_and_towers",
-        "side": "west",
-        "x": 29.177,
+        "side": "east",
+        "x": 34,
         "z": 20.85,
         "separateObject": true,
         "planOpeningId": "window_roof_and_towers_walltop_gate_threshold"
+      },
+      {
+        "id": "window_roof_and_towers_cut_west",
+        "kind": "window",
+        "levelId": "roof_and_towers",
+        "side": "west",
+        "x": 0.0,
+        "z": 15.4,
+        "separateObject": true,
+        "planOpeningId": "window_roof_and_towers_cut_west"
+      },
+      {
+        "id": "window_roof_and_towers_cut_east",
+        "kind": "window",
+        "levelId": "roof_and_towers",
+        "side": "east",
+        "x": 34,
+        "z": 15.4,
+        "separateObject": true,
+        "planOpeningId": "window_roof_and_towers_cut_east"
+      },
+      {
+        "id": "window_roof_and_towers_cut_south",
+        "kind": "window",
+        "levelId": "roof_and_towers",
+        "side": "south",
+        "x": 12.24,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_roof_and_towers_cut_south"
+      },
+      {
+        "id": "window_roof_and_towers_cut_north",
+        "kind": "window",
+        "levelId": "roof_and_towers",
+        "side": "north",
+        "x": 12.24,
+        "z": 28,
+        "separateObject": true,
+        "planOpeningId": "window_roof_and_towers_cut_north"
+      }
+    ],
+    "criticalFeatures": [
+      {
+        "id": "open_courtyard",
+        "x": 12.24,
+        "z": 10.08,
+        "width": 9.52,
+        "depth": 7.84,
+        "kind": "open_courtyard",
+        "symbol": "COURT",
+        "sectionHeightMeters": 17.0,
+        "sectionVisible": true,
+        "openToSky": true
       }
     ],
     "siteContext": {
@@ -502,7 +636,7 @@
         "gateSeparate": true
       }
     },
-    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable."
   },
   "floorPlans": [
     {
@@ -775,69 +909,62 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 23.48,
-            "z": 13.3,
-            "width": 2.0,
-            "depth": 4.2,
+            "x": 26.202,
+            "z": 10.98,
+            "width": 1.8,
+            "depth": 3.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "loading_tunnel"
+          "locatedInRoomId": "streaming_airlock"
         },
         {
           "coreId": "castle_enterable_public_lift",
           "type": "public_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 20.68,
-            "z": 13.3,
-            "width": 2.4,
-            "depth": 2.4,
+            "x": 26.202,
+            "z": 12.18,
+            "width": 2.0,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "loading_tunnel"
+          "locatedInRoomId": "streaming_airlock"
         }
       ],
       "furnishingLayouts": [
         {
           "roomId": "service_cellar",
-          "layoutIntent": "racks / crates",
+          "layoutIntent": "secure cot + cell partition",
           "footprints": [
             {
-              "id": "undercroft_service_cellar_storage_rack_1",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.458,
-              "depth": 0.9,
+              "id": "undercroft_service_cellar_secure_cot_1",
+              "kind": "secure_cot",
+              "label": "secure cot",
+              "symbol": "COT",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.9,
+              "depth": 0.8,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.6
             },
             {
-              "id": "undercroft_service_cellar_storage_rack_2",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 2.208,
-              "z": 12.95,
-              "width": 1.458,
-              "depth": 0.9,
+              "id": "undercroft_service_cellar_cell_partition_2",
+              "kind": "cell_partition",
+              "label": "cell partition",
+              "symbol": "CELL",
+              "x": 0.65,
+              "z": 12.15,
+              "width": 0.2,
+              "depth": 1.8,
               "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "undercroft_service_cellar_storage_rack_3",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 3.666,
-              "z": 0.75,
-              "width": 1.458,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 2.2
             }
           ],
           "protectedClearances": [
@@ -867,34 +994,14 @@
               "id": "undercroft_secure_archive_shelf_bay_1",
               "kind": "shelf_bay",
               "label": "archive shelving",
-              "x": 6.024,
-              "z": 0.75,
-              "width": 1.458,
-              "depth": 0.9,
+              "symbol": "SHELF",
+              "x": 5.924,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.45,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "undercroft_secure_archive_shelf_bay_2",
-              "kind": "shelf_bay",
-              "label": "archive shelving",
-              "x": 7.482,
-              "z": 12.95,
-              "width": 1.458,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "undercroft_secure_archive_shelf_bay_3",
-              "kind": "shelf_bay",
-              "label": "archive shelving",
-              "x": 8.94,
-              "z": 0.75,
-              "width": 1.458,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 2.0
             }
           ],
           "protectedClearances": [
@@ -918,29 +1025,33 @@
         },
         {
           "roomId": "detention_cells",
-          "layoutIntent": "cot + secure partition",
+          "layoutIntent": "secure cot + cell partition",
           "footprints": [
             {
               "id": "undercroft_detention_cells_secure_cot_1",
               "kind": "secure_cot",
-              "label": "cot + secure partition",
-              "x": 11.297,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "label": "secure cot",
+              "symbol": "COT",
+              "x": 11.197,
+              "z": 0.65,
+              "width": 1.9,
+              "depth": 0.8,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.6
             },
             {
-              "id": "undercroft_detention_cells_secure_cot_2",
-              "kind": "secure_cot",
-              "label": "cot + secure partition",
-              "x": 16.215,
-              "z": 12.95,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "undercroft_detention_cells_cell_partition_2",
+              "kind": "cell_partition",
+              "label": "cell partition",
+              "symbol": "CELL",
+              "x": 11.197,
+              "z": 12.15,
+              "width": 0.2,
+              "depth": 1.8,
               "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 2.2
             }
           ],
           "protectedClearances": [
@@ -964,18 +1075,20 @@
         },
         {
           "roomId": "guard_room",
-          "layoutIntent": "weapon rack + bench",
+          "layoutIntent": "weapon rack",
           "footprints": [
             {
               "id": "undercroft_guard_room_weapon_rack_1",
               "kind": "weapon_rack",
-              "label": "weapon rack + bench",
-              "x": 18.915,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 18.815,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.5,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.8
             }
           ],
           "protectedClearances": [
@@ -999,29 +1112,20 @@
         },
         {
           "roomId": "streaming_airlock",
-          "layoutIntent": "task table + wall storage",
+          "layoutIntent": "physical portal cover",
           "footprints": [
             {
-              "id": "undercroft_streaming_airlock_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 26.532,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "undercroft_streaming_airlock_portal_cover_1",
+              "kind": "portal_cover",
+              "label": "physical portal cover",
+              "symbol": "PORTAL",
+              "x": 26.432,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 1.1,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "undercroft_streaming_airlock_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 31.45,
-              "z": 12.95,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 2.2
             }
           ],
           "protectedClearances": [
@@ -1051,23 +1155,14 @@
               "id": "undercroft_loading_tunnel_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 8.95,
-              "z": 16.69,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 8.85,
+              "z": 16.59,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "undercroft_loading_tunnel_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 23.25,
-              "z": 24.41,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1224,11 +1319,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            24.48,
+            12.24,
             0.3
           ],
           "to": [
-            24.48,
+            12.24,
             27.7
           ],
           "cutsVerticalCoreId": "castle_enterable_stair_core"
@@ -1620,9 +1715,10 @@
           "id": "window_ground_public_entry_hall",
           "separateFrameGlassShutter": true,
           "serves": "public_entry_hall",
-          "side": "north",
+          "side": "south",
           "x": 8.65,
-          "z": 5.19,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1633,8 +1729,9 @@
           "separateFrameGlassShutter": true,
           "serves": "great_council_hall",
           "side": "east",
-          "x": 17.0,
+          "x": 34,
           "z": 20.994,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -1645,8 +1742,9 @@
           "separateFrameGlassShutter": true,
           "serves": "service_kitchen",
           "side": "west",
-          "x": 6.27,
+          "x": 0.0,
           "z": 14.0,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -1656,9 +1754,10 @@
           "id": "window_ground_guard_muster",
           "separateFrameGlassShutter": true,
           "serves": "guard_muster",
-          "side": "north",
-          "x": 27.73,
+          "side": "east",
+          "x": 34,
           "z": 14.0,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -1668,9 +1767,10 @@
           "id": "window_ground_courtyard_gallery",
           "separateFrameGlassShutter": true,
           "serves": "courtyard_gallery",
-          "side": "east",
+          "side": "south",
           "x": 25.35,
-          "z": 5.19,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1680,13 +1780,70 @@
           "id": "window_ground_accessible_core",
           "separateFrameGlassShutter": true,
           "serves": "accessible_core",
-          "side": "west",
-          "x": 17.0,
+          "side": "east",
+          "x": 34,
           "z": 25.884,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_ground_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "service_kitchen",
+          "side": "west",
+          "x": 0.0,
+          "z": 15.4,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "guard_muster",
+          "side": "east",
+          "x": 34,
+          "z": 15.4,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "public_entry_hall",
+          "side": "south",
+          "x": 12.24,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "accessible_core",
+          "side": "north",
+          "x": 12.24,
+          "z": 28,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -1696,30 +1853,30 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 23.48,
-            "z": 13.3,
-            "width": 2.0,
-            "depth": 4.2,
+            "x": 10.32,
+            "z": 13.8,
+            "width": 1.8,
+            "depth": 3.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "guard_muster"
+          "locatedInRoomId": "service_kitchen"
         },
         {
           "coreId": "castle_enterable_public_lift",
           "type": "public_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 20.68,
-            "z": 13.3,
-            "width": 2.4,
-            "depth": 2.4,
+            "x": 10.12,
+            "z": 13.8,
+            "width": 2.0,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "guard_muster"
+          "locatedInRoomId": "service_kitchen"
         }
       ],
       "furnishingLayouts": [
@@ -1731,34 +1888,14 @@
               "id": "ground_public_entry_hall_table_bench_1",
               "kind": "table_bench",
               "label": "table / benches",
-              "x": 0.75,
-              "z": 0.75,
+              "symbol": "TABLE",
+              "x": 0.65,
+              "z": 0.65,
               "width": 1.8,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_public_entry_hall_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 7.75,
-              "z": 8.73,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "ground_public_entry_hall_table_bench_3",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 14.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1782,40 +1919,33 @@
         },
         {
           "roomId": "great_council_hall",
-          "layoutIntent": "table / benches",
+          "layoutIntent": "council table + benches",
           "footprints": [
             {
-              "id": "ground_great_council_hall_table_bench_1",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 0.75,
-              "z": 18.37,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "ground_great_council_hall_council_table_1",
+              "kind": "council_table",
+              "label": "council table",
+              "symbol": "COUNCIL",
+              "x": 0.65,
+              "z": 18.27,
+              "width": 2.6,
+              "depth": 1.2,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.9
             },
             {
-              "id": "ground_great_council_hall_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 16.1,
-              "z": 22.717,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "ground_great_council_hall_bench_row_2",
+              "kind": "bench_row",
+              "label": "benches",
+              "symbol": "BENCH",
+              "x": 0.65,
+              "z": 23.217,
+              "width": 2.2,
+              "depth": 0.5,
               "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "ground_great_council_hall_table_bench_3",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 31.45,
-              "z": 18.37,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.5
             }
           ],
           "protectedClearances": [
@@ -1839,29 +1969,33 @@
         },
         {
           "roomId": "service_kitchen",
-          "layoutIntent": "prep table + storage",
+          "layoutIntent": "keep kitchen + range",
           "footprints": [
             {
               "id": "ground_service_kitchen_prep_table_1",
               "kind": "prep_table",
-              "label": "prep table + storage",
-              "x": 0.75,
-              "z": 10.53,
+              "label": "keep kitchen",
+              "symbol": "PREP",
+              "x": 0.65,
+              "z": 10.43,
               "width": 1.8,
-              "depth": 0.9,
+              "depth": 0.8,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.9
             },
             {
-              "id": "ground_service_kitchen_prep_table_2",
-              "kind": "prep_table",
-              "label": "prep table + storage",
-              "x": 9.99,
-              "z": 16.57,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "ground_service_kitchen_hearth_range_2",
+              "kind": "hearth_range",
+              "label": "range",
+              "symbol": "RANGE",
+              "x": 0.65,
+              "z": 16.77,
+              "width": 1.6,
+              "depth": 0.8,
               "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.2
             }
           ],
           "protectedClearances": [
@@ -1885,29 +2019,33 @@
         },
         {
           "roomId": "guard_muster",
-          "layoutIntent": "weapon rack + bench",
+          "layoutIntent": "weapon rack + muster bench",
           "footprints": [
             {
               "id": "ground_guard_muster_weapon_rack_1",
               "kind": "weapon_rack",
-              "label": "weapon rack + bench",
-              "x": 22.21,
-              "z": 10.53,
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 22.11,
+              "z": 10.43,
               "width": 1.8,
-              "depth": 0.9,
+              "depth": 0.5,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.8
             },
             {
-              "id": "ground_guard_muster_weapon_rack_2",
-              "kind": "weapon_rack",
-              "label": "weapon rack + bench",
-              "x": 31.45,
-              "z": 16.57,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "ground_guard_muster_bench_row_2",
+              "kind": "bench_row",
+              "label": "muster bench",
+              "symbol": "BENCH",
+              "x": 22.11,
+              "z": 17.12,
+              "width": 2.0,
+              "depth": 0.45,
               "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.5
             }
           ],
           "protectedClearances": [
@@ -1931,40 +2069,20 @@
         },
         {
           "roomId": "courtyard_gallery",
-          "layoutIntent": "table / benches",
+          "layoutIntent": "court cistern lip",
           "footprints": [
             {
-              "id": "ground_courtyard_gallery_table_bench_1",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 17.45,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "ground_courtyard_gallery_court_well_1",
+              "kind": "court_well",
+              "label": "court cistern lip",
+              "symbol": "WELL",
+              "x": 17.35,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 1.2,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_courtyard_gallery_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 24.45,
-              "z": 8.73,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "ground_courtyard_gallery_table_bench_3",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 31.45,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.6
             }
           ],
           "protectedClearances": [
@@ -1988,29 +2106,20 @@
         },
         {
           "roomId": "accessible_core",
-          "layoutIntent": "guarded machine / material bay",
+          "layoutIntent": "guarded machine",
           "footprints": [
             {
               "id": "ground_accessible_core_machine_bed_1",
               "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 0.736,
-              "z": 24.503,
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 0.65,
+              "z": 24.417,
               "width": 1.8,
-              "depth": 0.663,
+              "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_accessible_core_machine_bed_2",
-              "kind": "machine_bed",
-              "label": "guarded machine / material bay",
-              "x": 31.464,
-              "z": 26.601,
-              "width": 1.8,
-              "depth": 0.663,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.3
             }
           ],
           "protectedClearances": [
@@ -2167,11 +2276,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            24.48,
+            12.24,
             0.3
           ],
           "to": [
-            24.48,
+            12.24,
             27.7
           ],
           "cutsVerticalCoreId": "castle_enterable_stair_core"
@@ -2447,9 +2556,10 @@
           "id": "window_upper_command_chamber",
           "separateFrameGlassShutter": true,
           "serves": "command_chamber",
-          "side": "north",
+          "side": "south",
           "x": 5.234,
-          "z": 7.15,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -2459,9 +2569,10 @@
           "id": "window_upper_audience_hall",
           "separateFrameGlassShutter": true,
           "serves": "audience_hall",
-          "side": "east",
+          "side": "south",
           "x": 18.518,
-          "z": 7.15,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -2471,9 +2582,10 @@
           "id": "window_upper_library_archive",
           "separateFrameGlassShutter": true,
           "serves": "library_archive",
-          "side": "west",
+          "side": "south",
           "x": 30.284,
-          "z": 7.15,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -2483,9 +2595,10 @@
           "id": "window_upper_guest_suite",
           "separateFrameGlassShutter": true,
           "serves": "guest_suite",
-          "side": "north",
-          "x": 5.234,
+          "side": "west",
+          "x": 0.0,
           "z": 20.85,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -2495,9 +2608,10 @@
           "id": "window_upper_staff_service",
           "separateFrameGlassShutter": true,
           "serves": "staff_service",
-          "side": "east",
+          "side": "north",
           "x": 13.584,
-          "z": 20.85,
+          "z": 28,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -2507,13 +2621,70 @@
           "id": "window_upper_upper_gallery",
           "separateFrameGlassShutter": true,
           "serves": "upper_gallery",
-          "side": "west",
-          "x": 25.35,
+          "side": "east",
+          "x": 34,
           "z": 20.85,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_upper_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "guest_suite",
+          "side": "west",
+          "x": 0.0,
+          "z": 15.4,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "library_archive",
+          "side": "east",
+          "x": 34,
+          "z": 15.4,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "audience_hall",
+          "side": "south",
+          "x": 12.24,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "staff_service",
+          "side": "north",
+          "x": 12.24,
+          "z": 28,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -2523,30 +2694,30 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 23.48,
-            "z": 13.3,
-            "width": 2.0,
-            "depth": 4.2,
+            "x": 8.248,
+            "z": 10.68,
+            "width": 1.8,
+            "depth": 3.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "upper_gallery"
+          "locatedInRoomId": "command_chamber"
         },
         {
           "coreId": "castle_enterable_public_lift",
           "type": "public_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 20.68,
-            "z": 13.3,
-            "width": 2.4,
-            "depth": 2.4,
+            "x": 8.048,
+            "z": 11.88,
+            "width": 2.0,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "upper_gallery"
+          "locatedInRoomId": "command_chamber"
         }
       ],
       "furnishingLayouts": [
@@ -2558,23 +2729,14 @@
               "id": "upper_command_chamber_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_command_chamber_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 7.918,
-              "z": 12.65,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -2598,40 +2760,33 @@
         },
         {
           "roomId": "audience_hall",
-          "layoutIntent": "table / benches",
+          "layoutIntent": "council table + benches",
           "footprints": [
             {
-              "id": "upper_audience_hall_table_bench_1",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 10.618,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "upper_audience_hall_council_table_1",
+              "kind": "council_table",
+              "label": "council table",
+              "symbol": "COUNCIL",
+              "x": 10.518,
+              "z": 0.65,
+              "width": 2.6,
+              "depth": 1.2,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.9
             },
             {
-              "id": "upper_audience_hall_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 17.618,
-              "z": 12.65,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "upper_audience_hall_bench_row_2",
+              "kind": "bench_row",
+              "label": "benches",
+              "symbol": "BENCH",
+              "x": 10.518,
+              "z": 13.15,
+              "width": 2.2,
+              "depth": 0.5,
               "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "upper_audience_hall_table_bench_3",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 24.618,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.5
             }
           ],
           "protectedClearances": [
@@ -2661,34 +2816,14 @@
               "id": "upper_library_archive_shelf_bay_1",
               "kind": "shelf_bay",
               "label": "archive shelving",
-              "x": 27.318,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "SHELF",
+              "x": 27.218,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.45,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_library_archive_shelf_bay_2",
-              "kind": "shelf_bay",
-              "label": "archive shelving",
-              "x": 29.384,
-              "z": 12.65,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "upper_library_archive_shelf_bay_3",
-              "kind": "shelf_bay",
-              "label": "archive shelving",
-              "x": 31.45,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 2.0
             }
           ],
           "protectedClearances": [
@@ -2718,23 +2853,14 @@
               "id": "upper_guest_suite_bed_or_cot_1",
               "kind": "bed_or_cot",
               "label": "sleeping furniture",
-              "x": 0.75,
-              "z": 14.45,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "BED",
+              "x": 0.65,
+              "z": 14.35,
+              "width": 2.0,
+              "depth": 1.0,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_guest_suite_bed_or_cot_2",
-              "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 7.918,
-              "z": 26.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.7
             }
           ],
           "protectedClearances": [
@@ -2764,23 +2890,14 @@
               "id": "upper_staff_service_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 10.618,
-              "z": 14.45,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 10.518,
+              "z": 14.35,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_staff_service_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 14.75,
-              "z": 26.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -2810,34 +2927,14 @@
               "id": "upper_upper_gallery_table_bench_1",
               "kind": "table_bench",
               "label": "table / benches",
-              "x": 17.45,
-              "z": 14.45,
+              "symbol": "TABLE",
+              "x": 17.35,
+              "z": 14.35,
               "width": 1.8,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_upper_gallery_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 24.45,
-              "z": 26.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "upper_upper_gallery_table_bench_3",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 31.45,
-              "z": 14.45,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -2994,11 +3091,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            24.48,
+            12.24,
             0.3
           ],
           "to": [
-            24.48,
+            12.24,
             27.7
           ],
           "cutsVerticalCoreId": "castle_enterable_stair_core"
@@ -3274,9 +3371,10 @@
           "id": "window_roof_and_towers_tower_room_a",
           "separateFrameGlassShutter": true,
           "serves": "tower_room_a",
-          "side": "north",
+          "side": "south",
           "x": 5.866,
-          "z": 7.15,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -3286,9 +3384,10 @@
           "id": "window_roof_and_towers_tower_room_b",
           "separateFrameGlassShutter": true,
           "serves": "tower_room_b",
-          "side": "east",
+          "side": "south",
           "x": 16.999,
-          "z": 7.15,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -3298,9 +3397,10 @@
           "id": "window_roof_and_towers_signal_room",
           "separateFrameGlassShutter": true,
           "serves": "signal_room",
-          "side": "west",
+          "side": "south",
           "x": 28.133,
-          "z": 7.15,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -3310,9 +3410,10 @@
           "id": "window_roof_and_towers_roof_access",
           "separateFrameGlassShutter": true,
           "serves": "roof_access",
-          "side": "north",
-          "x": 4.823,
+          "side": "west",
+          "x": 0.0,
           "z": 20.85,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -3322,9 +3423,10 @@
           "id": "window_roof_and_towers_defensive_gallery",
           "separateFrameGlassShutter": true,
           "serves": "defensive_gallery",
-          "side": "east",
+          "side": "north",
           "x": 17.0,
-          "z": 20.85,
+          "z": 28,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -3334,13 +3436,70 @@
           "id": "window_roof_and_towers_walltop_gate_threshold",
           "separateFrameGlassShutter": true,
           "serves": "walltop_gate_threshold",
-          "side": "west",
-          "x": 29.177,
+          "side": "east",
+          "x": 34,
           "z": 20.85,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_roof_and_towers_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "roof_access",
+          "side": "west",
+          "x": 0.0,
+          "z": 15.4,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_roof_and_towers_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "walltop_gate_threshold",
+          "side": "east",
+          "x": 34,
+          "z": 15.4,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_roof_and_towers_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "tower_room_b",
+          "side": "south",
+          "x": 12.24,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_roof_and_towers_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "defensive_gallery",
+          "side": "north",
+          "x": 12.24,
+          "z": 28,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -3350,30 +3509,30 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 23.48,
-            "z": 13.3,
-            "width": 2.0,
-            "depth": 4.2,
+            "x": 9.513,
+            "z": 10.68,
+            "width": 1.8,
+            "depth": 3.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "defensive_gallery"
+          "locatedInRoomId": "tower_room_a"
         },
         {
           "coreId": "castle_enterable_public_lift",
           "type": "public_lift",
           "footprint": {
             "id": "lift_footprint",
-            "x": 20.68,
-            "z": 13.3,
-            "width": 2.4,
-            "depth": 2.4,
+            "x": 9.313,
+            "z": 11.88,
+            "width": 2.0,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "defensive_gallery"
+          "locatedInRoomId": "tower_room_a"
         }
       ],
       "furnishingLayouts": [
@@ -3385,23 +3544,14 @@
               "id": "roof_and_towers_tower_room_a_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "roof_and_towers_tower_room_a_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 9.183,
-              "z": 12.65,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -3431,12 +3581,14 @@
               "id": "roof_and_towers_tower_room_b_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 11.883,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 11.783,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -3466,23 +3618,14 @@
               "id": "roof_and_towers_signal_room_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 23.017,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 22.917,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "roof_and_towers_signal_room_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 31.45,
-              "z": 12.65,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -3512,23 +3655,14 @@
               "id": "roof_and_towers_roof_access_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 0.75,
-              "z": 14.45,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 0.65,
+              "z": 14.35,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "roof_and_towers_roof_access_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 7.096,
-              "z": 26.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -3558,23 +3692,14 @@
               "id": "roof_and_towers_defensive_gallery_table_bench_1",
               "kind": "table_bench",
               "label": "table / benches",
-              "x": 9.796,
-              "z": 14.45,
+              "symbol": "TABLE",
+              "x": 9.696,
+              "z": 14.35,
               "width": 1.8,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "roof_and_towers_defensive_gallery_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 16.1,
-              "z": 26.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -3601,26 +3726,17 @@
           "layoutIntent": "racks / crates",
           "footprints": [
             {
-              "id": "roof_and_towers_walltop_gate_threshold_storage_rack_2",
+              "id": "roof_and_towers_walltop_gate_threshold_storage_rack_1",
               "kind": "storage_rack",
               "label": "racks / crates",
-              "x": 28.277,
-              "z": 26.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "roof_and_towers_walltop_gate_threshold_storage_rack_3",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 31.45,
-              "z": 14.45,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "RACK",
+              "x": 25.004,
+              "z": 14.35,
+              "width": 1.6,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.5
             }
           ],
           "protectedClearances": [
@@ -3777,11 +3893,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            24.48,
+            12.24,
             0.3
           ],
           "to": [
-            24.48,
+            12.24,
             27.7
           ],
           "cutsVerticalCoreId": "castle_enterable_stair_core"
@@ -3797,10 +3913,10 @@
       "type": "u_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 23.48,
-        "z": 13.3,
-        "width": 2.0,
-        "depth": 4.2,
+        "x": 10.32,
+        "z": 13.8,
+        "width": 1.8,
+        "depth": 3.2,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -3841,10 +3957,10 @@
       "type": "public_lift",
       "footprint": {
         "id": "lift_footprint",
-        "x": 20.68,
-        "z": 13.3,
-        "width": 2.4,
-        "depth": 2.4,
+        "x": 21.23,
+        "z": 13.8,
+        "width": 2.0,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -3984,6 +4100,44 @@
           "clearHeightMeters": 3.0
         }
       ],
+      "voidSlices": [
+        {
+          "levelId": "undercroft",
+          "voidId": "open_courtyard",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 12.24,
+          "endMeters": 21.759999999999998,
+          "baseElevationMeters": 0.0
+        },
+        {
+          "levelId": "ground",
+          "voidId": "open_courtyard",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 12.24,
+          "endMeters": 21.759999999999998,
+          "baseElevationMeters": 0.0
+        },
+        {
+          "levelId": "upper",
+          "voidId": "open_courtyard",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 12.24,
+          "endMeters": 21.759999999999998,
+          "baseElevationMeters": 3.8
+        },
+        {
+          "levelId": "roof_and_towers",
+          "voidId": "open_courtyard",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 12.24,
+          "endMeters": 21.759999999999998,
+          "baseElevationMeters": 7.3
+        }
+      ],
       "slabs": [
         {
           "levelId": "undercroft",
@@ -4016,7 +4170,9 @@
             "upper",
             "roof_and_towers"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 10.32,
+          "endMeters": 12.12
         },
         {
           "coreId": "castle_enterable_public_lift",
@@ -4027,49 +4183,71 @@
             "upper",
             "roof_and_towers"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 21.23,
+          "endMeters": 23.23
         }
       ],
       "apertureSlices": [
         {
-          "levelId": "undercroft",
-          "openingId": "door_undercroft_service_cellar",
-          "kind": "door"
-        },
-        {
-          "levelId": "undercroft",
-          "openingId": "door_undercroft_secure_archive",
-          "kind": "door"
+          "levelId": "ground",
+          "openingId": "window_ground_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 15.4,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 15.4
         },
         {
           "levelId": "ground",
-          "openingId": "castle_enterable_main_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "ground",
-          "openingId": "castle_enterable_service_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "upper",
-          "openingId": "door_upper_command_chamber",
-          "kind": "door"
+          "openingId": "window_ground_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 34,
+          "z": 15.4,
+          "positionMeters": 34,
+          "orthogonalMeters": 15.4
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_audience_hall",
-          "kind": "door"
+          "openingId": "window_upper_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 15.4,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 15.4
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 34,
+          "z": 15.4,
+          "positionMeters": 34,
+          "orthogonalMeters": 15.4
         },
         {
           "levelId": "roof_and_towers",
-          "openingId": "door_roof_and_towers_tower_room_a",
-          "kind": "door"
+          "openingId": "window_roof_and_towers_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 15.4,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 15.4
         },
         {
           "levelId": "roof_and_towers",
-          "openingId": "door_roof_and_towers_tower_room_b",
-          "kind": "door"
+          "openingId": "window_roof_and_towers_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 34,
+          "z": 15.4,
+          "positionMeters": 34,
+          "orthogonalMeters": 15.4
         }
       ],
       "furnitureSlices": [
@@ -4077,115 +4255,99 @@
           "levelId": "undercroft",
           "roomId": "loading_tunnel",
           "kind": "utility_table",
-          "positionMeters": 8.95
-        },
-        {
-          "levelId": "undercroft",
-          "roomId": "loading_tunnel",
-          "kind": "utility_table",
-          "positionMeters": 23.25
+          "symbol": "UTILITY",
+          "positionMeters": 8.85,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
           "roomId": "service_kitchen",
           "kind": "prep_table",
-          "positionMeters": 0.75
+          "symbol": "PREP",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.9
         },
         {
           "levelId": "ground",
           "roomId": "service_kitchen",
-          "kind": "prep_table",
-          "positionMeters": 9.99
+          "kind": "hearth_range",
+          "symbol": "RANGE",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.2
         },
         {
           "levelId": "ground",
           "roomId": "guard_muster",
           "kind": "weapon_rack",
-          "positionMeters": 22.21
+          "symbol": "ARMS",
+          "positionMeters": 22.11,
+          "sectionHeightMeters": 1.8
         },
         {
           "levelId": "ground",
           "roomId": "guard_muster",
-          "kind": "weapon_rack",
-          "positionMeters": 31.45
+          "kind": "bench_row",
+          "symbol": "BENCH",
+          "positionMeters": 22.11,
+          "sectionHeightMeters": 0.5
         },
         {
           "levelId": "upper",
           "roomId": "guest_suite",
           "kind": "bed_or_cot",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "upper",
-          "roomId": "guest_suite",
-          "kind": "bed_or_cot",
-          "positionMeters": 7.918
+          "symbol": "BED",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.7
         },
         {
           "levelId": "upper",
           "roomId": "staff_service",
           "kind": "utility_table",
-          "positionMeters": 10.618
-        },
-        {
-          "levelId": "upper",
-          "roomId": "staff_service",
-          "kind": "utility_table",
-          "positionMeters": 14.75
+          "symbol": "UTILITY",
+          "positionMeters": 10.518,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "upper",
           "roomId": "upper_gallery",
           "kind": "table_bench",
-          "positionMeters": 17.45
-        },
-        {
-          "levelId": "upper",
-          "roomId": "upper_gallery",
-          "kind": "table_bench",
-          "positionMeters": 24.45
-        },
-        {
-          "levelId": "upper",
-          "roomId": "upper_gallery",
-          "kind": "table_bench",
-          "positionMeters": 31.45
+          "symbol": "TABLE",
+          "positionMeters": 17.35,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "roof_and_towers",
           "roomId": "roof_access",
           "kind": "utility_table",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "roof_and_towers",
-          "roomId": "roof_access",
-          "kind": "utility_table",
-          "positionMeters": 7.096
+          "symbol": "UTILITY",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "roof_and_towers",
           "roomId": "defensive_gallery",
           "kind": "table_bench",
-          "positionMeters": 9.796
-        },
-        {
-          "levelId": "roof_and_towers",
-          "roomId": "defensive_gallery",
-          "kind": "table_bench",
-          "positionMeters": 16.1
+          "symbol": "TABLE",
+          "positionMeters": 9.696,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "roof_and_towers",
           "roomId": "walltop_gate_threshold",
           "kind": "storage_rack",
-          "positionMeters": 28.277
-        },
+          "symbol": "RACK",
+          "positionMeters": 25.004,
+          "sectionHeightMeters": 1.5
+        }
+      ],
+      "featureSlices": [
         {
-          "levelId": "roof_and_towers",
-          "roomId": "walltop_gate_threshold",
-          "kind": "storage_rack",
-          "positionMeters": 31.45
+          "id": "open_courtyard",
+          "kind": "open_courtyard",
+          "symbol": "COURT",
+          "positionMeters": 12.24,
+          "sectionHeightMeters": 17.0,
+          "openToSky": true
         }
       ],
       "foundation": {
@@ -4197,14 +4359,32 @@
         "baseElevationMeters": 10.3,
         "peakElevationMeters": 17.0,
         "structure": "Layered stepped keep roofs with a low central iron crown; no needle spires.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": [
+          {
+            "startMeters": 12.24,
+            "endMeters": 21.759999999999998
+          },
+          {
+            "startMeters": 12.24,
+            "endMeters": 21.759999999999998
+          },
+          {
+            "startMeters": 12.24,
+            "endMeters": 21.759999999999998
+          },
+          {
+            "startMeters": 12.24,
+            "endMeters": 21.759999999999998
+          }
+        ]
       }
     },
     "cross": {
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 24.48,
+      "cutCoordinateMeters": 12.24,
       "spanMeters": 28,
       "levels": [
         {
@@ -4231,7 +4411,7 @@
       "roomSlices": [
         {
           "levelId": "undercroft",
-          "roomId": "guard_room",
+          "roomId": "detention_cells",
           "startMeters": 0.3,
           "endMeters": 14.3,
           "baseElevationMeters": -3.5,
@@ -4247,6 +4427,14 @@
         },
         {
           "levelId": "ground",
+          "roomId": "public_entry_hall",
+          "startMeters": 0.3,
+          "endMeters": 10.08,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "levelId": "ground",
           "roomId": "great_council_hall",
           "startMeters": 17.92,
           "endMeters": 24.067,
@@ -4255,17 +4443,9 @@
         },
         {
           "levelId": "ground",
-          "roomId": "guard_muster",
+          "roomId": "service_kitchen",
           "startMeters": 10.08,
           "endMeters": 17.92,
-          "baseElevationMeters": 0,
-          "clearHeightMeters": 3.5
-        },
-        {
-          "levelId": "ground",
-          "roomId": "courtyard_gallery",
-          "startMeters": 0.3,
-          "endMeters": 10.08,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.5
         },
@@ -4287,7 +4467,7 @@
         },
         {
           "levelId": "upper",
-          "roomId": "upper_gallery",
+          "roomId": "staff_service",
           "startMeters": 14.0,
           "endMeters": 27.7,
           "baseElevationMeters": 3.8,
@@ -4295,7 +4475,7 @@
         },
         {
           "levelId": "roof_and_towers",
-          "roomId": "signal_room",
+          "roomId": "tower_room_b",
           "startMeters": 0.3,
           "endMeters": 14.0,
           "baseElevationMeters": 7.3,
@@ -4308,6 +4488,44 @@
           "endMeters": 27.7,
           "baseElevationMeters": 7.3,
           "clearHeightMeters": 3.0
+        }
+      ],
+      "voidSlices": [
+        {
+          "levelId": "undercroft",
+          "voidId": "open_courtyard",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 10.08,
+          "endMeters": 17.92,
+          "baseElevationMeters": 0.0
+        },
+        {
+          "levelId": "ground",
+          "voidId": "open_courtyard",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 10.08,
+          "endMeters": 17.92,
+          "baseElevationMeters": 0.0
+        },
+        {
+          "levelId": "upper",
+          "voidId": "open_courtyard",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 10.08,
+          "endMeters": 17.92,
+          "baseElevationMeters": 3.8
+        },
+        {
+          "levelId": "roof_and_towers",
+          "voidId": "open_courtyard",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 10.08,
+          "endMeters": 17.92,
+          "baseElevationMeters": 7.3
         }
       ],
       "slabs": [
@@ -4342,7 +4560,9 @@
             "upper",
             "roof_and_towers"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 13.8,
+          "endMeters": 17.0
         },
         {
           "coreId": "castle_enterable_public_lift",
@@ -4353,189 +4573,195 @@
             "upper",
             "roof_and_towers"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 13.8,
+          "endMeters": 15.8
         }
       ],
       "apertureSlices": [
         {
-          "levelId": "undercroft",
-          "openingId": "door_undercroft_service_cellar",
-          "kind": "door"
-        },
-        {
-          "levelId": "undercroft",
-          "openingId": "door_undercroft_secure_archive",
-          "kind": "door"
+          "levelId": "ground",
+          "openingId": "window_ground_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 12.24,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 12.24
         },
         {
           "levelId": "ground",
-          "openingId": "castle_enterable_main_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "ground",
-          "openingId": "castle_enterable_service_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "upper",
-          "openingId": "door_upper_command_chamber",
-          "kind": "door"
+          "openingId": "window_ground_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 12.24,
+          "z": 28,
+          "positionMeters": 28,
+          "orthogonalMeters": 12.24
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_audience_hall",
-          "kind": "door"
+          "openingId": "window_upper_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 12.24,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 12.24
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 12.24,
+          "z": 28,
+          "positionMeters": 28,
+          "orthogonalMeters": 12.24
         },
         {
           "levelId": "roof_and_towers",
-          "openingId": "door_roof_and_towers_tower_room_a",
-          "kind": "door"
+          "openingId": "window_roof_and_towers_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 12.24,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 12.24
         },
         {
           "levelId": "roof_and_towers",
-          "openingId": "door_roof_and_towers_tower_room_b",
-          "kind": "door"
+          "openingId": "window_roof_and_towers_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 12.24,
+          "z": 28,
+          "positionMeters": 28,
+          "orthogonalMeters": 12.24
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "undercroft",
-          "roomId": "guard_room",
-          "kind": "weapon_rack",
-          "positionMeters": 0.75
+          "roomId": "detention_cells",
+          "kind": "secure_cot",
+          "symbol": "COT",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.6
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "detention_cells",
+          "kind": "cell_partition",
+          "symbol": "CELL",
+          "positionMeters": 12.15,
+          "sectionHeightMeters": 2.2
         },
         {
           "levelId": "undercroft",
           "roomId": "loading_tunnel",
           "kind": "utility_table",
-          "positionMeters": 16.69
+          "symbol": "UTILITY",
+          "positionMeters": 16.59,
+          "sectionHeightMeters": 0.8
         },
         {
-          "levelId": "undercroft",
-          "roomId": "loading_tunnel",
-          "kind": "utility_table",
-          "positionMeters": 24.41
+          "levelId": "ground",
+          "roomId": "public_entry_hall",
+          "kind": "table_bench",
+          "symbol": "TABLE",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
           "roomId": "great_council_hall",
-          "kind": "table_bench",
-          "positionMeters": 18.37
+          "kind": "council_table",
+          "symbol": "COUNCIL",
+          "positionMeters": 18.27,
+          "sectionHeightMeters": 0.9
         },
         {
           "levelId": "ground",
           "roomId": "great_council_hall",
-          "kind": "table_bench",
-          "positionMeters": 22.717
+          "kind": "bench_row",
+          "symbol": "BENCH",
+          "positionMeters": 23.217,
+          "sectionHeightMeters": 0.5
         },
         {
           "levelId": "ground",
-          "roomId": "great_council_hall",
-          "kind": "table_bench",
-          "positionMeters": 18.37
+          "roomId": "service_kitchen",
+          "kind": "prep_table",
+          "symbol": "PREP",
+          "positionMeters": 10.43,
+          "sectionHeightMeters": 0.9
         },
         {
           "levelId": "ground",
-          "roomId": "guard_muster",
-          "kind": "weapon_rack",
-          "positionMeters": 10.53
-        },
-        {
-          "levelId": "ground",
-          "roomId": "guard_muster",
-          "kind": "weapon_rack",
-          "positionMeters": 16.57
-        },
-        {
-          "levelId": "ground",
-          "roomId": "courtyard_gallery",
-          "kind": "table_bench",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "ground",
-          "roomId": "courtyard_gallery",
-          "kind": "table_bench",
-          "positionMeters": 8.73
-        },
-        {
-          "levelId": "ground",
-          "roomId": "courtyard_gallery",
-          "kind": "table_bench",
-          "positionMeters": 0.75
+          "roomId": "service_kitchen",
+          "kind": "hearth_range",
+          "symbol": "RANGE",
+          "positionMeters": 16.77,
+          "sectionHeightMeters": 1.2
         },
         {
           "levelId": "ground",
           "roomId": "accessible_core",
           "kind": "machine_bed",
-          "positionMeters": 24.503
-        },
-        {
-          "levelId": "ground",
-          "roomId": "accessible_core",
-          "kind": "machine_bed",
-          "positionMeters": 26.601
+          "symbol": "MACHINE",
+          "positionMeters": 24.417,
+          "sectionHeightMeters": 1.3
         },
         {
           "levelId": "upper",
           "roomId": "audience_hall",
-          "kind": "table_bench",
-          "positionMeters": 0.75
+          "kind": "council_table",
+          "symbol": "COUNCIL",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.9
         },
         {
           "levelId": "upper",
           "roomId": "audience_hall",
-          "kind": "table_bench",
-          "positionMeters": 12.65
+          "kind": "bench_row",
+          "symbol": "BENCH",
+          "positionMeters": 13.15,
+          "sectionHeightMeters": 0.5
         },
         {
           "levelId": "upper",
-          "roomId": "audience_hall",
-          "kind": "table_bench",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "upper",
-          "roomId": "upper_gallery",
-          "kind": "table_bench",
-          "positionMeters": 14.45
-        },
-        {
-          "levelId": "upper",
-          "roomId": "upper_gallery",
-          "kind": "table_bench",
-          "positionMeters": 26.35
-        },
-        {
-          "levelId": "upper",
-          "roomId": "upper_gallery",
-          "kind": "table_bench",
-          "positionMeters": 14.45
+          "roomId": "staff_service",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 14.35,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "roof_and_towers",
-          "roomId": "signal_room",
+          "roomId": "tower_room_b",
           "kind": "utility_table",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "roof_and_towers",
-          "roomId": "signal_room",
-          "kind": "utility_table",
-          "positionMeters": 12.65
+          "symbol": "UTILITY",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "roof_and_towers",
           "roomId": "defensive_gallery",
           "kind": "table_bench",
-          "positionMeters": 14.45
-        },
+          "symbol": "TABLE",
+          "positionMeters": 14.35,
+          "sectionHeightMeters": 0.8
+        }
+      ],
+      "featureSlices": [
         {
-          "levelId": "roof_and_towers",
-          "roomId": "defensive_gallery",
-          "kind": "table_bench",
-          "positionMeters": 26.35
+          "id": "open_courtyard",
+          "kind": "open_courtyard",
+          "symbol": "COURT",
+          "positionMeters": 10.08,
+          "sectionHeightMeters": 17.0,
+          "openToSky": true
         }
       ],
       "foundation": {
@@ -4547,7 +4773,25 @@
         "baseElevationMeters": 10.3,
         "peakElevationMeters": 17.0,
         "structure": "Layered stepped keep roofs with a low central iron crown; no needle spires.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": [
+          {
+            "startMeters": 10.08,
+            "endMeters": 17.92
+          },
+          {
+            "startMeters": 10.08,
+            "endMeters": 17.92
+          },
+          {
+            "startMeters": 10.08,
+            "endMeters": 17.92
+          },
+          {
+            "startMeters": 10.08,
+            "endMeters": 17.92
+          }
+        ]
       }
     }
   },

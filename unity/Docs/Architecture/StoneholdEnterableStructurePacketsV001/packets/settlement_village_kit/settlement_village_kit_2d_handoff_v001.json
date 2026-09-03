@@ -206,9 +206,9 @@
         "id": "window_ground_dwelling_living",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
+        "side": "south",
         "x": 3.76,
-        "z": 6.032,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_dwelling_living"
       },
@@ -216,8 +216,8 @@
         "id": "window_ground_shared_store",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
-        "x": 3.76,
+        "side": "west",
+        "x": 0.0,
         "z": 15.732,
         "separateObject": true,
         "planOpeningId": "window_ground_shared_store"
@@ -226,9 +226,9 @@
         "id": "window_ground_service_shop",
         "kind": "window",
         "levelId": "ground",
-        "side": "west",
+        "side": "south",
         "x": 12.0,
-        "z": 4.268,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_service_shop"
       },
@@ -238,7 +238,7 @@
         "levelId": "ground",
         "side": "north",
         "x": 12.0,
-        "z": 13.968,
+        "z": 20,
         "separateObject": true,
         "planOpeningId": "window_ground_work_yard"
       },
@@ -246,9 +246,9 @@
         "id": "window_ground_communal_hall",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
+        "side": "south",
         "x": 20.24,
-        "z": 6.397,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_communal_hall"
       },
@@ -256,19 +256,59 @@
         "id": "window_ground_covered_walk",
         "kind": "window",
         "levelId": "ground",
-        "side": "west",
-        "x": 20.24,
+        "side": "east",
+        "x": 24,
         "z": 16.097,
         "separateObject": true,
         "planOpeningId": "window_ground_covered_walk"
       },
       {
+        "id": "window_ground_cut_west",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 0.0,
+        "z": 10.774,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_west"
+      },
+      {
+        "id": "window_ground_cut_east",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 24,
+        "z": 10.774,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_east"
+      },
+      {
+        "id": "window_ground_cut_south",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 18.72,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_south"
+      },
+      {
+        "id": "window_ground_cut_north",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 18.72,
+        "z": 20,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_north"
+      },
+      {
         "id": "window_lofts_dwelling_sleeping",
         "kind": "window",
         "levelId": "lofts",
-        "side": "north",
+        "side": "south",
         "x": 3.76,
-        "z": 6.032,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_lofts_dwelling_sleeping"
       },
@@ -276,8 +316,8 @@
         "id": "window_lofts_service_landing",
         "kind": "window",
         "levelId": "lofts",
-        "side": "east",
-        "x": 3.76,
+        "side": "west",
+        "x": 0.0,
         "z": 15.732,
         "separateObject": true,
         "planOpeningId": "window_lofts_service_landing"
@@ -286,9 +326,9 @@
         "id": "window_lofts_shop_stock_loft",
         "kind": "window",
         "levelId": "lofts",
-        "side": "west",
+        "side": "south",
         "x": 12.0,
-        "z": 10.0,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_lofts_shop_stock_loft"
       },
@@ -296,13 +336,54 @@
         "id": "window_lofts_hall_meeting_loft",
         "kind": "window",
         "levelId": "lofts",
-        "side": "north",
+        "side": "south",
         "x": 20.24,
-        "z": 10.0,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_lofts_hall_meeting_loft"
+      },
+      {
+        "id": "window_lofts_cut_west",
+        "kind": "window",
+        "levelId": "lofts",
+        "side": "west",
+        "x": 0.0,
+        "z": 10.774,
+        "separateObject": true,
+        "planOpeningId": "window_lofts_cut_west"
+      },
+      {
+        "id": "window_lofts_cut_east",
+        "kind": "window",
+        "levelId": "lofts",
+        "side": "east",
+        "x": 24,
+        "z": 10.774,
+        "separateObject": true,
+        "planOpeningId": "window_lofts_cut_east"
+      },
+      {
+        "id": "window_lofts_cut_south",
+        "kind": "window",
+        "levelId": "lofts",
+        "side": "south",
+        "x": 18.72,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_lofts_cut_south"
+      },
+      {
+        "id": "window_lofts_cut_north",
+        "kind": "window",
+        "levelId": "lofts",
+        "side": "north",
+        "x": 18.72,
+        "z": 20,
+        "separateObject": true,
+        "planOpeningId": "window_lofts_cut_north"
       }
     ],
+    "criticalFeatures": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
@@ -326,7 +407,7 @@
       ],
       "perimeterWall": null
     },
-    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable."
   },
   "floorPlans": [
     {
@@ -633,9 +714,10 @@
           "id": "window_ground_dwelling_living",
           "separateFrameGlassShutter": true,
           "serves": "dwelling_living",
-          "side": "north",
+          "side": "south",
           "x": 3.76,
-          "z": 6.032,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -645,9 +727,10 @@
           "id": "window_ground_shared_store",
           "separateFrameGlassShutter": true,
           "serves": "shared_store",
-          "side": "east",
-          "x": 3.76,
+          "side": "west",
+          "x": 0.0,
           "z": 15.732,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -657,9 +740,10 @@
           "id": "window_ground_service_shop",
           "separateFrameGlassShutter": true,
           "serves": "service_shop",
-          "side": "west",
+          "side": "south",
           "x": 12.0,
-          "z": 4.268,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -671,7 +755,8 @@
           "serves": "work_yard",
           "side": "north",
           "x": 12.0,
-          "z": 13.968,
+          "z": 20,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -681,9 +766,10 @@
           "id": "window_ground_communal_hall",
           "separateFrameGlassShutter": true,
           "serves": "communal_hall",
-          "side": "east",
+          "side": "south",
           "x": 20.24,
-          "z": 6.397,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -693,13 +779,70 @@
           "id": "window_ground_covered_walk",
           "separateFrameGlassShutter": true,
           "serves": "covered_walk",
-          "side": "west",
-          "x": 20.24,
+          "side": "east",
+          "x": 24,
           "z": 16.097,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_ground_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "dwelling_living",
+          "side": "west",
+          "x": 0.0,
+          "z": 10.774,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "communal_hall",
+          "side": "east",
+          "x": 24,
+          "z": 10.774,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "communal_hall",
+          "side": "south",
+          "x": 18.72,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "covered_walk",
+          "side": "north",
+          "x": 18.72,
+          "z": 20,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -709,30 +852,30 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 17.72,
-            "z": 11.5,
-            "width": 2.0,
-            "depth": 4.2,
+            "x": 17.82,
+            "z": 9.174,
+            "width": 1.8,
+            "depth": 3.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "covered_walk"
+          "locatedInRoomId": "communal_hall"
         },
         {
           "coreId": "settlement_village_kit_service_platform",
           "type": "service_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 14.92,
-            "z": 11.5,
-            "width": 2.4,
-            "depth": 2.4,
+            "x": 16.9,
+            "z": 10.374,
+            "width": 2.0,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "covered_walk"
+          "locatedInRoomId": "communal_hall"
         }
       ],
       "furnishingLayouts": [
@@ -744,23 +887,14 @@
               "id": "ground_dwelling_living_bed_or_cot_1",
               "kind": "bed_or_cot",
               "label": "sleeping furniture",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "BED",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 2.0,
+              "depth": 1.0,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_dwelling_living_bed_or_cot_2",
-              "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 4.97,
-              "z": 10.414,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.7
             }
           ],
           "protectedClearances": [
@@ -790,34 +924,14 @@
               "id": "ground_shared_store_storage_rack_1",
               "kind": "storage_rack",
               "label": "racks / crates",
-              "x": 0.75,
-              "z": 12.214,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "RACK",
+              "x": 0.65,
+              "z": 12.114,
+              "width": 1.6,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_shared_store_storage_rack_2",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 2.86,
-              "z": 18.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "ground_shared_store_storage_rack_3",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 4.97,
-              "z": 12.214,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.5
             }
           ],
           "protectedClearances": [
@@ -847,23 +961,14 @@
               "id": "ground_service_shop_service_counter_1",
               "kind": "service_counter",
               "label": "counter + display",
-              "x": 8.99,
-              "z": 0.75,
+              "symbol": "COUNTER",
+              "x": 8.89,
+              "z": 0.65,
               "width": 1.8,
-              "depth": 0.9,
+              "depth": 0.7,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_service_shop_service_counter_2",
-              "kind": "service_counter",
-              "label": "counter + display",
-              "x": 13.21,
-              "z": 6.886,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.1
             }
           ],
           "protectedClearances": [
@@ -893,23 +998,14 @@
               "id": "ground_work_yard_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 8.99,
-              "z": 8.686,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 8.89,
+              "z": 8.586,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_work_yard_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 13.21,
-              "z": 18.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -939,23 +1035,14 @@
               "id": "ground_communal_hall_table_bench_1",
               "kind": "table_bench",
               "label": "table / benches",
-              "x": 17.23,
-              "z": 0.75,
+              "symbol": "TABLE",
+              "x": 17.13,
+              "z": 0.65,
               "width": 1.8,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_communal_hall_table_bench_3",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 21.45,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -982,15 +1069,17 @@
           "layoutIntent": "task table + wall storage",
           "footprints": [
             {
-              "id": "ground_covered_walk_utility_table_2",
+              "id": "ground_covered_walk_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 21.45,
-              "z": 18.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "symbol": "UTILITY",
+              "x": 17.13,
+              "z": 12.844,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1135,11 +1224,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            13.6
+            10.774
           ],
           "to": [
             23.7,
-            13.6
+            10.774
           ],
           "cutsVerticalCoreId": "settlement_village_kit_stair_core"
         },
@@ -1359,9 +1448,10 @@
           "id": "window_lofts_dwelling_sleeping",
           "separateFrameGlassShutter": true,
           "serves": "dwelling_sleeping",
-          "side": "north",
+          "side": "south",
           "x": 3.76,
-          "z": 6.032,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1371,9 +1461,10 @@
           "id": "window_lofts_service_landing",
           "separateFrameGlassShutter": true,
           "serves": "service_landing",
-          "side": "east",
-          "x": 3.76,
+          "side": "west",
+          "x": 0.0,
           "z": 15.732,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -1383,9 +1474,10 @@
           "id": "window_lofts_shop_stock_loft",
           "separateFrameGlassShutter": true,
           "serves": "shop_stock_loft",
-          "side": "west",
+          "side": "south",
           "x": 12.0,
-          "z": 10.0,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1395,13 +1487,70 @@
           "id": "window_lofts_hall_meeting_loft",
           "separateFrameGlassShutter": true,
           "serves": "hall_meeting_loft",
-          "side": "north",
+          "side": "south",
           "x": 20.24,
-          "z": 10.0,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_lofts_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "dwelling_sleeping",
+          "side": "west",
+          "x": 0.0,
+          "z": 10.774,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_lofts_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "hall_meeting_loft",
+          "side": "east",
+          "x": 24,
+          "z": 10.774,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_lofts_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "hall_meeting_loft",
+          "side": "south",
+          "x": 18.72,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_lofts_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "hall_meeting_loft",
+          "side": "north",
+          "x": 18.72,
+          "z": 20,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -1411,58 +1560,49 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 17.72,
-            "z": 11.5,
-            "width": 2.0,
-            "depth": 4.2,
+            "x": 5.3,
+            "z": 12.0,
+            "width": 1.8,
+            "depth": 3.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "hall_meeting_loft"
+          "locatedInRoomId": "service_landing"
         },
         {
           "coreId": "settlement_village_kit_service_platform",
           "type": "service_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 14.92,
-            "z": 11.5,
-            "width": 2.4,
-            "depth": 2.4,
+            "x": 5.1,
+            "z": 12.0,
+            "width": 2.0,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "hall_meeting_loft"
+          "locatedInRoomId": "service_landing"
         }
       ],
       "furnishingLayouts": [
         {
           "roomId": "dwelling_sleeping",
-          "layoutIntent": "task table + wall storage",
+          "layoutIntent": "sleeping furniture",
           "footprints": [
             {
-              "id": "lofts_dwelling_sleeping_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "lofts_dwelling_sleeping_bed_or_cot_1",
+              "kind": "bed_or_cot",
+              "label": "sleeping furniture",
+              "symbol": "BED",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 2.0,
+              "depth": 1.0,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "lofts_dwelling_sleeping_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 4.97,
-              "z": 10.414,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.7
             }
           ],
           "protectedClearances": [
@@ -1492,23 +1632,14 @@
               "id": "lofts_service_landing_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 0.75,
-              "z": 12.214,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 0.65,
+              "z": 12.114,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "lofts_service_landing_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 4.97,
-              "z": 18.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1538,34 +1669,14 @@
               "id": "lofts_shop_stock_loft_storage_rack_1",
               "kind": "storage_rack",
               "label": "racks / crates",
-              "x": 8.99,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "RACK",
+              "x": 8.89,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "lofts_shop_stock_loft_storage_rack_2",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 11.1,
-              "z": 18.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "lofts_shop_stock_loft_storage_rack_3",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 13.21,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.5
             }
           ],
           "protectedClearances": [
@@ -1595,34 +1706,14 @@
               "id": "lofts_hall_meeting_loft_table_bench_1",
               "kind": "table_bench",
               "label": "table / benches",
-              "x": 17.23,
-              "z": 0.75,
+              "symbol": "TABLE",
+              "x": 17.13,
+              "z": 0.65,
               "width": 1.8,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "lofts_hall_meeting_loft_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 19.34,
-              "z": 18.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "lofts_hall_meeting_loft_table_bench_3",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 21.45,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1739,11 +1830,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            13.6
+            10.774
           ],
           "to": [
             23.7,
-            13.6
+            10.774
           ],
           "cutsVerticalCoreId": "settlement_village_kit_stair_core"
         },
@@ -1771,10 +1862,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 17.72,
-        "z": 11.5,
-        "width": 2.0,
-        "depth": 4.2,
+        "x": 17.82,
+        "z": 9.174,
+        "width": 1.8,
+        "depth": 3.2,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1803,10 +1894,10 @@
       "type": "service_platform",
       "footprint": {
         "id": "lift_footprint",
-        "x": 14.92,
-        "z": 11.5,
-        "width": 2.4,
-        "depth": 2.4,
+        "x": 15.47,
+        "z": 12.0,
+        "width": 2.0,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1836,7 +1927,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 13.6,
+      "cutCoordinateMeters": 10.774,
       "spanMeters": 24,
       "levels": [
         {
@@ -1853,7 +1944,7 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "shared_store",
+          "roomId": "dwelling_living",
           "startMeters": 0.3,
           "endMeters": 7.22,
           "baseElevationMeters": 0,
@@ -1869,7 +1960,7 @@
         },
         {
           "levelId": "ground",
-          "roomId": "covered_walk",
+          "roomId": "communal_hall",
           "startMeters": 16.78,
           "endMeters": 23.700000000000003,
           "baseElevationMeters": 0,
@@ -1877,7 +1968,7 @@
         },
         {
           "levelId": "lofts",
-          "roomId": "service_landing",
+          "roomId": "dwelling_sleeping",
           "startMeters": 0.3,
           "endMeters": 7.22,
           "baseElevationMeters": 3.2,
@@ -1898,6 +1989,26 @@
           "endMeters": 23.700000000000003,
           "baseElevationMeters": 3.2,
           "clearHeightMeters": 2.5
+        }
+      ],
+      "voidSlices": [
+        {
+          "levelId": "ground",
+          "voidId": "shared_work_yard",
+          "kind": "exterior_yard",
+          "openToSky": false,
+          "startMeters": 7.22,
+          "endMeters": 16.78,
+          "baseElevationMeters": 0.0
+        },
+        {
+          "levelId": "lofts",
+          "voidId": "shared_work_yard",
+          "kind": "exterior_yard",
+          "openToSky": false,
+          "startMeters": 7.22,
+          "endMeters": 16.78,
+          "baseElevationMeters": 3.2
         }
       ],
       "slabs": [
@@ -1920,7 +2031,9 @@
             "ground",
             "lofts"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 17.82,
+          "endMeters": 19.62
         },
         {
           "coreId": "settlement_village_kit_service_platform",
@@ -1929,117 +2042,104 @@
             "ground",
             "lofts"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 15.47,
+          "endMeters": 17.47
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "settlement_village_kit_main_entry",
-          "kind": "door"
+          "openingId": "window_ground_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 10.774,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 10.774
         },
         {
           "levelId": "ground",
-          "openingId": "door_ground_dwelling_living",
-          "kind": "door"
+          "openingId": "window_ground_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 24,
+          "z": 10.774,
+          "positionMeters": 24,
+          "orthogonalMeters": 10.774
         },
         {
           "levelId": "lofts",
-          "openingId": "door_lofts_dwelling_sleeping",
-          "kind": "door"
+          "openingId": "window_lofts_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 10.774,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 10.774
         },
         {
           "levelId": "lofts",
-          "openingId": "door_lofts_service_landing",
-          "kind": "door"
+          "openingId": "window_lofts_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 24,
+          "z": 10.774,
+          "positionMeters": 24,
+          "orthogonalMeters": 10.774
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "shared_store",
-          "kind": "storage_rack",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "ground",
-          "roomId": "shared_store",
-          "kind": "storage_rack",
-          "positionMeters": 2.86
-        },
-        {
-          "levelId": "ground",
-          "roomId": "shared_store",
-          "kind": "storage_rack",
-          "positionMeters": 4.97
+          "roomId": "dwelling_living",
+          "kind": "bed_or_cot",
+          "symbol": "BED",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.7
         },
         {
           "levelId": "ground",
           "roomId": "work_yard",
           "kind": "utility_table",
-          "positionMeters": 8.99
+          "symbol": "UTILITY",
+          "positionMeters": 8.89,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
-          "roomId": "work_yard",
-          "kind": "utility_table",
-          "positionMeters": 13.21
-        },
-        {
-          "levelId": "ground",
-          "roomId": "covered_walk",
-          "kind": "utility_table",
-          "positionMeters": 21.45
+          "roomId": "communal_hall",
+          "kind": "table_bench",
+          "symbol": "TABLE",
+          "positionMeters": 17.13,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "lofts",
-          "roomId": "service_landing",
-          "kind": "utility_table",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "lofts",
-          "roomId": "service_landing",
-          "kind": "utility_table",
-          "positionMeters": 4.97
+          "roomId": "dwelling_sleeping",
+          "kind": "bed_or_cot",
+          "symbol": "BED",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.7
         },
         {
           "levelId": "lofts",
           "roomId": "shop_stock_loft",
           "kind": "storage_rack",
-          "positionMeters": 8.99
-        },
-        {
-          "levelId": "lofts",
-          "roomId": "shop_stock_loft",
-          "kind": "storage_rack",
-          "positionMeters": 11.1
-        },
-        {
-          "levelId": "lofts",
-          "roomId": "shop_stock_loft",
-          "kind": "storage_rack",
-          "positionMeters": 13.21
+          "symbol": "RACK",
+          "positionMeters": 8.89,
+          "sectionHeightMeters": 1.5
         },
         {
           "levelId": "lofts",
           "roomId": "hall_meeting_loft",
           "kind": "table_bench",
-          "positionMeters": 17.23
-        },
-        {
-          "levelId": "lofts",
-          "roomId": "hall_meeting_loft",
-          "kind": "table_bench",
-          "positionMeters": 19.34
-        },
-        {
-          "levelId": "lofts",
-          "roomId": "hall_meeting_loft",
-          "kind": "table_bench",
-          "positionMeters": 21.45
+          "symbol": "TABLE",
+          "positionMeters": 17.13,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -0.6,
         "thicknessMeters": 0.6,
@@ -2049,7 +2149,8 @@
         "baseElevationMeters": 5.7,
         "peakElevationMeters": 7.2,
         "structure": "Three low clipped gables with shared iron-ridge language.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     },
     "cross": {
@@ -2096,6 +2197,7 @@
           "clearHeightMeters": 2.5
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "ground",
@@ -2116,7 +2218,9 @@
             "ground",
             "lofts"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 9.174,
+          "endMeters": 12.374
         },
         {
           "coreId": "settlement_village_kit_service_platform",
@@ -2125,29 +2229,51 @@
             "ground",
             "lofts"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 12.0,
+          "endMeters": 14.0
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "settlement_village_kit_main_entry",
-          "kind": "door"
+          "openingId": "window_ground_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 18.72,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 18.72
         },
         {
           "levelId": "ground",
-          "openingId": "door_ground_dwelling_living",
-          "kind": "door"
+          "openingId": "window_ground_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 18.72,
+          "z": 20,
+          "positionMeters": 20,
+          "orthogonalMeters": 18.72
         },
         {
           "levelId": "lofts",
-          "openingId": "door_lofts_dwelling_sleeping",
-          "kind": "door"
+          "openingId": "window_lofts_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 18.72,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 18.72
         },
         {
           "levelId": "lofts",
-          "openingId": "door_lofts_service_landing",
-          "kind": "door"
+          "openingId": "window_lofts_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 18.72,
+          "z": 20,
+          "positionMeters": 20,
+          "orthogonalMeters": 18.72
         }
       ],
       "furnitureSlices": [
@@ -2155,39 +2281,28 @@
           "levelId": "ground",
           "roomId": "communal_hall",
           "kind": "table_bench",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "ground",
-          "roomId": "communal_hall",
-          "kind": "table_bench",
-          "positionMeters": 0.75
+          "symbol": "TABLE",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
           "roomId": "covered_walk",
           "kind": "utility_table",
-          "positionMeters": 18.35
+          "symbol": "UTILITY",
+          "positionMeters": 12.844,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "lofts",
           "roomId": "hall_meeting_loft",
           "kind": "table_bench",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "lofts",
-          "roomId": "hall_meeting_loft",
-          "kind": "table_bench",
-          "positionMeters": 18.35
-        },
-        {
-          "levelId": "lofts",
-          "roomId": "hall_meeting_loft",
-          "kind": "table_bench",
-          "positionMeters": 0.75
+          "symbol": "TABLE",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -0.6,
         "thicknessMeters": 0.6,
@@ -2197,7 +2312,8 @@
         "baseElevationMeters": 5.7,
         "peakElevationMeters": 7.2,
         "structure": "Three low clipped gables with shared iron-ridge language.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     }
   },

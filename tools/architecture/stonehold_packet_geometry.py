@@ -43,6 +43,11 @@ LAYOUT_PROFILES: dict[str, dict[str, Any]] = {
     "warehouse_barn": {"archetype": "clear-span loading hall with secure rear cells", "patterns": ["clear_span", "guard_mezzanine"], "entry": "south", "core": (0.86, 0.65), "lift": "goods_platform", "yard": True, "masses": 1},
 }
 
+FACADE_TOLERANCE = 0.35
+CUT_APERTURE_TOLERANCE = 0.5
+CORE_ROOM_TOKENS = ("stair", "landing", "core", "lift", "ramp", "accessible")
+VERTICAL_CORE_KIND = "vertical_circulation"
+
 
 def rect(identifier: str, x: float, z: float, width: float, depth: float, kind: str = "building") -> dict[str, Any]:
     return {"id": identifier, "x": round(x, 3), "z": round(z, 3), "width": round(width, 3), "depth": round(depth, 3), "kind": kind}
@@ -87,6 +92,104 @@ def grid_rooms(room_ids: list[str], area: dict[str, Any], columns: int) -> list[
 
 def choose_primary(room_ids: list[str]) -> str:
     return max(room_ids, key=lambda item: (room_score(item), -room_ids.index(item)))
+
+
+def contains_rect(container: dict[str, Any], item: dict[str, Any], tolerance: float = 0.002) -> bool:
+    return (
+        item.get("width", 0) > 0
+        and item.get("depth", 0) > 0
+        and item["x"] >= container["x"] - tolerance
+        and item["z"] >= container["z"] - tolerance
+        and item["x"] + item["width"] <= container["x"] + container["width"] + tolerance
+        and item["z"] + item["depth"] <= container["z"] + container["depth"] + tolerance
+    )
+
+
+def center_of(item: dict[str, Any]) -> tuple[float, float]:
+    return item["x"] + item["width"] / 2, item["z"] + item["depth"] / 2
+
+
+def room_exterior_sides(room: dict[str, Any], width: float, depth: float, wall: float = 0.55) -> list[str]:
+    sides = []
+    if room["z"] <= wall:
+        sides.append("south")
+    if room["z"] + room["depth"] >= depth - wall:
+        sides.append("north")
+    if room["x"] <= wall:
+        sides.append("west")
+    if room["x"] + room["width"] >= width - wall:
+        sides.append("east")
+    return sides
+
+
+def window_on_facade(room: dict[str, Any], side: str, width: float, depth: float, identifier: str) -> dict[str, Any]:
+    if side == "north":
+        x, z = room["x"] + room["width"] / 2, depth
+        orientation = "horizontal"
+    elif side == "south":
+        x, z = room["x"] + room["width"] / 2, 0.0
+        orientation = "horizontal"
+    elif side == "east":
+        x, z = width, room["z"] + room["depth"] / 2
+        orientation = "vertical"
+    else:
+        x, z = 0.0, room["z"] + room["depth"] / 2
+        orientation = "vertical"
+    return {
+        "id": identifier, "separateFrameGlassShutter": True, "serves": room["id"], "side": side,
+        "x": round(x, 3), "z": round(z, 3), "orientation": orientation, "openingMeters": [1.2, 1.5],
+    }
+
+
+def nearest_room_to_point(rooms: list[dict[str, Any]], x: float, z: float) -> dict[str, Any]:
+    return min(rooms, key=lambda room: (room["x"] + room["width"] / 2 - x) ** 2 + (room["z"] + room["depth"] / 2 - z) ** 2)
+
+
+def choose_core_room(rooms: list[dict[str, Any]], core: dict[str, Any], voids: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    court = next((item for item in (voids or []) if item.get("kind") == "open_to_sky"), None)
+    if court:
+        wing_rooms = [
+            room for room in rooms
+            if room["z"] < court["z"] + court["depth"] and room["z"] + room["depth"] > court["z"]
+            and (room["x"] + room["width"] <= court["x"] + 0.15 or room["x"] >= court["x"] + court["width"] - 0.15)
+        ]
+        if wing_rooms:
+            named = [room for room in wing_rooms if any(token in room["id"] for token in CORE_ROOM_TOKENS)]
+            return max(named or wing_rooms, key=lambda room: room["width"] * room["depth"])
+    named = [room for room in rooms if any(token in room["id"] for token in CORE_ROOM_TOKENS)]
+    candidates = named or rooms
+    cx, cz = center_of(core["footprint"])
+
+    def score(room: dict[str, Any]) -> tuple[float, float, float]:
+        rcx, rcz = center_of(room)
+        named_bonus = 1.0 if any(token in room["id"] for token in CORE_ROOM_TOKENS) else 0.0
+        area = room["width"] * room["depth"]
+        return (named_bonus, area, -((rcx - cx) ** 2 + (rcz - cz) ** 2))
+
+    return max(candidates, key=score)
+
+
+def fit_core_in_room(footprint: dict[str, Any], room: dict[str, Any], pad: float = 0.12, voids: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    usable_w = max(0.9, room["width"] - 2 * pad)
+    usable_d = max(0.9, room["depth"] - 2 * pad)
+    width = min(max(1.2, footprint["width"]), usable_w)
+    depth = min(max(1.5, footprint["depth"]), usable_d)
+    width = min(width, usable_w)
+    depth = min(depth, usable_d)
+    x = max(room["x"] + pad, min(footprint["x"], room["x"] + room["width"] - pad - width))
+    z = max(room["z"] + pad, min(footprint["z"], room["z"] + room["depth"] - pad - depth))
+    court = next((item for item in (voids or []) if item.get("kind") == "open_to_sky"), None)
+    if court:
+        if room["x"] >= court["x"] + court["width"] - 0.2:
+            x = room["x"] + pad
+        elif room["x"] + room["width"] <= court["x"] + 0.2:
+            x = room["x"] + room["width"] - pad - width
+    return rect(footprint.get("id", "stair_footprint"), x, z, width, depth, VERTICAL_CORE_KIND)
+
+
+def opening_intersects_cut(opening: dict[str, Any], axis: str, coordinate: float, tolerance: float = CUT_APERTURE_TOLERANCE) -> bool:
+    orthogonal = opening["z"] if axis == "x" else opening["x"]
+    return abs(orthogonal - coordinate) <= tolerance
 
 
 def footprint_set(profile: dict[str, Any], width: float, depth: float) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -211,48 +314,194 @@ def place_rooms(pattern: str, room_ids: list[str], width: float, depth: float, f
     return rooms, circulation, corridor_points
 
 
-def furniture_kind(room_id: str) -> tuple[str, str, int]:
+def _eq(kind: str, label: str, symbol: str, width: float, depth: float, section_height: float = 1.1) -> dict[str, Any]:
+    return {"kind": kind, "label": label, "symbol": symbol, "width": width, "depth": depth, "sectionHeightMeters": section_height}
+
+
+def equipment_spec(packet_slug: str, room_id: str) -> list[dict[str, Any]]:
+    rid = room_id
+    if packet_slug == "forge":
+        if "hearth" in rid:
+            return [_eq("furnace", "coal furnace", "FURNACE", 1.8, 1.3, 1.8), _eq("hood_flue", "smoke hood / flue", "HOOD", 1.5, 0.55, 2.4)]
+        if "forge_workfloor" in rid or rid.endswith("workfloor"):
+            return [_eq("anvil", "anvil station", "ANVIL", 0.8, 0.8, 0.9), _eq("work_bench", "hot-work bench", "BENCH", 1.8, 0.7, 0.9)]
+        if "quench" in rid:
+            return [_eq("quench_trough", "quench trough", "QUENCH", 2.0, 0.75, 0.8)]
+        if "counter" in rid:
+            return [_eq("service_counter", "public counter", "COUNTER", 2.0, 0.7, 1.1)]
+        if "material" in rid or "store" in rid:
+            return [_eq("billet_rack", "billet / bar rack", "BILLET", 1.6, 0.6, 1.4)]
+        if "pattern" in rid or "archive" in rid:
+            return [_eq("shelf_bay", "pattern archive", "SHELF", 1.6, 0.45, 2.0)]
+        if "tool" in rid:
+            return [_eq("tool_rack", "tool wall", "TOOLS", 1.8, 0.4, 1.8)]
+        if "foreman" in rid or "desk" in rid:
+            return [_eq("desk", "foreman desk", "DESK", 1.4, 0.7, 0.8)]
+    if packet_slug == "mill_wind_water":
+        if "wheel" in rid:
+            return [_eq("waterwheel", "guarded waterwheel", "WHEEL", 1.6, 1.6, 3.2), _eq("race_channel", "headrace / tailrace", "RACE", 2.6, 0.6, 0.7)]
+        if "gear" in rid:
+            return [_eq("gearing", "pit-wheel gearing", "GEARS", 1.6, 1.2, 1.6), _eq("mill_shaft", "horizontal drive shaft", "SHAFT", 2.4, 0.35, 0.4)]
+        if "milling" in rid:
+            return [_eq("millstone", "millstones", "STONE", 1.4, 1.4, 0.7), _eq("hopper", "grain hopper", "HOPPER", 1.0, 0.8, 1.4)]
+        if "grain_receiving" in rid or "bagging" in rid:
+            return [_eq("grain_bin", "grain bin", "BIN", 1.4, 0.9, 1.2), _eq("sack_bench", "bagging bench", "SACK", 1.6, 0.6, 0.9)]
+        if "grain_store" in rid:
+            return [_eq("storage_rack", "grain sacks", "SACKS", 1.8, 0.7, 1.4)]
+        if "drainage" in rid:
+            return [_eq("race_channel", "tailrace walk", "RACE", 2.2, 0.55, 0.5)]
+    if packet_slug == "academy":
+        if "teaching" in rid:
+            return [_eq("lecture_table", "instructor table", "LECTURE", 2.2, 0.8, 0.9), _eq("bench_row", "student benches", "BENCH", 2.4, 0.5, 0.5), _eq("chalkboard", "slate board", "BOARD", 2.0, 0.2, 1.4)]
+        if "practice_lab" in rid or "lab" in rid:
+            return [_eq("lab_bench", "practice bench", "LAB", 2.0, 0.8, 0.9), _eq("tool_rack", "tool rack", "TOOLS", 1.6, 0.45, 1.6), _eq("vise_station", "vise station", "VISE", 0.8, 0.8, 1.1), _eq("material_bin", "material bin", "BIN", 0.9, 0.7, 0.8)]
+        if "library" in rid or "archive" in rid or "records" in rid:
+            return [_eq("shelf_bay", "archive shelving", "SHELF", 1.8, 0.45, 2.2), _eq("reading_table", "reading table", "TABLE", 1.6, 0.8, 0.8)]
+        if "study" in rid:
+            return [_eq("study_desk", "study desks", "DESK", 1.5, 0.7, 0.8)]
+        if "office" in rid:
+            return [_eq("desk", "instructor desk", "DESK", 1.4, 0.7, 0.8)]
+        if "tool_store" in rid:
+            return [_eq("tool_rack", "stored tools", "TOOLS", 1.6, 0.45, 1.6)]
+    if packet_slug == "workshop":
+        if "workfloor" in rid:
+            return [_eq("work_bench", "assembly bench", "BENCH", 2.0, 0.8, 0.9), _eq("vise_station", "vise", "VISE", 0.7, 0.7, 1.1)]
+        if "tool_wall" in rid:
+            return [_eq("tool_rack", "tool wall", "TOOLS", 2.2, 0.4, 1.8)]
+        if "counter" in rid:
+            return [_eq("service_counter", "public counter", "COUNTER", 2.0, 0.7, 1.1)]
+        if "pattern" in rid:
+            return [_eq("shelf_bay", "pattern store", "SHELF", 1.6, 0.45, 2.0)]
+    if packet_slug in {"lumber_mill"}:
+        if "saw" in rid:
+            return [_eq("saw_bed", "saw carriage", "SAW", 2.6, 1.0, 1.2), _eq("log_deck", "log deck", "LOG", 2.4, 0.9, 0.8)]
+        if "timber" in rid:
+            return [_eq("timber_rack", "sorted timber", "TIMBER", 2.0, 0.8, 1.2)]
+    if packet_slug == "gold_mine":
+        if "assay" in rid:
+            return [_eq("assay_furnace", "assay furnace", "ASSAY", 1.2, 0.9, 1.4), _eq("assay_bench", "assay bench", "BENCH", 1.6, 0.7, 0.9)]
+        if "winch" in rid:
+            return [_eq("winch_drum", "winch drum", "WINCH", 1.6, 1.2, 1.4)]
+        if "ore" in rid:
+            return [_eq("ore_bin", "ore bin", "ORE", 1.6, 1.0, 1.2)]
+        if "portal" in rid or "airlock" in rid or "loading_cover" in rid:
+            return [_eq("portal_cover", "physical loading cover", "PORTAL", 1.8, 1.2, 2.2)]
+    if packet_slug == "quarry":
+        if "cutting" in rid:
+            return [_eq("cutting_frame", "stone cutting frame", "CUT", 2.2, 1.1, 1.6), _eq("block_bed", "block bed", "BLOCK", 1.8, 1.0, 0.7)]
+        if "machine" in rid:
+            return [_eq("crusher_bed", "machine bed", "CRUSH", 2.0, 1.1, 1.5)]
+    if packet_slug == "stable":
+        if "stall" in rid:
+            return [_eq("stall_partition", "stall partition", "STALL", 1.8, 1.2, 1.4), _eq("manger", "manger", "FEED", 1.4, 0.45, 0.7)]
+        if "tack" in rid:
+            return [_eq("tack_rack", "tack rack", "TACK", 1.8, 0.45, 1.6)]
+        if "hay" in rid or "feed" in rid:
+            return [_eq("hay_bay", "hay / feed bay", "HAY", 1.8, 1.0, 1.2)]
+        if "aisle" in rid:
+            return [_eq("grooming_post", "grooming post", "GROOM", 0.6, 0.6, 1.4)]
+    if packet_slug == "inn_tavern":
+        if "kitchen" in rid:
+            return [_eq("prep_table", "kitchen prep", "PREP", 1.8, 0.8, 0.9), _eq("hearth_range", "cooking range", "RANGE", 1.6, 0.8, 1.2)]
+        if "bar" in rid:
+            return [_eq("service_bar", "service bar", "BAR", 2.4, 0.7, 1.1)]
+        if "common" in rid:
+            return [_eq("table_bench", "common tables", "TABLE", 1.6, 0.9, 0.8), _eq("bench_row", "benches", "BENCH", 2.0, 0.45, 0.5)]
+        if "guest" in rid or "bunk" in rid or "bedroom" in rid:
+            return [_eq("bed_or_cot", "guest bed", "BED", 2.0, 1.0, 0.7)]
+    if packet_slug in {"castle_enterable", "fortress_enterable"}:
+        if "council" in rid or "audience" in rid or "command_hall" in rid:
+            return [_eq("council_table", "council table", "COUNCIL", 2.6, 1.2, 0.9), _eq("bench_row", "benches", "BENCH", 2.2, 0.5, 0.5)]
+        if "detention" in rid or "cell" in rid:
+            return [_eq("secure_cot", "secure cot", "COT", 1.9, 0.8, 0.6), _eq("cell_partition", "cell partition", "CELL", 0.2, 1.8, 2.2)]
+        if "kitchen" in rid:
+            return [_eq("prep_table", "keep kitchen", "PREP", 1.8, 0.8, 0.9), _eq("hearth_range", "range", "RANGE", 1.6, 0.8, 1.2)]
+        if "armory" in rid or "muster" in rid:
+            return [_eq("weapon_rack", "weapon rack", "ARMS", 1.8, 0.5, 1.8), _eq("bench_row", "muster bench", "BENCH", 2.0, 0.45, 0.5)]
+        if "courtyard" in rid or "capture_court" in rid:
+            return [_eq("court_well", "court cistern lip", "WELL", 1.2, 1.2, 0.6)]
+    if packet_slug == "barracks":
+        if "bunk" in rid:
+            return [_eq("bed_or_cot", "bunks", "BUNK", 2.0, 0.9, 1.6), _eq("locker_bank", "lockers", "LOCKER", 1.6, 0.5, 1.8)]
+        if "armory" in rid or "weapon" in rid or "gear" in rid:
+            return [_eq("weapon_rack", "weapon rack", "ARMS", 1.8, 0.5, 1.8)]
+        if "muster" in rid:
+            return [_eq("bench_row", "muster benches", "BENCH", 2.4, 0.5, 0.5)]
+    if packet_slug == "dwelling":
+        if "living" in rid or "hearth" in rid:
+            return [_eq("hearth", "living hearth", "HEARTH", 1.4, 0.7, 1.3), _eq("table_bench", "family table", "TABLE", 1.6, 0.9, 0.8)]
+        if "kitchen" in rid:
+            return [_eq("prep_table", "kitchen prep", "PREP", 1.5, 0.7, 0.9)]
+        if "bedroom" in rid:
+            return [_eq("bed_or_cot", "bed", "BED", 2.0, 1.0, 0.7)]
+        if "pantry" in rid:
+            return [_eq("storage_rack", "pantry racks", "RACK", 1.2, 0.45, 1.6)]
+    if packet_slug == "town_hall":
+        if "public_hall" in rid or "council" in rid:
+            return [_eq("council_table", "civic table", "TABLE", 2.2, 1.0, 0.9), _eq("bench_row", "public benches", "BENCH", 2.0, 0.45, 0.5)]
+        if "records" in rid or "archive" in rid:
+            return [_eq("shelf_bay", "records", "SHELF", 1.6, 0.45, 2.0)]
+        if "office" in rid or "steward" in rid:
+            return [_eq("desk", "steward desk", "DESK", 1.4, 0.7, 0.8)]
+        if "stores" in rid:
+            return [_eq("storage_rack", "civic stores", "RACK", 1.4, 0.5, 1.6)]
+
     rules = [
-        (("bed", "bunk", "guest", "living", "rest"), "bed_or_cot", "sleeping furniture", 2),
-        (("kitchen", "pantry", "food", "drink"), "prep_table", "prep table + storage", 2),
-        (("archive", "record", "library", "drawing", "pattern"), "shelf_bay", "archive shelving", 3),
-        (("store", "stock", "hold", "cellar"), "storage_rack", "racks / crates", 3),
-        (("forge", "hearth", "quench", "workfloor", "workroom", "workshop"), "work_station", "hearth / workbench", 2),
-        (("market", "shop", "counter", "assay"), "service_counter", "counter + display", 2),
-        (("office", "desk", "warden", "foreman", "clerk", "sergeant"), "desk", "desk + chair", 2),
-        (("muster", "guard", "armory", "weapon", "barracks"), "weapon_rack", "weapon rack + bench", 2),
-        (("stable", "stall", "feed", "hay"), "stall_partition", "stall / feed bay", 3),
-        (("mill", "grain", "wheel", "machine", "winch", "pump", "ore", "cutting", "saw"), "machine_bed", "guarded machine / material bay", 2),
-        (("detention", "cell", "prison"), "secure_cot", "cot + secure partition", 2),
-        (("hall", "court", "gallery", "common", "assembly", "teaching", "petition", "reception"), "table_bench", "table / benches", 3),
+        (("bed", "bunk", "guest", "living", "rest", "sleep"), [_eq("bed_or_cot", "sleeping furniture", "BED", 2.0, 1.0, 0.7)]),
+        (("kitchen", "pantry", "food", "drink"), [_eq("prep_table", "prep table", "PREP", 1.6, 0.7, 0.9)]),
+        (("archive", "record", "library", "drawing", "pattern"), [_eq("shelf_bay", "archive shelving", "SHELF", 1.6, 0.45, 2.0)]),
+        (("store", "stock", "hold", "cellar", "cage"), [_eq("storage_rack", "racks / crates", "RACK", 1.6, 0.6, 1.5)]),
+        (("forge", "hearth", "quench", "workfloor", "workroom", "workshop"), [_eq("work_bench", "workbench", "BENCH", 1.8, 0.7, 0.9)]),
+        (("market", "shop", "counter", "assay", "stall"), [_eq("service_counter", "counter + display", "COUNTER", 1.8, 0.7, 1.1)]),
+        (("office", "desk", "warden", "foreman", "clerk", "sergeant", "steward"), [_eq("desk", "desk + chair", "DESK", 1.4, 0.7, 0.8)]),
+        (("muster", "guard", "armory", "weapon", "barracks"), [_eq("weapon_rack", "weapon rack", "ARMS", 1.6, 0.5, 1.8)]),
+        (("stable", "stall", "feed", "hay"), [_eq("stall_partition", "stall / feed bay", "STALL", 1.6, 1.0, 1.4)]),
+        (("mill", "grain", "wheel", "machine", "winch", "pump", "ore", "cutting", "saw"), [_eq("machine_bed", "guarded machine", "MACHINE", 1.8, 0.9, 1.3)]),
+        (("detention", "cell", "prison"), [_eq("secure_cot", "cot + partition", "COT", 1.9, 0.8, 0.6)]),
+        (("hall", "court", "gallery", "common", "assembly", "teaching", "petition", "reception"), [_eq("table_bench", "table / benches", "TABLE", 1.8, 0.9, 0.8)]),
+        (("wash",), [_eq("wash_trough", "wash trough", "WASH", 1.4, 0.55, 0.8)]),
+        (("portal", "airlock", "loading_cover"), [_eq("portal_cover", "physical portal cover", "PORTAL", 1.6, 1.1, 2.2)]),
     ]
-    for tokens, kind, label, count in rules:
-        if any(token in room_id for token in tokens):
-            return kind, label, count
-    return "utility_table", "task table + wall storage", 2
+    for tokens, specs in rules:
+        if any(token in rid for token in tokens):
+            return specs
+    return [_eq("utility_table", "task table + wall storage", "UTILITY", 1.2, 0.6, 0.8)]
 
 
-def furnish_room(room: dict[str, Any], floor_id: str) -> dict[str, Any]:
-    kind, label, count = furniture_kind(room["id"])
-    pad = min(0.45, room["width"] * 0.12, room["depth"] * 0.12)
-    usable_w = max(0.35, room["width"] - 2 * pad)
-    usable_d = max(0.35, room["depth"] - 2 * pad)
-    item_w = max(0.35, min(1.8, usable_w / max(2, count)))
-    item_d = max(0.30, min(0.9, usable_d * 0.24))
+def furnish_room(room: dict[str, Any], floor_id: str, packet_slug: str) -> dict[str, Any]:
+    specs = equipment_spec(packet_slug, room["id"])
+    pad = min(0.35, room["width"] * 0.1, room["depth"] * 0.1)
+    usable_w = max(0.4, room["width"] - 2 * pad)
+    usable_d = max(0.4, room["depth"] - 2 * pad)
     footprints = []
-    for index in range(count):
-        x = room["x"] + pad + (usable_w - item_w) * (index / max(1, count - 1))
-        z = room["z"] + pad if index % 2 == 0 else room["z"] + room["depth"] - pad - item_d
+    south_cursor = room["x"] + pad
+    north_cursor = room["x"] + pad
+    for index, spec in enumerate(specs):
+        item_w = min(spec["width"], max(0.35, usable_w * 0.72))
+        item_d = min(spec["depth"], max(0.25, usable_d * 0.32))
+        if index % 2 == 0:
+            x = min(south_cursor, room["x"] + room["width"] - pad - item_w)
+            z = room["z"] + pad
+            south_cursor = x + item_w + 0.18
+            orientation = 0
+        else:
+            x = min(north_cursor, room["x"] + room["width"] - pad - item_w)
+            z = room["z"] + room["depth"] - pad - item_d
+            north_cursor = x + item_w + 0.18
+            orientation = 180
+        x = min(max(x, room["x"] + pad), room["x"] + room["width"] - pad - item_w)
+        z = min(max(z, room["z"] + pad), room["z"] + room["depth"] - pad - item_d)
         footprints.append({
-            "id": f"{floor_id}_{room['id']}_{kind}_{index + 1}", "kind": kind, "label": label,
+            "id": f"{floor_id}_{room['id']}_{spec['kind']}_{index + 1}",
+            "kind": spec["kind"], "label": spec["label"], "symbol": spec["symbol"],
             "x": round(x, 3), "z": round(z, 3), "width": round(item_w, 3), "depth": round(item_d, 3),
-            "orientationDegrees": 0 if index % 2 == 0 else 180, "count": 1,
+            "orientationDegrees": orientation, "count": 1, "sectionHeightMeters": spec["sectionHeightMeters"],
         })
     aisle_d = min(1.2, room["depth"])
     aisle = rect(f"{room['id']}_protected_aisle", room["x"], room["z"] + (room["depth"] - aisle_d) / 2, room["width"], aisle_d, "minimum_1_2m_aisle")
     approach_w = min(1.2, room["width"])
     approach = rect(f"{room['id']}_door_approach", room["x"] + (room["width"] - approach_w) / 2, room["z"], approach_w, min(1.2, room["depth"]), "door_swing_clearance")
-    return {"roomId": room["id"], "layoutIntent": label, "footprints": footprints, "protectedClearances": [aisle, approach]}
+    return {"roomId": room["id"], "layoutIntent": " + ".join(spec["label"] for spec in specs), "footprints": footprints, "protectedClearances": [aisle, approach]}
 
 
 def side_point(side: str, width: float, depth: float, offset: float = 0.5) -> tuple[float, float, str]:
@@ -270,38 +519,137 @@ def vertical_circulation(packet: dict[str, Any], profile: dict[str, Any]) -> lis
     levels = packet["levels"]
     level_ids = [level["id"] for level in levels]
     cx, cz = profile["core"]
-    stair_w = min(2.0, max(1.5, width * 0.12))
-    stair_d = min(4.2, max(2.8, depth * 0.28))
+    stair_w = min(1.8, max(1.4, width * 0.10))
+    stair_d = min(3.2, max(2.2, depth * 0.18))
     x = min(width - stair_w - 0.3, max(0.3, width * cx - stair_w / 2))
     z = min(depth - stair_d - 0.3, max(0.3, depth * cz - stair_d / 2))
     cores = [{
         "id": f"{packet['slug']}_stair_core", "type": "u_stair" if len(levels) > 2 else "dogleg_stair",
-        "footprint": rect("stair_footprint", x, z, stair_w, stair_d, "vertical_circulation"),
+        "footprint": rect("stair_footprint", x, z, stair_w, stair_d, VERTICAL_CORE_KIND),
         "clearWidthMeters": 1.5, "direction": "UP clockwise", "connectsLevels": level_ids,
         "landings": [{"levelId": level["id"], "elevationMeters": level["elevationMeters"], "depthMeters": 1.5} for level in levels],
         "accessible": False, "separateObjects": True,
     }]
     if profile.get("lift"):
-        lift_w = min(2.4, max(1.8, width * 0.12))
-        lift_d = min(2.4, max(1.8, depth * 0.16))
-        lx = max(0.3, x - lift_w - 0.4)
+        lift_w = min(2.0, max(1.6, width * 0.10))
+        lift_d = min(2.0, max(1.6, depth * 0.12))
+        lx = max(0.3, x - lift_w - 0.35)
         cores.append({
             "id": f"{packet['slug']}_{profile['lift']}", "type": profile["lift"],
-            "footprint": rect("lift_footprint", lx, z, lift_w, lift_d, "vertical_circulation"),
+            "footprint": rect("lift_footprint", lx, z, lift_w, lift_d, VERTICAL_CORE_KIND),
             "clearWidthMeters": 1.5, "direction": "vertical platform", "connectsLevels": level_ids,
             "landings": [{"levelId": level["id"], "elevationMeters": level["elevationMeters"], "depthMeters": 1.5} for level in levels],
             "accessible": "goods" not in profile["lift"], "separateObjects": True,
         })
     if profile.get("ramp"):
-        ramp_w = max(1.5, min(2.0, width * 0.18))
+        ramp_w = max(1.5, min(1.8, width * 0.16))
         cores.append({
             "id": f"{packet['slug']}_switchback_ramp", "type": "switchback_ramp_1_to_12",
-            "footprint": rect("ramp_footprint", 0.5, depth * 0.18, ramp_w, min(depth * 0.62, 8.0), "vertical_circulation"),
+            "footprint": rect("ramp_footprint", 0.5, depth * 0.18, ramp_w, min(depth * 0.45, 6.0), VERTICAL_CORE_KIND),
             "clearWidthMeters": 1.5, "direction": "UP with 1.5 m intermediate landing", "connectsLevels": level_ids,
             "landings": [{"levelId": level["id"], "elevationMeters": level["elevationMeters"], "depthMeters": 1.5} for level in levels],
             "accessible": True, "separateObjects": True,
         })
     return cores
+
+
+def windows_for_level(rooms: list[dict[str, Any]], width: float, depth: float, floor_id: str, elevation: float) -> list[dict[str, Any]]:
+    if elevation < 0:
+        return []
+    windows = []
+    for room in rooms:
+        sides = room_exterior_sides(room, width, depth)
+        if not sides:
+            continue
+        side = sides[0] if len(sides) == 1 else sides[len(windows) % len(sides)]
+        windows.append(window_on_facade(room, side, width, depth, f"window_{floor_id}_{room['id']}"))
+    return windows
+
+
+def add_cut_aligned_windows(floors: list[dict[str, Any]], cores: list[dict[str, Any]], width: float, depth: float) -> None:
+    cut_a = floors[0]["sectionCutLines"][0]
+    cut_b = floors[0]["sectionCutLines"][1]
+    longitudinal_z = cut_a["from"][1]
+    cross_x = cut_b["from"][0]
+    targets = [
+        ("west", 0.0, longitudinal_z),
+        ("east", width, longitudinal_z),
+        ("south", cross_x, 0.0),
+        ("north", cross_x, depth),
+    ]
+    for floor in floors:
+        if floor["elevationMeters"] < 0:
+            continue
+        existing = {(round(window["x"], 2), round(window["z"], 2), window["side"]) for window in floor["windowOpenings"]}
+        for side, x, z in targets:
+            key = (round(x, 2), round(z, 2), side)
+            if key in existing:
+                continue
+            room = nearest_room_to_point(floor["rooms"], x if side in {"south", "north"} else (0.4 if side == "west" else width - 0.4), z if side in {"east", "west"} else (0.4 if side == "south" else depth - 0.4))
+            window = {
+                "id": f"window_{floor['id']}_cut_{side}",
+                "separateFrameGlassShutter": True, "serves": room["id"], "side": side,
+                "x": round(x, 3), "z": round(z, 3),
+                "orientation": "vertical" if side in {"east", "west"} else "horizontal",
+                "openingMeters": [1.2, 1.5], "cutAligned": True,
+            }
+            floor["windowOpenings"].append(window)
+            existing.add(key)
+
+
+def unify_section_cuts(packet: dict[str, Any], floors: list[dict[str, Any]], cores: list[dict[str, Any]]) -> None:
+    width, depth = packet["envelopeMeters"]["width"], packet["envelopeMeters"]["depth"]
+    ground = floors[min(range(len(floors)), key=lambda index: abs(floors[index]["elevationMeters"]))]
+    primary_local = next(item for item in ground["verticalCoreFootprints"] if item["coreId"] == cores[0]["id"])
+    cores[0]["footprint"] = primary_local["footprint"]
+    longitudinal_z = round(primary_local["footprint"]["z"] + primary_local["footprint"]["depth"] / 2, 3)
+    core_x = primary_local["footprint"]["x"]
+    core_w = primary_local["footprint"]["width"]
+    court = next((void for floor in floors for void in floor.get("exteriorVoidsAndCourts", []) if void.get("kind") == "open_to_sky"), None)
+    if court and core_x + core_w <= court["x"] + 0.4:
+        cross_x = round(court["x"], 3)
+    elif court and core_x >= court["x"] + court["width"] - 0.4:
+        cross_x = round(court["x"] + court["width"], 3)
+    else:
+        cross_x = round(core_x + core_w / 2, 3)
+    section_lines = [
+        {"id": "A-A", "orientation": "longitudinal", "from": [0.3, longitudinal_z], "to": [round(width - 0.3, 3), longitudinal_z], "cutsVerticalCoreId": cores[0]["id"]},
+        {"id": "B-B", "orientation": "cross", "from": [cross_x, 0.3], "to": [cross_x, round(depth - 0.3, 3)], "cutsVerticalCoreId": cores[0]["id"]},
+    ]
+    for floor in floors:
+        floor["sectionCutLines"] = [dict(line) for line in section_lines]
+
+
+def critical_features(packet: dict[str, Any], floors: list[dict[str, Any]], cores: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    width, depth = packet["envelopeMeters"]["width"], packet["envelopeMeters"]["depth"]
+    slug = packet["slug"]
+    primary = cores[0]["footprint"]
+    longitudinal_z = primary["z"] + primary["depth"] / 2
+    features: list[dict[str, Any]] = []
+    if slug == "mill_wind_water":
+        features.extend([
+            {"id": "waterwheel", "kind": "waterwheel", "symbol": "WHEEL", "x": 0.05, "z": round(max(0.4, longitudinal_z - 1.1), 3), "width": 1.7, "depth": 2.2, "sectionHeightMeters": 3.4, "sectionVisible": True},
+            {"id": "headrace", "kind": "race_channel", "symbol": "RACE", "x": 0.05, "z": round(max(0.2, longitudinal_z - 0.3), 3), "width": min(6.0, width * 0.42), "depth": 0.7, "sectionHeightMeters": 0.7, "sectionVisible": True},
+            {"id": "drive_shaft", "kind": "mill_shaft", "symbol": "SHAFT", "x": 1.6, "z": round(longitudinal_z - 0.15, 3), "width": min(5.5, width * 0.38), "depth": 0.35, "sectionHeightMeters": 0.4, "sectionVisible": True},
+            {"id": "pit_gearing", "kind": "gearing", "symbol": "GEARS", "x": min(width * 0.34, 5.2), "z": round(longitudinal_z - 0.6, 3), "width": 1.6, "depth": 1.2, "sectionHeightMeters": 1.6, "sectionVisible": True},
+        ])
+    if slug == "forge":
+        hearth = next((room for floor in floors for room in floor["rooms"] if "hearth" in room["id"]), None)
+        if hearth:
+            hx, hz = center_of(hearth)
+            features.append({"id": "forge_hood_flue", "kind": "hood_flue", "symbol": "HOOD", "x": round(hx - 0.75, 3), "z": round(hz - 0.25, 3), "width": 1.5, "depth": 0.5, "sectionHeightMeters": 2.6, "sectionVisible": True})
+            features.append({"id": "forge_furnace", "kind": "furnace", "symbol": "FURNACE", "x": round(hx - 0.9, 3), "z": round(hearth["z"] + 0.25, 3), "width": 1.8, "depth": 1.2, "sectionHeightMeters": 1.8, "sectionVisible": True})
+    if slug == "academy":
+        lab = next((room for floor in floors for room in floor["rooms"] if "practice_lab" in room["id"]), None)
+        if lab:
+            lx, lz = center_of(lab)
+            features.append({"id": "academy_lab_bench", "kind": "lab_bench", "symbol": "LAB", "x": round(lab["x"] + 0.3, 3), "z": round(lab["z"] + 0.25, 3), "width": min(2.0, lab["width"] - 0.6), "depth": 0.8, "sectionHeightMeters": 0.9, "sectionVisible": True})
+            features.append({"id": "academy_tool_rack", "kind": "tool_rack", "symbol": "TOOLS", "x": round(lx, 3), "z": round(lab["z"] + lab["depth"] - 0.7, 3), "width": 1.6, "depth": 0.4, "sectionHeightMeters": 1.6, "sectionVisible": True})
+    if slug in {"castle_enterable", "fortress_enterable"}:
+        court = next((void for floor in floors for void in floor["exteriorVoidsAndCourts"] if void.get("kind") == "open_to_sky"), None)
+        if court:
+            features.append({**court, "kind": "open_courtyard", "symbol": "COURT", "sectionHeightMeters": packet["envelopeMeters"]["height"], "sectionVisible": True, "openToSky": True})
+    return features
 
 
 def build_level(packet: dict[str, Any], level: dict[str, Any], index: int, profile: dict[str, Any], cores: list[dict[str, Any]], approved: dict[str, Any] | None) -> dict[str, Any]:
@@ -359,11 +707,7 @@ def build_level(packet: dict[str, Any], level: dict[str, Any], index: int, profi
                 "x": round(room["x"] + room["width"] / 2, 3), "z": round(room["z"] + (0 if room["z"] > depth / 2 else room["depth"]), 3),
                 "clearOpeningMeters": [1.2, 2.4], "swing": "in",
             })
-    windows = [] if level["elevationMeters"] < 0 else [
-        {"id": f"window_{floor_id}_{room['id']}", "separateFrameGlassShutter": True, "serves": room["id"], "side": "north" if i % 3 == 0 else ("east" if i % 3 == 1 else "west"), "x": round(room["x"] + room["width"] / 2, 3), "z": round(room["z"] + room["depth"] / 2, 3), "openingMeters": [1.2, 1.5]}
-        for i, room in enumerate(rooms)
-    ]
-    core_shapes = [core["footprint"] for core in cores if floor_id in core["connectsLevels"]]
+    windows = windows_for_level(rooms, width, depth, floor_id, level["elevationMeters"])
 
     def overlaps(left: dict[str, Any], right: dict[str, Any]) -> bool:
         return not (
@@ -373,11 +717,25 @@ def build_level(packet: dict[str, Any], level: dict[str, Any], index: int, profi
             or right["z"] + right["depth"] <= left["z"]
         )
 
-    furnishing = [furnish_room(room, floor_id) for room in rooms]
+    core_footprints = []
+    for core in cores:
+        if floor_id not in core["connectsLevels"]:
+            continue
+        room = choose_core_room(rooms, core, voids)
+        fitted = fit_core_in_room(core["footprint"], room, voids=voids)
+        if not contains_rect(room, fitted):
+            fitted = fit_core_in_room(rect("retry", room["x"] + 0.12, room["z"] + 0.12, min(1.4, room["width"] - 0.24), min(1.8, room["depth"] - 0.24), VERTICAL_CORE_KIND), room, voids=voids)
+        core_footprints.append({"coreId": core["id"], "type": core["type"], "footprint": fitted, "landingDepthMeters": 1.5, "direction": core["direction"], "locatedInRoomId": room["id"]})
+
+    furnishing = [furnish_room(room, floor_id, packet["slug"]) for room in rooms]
+    fitted_core_shapes = [item["footprint"] for item in core_footprints]
     for room_layout in furnishing:
-        unobstructed = [item for item in room_layout["footprints"] if not any(overlaps(item, core) for core in core_shapes)]
+        unobstructed = [item for item in room_layout["footprints"] if not any(overlaps(item, core) for core in fitted_core_shapes)]
         if unobstructed:
             room_layout["footprints"] = unobstructed
+        elif not room_layout["footprints"]:
+            room = next(item for item in rooms if item["id"] == room_layout["roomId"])
+            room_layout["footprints"] = furnish_room(room, floor_id, packet["slug"])["footprints"][:1]
     clearances = [rect(f"{floor_id}_accessible_route", circulation["x"], circulation["z"], circulation["width"], circulation["depth"], "primary_accessible_route")]
     largest = max(rooms, key=lambda room: room["width"] * room["depth"])
     diameter = min(packet["clearancesMeters"]["combatClearDiameter"], largest["width"], largest["depth"])
@@ -390,15 +748,7 @@ def build_level(packet: dict[str, Any], level: dict[str, Any], index: int, profi
             {"id": f"light_{floor_id}_{room['id']}", "type": "lighting", "roomId": room["id"], "x": cx, "z": cz},
             {"id": f"interaction_{floor_id}_{room['id']}", "type": "interaction", "roomId": room["id"], "x": round(room["x"] + min(0.6, room["width"] / 3), 3), "z": round(room["z"] + min(0.6, room["depth"] / 3), 3)},
         ])
-    core_footprints = []
-    for core in cores:
-        if floor_id not in core["connectsLevels"]:
-            continue
-        footprint = core["footprint"]
-        core_center = (footprint["x"] + footprint["width"] / 2, footprint["z"] + footprint["depth"] / 2)
-        containing_room = next((room["id"] for room in rooms if room["x"] <= core_center[0] <= room["x"] + room["width"] and room["z"] <= core_center[1] <= room["z"] + room["depth"]), rooms[-1]["id"])
-        core_footprints.append({"coreId": core["id"], "type": core["type"], "footprint": footprint, "landingDepthMeters": 1.5, "direction": core["direction"], "locatedInRoomId": containing_room})
-    primary_core = core_shapes[0]
+    primary_core = core_footprints[0]["footprint"]
     longitudinal_z = round(primary_core["z"] + primary_core["depth"] / 2, 3)
     cross_x = round(primary_core["x"] + primary_core["width"] / 2, 3)
     section_lines = [
@@ -431,15 +781,19 @@ def build_level(packet: dict[str, Any], level: dict[str, Any], index: int, profi
     }
 
 
-def build_sections(packet: dict[str, Any], floors: list[dict[str, Any]], cores: list[dict[str, Any]]) -> dict[str, Any]:
+def build_sections(packet: dict[str, Any], floors: list[dict[str, Any]], cores: list[dict[str, Any]], features: list[dict[str, Any]]) -> dict[str, Any]:
     width, depth = packet["envelopeMeters"]["width"], packet["envelopeMeters"]["depth"]
-    primary_core = cores[0]["footprint"]
-    longitudinal_z = primary_core["z"] + primary_core["depth"] / 2
-    cross_x = primary_core["x"] + primary_core["width"] / 2
+    cut_a = floors[0]["sectionCutLines"][0]
+    cut_b = floors[0]["sectionCutLines"][1]
+    longitudinal_z = cut_a["from"][1]
+    cross_x = cut_b["from"][0]
     sections = {}
     for name, axis, coordinate, cut_id, span in (("longitudinal", "x", longitudinal_z, "A-A", width), ("cross", "z", cross_x, "B-B", depth)):
         room_slices = []
         furniture_slices = []
+        void_slices = []
+        feature_slices = []
+        aperture_slices = []
         for floor in floors:
             floor_slice_count = 0
             for room in floor["rooms"]:
@@ -448,29 +802,81 @@ def build_sections(packet: dict[str, Any], floors: list[dict[str, Any]], cores: 
                     floor_slice_count += 1
                     room_slices.append({"levelId": floor["id"], "roomId": room["id"], "startMeters": room["x"] if axis == "x" else room["z"], "endMeters": room["x"] + room["width"] if axis == "x" else room["z"] + room["depth"], "baseElevationMeters": floor["elevationMeters"], "clearHeightMeters": floor["clearHeightMeters"]})
                     layout = next(item for item in floor["furnishingLayouts"] if item["roomId"] == room["id"])
-                    furniture_slices.extend({"levelId": floor["id"], "roomId": room["id"], "kind": item["kind"], "positionMeters": item["x"] if axis == "x" else item["z"]} for item in layout["footprints"])
+                    furniture_slices.extend({
+                        "levelId": floor["id"], "roomId": room["id"], "kind": item["kind"], "symbol": item.get("symbol", item["kind"]),
+                        "positionMeters": item["x"] if axis == "x" else item["z"],
+                        "sectionHeightMeters": item.get("sectionHeightMeters", 0.9),
+                    } for item in layout["footprints"])
             if floor_slice_count == 0:
-                # Detached/courtyard levels can leave the core cut in an open gap;
-                # bind the nearest room edge and record its furnishings explicitly.
                 room = min(floor["rooms"], key=lambda item: abs((item["z"] + item["depth"] / 2 if axis == "x" else item["x"] + item["width"] / 2) - coordinate))
                 room_slices.append({"levelId": floor["id"], "roomId": room["id"], "startMeters": room["x"] if axis == "x" else room["z"], "endMeters": room["x"] + room["width"] if axis == "x" else room["z"] + room["depth"], "baseElevationMeters": floor["elevationMeters"], "clearHeightMeters": floor["clearHeightMeters"]})
                 layout = next(item for item in floor["furnishingLayouts"] if item["roomId"] == room["id"])
-                furniture_slices.extend({"levelId": floor["id"], "roomId": room["id"], "kind": item["kind"], "positionMeters": item["x"] if axis == "x" else item["z"]} for item in layout["footprints"])
+                furniture_slices.extend({
+                    "levelId": floor["id"], "roomId": room["id"], "kind": item["kind"], "symbol": item.get("symbol", item["kind"]),
+                    "positionMeters": item["x"] if axis == "x" else item["z"],
+                    "sectionHeightMeters": item.get("sectionHeightMeters", 0.9),
+                } for item in layout["footprints"])
+            for void in floor["exteriorVoidsAndCourts"]:
+                intersects = void["z"] <= coordinate <= void["z"] + void["depth"] if axis == "x" else void["x"] <= coordinate <= void["x"] + void["width"]
+                if intersects:
+                    void_slices.append({
+                        "levelId": floor["id"], "voidId": void["id"], "kind": void.get("kind", "void"),
+                        "openToSky": void.get("kind") == "open_to_sky",
+                        "startMeters": void["x"] if axis == "x" else void["z"],
+                        "endMeters": void["x"] + void["width"] if axis == "x" else void["z"] + void["depth"],
+                        "baseElevationMeters": max(0.0, floor["elevationMeters"]),
+                    })
+            openings = [
+                *floor.get("exteriorEntrances", []),
+                *floor.get("windowOpenings", []),
+                *[{**door, "kind": "door"} for door in floor.get("doorOpenings", [])],
+            ]
+            for opening in openings:
+                if opening_intersects_cut(opening, axis, coordinate):
+                    along = opening["x"] if axis == "x" else opening["z"]
+                    orthogonal = opening["z"] if axis == "x" else opening["x"]
+                    aperture_slices.append({
+                        "levelId": floor["id"], "openingId": opening["id"],
+                        "kind": opening.get("kind") or ("window" if opening["id"].startswith("window_") else "door"),
+                        "side": opening.get("side"),
+                        "x": opening["x"], "z": opening["z"],
+                        "positionMeters": round(along, 3),
+                        "orthogonalMeters": round(orthogonal, 3),
+                    })
+        for feature in features:
+            intersects = feature["z"] <= coordinate <= feature["z"] + feature["depth"] if axis == "x" else feature["x"] <= coordinate <= feature["x"] + feature["width"]
+            if intersects or feature.get("openToSky") and (feature["z"] <= coordinate <= feature["z"] + feature["depth"] if axis == "x" else feature["x"] <= coordinate <= feature["x"] + feature["width"]):
+                feature_slices.append({
+                    "id": feature["id"], "kind": feature["kind"], "symbol": feature.get("symbol", feature["kind"]),
+                    "positionMeters": feature["x"] if axis == "x" else feature["z"],
+                    "sectionHeightMeters": feature.get("sectionHeightMeters", 1.2),
+                    "openToSky": feature.get("openToSky", False),
+                })
+        core_slices = []
+        for core in cores:
+            along = core["footprint"]["x"] if axis == "x" else core["footprint"]["z"]
+            extent = core["footprint"]["width"] if axis == "x" else core["footprint"]["depth"]
+            core_slices.append({
+                "coreId": core["id"], "type": core["type"], "connectsLevels": core["connectsLevels"],
+                "direction": core["direction"], "startMeters": round(along, 3), "endMeters": round(along + extent, 3),
+            })
         sections[name] = {
             "id": cut_id, "cutLineId": cut_id, "axis": axis, "cutCoordinateMeters": round(coordinate, 3), "spanMeters": span,
             "levels": [{"id": floor["id"], "elevationMeters": floor["elevationMeters"], "clearHeightMeters": floor["clearHeightMeters"]} for floor in floors],
             "roomSlices": room_slices,
+            "voidSlices": void_slices,
             "slabs": [{"levelId": floor["id"], "elevationMeters": floor["elevationMeters"], "thicknessMeters": 0.3} for floor in floors],
-            "verticalCoreSlices": [{"coreId": core["id"], "type": core["type"], "connectsLevels": core["connectsLevels"], "direction": core["direction"]} for core in cores],
-            "apertureSlices": [{"levelId": floor["id"], "openingId": opening["id"], "kind": "door"} for floor in floors for opening in floor["doorOpenings"][:2]],
+            "verticalCoreSlices": core_slices,
+            "apertureSlices": aperture_slices,
             "furnitureSlices": furniture_slices,
+            "featureSlices": feature_slices,
             "foundation": {"baseElevationMeters": min(floor["elevationMeters"] for floor in floors) - 0.6, "thicknessMeters": 0.6, "steppedBasalt": True},
-            "roofProfile": {"baseElevationMeters": max(floor["elevationMeters"] + floor["clearHeightMeters"] for floor in floors), "peakElevationMeters": packet["envelopeMeters"]["height"], "structure": packet["roofRecommendation"], "cutRoomsAndVoids": True},
+            "roofProfile": {"baseElevationMeters": max(floor["elevationMeters"] + floor["clearHeightMeters"] for floor in floors), "peakElevationMeters": packet["envelopeMeters"]["height"], "structure": packet["roofRecommendation"], "cutRoomsAndVoids": True, "openToSkySpans": [{"startMeters": item["startMeters"], "endMeters": item["endMeters"]} for item in void_slices if item.get("openToSky")]},
         }
     return sections
 
 
-def architecture_design(packet: dict[str, Any], profile: dict[str, Any], floors: list[dict[str, Any]]) -> dict[str, Any]:
+def architecture_design(packet: dict[str, Any], profile: dict[str, Any], floors: list[dict[str, Any]], features: list[dict[str, Any]]) -> dict[str, Any]:
     width, depth = packet["envelopeMeters"]["width"], packet["envelopeMeters"]["depth"]
     masses = []
     for footprint in floors[min(range(len(floors)), key=lambda i: abs(floors[i]["elevationMeters"]))]["levelMassFootprints"]:
@@ -491,8 +897,9 @@ def architecture_design(packet: dict[str, Any], profile: dict[str, Any], floors:
         "packetSlug": packet["slug"], "layoutArchetype": profile["archetype"],
         "planSignature": f"{packet['slug']}|{'|'.join(profile['patterns'])}|{profile['entry']}|{profile['core']}",
         "exteriorMasses": masses, "roofVolumes": roofs, "exteriorOpeningRegister": openings,
+        "criticalFeatures": features,
         "siteContext": site,
-        "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable.",
+        "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable.",
     }
 
 
@@ -502,6 +909,9 @@ def build_packet_geometry(packet: dict[str, Any], approved_civic_layout: dict[st
         raise ValueError(f"{packet['slug']} profile does not cover every physical level")
     cores = vertical_circulation(packet, profile)
     floors = [build_level(packet, level, index, profile, cores, approved_civic_layout) for index, level in enumerate(packet["levels"])]
-    sections = build_sections(packet, floors, cores)
-    design = architecture_design(packet, profile, floors)
+    unify_section_cuts(packet, floors, cores)
+    add_cut_aligned_windows(floors, cores, packet["envelopeMeters"]["width"], packet["envelopeMeters"]["depth"])
+    features = critical_features(packet, floors, cores)
+    sections = build_sections(packet, floors, cores, features)
+    design = architecture_design(packet, profile, floors, features)
     return design, floors, cores, sections

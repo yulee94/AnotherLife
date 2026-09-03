@@ -151,9 +151,9 @@
         "id": "window_ground_open_hall",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
+        "side": "south",
         "x": 3.883,
-        "z": 2.4,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_open_hall"
       },
@@ -162,7 +162,7 @@
         "kind": "window",
         "levelId": "ground",
         "side": "east",
-        "x": 9.583,
+        "x": 12,
         "z": 2.4,
         "separateObject": true,
         "planOpeningId": "window_ground_surviving_side_room"
@@ -171,9 +171,9 @@
         "id": "window_ground_safe_route",
         "kind": "window",
         "levelId": "ground",
-        "side": "west",
+        "side": "north",
         "x": 3.15,
-        "z": 6.6,
+        "z": 9,
         "separateObject": true,
         "planOpeningId": "window_ground_safe_route"
       },
@@ -181,20 +181,61 @@
         "id": "window_ground_blocked_collapse_zone",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
-        "x": 8.85,
+        "side": "east",
+        "x": 12,
         "z": 6.6,
         "separateObject": true,
         "planOpeningId": "window_ground_blocked_collapse_zone"
+      },
+      {
+        "id": "window_ground_cut_west",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 0.0,
+        "z": 3.28,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_west"
+      },
+      {
+        "id": "window_ground_cut_east",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 12,
+        "z": 3.28,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_east"
+      },
+      {
+        "id": "window_ground_cut_south",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 2.88,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_south"
+      },
+      {
+        "id": "window_ground_cut_north",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 2.88,
+        "z": 9,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_north"
       }
     ],
+    "criticalFeatures": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "west",
       "courtyardsAndYards": [],
       "perimeterWall": null
     },
-    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable."
   },
   "floorPlans": [
     {
@@ -344,30 +385,30 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 2.13,
-            "z": 4.18,
-            "width": 1.5,
-            "depth": 2.8,
+            "x": 5.084,
+            "z": 2.48,
+            "width": 1.4,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "safe_excavated_cell"
+          "locatedInRoomId": "collapse_buffer"
         },
         {
           "coreId": "ruin_structure_switchback_ramp",
           "type": "switchback_ramp_1_to_12",
           "footprint": {
             "id": "ramp_footprint",
-            "x": 0.5,
-            "z": 1.62,
-            "width": 2.0,
-            "depth": 5.58,
+            "x": 5.084,
+            "z": 0.63,
+            "width": 1.8,
+            "depth": 4.05,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP with 1.5 m intermediate landing",
-          "locatedInRoomId": "sealed_store"
+          "locatedInRoomId": "collapse_buffer"
         }
       ],
       "furnishingLayouts": [
@@ -379,23 +420,14 @@
               "id": "cellar_sealed_store_storage_rack_1",
               "kind": "storage_rack",
               "label": "racks / crates",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.255,
-              "depth": 0.864,
+              "symbol": "RACK",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "cellar_sealed_store_storage_rack_3",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "x": 3.259,
-              "z": 0.75,
-              "width": 1.255,
-              "depth": 0.864,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.5
             }
           ],
           "protectedClearances": [
@@ -425,23 +457,14 @@
               "id": "cellar_collapse_buffer_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 5.414,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.864,
+              "symbol": "UTILITY",
+              "x": 5.314,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "cellar_collapse_buffer_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 9.45,
-              "z": 3.486,
-              "width": 1.8,
-              "depth": 0.864,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -465,18 +488,20 @@
         },
         {
           "roomId": "safe_excavated_cell",
-          "layoutIntent": "cot + secure partition",
+          "layoutIntent": "cot + partition",
           "footprints": [
             {
-              "id": "cellar_safe_excavated_cell_secure_cot_2",
+              "id": "cellar_safe_excavated_cell_secure_cot_1",
               "kind": "secure_cot",
-              "label": "cot + secure partition",
-              "x": 6.833,
-              "z": 7.355,
-              "width": 1.8,
-              "depth": 0.558,
-              "orientationDegrees": 180,
-              "count": 1
+              "label": "cot + partition",
+              "symbol": "COT",
+              "x": 3.306,
+              "z": 5.526,
+              "width": 1.9,
+              "depth": 0.783,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.6
             }
           ],
           "protectedClearances": [
@@ -579,11 +604,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            5.58
+            3.28
           ],
           "to": [
             11.7,
-            5.58
+            3.28
           ],
           "cutsVerticalCoreId": "ruin_structure_stair_core"
         },
@@ -823,9 +848,10 @@
           "id": "window_ground_open_hall",
           "separateFrameGlassShutter": true,
           "serves": "open_hall",
-          "side": "north",
+          "side": "south",
           "x": 3.883,
-          "z": 2.4,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -836,8 +862,9 @@
           "separateFrameGlassShutter": true,
           "serves": "surviving_side_room",
           "side": "east",
-          "x": 9.583,
+          "x": 12,
           "z": 2.4,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -847,9 +874,10 @@
           "id": "window_ground_safe_route",
           "separateFrameGlassShutter": true,
           "serves": "safe_route",
-          "side": "west",
+          "side": "north",
           "x": 3.15,
-          "z": 6.6,
+          "z": 9,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -859,13 +887,70 @@
           "id": "window_ground_blocked_collapse_zone",
           "separateFrameGlassShutter": true,
           "serves": "blocked_collapse_zone",
-          "side": "north",
-          "x": 8.85,
+          "side": "east",
+          "x": 12,
           "z": 6.6,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_ground_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "open_hall",
+          "side": "west",
+          "x": 0.0,
+          "z": 3.28,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "surviving_side_room",
+          "side": "east",
+          "x": 12,
+          "z": 3.28,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "open_hall",
+          "side": "south",
+          "x": 2.88,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "safe_route",
+          "side": "north",
+          "x": 2.88,
+          "z": 9,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -875,15 +960,15 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 2.13,
-            "z": 4.18,
-            "width": 1.5,
-            "depth": 2.8,
+            "x": 2.18,
+            "z": 2.18,
+            "width": 1.4,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "safe_route"
+          "locatedInRoomId": "open_hall"
         },
         {
           "coreId": "ruin_structure_switchback_ramp",
@@ -891,9 +976,9 @@
           "footprint": {
             "id": "ramp_footprint",
             "x": 0.5,
-            "z": 1.62,
-            "width": 2.0,
-            "depth": 5.58,
+            "z": 0.42,
+            "width": 1.8,
+            "depth": 3.96,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -910,34 +995,14 @@
               "id": "ground_open_hall_table_bench_1",
               "kind": "table_bench",
               "label": "table / benches",
-              "x": 0.75,
-              "z": 0.75,
+              "symbol": "TABLE",
+              "x": 0.65,
+              "z": 0.65,
               "width": 1.8,
-              "depth": 0.792,
+              "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_open_hall_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 2.983,
-              "z": 3.258,
-              "width": 1.8,
-              "depth": 0.792,
-              "orientationDegrees": 180,
-              "count": 1
-            },
-            {
-              "id": "ground_open_hall_table_bench_3",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 5.216,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.792,
-              "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -967,23 +1032,14 @@
               "id": "ground_surviving_side_room_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 7.916,
-              "z": 0.75,
-              "width": 1.667,
-              "depth": 0.792,
+              "symbol": "UTILITY",
+              "x": 7.816,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_surviving_side_room_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 9.583,
-              "z": 3.258,
-              "width": 1.667,
-              "depth": 0.792,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1010,15 +1066,17 @@
           "layoutIntent": "task table + wall storage",
           "footprints": [
             {
-              "id": "ground_safe_route_utility_table_2",
+              "id": "ground_safe_route_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 3.75,
-              "z": 7.458,
-              "width": 1.8,
-              "depth": 0.792,
-              "orientationDegrees": 180,
-              "count": 1
+              "symbol": "UTILITY",
+              "x": 0.65,
+              "z": 4.85,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1048,23 +1106,14 @@
               "id": "ground_blocked_collapse_zone_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 6.45,
-              "z": 4.95,
-              "width": 1.8,
-              "depth": 0.792,
+              "symbol": "UTILITY",
+              "x": 6.35,
+              "z": 4.85,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_blocked_collapse_zone_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 9.45,
-              "z": 7.458,
-              "width": 1.8,
-              "depth": 0.792,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1181,11 +1230,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            5.58
+            3.28
           ],
           "to": [
             11.7,
-            5.58
+            3.28
           ],
           "cutsVerticalCoreId": "ruin_structure_stair_core"
         },
@@ -1213,10 +1262,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 2.13,
-        "z": 4.18,
-        "width": 1.5,
-        "depth": 2.8,
+        "x": 2.18,
+        "z": 2.18,
+        "width": 1.4,
+        "depth": 2.2,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1247,8 +1296,8 @@
         "id": "ramp_footprint",
         "x": 0.5,
         "z": 1.62,
-        "width": 2.0,
-        "depth": 5.58,
+        "width": 1.8,
+        "depth": 4.05,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1278,7 +1327,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 5.58,
+      "cutCoordinateMeters": 3.28,
       "spanMeters": 12,
       "levels": [
         {
@@ -1295,29 +1344,38 @@
       "roomSlices": [
         {
           "levelId": "cellar",
-          "roomId": "safe_excavated_cell",
-          "startMeters": 3.0,
-          "endMeters": 9.0,
+          "roomId": "sealed_store",
+          "startMeters": 0.3,
+          "endMeters": 4.9639999999999995,
+          "baseElevationMeters": -3.0,
+          "clearHeightMeters": 2.6
+        },
+        {
+          "levelId": "cellar",
+          "roomId": "collapse_buffer",
+          "startMeters": 4.964,
+          "endMeters": 11.7,
           "baseElevationMeters": -3.0,
           "clearHeightMeters": 2.6
         },
         {
           "levelId": "ground",
-          "roomId": "safe_route",
+          "roomId": "open_hall",
           "startMeters": 0.3,
-          "endMeters": 6.0,
+          "endMeters": 7.466,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.0
         },
         {
           "levelId": "ground",
-          "roomId": "blocked_collapse_zone",
-          "startMeters": 6.0,
+          "roomId": "surviving_side_room",
+          "startMeters": 7.466,
           "endMeters": 11.7,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.0
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "cellar",
@@ -1338,7 +1396,9 @@
             "cellar",
             "ground"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 2.18,
+          "endMeters": 3.58
         },
         {
           "coreId": "ruin_structure_switchback_ramp",
@@ -1347,57 +1407,68 @@
             "cellar",
             "ground"
           ],
-          "direction": "UP with 1.5 m intermediate landing"
+          "direction": "UP with 1.5 m intermediate landing",
+          "startMeters": 0.5,
+          "endMeters": 2.3
         }
       ],
       "apertureSlices": [
         {
-          "levelId": "cellar",
-          "openingId": "door_cellar_sealed_store",
-          "kind": "door"
-        },
-        {
-          "levelId": "cellar",
-          "openingId": "door_cellar_collapse_buffer",
-          "kind": "door"
+          "levelId": "ground",
+          "openingId": "window_ground_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 3.28,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 3.28
         },
         {
           "levelId": "ground",
-          "openingId": "ruin_structure_main_entry",
-          "kind": "door"
-        },
-        {
-          "levelId": "ground",
-          "openingId": "door_ground_open_hall",
-          "kind": "door"
+          "openingId": "window_ground_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 12,
+          "z": 3.28,
+          "positionMeters": 12,
+          "orthogonalMeters": 3.28
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "cellar",
-          "roomId": "safe_excavated_cell",
-          "kind": "secure_cot",
-          "positionMeters": 6.833
+          "roomId": "sealed_store",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "cellar",
+          "roomId": "collapse_buffer",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 5.314,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
-          "roomId": "safe_route",
-          "kind": "utility_table",
-          "positionMeters": 3.75
+          "roomId": "open_hall",
+          "kind": "table_bench",
+          "symbol": "TABLE",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
-          "roomId": "blocked_collapse_zone",
+          "roomId": "surviving_side_room",
           "kind": "utility_table",
-          "positionMeters": 6.45
-        },
-        {
-          "levelId": "ground",
-          "roomId": "blocked_collapse_zone",
-          "kind": "utility_table",
-          "positionMeters": 9.45
+          "symbol": "UTILITY",
+          "positionMeters": 7.816,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -3.6,
         "thicknessMeters": 0.6,
@@ -1407,7 +1478,8 @@
         "baseElevationMeters": 3.0,
         "peakElevationMeters": 6.0,
         "structure": "Partial collapsed clipped gable with retained iron-ridge fragment.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     },
     "cross": {
@@ -1454,6 +1526,7 @@
           "clearHeightMeters": 3.0
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "cellar",
@@ -1474,7 +1547,9 @@
             "cellar",
             "ground"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 2.18,
+          "endMeters": 4.38
         },
         {
           "coreId": "ruin_structure_switchback_ramp",
@@ -1483,29 +1558,61 @@
             "cellar",
             "ground"
           ],
-          "direction": "UP with 1.5 m intermediate landing"
+          "direction": "UP with 1.5 m intermediate landing",
+          "startMeters": 1.62,
+          "endMeters": 5.67
         }
       ],
       "apertureSlices": [
         {
           "levelId": "cellar",
           "openingId": "door_cellar_sealed_store",
-          "kind": "door"
-        },
-        {
-          "levelId": "cellar",
-          "openingId": "door_cellar_collapse_buffer",
-          "kind": "door"
-        },
-        {
-          "levelId": "ground",
-          "openingId": "ruin_structure_main_entry",
-          "kind": "door"
+          "kind": "door",
+          "side": null,
+          "x": 2.632,
+          "z": 4.8,
+          "positionMeters": 4.8,
+          "orthogonalMeters": 2.632
         },
         {
           "levelId": "ground",
-          "openingId": "door_ground_open_hall",
-          "kind": "door"
+          "openingId": "window_ground_safe_route",
+          "kind": "window",
+          "side": "north",
+          "x": 3.15,
+          "z": 9,
+          "positionMeters": 9,
+          "orthogonalMeters": 3.15
+        },
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 2.88,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 2.88
+        },
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 2.88,
+          "z": 9,
+          "positionMeters": 9,
+          "orthogonalMeters": 2.88
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_safe_route",
+          "kind": "door",
+          "side": null,
+          "x": 3.15,
+          "z": 8.7,
+          "positionMeters": 8.7,
+          "orthogonalMeters": 3.15
         }
       ],
       "furnitureSlices": [
@@ -1513,39 +1620,28 @@
           "levelId": "cellar",
           "roomId": "sealed_store",
           "kind": "storage_rack",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "cellar",
-          "roomId": "sealed_store",
-          "kind": "storage_rack",
-          "positionMeters": 0.75
+          "symbol": "RACK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.5
         },
         {
           "levelId": "ground",
           "roomId": "open_hall",
           "kind": "table_bench",
-          "positionMeters": 0.75
-        },
-        {
-          "levelId": "ground",
-          "roomId": "open_hall",
-          "kind": "table_bench",
-          "positionMeters": 3.258
-        },
-        {
-          "levelId": "ground",
-          "roomId": "open_hall",
-          "kind": "table_bench",
-          "positionMeters": 0.75
+          "symbol": "TABLE",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
           "roomId": "safe_route",
           "kind": "utility_table",
-          "positionMeters": 7.458
+          "symbol": "UTILITY",
+          "positionMeters": 4.85,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -3.6,
         "thicknessMeters": 0.6,
@@ -1555,7 +1651,8 @@
         "baseElevationMeters": 3.0,
         "peakElevationMeters": 6.0,
         "structure": "Partial collapsed clipped gable with retained iron-ridge fragment.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     }
   },

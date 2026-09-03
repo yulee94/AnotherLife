@@ -169,9 +169,9 @@
         "id": "window_ground_muster_hall",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
+        "side": "south",
         "x": 3.84,
-        "z": 2.683,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_muster_hall"
       },
@@ -179,8 +179,8 @@
         "id": "window_ground_armory",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
-        "x": 3.84,
+        "side": "west",
+        "x": 0.0,
         "z": 6.476,
         "separateObject": true,
         "planOpeningId": "window_ground_armory"
@@ -189,9 +189,9 @@
         "id": "window_ground_gear_issue",
         "kind": "window",
         "levelId": "ground",
-        "side": "west",
+        "side": "north",
         "x": 3.84,
-        "z": 9.291,
+        "z": 11,
         "separateObject": true,
         "planOpeningId": "window_ground_gear_issue"
       },
@@ -199,8 +199,8 @@
         "id": "window_ground_sergeant_room",
         "kind": "window",
         "levelId": "ground",
-        "side": "north",
-        "x": 14.16,
+        "side": "east",
+        "x": 18,
         "z": 2.232,
         "separateObject": true,
         "planOpeningId": "window_ground_sergeant_room"
@@ -210,7 +210,7 @@
         "kind": "window",
         "levelId": "ground",
         "side": "east",
-        "x": 14.16,
+        "x": 18,
         "z": 5.5,
         "separateObject": true,
         "planOpeningId": "window_ground_wash_service"
@@ -219,19 +219,59 @@
         "id": "window_ground_rear_ready_exit",
         "kind": "window",
         "levelId": "ground",
-        "side": "west",
-        "x": 14.16,
+        "side": "east",
+        "x": 18,
         "z": 8.768,
         "separateObject": true,
         "planOpeningId": "window_ground_rear_ready_exit"
       },
       {
+        "id": "window_ground_cut_west",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 0.0,
+        "z": 3.847,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_west"
+      },
+      {
+        "id": "window_ground_cut_east",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 18,
+        "z": 3.847,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_east"
+      },
+      {
+        "id": "window_ground_cut_south",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 6.36,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_south"
+      },
+      {
+        "id": "window_ground_cut_north",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 6.36,
+        "z": 11,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_north"
+      },
+      {
         "id": "window_upper_bunk_room_a",
         "kind": "window",
         "levelId": "upper",
-        "side": "north",
+        "side": "south",
         "x": 3.531,
-        "z": 2.9,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_bunk_room_a"
       },
@@ -239,9 +279,9 @@
         "id": "window_upper_bunk_room_b",
         "kind": "window",
         "levelId": "upper",
-        "side": "east",
+        "side": "south",
         "x": 9.995,
-        "z": 2.9,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_bunk_room_b"
       },
@@ -249,9 +289,9 @@
         "id": "window_upper_officer_room",
         "kind": "window",
         "levelId": "upper",
-        "side": "west",
+        "side": "south",
         "x": 15.463,
-        "z": 2.9,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_officer_room"
       },
@@ -259,8 +299,8 @@
         "id": "window_upper_landing_lockers",
         "kind": "window",
         "levelId": "upper",
-        "side": "north",
-        "x": 2.826,
+        "side": "west",
+        "x": 0.0,
         "z": 8.1,
         "separateObject": true,
         "planOpeningId": "window_upper_landing_lockers"
@@ -269,20 +309,61 @@
         "id": "window_upper_night_watch_gallery",
         "kind": "window",
         "levelId": "upper",
-        "side": "east",
+        "side": "north",
         "x": 11.526,
-        "z": 8.1,
+        "z": 11,
         "separateObject": true,
         "planOpeningId": "window_upper_night_watch_gallery"
+      },
+      {
+        "id": "window_upper_cut_west",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 0.0,
+        "z": 3.847,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_west"
+      },
+      {
+        "id": "window_upper_cut_east",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 18,
+        "z": 3.847,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_east"
+      },
+      {
+        "id": "window_upper_cut_south",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "south",
+        "x": 6.36,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_south"
+      },
+      {
+        "id": "window_upper_cut_north",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 6.36,
+        "z": 11,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_north"
       }
     ],
+    "criticalFeatures": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
       "courtyardsAndYards": [],
       "perimeterWall": null
     },
-    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable."
   },
   "floorPlans": [
     {
@@ -619,9 +700,10 @@
           "id": "window_ground_muster_hall",
           "separateFrameGlassShutter": true,
           "serves": "muster_hall",
-          "side": "north",
+          "side": "south",
           "x": 3.84,
-          "z": 2.683,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -631,9 +713,10 @@
           "id": "window_ground_armory",
           "separateFrameGlassShutter": true,
           "serves": "armory",
-          "side": "east",
-          "x": 3.84,
+          "side": "west",
+          "x": 0.0,
           "z": 6.476,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -643,9 +726,10 @@
           "id": "window_ground_gear_issue",
           "separateFrameGlassShutter": true,
           "serves": "gear_issue",
-          "side": "west",
+          "side": "north",
           "x": 3.84,
-          "z": 9.291,
+          "z": 11,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -655,9 +739,10 @@
           "id": "window_ground_sergeant_room",
           "separateFrameGlassShutter": true,
           "serves": "sergeant_room",
-          "side": "north",
-          "x": 14.16,
+          "side": "east",
+          "x": 18,
           "z": 2.232,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -668,8 +753,9 @@
           "separateFrameGlassShutter": true,
           "serves": "wash_service",
           "side": "east",
-          "x": 14.16,
+          "x": 18,
           "z": 5.5,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -679,13 +765,70 @@
           "id": "window_ground_rear_ready_exit",
           "separateFrameGlassShutter": true,
           "serves": "rear_ready_exit",
-          "side": "west",
-          "x": 14.16,
+          "side": "east",
+          "x": 18,
           "z": 8.768,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_ground_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "muster_hall",
+          "side": "west",
+          "x": 0.0,
+          "z": 3.847,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "sergeant_room",
+          "side": "east",
+          "x": 18,
+          "z": 3.847,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "muster_hall",
+          "side": "south",
+          "x": 6.36,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "gear_issue",
+          "side": "north",
+          "x": 6.36,
+          "z": 11,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -695,58 +838,49 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 14.12,
-            "z": 4.84,
-            "width": 2.0,
-            "depth": 3.08,
+            "x": 5.46,
+            "z": 2.747,
+            "width": 1.8,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "wash_service"
+          "locatedInRoomId": "muster_hall"
         },
         {
           "coreId": "barracks_public_platform",
           "type": "public_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 11.56,
-            "z": 4.84,
-            "width": 2.16,
-            "depth": 1.8,
+            "x": 5.46,
+            "z": 3.347,
+            "width": 1.8,
+            "depth": 1.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "wash_service"
+          "locatedInRoomId": "muster_hall"
         }
       ],
       "furnishingLayouts": [
         {
           "roomId": "muster_hall",
-          "layoutIntent": "weapon rack + bench",
+          "layoutIntent": "muster benches",
           "footprints": [
             {
-              "id": "ground_muster_hall_weapon_rack_1",
-              "kind": "weapon_rack",
-              "label": "weapon rack + bench",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "ground_muster_hall_bench_row_1",
+              "kind": "bench_row",
+              "label": "muster benches",
+              "symbol": "BENCH",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 2.4,
+              "depth": 0.5,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_muster_hall_weapon_rack_2",
-              "kind": "weapon_rack",
-              "label": "weapon rack + bench",
-              "x": 5.13,
-              "z": 3.717,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.5
             }
           ],
           "protectedClearances": [
@@ -770,29 +904,20 @@
         },
         {
           "roomId": "armory",
-          "layoutIntent": "weapon rack + bench",
+          "layoutIntent": "weapon rack",
           "footprints": [
             {
               "id": "ground_armory_weapon_rack_1",
               "kind": "weapon_rack",
-              "label": "weapon rack + bench",
-              "x": 0.638,
-              "z": 5.405,
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 0.582,
+              "z": 5.349,
               "width": 1.8,
-              "depth": 0.514,
+              "depth": 0.5,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_armory_weapon_rack_2",
-              "kind": "weapon_rack",
-              "label": "weapon rack + bench",
-              "x": 5.242,
-              "z": 7.032,
-              "width": 1.8,
-              "depth": 0.514,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.8
             }
           ],
           "protectedClearances": [
@@ -816,29 +941,20 @@
         },
         {
           "roomId": "gear_issue",
-          "layoutIntent": "task table + wall storage",
+          "layoutIntent": "weapon rack",
           "footprints": [
             {
-              "id": "ground_gear_issue_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 0.638,
-              "z": 8.221,
+              "id": "ground_gear_issue_weapon_rack_1",
+              "kind": "weapon_rack",
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 0.582,
+              "z": 8.165,
               "width": 1.8,
-              "depth": 0.514,
+              "depth": 0.5,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_gear_issue_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 5.242,
-              "z": 9.848,
-              "width": 1.8,
-              "depth": 0.514,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.8
             }
           ],
           "protectedClearances": [
@@ -868,23 +984,14 @@
               "id": "ground_sergeant_room_desk_1",
               "kind": "desk",
               "label": "desk + chair",
-              "x": 11.07,
-              "z": 0.75,
-              "width": 1.8,
-              "depth": 0.711,
+              "symbol": "DESK",
+              "x": 10.97,
+              "z": 0.65,
+              "width": 1.4,
+              "depth": 0.7,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_sergeant_room_desk_2",
-              "kind": "desk",
-              "label": "desk + chair",
-              "x": 15.45,
-              "z": 3.002,
-              "width": 1.8,
-              "depth": 0.711,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -908,29 +1015,20 @@
         },
         {
           "roomId": "wash_service",
-          "layoutIntent": "task table + wall storage",
+          "layoutIntent": "wash trough",
           "footprints": [
             {
-              "id": "ground_wash_service_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 10.941,
-              "z": 4.484,
-              "width": 1.8,
-              "depth": 0.488,
+              "id": "ground_wash_service_wash_trough_1",
+              "kind": "wash_trough",
+              "label": "wash trough",
+              "symbol": "WASH",
+              "x": 10.887,
+              "z": 4.43,
+              "width": 1.4,
+              "depth": 0.55,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_wash_service_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 15.579,
-              "z": 6.028,
-              "width": 1.8,
-              "depth": 0.488,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -960,23 +1058,14 @@
               "id": "ground_rear_ready_exit_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 11.07,
-              "z": 7.287,
-              "width": 1.8,
-              "depth": 0.711,
+              "symbol": "UTILITY",
+              "x": 10.97,
+              "z": 7.187,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "ground_rear_ready_exit_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 15.45,
-              "z": 9.539,
-              "width": 1.8,
-              "depth": 0.711,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1121,11 +1210,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.38
+            3.847
           ],
           "to": [
             17.7,
-            6.38
+            3.847
           ],
           "cutsVerticalCoreId": "barracks_stair_core"
         },
@@ -1133,11 +1222,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            15.12,
+            6.36,
             0.3
           ],
           "to": [
-            15.12,
+            6.36,
             10.7
           ],
           "cutsVerticalCoreId": "barracks_stair_core"
@@ -1350,9 +1439,10 @@
           "id": "window_upper_bunk_room_a",
           "separateFrameGlassShutter": true,
           "serves": "bunk_room_a",
-          "side": "north",
+          "side": "south",
           "x": 3.531,
-          "z": 2.9,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1362,9 +1452,10 @@
           "id": "window_upper_bunk_room_b",
           "separateFrameGlassShutter": true,
           "serves": "bunk_room_b",
-          "side": "east",
+          "side": "south",
           "x": 9.995,
-          "z": 2.9,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1374,9 +1465,10 @@
           "id": "window_upper_officer_room",
           "separateFrameGlassShutter": true,
           "serves": "officer_room",
-          "side": "west",
+          "side": "south",
           "x": 15.463,
-          "z": 2.9,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1386,9 +1478,10 @@
           "id": "window_upper_landing_lockers",
           "separateFrameGlassShutter": true,
           "serves": "landing_lockers",
-          "side": "north",
-          "x": 2.826,
+          "side": "west",
+          "x": 0.0,
           "z": 8.1,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -1398,13 +1491,70 @@
           "id": "window_upper_night_watch_gallery",
           "separateFrameGlassShutter": true,
           "serves": "night_watch_gallery",
-          "side": "east",
+          "side": "north",
           "x": 11.526,
-          "z": 8.1,
+          "z": 11,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
           ]
+        },
+        {
+          "id": "window_upper_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "bunk_room_a",
+          "side": "west",
+          "x": 0.0,
+          "z": 3.847,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_east",
+          "separateFrameGlassShutter": true,
+          "serves": "officer_room",
+          "side": "east",
+          "x": 18,
+          "z": 3.847,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "bunk_room_a",
+          "side": "south",
+          "x": 6.36,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_upper_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "landing_lockers",
+          "side": "north",
+          "x": 6.36,
+          "z": 11,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -1414,58 +1564,62 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 14.12,
-            "z": 4.84,
-            "width": 2.0,
-            "depth": 3.08,
+            "x": 3.432,
+            "z": 5.62,
+            "width": 1.8,
+            "depth": 2.2,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "night_watch_gallery"
+          "locatedInRoomId": "landing_lockers"
         },
         {
           "coreId": "barracks_public_platform",
           "type": "public_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 11.56,
-            "z": 4.84,
-            "width": 2.16,
-            "depth": 1.8,
+            "x": 3.432,
+            "z": 5.62,
+            "width": 1.8,
+            "depth": 1.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "night_watch_gallery"
+          "locatedInRoomId": "landing_lockers"
         }
       ],
       "furnishingLayouts": [
         {
           "roomId": "bunk_room_a",
-          "layoutIntent": "sleeping furniture",
+          "layoutIntent": "bunks + lockers",
           "footprints": [
             {
               "id": "upper_bunk_room_a_bed_or_cot_1",
               "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 0.75,
-              "z": 0.75,
-              "width": 1.8,
+              "label": "bunks",
+              "symbol": "BUNK",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 2.0,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.6
             },
             {
-              "id": "upper_bunk_room_a_bed_or_cot_2",
-              "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 4.513,
-              "z": 4.15,
-              "width": 1.8,
-              "depth": 0.9,
+              "id": "upper_bunk_room_a_locker_bank_2",
+              "kind": "locker_bank",
+              "label": "lockers",
+              "symbol": "LOCKER",
+              "x": 0.65,
+              "z": 4.65,
+              "width": 1.6,
+              "depth": 0.5,
               "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.8
             }
           ],
           "protectedClearances": [
@@ -1489,18 +1643,33 @@
         },
         {
           "roomId": "bunk_room_b",
-          "layoutIntent": "sleeping furniture",
+          "layoutIntent": "bunks + lockers",
           "footprints": [
             {
               "id": "upper_bunk_room_b_bed_or_cot_1",
               "kind": "bed_or_cot",
-              "label": "sleeping furniture",
-              "x": 7.213,
-              "z": 0.75,
-              "width": 1.8,
+              "label": "bunks",
+              "symbol": "BUNK",
+              "x": 7.113,
+              "z": 0.65,
+              "width": 2.0,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 1.6
+            },
+            {
+              "id": "upper_bunk_room_b_locker_bank_2",
+              "kind": "locker_bank",
+              "label": "lockers",
+              "symbol": "LOCKER",
+              "x": 7.113,
+              "z": 4.65,
+              "width": 1.6,
+              "depth": 0.5,
+              "orientationDegrees": 180,
+              "count": 1,
+              "sectionHeightMeters": 1.8
             }
           ],
           "protectedClearances": [
@@ -1530,12 +1699,14 @@
               "id": "upper_officer_room_desk_1",
               "kind": "desk",
               "label": "desk + chair",
-              "x": 13.676,
-              "z": 0.75,
-              "width": 1.787,
-              "depth": 0.9,
+              "symbol": "DESK",
+              "x": 13.576,
+              "z": 0.65,
+              "width": 1.4,
+              "depth": 0.7,
               "orientationDegrees": 0,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1565,23 +1736,14 @@
               "id": "upper_landing_lockers_utility_table_1",
               "kind": "utility_table",
               "label": "task table + wall storage",
-              "x": 0.75,
-              "z": 5.95,
-              "width": 1.8,
-              "depth": 0.9,
+              "symbol": "UTILITY",
+              "x": 0.65,
+              "z": 5.85,
+              "width": 1.2,
+              "depth": 0.6,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_landing_lockers_utility_table_2",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "x": 3.102,
-              "z": 9.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1611,23 +1773,14 @@
               "id": "upper_night_watch_gallery_table_bench_1",
               "kind": "table_bench",
               "label": "table / benches",
-              "x": 5.802,
-              "z": 5.95,
+              "symbol": "TABLE",
+              "x": 5.702,
+              "z": 5.85,
               "width": 1.8,
               "depth": 0.9,
               "orientationDegrees": 0,
-              "count": 1
-            },
-            {
-              "id": "upper_night_watch_gallery_table_bench_2",
-              "kind": "table_bench",
-              "label": "table / benches",
-              "x": 10.626,
-              "z": 9.35,
-              "width": 1.8,
-              "depth": 0.9,
-              "orientationDegrees": 180,
-              "count": 1
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
@@ -1758,11 +1911,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.38
+            3.847
           ],
           "to": [
             17.7,
-            6.38
+            3.847
           ],
           "cutsVerticalCoreId": "barracks_stair_core"
         },
@@ -1770,11 +1923,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            15.12,
+            6.36,
             0.3
           ],
           "to": [
-            15.12,
+            6.36,
             10.7
           ],
           "cutsVerticalCoreId": "barracks_stair_core"
@@ -1790,10 +1943,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 14.12,
-        "z": 4.84,
-        "width": 2.0,
-        "depth": 3.08,
+        "x": 5.46,
+        "z": 2.747,
+        "width": 1.8,
+        "depth": 2.2,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1822,10 +1975,10 @@
       "type": "public_platform",
       "footprint": {
         "id": "lift_footprint",
-        "x": 11.56,
-        "z": 4.84,
-        "width": 2.16,
-        "depth": 1.8,
+        "x": 12.07,
+        "z": 5.28,
+        "width": 1.8,
+        "depth": 1.6,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1855,7 +2008,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 6.38,
+      "cutCoordinateMeters": 3.847,
       "spanMeters": 18,
       "levels": [
         {
@@ -1872,7 +2025,7 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "armory",
+          "roomId": "muster_hall",
           "startMeters": 0.3,
           "endMeters": 7.38,
           "baseElevationMeters": 0,
@@ -1880,7 +2033,7 @@
         },
         {
           "levelId": "ground",
-          "roomId": "wash_service",
+          "roomId": "sergeant_room",
           "startMeters": 10.62,
           "endMeters": 17.7,
           "baseElevationMeters": 0,
@@ -1888,21 +2041,30 @@
         },
         {
           "levelId": "upper",
-          "roomId": "landing_lockers",
+          "roomId": "bunk_room_a",
           "startMeters": 0.3,
-          "endMeters": 5.351999999999999,
+          "endMeters": 6.763,
           "baseElevationMeters": 3.4,
           "clearHeightMeters": 2.7
         },
         {
           "levelId": "upper",
-          "roomId": "night_watch_gallery",
-          "startMeters": 5.352,
+          "roomId": "bunk_room_b",
+          "startMeters": 6.763,
+          "endMeters": 13.225999999999999,
+          "baseElevationMeters": 3.4,
+          "clearHeightMeters": 2.7
+        },
+        {
+          "levelId": "upper",
+          "roomId": "officer_room",
+          "startMeters": 13.226,
           "endMeters": 17.700000000000003,
           "baseElevationMeters": 3.4,
           "clearHeightMeters": 2.7
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "ground",
@@ -1923,7 +2085,9 @@
             "ground",
             "upper"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 5.46,
+          "endMeters": 7.26
         },
         {
           "coreId": "barracks_public_platform",
@@ -1932,81 +2096,122 @@
             "ground",
             "upper"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 12.07,
+          "endMeters": 13.87
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "barracks_main_entry",
-          "kind": "door"
+          "openingId": "window_ground_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 3.847,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 3.847
         },
         {
           "levelId": "ground",
-          "openingId": "barracks_service_entry",
-          "kind": "door"
+          "openingId": "window_ground_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 18,
+          "z": 3.847,
+          "positionMeters": 18,
+          "orthogonalMeters": 3.847
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_sergeant_room",
+          "kind": "door",
+          "side": null,
+          "x": 14.16,
+          "z": 4.163,
+          "positionMeters": 14.16,
+          "orthogonalMeters": 4.163
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_bunk_room_a",
-          "kind": "door"
+          "openingId": "window_upper_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 3.847,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 3.847
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_bunk_room_b",
-          "kind": "door"
+          "openingId": "window_upper_cut_east",
+          "kind": "window",
+          "side": "east",
+          "x": 18,
+          "z": 3.847,
+          "positionMeters": 18,
+          "orthogonalMeters": 3.847
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "armory",
-          "kind": "weapon_rack",
-          "positionMeters": 0.638
+          "roomId": "muster_hall",
+          "kind": "bench_row",
+          "symbol": "BENCH",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.5
         },
         {
           "levelId": "ground",
-          "roomId": "armory",
-          "kind": "weapon_rack",
-          "positionMeters": 5.242
-        },
-        {
-          "levelId": "ground",
-          "roomId": "wash_service",
-          "kind": "utility_table",
-          "positionMeters": 10.941
-        },
-        {
-          "levelId": "ground",
-          "roomId": "wash_service",
-          "kind": "utility_table",
-          "positionMeters": 15.579
+          "roomId": "sergeant_room",
+          "kind": "desk",
+          "symbol": "DESK",
+          "positionMeters": 10.97,
+          "sectionHeightMeters": 0.8
         },
         {
           "levelId": "upper",
-          "roomId": "landing_lockers",
-          "kind": "utility_table",
-          "positionMeters": 0.75
+          "roomId": "bunk_room_a",
+          "kind": "bed_or_cot",
+          "symbol": "BUNK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.6
         },
         {
           "levelId": "upper",
-          "roomId": "landing_lockers",
-          "kind": "utility_table",
-          "positionMeters": 3.102
+          "roomId": "bunk_room_a",
+          "kind": "locker_bank",
+          "symbol": "LOCKER",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.8
         },
         {
           "levelId": "upper",
-          "roomId": "night_watch_gallery",
-          "kind": "table_bench",
-          "positionMeters": 5.802
+          "roomId": "bunk_room_b",
+          "kind": "bed_or_cot",
+          "symbol": "BUNK",
+          "positionMeters": 7.113,
+          "sectionHeightMeters": 1.6
         },
         {
           "levelId": "upper",
-          "roomId": "night_watch_gallery",
-          "kind": "table_bench",
-          "positionMeters": 10.626
+          "roomId": "bunk_room_b",
+          "kind": "locker_bank",
+          "symbol": "LOCKER",
+          "positionMeters": 7.113,
+          "sectionHeightMeters": 1.8
+        },
+        {
+          "levelId": "upper",
+          "roomId": "officer_room",
+          "kind": "desk",
+          "symbol": "DESK",
+          "positionMeters": 13.576,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -0.6,
         "thicknessMeters": 0.6,
@@ -2016,14 +2221,15 @@
         "baseElevationMeters": 6.1,
         "peakElevationMeters": 7.8,
         "structure": "Long low iron-ribbed gable with two vent crowns.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     },
     "cross": {
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 15.12,
+      "cutCoordinateMeters": 6.36,
       "spanMeters": 11,
       "levels": [
         {
@@ -2040,31 +2246,31 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "sergeant_room",
+          "roomId": "muster_hall",
           "startMeters": 0.3,
-          "endMeters": 4.163,
+          "endMeters": 5.067,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.1
         },
         {
           "levelId": "ground",
-          "roomId": "wash_service",
-          "startMeters": 4.163,
-          "endMeters": 6.837,
+          "roomId": "armory",
+          "startMeters": 5.067,
+          "endMeters": 7.884,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.1
         },
         {
           "levelId": "ground",
-          "roomId": "rear_ready_exit",
-          "startMeters": 6.837,
+          "roomId": "gear_issue",
+          "startMeters": 7.883,
           "endMeters": 10.7,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.1
         },
         {
           "levelId": "upper",
-          "roomId": "officer_room",
+          "roomId": "bunk_room_a",
           "startMeters": 0.3,
           "endMeters": 5.5,
           "baseElevationMeters": 3.4,
@@ -2079,6 +2285,7 @@
           "clearHeightMeters": 2.7
         }
       ],
+      "voidSlices": [],
       "slabs": [
         {
           "levelId": "ground",
@@ -2099,7 +2306,9 @@
             "ground",
             "upper"
           ],
-          "direction": "UP clockwise"
+          "direction": "UP clockwise",
+          "startMeters": 2.747,
+          "endMeters": 4.947
         },
         {
           "coreId": "barracks_public_platform",
@@ -2108,87 +2317,104 @@
             "ground",
             "upper"
           ],
-          "direction": "vertical platform"
+          "direction": "vertical platform",
+          "startMeters": 5.28,
+          "endMeters": 6.88
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "barracks_main_entry",
-          "kind": "door"
+          "openingId": "window_ground_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 6.36,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 6.36
         },
         {
           "levelId": "ground",
-          "openingId": "barracks_service_entry",
-          "kind": "door"
+          "openingId": "window_ground_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 6.36,
+          "z": 11,
+          "positionMeters": 11,
+          "orthogonalMeters": 6.36
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_bunk_room_a",
-          "kind": "door"
+          "openingId": "window_upper_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 6.36,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 6.36
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_bunk_room_b",
-          "kind": "door"
+          "openingId": "window_upper_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 6.36,
+          "z": 11,
+          "positionMeters": 11,
+          "orthogonalMeters": 6.36
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "sergeant_room",
-          "kind": "desk",
-          "positionMeters": 0.75
+          "roomId": "muster_hall",
+          "kind": "bench_row",
+          "symbol": "BENCH",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.5
         },
         {
           "levelId": "ground",
-          "roomId": "sergeant_room",
-          "kind": "desk",
-          "positionMeters": 3.002
+          "roomId": "armory",
+          "kind": "weapon_rack",
+          "symbol": "ARMS",
+          "positionMeters": 5.349,
+          "sectionHeightMeters": 1.8
         },
         {
           "levelId": "ground",
-          "roomId": "wash_service",
-          "kind": "utility_table",
-          "positionMeters": 4.484
-        },
-        {
-          "levelId": "ground",
-          "roomId": "wash_service",
-          "kind": "utility_table",
-          "positionMeters": 6.028
-        },
-        {
-          "levelId": "ground",
-          "roomId": "rear_ready_exit",
-          "kind": "utility_table",
-          "positionMeters": 7.287
-        },
-        {
-          "levelId": "ground",
-          "roomId": "rear_ready_exit",
-          "kind": "utility_table",
-          "positionMeters": 9.539
+          "roomId": "gear_issue",
+          "kind": "weapon_rack",
+          "symbol": "ARMS",
+          "positionMeters": 8.165,
+          "sectionHeightMeters": 1.8
         },
         {
           "levelId": "upper",
-          "roomId": "officer_room",
-          "kind": "desk",
-          "positionMeters": 0.75
+          "roomId": "bunk_room_a",
+          "kind": "bed_or_cot",
+          "symbol": "BUNK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.6
+        },
+        {
+          "levelId": "upper",
+          "roomId": "bunk_room_a",
+          "kind": "locker_bank",
+          "symbol": "LOCKER",
+          "positionMeters": 4.65,
+          "sectionHeightMeters": 1.8
         },
         {
           "levelId": "upper",
           "roomId": "night_watch_gallery",
           "kind": "table_bench",
-          "positionMeters": 5.95
-        },
-        {
-          "levelId": "upper",
-          "roomId": "night_watch_gallery",
-          "kind": "table_bench",
-          "positionMeters": 9.35
+          "symbol": "TABLE",
+          "positionMeters": 5.85,
+          "sectionHeightMeters": 0.8
         }
       ],
+      "featureSlices": [],
       "foundation": {
         "baseElevationMeters": -0.6,
         "thicknessMeters": 0.6,
@@ -2198,7 +2424,8 @@
         "baseElevationMeters": 6.1,
         "peakElevationMeters": 7.8,
         "structure": "Long low iron-ribbed gable with two vent crowns.",
-        "cutRoomsAndVoids": true
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
       }
     }
   },
