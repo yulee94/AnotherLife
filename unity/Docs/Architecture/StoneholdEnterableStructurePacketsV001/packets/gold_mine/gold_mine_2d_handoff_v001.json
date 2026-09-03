@@ -1,0 +1,1027 @@
+{
+  "schema": "anotherlife.stonehold-enterable-structure-2d-handoff.v1",
+  "packetSetId": "stonehold_enterable_structure_packets_v001",
+  "packetId": "stonehold_gold_mine_2d_handoff_v001",
+  "taxonomyId": "waf_architecture_building_gold_mine",
+  "slug": "gold_mine",
+  "title": "Stonehold Gold-Mine Headhouse",
+  "category": "industrial",
+  "status": "pending_owner_review",
+  "envelopeMeters": {
+    "width": 16,
+    "depth": 12,
+    "height": 11.0
+  },
+  "massingRecommendation": "Enterable assay/service headhouse framing a physical mine portal; never a blocked decorative tunnel.",
+  "roofRecommendation": "Stepped iron headframe roof with low enclosed assay wing.",
+  "materialRecommendation": "Stepped basalt base; dark iron ribs; soot-aged dark timber; sparse bronze repairs; localized forge-amber practical light only.",
+  "levels": [
+    {
+      "id": "lower_staging",
+      "elevationMeters": -3.2,
+      "clearHeightMeters": 3.0,
+      "rooms": [
+        "ore_receiving",
+        "secure_hold",
+        "pump_service",
+        "portal_loading_cover"
+      ]
+    },
+    {
+      "id": "ground",
+      "elevationMeters": 0,
+      "clearHeightMeters": 3.3,
+      "rooms": [
+        "muster",
+        "tool_issue",
+        "assay_room",
+        "ore_sort",
+        "warden_office",
+        "mine_portal_airlock"
+      ]
+    },
+    {
+      "id": "upper",
+      "elevationMeters": 3.6,
+      "clearHeightMeters": 2.7,
+      "rooms": [
+        "winch_gallery",
+        "records",
+        "watch_platform",
+        "landing"
+      ]
+    }
+  ],
+  "streamingPolicy": "Hybrid: headhouse seamless; mine beyond portal is a separately loaded unrestricted public interior.",
+  "accessibilityRoute": "Step-free ground services; industrial lift to lower staging and upper winch gallery.",
+  "clearancesMeters": {
+    "publicEntrance": [
+      2.5,
+      3.0
+    ],
+    "interiorDoor": [
+      1.2,
+      2.4
+    ],
+    "minimumFurnitureAisle": 1.2,
+    "primaryCirculationWidth": 1.5,
+    "combatClearDiameter": 4.0,
+    "cameraBackoff": 2.5,
+    "stairWidth": 1.5,
+    "landingDepth": 1.5,
+    "rampMaximumSlope": "1:12"
+  },
+  "interiorModuleIds": [
+    "waf_interior_shell_wall_floor_ceiling",
+    "waf_interior_door_window_threshold",
+    "waf_interior_entry_vestibule",
+    "waf_interior_corridor_junction",
+    "waf_interior_stair_landing",
+    "waf_interior_cutaway_occlusion_set",
+    "waf_interior_storage_pantry_cellar",
+    "waf_interior_utility_service_room",
+    "waf_interior_mine_cave_room",
+    "waf_interior_library_archive"
+  ],
+  "propPacks": [
+    "common",
+    "mine",
+    "industrial",
+    "storage",
+    "military",
+    "utility",
+    "archive"
+  ],
+  "socketSets": [
+    "lighting",
+    "interaction",
+    "quest",
+    "audio",
+    "vfx_anchor_runtime_separate",
+    "portal_streaming"
+  ],
+  "variants": {
+    "clean": {
+      "required": true,
+      "sharedGeometryPreferred": true
+    },
+    "used": {
+      "required": true,
+      "sharedGeometryPreferred": true
+    },
+    "damaged": {
+      "required": true,
+      "sharedGeometryPreferred": true
+    }
+  },
+  "familySpecificGate": "Approve the headhouse-to-streamed-mine portal sequence and secure assay wing.",
+  "units": "meters",
+  "views": [
+    "front_elevation",
+    "side_elevation",
+    "rear_elevation",
+    "roof_plan",
+    "material_study",
+    "every_floor_plan",
+    "longitudinal_section",
+    "cross_section"
+  ],
+  "floorPlans": [
+    {
+      "id": "lower_staging",
+      "elevationMeters": -3.2,
+      "clearHeightMeters": 3.0,
+      "rooms": [
+        {
+          "id": "ore_receiving",
+          "purpose": "ore receiving",
+          "x": 0.3,
+          "z": 6.75,
+          "width": 7.7,
+          "depth": 4.95,
+          "furnitureZones": [
+            "ore_receiving_primary",
+            "ore_receiving_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "secure_hold",
+          "purpose": "secure hold",
+          "x": 8.0,
+          "z": 6.75,
+          "width": 7.7,
+          "depth": 4.95,
+          "furnitureZones": [
+            "secure_hold_primary",
+            "secure_hold_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "pump_service",
+          "purpose": "pump service",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 5.133,
+          "depth": 4.95,
+          "furnitureZones": [
+            "pump_service_primary",
+            "pump_service_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "portal_loading_cover",
+          "purpose": "portal loading cover",
+          "x": 5.433,
+          "z": 0.3,
+          "width": 10.267,
+          "depth": 4.95,
+          "furnitureZones": [
+            "portal_loading_cover_primary",
+            "portal_loading_cover_storage",
+            "clear_route_edge"
+          ]
+        }
+      ],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 0.3,
+        "z": 5.25,
+        "width": 15.4,
+        "depth": 1.5
+      },
+      "adjacency": [
+        [
+          "ore_receiving",
+          "primary_circulation"
+        ],
+        [
+          "secure_hold",
+          "primary_circulation"
+        ],
+        [
+          "pump_service",
+          "primary_circulation"
+        ],
+        [
+          "portal_loading_cover",
+          "primary_circulation"
+        ]
+      ],
+      "doorOpenings": [
+        {
+          "id": "door_lower_staging_ore_receiving",
+          "separateObject": true,
+          "between": [
+            "ore_receiving",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_lower_staging_secure_hold",
+          "separateObject": true,
+          "between": [
+            "secure_hold",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_lower_staging_pump_service",
+          "separateObject": true,
+          "between": [
+            "pump_service",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_lower_staging_portal_loading_cover",
+          "separateObject": true,
+          "between": [
+            "portal_loading_cover",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        }
+      ],
+      "windowOpenings": [],
+      "windowPolicy": "No exterior windows below grade; separate ventilation and emergency shafts.",
+      "verticalCore": {
+        "stairMeters": [
+          1.5,
+          1.5
+        ],
+        "liftPlatformReserved": true,
+        "separateObjects": true
+      },
+      "portalBoundary": "physical_loading_cover_and_streaming_portal"
+    },
+    {
+      "id": "ground",
+      "elevationMeters": 0,
+      "clearHeightMeters": 3.3,
+      "rooms": [
+        {
+          "id": "muster",
+          "purpose": "muster",
+          "x": 0.3,
+          "z": 6.75,
+          "width": 6.545,
+          "depth": 4.95,
+          "furnitureZones": [
+            "muster_primary",
+            "muster_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "tool_issue",
+          "purpose": "tool issue",
+          "x": 6.845,
+          "z": 6.75,
+          "width": 4.428,
+          "depth": 4.95,
+          "furnitureZones": [
+            "tool_issue_primary",
+            "tool_issue_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "assay_room",
+          "purpose": "assay room",
+          "x": 11.273,
+          "z": 6.75,
+          "width": 4.428,
+          "depth": 4.95,
+          "furnitureZones": [
+            "assay_room_primary",
+            "assay_room_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "ore_sort",
+          "purpose": "ore sort",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 5.622,
+          "depth": 4.95,
+          "furnitureZones": [
+            "ore_sort_primary",
+            "ore_sort_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "warden_office",
+          "purpose": "warden office",
+          "x": 5.922,
+          "z": 0.3,
+          "width": 4.156,
+          "depth": 4.95,
+          "furnitureZones": [
+            "warden_office_primary",
+            "warden_office_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "mine_portal_airlock",
+          "purpose": "mine portal airlock",
+          "x": 10.078,
+          "z": 0.3,
+          "width": 5.622,
+          "depth": 4.95,
+          "furnitureZones": [
+            "mine_portal_airlock_primary",
+            "mine_portal_airlock_storage",
+            "clear_route_edge"
+          ]
+        }
+      ],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 0.3,
+        "z": 5.25,
+        "width": 15.4,
+        "depth": 1.5
+      },
+      "adjacency": [
+        [
+          "muster",
+          "primary_circulation"
+        ],
+        [
+          "tool_issue",
+          "primary_circulation"
+        ],
+        [
+          "assay_room",
+          "primary_circulation"
+        ],
+        [
+          "ore_sort",
+          "primary_circulation"
+        ],
+        [
+          "warden_office",
+          "primary_circulation"
+        ],
+        [
+          "mine_portal_airlock",
+          "primary_circulation"
+        ]
+      ],
+      "doorOpenings": [
+        {
+          "id": "door_ground_muster",
+          "separateObject": true,
+          "between": [
+            "muster",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_ground_tool_issue",
+          "separateObject": true,
+          "between": [
+            "tool_issue",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_ground_assay_room",
+          "separateObject": true,
+          "between": [
+            "assay_room",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_ground_ore_sort",
+          "separateObject": true,
+          "between": [
+            "ore_sort",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_ground_warden_office",
+          "separateObject": true,
+          "between": [
+            "warden_office",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_ground_mine_portal_airlock",
+          "separateObject": true,
+          "between": [
+            "mine_portal_airlock",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        }
+      ],
+      "windowOpenings": [
+        {
+          "id": "window_ground_muster",
+          "separateFrameGlassShutter": true,
+          "serves": "muster",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_tool_issue",
+          "separateFrameGlassShutter": true,
+          "serves": "tool_issue",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_assay_room",
+          "separateFrameGlassShutter": true,
+          "serves": "assay_room",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_ore_sort",
+          "separateFrameGlassShutter": true,
+          "serves": "ore_sort",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_warden_office",
+          "separateFrameGlassShutter": true,
+          "serves": "warden_office",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_mine_portal_airlock",
+          "separateFrameGlassShutter": true,
+          "serves": "mine_portal_airlock",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        }
+      ],
+      "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
+      "verticalCore": {
+        "stairMeters": [
+          1.5,
+          1.5
+        ],
+        "liftPlatformReserved": true,
+        "separateObjects": true
+      },
+      "portalBoundary": "physical_loading_cover_and_streaming_portal"
+    },
+    {
+      "id": "upper",
+      "elevationMeters": 3.6,
+      "clearHeightMeters": 2.7,
+      "rooms": [
+        {
+          "id": "winch_gallery",
+          "purpose": "winch gallery",
+          "x": 0.3,
+          "z": 6.75,
+          "width": 9.186,
+          "depth": 4.95,
+          "furnitureZones": [
+            "winch_gallery_primary",
+            "winch_gallery_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "records",
+          "purpose": "records",
+          "x": 9.486,
+          "z": 6.75,
+          "width": 6.214,
+          "depth": 4.95,
+          "furnitureZones": [
+            "records_primary",
+            "records_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "watch_platform",
+          "purpose": "watch platform",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 8.855,
+          "depth": 4.95,
+          "furnitureZones": [
+            "watch_platform_primary",
+            "watch_platform_storage",
+            "clear_route_edge"
+          ]
+        },
+        {
+          "id": "landing",
+          "purpose": "landing",
+          "x": 9.155,
+          "z": 0.3,
+          "width": 6.545,
+          "depth": 4.95,
+          "furnitureZones": [
+            "landing_primary",
+            "landing_storage",
+            "clear_route_edge"
+          ]
+        }
+      ],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 0.3,
+        "z": 5.25,
+        "width": 15.4,
+        "depth": 1.5
+      },
+      "adjacency": [
+        [
+          "winch_gallery",
+          "primary_circulation"
+        ],
+        [
+          "records",
+          "primary_circulation"
+        ],
+        [
+          "watch_platform",
+          "primary_circulation"
+        ],
+        [
+          "landing",
+          "primary_circulation"
+        ]
+      ],
+      "doorOpenings": [
+        {
+          "id": "door_upper_winch_gallery",
+          "separateObject": true,
+          "between": [
+            "winch_gallery",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_upper_records",
+          "separateObject": true,
+          "between": [
+            "records",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_upper_watch_platform",
+          "separateObject": true,
+          "between": [
+            "watch_platform",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        },
+        {
+          "id": "door_upper_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ]
+        }
+      ],
+      "windowOpenings": [
+        {
+          "id": "window_upper_winch_gallery",
+          "separateFrameGlassShutter": true,
+          "serves": "winch_gallery",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_upper_records",
+          "separateFrameGlassShutter": true,
+          "serves": "records",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_upper_watch_platform",
+          "separateFrameGlassShutter": true,
+          "serves": "watch_platform",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_upper_landing",
+          "separateFrameGlassShutter": true,
+          "serves": "landing",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        }
+      ],
+      "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
+      "verticalCore": {
+        "stairMeters": [
+          1.5,
+          1.5
+        ],
+        "liftPlatformReserved": true,
+        "separateObjects": true
+      },
+      "portalBoundary": "none_on_this_level"
+    }
+  ],
+  "sections": {
+    "longitudinal": {
+      "spanMeters": 16,
+      "levels": [
+        {
+          "id": "lower_staging",
+          "elevationMeters": -3.2,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "id": "ground",
+          "elevationMeters": 0,
+          "clearHeightMeters": 3.3
+        },
+        {
+          "id": "upper",
+          "elevationMeters": 3.6,
+          "clearHeightMeters": 2.7
+        }
+      ]
+    },
+    "cross": {
+      "spanMeters": 12,
+      "levels": [
+        {
+          "id": "lower_staging",
+          "elevationMeters": -3.2,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "id": "ground",
+          "elevationMeters": 0,
+          "clearHeightMeters": 3.3
+        },
+        {
+          "id": "upper",
+          "elevationMeters": 3.6,
+          "clearHeightMeters": 2.7
+        }
+      ]
+    }
+  },
+  "roomPurposeAndAdjacency": "Each room has a purpose label and connects to the dimensioned primary circulation spine; adjacency and separate openings are explicit in every floor plan.",
+  "sharedModules": {
+    "structural": [
+      "foundation_3m",
+      "floor_3m",
+      "ceiling_3m",
+      "wall_solid_3m",
+      "wall_opening_3m",
+      "inside_corner",
+      "outside_corner",
+      "pillar",
+      "beam_lintel",
+      "roof_slope",
+      "roof_ridge",
+      "roof_hip_valley",
+      "roof_gable_end",
+      "roof_fascia"
+    ],
+    "aperturesSeparate": [
+      "door_leaf_1_2x2_4",
+      "public_door_leaf_2_5x3_0",
+      "window_frame_1_2x1_5",
+      "glass_group",
+      "shutter_pair",
+      "local_gate_4m",
+      "major_gate_8m",
+      "main_gate_face",
+      "gate_control"
+    ],
+    "traversal": [
+      "stair_1_5m",
+      "landing_1_5m",
+      "ramp_1_to_12",
+      "lift_platform",
+      "ladder_fixed",
+      "walkway_2m",
+      "walltop_route_2m",
+      "bridge_4m_bay"
+    ],
+    "technical": [
+      "streaming_portal",
+      "loading_cover",
+      "occlusion_cell",
+      "navmesh_link",
+      "unload_boundary",
+      "lighting_socket",
+      "interaction_socket",
+      "quest_socket",
+      "audio_socket",
+      "vfx_anchor"
+    ]
+  },
+  "furnishedRoomModules": [
+    "waf_interior_shell_wall_floor_ceiling",
+    "waf_interior_door_window_threshold",
+    "waf_interior_entry_vestibule",
+    "waf_interior_corridor_junction",
+    "waf_interior_stair_landing",
+    "waf_interior_cutaway_occlusion_set",
+    "waf_interior_storage_pantry_cellar",
+    "waf_interior_utility_service_room",
+    "waf_interior_mine_cave_room",
+    "waf_interior_library_archive"
+  ],
+  "propDecorFamilies": [
+    "waf_banner_war_objective",
+    "waf_interactable_container_loot",
+    "waf_interactable_lever_switch",
+    "waf_interactable_lift_platform",
+    "waf_interactable_quest_objective",
+    "waf_interactable_seat_use",
+    "waf_interactable_service_station",
+    "waf_prop_clutter_books_scrolls_papers",
+    "waf_prop_clutter_debris_rubble",
+    "waf_prop_clutter_personal_items",
+    "waf_prop_clutter_pottery_bottles",
+    "waf_prop_forge_bellows_quench",
+    "waf_prop_forge_hearth_anvil",
+    "waf_prop_forge_tool_rack",
+    "waf_prop_lighting_brazier_hearth_fireplace",
+    "waf_prop_lighting_candle_lamp",
+    "waf_prop_lighting_chandelier_hanging",
+    "waf_prop_lighting_lantern_sconce",
+    "waf_prop_military_armor_stand",
+    "waf_prop_military_siege_ammunition",
+    "waf_prop_military_training_dummy_target",
+    "waf_prop_military_war_map_table",
+    "waf_prop_military_weapon_rack",
+    "waf_prop_seating_bench_pew",
+    "waf_prop_seating_chair_stool",
+    "waf_prop_storage_cabinet_cupboard",
+    "waf_prop_storage_chest_coffer",
+    "waf_prop_storage_crate_barrel_sack_basket",
+    "waf_prop_storage_shelf_bookcase",
+    "waf_prop_surface_table_desk",
+    "waf_prop_textile_rug_tapestry",
+    "waf_prop_utility_bucket_tub_washbasin",
+    "waf_prop_utility_cart_wagon",
+    "waf_prop_utility_firewood_fuel",
+    "waf_prop_utility_rope_chain",
+    "waf_prop_utility_scaffold_ladder",
+    "waf_prop_utility_tools_workset",
+    "waf_sign_notice_contract_board"
+  ],
+  "propVisualAuthority": "Room-fit placeholders and taxonomy bindings only. Individual prop looks remain owner-review gated by prop_stonehold_interior_decor_v001.",
+  "sockets": {
+    "lighting": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "interaction": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "quest": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "audio": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "vfx_anchor_runtime_separate": {
+      "required": true,
+      "separateFromCleanGeometry": true
+    },
+    "portal_streaming": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    }
+  },
+  "bindingPolicies": {
+    "gridMeters": 0.5,
+    "placementCellMeters": 2.0,
+    "structuralBayMeters": 4.0,
+    "verticalTierMeters": 1.0,
+    "doorsAndGates": "Every door leaf, frame, shutter, glass group, local gate and main gate is a separate object from shells and perimeter walls.",
+    "mainGate": "An intact main gate stays physically impassable. Future interaction teleports atomically between paired anchors; this packet implements no teleport.",
+    "hostileGateBreak": "Reference t_c8ea885d only. This packet implements no break logic and authorizes no destructible 3D geometry.",
+    "perimeterWall": "Main castle, fortress, fort and city perimeter walls stay non-enterable and impassable; only defendable walltops and designated routes are traversable.",
+    "interiorScale": "Small interiors are seamless. Large combat interiors use separate asynchronously loaded scenes behind physical portals.",
+    "runtimeVfx": "Particles, smoke, sparks, auras, volumetrics and magic remain runtime-separate from clean geometry.",
+    "staticAssembly": "Combine opaque structural and finish modules per room or exterior visibility cell and atlas; never retain one renderer or collider per source tile at runtime."
+  },
+  "mobilePolicy": {
+    "lodIntent": [
+      "LOD0 authored source",
+      "LOD1 50-60% silhouette-preserving",
+      "LOD2 20-30%",
+      "HLOD 5-10% or chunk proxy"
+    ],
+    "atlasIntent": [
+      "one shared opaque Stonehold exterior atlas",
+      "one shared opaque interior atlas",
+      "minimum separate glass renderer set"
+    ],
+    "protectedCues": [
+      "compressed roofline",
+      "stepped basalt foundation",
+      "thick buttress rhythm",
+      "clipped-corner aperture"
+    ],
+    "dropFirst": [
+      "workers",
+      "secondary clutter",
+      "scaffolds",
+      "smoke",
+      "sparks",
+      "small banners"
+    ]
+  },
+  "provenance": [
+    "DESIGN.md",
+    "unity/Assets/AL/Art/Designs/FourRealmArchitecture.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/CivicHall/civic_hall_2d_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/FortGatehouse/fort_gatehouse_2d_manifest_v001.json",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/stonehold_concept_packet_coverage_v001.json",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_enterable_structures_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_exterior_interior_floorplan_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_settlement_silhouettes_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/prop_stonehold_interior_decor_v001.md"
+  ],
+  "avoid": [
+    "Solid decorative shell or facade-only substitute.",
+    "Enterable main perimeter walls.",
+    "Gate, door, window glass or shutter fused into a wall/building mesh.",
+    "Unmarked inaccessible room or painted-on aperture.",
+    "Dwarf pastiche or copied BDO / Infinity Kingdom architecture.",
+    "Crownlands vertical civic silhouette or Eldergrove root grammar.",
+    "Glowing cracks, smoke or VFX used as required silhouette.",
+    "Slagfall Quarry treated as architecture visual authorization.",
+    "Invented religious, royal, heraldic or textual meaning.",
+    "One renderer, material or collider per modular tile.",
+    "Unique 4K runtime textures for common structures."
+  ],
+  "ownerReview": {
+    "required": true,
+    "allowedDecisions": [
+      "APPROVE",
+      "REVISE",
+      "REJECT"
+    ],
+    "decision": null,
+    "gates": [
+      {
+        "id": "massing",
+        "question": "Approve the recommended exterior massing?",
+        "recommendation": "Enterable assay/service headhouse framing a physical mine portal; never a blocked decorative tunnel.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "roof",
+        "question": "Approve the recommended roof profile?",
+        "recommendation": "Stepped iron headframe roof with low enclosed assay wing.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "materials",
+        "question": "Approve the shown Stonehold material balance?",
+        "recommendation": "Basalt dominant, iron secondary, timber interior, bronze repair sparse.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "access",
+        "question": "Approve the entry, circulation and accessibility sequence?",
+        "recommendation": "Step-free ground services; industrial lift to lower staging and upper winch gallery.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "family_specific",
+        "question": "Approve the headhouse-to-streamed-mine portal sequence and secure assay wing.",
+        "recommendation": "The option drawn and documented in this packet.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      }
+    ]
+  },
+  "productionAuthorization": {
+    "comfyuiLocal": "approved_for_2d_only",
+    "meshy": false,
+    "blender": false,
+    "runtime3d": false,
+    "new3dJobsSubmitted": 0
+  }
+}

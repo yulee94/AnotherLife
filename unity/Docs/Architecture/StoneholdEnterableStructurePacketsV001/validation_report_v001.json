@@ -1,0 +1,28 @@
+{
+  "schema": "anotherlife.stonehold-enterable-structure-packet-validation.v1",
+  "status": "passed",
+  "packetSetId": "stonehold_enterable_structure_packets_v001",
+  "counts": {
+    "taxonomyFamilies": 40,
+    "enterablePackets": 27,
+    "sharedModuleFamilies": 11,
+    "interiorModuleFamilies": 21,
+    "propDecorFamilies": 65,
+    "artifactRecords": 88
+  },
+  "checks": {
+    "taxonomyCoverage40of40": true,
+    "enterablePackets27of27": true,
+    "sharedModuleFamilies11of11": true,
+    "wallExceptionExplicit": true,
+    "accordantExcluded": true,
+    "gateRulesReferenceOnly": true,
+    "no3dAuthorization": true,
+    "allPacketsComplete": true,
+    "interiorModules21of21": true,
+    "propFamilies65Accounted": true,
+    "artifactsHashAndDimensions": true,
+    "no3dFiles": true,
+    "reviewArtifactsPresent": true
+  }
+}
