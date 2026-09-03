@@ -100,11 +100,6 @@ jobs:
             if ($LASTEXITCODE -ne 0) {
               throw "Deterministic QA fixture profile exited with code $LASTEXITCODE."
             }
-            & python tools/qa/run_deterministic_qa.py --repo-root . --profile ci --output-dir artifacts/deterministic-qa-ci *>&1 |
-              Tee-Object -FilePath $transcript -Append
-            if ($LASTEXITCODE -ne 0) {
-              throw "Deterministic QA CI profile exited with code $LASTEXITCODE."
-            }
           } catch {
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
@@ -154,9 +149,6 @@ jobs:
             artifacts/deterministic-qa/report.json
             artifacts/deterministic-qa/junit.xml
             artifacts/deterministic-qa/logs/
-            artifacts/deterministic-qa-ci/report.json
-            artifacts/deterministic-qa-ci/junit.xml
-            artifacts/deterministic-qa-ci/logs/
             artifacts/quality-gate-fixtures.txt
             artifacts/golden-scene-evidence-validator.txt
           if-no-files-found: error

@@ -42,23 +42,25 @@ requires nonzero test totals. The build uses the pinned
 `AL.EditorTools.ProductionPlayerBuilder.BuildWindows64Development` path. The packaged
 narrative contract consumes that build's manifest and executable.
 
-Hosted CI has no Unity license/editor runner. It therefore runs three honest gates:
+Hosted CI has no Unity license/editor runner and does not fetch Git LFS scene
+bytes, so it cannot honestly execute Unity, Player, or scene/content hash
+contracts. It therefore runs these gates:
 
 ```powershell
 python tools/qa/test_run_deterministic_qa.py
 python tools/qa/run_deterministic_qa.py --repo-root . --profile contract `
   --output-dir artifacts/deterministic-qa
-python tools/qa/run_deterministic_qa.py --repo-root . --profile ci `
-  --output-dir artifacts/deterministic-qa-ci
 ```
 
 `contract` exercises all twelve orchestration, evidence, comparison, and failure
-contracts with versioned deterministic fixtures. It is not runtime Unity evidence.
-The `ci` profile runs the actual Python unit, integration, scene-manifest, and
-content-manifest subset. Release evidence is valid only from `full`; a hosted
-fixture or Python-subset pass must never be relabeled as a Player, save-runtime,
-or Unity test pass. The original reproducible-build unittest and inventory commands
-remain in `repository / hygiene` and are not replaced by this suite.
+contracts with versioned deterministic fixtures. It is not runtime Unity, save,
+Player, or scene-hash evidence. The `ci` profile is the local Python
+unit/integration/scene/content subset and requires a complete checkout with Git
+LFS scene bytes; HASH_DRIFT on a pointer-only checkout is stop-ship, not a skip.
+Release evidence is valid only from `full`. A hosted fixture pass must never be
+relabeled as a Player, save-runtime, Unity, or scene-hash pass. The original
+reproducible-build unittest and inventory commands remain in
+`repository / hygiene` and are not replaced by this suite.
 
 ## Deterministic controls
 

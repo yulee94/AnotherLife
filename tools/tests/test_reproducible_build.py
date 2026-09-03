@@ -581,10 +581,6 @@ class ReproducibleBuildTests(unittest.TestCase):
             "python tools/qa/run_deterministic_qa.py --repo-root . --profile contract",
             workflow,
         )
-        self.assertIn(
-            "python tools/qa/run_deterministic_qa.py --repo-root . --profile ci",
-            workflow,
-        )
         self.assertIn("artifacts/deterministic-qa/report.json", workflow)
 
 
