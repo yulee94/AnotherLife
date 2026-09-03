@@ -456,7 +456,6 @@ namespace AL.Warmaster.Planning
                     "Exact accepted Warmaster set membership is not complete.");
             }
 
-
             if (state.UnlockedSets.Count >= MaximumUnlockedSets)
             {
                 return Reject(
@@ -1028,6 +1027,7 @@ namespace AL.Warmaster.Planning
             foreach (WarmasterTransactionRecord record in state.TransactionRecords)
             {
                 if (!IsStructurallyValidRecord(record) ||
+                    !string.Equals(record.ProfileId, state.ProfileId, StringComparison.Ordinal) ||
                     !operationIds.Add(record.OperationId) ||
                     !eventIds.Add(record.EventId) ||
                     !revisions.Add(record.ResultingStateRevision) ||
@@ -1061,6 +1061,7 @@ namespace AL.Warmaster.Planning
                 int matchingCurrentRecords = state.TransactionRecords.Count(record =>
                     record.IsSupported &&
                     record.ResultingStateRevision == state.Revision &&
+                    CurrentResultMatchesState(record, state) &&
                     string.Equals(
                         record.ResultingStateHash,
                         currentStateHash,
@@ -1076,6 +1077,29 @@ namespace AL.Warmaster.Planning
             }
 
             return null;
+        }
+
+        private static bool CurrentResultMatchesState(
+            WarmasterTransactionRecord record,
+            WarmasterStateSnapshot state)
+        {
+            switch (record.Operation)
+            {
+                case WarmasterOperation.PurchasePiece:
+                    return state.PurchasedPieces.Any(piece =>
+                        piece.IsSupported &&
+                        string.Equals(piece.PieceId, record.PieceId, StringComparison.Ordinal));
+                case WarmasterOperation.UnlockSet:
+                    return ContainsSupportedSet(state.UnlockedSets, record.SetId);
+                case WarmasterOperation.EquipSet:
+                    return ContainsSupportedSet(state.UnlockedSets, record.SetId) &&
+                           string.Equals(
+                               state.EquippedSetId,
+                               record.SetId,
+                               StringComparison.Ordinal);
+                default:
+                    return false;
+            }
         }
 
         private static WarmasterPlanningResult ClassifyPriorReceipt(

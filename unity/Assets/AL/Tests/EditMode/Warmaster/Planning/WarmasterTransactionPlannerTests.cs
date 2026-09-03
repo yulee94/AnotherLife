@@ -506,6 +506,16 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                     committed,
                     wallet).Status,
                 Is.EqualTo(WarmasterPlanStatus.Conflict));
+
+            WarmasterStateSnapshot later = PurchaseAndVerify(
+                planner,
+                committed,
+                wallet,
+                SecondPieceId,
+                "purchase_later_beta",
+                "event_later_beta",
+                out wallet);
+            AssertDuplicate(planner.Plan(request, later, wallet), hasReceipt: false);
         }
 
         [Test]
@@ -976,6 +986,176 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                 Is.EqualTo(WarmasterPlanStatus.Unsupported));
         }
 
+        [Test]
+        public void InvalidRequestIdentitiesAndOperationFieldsFailClosed()
+        {
+            WarmasterStateSnapshot state = InitialState();
+            WarmasterWalletSnapshot wallet = Wallet();
+            WarmasterTransactionRequest request = PurchaseRequest(
+                state,
+                wallet,
+                FirstPieceId,
+                "purchase_identity",
+                "event_identity");
+
+            Assert.That(planner.Plan(null, state, wallet).Status,
+                Is.EqualTo(WarmasterPlanStatus.InvalidRequest));
+            foreach (string invalid in new[]
+            {
+                string.Empty,
+                " ",
+                "operation\ncontrol",
+                "operation with space",
+                new string('x', 129)
+            })
+            {
+                Assert.That(
+                    planner.Plan(
+                        CopyRequest(request, operationId: invalid),
+                        state,
+                        wallet).Status,
+                    Is.EqualTo(WarmasterPlanStatus.InvalidRequest));
+            }
+
+            foreach (string invalid in new[]
+            {
+                string.Empty,
+                "Fixture_piece_alpha",
+                "fixture__piece_alpha",
+                "fixture_piece_alpha_",
+                "fixture-piece-alpha",
+                new string('p', 129)
+            })
+            {
+                Assert.That(
+                    planner.Plan(
+                        CopyRequest(request, pieceId: invalid),
+                        state,
+                        wallet).Status,
+                    Is.EqualTo(WarmasterPlanStatus.InvalidRequest));
+            }
+
+            Assert.That(
+                planner.Plan(
+                    CopyRequest(request, operation: (WarmasterOperation)99),
+                    state,
+                    wallet).Status,
+                Is.EqualTo(WarmasterPlanStatus.InvalidRequest));
+            Assert.That(
+                planner.Plan(
+                    CopyRequest(request, expectedEconomyRevision: -1),
+                    state,
+                    wallet).Status,
+                Is.EqualTo(WarmasterPlanStatus.InvalidRequest));
+        }
+
+        [Test]
+        public void MissingRulesDuplicateDefinitionsAndMembershipDriftFailClosed()
+        {
+            WarmasterStateSnapshot state = InitialState();
+            WarmasterWalletSnapshot wallet = Wallet();
+            WarmasterTransactionRequest request = PurchaseRequest(
+                state,
+                wallet,
+                FirstPieceId,
+                "purchase_malformed_catalog",
+                "event_malformed_catalog");
+            WarmasterCatalogSnapshot[] malformed =
+            {
+                new WarmasterCatalogSnapshot(
+                    WarmasterCatalogStatus.Ready, catalog.Binding,
+                    catalog.Sets.Concat(catalog.Sets), catalog.Pieces, true),
+                new WarmasterCatalogSnapshot(
+                    WarmasterCatalogStatus.Ready, catalog.Binding,
+                    catalog.Sets, catalog.Pieces.Concat(catalog.Pieces), true),
+                new WarmasterCatalogSnapshot(
+                    WarmasterCatalogStatus.Ready, catalog.Binding,
+                    new[] { Set(SetId, new[] { FirstPieceId, FirstPieceId }) },
+                    catalog.Pieces, true),
+                new WarmasterCatalogSnapshot(
+                    WarmasterCatalogStatus.Ready, catalog.Binding,
+                    new[] { Set(SetId, new[] { FirstPieceId, "fixture_piece_missing" }) },
+                    catalog.Pieces, true),
+                new WarmasterCatalogSnapshot(
+                    WarmasterCatalogStatus.Ready, catalog.Binding,
+                    catalog.Sets,
+                    new[] { Piece(FirstPieceId, 0, 1, 3), Piece(SecondPieceId, 11, 0, 5) },
+                    true),
+                new WarmasterCatalogSnapshot(
+                    WarmasterCatalogStatus.Ready, catalog.Binding,
+                    new[]
+                    {
+                        Set(SetId, new[] { FirstPieceId, SecondPieceId },
+                            (WarmasterUnlockPolicy)99, WarmasterEquipPolicy.ManualOnly)
+                    },
+                    catalog.Pieces, true)
+            };
+            foreach (WarmasterCatalogSnapshot source in malformed)
+            {
+                Assert.That(
+                    new WarmasterTransactionPlanner(source, authority)
+                        .Plan(request, state, wallet).Status,
+                    Is.EqualTo(WarmasterPlanStatus.Malformed));
+            }
+
+            var missingProgression = new WarmasterCatalogSnapshot(
+                WarmasterCatalogStatus.Ready,
+                catalog.Binding,
+                catalog.Sets,
+                new[]
+                {
+                    new WarmasterPieceDefinition(
+                        FirstPieceId, SetId, 7,
+                        WarmasterPieceAvailability.Available, null, true),
+                    Piece(SecondPieceId, 11, 0, 5)
+                },
+                true);
+            Assert.That(
+                new WarmasterTransactionPlanner(missingProgression, authority)
+                    .Plan(request, state, wallet).Status,
+                Is.EqualTo(WarmasterPlanStatus.ApprovalMissing));
+        }
+
+        [Test]
+        public void CrossProfileAndStateLedgerContradictionsCannotReplay()
+        {
+            WarmasterStateSnapshot initial = InitialState();
+            WarmasterWalletSnapshot wallet = Wallet();
+            WarmasterTransactionRequest request = PurchaseRequest(
+                initial,
+                wallet,
+                FirstPieceId,
+                "purchase_profile_ledger",
+                "event_profile_ledger");
+            WarmasterStateSnapshot committed = Verify(
+                planner.Plan(request, initial, wallet),
+                out wallet,
+                out _);
+            WarmasterTransactionRecord source = committed.TransactionRecords.Single();
+            WarmasterStateSnapshot wrongProfileLedger = CopyState(
+                committed,
+                transactionRecords: new[]
+                {
+                    CloneRecord(source, profileId: "another_profile")
+                });
+            Assert.That(
+                planner.Plan(request, wrongProfileLedger, wallet).Status,
+                Is.EqualTo(WarmasterPlanStatus.Malformed));
+
+            WarmasterStateSnapshot wrongState = CopyState(
+                committed,
+                level: committed.Level + 1);
+            Assert.That(
+                planner.Plan(request, wrongState, wallet).Status,
+                Is.EqualTo(WarmasterPlanStatus.Malformed));
+            WarmasterStateSnapshot duplicateLedger = CopyState(
+                committed,
+                transactionRecords: new[] { source, source });
+            Assert.That(
+                planner.Plan(request, duplicateLedger, wallet).Status,
+                Is.EqualTo(WarmasterPlanStatus.Malformed));
+        }
+
         private void AssertCatalogStatus(
             WarmasterTransactionRequest request,
             WarmasterStateSnapshot state,
@@ -1189,19 +1369,22 @@ namespace AL.Tests.EditMode.Warmaster.Planning
             string profileId = null,
             string pieceId = null,
             long? expectedStateRevision = null,
-            WarmasterCatalogBinding expectedCatalogBinding = null)
+            WarmasterCatalogBinding expectedCatalogBinding = null,
+            string operationId = null,
+            WarmasterOperation? operation = null,
+            long? expectedEconomyRevision = null)
         {
             return new WarmasterTransactionRequest(
-                source.Operation,
+                operation ?? source.Operation,
                 profileId ?? source.ProfileId,
                 source.ActorId,
-                source.OperationId,
+                operationId ?? source.OperationId,
                 source.EventId,
                 source.CorrelationId,
                 source.SetId,
                 pieceId ?? source.PieceId,
                 expectedStateRevision ?? source.ExpectedStateRevision,
-                source.ExpectedEconomyRevision,
+                expectedEconomyRevision ?? source.ExpectedEconomyRevision,
                 expectedCatalogBinding ?? source.ExpectedCatalogBinding,
                 source.PriorReceipt);
         }
@@ -1331,13 +1514,14 @@ namespace AL.Tests.EditMode.Warmaster.Planning
             WarmasterTransactionRecord source,
             long? debitAmount = null,
             string resultingStateHash = null,
-            long? resultingStateRevision = null)
+            long? resultingStateRevision = null,
+            string profileId = null)
         {
             return new WarmasterTransactionRecord(
                 source.OperationId,
                 source.EventId,
                 source.CorrelationId,
-                source.ProfileId,
+                profileId ?? source.ProfileId,
                 source.Operation,
                 source.RequestFingerprint,
                 source.CatalogBinding,
