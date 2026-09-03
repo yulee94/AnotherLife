@@ -1,9 +1,13 @@
 # architecture_stonehold_enterable_structures_v001
 
-**Packet ID:** `architecture_stonehold_enterable_structures_v001`  
-**Catalog families:** 34  
-**Owner status:** `PARTIAL`  
-**Generation / activation:** `HELD`  
+**Packet ID:** `architecture_stonehold_enterable_structures_v001`
+
+**Catalog families:** 34
+
+**Owner status:** `PARTIAL`
+
+**Generation / activation:** `HELD`
+
 **Downstream 2D remainder:** `t_c748138b` (do not duplicate here)
 
 ## 1. Decision identity

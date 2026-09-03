@@ -1,8 +1,11 @@
 # derivative_stonehold_kingdom_strategic_v001
 
-**Packet ID:** `derivative_stonehold_kingdom_strategic_v001`  
-**Catalog families:** 15  
-**Owner status:** `PENDING`  
+**Packet ID:** `derivative_stonehold_kingdom_strategic_v001`
+
+**Catalog families:** 15
+
+**Owner status:** `PENDING`
+
 **Generation / activation:** `HELD`
 
 ## 1. Decision identity

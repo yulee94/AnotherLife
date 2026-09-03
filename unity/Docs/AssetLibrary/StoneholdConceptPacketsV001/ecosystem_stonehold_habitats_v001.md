@@ -1,8 +1,11 @@
 # ecosystem_stonehold_habitats_v001
 
-**Packet ID:** `ecosystem_stonehold_habitats_v001`  
-**Catalog families:** 9 ecosystem classes + 4 Stonehold habitat roster IDs  
-**Owner status:** `PENDING`  
+**Packet ID:** `ecosystem_stonehold_habitats_v001`
+
+**Catalog families:** 9 ecosystem classes + 4 Stonehold habitat roster IDs
+
+**Owner status:** `PENDING`
+
 **Generation / activation:** `HELD`
 
 Fantasy beasts, never animals.

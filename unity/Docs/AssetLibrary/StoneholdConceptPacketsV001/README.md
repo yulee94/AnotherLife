@@ -1,11 +1,17 @@
 # Stonehold concept packets v001
 
-**Task:** `t_a4734797`  
-**Created:** 2026-09-03  
-**Owner status:** `PENDING`  
-**Generation:** `HELD`  
-**Activation:** `HELD`  
-**ComfyUI:** not used (Local versus Cloud is unresolved)  
+**Task:** `t_a4734797`
+
+**Created:** 2026-09-03
+
+**Owner status:** `PENDING`
+
+**Generation:** `HELD`
+
+**Activation:** `HELD`
+
+**ComfyUI:** not used (Local versus Cloud is unresolved)
+
 **Meshy / 3D:** not authorized by this packet set
 
 This set maps every world-asset taxonomy family (`242/242`) to a versioned
@@ -26,7 +32,7 @@ Do not treat a packet APPROVE as Meshy, runtime, save, or release permission.
 
 | Packet ID | Families | Owner ruling now | What is already approved | What stays OPEN |
 | --- | ---: | --- | --- | --- |
-| `environment_stonehold_natural_ecology_v001` | 37 | PENDING | DESIGN.md Stonehold grammar; Slagfall soil/water-edge material read only | Realm-wide flora/ground look, harvest plants, trees |
+| `environment_stonehold_natural_ecology_v001` | 37 | PARTIAL | DESIGN.md grammar; Slagfall soil/ash/water-edge (`waf_terrain_surface_soil_loam`, `waf_terrain_surface_ash_slag_obsidian`, `waf_terrain_water_edge_module`) | Realm-wide flora/ground look, harvest plants, trees |
 | `environment_stonehold_geology_minerals_crystals_v001` | 17 | PARTIAL | Slagfall eight-family kit (profiling-scale candidates) | Dimensions, nav, crystals, mineables, non-Slagfall geology |
 | `architecture_stonehold_settlement_silhouettes_v001` | 6 | PENDING | Four-realm settlement/landmark sheets (directional) | Per-family world-space settlement kits |
 | `traversal_stonehold_roads_bridges_v001` | 9 | PENDING | Taxonomy widths (6 m / 4 m / 4 m spans) | Stonehold road/bridge look |
@@ -37,7 +43,7 @@ Do not treat a packet APPROVE as Meshy, runtime, save, or release permission.
 | `ecosystem_stonehold_habitats_v001` | 9 | PENDING | Slagfall habitat master + four roster habitats | Non-Slagfall habitat sheets; fauna/monster production |
 | `supporting_stonehold_technical_v001` | 29 | PENDING | Non-creative helpers | Not a visual approval |
 
-Coverage registry: `stonehold_concept_packet_coverage_v001.json`  
+Coverage registry: `stonehold_concept_packet_coverage_v001.json`
 Decision packet: `rct_stonehold_decision_concept_lane_v001.md`
 
 Declared totals in the registry must stay `familyRecords=242`, `mapped=242`,

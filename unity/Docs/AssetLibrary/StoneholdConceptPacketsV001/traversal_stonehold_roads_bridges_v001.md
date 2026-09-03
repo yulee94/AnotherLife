@@ -1,8 +1,11 @@
 # traversal_stonehold_roads_bridges_v001
 
-**Packet ID:** `traversal_stonehold_roads_bridges_v001`  
-**Catalog families:** 9  
-**Owner status:** `PENDING`  
+**Packet ID:** `traversal_stonehold_roads_bridges_v001`
+
+**Catalog families:** 9
+
+**Owner status:** `PENDING`
+
 **Generation / activation:** `HELD`
 
 ## 1. Decision identity

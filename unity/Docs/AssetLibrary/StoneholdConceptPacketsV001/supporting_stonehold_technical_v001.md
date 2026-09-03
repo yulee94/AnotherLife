@@ -1,8 +1,11 @@
 # supporting_stonehold_technical_v001
 
-**Packet ID:** `supporting_stonehold_technical_v001`  
-**Catalog families:** 19 technical helpers + 10 VFX anchors = 29  
-**Owner status:** `PENDING` (non-creative)  
+**Packet ID:** `supporting_stonehold_technical_v001`
+
+**Catalog families:** 19 technical helpers + 10 VFX anchors = 29
+
+**Owner status:** `PENDING` (non-creative)
+
 **Generation / activation:** `HELD`
 
 These families are sockets, colliders, LOD groups, navigation, occlusion,

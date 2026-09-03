@@ -1,8 +1,11 @@
 # architecture_stonehold_settlement_silhouettes_v001
 
-**Packet ID:** `architecture_stonehold_settlement_silhouettes_v001`  
-**Catalog families:** 6  
-**Owner status:** `PENDING`  
+**Packet ID:** `architecture_stonehold_settlement_silhouettes_v001`
+
+**Catalog families:** 6
+
+**Owner status:** `PENDING`
+
 **Generation / activation:** `HELD`
 
 ## 1. Decision identity

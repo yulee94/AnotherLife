@@ -1,11 +1,17 @@
 # environment_stonehold_geology_minerals_crystals_v001
 
-**Packet ID:** `environment_stonehold_geology_minerals_crystals_v001`  
-**Catalog families:** 17  
-**Owner status:** `PARTIAL` (Slagfall eight-family kit only)  
-**Generation / activation:** `HELD`  
-**Category:** environment  
-**Realm:** `stonehold`  
+**Packet ID:** `environment_stonehold_geology_minerals_crystals_v001`
+
+**Catalog families:** 17
+
+**Owner status:** `PARTIAL` (Slagfall eight-family kit only)
+
+**Generation / activation:** `HELD`
+
+**Category:** environment
+
+**Realm:** `stonehold`
+
 **Requested-by:** `t_a4734797`
 
 ## 1. Decision identity

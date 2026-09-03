@@ -1,12 +1,19 @@
 # rct_stonehold_decision_concept_lane_v001
 
-**Packet ID:** `rct_stonehold_decision_concept_lane_v001`  
-**Catalog ID:** `rct_stonehold_catalog_concept_lane_v001`  
-**Owner status:** `PENDING`  
-**Final decision authority:** Project owner  
-**Generation state:** `HELD`  
-**Activation state:** `HELD`  
-**Date opened (UTC):** 2026-09-03  
+**Packet ID:** `rct_stonehold_decision_concept_lane_v001`
+
+**Catalog ID:** `rct_stonehold_catalog_concept_lane_v001`
+
+**Owner status:** `PENDING`
+
+**Final decision authority:** Project owner
+
+**Generation state:** `HELD`
+
+**Activation state:** `HELD`
+
+**Date opened (UTC):** 2026-09-03
+
 **Requested-by:** `t_a4734797`
 
 ## 1. Decision identity

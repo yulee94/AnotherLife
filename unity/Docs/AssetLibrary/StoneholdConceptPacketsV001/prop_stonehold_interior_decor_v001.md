@@ -1,8 +1,11 @@
 # prop_stonehold_interior_decor_v001
 
-**Packet ID:** `prop_stonehold_interior_decor_v001`  
-**Catalog families:** 65  
-**Owner status:** `PENDING`  
+**Packet ID:** `prop_stonehold_interior_decor_v001`
+
+**Catalog families:** 65
+
+**Owner status:** `PENDING`
+
 **Generation / activation:** `HELD`
 
 ## 1. Decision identity

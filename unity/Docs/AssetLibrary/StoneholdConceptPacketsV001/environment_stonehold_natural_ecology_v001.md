@@ -1,11 +1,17 @@
 # environment_stonehold_natural_ecology_v001
 
-**Packet ID:** `environment_stonehold_natural_ecology_v001`  
-**Catalog families:** 37 (see coverage registry)  
-**Owner status:** `PENDING`  
-**Generation / activation:** `HELD`  
-**Category:** environment  
-**Realm:** `stonehold`  
+**Packet ID:** `environment_stonehold_natural_ecology_v001`
+
+**Catalog families:** 37 (see coverage registry)
+
+**Owner status:** `PARTIAL` (Slagfall soil/ash/water-edge only)
+
+**Generation / activation:** `HELD`
+
+**Category:** environment
+
+**Realm:** `stonehold`
+
 **Requested-by:** `t_a4734797`
 
 ## 1. Decision identity

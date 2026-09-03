@@ -1,8 +1,11 @@
 # architecture_stonehold_exterior_interior_floorplan_v001
 
-**Packet ID:** `architecture_stonehold_exterior_interior_floorplan_v001`  
-**Catalog families:** 21 interior modules  
-**Owner status:** `PARTIAL`  
+**Packet ID:** `architecture_stonehold_exterior_interior_floorplan_v001`
+
+**Catalog families:** 21 interior modules
+
+**Owner status:** `PARTIAL`
+
 **Generation / activation:** `HELD`
 
 ## 1. Decision identity
