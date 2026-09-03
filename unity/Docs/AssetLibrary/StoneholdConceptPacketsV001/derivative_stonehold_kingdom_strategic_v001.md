@@ -4,7 +4,7 @@
 
 **Catalog families:** 15
 
-**Owner status:** `PENDING`
+**Owner status:** `APPROVE` (planning and concept direction, 2026-09-03)
 
 **Generation / activation:** `HELD`
 
@@ -46,4 +46,5 @@ This packet exists so the family is mapped, not so 2.5D production can start.
 
 ## 4. Owner ruling
 
-Recommended: keep `PENDING`. No Meshy, no icon bake.
+**Recorded 2026-09-03:** `APPROVE` as planning and concept direction. 2.5D
+derivatives remain blocked until 3D identity exists. No Meshy, no icon bake.

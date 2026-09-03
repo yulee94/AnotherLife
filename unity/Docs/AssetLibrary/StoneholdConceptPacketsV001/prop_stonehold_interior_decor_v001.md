@@ -4,15 +4,19 @@
 
 **Catalog families:** 65
 
-**Owner status:** `PENDING`
+**Owner status:** `APPROVE` (planning and concept direction, 2026-09-03)
 
 **Generation / activation:** `HELD`
 
 ## 1. Decision identity
 
 **Question:** Keep every Stonehold prop, banner, sign, and interior interactable
-at `PENDING` until room purposes from the floor-plan packet are approved, rather
-than inventing a decor kit?
+without invented looks until room purposes from the floor-plan remainder are
+developed, rather than inventing a decor kit?
+
+**Owner answer (2026-09-03):** APPROVE this packet as planning/concept direction.
+Prop/decor families stay without invented sheets. ComfyUI Local chosen. Freestanding
+props are not enterable structures. No Meshy.
 
 **Already approved:**
 
@@ -27,7 +31,7 @@ than inventing a decor kit?
 - Every `waf_prop_*`, `waf_banner_*`, `waf_sign_*` family look.
 - Religious props (taxonomy `deferred_unapproved` on religious architecture).
 - Royal throne/dais vs civic council furniture — do not collapse them.
-- ComfyUI Local versus Cloud.
+- New ComfyUI Local prop sheets (none generated in this lane).
 
 ## 2. Required brief
 
@@ -55,5 +59,6 @@ Human compilation. No new images. Civic layout JSON is zoning only.
 
 ## 5. Owner ruling
 
-Recommended: keep `PENDING`. Do not generate prop sheets until Local versus
-Cloud is chosen and floor-plan remainder is reviewed.
+**Recorded 2026-09-03:** `APPROVE` as planning and concept direction. Do not
+generate prop sheets in this lane. Floor-plan remainder stays on `t_c748138b`.
+Meshy unauthorized.

@@ -4,7 +4,7 @@
 
 **Catalog families:** 9
 
-**Owner status:** `PENDING`
+**Owner status:** `APPROVE` (planning and concept direction, 2026-09-03)
 
 **Generation / activation:** `HELD`
 
@@ -13,6 +13,10 @@
 **Question:** Accept the taxonomy metric widths as engineering constraints and
 leave Stonehold road/bridge visual language `OPEN` until a dedicated 2D sheet
 exists?
+
+**Owner answer (2026-09-03):** APPROVE this packet as planning/concept direction.
+Metrics may be used by later engineering. Visual language stays without invented
+sheets. ComfyUI Local chosen. No Meshy.
 
 **Already approved / reserved (metrics, not look):**
 
@@ -26,7 +30,7 @@ exists?
 - Bridge parapet/support language (masonry vs iron vs mixed).
 - Rope-suspension use in Stonehold (taxonomy family exists; realm fit OPEN).
 - Natural root/log crossings — likely rare in Stonehold; do not import Eldergrove defaults.
-- ComfyUI Local versus Cloud.
+- New ComfyUI Local road/bridge sheets (none generated in this lane).
 
 ## 2. Required brief
 
@@ -57,5 +61,6 @@ road authority.
 
 ## 5. Owner ruling
 
-Recommended: keep `PENDING`. Metrics may be used by later engineering; visuals
-stay blocked.
+**Recorded 2026-09-03:** `APPROVE` as planning and concept direction. Metrics may
+be used by later engineering; visuals stay without invented sheets. Meshy
+unauthorized.

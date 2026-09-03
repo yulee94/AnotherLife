@@ -4,7 +4,7 @@
 
 **Catalog families:** 21 interior modules
 
-**Owner status:** `PENDING`
+**Owner status:** `APPROVE` (planning and concept direction, 2026-09-03)
 
 **Generation / activation:** `HELD`
 
@@ -13,6 +13,11 @@
 **Question:** Treat the shared civic-hall and fort-gatehouse plans/sections as
 the only locked exterior-to-interior continuity, and leave castle-keep and other
 building floor plans OPEN on `t_c748138b`?
+
+**Owner answer (2026-09-03):** APPROVE this packet as planning/concept direction.
+Civic/fort plans remain zoning hints, not family look lock. Every applicable 3D
+building must ship with a furnished traversable interior planned with its
+exterior; no representative shells. Remaining plans stay on `t_c748138b`.
 
 **Already approved (shared, not Stonehold-skinned):**
 
@@ -49,7 +54,7 @@ colliders/interaction are a separate family.
 
 ## 3. Interior family mapping
 
-Named rooms in taxonomy (`waf_interior_*`) stay `packet_authored_owner_decision_required`
+Named rooms in taxonomy (`waf_interior_*`) stay without invented looks
 except where the civic/fort layouts already name an equivalent zone (great/council
 hall, barracks room, stair landing, storage, utility, entry vestibule, door/window
 threshold, shell wall/floor/ceiling, courtyard/balcony as gallery).
@@ -63,6 +68,7 @@ cutaway occlusion set.
 
 ## 4. Owner ruling
 
-Recommended: keep `PENDING`. Civic/fort plans remain cited as zoning hints only,
-not family-level visual approval. REVISE if the owner wants Stonehold-specific
-interior finish sheets before `t_c748138b` resumes. Meshy unauthorized.
+**Recorded 2026-09-03:** `APPROVE` as planning and concept direction. Civic/fort
+plans remain zoning hints, not family-level visual lock. All 21 `waf_interior_*`
+families stay without invented looks. Detailed furnished interiors continue on
+`t_c748138b`. Meshy unauthorized.

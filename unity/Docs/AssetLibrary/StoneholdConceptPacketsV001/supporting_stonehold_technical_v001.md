@@ -4,7 +4,7 @@
 
 **Catalog families:** 19 technical helpers + 10 VFX anchors = 29
 
-**Owner status:** `PENDING` (non-creative)
+**Owner status:** `APPROVE` (non-creative mapping, 2026-09-03)
 
 **Generation / activation:** `HELD`
 
@@ -17,4 +17,5 @@ architecture/environment packet is approved.
 
 VFX stay runtime-separate from clean meshes.
 
-**Owner ruling:** keep `PENDING`. Not a visual APPROVE.
+**Owner ruling (2026-09-03):** `APPROVE` as mapped non-creative helpers. Not a
+visual look. Meshy unauthorized.
