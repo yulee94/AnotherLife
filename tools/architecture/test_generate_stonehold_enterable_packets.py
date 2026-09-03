@@ -5,6 +5,7 @@ from pathlib import Path
 
 from tools.architecture.generate_stonehold_enterable_packets import (
     COVERAGE_PATH,
+    FURNISHING_PRECEDENT_PATH,
     OUTPUT_ROOT,
     SHARED_SUPPORT_FAMILIES,
     STRUCTURES,
@@ -57,6 +58,14 @@ class StoneholdEnterablePacketTests(unittest.TestCase):
         self.assertEqual(self.report["counts"]["enterablePackets"], 27)
         self.assertEqual(self.report["counts"]["interiorModuleFamilies"], 21)
         self.assertEqual(self.report["counts"]["propDecorFamilies"], 65)
+
+    def test_owner_approved_pr_701_furnishing_precedent_is_bound(self) -> None:
+        self.assertTrue(FURNISHING_PRECEDENT_PATH.is_file())
+        self.assertTrue(self.report["checks"]["approvedFurnishingPrecedentBound"])
+        for entry in self.manifest["packets"]:
+            packet_path = OUTPUT_ROOT / entry["artifacts"][0]["locator"]
+            packet = json.loads(packet_path.read_text(encoding="utf-8"))
+            self.assertIn("PR #701", packet["approvedFurnishingPrecedent"]["approvalRecord"])
 
     def test_each_packet_has_every_physical_floor_and_required_views(self) -> None:
         for entry in self.manifest["packets"]:
@@ -123,6 +132,14 @@ class StoneholdEnterablePacketTests(unittest.TestCase):
         packet["productionAuthorization"]["meshy"] = True
         self.assertIn(
             "3D production must remain unauthorized with zero submitted jobs",
+            packet_shape_errors(packet),
+        )
+
+    def test_fail_closed_when_furnishing_precedent_is_removed(self) -> None:
+        packet = packet_document(STRUCTURES[0], self.prop_ids)
+        packet.pop("approvedFurnishingPrecedent")
+        self.assertIn(
+            "owner-approved PR #701 furnishing precedent must be bound explicitly",
             packet_shape_errors(packet),
         )
 

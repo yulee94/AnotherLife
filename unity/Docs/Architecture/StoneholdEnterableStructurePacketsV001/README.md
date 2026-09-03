@@ -14,6 +14,8 @@ Status: **PENDING OWNER REVIEW**. Return `APPROVE`, `REVISE`, or `REJECT` for ea
 
 Open `review/README.md` for the complete GitHub-rendered review register, `index.html` for the local dashboard, or the five PNG files under `review/` for compact contact sheets. Every structure folder contains one exterior sheet, one every-floor/section sheet, and one machine-readable packet.
 
+The merged owner-approved PR #701 Stonehold civic/fort furnishing packet supplies exact dimensions and protected-opening fit for its 16 prop families, plus the shared Stonehold material, atlas, LOD, collider and wear precedent. This packet set binds that authority explicitly after reconciling the latest `origin/main`.
+
 ## Binding decisions already fixed
 
 1. Every applicable Stonehold building/structure is genuinely enterable and end-to-end traversable with developed furnished rooms. No facade-only or solid-shell substitute is allowed.

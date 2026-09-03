@@ -21,6 +21,7 @@ PACKET_ROOT = OUTPUT_ROOT / "packets"
 REVIEW_ROOT = OUTPUT_ROOT / "review"
 COVERAGE_PATH = REPO_ROOT / "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/stonehold_concept_packet_coverage_v001.json"
 CIVIC_LAYOUT_PATH = REPO_ROOT / "unity/Docs/Architecture/WorldSpaceEnterableV001/CivicHall/2d/plans/shared_civic_hall_layout_v001.json"
+FURNISHING_PRECEDENT_PATH = REPO_ROOT / "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json"
 PACKET_SET_ID = "stonehold_enterable_structure_packets_v001"
 VERSION = "v001"
 SHEET_SIZE = (2400, 1500)
@@ -95,6 +96,7 @@ BINDING_POLICIES = {
     "interiorScale": "Small interiors are seamless. Large combat interiors use separate asynchronously loaded scenes behind physical portals.",
     "runtimeVfx": "Particles, smoke, sparks, auras, volumetrics and magic remain runtime-separate from clean geometry.",
     "staticAssembly": "Combine opaque structural and finish modules per room or exterior visibility cell and atlas; never retain one renderer or collider per source tile at runtime.",
+    "approvedFurnishingPrecedent": "PR #701 owner-approved the Stonehold Civic + Fort Furnishing Kit V001; reuse its measured envelopes, protected opening approaches, one-material/shared-atlas target and accepted single-cot correction where applicable.",
 }
 
 SHARED_MODULE_REGISTER = {
@@ -110,6 +112,9 @@ PROVENANCE = [
     "unity/Docs/Architecture/WorldSpaceEnterableV001/README.md",
     "unity/Docs/Architecture/WorldSpaceEnterableV001/CivicHall/civic_hall_2d_manifest_v001.json",
     "unity/Docs/Architecture/WorldSpaceEnterableV001/FortGatehouse/fort_gatehouse_2d_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json",
     "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/stonehold_concept_packet_coverage_v001.json",
     "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_enterable_structures_v001.md",
     "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_exterior_interior_floorplan_v001.md",
@@ -561,7 +566,12 @@ def packet_document(source: dict[str, Any], prop_ids: list[str]) -> dict[str, An
         "sharedModules": SHARED_MODULE_REGISTER,
         "furnishedRoomModules": source["interiorModuleIds"],
         "propDecorFamilies": prop_families,
-        "propVisualAuthority": "Room-fit placeholders and taxonomy bindings only. Individual prop looks remain owner-review gated by prop_stonehold_interior_decor_v001.",
+        "propVisualAuthority": "PR #701 is owner-approved measured/form authority for its 16 civic/fort furnishing families. Other room-fit symbols are taxonomy placeholders and remain owner-review gated by prop_stonehold_interior_decor_v001.",
+        "approvedFurnishingPrecedent": {
+            "source": "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json",
+            "approvalRecord": "PR #701 <!-- anotherlife-owner-approved -->",
+            "scope": "exact measured reuse for matching civic/fort room uses; Stonehold material, wear, atlas, LOD, collider and protected-clearance precedent elsewhere",
+        },
         "sockets": {name: {"required": True, "separateFromCleanGeometry": name == "vfx_anchor_runtime_separate"} for name in source["socketSets"]},
         "variants": {name: {"required": True, "sharedGeometryPreferred": True} for name in source["variants"]},
         "bindingPolicies": BINDING_POLICIES,
@@ -602,6 +612,9 @@ def packet_shape_errors(packet: dict[str, Any]) -> list[str]:
         errors.append("shared shell, aperture, entry, corridor, stair and cutaway modules are required")
     if not packet.get("propDecorFamilies"):
         errors.append("at least one furnished prop/decor family is required")
+    furnishing = packet.get("approvedFurnishingPrecedent", {})
+    if furnishing.get("source") != "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json" or "PR #701" not in furnishing.get("approvalRecord", ""):
+        errors.append("owner-approved PR #701 furnishing precedent must be bound explicitly")
     review = packet.get("ownerReview", {})
     gates = review.get("gates", [])
     if review.get("decision") is not None or len(gates) != 5:
@@ -934,6 +947,11 @@ def validate(manifest: dict[str, Any] | None = None) -> dict[str, Any]:
     checks["accordantExcluded"] = manifest["coverage"]["nonStoneholdExclusion"] == ["waf_architecture_event_accordant_isle"]
     checks["gateRulesReferenceOnly"] = "implements no teleport" in manifest["bindingPolicies"]["mainGate"] and "t_c8ea885d" in manifest["bindingPolicies"]["hostileGateBreak"]
     checks["no3dAuthorization"] = manifest["new3dJobsSubmitted"] == 0 and not any(manifest["productionAuthorization"][key] for key in ["meshy", "blender", "runtime3d"])
+    checks["approvedFurnishingPrecedentBound"] = (
+        FURNISHING_PRECEDENT_PATH.is_file()
+        and "PR #701" in manifest["bindingPolicies"].get("approvedFurnishingPrecedent", "")
+        and "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json" in manifest["provenance"]
+    )
     packet_checks = []
     artifact_ok = True
     no_3d_files = True
@@ -1013,6 +1031,8 @@ Status: **PENDING OWNER REVIEW**. Return `APPROVE`, `REVISE`, or `REJECT` for ea
 - New 3D jobs submitted: **0**.
 
 Open `review/README.md` for the complete GitHub-rendered review register, `index.html` for the local dashboard, or the five PNG files under `review/` for compact contact sheets. Every structure folder contains one exterior sheet, one every-floor/section sheet, and one machine-readable packet.
+
+The merged owner-approved PR #701 Stonehold civic/fort furnishing packet supplies exact dimensions and protected-opening fit for its 16 prop families, plus the shared Stonehold material, atlas, LOD, collider and wear precedent. This packet set binds that authority explicitly after reconciling the latest `origin/main`.
 
 ## Binding decisions already fixed
 

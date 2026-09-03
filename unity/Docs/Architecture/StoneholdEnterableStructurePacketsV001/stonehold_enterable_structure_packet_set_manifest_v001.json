@@ -68,7 +68,8 @@
     "perimeterWall": "Main castle, fortress, fort and city perimeter walls stay non-enterable and impassable; only defendable walltops and designated routes are traversable.",
     "interiorScale": "Small interiors are seamless. Large combat interiors use separate asynchronously loaded scenes behind physical portals.",
     "runtimeVfx": "Particles, smoke, sparks, auras, volumetrics and magic remain runtime-separate from clean geometry.",
-    "staticAssembly": "Combine opaque structural and finish modules per room or exterior visibility cell and atlas; never retain one renderer or collider per source tile at runtime."
+    "staticAssembly": "Combine opaque structural and finish modules per room or exterior visibility cell and atlas; never retain one renderer or collider per source tile at runtime.",
+    "approvedFurnishingPrecedent": "PR #701 owner-approved the Stonehold Civic + Fort Furnishing Kit V001; reuse its measured envelopes, protected opening approaches, one-material/shared-atlas target and accepted single-cot correction where applicable."
   },
   "sharedModuleRegister": {
     "structural": [
@@ -221,6 +222,9 @@
     "unity/Docs/Architecture/WorldSpaceEnterableV001/README.md",
     "unity/Docs/Architecture/WorldSpaceEnterableV001/CivicHall/civic_hall_2d_manifest_v001.json",
     "unity/Docs/Architecture/WorldSpaceEnterableV001/FortGatehouse/fort_gatehouse_2d_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json",
     "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/stonehold_concept_packet_coverage_v001.json",
     "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_enterable_structures_v001.md",
     "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_exterior_interior_floorplan_v001.md",
@@ -249,8 +253,8 @@
       "artifacts": [
         {
           "locator": "packets/city_capital_kit/city_capital_kit_2d_handoff_v001.json",
-          "byteLength": 29418,
-          "sha256": "e6896098fe2788b2628f4ce63ec6f85899ee5825742dd4661431c5db30a4bbdf"
+          "byteLength": 30484,
+          "sha256": "ffd0f9d7c47eef262820e6be3496739a0d0ede479f3dbadfb6a6d9bd1babbe3a"
         },
         {
           "locator": "packets/city_capital_kit/city_capital_kit_exterior_handoff_v001.png",
@@ -280,8 +284,8 @@
       "artifacts": [
         {
           "locator": "packets/settlement_village_kit/settlement_village_kit_2d_handoff_v001.json",
-          "byteLength": 23782,
-          "sha256": "00b056a0335aafb02bf7fc636fb5154f363356daf81df43de221430f88622436"
+          "byteLength": 24848,
+          "sha256": "17f8c50fc6ba3bffe42253c2a0f7b1266842b62bce0bc1efe3abf9b9b351ea43"
         },
         {
           "locator": "packets/settlement_village_kit/settlement_village_kit_exterior_handoff_v001.png",
@@ -311,8 +315,8 @@
       "artifacts": [
         {
           "locator": "packets/dwelling/dwelling_2d_handoff_v001.json",
-          "byteLength": 21331,
-          "sha256": "ffe091cee743ab55cb2f844015c3224b05ab96fa817d0a8d64a1e5398a38a8d3"
+          "byteLength": 22397,
+          "sha256": "6ee8f0803823fe02e0d1cfa33d0f2d8be80fd7eb2db3f501498824dbd582b7d1"
         },
         {
           "locator": "packets/dwelling/dwelling_exterior_handoff_v001.png",
@@ -342,8 +346,8 @@
       "artifacts": [
         {
           "locator": "packets/ruin_structure/ruin_structure_2d_handoff_v001.json",
-          "byteLength": 19635,
-          "sha256": "30ac0e37dd3f41495ae006668b8bf22f295c4b3f63df5b167beb0df23410492e"
+          "byteLength": 20701,
+          "sha256": "e3586051da262dca59216047434ee3c4feb403cb561b2078731e313c210c0186"
         },
         {
           "locator": "packets/ruin_structure/ruin_structure_exterior_handoff_v001.png",
@@ -373,8 +377,8 @@
       "artifacts": [
         {
           "locator": "packets/well_fountain_cistern/well_fountain_cistern_2d_handoff_v001.json",
-          "byteLength": 20651,
-          "sha256": "41cf2b9e22a043c9524164411a4d840f3b5e475460bff582837923eebf389003"
+          "byteLength": 21717,
+          "sha256": "8a1809caa26f1f68fa75f064d9c3259dea820c87705d4ddf4e1491bbd5e097c1"
         },
         {
           "locator": "packets/well_fountain_cistern/well_fountain_cistern_exterior_handoff_v001.png",
@@ -404,8 +408,8 @@
       "artifacts": [
         {
           "locator": "packets/academy/academy_2d_handoff_v001.json",
-          "byteLength": 24525,
-          "sha256": "c2450e1aa3a02ad25441c8912de18ad5d609b4ce2a6040615ec89d34c14be1a9"
+          "byteLength": 25591,
+          "sha256": "0a54f19562025e7718feeed8a8ad5e0f0491f8612b254fb13d0d1f353d3cf2b7"
         },
         {
           "locator": "packets/academy/academy_exterior_handoff_v001.png",
@@ -435,8 +439,8 @@
       "artifacts": [
         {
           "locator": "packets/barracks/barracks_2d_handoff_v001.json",
-          "byteLength": 24211,
-          "sha256": "3b8901690da382a13f9b39f3c72b64dab23188b2aecd83de16ad372b0dfd6fd9"
+          "byteLength": 25277,
+          "sha256": "178f60a013882873a3df6c423c65cb6cccb46185f1b4a6e0e5c98fff8ea7ee46"
         },
         {
           "locator": "packets/barracks/barracks_exterior_handoff_v001.png",
@@ -466,8 +470,8 @@
       "artifacts": [
         {
           "locator": "packets/embassy/embassy_2d_handoff_v001.json",
-          "byteLength": 24762,
-          "sha256": "6097d009c4a8cb15e0b3779d3ea09efb1a26b9abd4199ab5bae3fb270064f030"
+          "byteLength": 25828,
+          "sha256": "888dafa439739a4442a7549f0ea54a731a7ae8287e9a490a7e8437c967fcd3c9"
         },
         {
           "locator": "packets/embassy/embassy_exterior_handoff_v001.png",
@@ -497,8 +501,8 @@
       "artifacts": [
         {
           "locator": "packets/farm/farm_2d_handoff_v001.json",
-          "byteLength": 22745,
-          "sha256": "076e30ae3e6075d79f15d2552aa5683bd031b7fff38e3027c324bddd6ba8be2a"
+          "byteLength": 23811,
+          "sha256": "10ea881f5047704e1ddd9184b74a91289b912e7821be8daec3c8f69512f85ff5"
         },
         {
           "locator": "packets/farm/farm_exterior_handoff_v001.png",
@@ -528,8 +532,8 @@
       "artifacts": [
         {
           "locator": "packets/forge/forge_2d_handoff_v001.json",
-          "byteLength": 23398,
-          "sha256": "11b497a589a40c1d78ff0e2fd18753f4a2fd9f5d8bd9705f57b3ddcef307668b"
+          "byteLength": 24464,
+          "sha256": "df3b73619c2cfb4cc0672460f308150405dc3e15146348b8c979dbb565aac166"
         },
         {
           "locator": "packets/forge/forge_exterior_handoff_v001.png",
@@ -559,8 +563,8 @@
       "artifacts": [
         {
           "locator": "packets/gold_mine/gold_mine_2d_handoff_v001.json",
-          "byteLength": 27562,
-          "sha256": "03560f5fe1078a4fb6cc6a0e745ac61bea2d07c2f6864a61e8be1c6fbf8698ad"
+          "byteLength": 28628,
+          "sha256": "90b4b071f808abbc1f07733740601694dc5b6a4050f3b93a5bac66b1baceb2e1"
         },
         {
           "locator": "packets/gold_mine/gold_mine_exterior_handoff_v001.png",
@@ -590,8 +594,8 @@
       "artifacts": [
         {
           "locator": "packets/lumber_mill/lumber_mill_2d_handoff_v001.json",
-          "byteLength": 23001,
-          "sha256": "e65dcb0ef3ddd8d8c1f615fee82d393dab67931122bf5f8cbedff9e935047c6f"
+          "byteLength": 24067,
+          "sha256": "594fc26950f524bae77c07db9bc8f6757000a940a7c30baa39e29d21f6c536c6"
         },
         {
           "locator": "packets/lumber_mill/lumber_mill_exterior_handoff_v001.png",
@@ -621,8 +625,8 @@
       "artifacts": [
         {
           "locator": "packets/market/market_2d_handoff_v001.json",
-          "byteLength": 23663,
-          "sha256": "63daee47111470715fd7821f8bbaea7df860c46269ddba55545e61af2c8e90ed"
+          "byteLength": 24729,
+          "sha256": "a20846b7b29184a8bacf78c771fa44c2eae6d9043674daf49840f74f6695f944"
         },
         {
           "locator": "packets/market/market_exterior_handoff_v001.png",
@@ -652,8 +656,8 @@
       "artifacts": [
         {
           "locator": "packets/quarry/quarry_2d_handoff_v001.json",
-          "byteLength": 27433,
-          "sha256": "5e716274d2d30ebec249edc8a4bf7d1a2279a4be30d7204b3ce3fb721e0929ea"
+          "byteLength": 28499,
+          "sha256": "3b017b88098d54ecea8e30cf56eacd969de54681ef6024226c25732131e4b3c1"
         },
         {
           "locator": "packets/quarry/quarry_exterior_handoff_v001.png",
@@ -683,8 +687,8 @@
       "artifacts": [
         {
           "locator": "packets/stable/stable_2d_handoff_v001.json",
-          "byteLength": 22634,
-          "sha256": "285c687acaedbdf0710e0ffef8d1481400a27161974d6deb19ab585f0b3ad69f"
+          "byteLength": 23700,
+          "sha256": "0cd7d469c37f7ff9911d3075b3d0e63afe743635d52516f467b7d7184fa329a0"
         },
         {
           "locator": "packets/stable/stable_exterior_handoff_v001.png",
@@ -714,8 +718,8 @@
       "artifacts": [
         {
           "locator": "packets/storehouse/storehouse_2d_handoff_v001.json",
-          "byteLength": 23102,
-          "sha256": "ac7285a5178f2ed906129853ec33d09e0b234de1d36779f2d2834c99d207a300"
+          "byteLength": 24168,
+          "sha256": "31eec8b1ddfbaf61eb0e67bf4e4bcc1d49d355519ca3d7a3da1c1c8748603393"
         },
         {
           "locator": "packets/storehouse/storehouse_exterior_handoff_v001.png",
@@ -745,8 +749,8 @@
       "artifacts": [
         {
           "locator": "packets/town_hall/town_hall_2d_handoff_v001.json",
-          "byteLength": 25427,
-          "sha256": "1d79a34e6197af66921d3fad136829fa0f5092f77af489e590c07ae82de21dd7"
+          "byteLength": 26493,
+          "sha256": "435b5b117924f43fb188e964cff456c59159d2f018e7c0286d549db5f6b2f8e7"
         },
         {
           "locator": "packets/town_hall/town_hall_exterior_handoff_v001.png",
@@ -776,8 +780,8 @@
       "artifacts": [
         {
           "locator": "packets/watchtower/watchtower_2d_handoff_v001.json",
-          "byteLength": 26247,
-          "sha256": "6a651abe594a08763f70d0334b19de899aa02db61e1d74b5d309dc2c6112f991"
+          "byteLength": 27313,
+          "sha256": "222c365eb7bf1d4e1c5c2392c1d3225fb1395e75df6799ef2f2d1cd035de0b08"
         },
         {
           "locator": "packets/watchtower/watchtower_exterior_handoff_v001.png",
@@ -807,8 +811,8 @@
       "artifacts": [
         {
           "locator": "packets/workshop/workshop_2d_handoff_v001.json",
-          "byteLength": 23237,
-          "sha256": "9ebb14fcacc2a8e02ead884554cd5715e8722aceee98cb0f00aae91d25e04def"
+          "byteLength": 24303,
+          "sha256": "45c153da4c085fbda6146c81b599b06f1e768eccdbffd0f4738197cb8ea19cd9"
         },
         {
           "locator": "packets/workshop/workshop_exterior_handoff_v001.png",
@@ -838,8 +842,8 @@
       "artifacts": [
         {
           "locator": "packets/castle_enterable/castle_enterable_2d_handoff_v001.json",
-          "byteLength": 39182,
-          "sha256": "7dcd32ab2e75a4bdd5ca1afdbe8e6400015beb30a068eab56156ef0905927fd6"
+          "byteLength": 40248,
+          "sha256": "dbc7f613686e41ffb293ce587b8e59c192fc1a212b65ca0b368301b55050a33f"
         },
         {
           "locator": "packets/castle_enterable/castle_enterable_exterior_handoff_v001.png",
@@ -869,8 +873,8 @@
       "artifacts": [
         {
           "locator": "packets/fortress_enterable/fortress_enterable_2d_handoff_v001.json",
-          "byteLength": 35410,
-          "sha256": "61644cbf33a0954cb61331930613d001d715389a6bc0e025471cdd486c217d5f"
+          "byteLength": 36476,
+          "sha256": "8633eab3eba78a6df09d32858f51f275f7d54f8e9c197587d408af4acbfabfed"
         },
         {
           "locator": "packets/fortress_enterable/fortress_enterable_exterior_handoff_v001.png",
@@ -900,8 +904,8 @@
       "artifacts": [
         {
           "locator": "packets/guardpost_watch/guardpost_watch_2d_handoff_v001.json",
-          "byteLength": 22250,
-          "sha256": "4dd235876c1f5652b7957ba13d3fd6390af7f4705b842aabaeeaf8c9501cd62e"
+          "byteLength": 23316,
+          "sha256": "8899ae0a4ab45318242822ec65c00a0a740511dd5cbda3b785fb2a5109cc895c"
         },
         {
           "locator": "packets/guardpost_watch/guardpost_watch_exterior_handoff_v001.png",
@@ -931,8 +935,8 @@
       "artifacts": [
         {
           "locator": "packets/inn_tavern/inn_tavern_2d_handoff_v001.json",
-          "byteLength": 28989,
-          "sha256": "85dd87251fde7b45aa62c1de344f8b6acd07acae74e159e5cf3d427c4dd9b686"
+          "byteLength": 30055,
+          "sha256": "f854144022974c3482c7c745db4e44726cc6aa2412ca15b66c34216d92a93298"
         },
         {
           "locator": "packets/inn_tavern/inn_tavern_exterior_handoff_v001.png",
@@ -962,8 +966,8 @@
       "artifacts": [
         {
           "locator": "packets/mill_wind_water/mill_wind_water_2d_handoff_v001.json",
-          "byteLength": 26009,
-          "sha256": "5401eed26c121a79a8fe9d35bcf1624f1bf05294938456e658e5576010bd1a3c"
+          "byteLength": 27075,
+          "sha256": "203cb189ecca2149abddd544d9682949a543370515401d24c11899992dfb0797"
         },
         {
           "locator": "packets/mill_wind_water/mill_wind_water_exterior_handoff_v001.png",
@@ -993,8 +997,8 @@
       "artifacts": [
         {
           "locator": "packets/religious_cultural_structure/religious_cultural_structure_2d_handoff_v001.json",
-          "byteLength": 24690,
-          "sha256": "7c17832c2f9e4882a8c3449e88349ed6f69656b049b9dff0c471ca4805c55b44"
+          "byteLength": 25756,
+          "sha256": "52642322cc203a425a6191225e3fe1e06058239a630901ec716274595d6cfe4c"
         },
         {
           "locator": "packets/religious_cultural_structure/religious_cultural_structure_exterior_handoff_v001.png",
@@ -1024,8 +1028,8 @@
       "artifacts": [
         {
           "locator": "packets/shop_service/shop_service_2d_handoff_v001.json",
-          "byteLength": 23068,
-          "sha256": "6219de2665d47648f326c62ccc648fa135a74adc9a8a42f47ca44108b4b5f04d"
+          "byteLength": 24134,
+          "sha256": "a81e8e8355af8e8d32426dbd22a7040cc3a5698663dde6f4298d168614e64e8c"
         },
         {
           "locator": "packets/shop_service/shop_service_exterior_handoff_v001.png",
@@ -1055,8 +1059,8 @@
       "artifacts": [
         {
           "locator": "packets/warehouse_barn/warehouse_barn_2d_handoff_v001.json",
-          "byteLength": 23424,
-          "sha256": "ed991ceeeba5b726fe62525bae6970adbf2981ee24637a38b05dbd57e396f3ad"
+          "byteLength": 24490,
+          "sha256": "2ffbadafcc666c13375bc57c88a8032319fcabfeb2d3752fc06811ad9a9c0c9d"
         },
         {
           "locator": "packets/warehouse_barn/warehouse_barn_exterior_handoff_v001.png",

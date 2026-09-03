@@ -18,6 +18,7 @@
     "accordantExcluded": true,
     "gateRulesReferenceOnly": true,
     "no3dAuthorization": true,
+    "approvedFurnishingPrecedentBound": true,
     "allPacketsComplete": true,
     "interiorModules21of21": true,
     "propFamilies65Accounted": true,
