@@ -48,6 +48,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
 
             Assert.That(result.IsPrepared, Is.True);
             Assert.That(result.Plan.RequiresEconomyDebit, Is.True);
+            Assert.That(result.Plan.EconomyDebit.ProfileId, Is.EqualTo(ProfileId));
             Assert.That(result.Plan.EconomyDebit.CurrencyId, Is.EqualTo(CurrencyId));
             Assert.That(result.Plan.EconomyDebit.Amount, Is.EqualTo(7));
             Assert.That(result.Plan.EconomyDebit.CandidateBalance, Is.EqualTo(93));
@@ -213,6 +214,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                     state,
                     new WarmasterWalletSnapshot(
                         WarmasterWalletStatus.CommitUncertain,
+                        ProfileId,
                         CurrencyId,
                         100,
                         0,
@@ -224,6 +226,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                     state,
                     new WarmasterWalletSnapshot(
                         WarmasterWalletStatus.Malformed,
+                        ProfileId,
                         CurrencyId,
                         100,
                         0,
@@ -235,6 +238,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                     state,
                     new WarmasterWalletSnapshot(
                         WarmasterWalletStatus.Available,
+                        ProfileId,
                         CurrencyId,
                         6,
                         0,
@@ -246,6 +250,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                     state,
                     new WarmasterWalletSnapshot(
                         WarmasterWalletStatus.Available,
+                        ProfileId,
                         CurrencyId,
                         100,
                         1,
@@ -257,6 +262,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                     state,
                     new WarmasterWalletSnapshot(
                         WarmasterWalletStatus.Available,
+                        ProfileId,
                         "wrong_credit",
                         100,
                         0,
@@ -264,6 +270,18 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                 Is.EqualTo(WarmasterPlanStatus.Malformed));
             Assert.That(state.Revision, Is.Zero);
             Assert.That(state.PurchasedPieces, Is.Empty);
+            Assert.That(
+                planner.Plan(
+                    request,
+                    state,
+                    new WarmasterWalletSnapshot(
+                        WarmasterWalletStatus.Available,
+                        "another_profile",
+                        CurrencyId,
+                        100,
+                        0,
+                        true)).Status,
+                Is.EqualTo(WarmasterPlanStatus.Conflict));
         }
 
         [Test]
@@ -640,6 +658,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                     plan.CandidateState,
                     new WarmasterWalletSnapshot(
                         WarmasterWalletStatus.Available,
+                        ProfileId,
                         CurrencyId,
                         plan.EconomyDebit.CandidateBalance + 1,
                         plan.EconomyDebit.CandidateRevision,
@@ -653,6 +672,20 @@ namespace AL.Tests.EditMode.Warmaster.Planning
                     plan.CandidateState,
                     CandidateWallet(plan),
                     "not_a_generation_hash",
+                    out _),
+                Is.False);
+            Assert.That(
+                WarmasterTransactionPlanner.TryVerifyAdapterCommitAndCreateReceipt(
+                    plan,
+                    plan.CandidateState,
+                    new WarmasterWalletSnapshot(
+                        WarmasterWalletStatus.Available,
+                        "another_profile",
+                        CurrencyId,
+                        plan.EconomyDebit.CandidateBalance,
+                        plan.EconomyDebit.CandidateRevision,
+                        true),
+                    GenerationHash,
                     out _),
                 Is.False);
 
@@ -754,6 +787,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
 
             WarmasterWalletSnapshot maxWallet = new WarmasterWalletSnapshot(
                 WarmasterWalletStatus.Available,
+                ProfileId,
                 CurrencyId,
                 100,
                 long.MaxValue,
@@ -1316,6 +1350,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
         {
             return new WarmasterWalletSnapshot(
                 WarmasterWalletStatus.Available,
+                ProfileId,
                 CurrencyId,
                 balance,
                 revision,
@@ -1453,6 +1488,7 @@ namespace AL.Tests.EditMode.Warmaster.Planning
 
             return new WarmasterWalletSnapshot(
                 WarmasterWalletStatus.Available,
+                plan.EconomyDebit.ProfileId,
                 plan.EconomyDebit.CurrencyId,
                 plan.EconomyDebit.CandidateBalance,
                 plan.EconomyDebit.CandidateRevision,

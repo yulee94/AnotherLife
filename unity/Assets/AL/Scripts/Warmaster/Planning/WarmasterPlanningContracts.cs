@@ -267,12 +267,14 @@ namespace AL.Warmaster.Planning
     {
         public WarmasterWalletSnapshot(
             WarmasterWalletStatus status,
+            string profileId,
             string currencyId,
             long balance,
             long revision,
             bool isComplete)
         {
             Status = status;
+            ProfileId = profileId ?? string.Empty;
             CurrencyId = currencyId ?? string.Empty;
             Balance = balance;
             Revision = revision;
@@ -280,6 +282,7 @@ namespace AL.Warmaster.Planning
         }
 
         public WarmasterWalletStatus Status { get; }
+        public string ProfileId { get; }
         public string CurrencyId { get; }
         public long Balance { get; }
         public long Revision { get; }
@@ -446,6 +449,7 @@ namespace AL.Warmaster.Planning
     public sealed class WarmasterEconomyDebitIntent
     {
         internal WarmasterEconomyDebitIntent(
+            string profileId,
             string currencyId,
             long amount,
             long expectedRevision,
@@ -453,6 +457,7 @@ namespace AL.Warmaster.Planning
             long candidateBalance,
             string idempotencyKey)
         {
+            ProfileId = profileId;
             CurrencyId = currencyId;
             Amount = amount;
             ExpectedRevision = expectedRevision;
@@ -461,6 +466,7 @@ namespace AL.Warmaster.Planning
             IdempotencyKey = idempotencyKey;
         }
 
+        public string ProfileId { get; }
         public string CurrencyId { get; }
         public long Amount { get; }
         public long ExpectedRevision { get; }

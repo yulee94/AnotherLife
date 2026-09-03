@@ -236,6 +236,10 @@ namespace AL.Warmaster.Planning
                     verifiedWallet.Status != WarmasterWalletStatus.Available ||
                     !verifiedWallet.IsComplete ||
                     !string.Equals(
+                        verifiedWallet.ProfileId,
+                        debit.ProfileId,
+                        StringComparison.Ordinal) ||
+                    !string.Equals(
                         verifiedWallet.CurrencyId,
                         debit.CurrencyId,
                         StringComparison.Ordinal) ||
@@ -393,6 +397,7 @@ namespace AL.Warmaster.Planning
             long candidateEconomyRevision = checked(wallet.Revision + 1);
             long candidateBalance = checked(wallet.Balance - piece.PriceAmount);
             var debit = new WarmasterEconomyDebitIntent(
+                request.ProfileId,
                 catalog.Binding.CurrencyId,
                 piece.PriceAmount,
                 wallet.Revision,
@@ -666,6 +671,7 @@ namespace AL.Warmaster.Planning
 
             if (wallet.Status != WarmasterWalletStatus.Available ||
                 !wallet.IsComplete ||
+                !IsOpaqueId(wallet.ProfileId) ||
                 !IsStableId(wallet.CurrencyId) ||
                 wallet.Balance < 0 ||
                 wallet.Revision < 0 ||
@@ -679,6 +685,15 @@ namespace AL.Warmaster.Planning
                     "AL-WARMASTER-WALLET-MALFORMED",
                     request.ProfileId,
                     "Warmaster wallet identity, balance, or revision is malformed.");
+            }
+
+            if (!string.Equals(wallet.ProfileId, request.ProfileId, StringComparison.Ordinal))
+            {
+                return Reject(
+                    WarmasterPlanStatus.Conflict,
+                    "AL-WARMASTER-WALLET-PROFILE-CONFLICT",
+                    request.ProfileId,
+                    "Warmaster wallet belongs to another profile.");
             }
 
             if (wallet.Revision != request.ExpectedEconomyRevision)
