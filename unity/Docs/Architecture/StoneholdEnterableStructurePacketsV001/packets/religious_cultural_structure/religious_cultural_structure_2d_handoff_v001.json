@@ -116,6 +116,259 @@
     "longitudinal_section",
     "cross_section"
   ],
+  "architecturalDesign": {
+    "packetSlug": "religious_cultural_structure",
+    "layoutArchetype": "assembly hall and archive around a quiet court",
+    "planSignature": "religious_cultural_structure|memory_hall_court|archive_daylight|south|(0.84, 0.6)",
+    "exteriorMasses": [
+      {
+        "id": "south_wing",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 17.4,
+        "depth": 4.38,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper"
+        ],
+        "exteriorRole": "south wing"
+      },
+      {
+        "id": "north_wing",
+        "x": 0.3,
+        "z": 8.32,
+        "width": 17.4,
+        "depth": 4.38,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper"
+        ],
+        "exteriorRole": "north wing"
+      },
+      {
+        "id": "west_wing",
+        "x": 0.3,
+        "z": 4.68,
+        "width": 6.18,
+        "depth": 3.64,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper"
+        ],
+        "exteriorRole": "west wing"
+      },
+      {
+        "id": "east_wing",
+        "x": 11.52,
+        "z": 4.68,
+        "width": 6.18,
+        "depth": 3.64,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper"
+        ],
+        "exteriorRole": "east wing"
+      }
+    ],
+    "roofVolumes": [
+      {
+        "id": "roof_south_wing",
+        "massId": "south_wing",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 17.4,
+        "depth": 4.38,
+        "profile": "Low stepped hall roof with a restrained central daylight slot."
+      },
+      {
+        "id": "roof_north_wing",
+        "massId": "north_wing",
+        "x": 0.3,
+        "z": 8.32,
+        "width": 17.4,
+        "depth": 4.38,
+        "profile": "Low stepped hall roof with a restrained central daylight slot."
+      },
+      {
+        "id": "roof_west_wing",
+        "massId": "west_wing",
+        "x": 0.3,
+        "z": 4.68,
+        "width": 6.18,
+        "depth": 3.64,
+        "profile": "Low stepped hall roof with a restrained central daylight slot."
+      },
+      {
+        "id": "roof_east_wing",
+        "massId": "east_wing",
+        "x": 11.52,
+        "z": 4.68,
+        "width": 6.18,
+        "depth": 3.64,
+        "profile": "Low stepped hall roof with a restrained central daylight slot."
+      }
+    ],
+    "exteriorOpeningRegister": [
+      {
+        "id": "religious_cultural_structure_main_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "south",
+        "x": 9.0,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "religious_cultural_structure_main_entry"
+      },
+      {
+        "id": "religious_cultural_structure_service_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "north",
+        "x": 14.04,
+        "z": 13,
+        "separateObject": true,
+        "planOpeningId": "religious_cultural_structure_service_entry"
+      },
+      {
+        "id": "window_ground_entry_vestibule",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 5.441,
+        "z": 2.49,
+        "separateObject": true,
+        "planOpeningId": "window_ground_entry_vestibule"
+      },
+      {
+        "id": "window_ground_assembly_hall",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 9.0,
+        "z": 9.415,
+        "separateObject": true,
+        "planOpeningId": "window_ground_assembly_hall"
+      },
+      {
+        "id": "window_ground_memory_gallery",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 3.39,
+        "z": 6.5,
+        "separateObject": true,
+        "planOpeningId": "window_ground_memory_gallery"
+      },
+      {
+        "id": "window_ground_quiet_room",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 14.61,
+        "z": 6.5,
+        "separateObject": true,
+        "planOpeningId": "window_ground_quiet_room"
+      },
+      {
+        "id": "window_ground_service_store",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 14.141,
+        "z": 2.49,
+        "separateObject": true,
+        "planOpeningId": "window_ground_service_store"
+      },
+      {
+        "id": "window_ground_accessible_court",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 9.0,
+        "z": 11.605,
+        "separateObject": true,
+        "planOpeningId": "window_ground_accessible_court"
+      },
+      {
+        "id": "window_upper_archive",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 2.079,
+        "z": 3.4,
+        "separateObject": true,
+        "planOpeningId": "window_upper_archive"
+      },
+      {
+        "id": "window_upper_teaching_gallery",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 8.209,
+        "z": 3.4,
+        "separateObject": true,
+        "planOpeningId": "window_upper_teaching_gallery"
+      },
+      {
+        "id": "window_upper_custodian_room",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 15.13,
+        "z": 3.4,
+        "separateObject": true,
+        "planOpeningId": "window_upper_custodian_room"
+      },
+      {
+        "id": "window_upper_landing",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 3.859,
+        "z": 9.6,
+        "separateObject": true,
+        "planOpeningId": "window_upper_landing"
+      },
+      {
+        "id": "window_upper_daylight_walk",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 12.559,
+        "z": 9.6,
+        "separateObject": true,
+        "planOpeningId": "window_upper_daylight_walk"
+      }
+    ],
+    "siteContext": {
+      "orientation": "front/local south; rear/local north",
+      "entryApproachSide": "south",
+      "courtyardsAndYards": [
+        {
+          "id": "open_courtyard",
+          "x": 6.48,
+          "z": 4.68,
+          "width": 5.04,
+          "depth": 3.64,
+          "kind": "open_to_sky"
+        },
+        {
+          "id": "open_courtyard",
+          "x": 6.48,
+          "z": 4.68,
+          "width": 5.04,
+          "depth": 3.64,
+          "kind": "open_to_sky"
+        }
+      ],
+      "perimeterWall": null
+    },
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+  },
   "floorPlans": [
     {
       "id": "ground",
@@ -124,91 +377,174 @@
       "rooms": [
         {
           "id": "entry_vestibule",
-          "purpose": "entry vestibule",
           "x": 0.3,
-          "z": 7.25,
-          "width": 4.398,
-          "depth": 5.45,
-          "furnitureZones": [
-            "entry_vestibule_primary",
-            "entry_vestibule_storage",
-            "clear_route_edge"
-          ]
+          "z": 0.3,
+          "width": 10.282,
+          "depth": 4.38,
+          "kind": "room",
+          "purpose": "entry vestibule"
         },
         {
           "id": "assembly_hall",
-          "purpose": "assembly hall",
-          "x": 4.698,
-          "z": 7.25,
-          "width": 6.501,
-          "depth": 5.45,
-          "furnitureZones": [
-            "assembly_hall_primary",
-            "assembly_hall_storage",
-            "clear_route_edge"
-          ]
+          "x": 0.3,
+          "z": 8.32,
+          "width": 17.4,
+          "depth": 2.19,
+          "kind": "room",
+          "purpose": "assembly hall"
         },
         {
           "id": "memory_gallery",
-          "purpose": "memory gallery",
-          "x": 11.199,
-          "z": 7.25,
-          "width": 6.501,
-          "depth": 5.45,
-          "furnitureZones": [
-            "memory_gallery_primary",
-            "memory_gallery_storage",
-            "clear_route_edge"
-          ]
+          "x": 0.3,
+          "z": 4.68,
+          "width": 6.18,
+          "depth": 3.64,
+          "kind": "room",
+          "purpose": "memory gallery"
         },
         {
           "id": "quiet_room",
-          "purpose": "quiet room",
-          "x": 0.3,
-          "z": 0.3,
-          "width": 5.408,
-          "depth": 5.45,
-          "furnitureZones": [
-            "quiet_room_primary",
-            "quiet_room_storage",
-            "clear_route_edge"
-          ]
+          "x": 11.52,
+          "z": 4.68,
+          "width": 6.18,
+          "depth": 3.64,
+          "kind": "room",
+          "purpose": "quiet room"
         },
         {
           "id": "service_store",
-          "purpose": "service store",
-          "x": 5.708,
+          "x": 10.582,
           "z": 0.3,
-          "width": 3.997,
-          "depth": 5.45,
-          "furnitureZones": [
-            "service_store_primary",
-            "service_store_storage",
-            "clear_route_edge"
-          ]
+          "width": 7.118,
+          "depth": 4.38,
+          "kind": "room",
+          "purpose": "service store"
         },
         {
           "id": "accessible_court",
-          "purpose": "accessible court",
-          "x": 9.705,
+          "x": 0.3,
+          "z": 10.51,
+          "width": 17.4,
+          "depth": 2.19,
+          "kind": "room",
+          "purpose": "accessible court"
+        }
+      ],
+      "blueprintId": "religious_cultural_structure:ground:memory_hall_court",
+      "layoutPattern": "memory_hall_court",
+      "levelMassFootprints": [
+        {
+          "id": "south_wing",
+          "x": 0.3,
           "z": 0.3,
-          "width": 7.995,
-          "depth": 5.45,
-          "furnitureZones": [
-            "accessible_court_primary",
-            "accessible_court_storage",
-            "clear_route_edge"
-          ]
+          "width": 17.4,
+          "depth": 4.38,
+          "kind": "building"
+        },
+        {
+          "id": "north_wing",
+          "x": 0.3,
+          "z": 8.32,
+          "width": 17.4,
+          "depth": 4.38,
+          "kind": "building"
+        },
+        {
+          "id": "west_wing",
+          "x": 0.3,
+          "z": 4.68,
+          "width": 6.18,
+          "depth": 3.64,
+          "kind": "building"
+        },
+        {
+          "id": "east_wing",
+          "x": 11.52,
+          "z": 4.68,
+          "width": 6.18,
+          "depth": 3.64,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [
+        {
+          "id": "open_courtyard",
+          "x": 6.48,
+          "z": 4.68,
+          "width": 5.04,
+          "depth": 3.64,
+          "kind": "open_to_sky"
         }
       ],
       "circulation": {
         "id": "primary_circulation",
         "x": 0.3,
-        "z": 5.75,
+        "z": 4.68,
         "width": 17.4,
-        "depth": 1.5
+        "depth": 3.64,
+        "kind": "accessible_route_envelope"
       },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              9.0,
+              0.0
+            ],
+            [
+              0.3,
+              4.68
+            ],
+            [
+              6.48,
+              4.68
+            ],
+            [
+              6.48,
+              8.32
+            ],
+            [
+              11.52,
+              8.32
+            ],
+            [
+              11.52,
+              4.68
+            ],
+            [
+              17.7,
+              4.68
+            ]
+          ]
+        },
+        {
+          "id": "service_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              14.04,
+              13
+            ],
+            [
+              11.52,
+              8.32
+            ]
+          ]
+        }
+      ],
       "adjacency": [
+        [
+          "outside",
+          "entry_vestibule"
+        ],
+        [
+          "outside",
+          "service_store"
+        ],
         [
           "entry_vestibule",
           "primary_circulation"
@@ -236,16 +572,61 @@
       ],
       "doorOpenings": [
         {
+          "id": "religious_cultural_structure_main_entry",
+          "from": "outside",
+          "to": "entry_vestibule",
+          "side": "south",
+          "x": 9.0,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "entry_vestibule"
+          ]
+        },
+        {
+          "id": "religious_cultural_structure_service_entry",
+          "from": "outside",
+          "to": "service_store",
+          "side": "north",
+          "x": 14.04,
+          "z": 13,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "service_store"
+          ]
+        },
+        {
           "id": "door_ground_entry_vestibule",
           "separateObject": true,
           "between": [
             "entry_vestibule",
             "primary_circulation"
           ],
+          "to": "entry_vestibule",
+          "orientation": "vertical",
+          "x": 5.441,
+          "z": 4.68,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_assembly_hall",
@@ -254,10 +635,15 @@
             "assembly_hall",
             "primary_circulation"
           ],
+          "to": "assembly_hall",
+          "orientation": "horizontal",
+          "x": 9.0,
+          "z": 8.32,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_memory_gallery",
@@ -266,10 +652,15 @@
             "memory_gallery",
             "primary_circulation"
           ],
+          "to": "memory_gallery",
+          "orientation": "vertical",
+          "x": 3.39,
+          "z": 8.32,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_quiet_room",
@@ -278,10 +669,15 @@
             "quiet_room",
             "primary_circulation"
           ],
+          "to": "quiet_room",
+          "orientation": "vertical",
+          "x": 14.61,
+          "z": 8.32,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_service_store",
@@ -290,10 +686,15 @@
             "service_store",
             "primary_circulation"
           ],
+          "to": "service_store",
+          "orientation": "vertical",
+          "x": 14.141,
+          "z": 4.68,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_accessible_court",
@@ -302,10 +703,49 @@
             "accessible_court",
             "primary_circulation"
           ],
+          "to": "accessible_court",
+          "orientation": "horizontal",
+          "x": 9.0,
+          "z": 10.51,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
+        }
+      ],
+      "exteriorEntrances": [
+        {
+          "id": "religious_cultural_structure_main_entry",
+          "from": "outside",
+          "to": "entry_vestibule",
+          "side": "south",
+          "x": 9.0,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true
+        },
+        {
+          "id": "religious_cultural_structure_service_entry",
+          "from": "outside",
+          "to": "service_store",
+          "side": "north",
+          "x": 14.04,
+          "z": 13,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true
         }
       ],
       "windowOpenings": [
@@ -313,6 +753,9 @@
           "id": "window_ground_entry_vestibule",
           "separateFrameGlassShutter": true,
           "serves": "entry_vestibule",
+          "side": "north",
+          "x": 5.441,
+          "z": 2.49,
           "openingMeters": [
             1.2,
             1.5
@@ -322,6 +765,9 @@
           "id": "window_ground_assembly_hall",
           "separateFrameGlassShutter": true,
           "serves": "assembly_hall",
+          "side": "east",
+          "x": 9.0,
+          "z": 9.415,
           "openingMeters": [
             1.2,
             1.5
@@ -331,6 +777,9 @@
           "id": "window_ground_memory_gallery",
           "separateFrameGlassShutter": true,
           "serves": "memory_gallery",
+          "side": "west",
+          "x": 3.39,
+          "z": 6.5,
           "openingMeters": [
             1.2,
             1.5
@@ -340,6 +789,9 @@
           "id": "window_ground_quiet_room",
           "separateFrameGlassShutter": true,
           "serves": "quiet_room",
+          "side": "north",
+          "x": 14.61,
+          "z": 6.5,
           "openingMeters": [
             1.2,
             1.5
@@ -349,6 +801,9 @@
           "id": "window_ground_service_store",
           "separateFrameGlassShutter": true,
           "serves": "service_store",
+          "side": "east",
+          "x": 14.141,
+          "z": 2.49,
           "openingMeters": [
             1.2,
             1.5
@@ -358,6 +813,9 @@
           "id": "window_ground_accessible_court",
           "separateFrameGlassShutter": true,
           "serves": "accessible_court",
+          "side": "west",
+          "x": 9.0,
+          "z": 11.605,
           "openingMeters": [
             1.2,
             1.5
@@ -365,15 +823,484 @@
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
-      "verticalCore": {
-        "stairMeters": [
-          1.5,
-          1.5
-        ],
-        "liftPlatformReserved": true,
-        "separateObjects": true
-      },
-      "portalBoundary": "none_on_this_level"
+      "verticalCoreFootprints": [
+        {
+          "coreId": "religious_cultural_structure_stair_core",
+          "type": "dogleg_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 14.12,
+            "z": 5.98,
+            "width": 2.0,
+            "depth": 3.64,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "quiet_room"
+        },
+        {
+          "coreId": "religious_cultural_structure_public_platform",
+          "type": "public_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 11.56,
+            "z": 5.98,
+            "width": 2.16,
+            "depth": 2.08,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "quiet_room"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "entry_vestibule",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "ground_entry_vestibule_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 0.75,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.835,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_entry_vestibule_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 8.332,
+              "z": 3.395,
+              "width": 1.8,
+              "depth": 0.835,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "entry_vestibule_protected_aisle",
+              "x": 0.3,
+              "z": 1.89,
+              "width": 10.282,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "entry_vestibule_door_approach",
+              "x": 4.841,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "assembly_hall",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "ground_assembly_hall_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 0.563,
+              "z": 8.583,
+              "width": 1.8,
+              "depth": 0.399,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_assembly_hall_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 8.1,
+              "z": 9.848,
+              "width": 1.8,
+              "depth": 0.399,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "assembly_hall_protected_aisle",
+              "x": 0.3,
+              "z": 8.815,
+              "width": 17.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "assembly_hall_door_approach",
+              "x": 8.4,
+              "z": 8.32,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "memory_gallery",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "ground_memory_gallery_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 0.737,
+              "z": 5.117,
+              "width": 1.769,
+              "depth": 0.664,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_memory_gallery_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 2.506,
+              "z": 7.219,
+              "width": 1.769,
+              "depth": 0.664,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "ground_memory_gallery_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 4.274,
+              "z": 5.117,
+              "width": 1.769,
+              "depth": 0.664,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "memory_gallery_protected_aisle",
+              "x": 0.3,
+              "z": 5.9,
+              "width": 6.18,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "memory_gallery_door_approach",
+              "x": 2.79,
+              "z": 4.68,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "quiet_room",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "ground_quiet_room_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 11.957,
+              "z": 5.117,
+              "width": 1.8,
+              "depth": 0.664,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "quiet_room_protected_aisle",
+              "x": 11.52,
+              "z": 5.9,
+              "width": 6.18,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "quiet_room_door_approach",
+              "x": 14.01,
+              "z": 4.68,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "service_store",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "ground_service_store_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 11.032,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.835,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_service_store_storage_rack_2",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 13.241,
+              "z": 3.395,
+              "width": 1.8,
+              "depth": 0.835,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "ground_service_store_storage_rack_3",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 15.45,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.835,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "service_store_protected_aisle",
+              "x": 10.582,
+              "z": 1.89,
+              "width": 7.118,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "service_store_door_approach",
+              "x": 13.541,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "accessible_court",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "ground_accessible_court_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 0.563,
+              "z": 10.773,
+              "width": 1.8,
+              "depth": 0.399,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_accessible_court_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 8.1,
+              "z": 12.038,
+              "width": 1.8,
+              "depth": 0.399,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "ground_accessible_court_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 15.637,
+              "z": 10.773,
+              "width": 1.8,
+              "depth": 0.399,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "accessible_court_protected_aisle",
+              "x": 0.3,
+              "z": 11.005,
+              "width": 17.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "accessible_court_door_approach",
+              "x": 8.4,
+              "z": 10.51,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "ground_accessible_route",
+          "x": 0.3,
+          "z": 4.68,
+          "width": 17.4,
+          "depth": 3.64,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "ground_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "entry_vestibule",
+          "center": [
+            5.441,
+            2.49
+          ],
+          "diameter": 4.0
+        },
+        {
+          "id": "ground_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "entry_vestibule",
+          "center": [
+            5.441,
+            2.49
+          ],
+          "radius": 2.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_ground_entry_vestibule",
+          "type": "lighting",
+          "roomId": "entry_vestibule",
+          "x": 5.441,
+          "z": 2.49
+        },
+        {
+          "id": "interaction_ground_entry_vestibule",
+          "type": "interaction",
+          "roomId": "entry_vestibule",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_assembly_hall",
+          "type": "lighting",
+          "roomId": "assembly_hall",
+          "x": 9.0,
+          "z": 9.415
+        },
+        {
+          "id": "interaction_ground_assembly_hall",
+          "type": "interaction",
+          "roomId": "assembly_hall",
+          "x": 0.9,
+          "z": 8.92
+        },
+        {
+          "id": "light_ground_memory_gallery",
+          "type": "lighting",
+          "roomId": "memory_gallery",
+          "x": 3.39,
+          "z": 6.5
+        },
+        {
+          "id": "interaction_ground_memory_gallery",
+          "type": "interaction",
+          "roomId": "memory_gallery",
+          "x": 0.9,
+          "z": 5.28
+        },
+        {
+          "id": "light_ground_quiet_room",
+          "type": "lighting",
+          "roomId": "quiet_room",
+          "x": 14.61,
+          "z": 6.5
+        },
+        {
+          "id": "interaction_ground_quiet_room",
+          "type": "interaction",
+          "roomId": "quiet_room",
+          "x": 12.12,
+          "z": 5.28
+        },
+        {
+          "id": "light_ground_service_store",
+          "type": "lighting",
+          "roomId": "service_store",
+          "x": 14.141,
+          "z": 2.49
+        },
+        {
+          "id": "interaction_ground_service_store",
+          "type": "interaction",
+          "roomId": "service_store",
+          "x": 11.182,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_accessible_court",
+          "type": "lighting",
+          "roomId": "accessible_court",
+          "x": 9.0,
+          "z": 11.605
+        },
+        {
+          "id": "interaction_ground_accessible_court",
+          "type": "interaction",
+          "roomId": "accessible_court",
+          "x": 0.9,
+          "z": 11.11
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            7.8
+          ],
+          "to": [
+            17.7,
+            7.8
+          ],
+          "cutsVerticalCoreId": "religious_cultural_structure_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            15.12,
+            0.3
+          ],
+          "to": [
+            15.12,
+            12.7
+          ],
+          "cutsVerticalCoreId": "religious_cultural_structure_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
     },
     {
       "id": "upper",
@@ -382,77 +1309,121 @@
       "rooms": [
         {
           "id": "archive",
-          "purpose": "archive",
           "x": 0.3,
-          "z": 7.25,
-          "width": 3.997,
-          "depth": 5.45,
-          "furnitureZones": [
-            "archive_primary",
-            "archive_storage",
-            "clear_route_edge"
-          ]
+          "z": 0.3,
+          "width": 3.559,
+          "depth": 6.2,
+          "kind": "room",
+          "purpose": "archive"
         },
         {
           "id": "teaching_gallery",
-          "purpose": "teaching gallery",
-          "x": 4.297,
-          "z": 7.25,
-          "width": 7.995,
-          "depth": 5.45,
-          "furnitureZones": [
-            "teaching_gallery_primary",
-            "teaching_gallery_storage",
-            "clear_route_edge"
-          ]
+          "x": 3.859,
+          "z": 0.3,
+          "width": 8.7,
+          "depth": 6.2,
+          "kind": "room",
+          "purpose": "teaching gallery"
         },
         {
           "id": "custodian_room",
-          "purpose": "custodian room",
-          "x": 12.292,
-          "z": 7.25,
-          "width": 5.408,
-          "depth": 5.45,
-          "furnitureZones": [
-            "custodian_room_primary",
-            "custodian_room_storage",
-            "clear_route_edge"
-          ]
+          "x": 12.559,
+          "z": 0.3,
+          "width": 5.141,
+          "depth": 6.2,
+          "kind": "room",
+          "purpose": "custodian room"
         },
         {
           "id": "landing",
-          "purpose": "landing",
           "x": 0.3,
-          "z": 0.3,
-          "width": 7.395,
-          "depth": 5.45,
-          "furnitureZones": [
-            "landing_primary",
-            "landing_storage",
-            "clear_route_edge"
-          ]
+          "z": 6.5,
+          "width": 7.118,
+          "depth": 6.2,
+          "kind": "room",
+          "purpose": "landing"
         },
         {
           "id": "daylight_walk",
-          "purpose": "daylight walk",
-          "x": 7.695,
+          "x": 7.418,
+          "z": 6.5,
+          "width": 10.282,
+          "depth": 6.2,
+          "kind": "room",
+          "purpose": "daylight walk"
+        }
+      ],
+      "blueprintId": "religious_cultural_structure:upper:archive_daylight",
+      "layoutPattern": "archive_daylight",
+      "levelMassFootprints": [
+        {
+          "id": "south_wing",
+          "x": 0.3,
           "z": 0.3,
-          "width": 10.005,
-          "depth": 5.45,
-          "furnitureZones": [
-            "daylight_walk_primary",
-            "daylight_walk_storage",
-            "clear_route_edge"
-          ]
+          "width": 17.4,
+          "depth": 4.38,
+          "kind": "building"
+        },
+        {
+          "id": "north_wing",
+          "x": 0.3,
+          "z": 8.32,
+          "width": 17.4,
+          "depth": 4.38,
+          "kind": "building"
+        },
+        {
+          "id": "west_wing",
+          "x": 0.3,
+          "z": 4.68,
+          "width": 6.18,
+          "depth": 3.64,
+          "kind": "building"
+        },
+        {
+          "id": "east_wing",
+          "x": 11.52,
+          "z": 4.68,
+          "width": 6.18,
+          "depth": 3.64,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [
+        {
+          "id": "open_courtyard",
+          "x": 6.48,
+          "z": 4.68,
+          "width": 5.04,
+          "depth": 3.64,
+          "kind": "open_to_sky"
         }
       ],
       "circulation": {
         "id": "primary_circulation",
         "x": 0.3,
-        "z": 5.75,
+        "z": 6.76,
         "width": 17.4,
-        "depth": 1.5
+        "depth": 1.5,
+        "kind": "accessible_route_envelope"
       },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              0.3,
+              6.76
+            ],
+            [
+              17.7,
+              6.76
+            ]
+          ]
+        }
+      ],
       "adjacency": [
         [
           "archive",
@@ -483,10 +1454,15 @@
             "archive",
             "primary_circulation"
           ],
+          "to": "archive",
+          "orientation": "vertical",
+          "x": 2.079,
+          "z": 6.5,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_teaching_gallery",
@@ -495,10 +1471,15 @@
             "teaching_gallery",
             "primary_circulation"
           ],
+          "to": "teaching_gallery",
+          "orientation": "vertical",
+          "x": 8.209,
+          "z": 6.5,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_custodian_room",
@@ -507,10 +1488,15 @@
             "custodian_room",
             "primary_circulation"
           ],
+          "to": "custodian_room",
+          "orientation": "vertical",
+          "x": 15.13,
+          "z": 6.5,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_landing",
@@ -519,10 +1505,15 @@
             "landing",
             "primary_circulation"
           ],
+          "to": "landing",
+          "orientation": "vertical",
+          "x": 3.859,
+          "z": 12.7,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_daylight_walk",
@@ -531,17 +1522,26 @@
             "daylight_walk",
             "primary_circulation"
           ],
+          "to": "daylight_walk",
+          "orientation": "vertical",
+          "x": 12.559,
+          "z": 12.7,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         }
       ],
+      "exteriorEntrances": [],
       "windowOpenings": [
         {
           "id": "window_upper_archive",
           "separateFrameGlassShutter": true,
           "serves": "archive",
+          "side": "north",
+          "x": 2.079,
+          "z": 3.4,
           "openingMeters": [
             1.2,
             1.5
@@ -551,6 +1551,9 @@
           "id": "window_upper_teaching_gallery",
           "separateFrameGlassShutter": true,
           "serves": "teaching_gallery",
+          "side": "east",
+          "x": 8.209,
+          "z": 3.4,
           "openingMeters": [
             1.2,
             1.5
@@ -560,6 +1563,9 @@
           "id": "window_upper_custodian_room",
           "separateFrameGlassShutter": true,
           "serves": "custodian_room",
+          "side": "west",
+          "x": 15.13,
+          "z": 3.4,
           "openingMeters": [
             1.2,
             1.5
@@ -569,6 +1575,9 @@
           "id": "window_upper_landing",
           "separateFrameGlassShutter": true,
           "serves": "landing",
+          "side": "north",
+          "x": 3.859,
+          "z": 9.6,
           "openingMeters": [
             1.2,
             1.5
@@ -578,6 +1587,9 @@
           "id": "window_upper_daylight_walk",
           "separateFrameGlassShutter": true,
           "serves": "daylight_walk",
+          "side": "east",
+          "x": 12.559,
+          "z": 9.6,
           "openingMeters": [
             1.2,
             1.5
@@ -585,19 +1597,487 @@
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
-      "verticalCore": {
-        "stairMeters": [
-          1.5,
-          1.5
-        ],
-        "liftPlatformReserved": true,
-        "separateObjects": true
+      "verticalCoreFootprints": [
+        {
+          "coreId": "religious_cultural_structure_stair_core",
+          "type": "dogleg_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 14.12,
+            "z": 5.98,
+            "width": 2.0,
+            "depth": 3.64,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "daylight_walk"
+        },
+        {
+          "coreId": "religious_cultural_structure_public_platform",
+          "type": "public_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 11.56,
+            "z": 5.98,
+            "width": 2.16,
+            "depth": 2.08,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "daylight_walk"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "archive",
+          "layoutIntent": "archive shelving",
+          "footprints": [
+            {
+              "id": "upper_archive_shelf_bay_1",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 0.727,
+              "z": 0.727,
+              "width": 0.902,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_archive_shelf_bay_2",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 1.629,
+              "z": 5.173,
+              "width": 0.902,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "upper_archive_shelf_bay_3",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 2.53,
+              "z": 0.727,
+              "width": 0.902,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "archive_protected_aisle",
+              "x": 0.3,
+              "z": 2.8,
+              "width": 3.559,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "archive_door_approach",
+              "x": 1.48,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "teaching_gallery",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "upper_teaching_gallery_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 4.309,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_teaching_gallery_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 7.309,
+              "z": 5.15,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "upper_teaching_gallery_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 10.309,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "teaching_gallery_protected_aisle",
+              "x": 3.859,
+              "z": 2.8,
+              "width": 8.7,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "teaching_gallery_door_approach",
+              "x": 7.609,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "custodian_room",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "upper_custodian_room_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 13.009,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "custodian_room_protected_aisle",
+              "x": 12.559,
+              "z": 2.8,
+              "width": 5.141,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "custodian_room_door_approach",
+              "x": 14.529,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "landing",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "upper_landing_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 0.75,
+              "z": 6.95,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_landing_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 5.168,
+              "z": 11.35,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "landing_protected_aisle",
+              "x": 0.3,
+              "z": 9.0,
+              "width": 7.118,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "landing_door_approach",
+              "x": 3.259,
+              "z": 6.5,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "daylight_walk",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "upper_daylight_walk_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 7.868,
+              "z": 6.95,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_daylight_walk_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 15.45,
+              "z": 11.35,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "daylight_walk_protected_aisle",
+              "x": 7.418,
+              "z": 9.0,
+              "width": 10.282,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "daylight_walk_door_approach",
+              "x": 11.959,
+              "z": 6.5,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "upper_accessible_route",
+          "x": 0.3,
+          "z": 6.76,
+          "width": 17.4,
+          "depth": 1.5,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "upper_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "daylight_walk",
+          "center": [
+            12.559,
+            9.6
+          ],
+          "diameter": 4.0
+        },
+        {
+          "id": "upper_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "daylight_walk",
+          "center": [
+            12.559,
+            9.6
+          ],
+          "radius": 2.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_upper_archive",
+          "type": "lighting",
+          "roomId": "archive",
+          "x": 2.079,
+          "z": 3.4
+        },
+        {
+          "id": "interaction_upper_archive",
+          "type": "interaction",
+          "roomId": "archive",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_teaching_gallery",
+          "type": "lighting",
+          "roomId": "teaching_gallery",
+          "x": 8.209,
+          "z": 3.4
+        },
+        {
+          "id": "interaction_upper_teaching_gallery",
+          "type": "interaction",
+          "roomId": "teaching_gallery",
+          "x": 4.459,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_custodian_room",
+          "type": "lighting",
+          "roomId": "custodian_room",
+          "x": 15.13,
+          "z": 3.4
+        },
+        {
+          "id": "interaction_upper_custodian_room",
+          "type": "interaction",
+          "roomId": "custodian_room",
+          "x": 13.159,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_landing",
+          "type": "lighting",
+          "roomId": "landing",
+          "x": 3.859,
+          "z": 9.6
+        },
+        {
+          "id": "interaction_upper_landing",
+          "type": "interaction",
+          "roomId": "landing",
+          "x": 0.9,
+          "z": 7.1
+        },
+        {
+          "id": "light_upper_daylight_walk",
+          "type": "lighting",
+          "roomId": "daylight_walk",
+          "x": 12.559,
+          "z": 9.6
+        },
+        {
+          "id": "interaction_upper_daylight_walk",
+          "type": "interaction",
+          "roomId": "daylight_walk",
+          "x": 8.018,
+          "z": 7.1
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            7.8
+          ],
+          "to": [
+            17.7,
+            7.8
+          ],
+          "cutsVerticalCoreId": "religious_cultural_structure_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            15.12,
+            0.3
+          ],
+          "to": [
+            15.12,
+            12.7
+          ],
+          "cutsVerticalCoreId": "religious_cultural_structure_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
+    }
+  ],
+  "verticalCirculation": [
+    {
+      "id": "religious_cultural_structure_stair_core",
+      "type": "dogleg_stair",
+      "footprint": {
+        "id": "stair_footprint",
+        "x": 14.12,
+        "z": 5.98,
+        "width": 2.0,
+        "depth": 3.64,
+        "kind": "vertical_circulation"
       },
-      "portalBoundary": "none_on_this_level"
+      "clearWidthMeters": 1.5,
+      "direction": "UP clockwise",
+      "connectsLevels": [
+        "ground",
+        "upper"
+      ],
+      "landings": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.9,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": false,
+      "separateObjects": true
+    },
+    {
+      "id": "religious_cultural_structure_public_platform",
+      "type": "public_platform",
+      "footprint": {
+        "id": "lift_footprint",
+        "x": 11.56,
+        "z": 5.98,
+        "width": 2.16,
+        "depth": 2.08,
+        "kind": "vertical_circulation"
+      },
+      "clearWidthMeters": 1.5,
+      "direction": "vertical platform",
+      "connectsLevels": [
+        "ground",
+        "upper"
+      ],
+      "landings": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.9,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": true,
+      "separateObjects": true
     }
   ],
   "sections": {
     "longitudinal": {
+      "id": "A-A",
+      "cutLineId": "A-A",
+      "axis": "x",
+      "cutCoordinateMeters": 7.8,
       "spanMeters": 18,
       "levels": [
         {
@@ -610,9 +2090,162 @@
           "elevationMeters": 3.9,
           "clearHeightMeters": 2.8
         }
-      ]
+      ],
+      "roomSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "memory_gallery",
+          "startMeters": 0.3,
+          "endMeters": 6.4799999999999995,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.6
+        },
+        {
+          "levelId": "ground",
+          "roomId": "quiet_room",
+          "startMeters": 11.52,
+          "endMeters": 17.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.6
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing",
+          "startMeters": 0.3,
+          "endMeters": 7.418,
+          "baseElevationMeters": 3.9,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "upper",
+          "roomId": "daylight_walk",
+          "startMeters": 7.418,
+          "endMeters": 17.7,
+          "baseElevationMeters": 3.9,
+          "clearHeightMeters": 2.8
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.9,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "religious_cultural_structure_stair_core",
+          "type": "dogleg_stair",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "UP clockwise"
+        },
+        {
+          "coreId": "religious_cultural_structure_public_platform",
+          "type": "public_platform",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "vertical platform"
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "religious_cultural_structure_main_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "ground",
+          "openingId": "religious_cultural_structure_service_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_archive",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_teaching_gallery",
+          "kind": "door"
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "memory_gallery",
+          "kind": "table_bench",
+          "positionMeters": 0.737
+        },
+        {
+          "levelId": "ground",
+          "roomId": "memory_gallery",
+          "kind": "table_bench",
+          "positionMeters": 2.506
+        },
+        {
+          "levelId": "ground",
+          "roomId": "memory_gallery",
+          "kind": "table_bench",
+          "positionMeters": 4.274
+        },
+        {
+          "levelId": "ground",
+          "roomId": "quiet_room",
+          "kind": "utility_table",
+          "positionMeters": 11.957
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing",
+          "kind": "utility_table",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing",
+          "kind": "utility_table",
+          "positionMeters": 5.168
+        },
+        {
+          "levelId": "upper",
+          "roomId": "daylight_walk",
+          "kind": "utility_table",
+          "positionMeters": 7.868
+        },
+        {
+          "levelId": "upper",
+          "roomId": "daylight_walk",
+          "kind": "utility_table",
+          "positionMeters": 15.45
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -0.6,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 6.699999999999999,
+        "peakElevationMeters": 9.0,
+        "structure": "Low stepped hall roof with a restrained central daylight slot.",
+        "cutRoomsAndVoids": true
+      }
     },
     "cross": {
+      "id": "B-B",
+      "cutLineId": "B-B",
+      "axis": "z",
+      "cutCoordinateMeters": 15.12,
       "spanMeters": 13,
       "levels": [
         {
@@ -625,10 +2258,199 @@
           "elevationMeters": 3.9,
           "clearHeightMeters": 2.8
         }
-      ]
+      ],
+      "roomSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "assembly_hall",
+          "startMeters": 8.32,
+          "endMeters": 10.51,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.6
+        },
+        {
+          "levelId": "ground",
+          "roomId": "quiet_room",
+          "startMeters": 4.68,
+          "endMeters": 8.32,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.6
+        },
+        {
+          "levelId": "ground",
+          "roomId": "service_store",
+          "startMeters": 0.3,
+          "endMeters": 4.68,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.6
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_court",
+          "startMeters": 10.51,
+          "endMeters": 12.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.6
+        },
+        {
+          "levelId": "upper",
+          "roomId": "custodian_room",
+          "startMeters": 0.3,
+          "endMeters": 6.5,
+          "baseElevationMeters": 3.9,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "upper",
+          "roomId": "daylight_walk",
+          "startMeters": 6.5,
+          "endMeters": 12.7,
+          "baseElevationMeters": 3.9,
+          "clearHeightMeters": 2.8
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.9,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "religious_cultural_structure_stair_core",
+          "type": "dogleg_stair",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "UP clockwise"
+        },
+        {
+          "coreId": "religious_cultural_structure_public_platform",
+          "type": "public_platform",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "vertical platform"
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "religious_cultural_structure_main_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "ground",
+          "openingId": "religious_cultural_structure_service_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_archive",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_teaching_gallery",
+          "kind": "door"
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "assembly_hall",
+          "kind": "table_bench",
+          "positionMeters": 8.583
+        },
+        {
+          "levelId": "ground",
+          "roomId": "assembly_hall",
+          "kind": "table_bench",
+          "positionMeters": 9.848
+        },
+        {
+          "levelId": "ground",
+          "roomId": "quiet_room",
+          "kind": "utility_table",
+          "positionMeters": 5.117
+        },
+        {
+          "levelId": "ground",
+          "roomId": "service_store",
+          "kind": "storage_rack",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "ground",
+          "roomId": "service_store",
+          "kind": "storage_rack",
+          "positionMeters": 3.395
+        },
+        {
+          "levelId": "ground",
+          "roomId": "service_store",
+          "kind": "storage_rack",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_court",
+          "kind": "table_bench",
+          "positionMeters": 10.773
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_court",
+          "kind": "table_bench",
+          "positionMeters": 12.038
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_court",
+          "kind": "table_bench",
+          "positionMeters": 10.773
+        },
+        {
+          "levelId": "upper",
+          "roomId": "custodian_room",
+          "kind": "utility_table",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "upper",
+          "roomId": "daylight_walk",
+          "kind": "utility_table",
+          "positionMeters": 6.95
+        },
+        {
+          "levelId": "upper",
+          "roomId": "daylight_walk",
+          "kind": "utility_table",
+          "positionMeters": 11.35
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -0.6,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 6.699999999999999,
+        "peakElevationMeters": 9.0,
+        "structure": "Low stepped hall roof with a restrained central daylight slot.",
+        "cutRoomsAndVoids": true
+      }
     }
   },
-  "roomPurposeAndAdjacency": "Each room has a purpose label and connects to the dimensioned primary circulation spine; adjacency and separate openings are explicit in every floor plan.",
+  "roomPurposeAndAdjacency": "Every room has a purpose-specific footprint, furnished layout, protected clearances, separate openings, and a connection to the drawn circulation geometry. Plan-marked A-A/B-B cuts bind those rooms to both architectural sections.",
   "sharedModules": {
     "structural": [
       "foundation_3m",

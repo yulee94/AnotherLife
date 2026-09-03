@@ -118,6 +118,198 @@
     "longitudinal_section",
     "cross_section"
   ],
+  "architecturalDesign": {
+    "packetSlug": "embassy",
+    "layoutArchetype": "formal public front with offset secure service mass",
+    "planSignature": "embassy|public_private|diplomatic_suite|south|(0.82, 0.55)",
+    "exteriorMasses": [
+      {
+        "id": "primary_mass",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 8.64,
+        "depth": 10.4,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper"
+        ],
+        "exteriorRole": "primary mass"
+      },
+      {
+        "id": "offset_service_mass",
+        "x": 9.84,
+        "z": 1.98,
+        "width": 4.86,
+        "depth": 7.04,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper"
+        ],
+        "exteriorRole": "offset service mass"
+      }
+    ],
+    "roofVolumes": [
+      {
+        "id": "roof_primary_mass",
+        "massId": "primary_mass",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 8.64,
+        "depth": 10.4,
+        "profile": "Formal clipped hip with low iron lantern monitor."
+      },
+      {
+        "id": "roof_offset_service_mass",
+        "massId": "offset_service_mass",
+        "x": 9.84,
+        "z": 1.98,
+        "width": 4.86,
+        "depth": 7.04,
+        "profile": "Formal clipped hip with low iron lantern monitor."
+      }
+    ],
+    "exteriorOpeningRegister": [
+      {
+        "id": "embassy_main_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "south",
+        "x": 7.5,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "embassy_main_entry"
+      },
+      {
+        "id": "embassy_service_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "north",
+        "x": 11.7,
+        "z": 11,
+        "separateObject": true,
+        "planOpeningId": "embassy_service_entry"
+      },
+      {
+        "id": "window_ground_security_vestibule",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 2.25,
+        "z": 3.23,
+        "separateObject": true,
+        "planOpeningId": "window_ground_security_vestibule"
+      },
+      {
+        "id": "window_ground_public_reception",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 6.15,
+        "z": 3.23,
+        "separateObject": true,
+        "planOpeningId": "window_ground_public_reception"
+      },
+      {
+        "id": "window_ground_petition_room",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 10.05,
+        "z": 3.23,
+        "separateObject": true,
+        "planOpeningId": "window_ground_petition_room"
+      },
+      {
+        "id": "window_ground_records",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 13.35,
+        "z": 3.23,
+        "separateObject": true,
+        "planOpeningId": "window_ground_records"
+      },
+      {
+        "id": "window_ground_service_pantry",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 3.245,
+        "z": 8.43,
+        "separateObject": true,
+        "planOpeningId": "window_ground_service_pantry"
+      },
+      {
+        "id": "window_ground_secure_stair",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 10.445,
+        "z": 8.43,
+        "separateObject": true,
+        "planOpeningId": "window_ground_secure_stair"
+      },
+      {
+        "id": "window_upper_diplomatic_chamber",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 2.974,
+        "z": 3.23,
+        "separateObject": true,
+        "planOpeningId": "window_upper_diplomatic_chamber"
+      },
+      {
+        "id": "window_upper_guest_suite",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 8.323,
+        "z": 3.23,
+        "separateObject": true,
+        "planOpeningId": "window_upper_guest_suite"
+      },
+      {
+        "id": "window_upper_private_office",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 12.848,
+        "z": 3.23,
+        "separateObject": true,
+        "planOpeningId": "window_upper_private_office"
+      },
+      {
+        "id": "window_upper_archive",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 3.9,
+        "z": 8.43,
+        "separateObject": true,
+        "planOpeningId": "window_upper_archive"
+      },
+      {
+        "id": "window_upper_staff_landing",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 11.1,
+        "z": 8.43,
+        "separateObject": true,
+        "planOpeningId": "window_upper_staff_landing"
+      }
+    ],
+    "siteContext": {
+      "orientation": "front/local south; rear/local north",
+      "entryApproachSide": "south",
+      "courtyardsAndYards": [],
+      "perimeterWall": null
+    },
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+  },
   "floorPlans": [
     {
       "id": "ground",
@@ -126,91 +318,133 @@
       "rooms": [
         {
           "id": "security_vestibule",
-          "purpose": "security vestibule",
           "x": 0.3,
-          "z": 6.25,
-          "width": 4.8,
-          "depth": 4.45,
-          "furnitureZones": [
-            "security_vestibule_primary",
-            "security_vestibule_storage",
-            "clear_route_edge"
-          ]
+          "z": 0.3,
+          "width": 3.9,
+          "depth": 5.86,
+          "kind": "room",
+          "purpose": "security vestibule"
         },
         {
           "id": "public_reception",
-          "purpose": "public reception",
-          "x": 5.1,
-          "z": 6.25,
-          "width": 4.8,
-          "depth": 4.45,
-          "furnitureZones": [
-            "public_reception_primary",
-            "public_reception_storage",
-            "clear_route_edge"
-          ]
+          "x": 4.2,
+          "z": 0.3,
+          "width": 3.9,
+          "depth": 5.86,
+          "kind": "room",
+          "purpose": "public reception"
         },
         {
           "id": "petition_room",
-          "purpose": "petition room",
-          "x": 9.9,
-          "z": 6.25,
-          "width": 4.8,
-          "depth": 4.45,
-          "furnitureZones": [
-            "petition_room_primary",
-            "petition_room_storage",
-            "clear_route_edge"
-          ]
+          "x": 8.1,
+          "z": 0.3,
+          "width": 3.9,
+          "depth": 5.86,
+          "kind": "room",
+          "purpose": "petition room"
         },
         {
           "id": "records",
-          "purpose": "records",
-          "x": 0.3,
+          "x": 12.0,
           "z": 0.3,
-          "width": 5.257,
-          "depth": 4.45,
-          "furnitureZones": [
-            "records_primary",
-            "records_storage",
-            "clear_route_edge"
-          ]
+          "width": 2.7,
+          "depth": 5.86,
+          "kind": "room",
+          "purpose": "records"
         },
         {
           "id": "service_pantry",
-          "purpose": "service pantry",
-          "x": 5.557,
-          "z": 0.3,
-          "width": 3.886,
-          "depth": 4.45,
-          "furnitureZones": [
-            "service_pantry_primary",
-            "service_pantry_storage",
-            "clear_route_edge"
-          ]
+          "x": 0.3,
+          "z": 6.16,
+          "width": 5.891,
+          "depth": 4.54,
+          "kind": "room",
+          "purpose": "service pantry"
         },
         {
           "id": "secure_stair",
-          "purpose": "secure stair",
-          "x": 9.443,
+          "x": 6.191,
+          "z": 6.16,
+          "width": 8.509,
+          "depth": 4.54,
+          "kind": "room",
+          "purpose": "secure stair"
+        }
+      ],
+      "blueprintId": "embassy:ground:public_private",
+      "layoutPattern": "public_private",
+      "levelMassFootprints": [
+        {
+          "id": "primary_mass",
+          "x": 0.3,
           "z": 0.3,
-          "width": 5.257,
-          "depth": 4.45,
-          "furnitureZones": [
-            "secure_stair_primary",
-            "secure_stair_storage",
-            "clear_route_edge"
+          "width": 8.64,
+          "depth": 10.4,
+          "kind": "building"
+        },
+        {
+          "id": "offset_service_mass",
+          "x": 9.84,
+          "z": 1.98,
+          "width": 4.86,
+          "depth": 7.04,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 7.5,
+        "z": 0.3,
+        "width": 1.5,
+        "depth": 10.4,
+        "kind": "accessible_route_envelope"
+      },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              7.5,
+              0.0
+            ],
+            [
+              7.5,
+              0.3
+            ],
+            [
+              7.5,
+              10.7
+            ]
+          ]
+        },
+        {
+          "id": "service_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              11.7,
+              11
+            ],
+            [
+              7.5,
+              10.7
+            ]
           ]
         }
       ],
-      "circulation": {
-        "id": "primary_circulation",
-        "x": 0.3,
-        "z": 4.75,
-        "width": 14.4,
-        "depth": 1.5
-      },
       "adjacency": [
+        [
+          "outside",
+          "public_reception"
+        ],
+        [
+          "outside",
+          "service_pantry"
+        ],
         [
           "security_vestibule",
           "primary_circulation"
@@ -238,16 +472,61 @@
       ],
       "doorOpenings": [
         {
+          "id": "embassy_main_entry",
+          "from": "outside",
+          "to": "public_reception",
+          "side": "south",
+          "x": 7.5,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "public_reception"
+          ]
+        },
+        {
+          "id": "embassy_service_entry",
+          "from": "outside",
+          "to": "service_pantry",
+          "side": "north",
+          "x": 11.7,
+          "z": 11,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "service_pantry"
+          ]
+        },
+        {
           "id": "door_ground_security_vestibule",
           "separateObject": true,
           "between": [
             "security_vestibule",
             "primary_circulation"
           ],
+          "to": "security_vestibule",
+          "orientation": "vertical",
+          "x": 2.25,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_public_reception",
@@ -256,10 +535,15 @@
             "public_reception",
             "primary_circulation"
           ],
+          "to": "public_reception",
+          "orientation": "vertical",
+          "x": 6.15,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_petition_room",
@@ -268,10 +552,15 @@
             "petition_room",
             "primary_circulation"
           ],
+          "to": "petition_room",
+          "orientation": "vertical",
+          "x": 10.05,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_records",
@@ -280,10 +569,15 @@
             "records",
             "primary_circulation"
           ],
+          "to": "records",
+          "orientation": "vertical",
+          "x": 13.35,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_service_pantry",
@@ -292,10 +586,15 @@
             "service_pantry",
             "primary_circulation"
           ],
+          "to": "service_pantry",
+          "orientation": "horizontal",
+          "x": 3.245,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_secure_stair",
@@ -304,10 +603,49 @@
             "secure_stair",
             "primary_circulation"
           ],
+          "to": "secure_stair",
+          "orientation": "horizontal",
+          "x": 10.445,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
+        }
+      ],
+      "exteriorEntrances": [
+        {
+          "id": "embassy_main_entry",
+          "from": "outside",
+          "to": "public_reception",
+          "side": "south",
+          "x": 7.5,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true
+        },
+        {
+          "id": "embassy_service_entry",
+          "from": "outside",
+          "to": "service_pantry",
+          "side": "north",
+          "x": 11.7,
+          "z": 11,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true
         }
       ],
       "windowOpenings": [
@@ -315,6 +653,9 @@
           "id": "window_ground_security_vestibule",
           "separateFrameGlassShutter": true,
           "serves": "security_vestibule",
+          "side": "north",
+          "x": 2.25,
+          "z": 3.23,
           "openingMeters": [
             1.2,
             1.5
@@ -324,6 +665,9 @@
           "id": "window_ground_public_reception",
           "separateFrameGlassShutter": true,
           "serves": "public_reception",
+          "side": "east",
+          "x": 6.15,
+          "z": 3.23,
           "openingMeters": [
             1.2,
             1.5
@@ -333,6 +677,9 @@
           "id": "window_ground_petition_room",
           "separateFrameGlassShutter": true,
           "serves": "petition_room",
+          "side": "west",
+          "x": 10.05,
+          "z": 3.23,
           "openingMeters": [
             1.2,
             1.5
@@ -342,6 +689,9 @@
           "id": "window_ground_records",
           "separateFrameGlassShutter": true,
           "serves": "records",
+          "side": "north",
+          "x": 13.35,
+          "z": 3.23,
           "openingMeters": [
             1.2,
             1.5
@@ -351,6 +701,9 @@
           "id": "window_ground_service_pantry",
           "separateFrameGlassShutter": true,
           "serves": "service_pantry",
+          "side": "east",
+          "x": 3.245,
+          "z": 8.43,
           "openingMeters": [
             1.2,
             1.5
@@ -360,6 +713,9 @@
           "id": "window_ground_secure_stair",
           "separateFrameGlassShutter": true,
           "serves": "secure_stair",
+          "side": "west",
+          "x": 10.445,
+          "z": 8.43,
           "openingMeters": [
             1.2,
             1.5
@@ -367,15 +723,473 @@
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
-      "verticalCore": {
-        "stairMeters": [
-          1.5,
-          1.5
-        ],
-        "liftPlatformReserved": true,
-        "separateObjects": true
-      },
-      "portalBoundary": "none_on_this_level"
+      "verticalCoreFootprints": [
+        {
+          "coreId": "embassy_stair_core",
+          "type": "dogleg_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 11.4,
+            "z": 4.51,
+            "width": 1.8,
+            "depth": 3.08,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "records"
+        },
+        {
+          "coreId": "embassy_public_platform",
+          "type": "public_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 9.2,
+            "z": 4.51,
+            "width": 1.8,
+            "depth": 1.8,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "petition_room"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "security_vestibule",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "ground_security_vestibule_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 0.75,
+              "z": 0.75,
+              "width": 1.5,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_security_vestibule_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 2.25,
+              "z": 4.81,
+              "width": 1.5,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "security_vestibule_protected_aisle",
+              "x": 0.3,
+              "z": 2.63,
+              "width": 3.9,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "security_vestibule_door_approach",
+              "x": 1.65,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "public_reception",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "ground_public_reception_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 4.65,
+              "z": 0.75,
+              "width": 1.0,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_public_reception_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 5.65,
+              "z": 4.81,
+              "width": 1.0,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "ground_public_reception_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 6.65,
+              "z": 0.75,
+              "width": 1.0,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "public_reception_protected_aisle",
+              "x": 4.2,
+              "z": 2.63,
+              "width": 3.9,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "public_reception_door_approach",
+              "x": 5.55,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "petition_room",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "ground_petition_room_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 8.55,
+              "z": 0.75,
+              "width": 1.0,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_petition_room_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 10.55,
+              "z": 0.75,
+              "width": 1.0,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "petition_room_protected_aisle",
+              "x": 8.1,
+              "z": 2.63,
+              "width": 3.9,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "petition_room_door_approach",
+              "x": 9.45,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "records",
+          "layoutIntent": "archive shelving",
+          "footprints": [
+            {
+              "id": "ground_records_shelf_bay_1",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 12.324,
+              "z": 0.624,
+              "width": 0.684,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_records_shelf_bay_3",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 13.692,
+              "z": 0.624,
+              "width": 0.684,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "records_protected_aisle",
+              "x": 12.0,
+              "z": 2.63,
+              "width": 2.7,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "records_door_approach",
+              "x": 12.75,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "service_pantry",
+          "layoutIntent": "prep table + storage",
+          "footprints": [
+            {
+              "id": "ground_service_pantry_prep_table_1",
+              "kind": "prep_table",
+              "label": "prep table + storage",
+              "x": 0.75,
+              "z": 6.61,
+              "width": 1.8,
+              "depth": 0.874,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_service_pantry_prep_table_2",
+              "kind": "prep_table",
+              "label": "prep table + storage",
+              "x": 3.941,
+              "z": 9.376,
+              "width": 1.8,
+              "depth": 0.874,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "service_pantry_protected_aisle",
+              "x": 0.3,
+              "z": 7.83,
+              "width": 5.891,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "service_pantry_door_approach",
+              "x": 2.645,
+              "z": 6.16,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "secure_stair",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "ground_secure_stair_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 6.641,
+              "z": 6.61,
+              "width": 1.8,
+              "depth": 0.874,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_secure_stair_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 12.45,
+              "z": 9.376,
+              "width": 1.8,
+              "depth": 0.874,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "secure_stair_protected_aisle",
+              "x": 6.191,
+              "z": 7.83,
+              "width": 8.509,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "secure_stair_door_approach",
+              "x": 9.845,
+              "z": 6.16,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "ground_accessible_route",
+          "x": 7.5,
+          "z": 0.3,
+          "width": 1.5,
+          "depth": 10.4,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "ground_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "secure_stair",
+          "center": [
+            10.445,
+            8.43
+          ],
+          "diameter": 4.0
+        },
+        {
+          "id": "ground_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "secure_stair",
+          "center": [
+            10.445,
+            8.43
+          ],
+          "radius": 2.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_ground_security_vestibule",
+          "type": "lighting",
+          "roomId": "security_vestibule",
+          "x": 2.25,
+          "z": 3.23
+        },
+        {
+          "id": "interaction_ground_security_vestibule",
+          "type": "interaction",
+          "roomId": "security_vestibule",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_public_reception",
+          "type": "lighting",
+          "roomId": "public_reception",
+          "x": 6.15,
+          "z": 3.23
+        },
+        {
+          "id": "interaction_ground_public_reception",
+          "type": "interaction",
+          "roomId": "public_reception",
+          "x": 4.8,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_petition_room",
+          "type": "lighting",
+          "roomId": "petition_room",
+          "x": 10.05,
+          "z": 3.23
+        },
+        {
+          "id": "interaction_ground_petition_room",
+          "type": "interaction",
+          "roomId": "petition_room",
+          "x": 8.7,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_records",
+          "type": "lighting",
+          "roomId": "records",
+          "x": 13.35,
+          "z": 3.23
+        },
+        {
+          "id": "interaction_ground_records",
+          "type": "interaction",
+          "roomId": "records",
+          "x": 12.6,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_service_pantry",
+          "type": "lighting",
+          "roomId": "service_pantry",
+          "x": 3.245,
+          "z": 8.43
+        },
+        {
+          "id": "interaction_ground_service_pantry",
+          "type": "interaction",
+          "roomId": "service_pantry",
+          "x": 0.9,
+          "z": 6.76
+        },
+        {
+          "id": "light_ground_secure_stair",
+          "type": "lighting",
+          "roomId": "secure_stair",
+          "x": 10.445,
+          "z": 8.43
+        },
+        {
+          "id": "interaction_ground_secure_stair",
+          "type": "interaction",
+          "roomId": "secure_stair",
+          "x": 6.791,
+          "z": 6.76
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            6.05
+          ],
+          "to": [
+            14.7,
+            6.05
+          ],
+          "cutsVerticalCoreId": "embassy_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            12.3,
+            0.3
+          ],
+          "to": [
+            12.3,
+            10.7
+          ],
+          "cutsVerticalCoreId": "embassy_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
     },
     {
       "id": "upper",
@@ -384,77 +1198,96 @@
       "rooms": [
         {
           "id": "diplomatic_chamber",
-          "purpose": "diplomatic chamber",
           "x": 0.3,
-          "z": 6.25,
-          "width": 5.257,
-          "depth": 4.45,
-          "furnitureZones": [
-            "diplomatic_chamber_primary",
-            "diplomatic_chamber_storage",
-            "clear_route_edge"
-          ]
+          "z": 0.3,
+          "width": 5.349,
+          "depth": 5.86,
+          "kind": "room",
+          "purpose": "diplomatic chamber"
         },
         {
           "id": "guest_suite",
-          "purpose": "guest suite",
-          "x": 5.557,
-          "z": 6.25,
-          "width": 5.257,
-          "depth": 4.45,
-          "furnitureZones": [
-            "guest_suite_primary",
-            "guest_suite_storage",
-            "clear_route_edge"
-          ]
+          "x": 5.649,
+          "z": 0.3,
+          "width": 5.349,
+          "depth": 5.86,
+          "kind": "room",
+          "purpose": "guest suite"
         },
         {
           "id": "private_office",
-          "purpose": "private office",
-          "x": 10.814,
-          "z": 6.25,
-          "width": 3.886,
-          "depth": 4.45,
-          "furnitureZones": [
-            "private_office_primary",
-            "private_office_storage",
-            "clear_route_edge"
-          ]
+          "x": 10.997,
+          "z": 0.3,
+          "width": 3.703,
+          "depth": 5.86,
+          "kind": "room",
+          "purpose": "private office"
         },
         {
           "id": "archive",
-          "purpose": "archive",
           "x": 0.3,
-          "z": 0.3,
+          "z": 6.16,
           "width": 7.2,
-          "depth": 4.45,
-          "furnitureZones": [
-            "archive_primary",
-            "archive_storage",
-            "clear_route_edge"
-          ]
+          "depth": 4.54,
+          "kind": "room",
+          "purpose": "archive"
         },
         {
           "id": "staff_landing",
-          "purpose": "staff landing",
           "x": 7.5,
-          "z": 0.3,
+          "z": 6.16,
           "width": 7.2,
-          "depth": 4.45,
-          "furnitureZones": [
-            "staff_landing_primary",
-            "staff_landing_storage",
-            "clear_route_edge"
+          "depth": 4.54,
+          "kind": "room",
+          "purpose": "staff landing"
+        }
+      ],
+      "blueprintId": "embassy:upper:diplomatic_suite",
+      "layoutPattern": "diplomatic_suite",
+      "levelMassFootprints": [
+        {
+          "id": "primary_mass",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 8.64,
+          "depth": 10.4,
+          "kind": "building"
+        },
+        {
+          "id": "offset_service_mass",
+          "x": 9.84,
+          "z": 1.98,
+          "width": 4.86,
+          "depth": 7.04,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 7.5,
+        "z": 0.3,
+        "width": 1.5,
+        "depth": 10.4,
+        "kind": "accessible_route_envelope"
+      },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              7.5,
+              0.3
+            ],
+            [
+              7.5,
+              10.7
+            ]
           ]
         }
       ],
-      "circulation": {
-        "id": "primary_circulation",
-        "x": 0.3,
-        "z": 4.75,
-        "width": 14.4,
-        "depth": 1.5
-      },
       "adjacency": [
         [
           "diplomatic_chamber",
@@ -485,10 +1318,15 @@
             "diplomatic_chamber",
             "primary_circulation"
           ],
+          "to": "diplomatic_chamber",
+          "orientation": "vertical",
+          "x": 2.974,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_guest_suite",
@@ -497,10 +1335,15 @@
             "guest_suite",
             "primary_circulation"
           ],
+          "to": "guest_suite",
+          "orientation": "vertical",
+          "x": 8.323,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_private_office",
@@ -509,10 +1352,15 @@
             "private_office",
             "primary_circulation"
           ],
+          "to": "private_office",
+          "orientation": "vertical",
+          "x": 12.848,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_archive",
@@ -521,10 +1369,15 @@
             "archive",
             "primary_circulation"
           ],
+          "to": "archive",
+          "orientation": "horizontal",
+          "x": 3.9,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_staff_landing",
@@ -533,17 +1386,26 @@
             "staff_landing",
             "primary_circulation"
           ],
+          "to": "staff_landing",
+          "orientation": "horizontal",
+          "x": 11.1,
+          "z": 6.16,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         }
       ],
+      "exteriorEntrances": [],
       "windowOpenings": [
         {
           "id": "window_upper_diplomatic_chamber",
           "separateFrameGlassShutter": true,
           "serves": "diplomatic_chamber",
+          "side": "north",
+          "x": 2.974,
+          "z": 3.23,
           "openingMeters": [
             1.2,
             1.5
@@ -553,6 +1415,9 @@
           "id": "window_upper_guest_suite",
           "separateFrameGlassShutter": true,
           "serves": "guest_suite",
+          "side": "east",
+          "x": 8.323,
+          "z": 3.23,
           "openingMeters": [
             1.2,
             1.5
@@ -562,6 +1427,9 @@
           "id": "window_upper_private_office",
           "separateFrameGlassShutter": true,
           "serves": "private_office",
+          "side": "west",
+          "x": 12.848,
+          "z": 3.23,
           "openingMeters": [
             1.2,
             1.5
@@ -571,6 +1439,9 @@
           "id": "window_upper_archive",
           "separateFrameGlassShutter": true,
           "serves": "archive",
+          "side": "north",
+          "x": 3.9,
+          "z": 8.43,
           "openingMeters": [
             1.2,
             1.5
@@ -580,6 +1451,9 @@
           "id": "window_upper_staff_landing",
           "separateFrameGlassShutter": true,
           "serves": "staff_landing",
+          "side": "east",
+          "x": 11.1,
+          "z": 8.43,
           "openingMeters": [
             1.2,
             1.5
@@ -587,19 +1461,465 @@
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
-      "verticalCore": {
-        "stairMeters": [
-          1.5,
-          1.5
-        ],
-        "liftPlatformReserved": true,
-        "separateObjects": true
+      "verticalCoreFootprints": [
+        {
+          "coreId": "embassy_stair_core",
+          "type": "dogleg_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 11.4,
+            "z": 4.51,
+            "width": 1.8,
+            "depth": 3.08,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "private_office"
+        },
+        {
+          "coreId": "embassy_public_platform",
+          "type": "public_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 9.2,
+            "z": 4.51,
+            "width": 1.8,
+            "depth": 1.8,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "guest_suite"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "diplomatic_chamber",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "upper_diplomatic_chamber_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 0.75,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_diplomatic_chamber_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 3.399,
+              "z": 4.81,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "diplomatic_chamber_protected_aisle",
+              "x": 0.3,
+              "z": 2.63,
+              "width": 5.349,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "diplomatic_chamber_door_approach",
+              "x": 2.374,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "guest_suite",
+          "layoutIntent": "sleeping furniture",
+          "footprints": [
+            {
+              "id": "upper_guest_suite_bed_or_cot_1",
+              "kind": "bed_or_cot",
+              "label": "sleeping furniture",
+              "x": 6.099,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "guest_suite_protected_aisle",
+              "x": 5.649,
+              "z": 2.63,
+              "width": 5.349,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "guest_suite_door_approach",
+              "x": 7.723,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "private_office",
+          "layoutIntent": "desk + chair",
+          "footprints": [
+            {
+              "id": "upper_private_office_desk_1",
+              "kind": "desk",
+              "label": "desk + chair",
+              "x": 11.441,
+              "z": 0.744,
+              "width": 1.407,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "private_office_protected_aisle",
+              "x": 10.997,
+              "z": 2.63,
+              "width": 3.703,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "private_office_door_approach",
+              "x": 12.248,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "archive",
+          "layoutIntent": "archive shelving",
+          "footprints": [
+            {
+              "id": "upper_archive_shelf_bay_1",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 0.75,
+              "z": 6.61,
+              "width": 1.8,
+              "depth": 0.874,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_archive_shelf_bay_2",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 3.0,
+              "z": 9.376,
+              "width": 1.8,
+              "depth": 0.874,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "upper_archive_shelf_bay_3",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 5.25,
+              "z": 6.61,
+              "width": 1.8,
+              "depth": 0.874,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "archive_protected_aisle",
+              "x": 0.3,
+              "z": 7.83,
+              "width": 7.2,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "archive_door_approach",
+              "x": 3.3,
+              "z": 6.16,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "staff_landing",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "upper_staff_landing_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 7.95,
+              "z": 6.61,
+              "width": 1.8,
+              "depth": 0.874,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_staff_landing_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 12.45,
+              "z": 9.376,
+              "width": 1.8,
+              "depth": 0.874,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "staff_landing_protected_aisle",
+              "x": 7.5,
+              "z": 7.83,
+              "width": 7.2,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "staff_landing_door_approach",
+              "x": 10.5,
+              "z": 6.16,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "upper_accessible_route",
+          "x": 7.5,
+          "z": 0.3,
+          "width": 1.5,
+          "depth": 10.4,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "upper_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "archive",
+          "center": [
+            3.9,
+            8.43
+          ],
+          "diameter": 4.0
+        },
+        {
+          "id": "upper_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "archive",
+          "center": [
+            3.9,
+            8.43
+          ],
+          "radius": 2.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_upper_diplomatic_chamber",
+          "type": "lighting",
+          "roomId": "diplomatic_chamber",
+          "x": 2.974,
+          "z": 3.23
+        },
+        {
+          "id": "interaction_upper_diplomatic_chamber",
+          "type": "interaction",
+          "roomId": "diplomatic_chamber",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_guest_suite",
+          "type": "lighting",
+          "roomId": "guest_suite",
+          "x": 8.323,
+          "z": 3.23
+        },
+        {
+          "id": "interaction_upper_guest_suite",
+          "type": "interaction",
+          "roomId": "guest_suite",
+          "x": 6.249,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_private_office",
+          "type": "lighting",
+          "roomId": "private_office",
+          "x": 12.848,
+          "z": 3.23
+        },
+        {
+          "id": "interaction_upper_private_office",
+          "type": "interaction",
+          "roomId": "private_office",
+          "x": 11.597,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_archive",
+          "type": "lighting",
+          "roomId": "archive",
+          "x": 3.9,
+          "z": 8.43
+        },
+        {
+          "id": "interaction_upper_archive",
+          "type": "interaction",
+          "roomId": "archive",
+          "x": 0.9,
+          "z": 6.76
+        },
+        {
+          "id": "light_upper_staff_landing",
+          "type": "lighting",
+          "roomId": "staff_landing",
+          "x": 11.1,
+          "z": 8.43
+        },
+        {
+          "id": "interaction_upper_staff_landing",
+          "type": "interaction",
+          "roomId": "staff_landing",
+          "x": 8.1,
+          "z": 6.76
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            6.05
+          ],
+          "to": [
+            14.7,
+            6.05
+          ],
+          "cutsVerticalCoreId": "embassy_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            12.3,
+            0.3
+          ],
+          "to": [
+            12.3,
+            10.7
+          ],
+          "cutsVerticalCoreId": "embassy_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
+    }
+  ],
+  "verticalCirculation": [
+    {
+      "id": "embassy_stair_core",
+      "type": "dogleg_stair",
+      "footprint": {
+        "id": "stair_footprint",
+        "x": 11.4,
+        "z": 4.51,
+        "width": 1.8,
+        "depth": 3.08,
+        "kind": "vertical_circulation"
       },
-      "portalBoundary": "none_on_this_level"
+      "clearWidthMeters": 1.5,
+      "direction": "UP clockwise",
+      "connectsLevels": [
+        "ground",
+        "upper"
+      ],
+      "landings": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.5,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": false,
+      "separateObjects": true
+    },
+    {
+      "id": "embassy_public_platform",
+      "type": "public_platform",
+      "footprint": {
+        "id": "lift_footprint",
+        "x": 9.2,
+        "z": 4.51,
+        "width": 1.8,
+        "depth": 1.8,
+        "kind": "vertical_circulation"
+      },
+      "clearWidthMeters": 1.5,
+      "direction": "vertical platform",
+      "connectsLevels": [
+        "ground",
+        "upper"
+      ],
+      "landings": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.5,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": true,
+      "separateObjects": true
     }
   ],
   "sections": {
     "longitudinal": {
+      "id": "A-A",
+      "cutLineId": "A-A",
+      "axis": "x",
+      "cutCoordinateMeters": 6.05,
       "spanMeters": 15,
       "levels": [
         {
@@ -612,9 +1932,216 @@
           "elevationMeters": 3.5,
           "clearHeightMeters": 2.9
         }
-      ]
+      ],
+      "roomSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "security_vestibule",
+          "startMeters": 0.3,
+          "endMeters": 4.2,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "public_reception",
+          "startMeters": 4.2,
+          "endMeters": 8.1,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "petition_room",
+          "startMeters": 8.1,
+          "endMeters": 12.0,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "records",
+          "startMeters": 12.0,
+          "endMeters": 14.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "upper",
+          "roomId": "diplomatic_chamber",
+          "startMeters": 0.3,
+          "endMeters": 5.649,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        },
+        {
+          "levelId": "upper",
+          "roomId": "guest_suite",
+          "startMeters": 5.649,
+          "endMeters": 10.998000000000001,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        },
+        {
+          "levelId": "upper",
+          "roomId": "private_office",
+          "startMeters": 10.997,
+          "endMeters": 14.7,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.5,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "embassy_stair_core",
+          "type": "dogleg_stair",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "UP clockwise"
+        },
+        {
+          "coreId": "embassy_public_platform",
+          "type": "public_platform",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "vertical platform"
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "embassy_main_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "ground",
+          "openingId": "embassy_service_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_diplomatic_chamber",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_guest_suite",
+          "kind": "door"
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "security_vestibule",
+          "kind": "utility_table",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "ground",
+          "roomId": "security_vestibule",
+          "kind": "utility_table",
+          "positionMeters": 2.25
+        },
+        {
+          "levelId": "ground",
+          "roomId": "public_reception",
+          "kind": "table_bench",
+          "positionMeters": 4.65
+        },
+        {
+          "levelId": "ground",
+          "roomId": "public_reception",
+          "kind": "table_bench",
+          "positionMeters": 5.65
+        },
+        {
+          "levelId": "ground",
+          "roomId": "public_reception",
+          "kind": "table_bench",
+          "positionMeters": 6.65
+        },
+        {
+          "levelId": "ground",
+          "roomId": "petition_room",
+          "kind": "table_bench",
+          "positionMeters": 8.55
+        },
+        {
+          "levelId": "ground",
+          "roomId": "petition_room",
+          "kind": "table_bench",
+          "positionMeters": 10.55
+        },
+        {
+          "levelId": "ground",
+          "roomId": "records",
+          "kind": "shelf_bay",
+          "positionMeters": 12.324
+        },
+        {
+          "levelId": "ground",
+          "roomId": "records",
+          "kind": "shelf_bay",
+          "positionMeters": 13.692
+        },
+        {
+          "levelId": "upper",
+          "roomId": "diplomatic_chamber",
+          "kind": "utility_table",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "upper",
+          "roomId": "diplomatic_chamber",
+          "kind": "utility_table",
+          "positionMeters": 3.399
+        },
+        {
+          "levelId": "upper",
+          "roomId": "guest_suite",
+          "kind": "bed_or_cot",
+          "positionMeters": 6.099
+        },
+        {
+          "levelId": "upper",
+          "roomId": "private_office",
+          "kind": "desk",
+          "positionMeters": 11.441
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -0.6,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 6.4,
+        "peakElevationMeters": 8.5,
+        "structure": "Formal clipped hip with low iron lantern monitor.",
+        "cutRoomsAndVoids": true
+      }
     },
     "cross": {
+      "id": "B-B",
+      "cutLineId": "B-B",
+      "axis": "z",
+      "cutCoordinateMeters": 12.3,
       "spanMeters": 11,
       "levels": [
         {
@@ -627,10 +2154,153 @@
           "elevationMeters": 3.5,
           "clearHeightMeters": 2.9
         }
-      ]
+      ],
+      "roomSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "records",
+          "startMeters": 0.3,
+          "endMeters": 6.16,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "secure_stair",
+          "startMeters": 6.16,
+          "endMeters": 10.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "upper",
+          "roomId": "private_office",
+          "startMeters": 0.3,
+          "endMeters": 6.16,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        },
+        {
+          "levelId": "upper",
+          "roomId": "staff_landing",
+          "startMeters": 6.16,
+          "endMeters": 10.7,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.5,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "embassy_stair_core",
+          "type": "dogleg_stair",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "UP clockwise"
+        },
+        {
+          "coreId": "embassy_public_platform",
+          "type": "public_platform",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "vertical platform"
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "embassy_main_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "ground",
+          "openingId": "embassy_service_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_diplomatic_chamber",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_guest_suite",
+          "kind": "door"
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "records",
+          "kind": "shelf_bay",
+          "positionMeters": 0.624
+        },
+        {
+          "levelId": "ground",
+          "roomId": "records",
+          "kind": "shelf_bay",
+          "positionMeters": 0.624
+        },
+        {
+          "levelId": "ground",
+          "roomId": "secure_stair",
+          "kind": "utility_table",
+          "positionMeters": 6.61
+        },
+        {
+          "levelId": "ground",
+          "roomId": "secure_stair",
+          "kind": "utility_table",
+          "positionMeters": 9.376
+        },
+        {
+          "levelId": "upper",
+          "roomId": "private_office",
+          "kind": "desk",
+          "positionMeters": 0.744
+        },
+        {
+          "levelId": "upper",
+          "roomId": "staff_landing",
+          "kind": "utility_table",
+          "positionMeters": 6.61
+        },
+        {
+          "levelId": "upper",
+          "roomId": "staff_landing",
+          "kind": "utility_table",
+          "positionMeters": 9.376
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -0.6,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 6.4,
+        "peakElevationMeters": 8.5,
+        "structure": "Formal clipped hip with low iron lantern monitor.",
+        "cutRoomsAndVoids": true
+      }
     }
   },
-  "roomPurposeAndAdjacency": "Each room has a purpose label and connects to the dimensioned primary circulation spine; adjacency and separate openings are explicit in every floor plan.",
+  "roomPurposeAndAdjacency": "Every room has a purpose-specific footprint, furnished layout, protected clearances, separate openings, and a connection to the drawn circulation geometry. Plan-marked A-A/B-B cuts bind those rooms to both architectural sections.",
   "sharedModules": {
     "structural": [
       "foundation_3m",

@@ -116,6 +116,198 @@
     "longitudinal_section",
     "cross_section"
   ],
+  "architecturalDesign": {
+    "packetSlug": "academy",
+    "layoutArchetype": "paired teaching wings on an archive spine",
+    "planSignature": "academy|twin_wing|archive_gallery|south|(0.86, 0.52)",
+    "exteriorMasses": [
+      {
+        "id": "primary_mass",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 9.24,
+        "depth": 11.4,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper"
+        ],
+        "exteriorRole": "primary mass"
+      },
+      {
+        "id": "offset_service_mass",
+        "x": 10.5,
+        "z": 2.16,
+        "width": 5.2,
+        "depth": 7.68,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper"
+        ],
+        "exteriorRole": "offset service mass"
+      }
+    ],
+    "roofVolumes": [
+      {
+        "id": "roof_primary_mass",
+        "massId": "primary_mass",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 9.24,
+        "depth": 11.4,
+        "profile": "Paired clipped gables over a central archive ridge."
+      },
+      {
+        "id": "roof_offset_service_mass",
+        "massId": "offset_service_mass",
+        "x": 10.5,
+        "z": 2.16,
+        "width": 5.2,
+        "depth": 7.68,
+        "profile": "Paired clipped gables over a central archive ridge."
+      }
+    ],
+    "exteriorOpeningRegister": [
+      {
+        "id": "academy_main_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "south",
+        "x": 8.0,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "academy_main_entry"
+      },
+      {
+        "id": "academy_service_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "north",
+        "x": 12.48,
+        "z": 12,
+        "separateObject": true,
+        "planOpeningId": "academy_service_entry"
+      },
+      {
+        "id": "window_ground_teaching_hall",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 5.11,
+        "z": 6.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_teaching_hall"
+      },
+      {
+        "id": "window_ground_entry_vestibule",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 12.81,
+        "z": 1.698,
+        "separateObject": true,
+        "planOpeningId": "window_ground_entry_vestibule"
+      },
+      {
+        "id": "window_ground_practice_lab",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 12.81,
+        "z": 4.494,
+        "separateObject": true,
+        "planOpeningId": "window_ground_practice_lab"
+      },
+      {
+        "id": "window_ground_tool_store",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 12.81,
+        "z": 6.86,
+        "separateObject": true,
+        "planOpeningId": "window_ground_tool_store"
+      },
+      {
+        "id": "window_ground_accessible_service",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 12.81,
+        "z": 8.796,
+        "separateObject": true,
+        "planOpeningId": "window_ground_accessible_service"
+      },
+      {
+        "id": "window_ground_service_core",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 12.81,
+        "z": 10.732,
+        "separateObject": true,
+        "planOpeningId": "window_ground_service_core"
+      },
+      {
+        "id": "window_upper_study_gallery",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 5.11,
+        "z": 6.0,
+        "separateObject": true,
+        "planOpeningId": "window_upper_study_gallery"
+      },
+      {
+        "id": "window_upper_library_archive",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 12.81,
+        "z": 1.725,
+        "separateObject": true,
+        "planOpeningId": "window_upper_library_archive"
+      },
+      {
+        "id": "window_upper_instructor_office",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 12.81,
+        "z": 4.575,
+        "separateObject": true,
+        "planOpeningId": "window_upper_instructor_office"
+      },
+      {
+        "id": "window_upper_records_room",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 12.81,
+        "z": 7.425,
+        "separateObject": true,
+        "planOpeningId": "window_upper_records_room"
+      },
+      {
+        "id": "window_upper_landing",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 12.81,
+        "z": 10.275,
+        "separateObject": true,
+        "planOpeningId": "window_upper_landing"
+      }
+    ],
+    "siteContext": {
+      "orientation": "front/local south; rear/local north",
+      "entryApproachSide": "south",
+      "courtyardsAndYards": [],
+      "perimeterWall": null
+    },
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+  },
   "floorPlans": [
     {
       "id": "ground",
@@ -123,98 +315,140 @@
       "clearHeightMeters": 3.2,
       "rooms": [
         {
-          "id": "entry_vestibule",
-          "purpose": "entry vestibule",
+          "id": "teaching_hall",
           "x": 0.3,
-          "z": 6.75,
-          "width": 4.428,
-          "depth": 4.95,
-          "furnitureZones": [
-            "entry_vestibule_primary",
-            "entry_vestibule_storage",
-            "clear_route_edge"
-          ]
+          "z": 0.3,
+          "width": 9.62,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "teaching hall"
         },
         {
-          "id": "teaching_hall",
-          "purpose": "teaching hall",
-          "x": 4.728,
-          "z": 6.75,
-          "width": 6.545,
-          "depth": 4.95,
-          "furnitureZones": [
-            "teaching_hall_primary",
-            "teaching_hall_storage",
-            "clear_route_edge"
-          ]
+          "id": "entry_vestibule",
+          "x": 9.92,
+          "z": 0.3,
+          "width": 5.78,
+          "depth": 2.796,
+          "kind": "room",
+          "purpose": "entry vestibule"
         },
         {
           "id": "practice_lab",
-          "purpose": "practice lab",
-          "x": 11.273,
-          "z": 6.75,
-          "width": 4.428,
-          "depth": 4.95,
-          "furnitureZones": [
-            "practice_lab_primary",
-            "practice_lab_storage",
-            "clear_route_edge"
-          ]
+          "x": 9.92,
+          "z": 3.096,
+          "width": 5.78,
+          "depth": 2.796,
+          "kind": "room",
+          "purpose": "practice lab"
         },
         {
           "id": "tool_store",
-          "purpose": "tool store",
-          "x": 0.3,
-          "z": 0.3,
-          "width": 5.133,
-          "depth": 4.95,
-          "furnitureZones": [
-            "tool_store_primary",
-            "tool_store_storage",
-            "clear_route_edge"
-          ]
+          "x": 9.92,
+          "z": 5.892,
+          "width": 5.78,
+          "depth": 1.936,
+          "kind": "room",
+          "purpose": "tool store"
         },
         {
           "id": "accessible_service",
-          "purpose": "accessible service",
-          "x": 5.433,
-          "z": 0.3,
-          "width": 5.133,
-          "depth": 4.95,
-          "furnitureZones": [
-            "accessible_service_primary",
-            "accessible_service_storage",
-            "clear_route_edge"
-          ]
+          "x": 9.92,
+          "z": 7.828,
+          "width": 5.78,
+          "depth": 1.936,
+          "kind": "room",
+          "purpose": "accessible service"
         },
         {
           "id": "service_core",
-          "purpose": "service core",
-          "x": 10.567,
-          "z": 0.3,
-          "width": 5.133,
-          "depth": 4.95,
-          "furnitureZones": [
-            "service_core_primary",
-            "service_core_storage",
-            "clear_route_edge"
-          ]
+          "x": 9.92,
+          "z": 9.764,
+          "width": 5.78,
+          "depth": 1.936,
+          "kind": "room",
+          "purpose": "service core"
         }
       ],
+      "blueprintId": "academy:ground:twin_wing",
+      "layoutPattern": "twin_wing",
+      "levelMassFootprints": [
+        {
+          "id": "primary_mass",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 9.24,
+          "depth": 11.4,
+          "kind": "building"
+        },
+        {
+          "id": "offset_service_mass",
+          "x": 10.5,
+          "z": 2.16,
+          "width": 5.2,
+          "depth": 7.68,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [],
       "circulation": {
         "id": "primary_circulation",
         "x": 0.3,
-        "z": 5.25,
+        "z": 6.24,
         "width": 15.4,
-        "depth": 1.5
+        "depth": 1.5,
+        "kind": "accessible_route_envelope"
       },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              8.0,
+              0.0
+            ],
+            [
+              0.3,
+              6.24
+            ],
+            [
+              15.7,
+              6.24
+            ]
+          ]
+        },
+        {
+          "id": "service_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              12.48,
+              12
+            ],
+            [
+              15.7,
+              6.24
+            ]
+          ]
+        }
+      ],
       "adjacency": [
         [
-          "entry_vestibule",
-          "primary_circulation"
+          "outside",
+          "teaching_hall"
+        ],
+        [
+          "outside",
+          "tool_store"
         ],
         [
           "teaching_hall",
+          "primary_circulation"
+        ],
+        [
+          "entry_vestibule",
           "primary_circulation"
         ],
         [
@@ -236,15 +470,43 @@
       ],
       "doorOpenings": [
         {
-          "id": "door_ground_entry_vestibule",
+          "id": "academy_main_entry",
+          "from": "outside",
+          "to": "teaching_hall",
+          "side": "south",
+          "x": 8.0,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
           "separateObject": true,
           "between": [
-            "entry_vestibule",
-            "primary_circulation"
-          ],
+            "outside",
+            "teaching_hall"
+          ]
+        },
+        {
+          "id": "academy_service_entry",
+          "from": "outside",
+          "to": "tool_store",
+          "side": "north",
+          "x": 12.48,
+          "z": 12,
+          "orientation": "horizontal",
           "clearOpeningMeters": [
-            1.2,
+            1.4,
             2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "tool_store"
           ]
         },
         {
@@ -254,10 +516,32 @@
             "teaching_hall",
             "primary_circulation"
           ],
+          "to": "teaching_hall",
+          "orientation": "vertical",
+          "x": 5.11,
+          "z": 11.7,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_entry_vestibule",
+          "separateObject": true,
+          "between": [
+            "entry_vestibule",
+            "primary_circulation"
+          ],
+          "to": "entry_vestibule",
+          "orientation": "vertical",
+          "x": 12.81,
+          "z": 3.096,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_practice_lab",
@@ -266,10 +550,15 @@
             "practice_lab",
             "primary_circulation"
           ],
+          "to": "practice_lab",
+          "orientation": "vertical",
+          "x": 12.81,
+          "z": 5.892,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_tool_store",
@@ -278,10 +567,15 @@
             "tool_store",
             "primary_circulation"
           ],
+          "to": "tool_store",
+          "orientation": "vertical",
+          "x": 12.81,
+          "z": 7.828,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_accessible_service",
@@ -290,10 +584,15 @@
             "accessible_service",
             "primary_circulation"
           ],
+          "to": "accessible_service",
+          "orientation": "horizontal",
+          "x": 12.81,
+          "z": 7.828,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_ground_service_core",
@@ -302,26 +601,71 @@
             "service_core",
             "primary_circulation"
           ],
+          "to": "service_core",
+          "orientation": "horizontal",
+          "x": 12.81,
+          "z": 9.764,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
+        }
+      ],
+      "exteriorEntrances": [
+        {
+          "id": "academy_main_entry",
+          "from": "outside",
+          "to": "teaching_hall",
+          "side": "south",
+          "x": 8.0,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true
+        },
+        {
+          "id": "academy_service_entry",
+          "from": "outside",
+          "to": "tool_store",
+          "side": "north",
+          "x": 12.48,
+          "z": 12,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true
         }
       ],
       "windowOpenings": [
         {
-          "id": "window_ground_entry_vestibule",
+          "id": "window_ground_teaching_hall",
           "separateFrameGlassShutter": true,
-          "serves": "entry_vestibule",
+          "serves": "teaching_hall",
+          "side": "north",
+          "x": 5.11,
+          "z": 6.0,
           "openingMeters": [
             1.2,
             1.5
           ]
         },
         {
-          "id": "window_ground_teaching_hall",
+          "id": "window_ground_entry_vestibule",
           "separateFrameGlassShutter": true,
-          "serves": "teaching_hall",
+          "serves": "entry_vestibule",
+          "side": "east",
+          "x": 12.81,
+          "z": 1.698,
           "openingMeters": [
             1.2,
             1.5
@@ -331,6 +675,9 @@
           "id": "window_ground_practice_lab",
           "separateFrameGlassShutter": true,
           "serves": "practice_lab",
+          "side": "west",
+          "x": 12.81,
+          "z": 4.494,
           "openingMeters": [
             1.2,
             1.5
@@ -340,6 +687,9 @@
           "id": "window_ground_tool_store",
           "separateFrameGlassShutter": true,
           "serves": "tool_store",
+          "side": "north",
+          "x": 12.81,
+          "z": 6.86,
           "openingMeters": [
             1.2,
             1.5
@@ -349,6 +699,9 @@
           "id": "window_ground_accessible_service",
           "separateFrameGlassShutter": true,
           "serves": "accessible_service",
+          "side": "east",
+          "x": 12.81,
+          "z": 8.796,
           "openingMeters": [
             1.2,
             1.5
@@ -358,6 +711,9 @@
           "id": "window_ground_service_core",
           "separateFrameGlassShutter": true,
           "serves": "service_core",
+          "side": "west",
+          "x": 12.81,
+          "z": 10.732,
           "openingMeters": [
             1.2,
             1.5
@@ -365,15 +721,473 @@
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
-      "verticalCore": {
-        "stairMeters": [
-          1.5,
-          1.5
-        ],
-        "liftPlatformReserved": true,
-        "separateObjects": true
-      },
-      "portalBoundary": "none_on_this_level"
+      "verticalCoreFootprints": [
+        {
+          "coreId": "academy_stair_core",
+          "type": "dogleg_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 12.8,
+            "z": 4.56,
+            "width": 1.92,
+            "depth": 3.36,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "tool_store"
+        },
+        {
+          "coreId": "academy_public_platform",
+          "type": "public_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 10.48,
+            "z": 4.56,
+            "width": 1.92,
+            "depth": 1.92,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "practice_lab"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "teaching_hall",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "ground_teaching_hall_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 0.75,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_teaching_hall_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 4.21,
+              "z": 10.35,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "ground_teaching_hall_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 7.67,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "teaching_hall_protected_aisle",
+              "x": 0.3,
+              "z": 5.4,
+              "width": 9.62,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "teaching_hall_door_approach",
+              "x": 4.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "entry_vestibule",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "ground_entry_vestibule_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 10.256,
+              "z": 0.636,
+              "width": 1.8,
+              "depth": 0.51,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_entry_vestibule_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 13.564,
+              "z": 2.25,
+              "width": 1.8,
+              "depth": 0.51,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "entry_vestibule_protected_aisle",
+              "x": 9.92,
+              "z": 1.098,
+              "width": 5.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "entry_vestibule_door_approach",
+              "x": 12.21,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "practice_lab",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "ground_practice_lab_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 10.256,
+              "z": 3.432,
+              "width": 1.8,
+              "depth": 0.51,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "practice_lab_protected_aisle",
+              "x": 9.92,
+              "z": 3.894,
+              "width": 5.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "practice_lab_door_approach",
+              "x": 12.21,
+              "z": 3.096,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "tool_store",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "ground_tool_store_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 10.152,
+              "z": 6.124,
+              "width": 1.772,
+              "depth": 0.353,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_tool_store_storage_rack_2",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 11.924,
+              "z": 7.243,
+              "width": 1.772,
+              "depth": 0.353,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "ground_tool_store_storage_rack_3",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 13.696,
+              "z": 6.124,
+              "width": 1.772,
+              "depth": 0.353,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "tool_store_protected_aisle",
+              "x": 9.92,
+              "z": 6.26,
+              "width": 5.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "tool_store_door_approach",
+              "x": 12.21,
+              "z": 5.892,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "accessible_service",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "ground_accessible_service_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 10.152,
+              "z": 8.06,
+              "width": 1.8,
+              "depth": 0.353,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_accessible_service_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 13.668,
+              "z": 9.179,
+              "width": 1.8,
+              "depth": 0.353,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "accessible_service_protected_aisle",
+              "x": 9.92,
+              "z": 8.196,
+              "width": 5.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "accessible_service_door_approach",
+              "x": 12.21,
+              "z": 7.828,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "service_core",
+          "layoutIntent": "guarded machine / material bay",
+          "footprints": [
+            {
+              "id": "ground_service_core_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine / material bay",
+              "x": 10.152,
+              "z": 9.996,
+              "width": 1.8,
+              "depth": 0.353,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "ground_service_core_machine_bed_2",
+              "kind": "machine_bed",
+              "label": "guarded machine / material bay",
+              "x": 13.668,
+              "z": 11.115,
+              "width": 1.8,
+              "depth": 0.353,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "service_core_protected_aisle",
+              "x": 9.92,
+              "z": 10.132,
+              "width": 5.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "service_core_door_approach",
+              "x": 12.21,
+              "z": 9.764,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "ground_accessible_route",
+          "x": 0.3,
+          "z": 6.24,
+          "width": 15.4,
+          "depth": 1.5,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "ground_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "teaching_hall",
+          "center": [
+            5.11,
+            6.0
+          ],
+          "diameter": 4.0
+        },
+        {
+          "id": "ground_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "teaching_hall",
+          "center": [
+            5.11,
+            6.0
+          ],
+          "radius": 2.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_ground_teaching_hall",
+          "type": "lighting",
+          "roomId": "teaching_hall",
+          "x": 5.11,
+          "z": 6.0
+        },
+        {
+          "id": "interaction_ground_teaching_hall",
+          "type": "interaction",
+          "roomId": "teaching_hall",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_entry_vestibule",
+          "type": "lighting",
+          "roomId": "entry_vestibule",
+          "x": 12.81,
+          "z": 1.698
+        },
+        {
+          "id": "interaction_ground_entry_vestibule",
+          "type": "interaction",
+          "roomId": "entry_vestibule",
+          "x": 10.52,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_practice_lab",
+          "type": "lighting",
+          "roomId": "practice_lab",
+          "x": 12.81,
+          "z": 4.494
+        },
+        {
+          "id": "interaction_ground_practice_lab",
+          "type": "interaction",
+          "roomId": "practice_lab",
+          "x": 10.52,
+          "z": 3.696
+        },
+        {
+          "id": "light_ground_tool_store",
+          "type": "lighting",
+          "roomId": "tool_store",
+          "x": 12.81,
+          "z": 6.86
+        },
+        {
+          "id": "interaction_ground_tool_store",
+          "type": "interaction",
+          "roomId": "tool_store",
+          "x": 10.52,
+          "z": 6.492
+        },
+        {
+          "id": "light_ground_accessible_service",
+          "type": "lighting",
+          "roomId": "accessible_service",
+          "x": 12.81,
+          "z": 8.796
+        },
+        {
+          "id": "interaction_ground_accessible_service",
+          "type": "interaction",
+          "roomId": "accessible_service",
+          "x": 10.52,
+          "z": 8.428
+        },
+        {
+          "id": "light_ground_service_core",
+          "type": "lighting",
+          "roomId": "service_core",
+          "x": 12.81,
+          "z": 10.732
+        },
+        {
+          "id": "interaction_ground_service_core",
+          "type": "interaction",
+          "roomId": "service_core",
+          "x": 10.52,
+          "z": 10.364
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            6.24
+          ],
+          "to": [
+            15.7,
+            6.24
+          ],
+          "cutsVerticalCoreId": "academy_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            13.76,
+            0.3
+          ],
+          "to": [
+            13.76,
+            11.7
+          ],
+          "cutsVerticalCoreId": "academy_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
     },
     {
       "id": "upper",
@@ -381,85 +1195,104 @@
       "clearHeightMeters": 2.9,
       "rooms": [
         {
-          "id": "library_archive",
-          "purpose": "library archive",
+          "id": "study_gallery",
           "x": 0.3,
-          "z": 6.75,
-          "width": 3.85,
-          "depth": 4.95,
-          "furnitureZones": [
-            "library_archive_primary",
-            "library_archive_storage",
-            "clear_route_edge"
-          ]
+          "z": 0.3,
+          "width": 9.62,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "study gallery"
         },
         {
-          "id": "study_gallery",
-          "purpose": "study gallery",
-          "x": 4.15,
-          "z": 6.75,
-          "width": 7.7,
-          "depth": 4.95,
-          "furnitureZones": [
-            "study_gallery_primary",
-            "study_gallery_storage",
-            "clear_route_edge"
-          ]
+          "id": "library_archive",
+          "x": 9.92,
+          "z": 0.3,
+          "width": 5.78,
+          "depth": 2.85,
+          "kind": "room",
+          "purpose": "library archive"
         },
         {
           "id": "instructor_office",
-          "purpose": "instructor office",
-          "x": 11.85,
-          "z": 6.75,
-          "width": 3.85,
-          "depth": 4.95,
-          "furnitureZones": [
-            "instructor_office_primary",
-            "instructor_office_storage",
-            "clear_route_edge"
-          ]
+          "x": 9.92,
+          "z": 3.15,
+          "width": 5.78,
+          "depth": 2.85,
+          "kind": "room",
+          "purpose": "instructor office"
         },
         {
           "id": "records_room",
-          "purpose": "records room",
-          "x": 0.3,
-          "z": 0.3,
-          "width": 8.855,
-          "depth": 4.95,
-          "furnitureZones": [
-            "records_room_primary",
-            "records_room_storage",
-            "clear_route_edge"
-          ]
+          "x": 9.92,
+          "z": 6.0,
+          "width": 5.78,
+          "depth": 2.85,
+          "kind": "room",
+          "purpose": "records room"
         },
         {
           "id": "landing",
-          "purpose": "landing",
-          "x": 9.155,
-          "z": 0.3,
-          "width": 6.545,
-          "depth": 4.95,
-          "furnitureZones": [
-            "landing_primary",
-            "landing_storage",
-            "clear_route_edge"
-          ]
+          "x": 9.92,
+          "z": 8.85,
+          "width": 5.78,
+          "depth": 2.85,
+          "kind": "room",
+          "purpose": "landing"
         }
       ],
+      "blueprintId": "academy:upper:archive_gallery",
+      "layoutPattern": "archive_gallery",
+      "levelMassFootprints": [
+        {
+          "id": "primary_mass",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 9.24,
+          "depth": 11.4,
+          "kind": "building"
+        },
+        {
+          "id": "offset_service_mass",
+          "x": 10.5,
+          "z": 2.16,
+          "width": 5.2,
+          "depth": 7.68,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [],
       "circulation": {
         "id": "primary_circulation",
         "x": 0.3,
-        "z": 5.25,
+        "z": 6.24,
         "width": 15.4,
-        "depth": 1.5
+        "depth": 1.5,
+        "kind": "accessible_route_envelope"
       },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              0.3,
+              6.24
+            ],
+            [
+              15.7,
+              6.24
+            ]
+          ]
+        }
+      ],
       "adjacency": [
         [
-          "library_archive",
+          "study_gallery",
           "primary_circulation"
         ],
         [
-          "study_gallery",
+          "library_archive",
           "primary_circulation"
         ],
         [
@@ -477,28 +1310,38 @@
       ],
       "doorOpenings": [
         {
-          "id": "door_upper_library_archive",
-          "separateObject": true,
-          "between": [
-            "library_archive",
-            "primary_circulation"
-          ],
-          "clearOpeningMeters": [
-            1.2,
-            2.4
-          ]
-        },
-        {
           "id": "door_upper_study_gallery",
           "separateObject": true,
           "between": [
             "study_gallery",
             "primary_circulation"
           ],
+          "to": "study_gallery",
+          "orientation": "vertical",
+          "x": 5.11,
+          "z": 11.7,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_upper_library_archive",
+          "separateObject": true,
+          "between": [
+            "library_archive",
+            "primary_circulation"
+          ],
+          "to": "library_archive",
+          "orientation": "vertical",
+          "x": 12.81,
+          "z": 3.15,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_instructor_office",
@@ -507,10 +1350,15 @@
             "instructor_office",
             "primary_circulation"
           ],
+          "to": "instructor_office",
+          "orientation": "vertical",
+          "x": 12.81,
+          "z": 6.0,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_records_room",
@@ -519,10 +1367,15 @@
             "records_room",
             "primary_circulation"
           ],
+          "to": "records_room",
+          "orientation": "vertical",
+          "x": 12.81,
+          "z": 8.85,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_landing",
@@ -531,26 +1384,38 @@
             "landing",
             "primary_circulation"
           ],
+          "to": "landing",
+          "orientation": "horizontal",
+          "x": 12.81,
+          "z": 8.85,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         }
       ],
+      "exteriorEntrances": [],
       "windowOpenings": [
         {
-          "id": "window_upper_library_archive",
+          "id": "window_upper_study_gallery",
           "separateFrameGlassShutter": true,
-          "serves": "library_archive",
+          "serves": "study_gallery",
+          "side": "north",
+          "x": 5.11,
+          "z": 6.0,
           "openingMeters": [
             1.2,
             1.5
           ]
         },
         {
-          "id": "window_upper_study_gallery",
+          "id": "window_upper_library_archive",
           "separateFrameGlassShutter": true,
-          "serves": "study_gallery",
+          "serves": "library_archive",
+          "side": "east",
+          "x": 12.81,
+          "z": 1.725,
           "openingMeters": [
             1.2,
             1.5
@@ -560,6 +1425,9 @@
           "id": "window_upper_instructor_office",
           "separateFrameGlassShutter": true,
           "serves": "instructor_office",
+          "side": "west",
+          "x": 12.81,
+          "z": 4.575,
           "openingMeters": [
             1.2,
             1.5
@@ -569,6 +1437,9 @@
           "id": "window_upper_records_room",
           "separateFrameGlassShutter": true,
           "serves": "records_room",
+          "side": "north",
+          "x": 12.81,
+          "z": 7.425,
           "openingMeters": [
             1.2,
             1.5
@@ -578,6 +1449,9 @@
           "id": "window_upper_landing",
           "separateFrameGlassShutter": true,
           "serves": "landing",
+          "side": "east",
+          "x": 12.81,
+          "z": 10.275,
           "openingMeters": [
             1.2,
             1.5
@@ -585,19 +1459,476 @@
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
-      "verticalCore": {
-        "stairMeters": [
-          1.5,
-          1.5
-        ],
-        "liftPlatformReserved": true,
-        "separateObjects": true
+      "verticalCoreFootprints": [
+        {
+          "coreId": "academy_stair_core",
+          "type": "dogleg_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 12.8,
+            "z": 4.56,
+            "width": 1.92,
+            "depth": 3.36,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "records_room"
+        },
+        {
+          "coreId": "academy_public_platform",
+          "type": "public_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 10.48,
+            "z": 4.56,
+            "width": 1.92,
+            "depth": 1.92,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "instructor_office"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "study_gallery",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "upper_study_gallery_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 0.75,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_study_gallery_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 4.21,
+              "z": 10.35,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "upper_study_gallery_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 7.67,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "study_gallery_protected_aisle",
+              "x": 0.3,
+              "z": 5.4,
+              "width": 9.62,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "study_gallery_door_approach",
+              "x": 4.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "library_archive",
+          "layoutIntent": "archive shelving",
+          "footprints": [
+            {
+              "id": "upper_library_archive_shelf_bay_1",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 10.262,
+              "z": 0.642,
+              "width": 1.699,
+              "depth": 0.52,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_library_archive_shelf_bay_2",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 11.961,
+              "z": 2.288,
+              "width": 1.699,
+              "depth": 0.52,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "upper_library_archive_shelf_bay_3",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 13.659,
+              "z": 0.642,
+              "width": 1.699,
+              "depth": 0.52,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "library_archive_protected_aisle",
+              "x": 9.92,
+              "z": 1.125,
+              "width": 5.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "library_archive_door_approach",
+              "x": 12.21,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "instructor_office",
+          "layoutIntent": "desk + chair",
+          "footprints": [
+            {
+              "id": "upper_instructor_office_desk_1",
+              "kind": "desk",
+              "label": "desk + chair",
+              "x": 10.262,
+              "z": 3.492,
+              "width": 1.8,
+              "depth": 0.52,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "instructor_office_protected_aisle",
+              "x": 9.92,
+              "z": 3.975,
+              "width": 5.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "instructor_office_door_approach",
+              "x": 12.21,
+              "z": 3.15,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "records_room",
+          "layoutIntent": "archive shelving",
+          "footprints": [
+            {
+              "id": "upper_records_room_shelf_bay_2",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 11.961,
+              "z": 7.988,
+              "width": 1.699,
+              "depth": 0.52,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "records_room_protected_aisle",
+              "x": 9.92,
+              "z": 6.825,
+              "width": 5.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "records_room_door_approach",
+              "x": 12.21,
+              "z": 6.0,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "landing",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "upper_landing_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 10.262,
+              "z": 9.192,
+              "width": 1.8,
+              "depth": 0.52,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_landing_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 13.558,
+              "z": 10.838,
+              "width": 1.8,
+              "depth": 0.52,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "landing_protected_aisle",
+              "x": 9.92,
+              "z": 9.675,
+              "width": 5.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "landing_door_approach",
+              "x": 12.21,
+              "z": 8.85,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "upper_accessible_route",
+          "x": 0.3,
+          "z": 6.24,
+          "width": 15.4,
+          "depth": 1.5,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "upper_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "study_gallery",
+          "center": [
+            5.11,
+            6.0
+          ],
+          "diameter": 4.0
+        },
+        {
+          "id": "upper_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "study_gallery",
+          "center": [
+            5.11,
+            6.0
+          ],
+          "radius": 2.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_upper_study_gallery",
+          "type": "lighting",
+          "roomId": "study_gallery",
+          "x": 5.11,
+          "z": 6.0
+        },
+        {
+          "id": "interaction_upper_study_gallery",
+          "type": "interaction",
+          "roomId": "study_gallery",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_library_archive",
+          "type": "lighting",
+          "roomId": "library_archive",
+          "x": 12.81,
+          "z": 1.725
+        },
+        {
+          "id": "interaction_upper_library_archive",
+          "type": "interaction",
+          "roomId": "library_archive",
+          "x": 10.52,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_instructor_office",
+          "type": "lighting",
+          "roomId": "instructor_office",
+          "x": 12.81,
+          "z": 4.575
+        },
+        {
+          "id": "interaction_upper_instructor_office",
+          "type": "interaction",
+          "roomId": "instructor_office",
+          "x": 10.52,
+          "z": 3.75
+        },
+        {
+          "id": "light_upper_records_room",
+          "type": "lighting",
+          "roomId": "records_room",
+          "x": 12.81,
+          "z": 7.425
+        },
+        {
+          "id": "interaction_upper_records_room",
+          "type": "interaction",
+          "roomId": "records_room",
+          "x": 10.52,
+          "z": 6.6
+        },
+        {
+          "id": "light_upper_landing",
+          "type": "lighting",
+          "roomId": "landing",
+          "x": 12.81,
+          "z": 10.275
+        },
+        {
+          "id": "interaction_upper_landing",
+          "type": "interaction",
+          "roomId": "landing",
+          "x": 10.52,
+          "z": 9.45
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            6.24
+          ],
+          "to": [
+            15.7,
+            6.24
+          ],
+          "cutsVerticalCoreId": "academy_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            13.76,
+            0.3
+          ],
+          "to": [
+            13.76,
+            11.7
+          ],
+          "cutsVerticalCoreId": "academy_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
+    }
+  ],
+  "verticalCirculation": [
+    {
+      "id": "academy_stair_core",
+      "type": "dogleg_stair",
+      "footprint": {
+        "id": "stair_footprint",
+        "x": 12.8,
+        "z": 4.56,
+        "width": 1.92,
+        "depth": 3.36,
+        "kind": "vertical_circulation"
       },
-      "portalBoundary": "none_on_this_level"
+      "clearWidthMeters": 1.5,
+      "direction": "UP clockwise",
+      "connectsLevels": [
+        "ground",
+        "upper"
+      ],
+      "landings": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.5,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": false,
+      "separateObjects": true
+    },
+    {
+      "id": "academy_public_platform",
+      "type": "public_platform",
+      "footprint": {
+        "id": "lift_footprint",
+        "x": 10.48,
+        "z": 4.56,
+        "width": 1.92,
+        "depth": 1.92,
+        "kind": "vertical_circulation"
+      },
+      "clearWidthMeters": 1.5,
+      "direction": "vertical platform",
+      "connectsLevels": [
+        "ground",
+        "upper"
+      ],
+      "landings": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.5,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": true,
+      "separateObjects": true
     }
   ],
   "sections": {
     "longitudinal": {
+      "id": "A-A",
+      "cutLineId": "A-A",
+      "axis": "x",
+      "cutCoordinateMeters": 6.24,
       "spanMeters": 16,
       "levels": [
         {
@@ -610,9 +1941,174 @@
           "elevationMeters": 3.5,
           "clearHeightMeters": 2.9
         }
-      ]
+      ],
+      "roomSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "teaching_hall",
+          "startMeters": 0.3,
+          "endMeters": 9.92,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "tool_store",
+          "startMeters": 9.92,
+          "endMeters": 15.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "upper",
+          "roomId": "study_gallery",
+          "startMeters": 0.3,
+          "endMeters": 9.92,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        },
+        {
+          "levelId": "upper",
+          "roomId": "records_room",
+          "startMeters": 9.92,
+          "endMeters": 15.7,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.5,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "academy_stair_core",
+          "type": "dogleg_stair",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "UP clockwise"
+        },
+        {
+          "coreId": "academy_public_platform",
+          "type": "public_platform",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "vertical platform"
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "academy_main_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "ground",
+          "openingId": "academy_service_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_study_gallery",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_library_archive",
+          "kind": "door"
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "teaching_hall",
+          "kind": "table_bench",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "ground",
+          "roomId": "teaching_hall",
+          "kind": "table_bench",
+          "positionMeters": 4.21
+        },
+        {
+          "levelId": "ground",
+          "roomId": "teaching_hall",
+          "kind": "table_bench",
+          "positionMeters": 7.67
+        },
+        {
+          "levelId": "ground",
+          "roomId": "tool_store",
+          "kind": "storage_rack",
+          "positionMeters": 10.152
+        },
+        {
+          "levelId": "ground",
+          "roomId": "tool_store",
+          "kind": "storage_rack",
+          "positionMeters": 11.924
+        },
+        {
+          "levelId": "ground",
+          "roomId": "tool_store",
+          "kind": "storage_rack",
+          "positionMeters": 13.696
+        },
+        {
+          "levelId": "upper",
+          "roomId": "study_gallery",
+          "kind": "table_bench",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "upper",
+          "roomId": "study_gallery",
+          "kind": "table_bench",
+          "positionMeters": 4.21
+        },
+        {
+          "levelId": "upper",
+          "roomId": "study_gallery",
+          "kind": "table_bench",
+          "positionMeters": 7.67
+        },
+        {
+          "levelId": "upper",
+          "roomId": "records_room",
+          "kind": "shelf_bay",
+          "positionMeters": 11.961
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -0.6,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 6.4,
+        "peakElevationMeters": 8.2,
+        "structure": "Paired clipped gables over a central archive ridge.",
+        "cutRoomsAndVoids": true
+      }
     },
     "cross": {
+      "id": "B-B",
+      "cutLineId": "B-B",
+      "axis": "z",
+      "cutCoordinateMeters": 13.76,
       "spanMeters": 12,
       "levels": [
         {
@@ -625,10 +2121,253 @@
           "elevationMeters": 3.5,
           "clearHeightMeters": 2.9
         }
-      ]
+      ],
+      "roomSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "entry_vestibule",
+          "startMeters": 0.3,
+          "endMeters": 3.0959999999999996,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "practice_lab",
+          "startMeters": 3.096,
+          "endMeters": 5.8919999999999995,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "tool_store",
+          "startMeters": 5.892,
+          "endMeters": 7.828,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_service",
+          "startMeters": 7.828,
+          "endMeters": 9.764,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "service_core",
+          "startMeters": 9.764,
+          "endMeters": 11.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "upper",
+          "roomId": "library_archive",
+          "startMeters": 0.3,
+          "endMeters": 3.15,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        },
+        {
+          "levelId": "upper",
+          "roomId": "instructor_office",
+          "startMeters": 3.15,
+          "endMeters": 6.0,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        },
+        {
+          "levelId": "upper",
+          "roomId": "records_room",
+          "startMeters": 6.0,
+          "endMeters": 8.85,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing",
+          "startMeters": 8.85,
+          "endMeters": 11.7,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.9
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.5,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "academy_stair_core",
+          "type": "dogleg_stair",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "UP clockwise"
+        },
+        {
+          "coreId": "academy_public_platform",
+          "type": "public_platform",
+          "connectsLevels": [
+            "ground",
+            "upper"
+          ],
+          "direction": "vertical platform"
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "academy_main_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "ground",
+          "openingId": "academy_service_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_study_gallery",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_library_archive",
+          "kind": "door"
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "entry_vestibule",
+          "kind": "utility_table",
+          "positionMeters": 0.636
+        },
+        {
+          "levelId": "ground",
+          "roomId": "entry_vestibule",
+          "kind": "utility_table",
+          "positionMeters": 2.25
+        },
+        {
+          "levelId": "ground",
+          "roomId": "practice_lab",
+          "kind": "utility_table",
+          "positionMeters": 3.432
+        },
+        {
+          "levelId": "ground",
+          "roomId": "tool_store",
+          "kind": "storage_rack",
+          "positionMeters": 6.124
+        },
+        {
+          "levelId": "ground",
+          "roomId": "tool_store",
+          "kind": "storage_rack",
+          "positionMeters": 7.243
+        },
+        {
+          "levelId": "ground",
+          "roomId": "tool_store",
+          "kind": "storage_rack",
+          "positionMeters": 6.124
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_service",
+          "kind": "utility_table",
+          "positionMeters": 8.06
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_service",
+          "kind": "utility_table",
+          "positionMeters": 9.179
+        },
+        {
+          "levelId": "ground",
+          "roomId": "service_core",
+          "kind": "machine_bed",
+          "positionMeters": 9.996
+        },
+        {
+          "levelId": "ground",
+          "roomId": "service_core",
+          "kind": "machine_bed",
+          "positionMeters": 11.115
+        },
+        {
+          "levelId": "upper",
+          "roomId": "library_archive",
+          "kind": "shelf_bay",
+          "positionMeters": 0.642
+        },
+        {
+          "levelId": "upper",
+          "roomId": "library_archive",
+          "kind": "shelf_bay",
+          "positionMeters": 2.288
+        },
+        {
+          "levelId": "upper",
+          "roomId": "library_archive",
+          "kind": "shelf_bay",
+          "positionMeters": 0.642
+        },
+        {
+          "levelId": "upper",
+          "roomId": "instructor_office",
+          "kind": "desk",
+          "positionMeters": 3.492
+        },
+        {
+          "levelId": "upper",
+          "roomId": "records_room",
+          "kind": "shelf_bay",
+          "positionMeters": 7.988
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing",
+          "kind": "utility_table",
+          "positionMeters": 9.192
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing",
+          "kind": "utility_table",
+          "positionMeters": 10.838
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -0.6,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 6.4,
+        "peakElevationMeters": 8.2,
+        "structure": "Paired clipped gables over a central archive ridge.",
+        "cutRoomsAndVoids": true
+      }
     }
   },
-  "roomPurposeAndAdjacency": "Each room has a purpose label and connects to the dimensioned primary circulation spine; adjacency and separate openings are explicit in every floor plan.",
+  "roomPurposeAndAdjacency": "Every room has a purpose-specific footprint, furnished layout, protected clearances, separate openings, and a connection to the drawn circulation geometry. Plan-marked A-A/B-B cuts bind those rooms to both architectural sections.",
   "sharedModules": {
     "structural": [
       "foundation_3m",

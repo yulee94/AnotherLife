@@ -130,6 +130,267 @@
     "longitudinal_section",
     "cross_section"
   ],
+  "architecturalDesign": {
+    "packetSlug": "city_capital_kit",
+    "layoutArchetype": "four enterable blocks around a service court",
+    "planSignature": "city_capital_kit|service_grid|courtyard_four|gallery_ring|south|(0.82, 0.72)",
+    "exteriorMasses": [
+      {
+        "id": "south_wing",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 29.4,
+        "depth": 8.34,
+        "kind": "building",
+        "levels": [
+          "street",
+          "upper"
+        ],
+        "exteriorRole": "south wing"
+      },
+      {
+        "id": "north_wing",
+        "x": 0.3,
+        "z": 15.36,
+        "width": 29.4,
+        "depth": 8.34,
+        "kind": "building",
+        "levels": [
+          "street",
+          "upper"
+        ],
+        "exteriorRole": "north wing"
+      },
+      {
+        "id": "west_wing",
+        "x": 0.3,
+        "z": 8.64,
+        "width": 10.5,
+        "depth": 6.72,
+        "kind": "building",
+        "levels": [
+          "street",
+          "upper"
+        ],
+        "exteriorRole": "west wing"
+      },
+      {
+        "id": "east_wing",
+        "x": 19.2,
+        "z": 8.64,
+        "width": 10.5,
+        "depth": 6.72,
+        "kind": "building",
+        "levels": [
+          "street",
+          "upper"
+        ],
+        "exteriorRole": "east wing"
+      }
+    ],
+    "roofVolumes": [
+      {
+        "id": "roof_south_wing",
+        "massId": "south_wing",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 29.4,
+        "depth": 8.34,
+        "profile": "Linked low hips and clipped gables around a stepped civic court."
+      },
+      {
+        "id": "roof_north_wing",
+        "massId": "north_wing",
+        "x": 0.3,
+        "z": 15.36,
+        "width": 29.4,
+        "depth": 8.34,
+        "profile": "Linked low hips and clipped gables around a stepped civic court."
+      },
+      {
+        "id": "roof_west_wing",
+        "massId": "west_wing",
+        "x": 0.3,
+        "z": 8.64,
+        "width": 10.5,
+        "depth": 6.72,
+        "profile": "Linked low hips and clipped gables around a stepped civic court."
+      },
+      {
+        "id": "roof_east_wing",
+        "massId": "east_wing",
+        "x": 19.2,
+        "z": 8.64,
+        "width": 10.5,
+        "depth": 6.72,
+        "profile": "Linked low hips and clipped gables around a stepped civic court."
+      }
+    ],
+    "exteriorOpeningRegister": [
+      {
+        "id": "city_capital_kit_main_entry",
+        "kind": "door",
+        "levelId": "street",
+        "side": "south",
+        "x": 15.0,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "city_capital_kit_main_entry"
+      },
+      {
+        "id": "city_capital_kit_service_entry",
+        "kind": "door",
+        "levelId": "street",
+        "side": "north",
+        "x": 23.4,
+        "z": 24,
+        "separateObject": true,
+        "planOpeningId": "city_capital_kit_service_entry"
+      },
+      {
+        "id": "window_street_block_a_public_hall",
+        "kind": "window",
+        "levelId": "street",
+        "side": "north",
+        "x": 9.54,
+        "z": 4.47,
+        "separateObject": true,
+        "planOpeningId": "window_street_block_a_public_hall"
+      },
+      {
+        "id": "window_street_block_b_shop",
+        "kind": "window",
+        "levelId": "street",
+        "side": "east",
+        "x": 15.0,
+        "z": 16.909,
+        "separateObject": true,
+        "planOpeningId": "window_street_block_b_shop"
+      },
+      {
+        "id": "window_street_block_c_service_hall",
+        "kind": "window",
+        "levelId": "street",
+        "side": "west",
+        "x": 5.55,
+        "z": 12.0,
+        "separateObject": true,
+        "planOpeningId": "window_street_block_c_service_hall"
+      },
+      {
+        "id": "window_street_block_d_guard_post",
+        "kind": "window",
+        "levelId": "street",
+        "side": "north",
+        "x": 24.45,
+        "z": 12.0,
+        "separateObject": true,
+        "planOpeningId": "window_street_block_d_guard_post"
+      },
+      {
+        "id": "window_street_covered_arcade",
+        "kind": "window",
+        "levelId": "street",
+        "side": "east",
+        "x": 24.24,
+        "z": 4.47,
+        "separateObject": true,
+        "planOpeningId": "window_street_covered_arcade"
+      },
+      {
+        "id": "window_street_service_court",
+        "kind": "window",
+        "levelId": "street",
+        "side": "west",
+        "x": 15.0,
+        "z": 21.079,
+        "separateObject": true,
+        "planOpeningId": "window_street_service_court"
+      },
+      {
+        "id": "window_upper_block_a_records",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 4.567,
+        "z": 4.47,
+        "separateObject": true,
+        "planOpeningId": "window_upper_block_a_records"
+      },
+      {
+        "id": "window_upper_block_b_living",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 15.0,
+        "z": 19.53,
+        "separateObject": true,
+        "planOpeningId": "window_upper_block_b_living"
+      },
+      {
+        "id": "window_upper_block_c_workroom",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 5.55,
+        "z": 12.0,
+        "separateObject": true,
+        "planOpeningId": "window_upper_block_c_workroom"
+      },
+      {
+        "id": "window_upper_block_d_barracks",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "north",
+        "x": 24.45,
+        "z": 12.0,
+        "separateObject": true,
+        "planOpeningId": "window_upper_block_d_barracks"
+      },
+      {
+        "id": "window_upper_cross_gallery",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 19.267,
+        "z": 4.47,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cross_gallery"
+      }
+    ],
+    "siteContext": {
+      "orientation": "front/local south; rear/local north",
+      "entryApproachSide": "south",
+      "courtyardsAndYards": [
+        {
+          "id": "open_courtyard",
+          "x": 10.8,
+          "z": 8.64,
+          "width": 8.4,
+          "depth": 6.72,
+          "kind": "open_to_sky"
+        },
+        {
+          "id": "open_courtyard",
+          "x": 10.8,
+          "z": 8.64,
+          "width": 8.4,
+          "depth": 6.72,
+          "kind": "open_to_sky"
+        },
+        {
+          "id": "open_courtyard",
+          "x": 10.8,
+          "z": 8.64,
+          "width": 8.4,
+          "depth": 6.72,
+          "kind": "open_to_sky"
+        }
+      ],
+      "perimeterWall": null
+    },
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts; every labeled room is furnished and reachable."
+  },
   "floorPlans": [
     {
       "id": "undercroft",
@@ -138,64 +399,112 @@
       "rooms": [
         {
           "id": "block_a_store",
-          "purpose": "block a store",
           "x": 0.3,
-          "z": 12.9,
-          "width": 12.495,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_a_store_primary",
-            "block_a_store_storage",
-            "clear_route_edge"
-          ]
+          "z": 0.3,
+          "width": 8.535,
+          "depth": 11.7,
+          "kind": "room",
+          "purpose": "block a store"
         },
         {
           "id": "block_b_cellar",
-          "purpose": "block b cellar",
-          "x": 12.795,
-          "z": 12.9,
-          "width": 16.905,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_b_cellar_primary",
-            "block_b_cellar_storage",
-            "clear_route_edge"
-          ]
+          "x": 8.835,
+          "z": 0.3,
+          "width": 12.329,
+          "depth": 11.7,
+          "kind": "room",
+          "purpose": "block b cellar"
         },
         {
           "id": "shared_service_tunnel",
-          "purpose": "shared service tunnel",
-          "x": 0.3,
+          "x": 21.165,
           "z": 0.3,
-          "width": 9.8,
-          "depth": 10.8,
-          "furnitureZones": [
-            "shared_service_tunnel_primary",
-            "shared_service_tunnel_storage",
-            "clear_route_edge"
-          ]
+          "width": 8.535,
+          "depth": 11.7,
+          "kind": "room",
+          "purpose": "shared service tunnel"
         },
         {
           "id": "loading_hold",
-          "purpose": "loading hold",
-          "x": 10.1,
+          "x": 0.3,
+          "z": 12.0,
+          "width": 29.4,
+          "depth": 11.7,
+          "kind": "room",
+          "purpose": "loading hold"
+        }
+      ],
+      "blueprintId": "city_capital_kit:undercroft:service_grid",
+      "layoutPattern": "service_grid",
+      "levelMassFootprints": [
+        {
+          "id": "south_wing",
+          "x": 0.3,
           "z": 0.3,
-          "width": 19.6,
-          "depth": 10.8,
-          "furnitureZones": [
-            "loading_hold_primary",
-            "loading_hold_storage",
-            "clear_route_edge"
-          ]
+          "width": 29.4,
+          "depth": 8.34,
+          "kind": "building"
+        },
+        {
+          "id": "north_wing",
+          "x": 0.3,
+          "z": 15.36,
+          "width": 29.4,
+          "depth": 8.34,
+          "kind": "building"
+        },
+        {
+          "id": "west_wing",
+          "x": 0.3,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "building"
+        },
+        {
+          "id": "east_wing",
+          "x": 19.2,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [
+        {
+          "id": "open_courtyard",
+          "x": 10.8,
+          "z": 8.64,
+          "width": 8.4,
+          "depth": 6.72,
+          "kind": "open_to_sky"
         }
       ],
       "circulation": {
         "id": "primary_circulation",
         "x": 0.3,
-        "z": 11.1,
+        "z": 12.48,
         "width": 29.4,
-        "depth": 1.8
+        "depth": 1.5,
+        "kind": "accessible_route_envelope"
       },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.8,
+          "accessible": true,
+          "points": [
+            [
+              0.3,
+              12.48
+            ],
+            [
+              29.7,
+              12.48
+            ]
+          ]
+        }
+      ],
       "adjacency": [
         [
           "block_a_store",
@@ -222,10 +531,15 @@
             "block_a_store",
             "primary_circulation"
           ],
+          "to": "block_a_store",
+          "orientation": "vertical",
+          "x": 4.567,
+          "z": 12.0,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_undercroft_block_b_cellar",
@@ -234,10 +548,15 @@
             "block_b_cellar",
             "primary_circulation"
           ],
+          "to": "block_b_cellar",
+          "orientation": "vertical",
+          "x": 15.0,
+          "z": 12.0,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_undercroft_shared_service_tunnel",
@@ -246,10 +565,15 @@
             "shared_service_tunnel",
             "primary_circulation"
           ],
+          "to": "shared_service_tunnel",
+          "orientation": "vertical",
+          "x": 25.432,
+          "z": 12.0,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_undercroft_loading_hold",
@@ -258,23 +582,389 @@
             "loading_hold",
             "primary_circulation"
           ],
+          "to": "loading_hold",
+          "orientation": "vertical",
+          "x": 15.0,
+          "z": 23.7,
           "clearOpeningMeters": [
             1.2,
             2.4
+          ],
+          "swing": "in"
+        }
+      ],
+      "exteriorEntrances": [],
+      "windowOpenings": [],
+      "windowPolicy": "No exterior windows below grade; separate ventilation and emergency shafts.",
+      "verticalCoreFootprints": [
+        {
+          "coreId": "city_capital_kit_stair_core",
+          "type": "u_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 23.6,
+            "z": 15.18,
+            "width": 2.0,
+            "depth": 4.2,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "loading_hold"
+        },
+        {
+          "coreId": "city_capital_kit_public_platform",
+          "type": "public_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 20.8,
+            "z": 15.18,
+            "width": 2.4,
+            "depth": 2.4,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "loading_hold"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "block_a_store",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "undercroft_block_a_store_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 0.75,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "undercroft_block_a_store_storage_rack_2",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 3.667,
+              "z": 10.65,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "undercroft_block_a_store_storage_rack_3",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 6.585,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_a_store_protected_aisle",
+              "x": 0.3,
+              "z": 5.55,
+              "width": 8.535,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_a_store_door_approach",
+              "x": 3.967,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "block_b_cellar",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "undercroft_block_b_cellar_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 9.285,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "undercroft_block_b_cellar_storage_rack_2",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 14.099,
+              "z": 10.65,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "undercroft_block_b_cellar_storage_rack_3",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 18.914,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_b_cellar_protected_aisle",
+              "x": 8.835,
+              "z": 5.55,
+              "width": 12.329,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_b_cellar_door_approach",
+              "x": 14.4,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "shared_service_tunnel",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "undercroft_shared_service_tunnel_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 21.615,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "undercroft_shared_service_tunnel_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 27.45,
+              "z": 10.65,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "shared_service_tunnel_protected_aisle",
+              "x": 21.165,
+              "z": 5.55,
+              "width": 8.535,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "shared_service_tunnel_door_approach",
+              "x": 24.832,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "loading_hold",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "undercroft_loading_hold_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 0.75,
+              "z": 12.45,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "undercroft_loading_hold_storage_rack_2",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 14.1,
+              "z": 22.35,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "undercroft_loading_hold_storage_rack_3",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "x": 27.45,
+              "z": 12.45,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "loading_hold_protected_aisle",
+              "x": 0.3,
+              "z": 17.25,
+              "width": 29.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "loading_hold_door_approach",
+              "x": 14.4,
+              "z": 12.0,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
           ]
         }
       ],
-      "windowOpenings": [],
-      "windowPolicy": "No exterior windows below grade; separate ventilation and emergency shafts.",
-      "verticalCore": {
-        "stairMeters": [
-          1.5,
-          1.5
-        ],
-        "liftPlatformReserved": true,
-        "separateObjects": true
-      },
-      "portalBoundary": "none_on_this_level"
+      "clearanceZones": [
+        {
+          "id": "undercroft_accessible_route",
+          "x": 0.3,
+          "z": 12.48,
+          "width": 29.4,
+          "depth": 1.5,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "undercroft_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "loading_hold",
+          "center": [
+            15.0,
+            17.85
+          ],
+          "diameter": 6.0
+        },
+        {
+          "id": "undercroft_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "loading_hold",
+          "center": [
+            15.0,
+            17.85
+          ],
+          "radius": 3.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_undercroft_block_a_store",
+          "type": "lighting",
+          "roomId": "block_a_store",
+          "x": 4.567,
+          "z": 6.15
+        },
+        {
+          "id": "interaction_undercroft_block_a_store",
+          "type": "interaction",
+          "roomId": "block_a_store",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_undercroft_block_b_cellar",
+          "type": "lighting",
+          "roomId": "block_b_cellar",
+          "x": 15.0,
+          "z": 6.15
+        },
+        {
+          "id": "interaction_undercroft_block_b_cellar",
+          "type": "interaction",
+          "roomId": "block_b_cellar",
+          "x": 9.435,
+          "z": 0.9
+        },
+        {
+          "id": "light_undercroft_shared_service_tunnel",
+          "type": "lighting",
+          "roomId": "shared_service_tunnel",
+          "x": 25.432,
+          "z": 6.15
+        },
+        {
+          "id": "interaction_undercroft_shared_service_tunnel",
+          "type": "interaction",
+          "roomId": "shared_service_tunnel",
+          "x": 21.765,
+          "z": 0.9
+        },
+        {
+          "id": "light_undercroft_loading_hold",
+          "type": "lighting",
+          "roomId": "loading_hold",
+          "x": 15.0,
+          "z": 17.85
+        },
+        {
+          "id": "interaction_undercroft_loading_hold",
+          "type": "interaction",
+          "roomId": "loading_hold",
+          "x": 0.9,
+          "z": 12.6
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            17.28
+          ],
+          "to": [
+            29.7,
+            17.28
+          ],
+          "cutsVerticalCoreId": "city_capital_kit_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            24.6,
+            0.3
+          ],
+          "to": [
+            24.6,
+            23.7
+          ],
+          "cutsVerticalCoreId": "city_capital_kit_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
     },
     {
       "id": "street",
@@ -283,91 +973,174 @@
       "rooms": [
         {
           "id": "block_a_public_hall",
-          "purpose": "block a public hall",
           "x": 0.3,
-          "z": 12.9,
-          "width": 10.985,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_a_public_hall_primary",
-            "block_a_public_hall_storage",
-            "clear_route_edge"
-          ]
+          "z": 0.3,
+          "width": 18.48,
+          "depth": 8.34,
+          "kind": "room",
+          "purpose": "block a public hall"
         },
         {
           "id": "block_b_shop",
-          "purpose": "block b shop",
-          "x": 11.285,
-          "z": 12.9,
-          "width": 7.431,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_b_shop_primary",
-            "block_b_shop_storage",
-            "clear_route_edge"
-          ]
+          "x": 0.3,
+          "z": 15.36,
+          "width": 29.4,
+          "depth": 3.098,
+          "kind": "room",
+          "purpose": "block b shop"
         },
         {
           "id": "block_c_service_hall",
-          "purpose": "block c service hall",
-          "x": 18.715,
-          "z": 12.9,
-          "width": 10.985,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_c_service_hall_primary",
-            "block_c_service_hall_storage",
-            "clear_route_edge"
-          ]
+          "x": 0.3,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "room",
+          "purpose": "block c service hall"
         },
         {
           "id": "block_d_guard_post",
-          "purpose": "block d guard post",
-          "x": 0.3,
-          "z": 0.3,
-          "width": 8.452,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_d_guard_post_primary",
-            "block_d_guard_post_storage",
-            "clear_route_edge"
-          ]
+          "x": 19.2,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "room",
+          "purpose": "block d guard post"
         },
         {
           "id": "covered_arcade",
-          "purpose": "covered arcade",
-          "x": 8.752,
+          "x": 18.78,
           "z": 0.3,
-          "width": 8.452,
-          "depth": 10.8,
-          "furnitureZones": [
-            "covered_arcade_primary",
-            "covered_arcade_storage",
-            "clear_route_edge"
-          ]
+          "width": 10.92,
+          "depth": 8.34,
+          "kind": "room",
+          "purpose": "covered arcade"
         },
         {
           "id": "service_court",
-          "purpose": "service court",
-          "x": 17.205,
+          "x": 0.3,
+          "z": 18.458,
+          "width": 29.4,
+          "depth": 5.242,
+          "kind": "room",
+          "purpose": "service court"
+        }
+      ],
+      "blueprintId": "city_capital_kit:street:courtyard_four",
+      "layoutPattern": "courtyard_four",
+      "levelMassFootprints": [
+        {
+          "id": "south_wing",
+          "x": 0.3,
           "z": 0.3,
-          "width": 12.495,
-          "depth": 10.8,
-          "furnitureZones": [
-            "service_court_primary",
-            "service_court_storage",
-            "clear_route_edge"
-          ]
+          "width": 29.4,
+          "depth": 8.34,
+          "kind": "building"
+        },
+        {
+          "id": "north_wing",
+          "x": 0.3,
+          "z": 15.36,
+          "width": 29.4,
+          "depth": 8.34,
+          "kind": "building"
+        },
+        {
+          "id": "west_wing",
+          "x": 0.3,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "building"
+        },
+        {
+          "id": "east_wing",
+          "x": 19.2,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [
+        {
+          "id": "open_courtyard",
+          "x": 10.8,
+          "z": 8.64,
+          "width": 8.4,
+          "depth": 6.72,
+          "kind": "open_to_sky"
         }
       ],
       "circulation": {
         "id": "primary_circulation",
         "x": 0.3,
-        "z": 11.1,
+        "z": 8.64,
         "width": 29.4,
-        "depth": 1.8
+        "depth": 6.72,
+        "kind": "accessible_route_envelope"
       },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.8,
+          "accessible": true,
+          "points": [
+            [
+              15.0,
+              0.0
+            ],
+            [
+              0.3,
+              8.64
+            ],
+            [
+              10.8,
+              8.64
+            ],
+            [
+              10.8,
+              15.36
+            ],
+            [
+              19.200000000000003,
+              15.36
+            ],
+            [
+              19.200000000000003,
+              8.64
+            ],
+            [
+              29.7,
+              8.64
+            ]
+          ]
+        },
+        {
+          "id": "service_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              23.4,
+              24
+            ],
+            [
+              19.200000000000003,
+              15.36
+            ]
+          ]
+        }
+      ],
       "adjacency": [
+        [
+          "outside",
+          "block_a_public_hall"
+        ],
+        [
+          "outside",
+          "block_c_service_hall"
+        ],
         [
           "block_a_public_hall",
           "primary_circulation"
@@ -395,16 +1168,61 @@
       ],
       "doorOpenings": [
         {
+          "id": "city_capital_kit_main_entry",
+          "from": "outside",
+          "to": "block_a_public_hall",
+          "side": "south",
+          "x": 15.0,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "block_a_public_hall"
+          ]
+        },
+        {
+          "id": "city_capital_kit_service_entry",
+          "from": "outside",
+          "to": "block_c_service_hall",
+          "side": "north",
+          "x": 23.4,
+          "z": 24,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "block_c_service_hall"
+          ]
+        },
+        {
           "id": "door_street_block_a_public_hall",
           "separateObject": true,
           "between": [
             "block_a_public_hall",
             "primary_circulation"
           ],
+          "to": "block_a_public_hall",
+          "orientation": "vertical",
+          "x": 9.54,
+          "z": 8.64,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_street_block_b_shop",
@@ -413,10 +1231,15 @@
             "block_b_shop",
             "primary_circulation"
           ],
+          "to": "block_b_shop",
+          "orientation": "horizontal",
+          "x": 15.0,
+          "z": 15.36,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_street_block_c_service_hall",
@@ -425,10 +1248,15 @@
             "block_c_service_hall",
             "primary_circulation"
           ],
+          "to": "block_c_service_hall",
+          "orientation": "vertical",
+          "x": 5.55,
+          "z": 15.36,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_street_block_d_guard_post",
@@ -437,10 +1265,15 @@
             "block_d_guard_post",
             "primary_circulation"
           ],
+          "to": "block_d_guard_post",
+          "orientation": "vertical",
+          "x": 24.45,
+          "z": 15.36,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_street_covered_arcade",
@@ -449,10 +1282,15 @@
             "covered_arcade",
             "primary_circulation"
           ],
+          "to": "covered_arcade",
+          "orientation": "vertical",
+          "x": 24.24,
+          "z": 8.64,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_street_service_court",
@@ -461,10 +1299,49 @@
             "service_court",
             "primary_circulation"
           ],
+          "to": "service_court",
+          "orientation": "horizontal",
+          "x": 15.0,
+          "z": 18.458,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
+        }
+      ],
+      "exteriorEntrances": [
+        {
+          "id": "city_capital_kit_main_entry",
+          "from": "outside",
+          "to": "block_a_public_hall",
+          "side": "south",
+          "x": 15.0,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true
+        },
+        {
+          "id": "city_capital_kit_service_entry",
+          "from": "outside",
+          "to": "block_c_service_hall",
+          "side": "north",
+          "x": 23.4,
+          "z": 24,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true
         }
       ],
       "windowOpenings": [
@@ -472,6 +1349,9 @@
           "id": "window_street_block_a_public_hall",
           "separateFrameGlassShutter": true,
           "serves": "block_a_public_hall",
+          "side": "north",
+          "x": 9.54,
+          "z": 4.47,
           "openingMeters": [
             1.2,
             1.5
@@ -481,6 +1361,9 @@
           "id": "window_street_block_b_shop",
           "separateFrameGlassShutter": true,
           "serves": "block_b_shop",
+          "side": "east",
+          "x": 15.0,
+          "z": 16.909,
           "openingMeters": [
             1.2,
             1.5
@@ -490,6 +1373,9 @@
           "id": "window_street_block_c_service_hall",
           "separateFrameGlassShutter": true,
           "serves": "block_c_service_hall",
+          "side": "west",
+          "x": 5.55,
+          "z": 12.0,
           "openingMeters": [
             1.2,
             1.5
@@ -499,6 +1385,9 @@
           "id": "window_street_block_d_guard_post",
           "separateFrameGlassShutter": true,
           "serves": "block_d_guard_post",
+          "side": "north",
+          "x": 24.45,
+          "z": 12.0,
           "openingMeters": [
             1.2,
             1.5
@@ -508,6 +1397,9 @@
           "id": "window_street_covered_arcade",
           "separateFrameGlassShutter": true,
           "serves": "covered_arcade",
+          "side": "east",
+          "x": 24.24,
+          "z": 4.47,
           "openingMeters": [
             1.2,
             1.5
@@ -517,6 +1409,9 @@
           "id": "window_street_service_court",
           "separateFrameGlassShutter": true,
           "serves": "service_court",
+          "side": "west",
+          "x": 15.0,
+          "z": 21.079,
           "openingMeters": [
             1.2,
             1.5
@@ -524,15 +1419,495 @@
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
-      "verticalCore": {
-        "stairMeters": [
-          1.5,
-          1.5
-        ],
-        "liftPlatformReserved": true,
-        "separateObjects": true
-      },
-      "portalBoundary": "none_on_this_level"
+      "verticalCoreFootprints": [
+        {
+          "coreId": "city_capital_kit_stair_core",
+          "type": "u_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 23.6,
+            "z": 15.18,
+            "width": 2.0,
+            "depth": 4.2,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "block_b_shop"
+        },
+        {
+          "coreId": "city_capital_kit_public_platform",
+          "type": "public_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 20.8,
+            "z": 15.18,
+            "width": 2.4,
+            "depth": 2.4,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "block_b_shop"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "block_a_public_hall",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "street_block_a_public_hall_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 0.75,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "street_block_a_public_hall_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 8.64,
+              "z": 7.29,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "street_block_a_public_hall_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 16.53,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_a_public_hall_protected_aisle",
+              "x": 0.3,
+              "z": 3.87,
+              "width": 18.48,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_a_public_hall_door_approach",
+              "x": 8.94,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "block_b_shop",
+          "layoutIntent": "counter + display",
+          "footprints": [
+            {
+              "id": "street_block_b_shop_service_counter_1",
+              "kind": "service_counter",
+              "label": "counter + display",
+              "x": 0.672,
+              "z": 15.732,
+              "width": 1.8,
+              "depth": 0.565,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "street_block_b_shop_service_counter_2",
+              "kind": "service_counter",
+              "label": "counter + display",
+              "x": 27.528,
+              "z": 17.521,
+              "width": 1.8,
+              "depth": 0.565,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_b_shop_protected_aisle",
+              "x": 0.3,
+              "z": 16.309,
+              "width": 29.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_b_shop_door_approach",
+              "x": 14.4,
+              "z": 15.36,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "block_c_service_hall",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "street_block_c_service_hall_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 0.75,
+              "z": 9.09,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "street_block_c_service_hall_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 4.65,
+              "z": 14.01,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "street_block_c_service_hall_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 8.55,
+              "z": 9.09,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_c_service_hall_protected_aisle",
+              "x": 0.3,
+              "z": 11.4,
+              "width": 10.5,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_c_service_hall_door_approach",
+              "x": 4.95,
+              "z": 8.64,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "block_d_guard_post",
+          "layoutIntent": "weapon rack + bench",
+          "footprints": [
+            {
+              "id": "street_block_d_guard_post_weapon_rack_1",
+              "kind": "weapon_rack",
+              "label": "weapon rack + bench",
+              "x": 19.65,
+              "z": 9.09,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "street_block_d_guard_post_weapon_rack_2",
+              "kind": "weapon_rack",
+              "label": "weapon rack + bench",
+              "x": 27.45,
+              "z": 14.01,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_d_guard_post_protected_aisle",
+              "x": 19.2,
+              "z": 11.4,
+              "width": 10.5,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_d_guard_post_door_approach",
+              "x": 23.85,
+              "z": 8.64,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "covered_arcade",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "street_covered_arcade_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 19.23,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "street_covered_arcade_utility_table_2",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "x": 27.45,
+              "z": 7.29,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "covered_arcade_protected_aisle",
+              "x": 18.78,
+              "z": 3.87,
+              "width": 10.92,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "covered_arcade_door_approach",
+              "x": 23.64,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "service_court",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "street_service_court_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 0.75,
+              "z": 18.908,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "street_service_court_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 14.1,
+              "z": 22.35,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "street_service_court_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 27.45,
+              "z": 18.908,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "service_court_protected_aisle",
+              "x": 0.3,
+              "z": 20.479,
+              "width": 29.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "service_court_door_approach",
+              "x": 14.4,
+              "z": 18.458,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "street_accessible_route",
+          "x": 0.3,
+          "z": 8.64,
+          "width": 29.4,
+          "depth": 6.72,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "street_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "block_a_public_hall",
+          "center": [
+            9.54,
+            4.47
+          ],
+          "diameter": 6.0
+        },
+        {
+          "id": "street_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "block_a_public_hall",
+          "center": [
+            9.54,
+            4.47
+          ],
+          "radius": 3.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_street_block_a_public_hall",
+          "type": "lighting",
+          "roomId": "block_a_public_hall",
+          "x": 9.54,
+          "z": 4.47
+        },
+        {
+          "id": "interaction_street_block_a_public_hall",
+          "type": "interaction",
+          "roomId": "block_a_public_hall",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_street_block_b_shop",
+          "type": "lighting",
+          "roomId": "block_b_shop",
+          "x": 15.0,
+          "z": 16.909
+        },
+        {
+          "id": "interaction_street_block_b_shop",
+          "type": "interaction",
+          "roomId": "block_b_shop",
+          "x": 0.9,
+          "z": 15.96
+        },
+        {
+          "id": "light_street_block_c_service_hall",
+          "type": "lighting",
+          "roomId": "block_c_service_hall",
+          "x": 5.55,
+          "z": 12.0
+        },
+        {
+          "id": "interaction_street_block_c_service_hall",
+          "type": "interaction",
+          "roomId": "block_c_service_hall",
+          "x": 0.9,
+          "z": 9.24
+        },
+        {
+          "id": "light_street_block_d_guard_post",
+          "type": "lighting",
+          "roomId": "block_d_guard_post",
+          "x": 24.45,
+          "z": 12.0
+        },
+        {
+          "id": "interaction_street_block_d_guard_post",
+          "type": "interaction",
+          "roomId": "block_d_guard_post",
+          "x": 19.8,
+          "z": 9.24
+        },
+        {
+          "id": "light_street_covered_arcade",
+          "type": "lighting",
+          "roomId": "covered_arcade",
+          "x": 24.24,
+          "z": 4.47
+        },
+        {
+          "id": "interaction_street_covered_arcade",
+          "type": "interaction",
+          "roomId": "covered_arcade",
+          "x": 19.38,
+          "z": 0.9
+        },
+        {
+          "id": "light_street_service_court",
+          "type": "lighting",
+          "roomId": "service_court",
+          "x": 15.0,
+          "z": 21.079
+        },
+        {
+          "id": "interaction_street_service_court",
+          "type": "interaction",
+          "roomId": "service_court",
+          "x": 0.9,
+          "z": 19.058
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            17.28
+          ],
+          "to": [
+            29.7,
+            17.28
+          ],
+          "cutsVerticalCoreId": "city_capital_kit_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            24.6,
+            0.3
+          ],
+          "to": [
+            24.6,
+            23.7
+          ],
+          "cutsVerticalCoreId": "city_capital_kit_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
     },
     {
       "id": "upper",
@@ -541,77 +1916,137 @@
       "rooms": [
         {
           "id": "block_a_records",
-          "purpose": "block a records",
           "x": 0.3,
-          "z": 12.9,
-          "width": 9.8,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_a_records_primary",
-            "block_a_records_storage",
-            "clear_route_edge"
-          ]
+          "z": 0.3,
+          "width": 8.535,
+          "depth": 8.34,
+          "kind": "room",
+          "purpose": "block a records"
         },
         {
           "id": "block_b_living",
-          "purpose": "block b living",
-          "x": 10.1,
-          "z": 12.9,
-          "width": 9.8,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_b_living_primary",
-            "block_b_living_storage",
-            "clear_route_edge"
-          ]
+          "x": 0.3,
+          "z": 15.36,
+          "width": 29.4,
+          "depth": 8.34,
+          "kind": "room",
+          "purpose": "block b living"
         },
         {
           "id": "block_c_workroom",
-          "purpose": "block c workroom",
-          "x": 19.9,
-          "z": 12.9,
-          "width": 9.8,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_c_workroom_primary",
-            "block_c_workroom_storage",
-            "clear_route_edge"
-          ]
+          "x": 0.3,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "room",
+          "purpose": "block c workroom"
         },
         {
           "id": "block_d_barracks",
-          "purpose": "block d barracks",
-          "x": 0.3,
-          "z": 0.3,
-          "width": 11.863,
-          "depth": 10.8,
-          "furnitureZones": [
-            "block_d_barracks_primary",
-            "block_d_barracks_storage",
-            "clear_route_edge"
-          ]
+          "x": 19.2,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "room",
+          "purpose": "block d barracks"
         },
         {
           "id": "cross_gallery",
-          "purpose": "cross gallery",
-          "x": 12.163,
+          "x": 8.835,
           "z": 0.3,
-          "width": 17.537,
-          "depth": 10.8,
-          "furnitureZones": [
-            "cross_gallery_primary",
-            "cross_gallery_storage",
-            "clear_route_edge"
-          ]
+          "width": 20.865,
+          "depth": 8.34,
+          "kind": "room",
+          "purpose": "cross gallery"
+        }
+      ],
+      "blueprintId": "city_capital_kit:upper:gallery_ring",
+      "layoutPattern": "gallery_ring",
+      "levelMassFootprints": [
+        {
+          "id": "south_wing",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 29.4,
+          "depth": 8.34,
+          "kind": "building"
+        },
+        {
+          "id": "north_wing",
+          "x": 0.3,
+          "z": 15.36,
+          "width": 29.4,
+          "depth": 8.34,
+          "kind": "building"
+        },
+        {
+          "id": "west_wing",
+          "x": 0.3,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "building"
+        },
+        {
+          "id": "east_wing",
+          "x": 19.2,
+          "z": 8.64,
+          "width": 10.5,
+          "depth": 6.72,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [
+        {
+          "id": "open_courtyard",
+          "x": 10.8,
+          "z": 8.64,
+          "width": 8.4,
+          "depth": 6.72,
+          "kind": "open_to_sky"
         }
       ],
       "circulation": {
         "id": "primary_circulation",
         "x": 0.3,
-        "z": 11.1,
+        "z": 8.64,
         "width": 29.4,
-        "depth": 1.8
+        "depth": 6.72,
+        "kind": "accessible_route_envelope"
       },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.8,
+          "accessible": true,
+          "points": [
+            [
+              0.3,
+              8.64
+            ],
+            [
+              10.8,
+              8.64
+            ],
+            [
+              10.8,
+              15.36
+            ],
+            [
+              19.200000000000003,
+              15.36
+            ],
+            [
+              19.200000000000003,
+              8.64
+            ],
+            [
+              29.7,
+              8.64
+            ]
+          ]
+        }
+      ],
       "adjacency": [
         [
           "block_a_records",
@@ -642,10 +2077,15 @@
             "block_a_records",
             "primary_circulation"
           ],
+          "to": "block_a_records",
+          "orientation": "vertical",
+          "x": 4.567,
+          "z": 8.64,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_block_b_living",
@@ -654,10 +2094,15 @@
             "block_b_living",
             "primary_circulation"
           ],
+          "to": "block_b_living",
+          "orientation": "horizontal",
+          "x": 15.0,
+          "z": 15.36,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_block_c_workroom",
@@ -666,10 +2111,15 @@
             "block_c_workroom",
             "primary_circulation"
           ],
+          "to": "block_c_workroom",
+          "orientation": "vertical",
+          "x": 5.55,
+          "z": 15.36,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_block_d_barracks",
@@ -678,10 +2128,15 @@
             "block_d_barracks",
             "primary_circulation"
           ],
+          "to": "block_d_barracks",
+          "orientation": "vertical",
+          "x": 24.45,
+          "z": 15.36,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         },
         {
           "id": "door_upper_cross_gallery",
@@ -690,17 +2145,26 @@
             "cross_gallery",
             "primary_circulation"
           ],
+          "to": "cross_gallery",
+          "orientation": "vertical",
+          "x": 19.267,
+          "z": 8.64,
           "clearOpeningMeters": [
             1.2,
             2.4
-          ]
+          ],
+          "swing": "in"
         }
       ],
+      "exteriorEntrances": [],
       "windowOpenings": [
         {
           "id": "window_upper_block_a_records",
           "separateFrameGlassShutter": true,
           "serves": "block_a_records",
+          "side": "north",
+          "x": 4.567,
+          "z": 4.47,
           "openingMeters": [
             1.2,
             1.5
@@ -710,6 +2174,9 @@
           "id": "window_upper_block_b_living",
           "separateFrameGlassShutter": true,
           "serves": "block_b_living",
+          "side": "east",
+          "x": 15.0,
+          "z": 19.53,
           "openingMeters": [
             1.2,
             1.5
@@ -719,6 +2186,9 @@
           "id": "window_upper_block_c_workroom",
           "separateFrameGlassShutter": true,
           "serves": "block_c_workroom",
+          "side": "west",
+          "x": 5.55,
+          "z": 12.0,
           "openingMeters": [
             1.2,
             1.5
@@ -728,6 +2198,9 @@
           "id": "window_upper_block_d_barracks",
           "separateFrameGlassShutter": true,
           "serves": "block_d_barracks",
+          "side": "north",
+          "x": 24.45,
+          "z": 12.0,
           "openingMeters": [
             1.2,
             1.5
@@ -737,6 +2210,9 @@
           "id": "window_upper_cross_gallery",
           "separateFrameGlassShutter": true,
           "serves": "cross_gallery",
+          "side": "east",
+          "x": 19.267,
+          "z": 4.47,
           "openingMeters": [
             1.2,
             1.5
@@ -744,19 +2220,510 @@
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
-      "verticalCore": {
-        "stairMeters": [
-          1.5,
-          1.5
-        ],
-        "liftPlatformReserved": true,
-        "separateObjects": true
+      "verticalCoreFootprints": [
+        {
+          "coreId": "city_capital_kit_stair_core",
+          "type": "u_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 23.6,
+            "z": 15.18,
+            "width": 2.0,
+            "depth": 4.2,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "block_b_living"
+        },
+        {
+          "coreId": "city_capital_kit_public_platform",
+          "type": "public_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 20.8,
+            "z": 15.18,
+            "width": 2.4,
+            "depth": 2.4,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "block_b_living"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "block_a_records",
+          "layoutIntent": "archive shelving",
+          "footprints": [
+            {
+              "id": "upper_block_a_records_shelf_bay_1",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 0.75,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_block_a_records_shelf_bay_2",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 3.667,
+              "z": 7.29,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "upper_block_a_records_shelf_bay_3",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "x": 6.585,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_a_records_protected_aisle",
+              "x": 0.3,
+              "z": 3.87,
+              "width": 8.535,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_a_records_door_approach",
+              "x": 3.967,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "block_b_living",
+          "layoutIntent": "sleeping furniture",
+          "footprints": [
+            {
+              "id": "upper_block_b_living_bed_or_cot_1",
+              "kind": "bed_or_cot",
+              "label": "sleeping furniture",
+              "x": 0.75,
+              "z": 15.81,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_block_b_living_bed_or_cot_2",
+              "kind": "bed_or_cot",
+              "label": "sleeping furniture",
+              "x": 27.45,
+              "z": 22.35,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_b_living_protected_aisle",
+              "x": 0.3,
+              "z": 18.93,
+              "width": 29.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_b_living_door_approach",
+              "x": 14.4,
+              "z": 15.36,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "block_c_workroom",
+          "layoutIntent": "hearth / workbench",
+          "footprints": [
+            {
+              "id": "upper_block_c_workroom_work_station_1",
+              "kind": "work_station",
+              "label": "hearth / workbench",
+              "x": 0.75,
+              "z": 9.09,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_block_c_workroom_work_station_2",
+              "kind": "work_station",
+              "label": "hearth / workbench",
+              "x": 8.55,
+              "z": 14.01,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_c_workroom_protected_aisle",
+              "x": 0.3,
+              "z": 11.4,
+              "width": 10.5,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_c_workroom_door_approach",
+              "x": 4.95,
+              "z": 8.64,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "block_d_barracks",
+          "layoutIntent": "weapon rack + bench",
+          "footprints": [
+            {
+              "id": "upper_block_d_barracks_weapon_rack_1",
+              "kind": "weapon_rack",
+              "label": "weapon rack + bench",
+              "x": 19.65,
+              "z": 9.09,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_block_d_barracks_weapon_rack_2",
+              "kind": "weapon_rack",
+              "label": "weapon rack + bench",
+              "x": 27.45,
+              "z": 14.01,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "block_d_barracks_protected_aisle",
+              "x": 19.2,
+              "z": 11.4,
+              "width": 10.5,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "block_d_barracks_door_approach",
+              "x": 23.85,
+              "z": 8.64,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "cross_gallery",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "upper_cross_gallery_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 9.285,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            },
+            {
+              "id": "upper_cross_gallery_table_bench_2",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 18.367,
+              "z": 7.29,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1
+            },
+            {
+              "id": "upper_cross_gallery_table_bench_3",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "x": 27.45,
+              "z": 0.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "cross_gallery_protected_aisle",
+              "x": 8.835,
+              "z": 3.87,
+              "width": 20.865,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "cross_gallery_door_approach",
+              "x": 18.668,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "upper_accessible_route",
+          "x": 0.3,
+          "z": 8.64,
+          "width": 29.4,
+          "depth": 6.72,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "upper_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "block_b_living",
+          "center": [
+            15.0,
+            19.53
+          ],
+          "diameter": 6.0
+        },
+        {
+          "id": "upper_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "block_b_living",
+          "center": [
+            15.0,
+            19.53
+          ],
+          "radius": 3.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_upper_block_a_records",
+          "type": "lighting",
+          "roomId": "block_a_records",
+          "x": 4.567,
+          "z": 4.47
+        },
+        {
+          "id": "interaction_upper_block_a_records",
+          "type": "interaction",
+          "roomId": "block_a_records",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_block_b_living",
+          "type": "lighting",
+          "roomId": "block_b_living",
+          "x": 15.0,
+          "z": 19.53
+        },
+        {
+          "id": "interaction_upper_block_b_living",
+          "type": "interaction",
+          "roomId": "block_b_living",
+          "x": 0.9,
+          "z": 15.96
+        },
+        {
+          "id": "light_upper_block_c_workroom",
+          "type": "lighting",
+          "roomId": "block_c_workroom",
+          "x": 5.55,
+          "z": 12.0
+        },
+        {
+          "id": "interaction_upper_block_c_workroom",
+          "type": "interaction",
+          "roomId": "block_c_workroom",
+          "x": 0.9,
+          "z": 9.24
+        },
+        {
+          "id": "light_upper_block_d_barracks",
+          "type": "lighting",
+          "roomId": "block_d_barracks",
+          "x": 24.45,
+          "z": 12.0
+        },
+        {
+          "id": "interaction_upper_block_d_barracks",
+          "type": "interaction",
+          "roomId": "block_d_barracks",
+          "x": 19.8,
+          "z": 9.24
+        },
+        {
+          "id": "light_upper_cross_gallery",
+          "type": "lighting",
+          "roomId": "cross_gallery",
+          "x": 19.267,
+          "z": 4.47
+        },
+        {
+          "id": "interaction_upper_cross_gallery",
+          "type": "interaction",
+          "roomId": "cross_gallery",
+          "x": 9.435,
+          "z": 0.9
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            17.28
+          ],
+          "to": [
+            29.7,
+            17.28
+          ],
+          "cutsVerticalCoreId": "city_capital_kit_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            24.6,
+            0.3
+          ],
+          "to": [
+            24.6,
+            23.7
+          ],
+          "cutsVerticalCoreId": "city_capital_kit_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
+    }
+  ],
+  "verticalCirculation": [
+    {
+      "id": "city_capital_kit_stair_core",
+      "type": "u_stair",
+      "footprint": {
+        "id": "stair_footprint",
+        "x": 23.6,
+        "z": 15.18,
+        "width": 2.0,
+        "depth": 4.2,
+        "kind": "vertical_circulation"
       },
-      "portalBoundary": "none_on_this_level"
+      "clearWidthMeters": 1.5,
+      "direction": "UP clockwise",
+      "connectsLevels": [
+        "undercroft",
+        "street",
+        "upper"
+      ],
+      "landings": [
+        {
+          "levelId": "undercroft",
+          "elevationMeters": -3.2,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "street",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.4,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": false,
+      "separateObjects": true
+    },
+    {
+      "id": "city_capital_kit_public_platform",
+      "type": "public_platform",
+      "footprint": {
+        "id": "lift_footprint",
+        "x": 20.8,
+        "z": 15.18,
+        "width": 2.4,
+        "depth": 2.4,
+        "kind": "vertical_circulation"
+      },
+      "clearWidthMeters": 1.5,
+      "direction": "vertical platform",
+      "connectsLevels": [
+        "undercroft",
+        "street",
+        "upper"
+      ],
+      "landings": [
+        {
+          "levelId": "undercroft",
+          "elevationMeters": -3.2,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "street",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.4,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": true,
+      "separateObjects": true
     }
   ],
   "sections": {
     "longitudinal": {
+      "id": "A-A",
+      "cutLineId": "A-A",
+      "axis": "x",
+      "cutCoordinateMeters": 17.28,
       "spanMeters": 30,
       "levels": [
         {
@@ -774,9 +2741,165 @@
           "elevationMeters": 3.4,
           "clearHeightMeters": 2.8
         }
-      ]
+      ],
+      "roomSlices": [
+        {
+          "levelId": "undercroft",
+          "roomId": "loading_hold",
+          "startMeters": 0.3,
+          "endMeters": 29.7,
+          "baseElevationMeters": -3.2,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "street",
+          "roomId": "block_b_shop",
+          "startMeters": 0.3,
+          "endMeters": 29.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "upper",
+          "roomId": "block_b_living",
+          "startMeters": 0.3,
+          "endMeters": 29.7,
+          "baseElevationMeters": 3.4,
+          "clearHeightMeters": 2.8
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "undercroft",
+          "elevationMeters": -3.2,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "street",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.4,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "city_capital_kit_stair_core",
+          "type": "u_stair",
+          "connectsLevels": [
+            "undercroft",
+            "street",
+            "upper"
+          ],
+          "direction": "UP clockwise"
+        },
+        {
+          "coreId": "city_capital_kit_public_platform",
+          "type": "public_platform",
+          "connectsLevels": [
+            "undercroft",
+            "street",
+            "upper"
+          ],
+          "direction": "vertical platform"
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "undercroft",
+          "openingId": "door_undercroft_block_a_store",
+          "kind": "door"
+        },
+        {
+          "levelId": "undercroft",
+          "openingId": "door_undercroft_block_b_cellar",
+          "kind": "door"
+        },
+        {
+          "levelId": "street",
+          "openingId": "city_capital_kit_main_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "street",
+          "openingId": "city_capital_kit_service_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_block_a_records",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_block_b_living",
+          "kind": "door"
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "undercroft",
+          "roomId": "loading_hold",
+          "kind": "storage_rack",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "loading_hold",
+          "kind": "storage_rack",
+          "positionMeters": 14.1
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "loading_hold",
+          "kind": "storage_rack",
+          "positionMeters": 27.45
+        },
+        {
+          "levelId": "street",
+          "roomId": "block_b_shop",
+          "kind": "service_counter",
+          "positionMeters": 0.672
+        },
+        {
+          "levelId": "street",
+          "roomId": "block_b_shop",
+          "kind": "service_counter",
+          "positionMeters": 27.528
+        },
+        {
+          "levelId": "upper",
+          "roomId": "block_b_living",
+          "kind": "bed_or_cot",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "upper",
+          "roomId": "block_b_living",
+          "kind": "bed_or_cot",
+          "positionMeters": 27.45
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -3.8000000000000003,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 6.199999999999999,
+        "peakElevationMeters": 11.2,
+        "structure": "Linked low hips and clipped gables around a stepped civic court.",
+        "cutRoomsAndVoids": true
+      }
     },
     "cross": {
+      "id": "B-B",
+      "cutLineId": "B-B",
+      "axis": "z",
+      "cutCoordinateMeters": 24.6,
       "spanMeters": 24,
       "levels": [
         {
@@ -794,10 +2917,294 @@
           "elevationMeters": 3.4,
           "clearHeightMeters": 2.8
         }
-      ]
+      ],
+      "roomSlices": [
+        {
+          "levelId": "undercroft",
+          "roomId": "shared_service_tunnel",
+          "startMeters": 0.3,
+          "endMeters": 12.0,
+          "baseElevationMeters": -3.2,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "loading_hold",
+          "startMeters": 12.0,
+          "endMeters": 23.7,
+          "baseElevationMeters": -3.2,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "street",
+          "roomId": "block_b_shop",
+          "startMeters": 15.36,
+          "endMeters": 18.458,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "street",
+          "roomId": "block_d_guard_post",
+          "startMeters": 8.64,
+          "endMeters": 15.36,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "street",
+          "roomId": "covered_arcade",
+          "startMeters": 0.3,
+          "endMeters": 8.64,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "street",
+          "roomId": "service_court",
+          "startMeters": 18.458,
+          "endMeters": 23.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "upper",
+          "roomId": "block_b_living",
+          "startMeters": 15.36,
+          "endMeters": 23.7,
+          "baseElevationMeters": 3.4,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "upper",
+          "roomId": "block_d_barracks",
+          "startMeters": 8.64,
+          "endMeters": 15.36,
+          "baseElevationMeters": 3.4,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "upper",
+          "roomId": "cross_gallery",
+          "startMeters": 0.3,
+          "endMeters": 8.64,
+          "baseElevationMeters": 3.4,
+          "clearHeightMeters": 2.8
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "undercroft",
+          "elevationMeters": -3.2,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "street",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.4,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "city_capital_kit_stair_core",
+          "type": "u_stair",
+          "connectsLevels": [
+            "undercroft",
+            "street",
+            "upper"
+          ],
+          "direction": "UP clockwise"
+        },
+        {
+          "coreId": "city_capital_kit_public_platform",
+          "type": "public_platform",
+          "connectsLevels": [
+            "undercroft",
+            "street",
+            "upper"
+          ],
+          "direction": "vertical platform"
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "undercroft",
+          "openingId": "door_undercroft_block_a_store",
+          "kind": "door"
+        },
+        {
+          "levelId": "undercroft",
+          "openingId": "door_undercroft_block_b_cellar",
+          "kind": "door"
+        },
+        {
+          "levelId": "street",
+          "openingId": "city_capital_kit_main_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "street",
+          "openingId": "city_capital_kit_service_entry",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_block_a_records",
+          "kind": "door"
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_block_b_living",
+          "kind": "door"
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "undercroft",
+          "roomId": "shared_service_tunnel",
+          "kind": "utility_table",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "shared_service_tunnel",
+          "kind": "utility_table",
+          "positionMeters": 10.65
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "loading_hold",
+          "kind": "storage_rack",
+          "positionMeters": 12.45
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "loading_hold",
+          "kind": "storage_rack",
+          "positionMeters": 22.35
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "loading_hold",
+          "kind": "storage_rack",
+          "positionMeters": 12.45
+        },
+        {
+          "levelId": "street",
+          "roomId": "block_b_shop",
+          "kind": "service_counter",
+          "positionMeters": 15.732
+        },
+        {
+          "levelId": "street",
+          "roomId": "block_b_shop",
+          "kind": "service_counter",
+          "positionMeters": 17.521
+        },
+        {
+          "levelId": "street",
+          "roomId": "block_d_guard_post",
+          "kind": "weapon_rack",
+          "positionMeters": 9.09
+        },
+        {
+          "levelId": "street",
+          "roomId": "block_d_guard_post",
+          "kind": "weapon_rack",
+          "positionMeters": 14.01
+        },
+        {
+          "levelId": "street",
+          "roomId": "covered_arcade",
+          "kind": "utility_table",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "street",
+          "roomId": "covered_arcade",
+          "kind": "utility_table",
+          "positionMeters": 7.29
+        },
+        {
+          "levelId": "street",
+          "roomId": "service_court",
+          "kind": "table_bench",
+          "positionMeters": 18.908
+        },
+        {
+          "levelId": "street",
+          "roomId": "service_court",
+          "kind": "table_bench",
+          "positionMeters": 22.35
+        },
+        {
+          "levelId": "street",
+          "roomId": "service_court",
+          "kind": "table_bench",
+          "positionMeters": 18.908
+        },
+        {
+          "levelId": "upper",
+          "roomId": "block_b_living",
+          "kind": "bed_or_cot",
+          "positionMeters": 15.81
+        },
+        {
+          "levelId": "upper",
+          "roomId": "block_b_living",
+          "kind": "bed_or_cot",
+          "positionMeters": 22.35
+        },
+        {
+          "levelId": "upper",
+          "roomId": "block_d_barracks",
+          "kind": "weapon_rack",
+          "positionMeters": 9.09
+        },
+        {
+          "levelId": "upper",
+          "roomId": "block_d_barracks",
+          "kind": "weapon_rack",
+          "positionMeters": 14.01
+        },
+        {
+          "levelId": "upper",
+          "roomId": "cross_gallery",
+          "kind": "table_bench",
+          "positionMeters": 0.75
+        },
+        {
+          "levelId": "upper",
+          "roomId": "cross_gallery",
+          "kind": "table_bench",
+          "positionMeters": 7.29
+        },
+        {
+          "levelId": "upper",
+          "roomId": "cross_gallery",
+          "kind": "table_bench",
+          "positionMeters": 0.75
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -3.8000000000000003,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 6.199999999999999,
+        "peakElevationMeters": 11.2,
+        "structure": "Linked low hips and clipped gables around a stepped civic court.",
+        "cutRoomsAndVoids": true
+      }
     }
   },
-  "roomPurposeAndAdjacency": "Each room has a purpose label and connects to the dimensioned primary circulation spine; adjacency and separate openings are explicit in every floor plan.",
+  "roomPurposeAndAdjacency": "Every room has a purpose-specific footprint, furnished layout, protected clearances, separate openings, and a connection to the drawn circulation geometry. Plan-marked A-A/B-B cuts bind those rooms to both architectural sections.",
   "sharedModules": {
     "structural": [
       "foundation_3m",

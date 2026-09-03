@@ -13,7 +13,12 @@ import textwrap
 from pathlib import Path
 from typing import Any
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFont
+
+try:
+    from tools.architecture.stonehold_packet_geometry import LAYOUT_PROFILES, build_packet_geometry
+except ModuleNotFoundError:  # Direct `python tools/architecture/...py` execution.
+    from stonehold_packet_geometry import LAYOUT_PROFILES, build_packet_geometry
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_ROOT = REPO_ROOT / "unity/Docs/Architecture/StoneholdEnterableStructurePacketsV001"
@@ -335,22 +340,22 @@ def draw_elevation(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], vi
     if slug == "market":
         for canopy_x in (body_l + 65, (body_l + body_r) // 2, body_r - 65):
             draw.line((canopy_x - 45, body_t + 45, canopy_x, body_t + 18, canopy_x + 45, body_t + 45), fill=ACCENT, width=3)
-    if view == "FRONT":
-        door_w = max(32, int(w * 0.09))
-        door_h = int(h * 0.26)
-        cx = (body_l + body_r) // 2
-        draw.rectangle((cx - door_w // 2, base_y - door_h, cx + door_w // 2, base_y), fill="#111518", outline=AMBER, width=4)
-        draw.text((cx, base_y - door_h // 2), "SEPARATE\nDOOR", font=FONTS["tiny"], fill=AMBER, anchor="mm", align="center")
-    elif view == "REAR":
-        door_w = max(24, int(w * 0.065))
-        draw.rectangle((body_r - 85, base_y - 80, body_r - 85 + door_w, base_y), fill="#111518", outline=AMBER, width=3)
-        draw.text((body_r - 70, base_y - 105), "service", font=FONTS["tiny"], fill=MUTED, anchor="mm")
-    for item in masses:
-        left, top, right, _ = item
-        for i in range(2):
-            wx = left + int((i + 1) * (right - left) / 3)
-            window_top = min(base_y - 62, top + 45)
-            draw.rectangle((wx - 14, window_top, wx + 14, window_top + 38), fill="#151c20", outline="#8ecbe0", width=2)
+    visible_sides = {"FRONT": {"south"}, "REAR": {"north"}, "SIDE": {"east", "west"}}[view]
+    openings = [item for item in packet["architecturalDesign"]["exteriorOpeningRegister"] if item["side"] in visible_sides]
+    level_by_id = {level["id"]: level for level in packet["floorPlans"]}
+    for opening in openings:
+        level = level_by_id[opening["levelId"]]
+        axis_position = opening["x"] / env["width"] if opening["side"] in {"south", "north"} else opening["z"] / env["depth"]
+        ox = body_l + int((body_r - body_l) * max(0.05, min(0.95, axis_position)))
+        floor_y = base_y - int((level["elevationMeters"] / max(1.0, env["height"])) * h * 0.72)
+        if opening["kind"] == "door":
+            door_w = max(22, int(w * 0.055))
+            door_h = max(34, int(h * 0.16))
+            draw.rectangle((ox - door_w // 2, floor_y - door_h, ox + door_w // 2, floor_y), fill="#111518", outline=AMBER, width=4)
+            draw.text((ox, floor_y - door_h - 12), opening["id"].removeprefix(packet["slug"] + "_").replace("_", " "), font=FONTS["tiny"], fill=AMBER, anchor="ms")
+        else:
+            window_y = floor_y - max(24, int(h * 0.10))
+            draw.rectangle((ox - 12, window_y - 18, ox + 12, window_y + 18), fill="#151c20", outline="#8ecbe0", width=2)
     draw.line((x0 + 25, base_y, x1 - 25, base_y), fill="#56656d", width=3)
     dimension(draw, (body_l, base_y + 30), (body_r, base_y + 30), f"{shown:g} m")
     draw.text((x0 + 12, y0 + 8), view, font=FONTS["small"], fill=TEXT)
@@ -361,15 +366,22 @@ def draw_roof_study(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], p
     draw.text((x0 + 12, y0 + 8), "ROOF + MATERIAL STUDY", font=FONTS["small"], fill=TEXT)
     rx0, ry0, rx1, ry1 = x0 + 25, y0 + 55, x0 + (x1 - x0) // 2, y1 - 45
     slug = packet["slug"]
-    if slug in {"city_capital_kit", "settlement_village_kit", "castle_enterable", "fortress_enterable"}:
-        roof_boxes = [(rx0, ry0 + 40, rx0 + 75, ry1 - 20), (rx0 + 85, ry0, rx1 - 85, ry1), (rx1 - 75, ry0 + 40, rx1, ry1 - 20)]
-    else:
-        roof_boxes = [(rx0, ry0, rx1, ry1)]
-    for roof_box in roof_boxes:
+    env = packet["envelopeMeters"]
+    roof_boxes = []
+    for roof in packet["architecturalDesign"]["roofVolumes"]:
+        roof_box = (
+            rx0 + (roof["x"] / env["width"]) * (rx1 - rx0),
+            ry0 + (roof["z"] / env["depth"]) * (ry1 - ry0),
+            rx0 + ((roof["x"] + roof["width"]) / env["width"]) * (rx1 - rx0),
+            ry0 + ((roof["z"] + roof["depth"]) / env["depth"]) * (ry1 - ry0),
+        )
+        roof_boxes.append((roof_box, roof["massId"]))
+    for roof_box, mass_id in roof_boxes:
         draw.rectangle(roof_box, fill=STONE, outline=LINE, width=3)
         draw.line((roof_box[0], (roof_box[1] + roof_box[3]) // 2, roof_box[2], (roof_box[1] + roof_box[3]) // 2), fill=ACCENT, width=4)
-        for x in range(roof_box[0] + 25, roof_box[2], 50):
+        for x in range(int(roof_box[0]) + 25, int(roof_box[2]), 50):
             draw.line((x, roof_box[1], x, roof_box[3]), fill="#4b555a", width=1)
+        draw.text(((roof_box[0] + roof_box[2]) / 2, (roof_box[1] + roof_box[3]) / 2), mass_id.replace("_", "\n"), font=FONTS["tiny"], fill=TEXT, anchor="mm", align="center")
     if slug == "forge":
         draw.rectangle((rx1 - 55, ry0 - 10, rx1 - 15, ry0 + 35), fill=IRON, outline=ACCENT, width=2)
     if slug == "ruin_structure":
@@ -399,141 +411,108 @@ def expand_props(packet: dict[str, Any], prop_ids: list[str]) -> list[str]:
     return sorted(set(found))
 
 
-def build_level_layout(packet: dict[str, Any], level: dict[str, Any]) -> dict[str, Any]:
-    width = packet["envelopeMeters"]["width"]
-    depth = packet["envelopeMeters"]["depth"]
-    wall = 0.3
-    corridor = packet["clearancesMeters"]["primaryCirculationWidth"]
-    rooms = level["rooms"]
-    if packet["slug"] == "town_hall":
-        approved = json.loads(CIVIC_LAYOUT_PATH.read_text(encoding="utf-8"))
-        approved_rooms = approved["groundFloor" if level["id"] == "ground" else "upperFloor"]
-        room_records = [
-            {
-                "id": room["id"],
-                "purpose": room["id"].replace("_", " "),
-                "x": room["x"],
-                "z": room["z"],
-                "width": room["width"],
-                "depth": room["depth"],
-                "furnitureZones": room.get("furniture", []),
-                **({"void": room["void"]} if "void" in room else {}),
-            }
-            for room in approved_rooms
-        ]
-        floor_name = "ground" if level["id"] == "ground" else "upper"
-        doors = [
-            {"id": f"approved_{floor_name}_door_{index:02d}", "separateObject": True, **door}
-            for index, door in enumerate((item for item in approved["doorOpenings"] if item["floor"] == floor_name), 1)
-        ]
-        windows = [
-            {"id": f"window_{level['id']}_{room['id']}", "separateFrameGlassShutter": True, "serves": room["id"], "openingMeters": [1.2, 1.5]}
-            for room in room_records
-        ]
-        return {
-            **level,
-            "rooms": room_records,
-            "circulation": {"id": "approved_primary_circulation", "x": 2.1, "z": 2.2, "width": 5.3, "depth": 1.2},
-            "adjacency": [door["between"] for door in doors],
-            "doorOpenings": doors,
-            "windowOpenings": windows,
-            "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
-            "verticalCore": {"stairMeters": [1.5, 1.5], "liftPlatformReserved": True, "separateObjects": True},
-            "portalBoundary": "none",
-            "sourceAuthority": "PR #664 shared_civic_hall_layout_v001.json coordinates retained exactly",
-        }
-    top_count = math.ceil(len(rooms) / 2)
-    bottom_count = len(rooms) - top_count
-    clear_depth = depth - 2 * wall - corridor
-    top_depth = clear_depth / 2
-    bottom_depth = clear_depth - top_depth
-    room_records = []
-    def room_weight(room_id: str) -> float:
-        if any(token in room_id for token in ["hall", "court", "workfloor", "floor", "muster", "loading", "gallery", "common", "processing", "market", "water_chamber", "living_hearth"]):
-            return 1.7
-        if any(token in room_id for token in ["store", "office", "landing", "service", "archive", "pantry", "wash", "desk", "station"]):
-            return 0.85
-        return 1.15
-    for idx, room_id in enumerate(rooms):
-        top = idx < top_count
-        local_idx = idx if top else idx - top_count
-        row_rooms = rooms[:top_count] if top else rooms[top_count:]
-        weights = [room_weight(item) for item in row_rooms]
-        row_width = width - 2 * wall
-        rw = row_width * weights[local_idx] / sum(weights)
-        rx = wall + row_width * sum(weights[:local_idx]) / sum(weights)
-        room_records.append({
-            "id": room_id,
-            "purpose": room_id.replace("_", " "),
-            "x": round(rx, 3),
-            "z": round(wall + (top_depth + corridor if top else 0), 3),
-            "width": round(rw, 3),
-            "depth": round(top_depth if top else bottom_depth, 3),
-            "furnitureZones": [f"{room_id}_primary", f"{room_id}_storage", "clear_route_edge"],
-        })
-    circulation = {"id": "primary_circulation", "x": wall, "z": round(wall + bottom_depth, 3), "width": round(width - 2 * wall, 3), "depth": corridor}
-    doors = [{"id": f"door_{level['id']}_{room['id']}", "separateObject": True, "between": [room["id"], "primary_circulation"], "clearOpeningMeters": [1.2, 2.4]} for room in room_records]
-    windows = [] if level["elevationMeters"] < 0 else [{"id": f"window_{level['id']}_{room['id']}", "separateFrameGlassShutter": True, "serves": room["id"], "openingMeters": [1.2, 1.5]} for room in room_records]
-    adjacency = [[room["id"], "primary_circulation"] for room in room_records]
-    has_portal_room = any(any(token in room["id"] for token in ["portal", "airlock", "loading_cover"]) for room in room_records)
-    return {
-        **level,
-        "rooms": room_records,
-        "circulation": circulation,
-        "adjacency": adjacency,
-        "doorOpenings": doors,
-        "windowOpenings": windows,
-        "windowPolicy": "No exterior windows below grade; separate ventilation and emergency shafts." if level["elevationMeters"] < 0 else "Real recessed openings use separate frame, glass and shutter objects.",
-        "verticalCore": {"stairMeters": [1.5, 1.5], "liftPlatformReserved": True, "separateObjects": True},
-        "portalBoundary": "physical_loading_cover_and_streaming_portal" if has_portal_room else "none_on_this_level",
-    }
-
-
 def draw_floor_plan(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], layout: dict[str, Any], packet: dict[str, Any]) -> None:
     x0, y0, x1, y1 = box
-    draw.text((x0 + 8, y0 + 5), f"{layout['id'].upper()}  elev {layout['elevationMeters']:+g} m / clear {layout['clearHeightMeters']:g} m", font=FONTS["small"], fill=TEXT)
+    draw.text((x0 + 8, y0 + 5), f"{layout['id'].upper()}  {layout['layoutPattern']}  elev {layout['elevationMeters']:+g} m / clear {layout['clearHeightMeters']:g} m", font=FONTS["small"], fill=TEXT)
     px0, py0, px1, py1 = x0 + 25, y0 + 45, x1 - 35, y1 - 38
     env = packet["envelopeMeters"]
     sx = (px1 - px0) / env["width"]
     sz = (py1 - py0) / env["depth"]
+
+    def point(x: float, z: float) -> tuple[float, float]:
+        return px0 + x * sx, py0 + z * sz
+
+    def scaled_rect(item: dict[str, Any]) -> tuple[float, float, float, float]:
+        rx0, rz0 = point(item["x"], item["z"])
+        return rx0, rz0, rx0 + item["width"] * sx, rz0 + item["depth"] * sz
+
+    # Building masses and open courts are the same named geometry referenced by
+    # exterior/roof studies. The perimeter exception is site context, not a room.
+    for footprint in layout["levelMassFootprints"]:
+        draw.rectangle(scaled_rect(footprint), fill="#172027", outline=ACCENT, width=4)
+    for void in layout["exteriorVoidsAndCourts"]:
+        box_void = scaled_rect(void)
+        draw.rectangle(box_void, fill=BG, outline=PORTAL, width=3)
+        draw.text(((box_void[0] + box_void[2]) / 2, (box_void[1] + box_void[3]) / 2), void["id"].replace("_", "\n"), font=FONTS["tiny"], fill=PORTAL, anchor="mm", align="center")
+    perimeter = packet["architecturalDesign"]["siteContext"].get("perimeterWall")
+    if perimeter:
+        draw.rectangle((px0 + 2, py0 + 2, px1 - 2, py1 - 2), outline=DANGER, width=6)
+        draw.text((px0 + 10, py0 + 8), "SEPARATE NON-ENTERABLE PERIMETER · GATE SEPARATE", font=FONTS["tiny"], fill=DANGER)
+
+    furnishing_by_room = {item["roomId"]: item for item in layout["furnishingLayouts"]}
     for index, room in enumerate(layout["rooms"]):
-        rx0 = px0 + room["x"] * sx
-        rz0 = py0 + room["z"] * sz
-        rx1 = rx0 + room["width"] * sx
-        rz1 = rz0 + room["depth"] * sz
+        rx0, rz0, rx1, rz1 = scaled_rect(room)
         fill = PANEL_ALT if index % 2 else "#263842"
         draw.rectangle((rx0, rz0, rx1, rz1), fill=fill, outline=LINE, width=2)
-        furnish_w = min(42, max(18, int((rx1 - rx0) * 0.18)))
-        draw.rectangle((rx0 + 10, rz0 + 10, rx0 + 10 + furnish_w, rz0 + 28), fill=BRONZE, outline="#9b7249")
-        draw.rectangle((rx1 - 10 - furnish_w, rz1 - 28, rx1 - 10, rz1 - 10), fill=TIMBER, outline="#756053")
+        for protected in furnishing_by_room[room["id"]]["protectedClearances"]:
+            clear_box = scaled_rect(protected)
+            draw.rectangle(clear_box, outline="#417d7a", width=1)
+        for furnishing in furnishing_by_room[room["id"]]["footprints"]:
+            furnishing_box = scaled_rect(furnishing)
+            color = BRONZE if furnishing["kind"] in {"work_station", "machine_bed", "service_counter"} else TIMBER
+            draw.rectangle(furnishing_box, fill=color, outline="#b48552", width=1)
+            if furnishing_box[2] - furnishing_box[0] > 30 and furnishing_box[3] - furnishing_box[1] > 13:
+                symbol = {
+                    "bed_or_cot": "BED", "prep_table": "PREP", "shelf_bay": "SHELF", "storage_rack": "RACK",
+                    "work_station": "WORK", "service_counter": "COUNTER", "desk": "DESK", "weapon_rack": "ARMS",
+                    "stall_partition": "STALL", "machine_bed": "MACHINE", "secure_cot": "COT", "table_bench": "TABLE",
+                    "utility_table": "UTILITY",
+                }[furnishing["kind"]]
+                draw.text(((furnishing_box[0] + furnishing_box[2]) / 2, (furnishing_box[1] + furnishing_box[3]) / 2), symbol, font=FONTS["tiny"], fill=TEXT, anchor="mm")
         if "void" in room:
             void = room["void"]
-            vx0 = px0 + void["x"] * sx
-            vz0 = py0 + void["z"] * sz
-            vx1 = vx0 + void["width"] * sx
-            vz1 = vz0 + void["depth"] * sz
+            vx0, vz0, vx1, vz1 = scaled_rect(void)
             draw.rectangle((vx0, vz0, vx1, vz1), fill=BG, outline=PORTAL, width=3)
-            draw.text(((vx0 + vx1) / 2, (vz0 + vz1) / 2), "OPEN VOID", font=FONTS["tiny"], fill=PORTAL, anchor="mm")
-        label = room["purpose"].replace(" ", "\n")
+        label = "\n".join(wrap(room["purpose"], 15)[:3])
         draw.multiline_text(((rx0 + rx1) / 2, (rz0 + rz1) / 2), label, font=FONTS["tiny"], fill=TEXT, anchor="mm", align="center", spacing=2)
-    route = layout["circulation"]
-    cy = py0 + (route["z"] + route["depth"] / 2) * sz
-    draw.line((px0 + 4, cy, px1 - 4, cy), fill=ROUTE, width=8)
-    draw.polygon([(px1 - 12, cy - 10), (px1 + 5, cy), (px1 - 12, cy + 10)], fill=ROUTE)
-    for room in layout["rooms"]:
-        cx = px0 + (room["x"] + room["width"] / 2) * sx
-        room_above = room["z"] > route["z"]
-        door_y = py0 + (room["z"] if room_above else room["z"] + room["depth"]) * sz
-        draw.line((cx - 14, door_y, cx + 14, door_y), fill=AMBER, width=7)
-        if layout["windowOpenings"]:
-            window_y = py0 + (room["z"] + room["depth"] if room_above else room["z"]) * sz
-            draw.line((cx - 12, window_y, cx + 12, window_y), fill="#8ecbe0", width=5)
+
+    for route in layout["circulationRoutes"]:
+        route_points = [point(*route_point) for route_point in route["points"]]
+        if len(route_points) > 1:
+            draw.line(route_points, fill=ROUTE, width=6, joint="curve")
+            ex, ey = route_points[-1]
+            draw.ellipse((ex - 6, ey - 6, ex + 6, ey + 6), fill=ROUTE)
+
+    for opening in layout["doorOpenings"]:
+        ox, oz = point(opening["x"], opening["z"])
+        half = max(6, opening["clearOpeningMeters"][0] * min(sx, sz) / 2)
+        if opening["orientation"] == "vertical":
+            draw.line((ox, oz - half, ox, oz + half), fill=AMBER, width=6)
+        else:
+            draw.line((ox - half, oz, ox + half, oz), fill=AMBER, width=6)
+        if opening.get("from") == "outside":
+            draw.text((ox + 6, oz + 4), "ENTRY", font=FONTS["tiny"], fill=AMBER)
+    for opening in layout["windowOpenings"]:
+        ox, oz = point(opening["x"], opening["z"])
+        draw.line((ox - 8, oz, ox + 8, oz), fill="#8ecbe0", width=4)
+
+    for core in layout["verticalCoreFootprints"]:
+        core_box = scaled_rect(core["footprint"])
+        color = ROUTE if "stair" in core["type"] or "ramp" in core["type"] else PORTAL
+        draw.rectangle(core_box, outline=color, width=4)
+        draw.line((core_box[0] + 5, core_box[3] - 5, core_box[2] - 5, core_box[1] + 5), fill=color, width=3)
+        draw.text(((core_box[0] + core_box[2]) / 2, core_box[1] + 5), "UP " + core["type"].replace("_", " "), font=FONTS["tiny"], fill=color, anchor="ma")
+
+    for zone in layout["clearanceZones"]:
+        if zone["kind"] == "combat_diameter":
+            cx, cz = point(*zone["center"])
+            radius = zone["diameter"] * min(sx, sz) / 2
+            draw.ellipse((cx - radius, cz - radius, cx + radius, cz + radius), outline=DANGER, width=2)
+            draw.text((cx, cz - radius + 5), f"COMBAT Ø{zone['diameter']:g}m", font=FONTS["tiny"], fill=DANGER, anchor="ma")
+        elif zone["kind"] == "camera_backoff":
+            cx, cz = point(*zone["center"])
+            radius = min(zone["radius"] * min(sx, sz), min(px1 - px0, py1 - py0) * 0.28)
+            draw.ellipse((cx - radius, cz - radius, cx + radius, cz + radius), outline="#bea35f", width=1)
+
+    for cut in layout["sectionCutLines"]:
+        start, end = point(*cut["from"]), point(*cut["to"])
+        draw.line((*start, *end), fill="#d8d8d8", width=2)
+        draw.text((start[0] + 4, start[1] - 18), cut["id"], font=FONTS["tiny"], fill=TEXT)
+        draw.text((end[0] - 4, end[1] - 18), cut["id"], font=FONTS["tiny"], fill=TEXT, anchor="ra")
+
     if layout["portalBoundary"] == "physical_loading_cover_and_streaming_portal":
         portal_room = next((room for room in layout["rooms"] if any(token in room["id"] for token in ["portal", "airlock", "loading_cover"])), layout["rooms"][-1])
-        rx0 = px0 + portal_room["x"] * sx
-        rz0 = py0 + portal_room["z"] * sz
-        rx1 = rx0 + portal_room["width"] * sx
-        rz1 = rz0 + portal_room["depth"] * sz
+        rx0, rz0, rx1, rz1 = scaled_rect(portal_room)
         draw.rectangle((rx0 + 5, rz0 + 5, rx1 - 5, rz1 - 5), outline=PORTAL, width=7)
         draw.text((rx1 - 12, rz0 + 12), "STREAM PORTAL", font=FONTS["tiny"], fill=PORTAL, anchor="ra")
     draw.rectangle((px0, py0, px1, py1), outline=ACCENT, width=4)
@@ -542,7 +521,8 @@ def draw_floor_plan(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], l
 
 
 def packet_document(source: dict[str, Any], prop_ids: list[str]) -> dict[str, Any]:
-    layouts = [build_level_layout(source, level) for level in source["levels"]]
+    approved_civic = json.loads(CIVIC_LAYOUT_PATH.read_text(encoding="utf-8")) if source["slug"] == "town_hall" else None
+    architectural_design, layouts, vertical_circulation, sections = build_packet_geometry(source, approved_civic)
     prop_families = expand_props(source, prop_ids)
     owner_gates = [
         {"id": "massing", "question": "Approve the recommended exterior massing?", "recommendation": source["massingRecommendation"], "choices": ["APPROVE", "REVISE", "REJECT"], "decision": None},
@@ -557,12 +537,11 @@ def packet_document(source: dict[str, Any], prop_ids: list[str]) -> dict[str, An
         **source,
         "units": "meters",
         "views": ["front_elevation", "side_elevation", "rear_elevation", "roof_plan", "material_study", "every_floor_plan", "longitudinal_section", "cross_section"],
+        "architecturalDesign": architectural_design,
         "floorPlans": layouts,
-        "sections": {
-            "longitudinal": {"spanMeters": source["envelopeMeters"]["width"], "levels": [{"id": x["id"], "elevationMeters": x["elevationMeters"], "clearHeightMeters": x["clearHeightMeters"]} for x in layouts]},
-            "cross": {"spanMeters": source["envelopeMeters"]["depth"], "levels": [{"id": x["id"], "elevationMeters": x["elevationMeters"], "clearHeightMeters": x["clearHeightMeters"]} for x in layouts]},
-        },
-        "roomPurposeAndAdjacency": "Each room has a purpose label and connects to the dimensioned primary circulation spine; adjacency and separate openings are explicit in every floor plan.",
+        "verticalCirculation": vertical_circulation,
+        "sections": sections,
+        "roomPurposeAndAdjacency": "Every room has a purpose-specific footprint, furnished layout, protected clearances, separate openings, and a connection to the drawn circulation geometry. Plan-marked A-A/B-B cuts bind those rooms to both architectural sections.",
         "sharedModules": SHARED_MODULE_REGISTER,
         "furnishedRoomModules": source["interiorModuleIds"],
         "propDecorFamilies": prop_families,
@@ -608,6 +587,128 @@ def packet_shape_errors(packet: dict[str, Any]) -> list[str]:
             if has_portal_room != (level.get("portalBoundary") == "physical_loading_cover_and_streaming_portal"):
                 errors.append("physical portal rooms and streaming-boundary markers must match per level")
                 break
+        design = packet.get("architecturalDesign", {})
+        if (
+            design.get("packetSlug") != packet.get("slug")
+            or not design.get("layoutArchetype")
+            or not design.get("planSignature")
+            or not design.get("exteriorMasses")
+            or not design.get("roofVolumes")
+        ):
+            errors.append("a named packet-specific blueprint with bound exterior masses and roof volumes is required")
+        room_ids = {room["id"] for level in floor_plans for room in level["rooms"]}
+        exterior_entries = [entry for level in floor_plans for entry in level.get("exteriorEntrances", [])]
+        if not exterior_entries or not all(
+            entry.get("from") == "outside"
+            and entry.get("to") in room_ids
+            and entry.get("separateObject") is True
+            and entry.get("swing") in {"in", "out", "double_out", "sliding"}
+            for entry in exterior_entries
+        ):
+            errors.append("at least one outside-to-entry transition with a separate door is required")
+        cores = packet.get("verticalCirculation", [])
+        core_placement_ok = bool(cores)
+        connected_levels: set[str] = set()
+        for core in cores:
+            footprint = core.get("footprint", {})
+            connected = set(core.get("connectsLevels", []))
+            connected_levels.update(connected)
+            core_placement_ok = core_placement_ok and footprint.get("width", 0) > 0 and footprint.get("depth", 0) > 0
+            core_placement_ok = core_placement_ok and {landing.get("levelId") for landing in core.get("landings", [])} == connected
+            for level in floor_plans:
+                if level["id"] in connected:
+                    placed = {item.get("coreId") for item in level.get("verticalCoreFootprints", [])}
+                    core_placement_ok = core_placement_ok and core.get("id") in placed
+        if not core_placement_ok or connected_levels != {level["id"] for level in floor_plans}:
+            errors.append("every level must place each connecting vertical core and landing")
+        furnishing_ok = all(
+            {item.get("roomId") for item in level.get("furnishingLayouts", [])} == {room["id"] for room in level["rooms"]}
+            and all(item.get("footprints") and item.get("protectedClearances") for item in level.get("furnishingLayouts", []))
+            and level.get("clearanceZones")
+            and level.get("socketPlacements")
+            for level in floor_plans
+        )
+        if not furnishing_ok:
+            errors.append("every room needs room-specific furnishing footprints and protected clearances")
+        else:
+            width = packet["envelopeMeters"]["width"]
+            depth = packet["envelopeMeters"]["depth"]
+
+            def contains(container: dict[str, Any], item: dict[str, Any], tolerance: float = 0.002) -> bool:
+                return (
+                    item.get("width", 0) > 0
+                    and item.get("depth", 0) > 0
+                    and item["x"] >= container["x"] - tolerance
+                    and item["z"] >= container["z"] - tolerance
+                    and item["x"] + item["width"] <= container["x"] + container["width"] + tolerance
+                    and item["z"] + item["depth"] <= container["z"] + container["depth"] + tolerance
+                )
+
+            bounds = {"x": 0.0, "z": 0.0, "width": width, "depth": depth}
+            geometry_ok = True
+            for level in floor_plans:
+                rooms_by_id = {room["id"]: room for room in level["rooms"]}
+                geometry_ok = geometry_ok and all(contains(bounds, room) for room in level["rooms"])
+                geometry_ok = geometry_ok and all(
+                    route.get("accessible") is True
+                    and route.get("widthMeters", 0) >= packet["clearancesMeters"]["primaryCirculationWidth"]
+                    and len(route.get("points", [])) >= 2
+                    for route in level.get("circulationRoutes", [])
+                    if route.get("id") == "primary_accessible_route"
+                )
+                for room_layout in level["furnishingLayouts"]:
+                    room = rooms_by_id[room_layout["roomId"]]
+                    geometry_ok = geometry_ok and all(contains(room, item) for item in room_layout["footprints"])
+                    geometry_ok = geometry_ok and all(contains(room, item) for item in room_layout["protectedClearances"])
+                    aisle = next((item for item in room_layout["protectedClearances"] if item.get("kind") == "minimum_1_2m_aisle"), None)
+                    geometry_ok = geometry_ok and aisle is not None and max(aisle["width"], aisle["depth"]) >= 1.2
+                for entry in level.get("exteriorEntrances", []):
+                    geometry_ok = geometry_ok and any(route["points"][0] == [entry["x"], entry["z"]] for route in level["circulationRoutes"])
+            if not geometry_ok:
+                errors.append("rooms, furnishings, 1.2 m aisles and accessible entry routes must fit their measured plan geometry")
+        cut_line_ids = {line.get("id") for level in floor_plans for line in level.get("sectionCutLines", [])}
+        sections = packet.get("sections", {})
+        section_ok = set(sections) == {"longitudinal", "cross"}
+        for section in sections.values():
+            section_ok = section_ok and section.get("cutLineId") in cut_line_ids
+            section_ok = section_ok and [item.get("id") for item in section.get("levels", [])] == [level["id"] for level in floor_plans]
+            section_ok = section_ok and bool(section.get("roomSlices") and section.get("slabs") and section.get("foundation") and section.get("roofProfile"))
+        if not section_ok:
+            errors.append("sections must contain plan-tied room, slab, foundation and roof geometry")
+        else:
+            section_geometry_ok = all(
+                {slice_record.get("levelId") for slice_record in section["roomSlices"]} == {level["id"] for level in floor_plans}
+                and section.get("verticalCoreSlices")
+                and section.get("apertureSlices")
+                and section.get("furnitureSlices")
+                for section in sections.values()
+            )
+            primary_core_id = cores[0].get("id") if cores else None
+            section_geometry_ok = section_geometry_ok and all(
+                any(line.get("cutsVerticalCoreId") == primary_core_id for line in level.get("sectionCutLines", []))
+                for level in floor_plans
+            )
+            if not section_geometry_ok:
+                errors.append("section cuts must cross the placed core and show every level, apertures and furnishings")
+        plan_opening_ids = {
+            opening["id"]
+            for level in floor_plans
+            for opening in [*level.get("exteriorEntrances", []), *level.get("windowOpenings", [])]
+        }
+        registered_openings = design.get("exteriorOpeningRegister", [])
+        roof_mass_ids = {roof.get("massId") for roof in design.get("roofVolumes", [])}
+        mass_ids = {mass.get("id") for mass in design.get("exteriorMasses", [])}
+        if (
+            {opening.get("planOpeningId") for opening in registered_openings} != plan_opening_ids
+            or roof_mass_ids != mass_ids
+            or not all(level.get("levelMassFootprints") and len(level.get("sectionCutLines", [])) == 2 for level in floor_plans)
+        ):
+            errors.append("exterior openings, mass footprints, roof volumes and plan cut lines must remain continuous")
+        if packet.get("slug") in {"castle_enterable", "fortress_enterable"}:
+            site = design.get("siteContext", {})
+            perimeter = site.get("perimeterWall") or {}
+            if perimeter.get("enterable") is not False or perimeter.get("impassable") is not True or perimeter.get("gateSeparate") is not True or not site.get("courtyardsAndYards"):
+                errors.append("castle and fortress plans require an open court plus a separate non-enterable impassable perimeter and gate")
     if not required_modules <= set(packet.get("furnishedRoomModules", [])):
         errors.append("shared shell, aperture, entry, corridor, stair and cutaway modules are required")
     if not packet.get("propDecorFamilies"):
@@ -644,13 +745,18 @@ def draw_exterior_sheet(packet: dict[str, Any], destination: Path) -> None:
     draw_roof_study(draw, (boxes[3][0] + 15, boxes[3][1] + 65, boxes[3][2] - 15, boxes[3][3] - 15), packet)
     left = panel(draw, (55, 755, 1200, 1415), "EXTERIOR → INTERIOR CONTINUITY")
     x, y, x1, _ = left
-    y = draw_wrapped(draw, (x, y), packet["massingRecommendation"], 88, "body", TEXT)
+    y = draw_wrapped(draw, (x, y), "ARCHETYPE  " + packet["architecturalDesign"]["layoutArchetype"], 88, "body", TEXT)
+    y += 8
+    y = draw_wrapped(draw, (x, y), packet["massingRecommendation"], 88, "small", MUTED, max_lines=3)
     y += 12
-    y = draw_wrapped(draw, (x, y), "Roof: " + packet["roofRecommendation"], 88, "body", MUTED)
+    y = draw_wrapped(draw, (x, y), "ROOF  " + packet["roofRecommendation"], 88, "small", MUTED, max_lines=3)
     y += 12
     env = packet["envelopeMeters"]
     draw.text((x, y), f"Envelope  {env['width']:g} × {env['depth']:g} × {env['height']:g} m", font=FONTS["h2"], fill=ACCENT)
     y += 48
+    mass_names = " · ".join(mass["id"] for mass in packet["architecturalDesign"]["exteriorMasses"])
+    y = draw_wrapped(draw, (x, y), "NAMED MASSES  " + mass_names, 88, "tiny", ROUTE, max_lines=3) + 8
+    y = draw_wrapped(draw, (x, y), "All elevation apertures reuse plan IDs; all roof volumes reuse mass IDs; A-A/B-B cuts pass through the placed stair core.", 88, "tiny", TEXT, max_lines=3) + 8
     y = draw_wrapped(draw, (x, y), "Separate objects: door leaves/frames, glass, shutters, local gates and main gates. Windows are real recesses; no painted apertures.", 88, "body", TEXT)
     y += 10
     draw.text((x, y), "VARIANTS", font=FONTS["h2"], fill=ACCENT)
@@ -675,33 +781,76 @@ def draw_exterior_sheet(packet: dict[str, Any], destination: Path) -> None:
 
 def draw_section(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], packet: dict[str, Any], section_name: str) -> None:
     x0, y0, x1, y1 = box
-    draw.text((x0 + 8, y0 + 6), section_name, font=FONTS["small"], fill=TEXT)
+    section_key = "longitudinal" if section_name.startswith("LONG") else "cross"
+    section = packet["sections"][section_key]
+    draw.text((x0 + 8, y0 + 6), f"{section_name}  {section['cutLineId']} @ {section['cutCoordinateMeters']:g} m", font=FONTS["small"], fill=TEXT)
     base = y1 - 35
     left = x0 + 40
     right = x1 - 40
-    levels = packet["floorPlans"]
-    minimum_elevation = min(0.0, *(level["elevationMeters"] for level in levels))
-    maximum_elevation = max(packet["envelopeMeters"]["height"], *(level["elevationMeters"] + level["clearHeightMeters"] for level in levels))
+    levels = section["levels"]
+    minimum_elevation = min(0.0, section["foundation"]["baseElevationMeters"], *(level["elevationMeters"] for level in levels))
+    maximum_elevation = max(packet["envelopeMeters"]["height"], section["roofProfile"]["peakElevationMeters"], *(level["elevationMeters"] + level["clearHeightMeters"] for level in levels))
     total = max(1.0, maximum_elevation - minimum_elevation)
     top = y0 + 62
     scale = (base - top) / total
+    horizontal_scale = (right - left) / section["spanMeters"]
+
     def elevation_y(value: float) -> float:
         return base - (value - minimum_elevation) * scale
+
     ground_y = elevation_y(0.0)
-    roof_y = elevation_y(maximum_elevation)
-    draw.rectangle((left, roof_y, right, base), fill="#202a30", outline=ACCENT, width=3)
-    draw.polygon([(left - 8, roof_y), ((left + right) // 2, max(y0 + 46, roof_y - 30)), (right + 8, roof_y)], fill=IRON, outline=ACCENT)
-    if minimum_elevation < 0:
-        draw.rectangle((left, ground_y, right, base), fill="#182127", outline=PORTAL, width=2)
-        draw.text((right - 12, base - 20), "BELOW GRADE", font=FONTS["tiny"], fill=PORTAL, anchor="ra")
-    for level in levels:
+    foundation_top = elevation_y(section["foundation"]["baseElevationMeters"] + section["foundation"]["thicknessMeters"])
+    foundation_bottom = elevation_y(section["foundation"]["baseElevationMeters"])
+    draw.rectangle((left, foundation_top, right, foundation_bottom), fill=STONE, outline=ACCENT, width=2)
+    draw.line((left, ground_y, right, ground_y), fill="#66737a", width=2)
+    draw.text((right - 5, ground_y - 18), "GRADE ±0", font=FONTS["tiny"], fill=MUTED, anchor="ra")
+
+    for index, room_slice in enumerate(section["roomSlices"]):
+        x_start = left + room_slice["startMeters"] * horizontal_scale
+        x_end = left + room_slice["endMeters"] * horizontal_scale
+        floor_y = elevation_y(room_slice["baseElevationMeters"])
+        ceiling_y = elevation_y(room_slice["baseElevationMeters"] + room_slice["clearHeightMeters"])
+        draw.rectangle((x_start, ceiling_y, x_end, floor_y), fill="#24343d" if index % 2 else "#2a3b45", outline=LINE, width=2)
+        if x_end - x_start > 58:
+            draw.text(((x_start + x_end) / 2, (ceiling_y + floor_y) / 2), "\n".join(wrap(room_slice["roomId"].replace("_", " "), 13)[:2]), font=FONTS["tiny"], fill=TEXT, anchor="mm", align="center")
+
+    for slab in section["slabs"]:
+        slab_y = elevation_y(slab["elevationMeters"])
+        thickness = max(3, slab["thicknessMeters"] * scale)
+        draw.rectangle((left, slab_y - thickness / 2, right, slab_y + thickness / 2), fill=STONE, outline=ACCENT)
+        draw.text((left + 5, slab_y - 20), f"{slab['levelId']} {slab['elevationMeters']:+g} m", font=FONTS["tiny"], fill=MUTED)
+
+    roof_base = elevation_y(section["roofProfile"]["baseElevationMeters"])
+    roof_peak = elevation_y(section["roofProfile"]["peakElevationMeters"])
+    draw.polygon([(left - 5, roof_base), ((left + right) / 2, roof_peak), (right + 5, roof_base)], fill=IRON, outline=ACCENT)
+    draw.text(((left + right) / 2, roof_peak + 8), "ROOF STRUCTURE", font=FONTS["tiny"], fill=AMBER, anchor="ma")
+
+    for core_index, core in enumerate(section["verticalCoreSlices"]):
+        core_x = right - 80 - core_index * 55
+        core_top = elevation_y(max(level["elevationMeters"] + level["clearHeightMeters"] for level in levels))
+        core_bottom = elevation_y(min(level["elevationMeters"] for level in levels))
+        color = ROUTE if "stair" in core["type"] or "ramp" in core["type"] else PORTAL
+        draw.rectangle((core_x, core_top, core_x + 34, core_bottom), outline=color, width=3)
+        if "stair" in core["type"] or "ramp" in core["type"]:
+            step_count = max(3, len(levels) * 2)
+            points = [(core_x + (i % 2) * 30, core_bottom - i * (core_bottom - core_top) / step_count) for i in range(step_count + 1)]
+            draw.line(points, fill=color, width=3)
+        draw.text((core_x + 17, core_top - 6), core["type"].replace("_", " "), font=FONTS["tiny"], fill=color, anchor="ms")
+
+    for furnishing in section["furnitureSlices"]:
+        level = next(item for item in levels if item["id"] == furnishing["levelId"])
+        fx = left + max(0, min(section["spanMeters"], furnishing["positionMeters"])) * horizontal_scale
         floor_y = elevation_y(level["elevationMeters"])
-        draw.line((left, floor_y, right, floor_y), fill=LINE, width=3)
-        draw.text((left + 10, floor_y - 24), f"{level['id']} {level['elevationMeters']:+g} m", font=FONTS["tiny"], fill=MUTED)
-    cx = (left + right) // 2
-    draw.line((cx - 30, base, cx + 30, roof_y + 8), fill=ROUTE, width=7)
-    draw.text((cx + 38, (base + roof_y) // 2), "stair / lift core", font=FONTS["tiny"], fill=ROUTE)
-    dimension(draw, (left, base + 18), (right, base + 18), f"{packet['sections']['longitudinal' if section_name.startswith('LONG') else 'cross']['spanMeters']:g} m")
+        draw.rectangle((fx - 5, floor_y - 12, fx + 5, floor_y - 2), fill=BRONZE)
+    for aperture_index, aperture in enumerate(section["apertureSlices"]):
+        level = next(item for item in levels if item["id"] == aperture["levelId"])
+        floor_y = elevation_y(level["elevationMeters"])
+        ax = left + 20 + (aperture_index * 37) % max(40, int(right - left - 40))
+        draw.line((ax, floor_y, ax, floor_y - 25), fill=AMBER, width=5)
+
+    if minimum_elevation < 0:
+        draw.text((right - 12, base - 20), "BELOW GRADE / FOUNDATION CUT", font=FONTS["tiny"], fill=PORTAL, anchor="ra")
+    dimension(draw, (left, base + 18), (right, base + 18), f"{section['spanMeters']:g} m")
 
 
 def draw_interior_sheet(packet: dict[str, Any], destination: Path) -> None:
@@ -734,6 +883,12 @@ def draw_interior_sheet(packet: dict[str, Any], destination: Path) -> None:
     y = draw_wrapped(draw, (x, y), "STREAM  " + packet["streamingPolicy"], 68, "small", PORTAL, max_lines=4) + 8
     c = packet["clearancesMeters"]
     y = draw_wrapped(draw, (x, y), f"CLEAR  aisle ≥ {c['minimumFurnitureAisle']} m · circulation {c['primaryCirculationWidth']} m · combat diameter {c['combatClearDiameter']} m · camera backoff {c['cameraBackoff']} m", 68, "small", ROUTE, max_lines=4) + 8
+    core_text = " · ".join(
+        f"{core['type'].replace('_', ' ')} {core['footprint']['width']:g}×{core['footprint']['depth']:g} m / {','.join(core['connectsLevels'])}"
+        for core in packet["verticalCirculation"]
+    )
+    y = draw_wrapped(draw, (x, y), "VERTICAL  " + core_text, 68, "tiny", PORTAL, max_lines=4) + 8
+    y = draw_wrapped(draw, (x, y), "CUTS  A-A and B-B pass through the placed primary stair core; sections show rooms, slabs, foundation, apertures, furnishings and roof structure.", 68, "tiny", TEXT, max_lines=3) + 8
     draw.text((x, y), "ROOM MODULES", font=FONTS["small"], fill=ACCENT)
     y += 30
     y = draw_wrapped(draw, (x, y), " · ".join(item.removeprefix("waf_interior_") for item in packet["furnishedRoomModules"]), 70, "tiny", MUTED, max_lines=6) + 10
@@ -820,6 +975,11 @@ def build_review_pages(packet_docs: list[dict[str, Any]]) -> list[Path]:
         "Record exactly one decision per packet: `APPROVE`, `REVISE`, or `REJECT`.",
         "No packet authorizes 3D production while its decision remains pending.",
         "",
+        "Full-pair QA contact pages (three packet pairs each): " + " · ".join(
+            f"[{page_index:02d}](stonehold_enterable_packets_full_pair_qa_{page_index:02d}_v001.png)"
+            for page_index in range(1, 10)
+        ),
+        "",
     ]
     for index, packet in enumerate(packet_docs, start=1):
         base = f"../packets/{packet['slug']}"
@@ -840,6 +1000,33 @@ def build_review_pages(packet_docs: list[dict[str, Any]]) -> list[Path]:
     markdown_path = REVIEW_ROOT / "README.md"
     markdown_path.write_text("\n".join(markdown_lines), encoding="utf-8", newline="\n")
     pages.append(markdown_path)
+    return pages
+
+
+def build_full_pair_review_pages(packet_docs: list[dict[str, Any]]) -> list[Path]:
+    """Compose every full-resolution source pair into nine legible QA pages."""
+    pages = []
+    for page_index in range(math.ceil(len(packet_docs) / 3)):
+        page_packets = packet_docs[page_index * 3:(page_index + 1) * 3]
+        image = Image.new("RGB", (1840, 2030), BG)
+        draw = ImageDraw.Draw(image)
+        draw.text((35, 24), "STONEHOLD FULL-PAIR VISUAL QA", font=FONTS["h1"], fill=TEXT)
+        draw.text((1800, 30), f"v001 · {page_index + 1:02d}/09", font=FONTS["small"], fill=AMBER, anchor="ra")
+        draw.text((35, 68), "Each row is sourced from the packet's full 2400×1500 exterior and 3000×1900 interior/section sheets.", font=FONTS["small"], fill=MUTED)
+        for local_index, packet in enumerate(page_packets):
+            y0 = 115 + local_index * 630
+            draw.rounded_rectangle((25, y0, 1815, y0 + 610), radius=14, fill=PANEL, outline="#35434b", width=2)
+            draw.text((42, y0 + 12), f"{page_index * 3 + local_index + 1:02d}  {packet['title']}  ·  {packet['architecturalDesign']['layoutArchetype']}", font=FONTS["small"], fill=TEXT)
+            folder = PACKET_ROOT / packet["slug"]
+            exterior = Image.open(folder / f"{packet['slug']}_exterior_handoff_v001.png").convert("RGB")
+            interior = Image.open(folder / f"{packet['slug']}_interior_handoff_v001.png").convert("RGB")
+            exterior.thumbnail((780, 520), Image.Resampling.LANCZOS)
+            interior.thumbnail((950, 540), Image.Resampling.LANCZOS)
+            image.paste(exterior, (42, y0 + 58))
+            image.paste(interior, (850, y0 + 58))
+        destination = REVIEW_ROOT / f"stonehold_enterable_packets_full_pair_qa_{page_index + 1:02d}_v001.png"
+        image.save(destination, optimize=True)
+        pages.append(destination)
     return pages
 
 
@@ -896,6 +1083,7 @@ def build() -> dict[str, Any]:
             "artifacts": [file_record(json_path), file_record(exterior_path), file_record(interior_path)],
         })
     review_pages = build_review_pages(packet_docs)
+    pair_review_pages = build_full_pair_review_pages(packet_docs)
     index_path = OUTPUT_ROOT / "index.html"
     index_path.write_text(build_html(packet_docs, review_pages), encoding="utf-8", newline="\n")
     manifest = {
@@ -923,7 +1111,7 @@ def build() -> dict[str, Any]:
         "provenance": PROVENANCE,
         "avoid": AVOID,
         "packets": packet_artifacts,
-        "reviewArtifacts": [file_record(path) for path in review_pages] + [file_record(index_path)],
+        "reviewArtifacts": [file_record(path) for path in [*review_pages, *pair_review_pages]] + [file_record(index_path)],
         "productionAuthorization": {"comfyuiLocal": "approved_for_2d_only_not_used_by_this_deterministic_packet", "meshy": False, "blender": False, "runtime3d": False},
     }
     manifest_path = OUTPUT_ROOT / "stonehold_enterable_structure_packet_set_manifest_v001.json"
@@ -953,13 +1141,21 @@ def validate(manifest: dict[str, Any] | None = None) -> dict[str, Any]:
         and "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json" in manifest["provenance"]
     )
     packet_checks = []
+    packet_error_records: list[dict[str, Any]] = []
     artifact_ok = True
     no_3d_files = True
+    full_resolution_visual_records: list[dict[str, Any]] = []
+    packet_sheet_hashes: set[str] = set()
+    plan_signatures: set[str] = set()
     for entry in manifest["packets"]:
         packet_file = OUTPUT_ROOT / entry["artifacts"][0]["locator"]
         packet = json.loads(packet_file.read_text(encoding="utf-8"))
-        packet_ok = not packet_shape_errors(packet)
+        packet_errors = packet_shape_errors(packet)
+        packet_ok = not packet_errors
         packet_checks.append(packet_ok)
+        plan_signatures.add(packet.get("architecturalDesign", {}).get("planSignature", ""))
+        if packet_errors:
+            packet_error_records.append({"packetId": packet["packetId"], "errors": packet_errors})
         for artifact in entry["artifacts"]:
             artifact_path = OUTPUT_ROOT / artifact["locator"]
             no_3d_files = no_3d_files and artifact_path.suffix.lower() not in {".fbx", ".blend", ".obj", ".glb", ".gltf"}
@@ -971,6 +1167,24 @@ def validate(manifest: dict[str, Any] | None = None) -> dict[str, Any]:
             if artifact_path.suffix.lower() == ".png":
                 with Image.open(artifact_path) as image:
                     artifact_ok = artifact_ok and list(image.size) == artifact["pixelDimensions"]
+                    if artifact_path.parent.parent == PACKET_ROOT:
+                        expected_size = SHEET_SIZE if "_exterior_" in artifact_path.name else INTERIOR_SIZE
+                        rgb = image.convert("RGB")
+                        non_background = ImageChops.difference(rgb, Image.new("RGB", rgb.size, BG)).getbbox()
+                        palette_sample = rgb.resize((64, 64), Image.Resampling.LANCZOS).getcolors(maxcolors=4096) or []
+                        sheet_ok = (
+                            image.size == expected_size
+                            and non_background is not None
+                            and non_background[2] - non_background[0] >= image.width * 0.72
+                            and non_background[3] - non_background[1] >= image.height * 0.72
+                            and len(palette_sample) >= 12
+                        )
+                        packet_sheet_hashes.add(artifact["sha256"])
+                        full_resolution_visual_records.append({
+                            "locator": artifact["locator"], "pixelDimensions": list(image.size),
+                            "nonBackgroundBounds": list(non_background) if non_background else None,
+                            "sampledColorCount": len(palette_sample), "status": "passed" if sheet_ok else "failed",
+                        })
     for artifact in manifest["reviewArtifacts"]:
         artifact_path = OUTPUT_ROOT / artifact["locator"]
         if not artifact_path.is_file():
@@ -984,16 +1198,23 @@ def validate(manifest: dict[str, Any] | None = None) -> dict[str, Any]:
     all_interior_ids = {record["familyId"] for record in coverage["families"] if record["packetId"] == "architecture_stonehold_exterior_interior_floorplan_v001"}
     all_prop_ids = {record["familyId"] for record in coverage["families"] if record["packetId"] == "prop_stonehold_interior_decor_v001"}
     checks["allPacketsComplete"] = all(packet_checks) and len(packet_checks) == 27
+    checks["packetSpecificBlueprints27of27"] = set(LAYOUT_PROFILES) == {source["slug"] for source in STRUCTURES} and len(plan_signatures) == 27 and "" not in plan_signatures
     checks["interiorModules21of21"] = set(manifest["interiorModuleCoverage"]) == all_interior_ids and len(all_interior_ids) == 21
     checks["propFamilies65Accounted"] = set(manifest["propFamilyCoverage"]["mapped"]) | set(manifest["propFamilyCoverage"]["excluded"]) == all_prop_ids and len(all_prop_ids) == 65
     checks["artifactsHashAndDimensions"] = artifact_ok
+    checks["fullResolutionVisualQa54of54"] = (
+        len(full_resolution_visual_records) == 54
+        and len(packet_sheet_hashes) == 54
+        and all(record["status"] == "passed" for record in full_resolution_visual_records)
+    )
     checks["no3dFiles"] = no_3d_files and not any(path.suffix.lower() in {".fbx", ".blend", ".obj", ".glb", ".gltf"} for path in OUTPUT_ROOT.rglob("*"))
     review_locators = {item["locator"] for item in manifest["reviewArtifacts"]}
     checks["reviewArtifactsPresent"] = (
-        len(manifest["reviewArtifacts"]) == 7
+        len(manifest["reviewArtifacts"]) == 16
         and "review/README.md" in review_locators
         and "index.html" in review_locators
-        and len([item for item in review_locators if item.endswith(".png")]) == 5
+        and len([item for item in review_locators if "review_index_" in item and item.endswith(".png")]) == 5
+        and len([item for item in review_locators if "full_pair_qa_" in item and item.endswith(".png")]) == 9
         and all((OUTPUT_ROOT / item["locator"]).is_file() for item in manifest["reviewArtifacts"])
     )
     passed = all(checks.values())
@@ -1003,6 +1224,8 @@ def validate(manifest: dict[str, Any] | None = None) -> dict[str, Any]:
         "packetSetId": PACKET_SET_ID,
         "counts": {"taxonomyFamilies": len(expected), "enterablePackets": len(manifest["packets"]), "sharedModuleFamilies": len(SHARED_SUPPORT_FAMILIES), "interiorModuleFamilies": len(all_interior_ids), "propDecorFamilies": len(all_prop_ids), "artifactRecords": sum(len(item["artifacts"]) for item in manifest["packets"]) + len(manifest["reviewArtifacts"])},
         "checks": checks,
+        "packetErrors": packet_error_records,
+        "fullResolutionVisualQa": full_resolution_visual_records,
     }
     write_json(OUTPUT_ROOT / "validation_report_v001.json", report)
     if not passed:
@@ -1030,7 +1253,7 @@ Status: **PENDING OWNER REVIEW**. Return `APPROVE`, `REVISE`, or `REJECT` for ea
 - Artifact records verified: **{report['counts']['artifactRecords']}**.
 - New 3D jobs submitted: **0**.
 
-Open `review/README.md` for the complete GitHub-rendered review register, `index.html` for the local dashboard, or the five PNG files under `review/` for compact contact sheets. Every structure folder contains one exterior sheet, one every-floor/section sheet, and one machine-readable packet.
+Open `review/README.md` for the complete GitHub-rendered review register, `index.html` for the local dashboard, the five review-index PNGs for compact contact sheets, or the nine full-pair QA PNGs for every exterior/interior source pair. Every structure folder contains one exterior sheet, one every-floor/section sheet, and one machine-readable packet.
 
 The merged owner-approved PR #701 Stonehold civic/fort furnishing packet supplies exact dimensions and protected-opening fit for its 16 prop families, plus the shared Stonehold material, atlas, LOD, collider and wear precedent. This packet set binds that authority explicitly after reconciling the latest `origin/main`.
 

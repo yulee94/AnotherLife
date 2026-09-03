@@ -3,6 +3,8 @@
 Record exactly one decision per packet: `APPROVE`, `REVISE`, or `REJECT`.
 No packet authorizes 3D production while its decision remains pending.
 
+Full-pair QA contact pages (three packet pairs each): [01](stonehold_enterable_packets_full_pair_qa_01_v001.png) · [02](stonehold_enterable_packets_full_pair_qa_02_v001.png) · [03](stonehold_enterable_packets_full_pair_qa_03_v001.png) · [04](stonehold_enterable_packets_full_pair_qa_04_v001.png) · [05](stonehold_enterable_packets_full_pair_qa_05_v001.png) · [06](stonehold_enterable_packets_full_pair_qa_06_v001.png) · [07](stonehold_enterable_packets_full_pair_qa_07_v001.png) · [08](stonehold_enterable_packets_full_pair_qa_08_v001.png) · [09](stonehold_enterable_packets_full_pair_qa_09_v001.png)
+
 <details><summary><strong>01. Stonehold Capital Enterable Block Kit</strong> — waf_architecture_city_capital_kit</summary>
 
 Decision: [ ] APPROVE  [ ] REVISE  [ ] REJECT

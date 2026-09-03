@@ -9,10 +9,10 @@ Status: **PENDING OWNER REVIEW**. Return `APPROVE`, `REVISE`, or `REJECT` for ea
 - Shared door/gate/traversal families: **11 / 11**.
 - Interior room-module families: **21 / 21**.
 - Prop/decor families accounted: **65 / 65**; the event-only banner is explicitly excluded from permanent Stonehold furnishing.
-- Artifact records verified: **88**.
+- Artifact records verified: **97**.
 - New 3D jobs submitted: **0**.
 
-Open `review/README.md` for the complete GitHub-rendered review register, `index.html` for the local dashboard, or the five PNG files under `review/` for compact contact sheets. Every structure folder contains one exterior sheet, one every-floor/section sheet, and one machine-readable packet.
+Open `review/README.md` for the complete GitHub-rendered review register, `index.html` for the local dashboard, the five review-index PNGs for compact contact sheets, or the nine full-pair QA PNGs for every exterior/interior source pair. Every structure folder contains one exterior sheet, one every-floor/section sheet, and one machine-readable packet.
 
 The merged owner-approved PR #701 Stonehold civic/fort furnishing packet supplies exact dimensions and protected-opening fit for its 16 prop families, plus the shared Stonehold material, atlas, LOD, collider and wear precedent. This packet set binds that authority explicitly after reconciling the latest `origin/main`.
 

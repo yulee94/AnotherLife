@@ -5,6 +5,7 @@ from pathlib import Path
 
 from tools.architecture.generate_stonehold_enterable_packets import (
     COVERAGE_PATH,
+    CIVIC_LAYOUT_PATH,
     FURNISHING_PRECEDENT_PATH,
     OUTPUT_ROOT,
     SHARED_SUPPORT_FAMILIES,
@@ -58,6 +59,9 @@ class StoneholdEnterablePacketTests(unittest.TestCase):
         self.assertEqual(self.report["counts"]["enterablePackets"], 27)
         self.assertEqual(self.report["counts"]["interiorModuleFamilies"], 21)
         self.assertEqual(self.report["counts"]["propDecorFamilies"], 65)
+        self.assertTrue(self.report["checks"]["fullResolutionVisualQa54of54"])
+        self.assertEqual(len(self.report["fullResolutionVisualQa"]), 54)
+        self.assertEqual(len(self.manifest["reviewArtifacts"]), 16)
 
     def test_owner_approved_pr_701_furnishing_precedent_is_bound(self) -> None:
         self.assertTrue(FURNISHING_PRECEDENT_PATH.is_file())
@@ -75,6 +79,83 @@ class StoneholdEnterablePacketTests(unittest.TestCase):
             self.assertEqual(len(packet["floorPlans"]), len(packet["levels"]))
             self.assertTrue(all(level["rooms"] for level in packet["floorPlans"]))
 
+    def test_every_packet_has_a_named_packet_specific_blueprint(self) -> None:
+        signatures = set()
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            design = packet["architecturalDesign"]
+            self.assertEqual(design["packetSlug"], source["slug"])
+            self.assertTrue(design["layoutArchetype"])
+            self.assertTrue(design["exteriorMasses"])
+            self.assertTrue(design["roofVolumes"])
+            signatures.add((design["layoutArchetype"], design["planSignature"]))
+        self.assertEqual(len(signatures), len(STRUCTURES))
+
+    def test_exterior_entries_are_explicit_separate_and_connected(self) -> None:
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            entries = [entry for floor in packet["floorPlans"] for entry in floor["exteriorEntrances"]]
+            self.assertTrue(entries, packet["packetId"])
+            for entry in entries:
+                self.assertEqual(entry["from"], "outside")
+                self.assertTrue(entry["separateObject"])
+                self.assertIn(entry["to"], {room["id"] for floor in packet["floorPlans"] for room in floor["rooms"]})
+                self.assertIn(entry["swing"], {"in", "out", "double_out", "sliding"})
+                self.assertGreaterEqual(entry["clearOpeningMeters"][0], 1.2)
+
+    def test_vertical_cores_are_placed_and_connect_every_level(self) -> None:
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            level_ids = [floor["id"] for floor in packet["floorPlans"]]
+            cores = packet["verticalCirculation"]
+            self.assertTrue(cores, packet["packetId"])
+            connected = set()
+            for core in cores:
+                self.assertGreater(core["footprint"]["width"], 0)
+                self.assertGreater(core["footprint"]["depth"], 0)
+                self.assertTrue(core["landings"])
+                connected.update(core["connectsLevels"])
+                for floor in packet["floorPlans"]:
+                    if floor["id"] in core["connectsLevels"]:
+                        self.assertIn(core["id"], {item["coreId"] for item in floor["verticalCoreFootprints"]})
+            self.assertEqual(connected, set(level_ids), packet["packetId"])
+
+    def test_sections_are_tied_to_plan_cut_lines_and_level_geometry(self) -> None:
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            expected_levels = [floor["id"] for floor in packet["floorPlans"]]
+            for section_name, section in packet["sections"].items():
+                self.assertIn(section["cutLineId"], {line["id"] for floor in packet["floorPlans"] for line in floor["sectionCutLines"]})
+                self.assertEqual([level["id"] for level in section["levels"]], expected_levels)
+                self.assertTrue(section["roomSlices"], f"{packet['packetId']} {section_name}")
+                self.assertTrue(section["slabs"])
+                self.assertTrue(section["roofProfile"])
+                self.assertTrue(section["foundation"])
+
+    def test_furnishing_clearances_and_socket_positions_are_geometric(self) -> None:
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            for floor in packet["floorPlans"]:
+                room_ids = {room["id"] for room in floor["rooms"]}
+                self.assertEqual({item["roomId"] for item in floor["furnishingLayouts"]}, room_ids)
+                self.assertTrue(all(item["footprints"] for item in floor["furnishingLayouts"]))
+                self.assertTrue(all(item["protectedClearances"] for item in floor["furnishingLayouts"]))
+                self.assertTrue(floor["clearanceZones"])
+                self.assertTrue(floor["socketPlacements"])
+
+    def test_fail_closed_on_geometric_continuity_regressions(self) -> None:
+        packet = packet_document(STRUCTURES[0], self.prop_ids)
+        packet["floorPlans"][1]["verticalCoreFootprints"] = []
+        for floor in packet["floorPlans"]:
+            floor["exteriorEntrances"] = []
+        packet["sections"]["longitudinal"]["roomSlices"] = []
+        packet["floorPlans"][0]["furnishingLayouts"][0]["footprints"] = []
+        errors = packet_shape_errors(packet)
+        self.assertIn("every level must place each connecting vertical core and landing", errors)
+        self.assertIn("at least one outside-to-entry transition with a separate door is required", errors)
+        self.assertIn("sections must contain plan-tied room, slab, foundation and roof geometry", errors)
+        self.assertIn("every room needs room-specific furnishing footprints and protected clearances", errors)
+
     def test_town_hall_retains_approved_pr_664_room_coordinates(self) -> None:
         source = next(item for item in STRUCTURES if item["slug"] == "town_hall")
         packet = packet_document(source, self.prop_ids)
@@ -85,6 +166,14 @@ class StoneholdEnterablePacketTests(unittest.TestCase):
             {"x": 2.1, "z": 0.3, "width": 5.3, "depth": 5.0},
         )
         self.assertIn("coordinates retained exactly", ground["sourceAuthority"])
+        approved = json.loads(CIVIC_LAYOUT_PATH.read_text(encoding="utf-8"))
+        generated = [
+            {"floor": floor["id"], "between": door["between"], "orientation": door["orientation"], "x": door["x"], "z": door["z"], "width": door["clearOpeningMeters"][0]}
+            for floor in packet["floorPlans"]
+            for door in floor["doorOpenings"]
+            if door["id"].startswith("approved_")
+        ]
+        self.assertEqual(generated, approved["doorOpenings"])
 
     def test_below_grade_levels_have_no_fake_windows(self) -> None:
         source = next(item for item in STRUCTURES if item["slug"] == "castle_enterable")

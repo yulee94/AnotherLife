@@ -253,13 +253,13 @@
       "artifacts": [
         {
           "locator": "packets/city_capital_kit/city_capital_kit_2d_handoff_v001.json",
-          "byteLength": 30484,
-          "sha256": "ffd0f9d7c47eef262820e6be3496739a0d0ede479f3dbadfb6a6d9bd1babbe3a"
+          "byteLength": 94369,
+          "sha256": "de9e4810b606a8230d9a4446b97d654ca4d7847bbae3e163bb198afac9e143ac"
         },
         {
           "locator": "packets/city_capital_kit/city_capital_kit_exterior_handoff_v001.png",
-          "byteLength": 150987,
-          "sha256": "c1a9b1d41763bd8f15d67ff2b9d21dd96fdef5cb95e0484c30b7a983af42d29d",
+          "byteLength": 167347,
+          "sha256": "5ef39b61e4e3f04b0079283d6f4ae3cc6ec79e3021000105936af48f04f4adcd",
           "pixelDimensions": [
             2400,
             1500
@@ -267,8 +267,8 @@
         },
         {
           "locator": "packets/city_capital_kit/city_capital_kit_interior_handoff_v001.png",
-          "byteLength": 200859,
-          "sha256": "f67435131d881481f26f79075c677051369a07fa6755542a83ae2359dc4996fb",
+          "byteLength": 292547,
+          "sha256": "fa3d038b6e708df72670fc66f6f168a2cf412816ceaeda8bb510f2c9fb5c04ac",
           "pixelDimensions": [
             3000,
             1900
@@ -284,13 +284,13 @@
       "artifacts": [
         {
           "locator": "packets/settlement_village_kit/settlement_village_kit_2d_handoff_v001.json",
-          "byteLength": 24848,
-          "sha256": "17f8c50fc6ba3bffe42253c2a0f7b1266842b62bce0bc1efe3abf9b9b351ea43"
+          "byteLength": 67606,
+          "sha256": "a1f6c2d52fe987fab292928020177fe034f3baddaba68ed0531c2ec49d435140"
         },
         {
           "locator": "packets/settlement_village_kit/settlement_village_kit_exterior_handoff_v001.png",
-          "byteLength": 149117,
-          "sha256": "b374fdd5b516bb2016a8c39ac0e1de1bddadfd6b7089fcde8f0b4a791cedd2ee",
+          "byteLength": 161124,
+          "sha256": "edef41c49fa59e1b1ff44e7addd937c2d7158d8bd737eebd3f16d887e2492ea6",
           "pixelDimensions": [
             2400,
             1500
@@ -298,8 +298,8 @@
         },
         {
           "locator": "packets/settlement_village_kit/settlement_village_kit_interior_handoff_v001.png",
-          "byteLength": 174418,
-          "sha256": "edf8713f6d4de4d9e447d729e5a40e2014ee35aedc9f7346372bb864fec03086",
+          "byteLength": 247861,
+          "sha256": "c1de42feea00d37d66ed941780166b6131f92d918ea691366413b971082fc3eb",
           "pixelDimensions": [
             3000,
             1900
@@ -315,13 +315,13 @@
       "artifacts": [
         {
           "locator": "packets/dwelling/dwelling_2d_handoff_v001.json",
-          "byteLength": 22397,
-          "sha256": "6ee8f0803823fe02e0d1cfa33d0f2d8be80fd7eb2db3f501498824dbd582b7d1"
+          "byteLength": 53611,
+          "sha256": "3d1efd29ecad0de4299c06597a7720a22acb46300bc3442ef8868d7330344ac2"
         },
         {
           "locator": "packets/dwelling/dwelling_exterior_handoff_v001.png",
-          "byteLength": 143166,
-          "sha256": "2fdf8d4dec341b5b6eec619263261ac32f6617741a6d45757ff18bddbaf29cf1",
+          "byteLength": 156885,
+          "sha256": "9a5447af1e632ce03e3f49549e103959503bbb249c809aa7ce32db329220a30f",
           "pixelDimensions": [
             2400,
             1500
@@ -329,8 +329,8 @@
         },
         {
           "locator": "packets/dwelling/dwelling_interior_handoff_v001.png",
-          "byteLength": 165539,
-          "sha256": "bbd018d1d1d61838fa5abb2ca649186d3f9ae3a21d04a4a8c2fb92febad196eb",
+          "byteLength": 230054,
+          "sha256": "e194ee012f097bdbd71fdb0187a821e8b1790828dfccdf7d37c0fa72df80bd5c",
           "pixelDimensions": [
             3000,
             1900
@@ -346,13 +346,13 @@
       "artifacts": [
         {
           "locator": "packets/ruin_structure/ruin_structure_2d_handoff_v001.json",
-          "byteLength": 20701,
-          "sha256": "e3586051da262dca59216047434ee3c4feb403cb561b2078731e313c210c0186"
+          "byteLength": 50472,
+          "sha256": "1a71b0e61623474a3b522ed46e922bba44960cfaf1ca2d19f2f42b51f776cea2"
         },
         {
           "locator": "packets/ruin_structure/ruin_structure_exterior_handoff_v001.png",
-          "byteLength": 145132,
-          "sha256": "5db947bb6049d3b15ba1c2d415ed800666c695d4b9e1634809d87c3dc7face32",
+          "byteLength": 157416,
+          "sha256": "3a0ab165772455cf36ffcd38562d4ce748e78d511b1b5e04e8c251df8393484e",
           "pixelDimensions": [
             2400,
             1500
@@ -360,8 +360,8 @@
         },
         {
           "locator": "packets/ruin_structure/ruin_structure_interior_handoff_v001.png",
-          "byteLength": 167136,
-          "sha256": "8a12006804f7e582b72e4a5fa69078b93a1cd9d5188da89e7c77e3bb9528d2ef",
+          "byteLength": 234216,
+          "sha256": "18f0136e42b9af872e5a9394c9bbfb7e6e59315e53b5576146ebb98adad69334",
           "pixelDimensions": [
             3000,
             1900
@@ -377,13 +377,13 @@
       "artifacts": [
         {
           "locator": "packets/well_fountain_cistern/well_fountain_cistern_2d_handoff_v001.json",
-          "byteLength": 21717,
-          "sha256": "8a1809caa26f1f68fa75f064d9c3259dea820c87705d4ddf4e1491bbd5e097c1"
+          "byteLength": 52637,
+          "sha256": "55be93854d53ac1271275874a1407dc8d7dae904171e12bd1f875c2b8cf8502f"
         },
         {
           "locator": "packets/well_fountain_cistern/well_fountain_cistern_exterior_handoff_v001.png",
-          "byteLength": 148339,
-          "sha256": "ce63b914be7f5b107368c1a1a9038d8013727b2ce78482d3da7d91aedba3f358",
+          "byteLength": 160372,
+          "sha256": "aecddb593df8c509321c87f6030c85eefef8ff2005cfe0de5b34531938cc8319",
           "pixelDimensions": [
             2400,
             1500
@@ -391,8 +391,8 @@
         },
         {
           "locator": "packets/well_fountain_cistern/well_fountain_cistern_interior_handoff_v001.png",
-          "byteLength": 169704,
-          "sha256": "47335416bfc4a0aa455ecbdf538eea581997057ddeb845523dbef1ce5669ef82",
+          "byteLength": 245646,
+          "sha256": "2b654d4fa5b39a495b4bff7914af65a6f03d403b75b8256b19a594b681695510",
           "pixelDimensions": [
             3000,
             1900
@@ -408,13 +408,13 @@
       "artifacts": [
         {
           "locator": "packets/academy/academy_2d_handoff_v001.json",
-          "byteLength": 25591,
-          "sha256": "0a54f19562025e7718feeed8a8ad5e0f0491f8612b254fb13d0d1f353d3cf2b7"
+          "byteLength": 71483,
+          "sha256": "ef9d294985a10d0ce04684a6ba75bebb51aaa961bf680680ade4e8a9ee624898"
         },
         {
           "locator": "packets/academy/academy_exterior_handoff_v001.png",
-          "byteLength": 143383,
-          "sha256": "85757d51b273f7118ab9e648a42fbdd74688adc27d7bb9c4b52aa839b2cd63ab",
+          "byteLength": 160393,
+          "sha256": "a8bf5050e0f0154319675bb4036cc2962a75e81d4bccee62693179af9bda05e1",
           "pixelDimensions": [
             2400,
             1500
@@ -422,8 +422,8 @@
         },
         {
           "locator": "packets/academy/academy_interior_handoff_v001.png",
-          "byteLength": 169225,
-          "sha256": "68a7149906f8810ba6d7ca5c6c533e15c5147946f314d4cc1129e18713be830a",
+          "byteLength": 247643,
+          "sha256": "090fa82ab7bc69fc4066ba3335d7b1e259f496ad1cd1cec665bd866b22910ebd",
           "pixelDimensions": [
             3000,
             1900
@@ -439,13 +439,13 @@
       "artifacts": [
         {
           "locator": "packets/barracks/barracks_2d_handoff_v001.json",
-          "byteLength": 25277,
-          "sha256": "178f60a013882873a3df6c423c65cb6cccb46185f1b4a6e0e5c98fff8ea7ee46"
+          "byteLength": 66727,
+          "sha256": "b0149ff53a165e80d30e84fef6a83d79eba21f75a4a8ba454549a5a3823515d8"
         },
         {
           "locator": "packets/barracks/barracks_exterior_handoff_v001.png",
-          "byteLength": 143321,
-          "sha256": "67d14499b7ecd141f266ceab67b1f92b2d514dc13e3f888846ac95ac75c51e9d",
+          "byteLength": 156387,
+          "sha256": "03709fb6452a58b11e39698b864aff85f928fc844f8c9fe3aa266ee2944e4de2",
           "pixelDimensions": [
             2400,
             1500
@@ -453,8 +453,8 @@
         },
         {
           "locator": "packets/barracks/barracks_interior_handoff_v001.png",
-          "byteLength": 169917,
-          "sha256": "39018b6d7faf0db2d4dd3447ddd438845a5bb7c447074101af780e5ed87fe17d",
+          "byteLength": 247915,
+          "sha256": "7930484a29d363c1dedcbedbd9f37da064b4aa641b14e3d0852b83d7af560fad",
           "pixelDimensions": [
             3000,
             1900
@@ -470,13 +470,13 @@
       "artifacts": [
         {
           "locator": "packets/embassy/embassy_2d_handoff_v001.json",
-          "byteLength": 25828,
-          "sha256": "888dafa439739a4442a7549f0ea54a731a7ae8287e9a490a7e8437c967fcd3c9"
+          "byteLength": 69700,
+          "sha256": "6d9a64cb03a539c88ee8fd2dbb91e290f1bf2851dc933b9f71256b1a1c9ba2f7"
         },
         {
           "locator": "packets/embassy/embassy_exterior_handoff_v001.png",
-          "byteLength": 143337,
-          "sha256": "51597659680cc83b62708b71d251957d3f993501fe79d77a4c9bb755552507e0",
+          "byteLength": 160244,
+          "sha256": "114a8bf70bb2289bd61501d0654e5b0ab8189cbf0eb7822ea9e52d8d015e8966",
           "pixelDimensions": [
             2400,
             1500
@@ -484,8 +484,8 @@
         },
         {
           "locator": "packets/embassy/embassy_interior_handoff_v001.png",
-          "byteLength": 169196,
-          "sha256": "87fb04adf00d7c1b63224429edd5da4f8539259684dc02322b4aebee2d1e3749",
+          "byteLength": 241833,
+          "sha256": "3a342975afbef9f72aeed34fd272a6a578db6fc2a3c0d7492e2afba93752ba65",
           "pixelDimensions": [
             3000,
             1900
@@ -501,13 +501,13 @@
       "artifacts": [
         {
           "locator": "packets/farm/farm_2d_handoff_v001.json",
-          "byteLength": 23811,
-          "sha256": "10ea881f5047704e1ddd9184b74a91289b912e7821be8daec3c8f69512f85ff5"
+          "byteLength": 62736,
+          "sha256": "aa0fdb753c9a9372b9fb85007bc4a095bc377f2339beb4d3c4f65b3114359c46"
         },
         {
           "locator": "packets/farm/farm_exterior_handoff_v001.png",
-          "byteLength": 145115,
-          "sha256": "0254e7de45876d8cfcd251fedda5e2754831ddf60e0c77aa1cdc5b9eb1dfa21c",
+          "byteLength": 158076,
+          "sha256": "432aab55211f8e1b216ccc0a0f670f158bd49970f90da67fc516d981acfffc7a",
           "pixelDimensions": [
             2400,
             1500
@@ -515,8 +515,8 @@
         },
         {
           "locator": "packets/farm/farm_interior_handoff_v001.png",
-          "byteLength": 164563,
-          "sha256": "d60d4a46e3068ff3990488c48a082d6d7627e7705c8bfd4fe46148efcf27b56b",
+          "byteLength": 238445,
+          "sha256": "63b3d292332f2d468640359aab7acc8a95032b378584e6078f449bbe29a088d7",
           "pixelDimensions": [
             3000,
             1900
@@ -532,13 +532,13 @@
       "artifacts": [
         {
           "locator": "packets/forge/forge_2d_handoff_v001.json",
-          "byteLength": 24464,
-          "sha256": "df3b73619c2cfb4cc0672460f308150405dc3e15146348b8c979dbb565aac166"
+          "byteLength": 70115,
+          "sha256": "062bcfeff3d6339f866b10c7d82f07d8af5fc50652c118a046b53ef53cee0214"
         },
         {
           "locator": "packets/forge/forge_exterior_handoff_v001.png",
-          "byteLength": 143849,
-          "sha256": "2ee9eab2dd657db38d2528d28443a89293a1b5a6aacaefb3166696f35518a0ba",
+          "byteLength": 162294,
+          "sha256": "9dba1fe42c65cb2edcfb4bb2cdadcd8a4b0375091f08e6f7a988f78c74cac161",
           "pixelDimensions": [
             2400,
             1500
@@ -546,8 +546,8 @@
         },
         {
           "locator": "packets/forge/forge_interior_handoff_v001.png",
-          "byteLength": 169757,
-          "sha256": "6e87af61ca9269eabba3866c5aa3b0a176ac2c4608d05e1143ce4bc64d55c5c8",
+          "byteLength": 259086,
+          "sha256": "ef228045cb5e0a7b190a81a13e86e7bcca925baa3cfef60995f60fab8dc7918f",
           "pixelDimensions": [
             3000,
             1900
@@ -563,13 +563,13 @@
       "artifacts": [
         {
           "locator": "packets/gold_mine/gold_mine_2d_handoff_v001.json",
-          "byteLength": 28628,
-          "sha256": "90b4b071f808abbc1f07733740601694dc5b6a4050f3b93a5bac66b1baceb2e1"
+          "byteLength": 79160,
+          "sha256": "a2f2b69eb19458114b11e9e5df79057508c13c6d0efd683bd64f4bfa57cfe3e1"
         },
         {
           "locator": "packets/gold_mine/gold_mine_exterior_handoff_v001.png",
-          "byteLength": 149307,
-          "sha256": "4cd5b4ee55b272407a851b8fa0c5a3fe07fcc0a1266b1bc4973ec66c31a3f98d",
+          "byteLength": 166506,
+          "sha256": "3748e658488be55d9a9dd5eabc703226f106c6d61e1ebaeb837e0976246ca90f",
           "pixelDimensions": [
             2400,
             1500
@@ -577,8 +577,8 @@
         },
         {
           "locator": "packets/gold_mine/gold_mine_interior_handoff_v001.png",
-          "byteLength": 195951,
-          "sha256": "f332f336a8d4a9a768226e7536c81b73dbfb9c4e32b91d8c242aabe10e707bf8",
+          "byteLength": 273268,
+          "sha256": "58d3f12279cf422a938fade38c30da3d239b0029eab2a880fecda233434b9dc9",
           "pixelDimensions": [
             3000,
             1900
@@ -594,13 +594,13 @@
       "artifacts": [
         {
           "locator": "packets/lumber_mill/lumber_mill_2d_handoff_v001.json",
-          "byteLength": 24067,
-          "sha256": "594fc26950f524bae77c07db9bc8f6757000a940a7c30baa39e29d21f6c536c6"
+          "byteLength": 65723,
+          "sha256": "9d8f09f9ad588be19cf79b9913d74e34a0c87981f712c6293f6b0ba2ac50aa3d"
         },
         {
           "locator": "packets/lumber_mill/lumber_mill_exterior_handoff_v001.png",
-          "byteLength": 142372,
-          "sha256": "eb3f24fa3a7a56f110ec185c91aa1b609666abacb49ec45ce3f55be18e2ed39d",
+          "byteLength": 159241,
+          "sha256": "d2b5e0704753d2a2d5c825125d93e98ea58156243171403277e437d574b47641",
           "pixelDimensions": [
             2400,
             1500
@@ -608,8 +608,8 @@
         },
         {
           "locator": "packets/lumber_mill/lumber_mill_interior_handoff_v001.png",
-          "byteLength": 167305,
-          "sha256": "6f08f32b506da760d14411baa58b84d692ee80405ed2d142cd7a19cb71f1de08",
+          "byteLength": 245297,
+          "sha256": "fc623568e198cbc00d5d7140e0943632f684059156a67fb4260d55a619c07526",
           "pixelDimensions": [
             3000,
             1900
@@ -625,13 +625,13 @@
       "artifacts": [
         {
           "locator": "packets/market/market_2d_handoff_v001.json",
-          "byteLength": 24729,
-          "sha256": "a20846b7b29184a8bacf78c771fa44c2eae6d9043674daf49840f74f6695f944"
+          "byteLength": 65923,
+          "sha256": "faf69b4c9b102970d4015b4026509ab2eb2b6aaa7176895d2781e7535687ad54"
         },
         {
           "locator": "packets/market/market_exterior_handoff_v001.png",
-          "byteLength": 145613,
-          "sha256": "d56aebff32c130f25609816a3ffe6cac9a1e32b1912bf355e4504e04dc8066c3",
+          "byteLength": 158587,
+          "sha256": "639f6eb4a6fbb2fb7b27d2a7b277f5d1b7f49f0584391f297615170b9e1cc654",
           "pixelDimensions": [
             2400,
             1500
@@ -639,8 +639,8 @@
         },
         {
           "locator": "packets/market/market_interior_handoff_v001.png",
-          "byteLength": 172089,
-          "sha256": "03c82c813b55ef6c0a0225d805691c6dc7ceb34bc0b90210559a4e91479e4583",
+          "byteLength": 250337,
+          "sha256": "f53f136f375c7992e962efe5a0a2293a1debbe3fe8b1762edb2096ca3d84de38",
           "pixelDimensions": [
             3000,
             1900
@@ -656,13 +656,13 @@
       "artifacts": [
         {
           "locator": "packets/quarry/quarry_2d_handoff_v001.json",
-          "byteLength": 28499,
-          "sha256": "3b017b88098d54ecea8e30cf56eacd969de54681ef6024226c25732131e4b3c1"
+          "byteLength": 82190,
+          "sha256": "f897e99576e95eb5ce5d087c3dc3f8848d915f1950f75f0c0cef81d734f01924"
         },
         {
           "locator": "packets/quarry/quarry_exterior_handoff_v001.png",
-          "byteLength": 150097,
-          "sha256": "cd6ed21b7a575616e3a47f3ce06b975f0d1c5603d09c644775792f77471db23f",
+          "byteLength": 166654,
+          "sha256": "a9dc11c4b83db62b37b257dad20aea021b802489d9ea325e79c4ec7adc0149cc",
           "pixelDimensions": [
             2400,
             1500
@@ -670,8 +670,8 @@
         },
         {
           "locator": "packets/quarry/quarry_interior_handoff_v001.png",
-          "byteLength": 197318,
-          "sha256": "9158c53ed27ed05b3d494f0a323d4c357a1070bc9f8aa78006ece1d5e95bd1cb",
+          "byteLength": 286717,
+          "sha256": "673fc56934c8e22c25aae17adabee0626b459f44c07715876d65696f246897d8",
           "pixelDimensions": [
             3000,
             1900
@@ -687,13 +687,13 @@
       "artifacts": [
         {
           "locator": "packets/stable/stable_2d_handoff_v001.json",
-          "byteLength": 23700,
-          "sha256": "0cd7d469c37f7ff9911d3075b3d0e63afe743635d52516f467b7d7184fa329a0"
+          "byteLength": 63167,
+          "sha256": "7d494283577934fec971334537efc22e62e895a20afd2fb05143b5daddde05e7"
         },
         {
           "locator": "packets/stable/stable_exterior_handoff_v001.png",
-          "byteLength": 141421,
-          "sha256": "4c982217d47ead1e67cbc8dd87f7a6389094755e913aa100abc35e8fb16fb7a9",
+          "byteLength": 154314,
+          "sha256": "8b3ac446ab7210b3478944eed0d9ca3a6942d8fea2de34a15760ae5df6f37e93",
           "pixelDimensions": [
             2400,
             1500
@@ -701,8 +701,8 @@
         },
         {
           "locator": "packets/stable/stable_interior_handoff_v001.png",
-          "byteLength": 160726,
-          "sha256": "cea516536b99ca37e83f019dc0dff4de9bbe5f922e7742b047e3ee73d9afbd60",
+          "byteLength": 234482,
+          "sha256": "cd7e61595c67ebe1091409b558011c0bb65db2b9f8fc7299bfabf92534665f73",
           "pixelDimensions": [
             3000,
             1900
@@ -718,13 +718,13 @@
       "artifacts": [
         {
           "locator": "packets/storehouse/storehouse_2d_handoff_v001.json",
-          "byteLength": 24168,
-          "sha256": "31eec8b1ddfbaf61eb0e67bf4e4bcc1d49d355519ca3d7a3da1c1c8748603393"
+          "byteLength": 62634,
+          "sha256": "e704a5bca995915fcd6255168f9f9bcb411ab19bd44257f2a5b1adcd1d065d1f"
         },
         {
           "locator": "packets/storehouse/storehouse_exterior_handoff_v001.png",
-          "byteLength": 139139,
-          "sha256": "b1ca8e0d4c785a3dccb47bf1dbb29faf69898b8bdeed66648a530bd8d3d34331",
+          "byteLength": 150786,
+          "sha256": "b6deb55cccbfc9ae4e36f2fdb07768b5681973eef6e5e3b2c054044e4ee71d2b",
           "pixelDimensions": [
             2400,
             1500
@@ -732,8 +732,8 @@
         },
         {
           "locator": "packets/storehouse/storehouse_interior_handoff_v001.png",
-          "byteLength": 163174,
-          "sha256": "63c45a4bdd5a7fdb3cb9f12d72e9b0a9b7b8639ae97dd31af623e4ac8d8c5c60",
+          "byteLength": 241733,
+          "sha256": "69e2bd52555e7637ee9f3eed6291a591911f416d4465d4c129ae701b309df68b",
           "pixelDimensions": [
             3000,
             1900
@@ -749,13 +749,13 @@
       "artifacts": [
         {
           "locator": "packets/town_hall/town_hall_2d_handoff_v001.json",
-          "byteLength": 26493,
-          "sha256": "435b5b117924f43fb188e964cff456c59159d2f018e7c0286d549db5f6b2f8e7"
+          "byteLength": 71315,
+          "sha256": "147a448ce782f55537ead50242748a46e376b77b3c9e012287fd79ad901971a8"
         },
         {
           "locator": "packets/town_hall/town_hall_exterior_handoff_v001.png",
-          "byteLength": 150995,
-          "sha256": "ed5360f914a3608a00e9a3d787b6f1c6a4ddb0d67af3319f456da01ec36e44d9",
+          "byteLength": 162761,
+          "sha256": "d03b25e9d2290f8ea39ac8fc1139249352c2337f4665998b790090dc8c74f793",
           "pixelDimensions": [
             2400,
             1500
@@ -763,8 +763,8 @@
         },
         {
           "locator": "packets/town_hall/town_hall_interior_handoff_v001.png",
-          "byteLength": 173914,
-          "sha256": "e8c8398a425b127de66b2da208316975f798bf4882428864345e7724e751d4b4",
+          "byteLength": 250499,
+          "sha256": "89e86c4738ba329ec9a2d0f9fae4f00c1f68ba6b0011f932368f00eb588e3d45",
           "pixelDimensions": [
             3000,
             1900
@@ -780,13 +780,13 @@
       "artifacts": [
         {
           "locator": "packets/watchtower/watchtower_2d_handoff_v001.json",
-          "byteLength": 27313,
-          "sha256": "222c365eb7bf1d4e1c5c2392c1d3225fb1395e75df6799ef2f2d1cd035de0b08"
+          "byteLength": 73834,
+          "sha256": "a70d7976a062d7a1781b2470e27446125430cd8caff580d96ab5bea7e1f418bd"
         },
         {
           "locator": "packets/watchtower/watchtower_exterior_handoff_v001.png",
-          "byteLength": 143648,
-          "sha256": "3becf386fbc79c0a0bba2112000d1da980a26f6fe42a78220d836c38fc28d645",
+          "byteLength": 156293,
+          "sha256": "189faf6fa1af36026cb5ad0153ee66d560af2321e4fbdc11e94672f8faa93f78",
           "pixelDimensions": [
             2400,
             1500
@@ -794,8 +794,8 @@
         },
         {
           "locator": "packets/watchtower/watchtower_interior_handoff_v001.png",
-          "byteLength": 182850,
-          "sha256": "ac662650e5f7314c01aeaec859fc863fd29022a4f756ffa33894208e5d59885f",
+          "byteLength": 261937,
+          "sha256": "afe1a6ecacbfc1cef63d454dc5abee55c644d9b1f3ed9e90594bdf75a2ade2d5",
           "pixelDimensions": [
             3000,
             1900
@@ -811,13 +811,13 @@
       "artifacts": [
         {
           "locator": "packets/workshop/workshop_2d_handoff_v001.json",
-          "byteLength": 24303,
-          "sha256": "45c153da4c085fbda6146c81b599b06f1e768eccdbffd0f4738197cb8ea19cd9"
+          "byteLength": 65427,
+          "sha256": "e51407207a7c11d5aac6d1fc39d5137443f5ac3ce29ddbb4a1d97a3ea5039d72"
         },
         {
           "locator": "packets/workshop/workshop_exterior_handoff_v001.png",
-          "byteLength": 151004,
-          "sha256": "475c9a1efc536d916e8d3a841d19831ba200a4d5a270b640b79270b373413cc4",
+          "byteLength": 163091,
+          "sha256": "75cbb2d11fbf61db76f082785ef812c88cc841d646923ac13183ef67349dc868",
           "pixelDimensions": [
             2400,
             1500
@@ -825,8 +825,8 @@
         },
         {
           "locator": "packets/workshop/workshop_interior_handoff_v001.png",
-          "byteLength": 168456,
-          "sha256": "bb46cec5a039ed946a7139e25aa86d416ac358753e9b8a0d40944bd35c5829e8",
+          "byteLength": 252636,
+          "sha256": "62f47904e1b3140e7c10a7022e9a4aeb3140ba2218731caeb278ec6c4e746fdc",
           "pixelDimensions": [
             3000,
             1900
@@ -842,13 +842,13 @@
       "artifacts": [
         {
           "locator": "packets/castle_enterable/castle_enterable_2d_handoff_v001.json",
-          "byteLength": 40248,
-          "sha256": "dbc7f613686e41ffb293ce587b8e59c192fc1a212b65ca0b368301b55050a33f"
+          "byteLength": 130965,
+          "sha256": "bbcf3930140557e50ebd2deb15a0a6b022660e7ba05e27bdc2006e9f36a8d42d"
         },
         {
           "locator": "packets/castle_enterable/castle_enterable_exterior_handoff_v001.png",
-          "byteLength": 148965,
-          "sha256": "a77081b70e750e2bca5638408770dd090f4056083e2ae38d1bf7273cdf2d3ec9",
+          "byteLength": 165980,
+          "sha256": "b6acdfc3ddecf4341d4d3fa4c886b9b65447f08f8a181faa908de12a7519f9fe",
           "pixelDimensions": [
             2400,
             1500
@@ -856,8 +856,8 @@
         },
         {
           "locator": "packets/castle_enterable/castle_enterable_interior_handoff_v001.png",
-          "byteLength": 221171,
-          "sha256": "f596b4cc7da1ecc0754f413e9c00af900c0811e3828e6926d05ecb3ffc18c1d3",
+          "byteLength": 325493,
+          "sha256": "49dac2d5593cde24e0262b1b2f69d60a21b0a6615257f54a84629d87dcbad7e0",
           "pixelDimensions": [
             3000,
             1900
@@ -873,13 +873,13 @@
       "artifacts": [
         {
           "locator": "packets/fortress_enterable/fortress_enterable_2d_handoff_v001.json",
-          "byteLength": 36476,
-          "sha256": "8633eab3eba78a6df09d32858f51f275f7d54f8e9c197587d408af4acbfabfed"
+          "byteLength": 118775,
+          "sha256": "24e01da2b36bcac1b9583a83dd2b5c8d760682f855039db0f9368692f19d3474"
         },
         {
           "locator": "packets/fortress_enterable/fortress_enterable_exterior_handoff_v001.png",
-          "byteLength": 148747,
-          "sha256": "b4473e15cb9c7d9a31ecdaed7b16ce21f90702953f3487eae5c18fd0ac65e116",
+          "byteLength": 165623,
+          "sha256": "818ca1fa25f2cdd974ef5d4187237bdb9024dd7fde25ed8a8ae929206cad2ff6",
           "pixelDimensions": [
             2400,
             1500
@@ -887,8 +887,8 @@
         },
         {
           "locator": "packets/fortress_enterable/fortress_enterable_interior_handoff_v001.png",
-          "byteLength": 211782,
-          "sha256": "c4e6463066fe8d57f458c2309cd84ee2d21c2d2d4b94ae444292180010606c0e",
+          "byteLength": 310204,
+          "sha256": "0e7e1a5a4092c41540b339fc2509c1f8b16640d8b5bdaeef729d9e48015cb91e",
           "pixelDimensions": [
             3000,
             1900
@@ -904,13 +904,13 @@
       "artifacts": [
         {
           "locator": "packets/guardpost_watch/guardpost_watch_2d_handoff_v001.json",
-          "byteLength": 23316,
-          "sha256": "8899ae0a4ab45318242822ec65c00a0a740511dd5cbda3b785fb2a5109cc895c"
+          "byteLength": 59894,
+          "sha256": "28daf349e72bf81b32f0f1a7730b7cf406ad77903194248078b718c91e434fad"
         },
         {
           "locator": "packets/guardpost_watch/guardpost_watch_exterior_handoff_v001.png",
-          "byteLength": 143452,
-          "sha256": "9074232fab715f63cb01e35c0a03a5bea1572b841287f42e111be05fe5dcaae1",
+          "byteLength": 156201,
+          "sha256": "7d0be6689f770ceddce2ad6979e0eb960dee35f776fa53e7635caa635cae39a5",
           "pixelDimensions": [
             2400,
             1500
@@ -918,8 +918,8 @@
         },
         {
           "locator": "packets/guardpost_watch/guardpost_watch_interior_handoff_v001.png",
-          "byteLength": 164681,
-          "sha256": "96349e4df8c14465839da492d6be9639fce8857668f511c584b35436b0fda324",
+          "byteLength": 239038,
+          "sha256": "3094577613ba35deaf46c9c855813dfc88aa95de055596a66c321637068eedb4",
           "pixelDimensions": [
             3000,
             1900
@@ -935,13 +935,13 @@
       "artifacts": [
         {
           "locator": "packets/inn_tavern/inn_tavern_2d_handoff_v001.json",
-          "byteLength": 30055,
-          "sha256": "f854144022974c3482c7c745db4e44726cc6aa2412ca15b66c34216d92a93298"
+          "byteLength": 83018,
+          "sha256": "091e34eaaf4707657d2aa08b3bb66a7ef3647b937b9a931ab7c1a0cca29b8421"
         },
         {
           "locator": "packets/inn_tavern/inn_tavern_exterior_handoff_v001.png",
-          "byteLength": 143387,
-          "sha256": "53175fef6a01fc98b9991148ca1046dde2175949bfb20c685de9af81ae737a0d",
+          "byteLength": 160943,
+          "sha256": "b3c1091637cf0b761bccb3a84bbcf4052efc6ca57f7f3da2e330290dc81ed2f3",
           "pixelDimensions": [
             2400,
             1500
@@ -949,8 +949,8 @@
         },
         {
           "locator": "packets/inn_tavern/inn_tavern_interior_handoff_v001.png",
-          "byteLength": 188590,
-          "sha256": "b5b385f0bb13e6cad0ded0e700f61273e7b0e23bd13da742c1a6801b04c4f08d",
+          "byteLength": 263533,
+          "sha256": "91e6e2124e05d9b34c120b516c10ca7f76898e468c4e4c54d9d2043b507c7628",
           "pixelDimensions": [
             3000,
             1900
@@ -966,13 +966,13 @@
       "artifacts": [
         {
           "locator": "packets/mill_wind_water/mill_wind_water_2d_handoff_v001.json",
-          "byteLength": 27075,
-          "sha256": "203cb189ecca2149abddd544d9682949a543370515401d24c11899992dfb0797"
+          "byteLength": 76515,
+          "sha256": "4344429657f24e4e8de04a8119d81b523b826d54bafb87382eaa190834085e53"
         },
         {
           "locator": "packets/mill_wind_water/mill_wind_water_exterior_handoff_v001.png",
-          "byteLength": 146503,
-          "sha256": "6dd38633605d8c1992ddb48530e45100d4be0de1b5f4f510890522eb34782c5a",
+          "byteLength": 163022,
+          "sha256": "f1cfdf69bb3bd1c2789b3880f5832ee7e5645fa297a68cdadc9688cc895adfcd",
           "pixelDimensions": [
             2400,
             1500
@@ -980,8 +980,8 @@
         },
         {
           "locator": "packets/mill_wind_water/mill_wind_water_interior_handoff_v001.png",
-          "byteLength": 184261,
-          "sha256": "266aa6993636be48a7b80f3aaa0de8932c226e29c2104113c824ece3cb2046a7",
+          "byteLength": 274839,
+          "sha256": "b723b25a9e0a04739182a201708635a292b29f7c3fa20ae9189cfd74a628ba0f",
           "pixelDimensions": [
             3000,
             1900
@@ -997,13 +997,13 @@
       "artifacts": [
         {
           "locator": "packets/religious_cultural_structure/religious_cultural_structure_2d_handoff_v001.json",
-          "byteLength": 25756,
-          "sha256": "52642322cc203a425a6191225e3fe1e06058239a630901ec716274595d6cfe4c"
+          "byteLength": 73828,
+          "sha256": "5cf26d71280c231f18aff52a0c979825bf80507e9dd5ee42a917f3483d3aa43f"
         },
         {
           "locator": "packets/religious_cultural_structure/religious_cultural_structure_exterior_handoff_v001.png",
-          "byteLength": 148800,
-          "sha256": "bf429a9a45f2b121fe36f8160c4815f95474ea701188c3b118bdd409e083e5b5",
+          "byteLength": 166035,
+          "sha256": "8d10f2cb6cb21d91201bd4c28e6857d2dda968be1bc512689836256eeecb8aa8",
           "pixelDimensions": [
             2400,
             1500
@@ -1011,8 +1011,8 @@
         },
         {
           "locator": "packets/religious_cultural_structure/religious_cultural_structure_interior_handoff_v001.png",
-          "byteLength": 171338,
-          "sha256": "363b753f401d8c166d00b3806b39bf7a39e49d785385b001247c980f30a0c7ff",
+          "byteLength": 254692,
+          "sha256": "ddd9fd0a5cd9f71565ff853743189028159d546fa5622f962884591f4119b5d9",
           "pixelDimensions": [
             3000,
             1900
@@ -1028,13 +1028,13 @@
       "artifacts": [
         {
           "locator": "packets/shop_service/shop_service_2d_handoff_v001.json",
-          "byteLength": 24134,
-          "sha256": "a81e8e8355af8e8d32426dbd22a7040cc3a5698663dde6f4298d168614e64e8c"
+          "byteLength": 60483,
+          "sha256": "be36fe61dc8ae33420eeedb477b877052d1cd5d952d4820bf460f12fd6754709"
         },
         {
           "locator": "packets/shop_service/shop_service_exterior_handoff_v001.png",
-          "byteLength": 143452,
-          "sha256": "4d84b3f0452ba0446e16b38cfb3ff10b76fdec39a926c43d05cb0ad10f3e3f42",
+          "byteLength": 155945,
+          "sha256": "3d518a28012dd0dfc62482499f21e104ead4cb8c729b9c0802a9ee2b17875b46",
           "pixelDimensions": [
             2400,
             1500
@@ -1042,8 +1042,8 @@
         },
         {
           "locator": "packets/shop_service/shop_service_interior_handoff_v001.png",
-          "byteLength": 168174,
-          "sha256": "5197d4593c0d755f44975fb404075da729e7c678a2a5dabf459f05c37465948f",
+          "byteLength": 232948,
+          "sha256": "8fd508f718cd0a5a1696104e1e6f0425a3190fa7eed0436f59a8df413ea4a5e3",
           "pixelDimensions": [
             3000,
             1900
@@ -1059,13 +1059,13 @@
       "artifacts": [
         {
           "locator": "packets/warehouse_barn/warehouse_barn_2d_handoff_v001.json",
-          "byteLength": 24490,
-          "sha256": "2ffbadafcc666c13375bc57c88a8032319fcabfeb2d3752fc06811ad9a9c0c9d"
+          "byteLength": 64241,
+          "sha256": "41b45bdc5f0fb026917dbe2bbf80b0da512d6a13d861a62e2566b53f3b8f0a15"
         },
         {
           "locator": "packets/warehouse_barn/warehouse_barn_exterior_handoff_v001.png",
-          "byteLength": 145877,
-          "sha256": "f00fbd2e1520e51903a97e7b260fe4fd0f0ca8c58e82121e929ec149ad03b3d3",
+          "byteLength": 158034,
+          "sha256": "9fd2cc9b69c70e3ca32d238b288b53737319325a97766a250a7abaab0dcff86f",
           "pixelDimensions": [
             2400,
             1500
@@ -1073,8 +1073,8 @@
         },
         {
           "locator": "packets/warehouse_barn/warehouse_barn_interior_handoff_v001.png",
-          "byteLength": 170270,
-          "sha256": "70b9dcf9fce54adb772d1b8c3000a4bce81379ad404d285ad987ec5f2383bcdb",
+          "byteLength": 246076,
+          "sha256": "9e01a2215edf7280efa5f5176858f74e5b56c2a401b381961cdedb1d97c5cb6a",
           "pixelDimensions": [
             3000,
             1900
@@ -1086,8 +1086,8 @@
   "reviewArtifacts": [
     {
       "locator": "review/stonehold_enterable_packets_review_index_01_v001.png",
-      "byteLength": 375449,
-      "sha256": "0f666a370a2fbb3686633c7380c31fe4444b8a1c78ad88d97ef54ea9e92dd960",
+      "byteLength": 398174,
+      "sha256": "e48c8fd120f6515b7c7eebf5ea00ad6d8022d4fc163bfd87ee480aed11c936ee",
       "pixelDimensions": [
         2400,
         1700
@@ -1095,8 +1095,8 @@
     },
     {
       "locator": "review/stonehold_enterable_packets_review_index_02_v001.png",
-      "byteLength": 360560,
-      "sha256": "6266cd19c38cf9c328afdd17a7310cdb16f4ed64b6ba5ef90f38508e17b827a5",
+      "byteLength": 385235,
+      "sha256": "cd26b48cf75c8d9d7cba311995b9a5e57dcbe49c5afb9a3c3b34b4a5fd33461a",
       "pixelDimensions": [
         2400,
         1700
@@ -1104,8 +1104,8 @@
     },
     {
       "locator": "review/stonehold_enterable_packets_review_index_03_v001.png",
-      "byteLength": 369901,
-      "sha256": "a573c7d6e3e62c7ecf8a81f7deab853d9126ad0b437d1342ca701eb7c18cc354",
+      "byteLength": 392711,
+      "sha256": "19cab7daa903adec2b8af3c6f46f9b7b58d0acb8bd7282296da08605192cef07",
       "pixelDimensions": [
         2400,
         1700
@@ -1113,8 +1113,8 @@
     },
     {
       "locator": "review/stonehold_enterable_packets_review_index_04_v001.png",
-      "byteLength": 413983,
-      "sha256": "3372c35669808ed79f47fd5eb623bb1a7056485887e2bf17f040fb118621b6fe",
+      "byteLength": 436543,
+      "sha256": "0384ca0f48259f19160b3e06b2c3b42dbbfcf96faa35d118ed304dc26278f41e",
       "pixelDimensions": [
         2400,
         1700
@@ -1122,8 +1122,8 @@
     },
     {
       "locator": "review/stonehold_enterable_packets_review_index_05_v001.png",
-      "byteLength": 246169,
-      "sha256": "7d91b72942c9e2413b029aa5bd6cd4f00d8f40073337f7eb8c71b57ce1eb78fc",
+      "byteLength": 261555,
+      "sha256": "583c9ebd6ec2b0e99e39fb2deacc9120ac588a1c85203704e0c4f402b4afc43f",
       "pixelDimensions": [
         2400,
         1700
@@ -1131,8 +1131,89 @@
     },
     {
       "locator": "review/README.md",
-      "byteLength": 13135,
-      "sha256": "aec88c26b533ea8685cb896f54a092cccf8d296af82c0265e16e89bbf5ccdc06"
+      "byteLength": 13745,
+      "sha256": "e24c23f6c4cabf060d4e18798015dc9468cfbfa7e77ff14ee5bf81ad24f2c929"
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_01_v001.png",
+      "byteLength": 925353,
+      "sha256": "bce22c0e4b08ec932fc097319ed57c022e75e2069db7d8117210bfb9ec694901",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_02_v001.png",
+      "byteLength": 908930,
+      "sha256": "e363c8ca0ab0b39cddaac5f0bc901be2a0529fac7f3ec222921cc438366824e5",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_03_v001.png",
+      "byteLength": 881487,
+      "sha256": "181cedf47fbfd2e4200b6921774718ba9742ce20a6f776c1364f7aaa51ee3dc3",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_04_v001.png",
+      "byteLength": 931729,
+      "sha256": "855a880ca4653df8989d74757c75301e1e8d6038943ce5606c41766916d4c380",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_05_v001.png",
+      "byteLength": 909031,
+      "sha256": "e22b98867ba61830c5ee3e06a85bf5c2353ca299a55255e0e7128c01ee98b18a",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_06_v001.png",
+      "byteLength": 903953,
+      "sha256": "7f345be33cb41399b9f86254df5f4f18341676b08d418711d461100d139e1c54",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_07_v001.png",
+      "byteLength": 1015983,
+      "sha256": "435db74511b693161bef823e4f3ffb233327c501b9c961e593e6dc71017601da",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_08_v001.png",
+      "byteLength": 930014,
+      "sha256": "347472fe89f1afbb65091c40a79f17513af0f77bbaadc06c5f59b0b2c64a2c3d",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_09_v001.png",
+      "byteLength": 894612,
+      "sha256": "15e4fd0e0c321b38de2556f13c63203912f9336899abb591c0dea8308a089468",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
     },
     {
       "locator": "index.html",
