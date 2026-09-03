@@ -2,8 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AL.ChampionMode;
+using AL.ChampionMode.Control;
 using AL.ChampionMode.Interaction;
+using AL.ChampionMode.UI;
 using AL.Core;
+using AL.Input;
 using AL.World;
 using NUnit.Framework;
 using UnityEngine;
@@ -253,6 +256,288 @@ namespace AL.Tests.EditMode.ChampionMode
                 Object.DestroyImmediate(cameraObject);
                 Object.DestroyImmediate(targetObject);
                 Object.DestroyImmediate(directorObject);
+            }
+        }
+
+        [TestCase("out-of-range")]
+        [TestCase("look-away")]
+        [TestCase("target-disabled")]
+        [TestCase("target-inactive")]
+        [TestCase("target-destroyed")]
+        [TestCase("actor-inactive")]
+        [TestCase("actor-destroyed")]
+        [TestCase("director-disabled")]
+        [TestCase("input-suppressed")]
+        [TestCase("menu-open")]
+        [TestCase("recap-open")]
+        public void ConfirmationRejectsFocusThatBecameUnavailable(string change)
+        {
+            using (var setup = new FocusedInteractionSetup())
+            {
+                int confirmations = 0;
+                setup.Director.Confirmed += _ => confirmations++;
+                switch (change)
+                {
+                    case "out-of-range":
+                        setup.Player.transform.position = new Vector3(0f, 0f, -20f);
+                        break;
+                    case "look-away":
+                        setup.Camera.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+                        break;
+                    case "target-disabled":
+                        setup.Target.enabled = false;
+                        break;
+                    case "target-inactive":
+                        setup.Target.gameObject.SetActive(false);
+                        break;
+                    case "target-destroyed":
+                        Object.DestroyImmediate(setup.Target.gameObject);
+                        break;
+                    case "actor-inactive":
+                        setup.Player.SetActive(false);
+                        break;
+                    case "actor-destroyed":
+                        Object.DestroyImmediate(setup.Player);
+                        break;
+                    case "director-disabled":
+                        setup.Director.enabled = false;
+                        break;
+                    case "input-suppressed":
+                        GameInput.SetGameplaySuppressed(true);
+                        break;
+                    case "menu-open":
+                        ChampionHudCameraGate.MenuOpen = true;
+                        break;
+                    case "recap-open":
+                        ChampionHudCameraGate.RecapOpen = true;
+                        break;
+                }
+
+                Assert.That(setup.Director.TryConfirmFocused(), Is.False, change);
+                Assert.That(confirmations, Is.Zero);
+                Assert.That(setup.Director.Focused, Is.Null);
+                Assert.That(setup.Prompt.IsVisible, Is.False);
+                Assert.That(setup.Director.LastFeedback, Is.Empty);
+                if (setup.Target != null)
+                {
+                    Assert.That(setup.Target.ConfirmCount, Is.Zero);
+                }
+            }
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void ConfirmationRespectsChampionControlAvailability(bool disableController)
+        {
+            using (var setup = new FocusedInteractionSetup())
+            {
+                ChampionController controller = setup.Player.AddComponent<ChampionController>();
+                setup.Director.Configure(setup.Player.transform, setup.Camera, setup.Prompt);
+                setup.RefreshFocus();
+                Assert.That(setup.Director.Focused, Is.SameAs(setup.Target));
+                if (disableController)
+                {
+                    controller.enabled = false;
+                }
+                else
+                {
+                    controller.SetControlLocked(true);
+                }
+
+                Assert.That(setup.Director.TryConfirmFocused(), Is.False);
+                Assert.That(setup.Target.ConfirmCount, Is.Zero);
+                Assert.That(setup.Prompt.IsVisible, Is.False);
+            }
+        }
+
+        [Test]
+        public void ConfirmationDoesNotRetargetAStaleTap()
+        {
+            using (var setup = new FocusedInteractionSetup())
+            {
+                WorldInteractable second = setup.AddTarget("second_target", new Vector3(3f, 0f, 0f));
+                setup.Camera.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+
+                Assert.That(setup.Director.TryConfirmFocused(), Is.False);
+                Assert.That(setup.Target.ConfirmCount, Is.Zero);
+                Assert.That(second.ConfirmCount, Is.Zero);
+                Assert.That(setup.Director.Focused, Is.SameAs(second));
+                Assert.That(setup.Director.TryConfirmFocused(), Is.True);
+                Assert.That(second.ConfirmCount, Is.EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void CursorOwnershipBlocksInteractionAndReleaseRestoresIt()
+        {
+            using (var setup = new FocusedInteractionSetup())
+            {
+                using (ChampionHudCameraGate.AcquireCursorOwnership("interaction-test-modal"))
+                {
+                    Assert.That(setup.Director.TryConfirmFocused(), Is.False);
+                    Assert.That(setup.Target.ConfirmCount, Is.Zero);
+                    Assert.That(setup.Prompt.IsVisible, Is.False);
+                }
+
+                setup.RefreshFocus();
+                Assert.That(setup.Prompt.IsVisible, Is.True);
+                Assert.That(setup.Director.TryConfirmFocused(), Is.True);
+                Assert.That(setup.Target.ConfirmCount, Is.EqualTo(1));
+            }
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void ConfirmationRejectsDeadOrDisabledCombatOwner(bool disableCombat)
+        {
+            using (var setup = new FocusedInteractionSetup())
+            {
+                ChampionCombat combat = setup.Player.AddComponent<ChampionCombat>();
+                typeof(ChampionCombat).GetMethod("Start",
+                    BindingFlags.Instance | BindingFlags.NonPublic).Invoke(combat, null);
+                setup.Director.Configure(setup.Player.transform, setup.Camera, setup.Prompt);
+                setup.RefreshFocus();
+                Assert.That(setup.Director.Focused, Is.SameAs(setup.Target));
+                if (disableCombat)
+                {
+                    combat.enabled = false;
+                }
+                else
+                {
+                    combat.TakeDamage(combat.MaxHealth);
+                    Assert.That(combat.IsDead, Is.True);
+                }
+
+                Assert.That(setup.Director.TryConfirmFocused(), Is.False);
+                Assert.That(setup.Target.ConfirmCount, Is.Zero);
+                Assert.That(setup.Prompt.IsVisible, Is.False);
+            }
+        }
+
+        [Test]
+        public void FocusKeepsTheSelectedInstanceWhenCatalogIdsRepeat()
+        {
+            using (var setup = new FocusedInteractionSetup())
+            {
+                setup.Target.transform.position = new Vector3(20f, 0f, 0f);
+                WorldInteractable second = setup.AddTarget(
+                    setup.Target.CatalogId,
+                    new Vector3(0f, 0f, 3f));
+                setup.RefreshFocus();
+
+                Assert.That(setup.Director.Focused, Is.SameAs(second));
+                Assert.That(setup.Director.TryConfirmFocused(), Is.True);
+                Assert.That(second.ConfirmCount, Is.EqualTo(1));
+                Assert.That(setup.Target.ConfirmCount, Is.Zero);
+            }
+        }
+
+        [Test]
+        public void ConfirmationFeedbackCannotBeClickedOrReplayedBeforeTheNextFrame()
+        {
+            using (var setup = new FocusedInteractionSetup())
+            {
+                var button = setup.Prompt.GetComponentInChildren<UnityEngine.UI.Button>();
+                Assert.That(button, Is.Not.Null);
+                Assert.That(button.interactable, Is.True);
+                int confirmations = 0;
+                setup.Director.Confirmed += _ =>
+                {
+                    confirmations++;
+                    if (confirmations == 1)
+                    {
+                        Assert.That(setup.Director.TryConfirmFocused(), Is.False,
+                            "A callback must not be able to re-confirm the consumed focus.");
+                    }
+                };
+
+                Assert.That(setup.Director.TryConfirmFocused(), Is.True);
+                Assert.That(setup.Director.Focused, Is.Null);
+                Assert.That(setup.Director.TryConfirmFocused(), Is.False);
+                Assert.That(setup.Target.ConfirmCount, Is.EqualTo(1));
+                Assert.That(confirmations, Is.EqualTo(1));
+                Assert.That(setup.Prompt.IsVisible, Is.True);
+                Assert.That(button.interactable, Is.False);
+                Assert.That(setup.Prompt.CurrentCopy,
+                    Is.EqualTo(WorldInteractionPromptCopy.GuideObjectiveText));
+
+                setup.Prompt.Show("Talk");
+                Assert.That(button.interactable, Is.True);
+                setup.Prompt.Hide();
+                Assert.That(button.interactable, Is.False);
+            }
+        }
+
+        [Test]
+        public void ConfigureClearsFocusAndFeedbackFromThePreviousActor()
+        {
+            using (var setup = new FocusedInteractionSetup())
+            {
+                Assert.That(setup.Director.TryConfirmFocused(), Is.True);
+                setup.Director.Configure(null, setup.Camera, setup.Prompt);
+
+                Assert.That(setup.Director.TryConfirmFocused(), Is.False);
+                Assert.That(setup.Director.Focused, Is.Null);
+                Assert.That(setup.Director.LastFeedback, Is.Empty);
+                Assert.That(setup.Prompt.IsVisible, Is.False);
+            }
+        }
+
+        private sealed class FocusedInteractionSetup : System.IDisposable
+        {
+            private readonly GameObject _root = new GameObject("FocusedInteractionTest");
+
+            public FocusedInteractionSetup()
+            {
+                ChampionHudCameraGate.Reset();
+                GameInput.SetGameplaySuppressed(false);
+                Player = CreateChild("Player");
+                Camera = CreateChild("Camera").AddComponent<UnityEngine.Camera>();
+                Director = _root.AddComponent<WorldInteractionDirector>();
+                Prompt = WorldInteractionPromptView.Create(_root.transform, null);
+                Target = AddTarget(
+                    FirstSessionWorldInteractables.GuideCatalogId,
+                    new Vector3(0f, 0f, 3f));
+                Director.Configure(Player.transform, Camera, Prompt);
+                RefreshFocus();
+                Assert.That(Director.Focused, Is.SameAs(Target));
+            }
+
+            public GameObject Player { get; }
+            public UnityEngine.Camera Camera { get; }
+            public WorldInteractionDirector Director { get; }
+            public WorldInteractionPromptView Prompt { get; }
+            public WorldInteractable Target { get; }
+
+            public WorldInteractable AddTarget(string catalogId, Vector3 position)
+            {
+                WorldInteractable target = CreateChild(catalogId).AddComponent<WorldInteractable>();
+                target.transform.position = position;
+                target.Configure(catalogId, WorldInteractionKind.Talk,
+                    WorldInteractionPromptCopy.GuideSubject,
+                    WorldInteractionPromptCopy.GuideObjectiveText);
+                Director.Register(target);
+                return target;
+            }
+
+            public void RefreshFocus()
+            {
+                typeof(WorldInteractionDirector).GetMethod("RefreshFocus",
+                    BindingFlags.Instance | BindingFlags.NonPublic).Invoke(Director, null);
+            }
+
+            public void Dispose()
+            {
+                Object.DestroyImmediate(_root);
+                GameInput.SetGameplaySuppressed(false);
+                ChampionHudCameraGate.Reset();
+            }
+
+            private GameObject CreateChild(string name)
+            {
+                var child = new GameObject(name);
+                child.transform.SetParent(_root.transform, false);
+                return child;
             }
         }
 

@@ -52,6 +52,11 @@ namespace AL.ChampionMode.Interaction
 
         public void Hide()
         {
+            if (_button != null)
+            {
+                _button.interactable = false;
+            }
+
             if (_root != null)
             {
                 _root.SetActive(false);
@@ -72,6 +77,11 @@ namespace AL.ChampionMode.Interaction
 
             string safeCopy = copy ?? string.Empty;
             bool hasCopy = !string.IsNullOrEmpty(safeCopy);
+            if (_button != null)
+            {
+                _button.interactable = hasCopy && showInteractGlyph;
+            }
+
             if (_glyph != null)
             {
                 _glyph.SetActive(hasCopy && showInteractGlyph);
