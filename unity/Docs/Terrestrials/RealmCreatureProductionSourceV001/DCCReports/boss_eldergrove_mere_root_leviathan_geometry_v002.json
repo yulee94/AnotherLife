@@ -9,7 +9,7 @@
   "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/boss_eldergrove_mere_root_leviathan/boss_eldergrove_mere_root_leviathan_source_v002.fbx",
   "outputSha256": "d9aebc51f066359885444c3a1adcf061647fc1c12ae2c2fcccac68972e265356",
   "editableBlend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/boss_eldergrove_mere_root_leviathan_geometry_v002.blend",
-  "status": "clean_geometry_pass_texture_uplift_required",
+  "status": "clean_geometry_pass_texture_rebuild_required",
   "productionReady": false,
   "rigged": false,
   "runtimeIntegrationState": "Blocked",

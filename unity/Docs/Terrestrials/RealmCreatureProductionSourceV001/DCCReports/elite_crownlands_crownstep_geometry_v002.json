@@ -9,7 +9,7 @@
   "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_crownlands_crownstep/elite_crownlands_crownstep_source_v002.fbx",
   "outputSha256": "786cb1d3b2245c76b50da2baf0fcc976f2dee8e93fa195f8d9e8d8401d37e51a",
   "editableBlend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/elite_crownlands_crownstep_geometry_v002.blend",
-  "status": "clean_geometry_pass_texture_uplift_required",
+  "status": "clean_geometry_pass_texture_rebuild_required",
   "productionReady": false,
   "rigged": false,
   "runtimeIntegrationState": "Blocked",
