@@ -60,7 +60,7 @@ namespace AL.ChampionMode.Interaction
                 return false;
             }
 
-            WorldInteractionResult result = offeredTarget.Confirm(actorAvailable: true);
+            WorldInteractionResult result = offeredTarget.Confirm(CanOfferInteraction);
             if (!result.Accepted)
             {
                 return false;
@@ -96,13 +96,7 @@ namespace AL.ChampionMode.Interaction
             _focused = null;
             _candidates.Clear();
             _candidateTargets.Clear();
-            if (!isActiveAndEnabled ||
-                _actor == null || !_actor.gameObject.activeInHierarchy ||
-                GameInput.GameplaySuppressed ||
-                ChampionHudCameraGate.BlocksGameplay ||
-                ChampionHudCameraGate.MenuOpen || ChampionHudCameraGate.RecapOpen ||
-                (_controller != null && _controller.BlocksGameplayEntry) ||
-                (_combat != null && (!_combat.isActiveAndEnabled || _combat.IsDead)))
+            if (!CanOfferInteraction)
             {
                 _prompt?.Hide();
                 return;
@@ -149,5 +143,14 @@ namespace AL.ChampionMode.Interaction
             _focused = null;
             _prompt?.Hide();
         }
+
+        private bool CanOfferInteraction =>
+            isActiveAndEnabled &&
+            _actor != null && _actor.gameObject.activeInHierarchy &&
+            !GameInput.GameplaySuppressed &&
+            !ChampionHudCameraGate.BlocksGameplay &&
+            !ChampionHudCameraGate.MenuOpen && !ChampionHudCameraGate.RecapOpen &&
+            (_controller == null || !_controller.BlocksGameplayEntry) &&
+            (_combat == null || (_combat.isActiveAndEnabled && !_combat.IsDead));
     }
 }
