@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using AL.ChampionMode.Camera;
 using AL.ChampionMode.UI;
 using AL.Input;
@@ -108,13 +110,13 @@ namespace AL.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator WorldObstaclePullsCameraInKeepsNearClipClearAndRestoresSmoothly()
+        public IEnumerator CloseWallPullsCameraInKeepsNearClipClearAndRestoresSmoothly()
         {
             CreateRig();
             BoxCollider obstacle = CreateBox(
-                "CameraWorldObstacle",
-                Pivot + Vector3.back * 4f,
-                new Vector3(6f, 6f, 0.5f));
+                "CameraCloseWall",
+                Pivot + Vector3.back * 1.55f,
+                new Vector3(6f, 6f, 0.3f));
             Physics.SyncTransforms();
 
             yield return null;
@@ -122,11 +124,11 @@ namespace AL.Tests.PlayMode
             float pulledDistance = Vector3.Distance(
                 Pivot,
                 _cameraObject.transform.position);
-            Assert.That(pulledDistance, Is.LessThan(4f),
-                "An obstruction between pivot and camera must pull the camera in immediately.");
+            Assert.That(pulledDistance, Is.LessThan(1.2f),
+                "A close wall must pull the camera in immediately instead of smoothing through it.");
             AssertNearClipClear(obstacle);
 
-            _follow.AddShake(1f, 0.2f);
+            _follow.AddShake(0.5f, 0.2f);
             for (int frame = 0; frame < 12; frame++)
             {
                 yield return null;
@@ -160,9 +162,51 @@ namespace AL.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator SaturatedCastExpandsReusableBufferAndChoosesNearestWall()
+        {
+            CreateRig();
+            const int obstructionCount = 48;
+            BoxCollider nearest = null;
+            for (int index = 0; index < obstructionCount; index++)
+            {
+                float distance = 7.4f - index * 0.13f;
+                BoxCollider obstruction = CreateBox(
+                    $"SaturatedCameraWall_{index:00}",
+                    Pivot + Vector3.back * distance,
+                    new Vector3(4f, 4f, 0.04f));
+                if (index == obstructionCount - 1)
+                {
+                    nearest = obstruction;
+                }
+            }
+
+            Physics.SyncTransforms();
+            yield return null;
+
+            Assert.That(GetQueryBufferLength("_obstructionHits"),
+                Is.GreaterThanOrEqualTo(64),
+                "A full non-alloc result buffer must grow and be reused rather than silently truncating the cast.");
+            Assert.That(
+                Vector3.Distance(Pivot, _cameraObject.transform.position),
+                Is.LessThan(1.1f),
+                "Saturated casts must still choose the nearest obstruction, independent of physics result order.");
+            AssertNearClipClear(nearest);
+        }
+
+        [UnityTest]
         public IEnumerator StartingInsideDenseWorldProxyDepenetratesNearClipOutsideGeometry()
         {
             CreateRig();
+            for (int index = 0; index < 40; index++)
+            {
+                var ignoredChild = new GameObject($"IgnoredDenseTargetCollider_{index:00}");
+                ignoredChild.transform.SetParent(_target.transform, false);
+                ignoredChild.transform.localPosition =
+                    Vector3.up * HeightOffset + Vector3.back * (FollowDistance * 0.5f);
+                BoxCollider ignoredCollider = ignoredChild.AddComponent<BoxCollider>();
+                ignoredCollider.size = new Vector3(12f, 8f, FollowDistance + 4f);
+            }
+
             BoxCollider enclosure = CreateBox(
                 "CameraStartingOverlap",
                 Pivot + Vector3.back * (FollowDistance * 0.5f),
@@ -176,6 +220,9 @@ namespace AL.Tests.PlayMode
 
             yield return null;
 
+            Assert.That(GetQueryBufferLength("_obstructionOverlaps"),
+                Is.GreaterThanOrEqualTo(64),
+                "Starting-overlap checks must expand past a saturated ignored-target result set.");
             AssertNearClipClear(enclosure);
             Assert.That(
                 Vector3.Dot(
@@ -185,8 +232,50 @@ namespace AL.Tests.PlayMode
                 "Starting-overlap recovery must keep the camera on its intended rear arm.");
         }
 
+        [Test]
+        public void WarmedSaturatedCollisionPathAllocatesNoManagedMemoryPerUpdate()
+        {
+            CreateRig();
+            for (int index = 0; index < 48; index++)
+            {
+                float distance = 7.4f - index * 0.13f;
+                CreateBox(
+                    $"AllocationCameraWall_{index:00}",
+                    Pivot + Vector3.back * distance,
+                    new Vector3(4f, 4f, 0.04f));
+            }
+
+            Physics.SyncTransforms();
+            _follow.enabled = false;
+            MethodInfo lateUpdate = typeof(CameraFollow).GetMethod(
+                "LateUpdate",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(lateUpdate, Is.Not.Null);
+            var invokeLateUpdate = (Action)Delegate.CreateDelegate(
+                typeof(Action),
+                _follow,
+                lateUpdate);
+
+            for (int index = 0; index < 8; index++)
+            {
+                invokeLateUpdate();
+            }
+
+            Assert.That(GetQueryBufferLength("_obstructionHits"),
+                Is.GreaterThanOrEqualTo(64));
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            for (int index = 0; index < 64; index++)
+            {
+                invokeLateUpdate();
+            }
+
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            Assert.That(allocated, Is.Zero,
+                "The warmed dense-arena camera path must not create per-frame managed garbage.");
+        }
+
         [UnityTest]
-        public IEnumerator OrbitZoomAndFollowPreserveMmoCameraContract()
+        public IEnumerator ChampionArenaPlayerOrbitZoomAndFollowPreserveMmoCameraContract()
         {
             AssertMmoCameraBindings();
             CreateChampionRig();
@@ -448,7 +537,7 @@ namespace AL.Tests.PlayMode
 
         private void CreateChampionRig()
         {
-            _target = Track(new GameObject("CameraFollowChampionTarget"));
+            _target = Track(new GameObject("Player_Champion"));
             _target.transform.position = new Vector3(0f, 1.05f, 0f);
             _targetController = _target.AddComponent<CharacterController>();
             _targetController.center = Vector3.zero;
@@ -456,7 +545,10 @@ namespace AL.Tests.PlayMode
             _targetController.radius = 0.45f;
             Physics.SyncTransforms();
 
-            _cameraObject = Track(new GameObject("CameraFollowChampionCamera"));
+            // Match the player/camera path authored by ChampionArenaSceneController
+            // without bootstrapping the arena's unrelated combat and save services.
+            _cameraObject = Track(new GameObject("Main Camera"));
+            _cameraObject.tag = "MainCamera";
             _camera = _cameraObject.AddComponent<UnityEngine.Camera>();
             _camera.nearClipPlane = 0.3f;
             _camera.fieldOfView = 42f;
@@ -470,6 +562,17 @@ namespace AL.Tests.PlayMode
 
             _follow = _cameraObject.AddComponent<CameraFollow>();
             _follow.ConfigureChampion(_target.transform);
+        }
+
+        private int GetQueryBufferLength(string fieldName)
+        {
+            FieldInfo field = typeof(CameraFollow).GetField(
+                fieldName,
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(field, Is.Not.Null);
+            var buffer = field.GetValue(_follow) as Array;
+            Assert.That(buffer, Is.Not.Null);
+            return buffer.Length;
         }
 
         private static void AssertMmoCameraBindings()
