@@ -64,6 +64,46 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Reproducible build contract
+        shell: pwsh
+        timeout-minutes: 10
+        run: |
+          $transcript = "artifacts/reproducible-build-contract.txt"
+          try {
+            & python -m unittest tools.tests.test_reproducible_build tools.tests.test_android_unity_package *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Reproducible build contract tests exited with code $LASTEXITCODE."
+            }
+            & python tools/reproducible_build.py --repo-root . inventory *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Reproducible build inventory exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Integrated deterministic QA contract
+        shell: pwsh
+        timeout-minutes: 15
+        run: |
+          $transcript = "artifacts/deterministic-qa-contract.txt"
+          try {
+            & python tools/qa/test_run_deterministic_qa.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Deterministic QA contract tests exited with code $LASTEXITCODE."
+            }
+            & python tools/qa/run_deterministic_qa.py --repo-root . --profile contract --output-dir artifacts/deterministic-qa *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Deterministic QA fixture profile exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Quality-gate fixture proof
         shell: pwsh
         timeout-minutes: 10
@@ -104,6 +144,11 @@ jobs:
           path: |
             artifacts/repository-hygiene.txt
             artifacts/android-unity-package-tests.txt
+            artifacts/reproducible-build-contract.txt
+            artifacts/deterministic-qa-contract.txt
+            artifacts/deterministic-qa/report.json
+            artifacts/deterministic-qa/junit.xml
+            artifacts/deterministic-qa/logs/
             artifacts/quality-gate-fixtures.txt
             artifacts/golden-scene-evidence-validator.txt
           if-no-files-found: error
