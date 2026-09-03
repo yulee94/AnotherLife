@@ -43,6 +43,7 @@ namespace AL.Input
         public static InputAction Scroll => Map["Scroll"];
         public static InputAction CameraRecenter => Map["CameraRecenter"];
         public static InputAction Attack => Map["Attack"];
+        public static InputAction Jump => Map["Jump"];
         public static InputAction Dodge => Map["Dodge"];
         public static InputAction Block => Map["Block"];
         public static InputAction Skill1 => Map["Skill1"];
@@ -184,6 +185,8 @@ namespace AL.Input
 
         public static bool AttackPressed() => !GameplaySuppressed && Attack.WasPressedThisFrame();
 
+        public static bool JumpPressed() => !GameplaySuppressed && Jump.WasPressedThisFrame();
+
         public static bool DodgePressed() => !GameplaySuppressed && Dodge.WasPressedThisFrame();
 
         public static bool BlockHeld() => !GameplaySuppressed && Block.IsPressed();
@@ -288,8 +291,11 @@ namespace AL.Input
             var attack = map.AddAction("Attack", InputActionType.Button, "<Mouse>/leftButton");
             attack.AddBinding("<Gamepad>/buttonWest");
 
-            var dodge = map.AddAction("Dodge", InputActionType.Button, "<Keyboard>/space");
-            dodge.AddBinding("<Gamepad>/buttonSouth");
+            var jump = map.AddAction("Jump", InputActionType.Button, "<Keyboard>/space");
+            jump.AddBinding("<Gamepad>/buttonSouth");
+
+            var dodge = map.AddAction("Dodge", InputActionType.Button, "<Keyboard>/leftAlt");
+            dodge.AddBinding("<Gamepad>/leftShoulder");
 
             var block = map.AddAction("Block", InputActionType.Button, "<Keyboard>/leftShift");
             block.AddBinding("<Gamepad>/leftTrigger");
