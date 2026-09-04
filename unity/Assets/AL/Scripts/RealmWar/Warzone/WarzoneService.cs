@@ -159,6 +159,13 @@ namespace AL.RealmWar.Warzone
                 return save != null;
             }
 
+            if (AL.Services.Local.TerritoryCaptureSaveAuthority.CanCommit(
+                    _saveGameService))
+            {
+                save = _saveGameService.CurrentSave;
+                return save != null;
+            }
+
             return _writeAuthorityGate.TryGetWritableSave(out save);
         }
 
