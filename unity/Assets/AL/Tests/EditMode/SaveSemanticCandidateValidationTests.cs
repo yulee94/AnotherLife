@@ -90,6 +90,14 @@ namespace AL.Tests.EditMode
             "\"Revisions\":[],\"Receipts\":[],\"Outbox\":[]}";
         private const string EmptyNotificationHistoryJson =
             "{\"Version\":1,\"Records\":[],\"Outbox\":[]}";
+        private const string EmptyOfflineProductionCatchUpJson =
+            "{\"Version\":1,\"OperationId\":\"al.offline.catchup.v1.test\"," +
+            "\"ReceiptId\":\"rcpt.test\",\"ProfileId\":\"alp_0123456789abcdef0123456789abcdef\"," +
+            "\"VerifiedGenerationFingerprint\":\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"," +
+            "\"LastVerifiedTimestamp\":100,\"CatchUpUntilTimestamp\":200,\"CappedElapsedSeconds\":100," +
+            "\"CatalogId\":\"kingdom_production_profile_v1\"," +
+            "\"CatalogSha256\":\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"," +
+            "\"SourceRevision\":\"test-source-v1\",\"Deltas\":[]}";
         private const string NeutralNvs01ProgressJson =
             "{\"Version\":0,\"PacketVersion\":\"\",\"PacketSha256\":\"\"," +
             "\"QuestId\":\"\",\"Revision\":0,\"StateId\":\"\",\"Objectives\":[]," +
@@ -327,6 +335,59 @@ namespace AL.Tests.EditMode
             Assert.That(
                 candidate.Diagnostics.Select(item => item.Code),
                 Does.Contain("SAVE_NOTIFICATION_HISTORY_SENSITIVE_TECHNICAL"));
+        }
+
+        [Test]
+        public void OfflineProductionCatchUpCurrentVersionIsWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"OfflineProductionCatchUp\":" + EmptyOfflineProductionCatchUpJson),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
+        public void OfflineProductionCatchUpForwardVersionStaysPreservedReadOnly()
+        {
+            string forward = EmptyOfflineProductionCatchUpJson.Replace(
+                "\"Version\":1",
+                "\"Version\":2");
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"OfflineProductionCatchUp\":" + forward),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_OFFLINE_PRODUCTION_CATCHUP_VERSION_FORWARD"));
+        }
+
+        [Test]
+        public void OfflineProductionCatchUpInvalidShapeIsMalformed()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"OfflineProductionCatchUp\":[]"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_OFFLINE_PRODUCTION_CATCHUP_INVALID"));
         }
 
         [Test]

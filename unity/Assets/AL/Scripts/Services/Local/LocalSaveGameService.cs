@@ -225,6 +225,7 @@ namespace AL.Services.Local
         ISaveGameCandidateStore,
         ILegacyRealmSelectionCandidateStore,
         IProfileBoundRealmSelectionCandidateStore,
+        IProfileBoundDeathPenaltyCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
         ILegacyFirstWorldProgressCandidateStore,
@@ -6347,6 +6348,26 @@ namespace AL.Services.Local
                 offlineProgressApplied: false,
                 diskChanged: diskChanged,
                 rawEvidencePreserved: true);
+        }
+
+        internal void PublishOfflineProgressApplied()
+        {
+            if (LastLoadDisposition == null ||
+                !LastLoadDisposition.IsWritable ||
+                LastLoadDisposition.OfflineProgressApplied)
+            {
+                return;
+            }
+
+            LastLoadDisposition = new SaveLoadDisposition(
+                LastLoadDisposition.CandidateSummaries,
+                LastLoadDisposition.SelectedSource,
+                LastLoadDisposition.SelectorReason,
+                LastLoadDisposition.IsWritable,
+                LastLoadDisposition.IsRuntimeUsable,
+                offlineProgressApplied: true,
+                diskChanged: true,
+                LastLoadDisposition.RawEvidencePreserved);
         }
 
         private static bool TryMapAuthoritySource(

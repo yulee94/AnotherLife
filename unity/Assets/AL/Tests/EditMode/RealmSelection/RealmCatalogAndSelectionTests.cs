@@ -409,15 +409,15 @@ namespace AL.Tests.EditMode.RealmSelection
         }
 
         [Test]
-        public void MissingRuntimeDefinitionCannotCommitOrProduceSplitCurrentRealmProperties()
+        public void MissingCatalogCannotCommitOrProduceSplitCurrentRealmProperties()
         {
             var uncommitted = new FakeSaveService();
-            var missingDefinitionService = new LocalRealmService(
+            var missingCatalogService = new LocalRealmService(
                 uncommitted,
-                new FakeGameDataService(_definitions, RealmId.Umbral),
-                _catalog);
+                new FakeGameDataService(_definitions),
+                null);
 
-            RealmSelectionResult missing = missingDefinitionService.TrySelectRealm(
+            RealmSelectionResult missing = missingCatalogService.TrySelectRealm(
                 new RealmSelectionRequest("tx_missing_definition", RealmId.Umbral));
 
             Assert.That(missing.Status, Is.EqualTo(RealmSelectionStatus.RealmDefinitionUnavailable));
@@ -425,18 +425,18 @@ namespace AL.Tests.EditMode.RealmSelection
             Assert.That(uncommitted.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.None));
 
             var committed = new FakeSaveService(RealmId.Umbral);
-            var inconsistentService = new LocalRealmService(
+            var catalogIdentity = new LocalRealmService(
                 committed,
                 new FakeGameDataService(_definitions, RealmId.Umbral),
                 _catalog);
 
-            Assert.That(inconsistentService.Identity.Status, Is.EqualTo(RealmIdentityStatus.CatalogUnavailable));
-            Assert.That(inconsistentService.CurrentRealmId, Is.EqualTo(RealmId.None));
-            Assert.That(inconsistentService.CurrentRealm, Is.Null);
+            Assert.That(catalogIdentity.Identity.Status, Is.EqualTo(RealmIdentityStatus.CommittedValid));
+            Assert.That(catalogIdentity.CurrentRealmId, Is.EqualTo(RealmId.Umbral));
+            Assert.That(catalogIdentity.CurrentRealm, Is.Null);
         }
 
         [Test]
-        public void NullGameDataServiceFailsClosedWithoutMutation()
+        public void NullGameDataServiceDoesNotBlockCatalogIdentity()
         {
             var save = new FakeSaveService();
             var service = new LocalRealmService(save, null, _catalog);
@@ -444,7 +444,8 @@ namespace AL.Tests.EditMode.RealmSelection
             RealmSelectionResult result = service.TrySelectRealm(
                 new RealmSelectionRequest("tx_null_game_data", RealmId.Crownlands));
 
-            Assert.That(result.Status, Is.EqualTo(RealmSelectionStatus.RealmDefinitionUnavailable));
+            Assert.That(result.Status, Is.EqualTo(RealmSelectionStatus.ProfileUnavailable));
+            Assert.That(result.TechnicalCode, Is.EqualTo("AL-REALM-TYPED-CANDIDATE-STORE-UNAVAILABLE"));
             Assert.That(save.SaveCount, Is.Zero);
             Assert.That(save.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.None));
         }

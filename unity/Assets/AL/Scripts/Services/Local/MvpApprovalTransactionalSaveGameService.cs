@@ -6,6 +6,7 @@ using AL.Data.Runtime;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
+using AL.ChampionMode.Death;
 
 namespace AL.Services.Local
 {
@@ -21,6 +22,7 @@ namespace AL.Services.Local
         ISaveGameCandidateStore,
         ILegacyRealmSelectionCandidateStore,
         IProfileBoundRealmSelectionCandidateStore,
+        IProfileBoundDeathPenaltyCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyFirstWorldProgressCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
@@ -125,6 +127,15 @@ namespace AL.Services.Local
                 () => ((IProfileBoundRealmSelectionCandidateStore)_inner)
                     .TryCommitProfileBoundRealmSelection(request),
                 ResolveRealmSelection);
+
+        DeathPenaltyCommitResult
+            IProfileBoundDeathPenaltyCandidateStore
+            .TryCommitProfileBoundDeathPenalty(
+                DeathPenaltyCommitRequest request) =>
+            Execute(
+                () => ((IProfileBoundDeathPenaltyCandidateStore)_inner)
+                    .TryCommitProfileBoundDeathPenalty(request),
+                ResolveDeathPenalty);
 
         SaveCandidateCommitResult
             ILegacyMvpLoopCandidateStore.TryCommitLegacyMvpLoop(
@@ -378,6 +389,33 @@ namespace AL.Services.Local
             }
 
             if (result.Status != RealmSelectionStatus.Committed)
+            {
+                return TransactionResolution.Rollback;
+            }
+
+            return result.Persisted && result.MutationOccurred && SaveCommitVerified
+                ? TransactionResolution.Commit
+                : TransactionResolution.RollbackAndFreeze;
+        }
+
+        private TransactionResolution ResolveDeathPenalty(DeathPenaltyCommitResult result)
+        {
+            if (InnerCommitUncertain ||
+                result.Status == DeathPenaltyCommitStatus.RejectedSaveUncertain)
+            {
+                return TransactionResolution.RollbackAndFreeze;
+            }
+
+            if (result.Status == DeathPenaltyCommitStatus.ReplayedBelowMax ||
+                result.Status == DeathPenaltyCommitStatus.ReplayedOathmarkPaymentRequired)
+            {
+                return result.Persisted && result.MutationOccurred && SaveCommitVerified
+                    ? TransactionResolution.Commit
+                    : TransactionResolution.Rollback;
+            }
+
+            if (result.Status != DeathPenaltyCommitStatus.CommittedBelowMax &&
+                result.Status != DeathPenaltyCommitStatus.OathmarkPaymentRequired)
             {
                 return TransactionResolution.Rollback;
             }

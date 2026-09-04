@@ -23,6 +23,11 @@ namespace AL.Data.Runtime
         // schema-2 saves keep SelectedRealm unchanged until the profile-bound
         // realm transaction installs committed metadata/receipt.
         public RealmSelectionAuthorityState RealmSelection;
+        // Optional schema-v2 extension. Omitted legacy schema-2 saves stay
+        // loadable; the first profile-bound death transaction installs
+        // progression and death-penalty authority together.
+        public ChampionProgressionState ChampionProgression;
+        public DeathPenaltyAuthorityState DeathPenalty;
         public List<ResourceData> Resources = new List<ResourceData>();
         public List<BuildingState> Buildings = new List<BuildingState>();
         public List<TroopInventoryData> Troops = new List<TroopInventoryData>();
@@ -59,6 +64,37 @@ namespace AL.Data.Runtime
         // Optional schema-v1 extension. Missing legacy saves admit empty
         // receipts/outbox and derive ownership revisions as 0 from Territories.
         public TerritoryCaptureLedgerData TerritoryCaptureLedger;
+        // Optional schema-v2 extension. Missing legacy schema-2 saves admit
+        // no catch-up receipt; OfflineProgressApplied stays false until a
+        // verified catch-up commit installs this marker.
+        public OfflineProductionCatchUpState OfflineProductionCatchUp;
+    }
+
+    [Serializable]
+    public sealed class OfflineProductionCatchUpState
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public string OperationId = string.Empty;
+        public string ReceiptId = string.Empty;
+        public string ProfileId = string.Empty;
+        public string VerifiedGenerationFingerprint = string.Empty;
+        public long LastVerifiedTimestamp;
+        public long CatchUpUntilTimestamp;
+        public long CappedElapsedSeconds;
+        public string CatalogId = string.Empty;
+        public string CatalogSha256 = string.Empty;
+        public string SourceRevision = string.Empty;
+        public List<OfflineProductionDeltaRecord> Deltas =
+            new List<OfflineProductionDeltaRecord>();
+    }
+
+    [Serializable]
+    public sealed class OfflineProductionDeltaRecord
+    {
+        public ResourceType ResourceType;
+        public long Amount;
     }
 
     [Serializable]
@@ -444,6 +480,85 @@ namespace AL.Data.Runtime
         public string ReceiptFingerprint = string.Empty;
         public string ExpectedGenerationFingerprint = string.Empty;
         public long Revision;
+    }
+
+    [Serializable]
+    public sealed class ChampionProgressionState
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public string ProfileId = string.Empty;
+        public string CharacterId = string.Empty;
+        public string AccountId = string.Empty;
+        public int CurrentLevel;
+        public int MaximumLevel;
+        public long InLevelExperienceUnits;
+        public long ExperienceUnitsPerLevel;
+        public string ProgressionRevision = string.Empty;
+        public string LevelCapPolicyId = string.Empty;
+        public string LevelCapPolicyRevision = string.Empty;
+    }
+
+    [Serializable]
+    public sealed class DeathPenaltyAuthorityState
+    {
+        public const int CurrentVersion = 1;
+        public const int OutcomeNone = 0;
+        public const int OutcomeBelowMaxCommitted = 1;
+        public const int OutcomeOathmarkPaymentRequired = 2;
+
+        public int Version;
+        public int Status;
+        public int Outcome;
+        public string ProfileId = string.Empty;
+        public string CharacterId = string.Empty;
+        public string AccountId = string.Empty;
+        public string DeathEventId = string.Empty;
+        public string CombatSessionId = string.Empty;
+        public string EncounterAttemptId = string.Empty;
+        public string InstanceId = string.Empty;
+        public long DeathOrdinal;
+        public string DeathStateRevision = string.Empty;
+        public string OperationId = string.Empty;
+        public string RequestFingerprint = string.Empty;
+        public string DeathFingerprint = string.Empty;
+        public string ReceiptHash = string.Empty;
+        public int Branch;
+        public string AfterProgressionRevision = string.Empty;
+        public string LedgerVersion = string.Empty;
+        public string LedgerRevision = string.Empty;
+        public string ExpectedGenerationFingerprint = string.Empty;
+        public long Revision;
+        public System.Collections.Generic.List<DeathPenaltyReceiptState> Receipts =
+            new System.Collections.Generic.List<DeathPenaltyReceiptState>();
+    }
+
+    [Serializable]
+    public sealed class DeathPenaltyReceiptState
+    {
+        public string OperationId = string.Empty;
+        public string RequestFingerprint = string.Empty;
+        public string DeathFingerprint = string.Empty;
+        public string ReceiptHash = string.Empty;
+        public string AccountId = string.Empty;
+        public string ProfileId = string.Empty;
+        public string CharacterId = string.Empty;
+        public string PolicyVersion = string.Empty;
+        public string LevelCapPolicyId = string.Empty;
+        public string LevelCapPolicyRevision = string.Empty;
+        public int Branch;
+        public int BeforeLevel;
+        public int AfterLevel;
+        public int MaximumLevel;
+        public long ExperienceUnitsPerLevel;
+        public long BeforeInLevelExperienceUnits;
+        public long AfterInLevelExperienceUnits;
+        public string BeforeProgressionRevision = string.Empty;
+        public string AfterProgressionRevision = string.Empty;
+        public string PlanHash = string.Empty;
+        public bool RequiresProgressionWrite;
+        public bool RevivalCommitted;
     }
 
     [Serializable]
