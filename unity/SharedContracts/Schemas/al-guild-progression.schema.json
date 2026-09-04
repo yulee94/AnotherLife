@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-guild-progression.schema.json",
+  "title": "Another Life Guild Progression And Research Policy",
+  "description": "Catalog authority for Guild level/research definitions and typed member-perk provenance. Guild is the machine identity; Clan is localization-only presentation copy. Numeric perk tuning is production-ineligible until an approved source exists.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "version",
+    "catalogId",
+    "game",
+    "sourceRevision",
+    "machineIdentity",
+    "playerFacingTerms",
+    "consumedContracts",
+    "progression",
+    "research",
+    "perks",
+    "hiddenGlobalMultipliers",
+    "transitions",
+    "replayPolicy",
+    "authorityBoundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "catalogId": { "const": "al_guild_progression_policy" },
+    "game": { "const": "Another Life" },
+    "sourceRevision": { "$ref": "#/$defs/stableId" },
+    "machineIdentity": { "const": "Guild" },
+    "playerFacingTerms": {
+      "type": "object",
+      "required": ["primary", "presentationAlias", "aliasScope"],
+      "properties": {
+        "primary": { "const": "Guild" },
+        "presentationAlias": { "const": "Clan" },
+        "aliasScope": { "const": "localization_only" }
+      },
+      "additionalProperties": false
+    },
+    "consumedContracts": {
+      "type": "object",
+      "required": ["guildCatalogId", "guildIdentity", "guildRoles"],
+      "properties": {
+        "guildCatalogId": { "const": "al_guild_membership_policy" },
+        "guildIdentity": { "const": "external_guild_snapshot" },
+        "guildRoles": { "const": "external_guild_roles" }
+      },
+      "additionalProperties": false
+    },
+    "progression": {
+      "type": "object",
+      "required": [
+        "levelCapSelected",
+        "researchTreeSelected",
+        "costsSelected",
+        "numericPerkTuningProductionEligible",
+        "authority",
+        "levels"
+      ],
+      "properties": {
+        "levelCapSelected": { "const": false },
+        "researchTreeSelected": { "const": false },
+        "costsSelected": { "const": false },
+        "numericPerkTuningProductionEligible": { "const": false },
+        "authority": { "const": "guild_master_only" },
+        "levels": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/structuralLevel" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "research": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/structuralResearch" }
+    },
+    "perks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/typedPerk" }
+    },
+    "hiddenGlobalMultipliers": { "const": "forbidden" },
+    "transitions": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        { "const": "advance_level" },
+        { "const": "complete_research" }
+      ],
+      "items": false
+    },
+    "replayPolicy": {
+      "type": "object",
+      "required": [
+        "operationIdentity",
+        "sameFingerprint",
+        "differentFingerprint",
+        "unknownOutcome"
+      ],
+      "properties": {
+        "operationIdentity": { "const": "operation_id" },
+        "sameFingerprint": { "const": "already_committed" },
+        "differentFingerprint": { "const": "conflict" },
+        "unknownOutcome": { "const": "fail_closed_until_reconciled" }
+      },
+      "additionalProperties": false
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "required": ["plannerScope", "numericPerkTuning", "excludedImplementations"],
+      "properties": {
+        "plannerScope": { "const": "engine_free_snapshot_only" },
+        "numericPerkTuning": { "const": "production_ineligible" },
+        "excludedImplementations": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "prefixItems": [
+            { "const": "persistence" },
+            { "const": "network" },
+            { "const": "save" },
+            { "const": "combat" },
+            { "const": "ui" },
+            { "const": "economy" },
+            { "const": "city" },
+            { "const": "raid" },
+            { "const": "oathmark_mint" },
+            { "const": "alliance" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 128
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "structuralLevel": {
+      "type": "object",
+      "required": ["levelId", "ordinal", "productionEligible"],
+      "properties": {
+        "levelId": { "$ref": "#/$defs/stableId" },
+        "ordinal": { "type": "integer", "minimum": 1 },
+        "productionEligible": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "structuralResearch": {
+      "type": "object",
+      "required": [
+        "researchId",
+        "requiredLevelId",
+        "requiredResearchIds",
+        "productionEligible"
+      ],
+      "properties": {
+        "researchId": { "$ref": "#/$defs/stableId" },
+        "requiredLevelId": { "$ref": "#/$defs/stableId" },
+        "requiredResearchIds": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stableId" }
+        },
+        "productionEligible": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "typedPerk": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "profileId",
+        "ruleId",
+        "requiredLevelId",
+        "requiredResearchId",
+        "scope",
+        "cap",
+        "stacking",
+        "sourceVersion",
+        "sourceHash",
+        "statBreakdownToken",
+        "hiddenGlobalMultiplier",
+        "productionEligible",
+        "appliesCombatMutation"
+      ],
+      "properties": {
+        "sourceId": { "const": "guild_progression" },
+        "profileId": { "const": "guild_member_character_stats" },
+        "ruleId": { "$ref": "#/$defs/stableId" },
+        "requiredLevelId": { "$ref": "#/$defs/stableId" },
+        "requiredResearchId": { "$ref": "#/$defs/stableId" },
+        "scope": { "const": "member_character_stats" },
+        "cap": {
+          "type": "object",
+          "required": ["kind", "productionEligible"],
+          "properties": {
+            "kind": { "const": "unselected" },
+            "productionEligible": { "const": false }
+          },
+          "additionalProperties": false
+        },
+        "stacking": {
+          "type": "object",
+          "required": ["group", "order", "rule"],
+          "properties": {
+            "group": { "$ref": "#/$defs/stableId" },
+            "order": { "type": "integer", "minimum": 0 },
+            "rule": { "const": "explicit_visible_only" }
+          },
+          "additionalProperties": false
+        },
+        "sourceVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "sourceHash": { "$ref": "#/$defs/sha256" },
+        "statBreakdownToken": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.]*$",
+          "maxLength": 128
+        },
+        "hiddenGlobalMultiplier": { "const": false },
+        "productionEligible": { "const": false },
+        "appliesCombatMutation": { "const": false }
+      },
+      "additionalProperties": false
+    }
+  }
+}

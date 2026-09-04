@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-guild-raid-muster.schema.json",
+  "title": "Another Life Guild Raid Muster And Closed Instance Policy",
+  "description": "Catalog authority for Guild weekly raid calls, explicit opt-in muster, and closed-instance transfer envelopes. Guild is the machine identity; Clan is localization-only presentation copy. Public realm dungeons remain a separate #456 authority.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "version",
+    "catalogId",
+    "game",
+    "sourceRevision",
+    "machineIdentity",
+    "playerFacingTerms",
+    "consumedContracts",
+    "callPolicy",
+    "bossRotation",
+    "closedInstance",
+    "consent",
+    "recovery",
+    "transitions",
+    "replayPolicy",
+    "authorityBoundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "catalogId": { "const": "al_guild_raid_muster_policy" },
+    "game": { "const": "Another Life" },
+    "sourceRevision": { "$ref": "#/$defs/stableId" },
+    "machineIdentity": { "const": "Guild" },
+    "playerFacingTerms": {
+      "type": "object",
+      "required": ["primary", "presentationAlias", "aliasScope"],
+      "properties": {
+        "primary": { "const": "Guild" },
+        "presentationAlias": { "const": "Clan" },
+        "aliasScope": { "const": "localization_only" }
+      },
+      "additionalProperties": false
+    },
+    "consumedContracts": {
+      "type": "object",
+      "required": ["guildCatalogId", "guildIdentity", "guildRoles", "allianceCatalogId", "allianceRelations"],
+      "properties": {
+        "guildCatalogId": { "const": "al_guild_membership_policy" },
+        "guildIdentity": { "const": "external_guild_snapshot" },
+        "guildRoles": { "const": "external_guild_roles" },
+        "allianceCatalogId": { "const": "al_alliance_war_policy" },
+        "allianceRelations": { "const": "external_alliance_war_snapshot" }
+      },
+      "additionalProperties": false
+    },
+    "callPolicy": {
+      "type": "object",
+      "required": [
+        "callerAuthority",
+        "windowMinutes",
+        "callsPerGuildPerWeek",
+        "parallelSlots",
+        "minJoinCount",
+        "clock"
+      ],
+      "properties": {
+        "callerAuthority": { "const": "master_or_officer" },
+        "windowMinutes": { "const": 30 },
+        "callsPerGuildPerWeek": { "const": 1 },
+        "parallelSlots": { "const": 1 },
+        "minJoinCount": { "type": "integer", "minimum": 1 },
+        "clock": { "const": "trusted_server_unix_seconds" }
+      },
+      "additionalProperties": false
+    },
+    "bossRotation": {
+      "type": "object",
+      "required": ["slotCount", "formula", "slots"],
+      "properties": {
+        "slotCount": { "const": 4 },
+        "formula": { "const": "season_epoch_plus_week_id_mod_4" },
+        "slots": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/bossSlot" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "closedInstance": {
+      "type": "object",
+      "required": [
+        "topologyId",
+        "idPrefix",
+        "transferAuthority",
+        "reservedPublicDungeonIds"
+      ],
+      "properties": {
+        "topologyId": { "$ref": "#/$defs/stableId" },
+        "idPrefix": { "const": "closed_raid_" },
+        "transferAuthority": { "const": "command_envelope_only" },
+        "reservedPublicDungeonIds": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            { "const": "public_realm_dungeon_entrance" },
+            { "const": "public_realm_dungeon_cooldown" },
+            { "const": "public_realm_dungeon_quest" },
+            { "const": "public_realm_dungeon_reward" },
+            { "const": "public_realm_dungeon_coordinate" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "consent": {
+      "type": "object",
+      "required": ["join", "decline", "silence", "warBypassesConsent", "membershipInfersJoin"],
+      "properties": {
+        "join": { "const": "explicit" },
+        "decline": { "const": "explicit" },
+        "silence": { "const": "no_response" },
+        "warBypassesConsent": { "const": false },
+        "membershipInfersJoin": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "recovery": {
+      "type": "object",
+      "required": [
+        "safeReturn",
+        "unknownOutcome",
+        "duplicateFingerprint",
+        "terminalResolution"
+      ],
+      "properties": {
+        "safeReturn": { "const": "validated_pre_raid_envelope" },
+        "unknownOutcome": { "const": "no_reward_no_lockout" },
+        "duplicateFingerprint": { "const": "already_committed" },
+        "terminalResolution": { "const": "xor" }
+      },
+      "additionalProperties": false
+    },
+    "transitions": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "prefixItems": [
+        { "const": "announce_call" },
+        { "const": "join" },
+        { "const": "decline" },
+        { "const": "launch" },
+        { "const": "transfer_in" },
+        { "const": "transfer_out" },
+        { "const": "reconcile" },
+        { "const": "cancel" },
+        { "const": "expire" }
+      ],
+      "items": false
+    },
+    "replayPolicy": {
+      "type": "object",
+      "required": [
+        "operationIdentity",
+        "sameFingerprint",
+        "differentFingerprint",
+        "unknownOutcome"
+      ],
+      "properties": {
+        "operationIdentity": { "const": "operation_id" },
+        "sameFingerprint": { "const": "already_committed" },
+        "differentFingerprint": { "const": "conflict" },
+        "unknownOutcome": { "const": "fail_closed_until_reconciled" }
+      },
+      "additionalProperties": false
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "required": ["plannerScope", "excludedImplementations"],
+      "properties": {
+        "plannerScope": { "const": "engine_free_snapshot_only" },
+        "excludedImplementations": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "prefixItems": [
+            { "const": "persistence" },
+            { "const": "network" },
+            { "const": "save" },
+            { "const": "combat" },
+            { "const": "ui" },
+            { "const": "economy" },
+            { "const": "city" },
+            { "const": "scene_teleport" },
+            { "const": "boss_balance" },
+            { "const": "public_realm_dungeon" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 128
+    },
+    "bossSlot": {
+      "type": "object",
+      "required": ["slotIndex", "bossProfileId"],
+      "properties": {
+        "slotIndex": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "bossProfileId": { "$ref": "#/$defs/stableId" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

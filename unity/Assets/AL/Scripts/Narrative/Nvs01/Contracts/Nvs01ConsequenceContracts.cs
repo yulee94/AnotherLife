@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using AL.ChampionMode.Encounter;
 using AL.Core.SaveAuthority;
 using AL.Narrative.Nvs01.Contracts;
 
@@ -61,7 +62,10 @@ namespace AL.Narrative.Nvs01
             "UNLOCK_REALM_CHAPTER_1";
 
         internal const string TearArtifactId = "ARTIFACT_CELESTIAL_TEAR";
-        internal const string GoldResourceId = "RESOURCE_GOLD";
+        internal const string CatalogGoldTargetId = "RESOURCE_GOLD";
+        internal const string OathmarkTechnicalCurrencyId = "oathmark";
+        internal const string ForbiddenLegacyGoldResourceId = "RESOURCE_GOLD";
+        internal const string ForbiddenKingdomResourceId = "kingdom_resource";
         internal const string ValeriusNpcId = "NPC_VALERIUS";
         internal const string AbstractChapterId = "CH1_REALM_INTRO";
 
@@ -69,7 +73,11 @@ namespace AL.Narrative.Nvs01
             "OMEN_1:ARENA_SUCCESS:";
         internal const string ReportOperationId =
             "OMEN_1:REPORT_COMPLETE:v1";
-        internal const long GoldAmount = 500;
+        internal const long OathmarkAmount = 500;
+        internal const string EncounterResultSnapshotVersion =
+            ChampionEncounterSourceSet.CurrentSourceSetVersion;
+        internal const string EncounterResultSnapshotReference =
+            ChampionEncounterSourceSet.CurrentSourceSetSha256;
         internal const float AffinityAmount = 5f;
         internal const float MinimumAffinity = -100f;
         internal const float MaximumAffinity = 100f;
@@ -114,6 +122,29 @@ namespace AL.Narrative.Nvs01
                     return string.Empty;
             }
         }
+
+        internal static bool IsAuthoritativeOathmarkCurrency(
+            string technicalCurrencyId) =>
+            string.Equals(
+                technicalCurrencyId,
+                OathmarkTechnicalCurrencyId,
+                StringComparison.Ordinal);
+
+        internal static bool IsForbiddenCurrencySubstitution(
+            string technicalCurrencyId) =>
+            !IsAuthoritativeOathmarkCurrency(technicalCurrencyId);
+
+        internal static bool MatchesCatalogBackedEncounterResult(
+            string snapshotVersion,
+            string snapshotReference) =>
+            string.Equals(
+                snapshotVersion,
+                EncounterResultSnapshotVersion,
+                StringComparison.Ordinal) &&
+            string.Equals(
+                snapshotReference,
+                EncounterResultSnapshotReference,
+                StringComparison.Ordinal);
     }
 
     internal static class Nvs01ConsequenceDiagnosticCodes
@@ -236,7 +267,8 @@ namespace AL.Narrative.Nvs01
             IList<string> appliedOperationIds,
             IList<string> appliedEffectKeys,
             IList<Nvs01ConsequenceApplicationReceipt>
-                applicationReceipts)
+                applicationReceipts,
+            string technicalCurrencyId = null)
         {
             ArtifactDefinitionStatus = artifactDefinitionStatus;
             GoldDefinitionStatus = goldDefinitionStatus;
@@ -244,6 +276,9 @@ namespace AL.Narrative.Nvs01
             GoldBalance = goldBalance;
             ValeriusAffinity = valeriusAffinity;
             CurrentChapterId = currentChapterId ?? string.Empty;
+            TechnicalCurrencyId = string.IsNullOrEmpty(technicalCurrencyId)
+                ? Nvs01ConsequenceContract.OathmarkTechnicalCurrencyId
+                : technicalCurrencyId;
             AcquiredArtifactInputCount = acquiredArtifactIds?.Count ?? -1;
             AcquiredArtifactIds = Nvs01ConsequenceImmutable.FreezeStrings(
                 acquiredArtifactIds,
@@ -276,6 +311,7 @@ namespace AL.Narrative.Nvs01
             get;
         }
         internal long GoldBalance { get; }
+        internal string TechnicalCurrencyId { get; }
         internal float ValeriusAffinity { get; }
         internal string CurrentChapterId { get; }
         internal int AcquiredArtifactInputCount { get; }
@@ -639,6 +675,7 @@ namespace AL.Narrative.Nvs01
                 CultureInfo.InvariantCulture));
             Append(builder, ((int)domain.AffinityDefinitionStatus).ToString(
                 CultureInfo.InvariantCulture));
+            Append(builder, domain.TechnicalCurrencyId);
             Append(builder, domain.GoldBalance.ToString(
                 CultureInfo.InvariantCulture));
             Append(builder, domain.ValeriusAffinity.ToString(
@@ -1235,7 +1272,8 @@ namespace AL.Narrative.Nvs01
             float resultingValeriusAffinity,
             string previousChapterId,
             string resultingChapterId,
-            string planFingerprint)
+            string planFingerprint,
+            string technicalCurrencyId = null)
         {
             ContractVersion = contractVersion;
             Kind = kind;
@@ -1265,6 +1303,9 @@ namespace AL.Narrative.Nvs01
             ResultingValeriusAffinity = resultingValeriusAffinity;
             PreviousChapterId = previousChapterId ?? string.Empty;
             ResultingChapterId = resultingChapterId ?? string.Empty;
+            TechnicalCurrencyId = string.IsNullOrEmpty(technicalCurrencyId)
+                ? Nvs01ConsequenceContract.OathmarkTechnicalCurrencyId
+                : technicalCurrencyId;
             PlanFingerprint = planFingerprint ?? string.Empty;
         }
 
@@ -1290,6 +1331,7 @@ namespace AL.Narrative.Nvs01
         internal float ResultingValeriusAffinity { get; }
         internal string PreviousChapterId { get; }
         internal string ResultingChapterId { get; }
+        internal string TechnicalCurrencyId { get; }
         internal string PlanFingerprint { get; }
 
         internal static Nvs01ConsequenceApplicationReceipt Create(
@@ -1312,8 +1354,12 @@ namespace AL.Narrative.Nvs01
             float previousValeriusAffinity,
             float resultingValeriusAffinity,
             string previousChapterId,
-            string resultingChapterId)
+            string resultingChapterId,
+            string technicalCurrencyId = null)
         {
+            string currency = string.IsNullOrEmpty(technicalCurrencyId)
+                ? Nvs01ConsequenceContract.OathmarkTechnicalCurrencyId
+                : technicalCurrencyId;
             var provisional = new Nvs01ConsequenceApplicationReceipt(
                 Nvs01ConsequenceContract.ContractVersion,
                 kind,
@@ -1336,7 +1382,8 @@ namespace AL.Narrative.Nvs01
                 resultingValeriusAffinity,
                 previousChapterId,
                 resultingChapterId,
-                string.Empty);
+                string.Empty,
+                currency);
             return new Nvs01ConsequenceApplicationReceipt(
                 provisional.ContractVersion,
                 provisional.Kind,
@@ -1359,7 +1406,8 @@ namespace AL.Narrative.Nvs01
                 provisional.ResultingValeriusAffinity,
                 provisional.PreviousChapterId,
                 provisional.ResultingChapterId,
-                ComputeFingerprint(provisional));
+                ComputeFingerprint(provisional),
+                provisional.TechnicalCurrencyId);
         }
 
         internal bool HasCanonicalFingerprint() =>
@@ -1398,6 +1446,7 @@ namespace AL.Narrative.Nvs01
                 Append(builder, receipt.EffectKeys[index]);
             }
             Append(builder, receipt.TargetChapterId);
+            Append(builder, receipt.TechnicalCurrencyId);
             Append(builder, receipt.PreviousGoldBalance.ToString(
                 CultureInfo.InvariantCulture));
             Append(builder, receipt.ResultingGoldBalance.ToString(

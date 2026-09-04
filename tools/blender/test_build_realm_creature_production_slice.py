@@ -56,6 +56,14 @@ class RealmCreatureProductionSliceBuilderTests(unittest.TestCase):
         self.assertAlmostEqual(0.25, position_error, places=5)
         self.assertAlmostEqual(45.0, rotation_error, places=4)
 
+    def test_try_rotate_skips_missing_bones(self) -> None:
+        bpy.ops.object.armature_add()
+        armature = bpy.context.object
+        BUILDER.try_rotate(armature, "missing_bone", y=0.5)
+        bone = armature.pose.bones[0]
+        BUILDER.try_rotate(armature, bone.name, y=0.2)
+        self.assertLess(bone.rotation_quaternion.w, 0.999)
+
     def test_triangle_vertex_order_check_rejects_reordered_indices(self) -> None:
         self.assertTrue(hasattr(BUILDER, "triangle_vertex_order_preserved"))
         self.assertTrue(
