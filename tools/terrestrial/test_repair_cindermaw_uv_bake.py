@@ -60,6 +60,61 @@ class CindermawUvBakeTests(unittest.TestCase):
     def test_accepts_complete_fail_closed_uv_bake_report(self):
         self.assertEqual([], validate_uv_bake_report(self._valid_report()))
 
+    def test_accepts_authored_normal_detail_after_smoothing_evidence(self):
+        report = self._valid_report()
+        report["status"] = (
+            "clean_geometry_pass_uv_bake_pass_smoothing_pass_"
+            "normal_detail_pass_texture_grade_pass_rigging_required"
+        )
+        report["metrics"].update(
+            {
+                "sharpEdgesBefore": 53054,
+                "sharpEdgesAfter": 631,
+                "normalAngularP95Degrees": 11.4,
+                "normalAngularMaxDegrees": 25.1,
+            }
+        )
+        report["normalDetail"] = {
+            "status": "PASS",
+            "method": "object_space_procedural_height_to_clean_uv_tangent_normal_v001",
+            "authoredNormalDetail": True,
+            "runtimeVfxSeparate": True,
+            "gutterRadiusPixels": 2.0,
+            "atlasBackground": "neutral_tangent",
+            "coordinateFrame": {
+                "lateralAxis": "world X",
+                "longitudinalAxis": "world Y",
+                "dorsalAxis": "world Z",
+                "span": [0.9, 1.9, 0.5],
+            },
+        }
+        report["bakedMaps"][1]["provenance"] = report["normalDetail"]["method"]
+
+        self.assertEqual([], validate_uv_bake_report(report))
+        report["normalDetail"]["gutterRadiusPixels"] = 3.0
+        self.assertIn(
+            "normalDetail gutter radius must be exactly two pixels",
+            validate_uv_bake_report(report),
+        )
+        report["normalDetail"]["gutterRadiusPixels"] = 2.0
+        report["normalDetail"]["atlasBackground"] = "nearest_island"
+        self.assertIn(
+            "normalDetail atlas background must stay neutral tangent",
+            validate_uv_bake_report(report),
+        )
+        report["normalDetail"]["atlasBackground"] = "neutral_tangent"
+        report["normalDetail"]["coordinateFrame"]["longitudinalAxis"] = "world Z"
+        self.assertIn(
+            "normalDetail coordinate frame axes are invalid",
+            validate_uv_bake_report(report),
+        )
+        report["normalDetail"]["coordinateFrame"]["longitudinalAxis"] = "world Y"
+        report["normalDetail"]["coordinateFrame"]["span"] = ["bad", 1.9, 0.5]
+        self.assertIn(
+            "normalDetail coordinate frame axes are invalid",
+            validate_uv_bake_report(report),
+        )
+
     def test_rejects_overlap_missing_maps_and_false_readiness(self):
         report = self._valid_report()
         report["productionReady"] = True
