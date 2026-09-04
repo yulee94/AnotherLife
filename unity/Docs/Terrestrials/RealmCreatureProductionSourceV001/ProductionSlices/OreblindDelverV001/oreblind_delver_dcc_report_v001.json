@@ -1,0 +1,443 @@
+{
+  "authorityBoundary": {
+    "deviceQualification": "BLOCKED",
+    "gameplayOrSpawnActivation": false,
+    "runtimeIntegration": "BLOCKED",
+    "runtimeVfxSeparate": true
+  },
+  "blenderVersion": "5.2.0 LTS",
+  "builder": {
+    "path": "tools/blender/build_realm_creature_production_slice.py",
+    "sha256": "725b6c9670f09fa9415caf3740be29352c20ec2c6f13f728dc1e6dbab4eff6fc"
+  },
+  "deformation": {
+    "degenerateTriangles": 0,
+    "inversionMethod": "triangle_vertex_order_identity_plus_positive_area_v1",
+    "invertedTriangles": 0,
+    "maximumBoundsExpansionRatio": 1.317472,
+    "nonFiniteVertices": 0,
+    "poseCount": 24,
+    "poses": [
+      {
+        "actionName": "ANIM_oreblind_delver_idle_weight_shift_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_idle_weight_shift_v001",
+        "frame": 30,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_idle_weight_shift_v001",
+        "frame": 61,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_locomotion_walk_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_locomotion_walk_v001",
+        "frame": 30,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_locomotion_walk_v001",
+        "frame": 61,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_locomotion_run_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_locomotion_run_v001",
+        "frame": 15,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_locomotion_run_v001",
+        "frame": 31,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_attack_basic_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_attack_basic_v001",
+        "frame": 23,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_attack_basic_v001",
+        "frame": 46,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_attack_special_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_attack_special_v001",
+        "frame": 30,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_attack_special_v001",
+        "frame": 61,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_skill_anticipation_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_skill_anticipation_v001",
+        "frame": 23,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_skill_anticipation_v001",
+        "frame": 46,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_reaction_hit_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_reaction_hit_v001",
+        "frame": 15,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_reaction_hit_v001",
+        "frame": 31,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_defeat_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_defeat_v001",
+        "frame": 30,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_oreblind_delver_defeat_v001",
+        "frame": 61,
+        "issues": 0
+      }
+    ]
+  },
+  "lods": [
+    {
+      "id": "LOD0",
+      "materialSlots": 1,
+      "object": "GEO_oreblind_delver_LOD0",
+      "protectedIdentityCues": [
+        "six_load_bearing_digging_limb_columns_in_three_distinct_pairs",
+        "eyeless_wedge_skull",
+        "broad_sensory_jaw_plates",
+        "short_counterweight_tail"
+      ],
+      "triangles": 45799,
+      "uvLayers": 1,
+      "vertices": 22922
+    },
+    {
+      "id": "LOD1",
+      "materialSlots": 1,
+      "object": "GEO_oreblind_delver_LOD1",
+      "protectedIdentityCues": [
+        "six_load_bearing_digging_limb_columns_in_three_distinct_pairs",
+        "eyeless_wedge_skull",
+        "broad_sensory_jaw_plates",
+        "short_counterweight_tail"
+      ],
+      "triangles": 26563,
+      "uvLayers": 1,
+      "vertices": 13298
+    },
+    {
+      "id": "LOD2",
+      "materialSlots": 1,
+      "object": "GEO_oreblind_delver_LOD2",
+      "protectedIdentityCues": [
+        "six_load_bearing_digging_limb_columns_in_three_distinct_pairs",
+        "eyeless_wedge_skull",
+        "broad_sensory_jaw_plates",
+        "short_counterweight_tail"
+      ],
+      "triangles": 12822,
+      "uvLayers": 1,
+      "vertices": 6425
+    }
+  ],
+  "logicalBuildSignature": "932a0f11bf3b5dc7fd7736dc0e95b656468c7577bb9c5cb84f950d886cb5ccc4",
+  "material": {
+    "emissionBakedIntoCleanMesh": false,
+    "id": "mat_oreblind_delver_pbr_v001",
+    "maximumTextureLongEdge": 2048,
+    "runtimeVfxSeparate": true,
+    "slotCount": 1,
+    "textureRoles": [
+      "ambient_occlusion",
+      "base_color",
+      "metallic_smoothness",
+      "normal"
+    ]
+  },
+  "motions": [
+    {
+      "actionName": "ANIM_oreblind_delver_idle_weight_shift_v001",
+      "finiteTransforms": true,
+      "frameCount": 61,
+      "loop": true,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "idle.weight_shift",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_oreblind_delver_locomotion_walk_v001",
+      "finiteTransforms": true,
+      "frameCount": 61,
+      "loop": true,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "locomotion.walk",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_oreblind_delver_locomotion_run_v001",
+      "finiteTransforms": true,
+      "frameCount": 31,
+      "loop": true,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "locomotion.run",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_oreblind_delver_attack_basic_v001",
+      "finiteTransforms": true,
+      "frameCount": 46,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "attack.basic",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_oreblind_delver_attack_special_v001",
+      "finiteTransforms": true,
+      "frameCount": 61,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "attack.special",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_oreblind_delver_skill_anticipation_v001",
+      "finiteTransforms": true,
+      "frameCount": 46,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "skill.anticipation",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_oreblind_delver_reaction_hit_v001",
+      "finiteTransforms": true,
+      "frameCount": 31,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "reaction.hit",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_oreblind_delver_defeat_v001",
+      "finiteTransforms": true,
+      "frameCount": 61,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 13.841348,
+      "motionKey": "defeat",
+      "sampleRateHz": 30
+    }
+  ],
+  "normalization": {
+    "boundsMaximum": [
+      3.6,
+      1.833386,
+      3.306057
+    ],
+    "boundsMinimum": [
+      -3.6,
+      -1.833386,
+      0.0
+    ],
+    "canonicalFront": "-X",
+    "detectedSourceFrontBeforeCanonicalization": "+X",
+    "dimensionsMeters": [
+      7.2,
+      3.666773,
+      3.306057
+    ],
+    "targetLengthMeters": 7.2
+  },
+  "qualificationId": "rcpq_elite_stonehold_oreblind_delver_v001",
+  "repeatBuildLogicalSignature": "932a0f11bf3b5dc7fd7736dc0e95b656468c7577bb9c5cb84f950d886cb5ccc4",
+  "rig": {
+    "armatureObject": "RIG_oreblind_delver",
+    "boneNames": [
+      "body_root",
+      "front_foot_l",
+      "front_foot_r",
+      "front_lower_l",
+      "front_lower_r",
+      "front_upper_l",
+      "front_upper_r",
+      "head",
+      "middle_foot_l",
+      "middle_foot_r",
+      "middle_lower_l",
+      "middle_lower_r",
+      "middle_upper_l",
+      "middle_upper_r",
+      "motion_root",
+      "neck_01",
+      "rear_foot_l",
+      "rear_foot_r",
+      "rear_lower_l",
+      "rear_lower_r",
+      "rear_upper_l",
+      "rear_upper_r",
+      "root",
+      "sensory_plate_front",
+      "sensory_plate_mid",
+      "sensory_plate_rear",
+      "socket_attack_origin",
+      "socket_camera_focus",
+      "socket_forefoot_contact_l",
+      "socket_forefoot_contact_r",
+      "socket_middle_foot_contact_l",
+      "socket_middle_foot_contact_r",
+      "socket_rear_foot_contact_l",
+      "socket_rear_foot_contact_r",
+      "socket_vfx_claw_spark",
+      "socket_vfx_gallery_dust",
+      "socket_vfx_jaw_sensor",
+      "socket_vfx_plate_stress",
+      "spine_front",
+      "spine_rear",
+      "tail_01",
+      "wedge_skull"
+    ],
+    "hierarchy": {
+      "body_root": "motion_root",
+      "front_foot_l": "front_lower_l",
+      "front_foot_r": "front_lower_r",
+      "front_lower_l": "front_upper_l",
+      "front_lower_r": "front_upper_r",
+      "front_upper_l": "spine_front",
+      "front_upper_r": "spine_front",
+      "head": "neck_01",
+      "middle_foot_l": "middle_lower_l",
+      "middle_foot_r": "middle_lower_r",
+      "middle_lower_l": "middle_upper_l",
+      "middle_lower_r": "middle_upper_r",
+      "middle_upper_l": "body_root",
+      "middle_upper_r": "body_root",
+      "motion_root": "root",
+      "neck_01": "spine_front",
+      "rear_foot_l": "rear_lower_l",
+      "rear_foot_r": "rear_lower_r",
+      "rear_lower_l": "rear_upper_l",
+      "rear_lower_r": "rear_upper_r",
+      "rear_upper_l": "spine_rear",
+      "rear_upper_r": "spine_rear",
+      "root": null,
+      "sensory_plate_front": "spine_front",
+      "sensory_plate_mid": "spine_front",
+      "sensory_plate_rear": "spine_rear",
+      "socket_attack_origin": "wedge_skull",
+      "socket_camera_focus": "body_root",
+      "socket_forefoot_contact_l": "front_foot_l",
+      "socket_forefoot_contact_r": "front_foot_r",
+      "socket_middle_foot_contact_l": "middle_foot_l",
+      "socket_middle_foot_contact_r": "middle_foot_r",
+      "socket_rear_foot_contact_l": "rear_foot_l",
+      "socket_rear_foot_contact_r": "rear_foot_r",
+      "socket_vfx_claw_spark": "front_foot_l",
+      "socket_vfx_gallery_dust": "body_root",
+      "socket_vfx_jaw_sensor": "wedge_skull",
+      "socket_vfx_plate_stress": "sensory_plate_mid",
+      "spine_front": "body_root",
+      "spine_rear": "body_root",
+      "tail_01": "spine_rear",
+      "wedge_skull": "head"
+    },
+    "hierarchySignature": "222865641603ec85a052df7e153b55f16aff00ee9115b058098089f1534491a1",
+    "maximumInfluencesPerVertex": 4,
+    "parentlessBones": [
+      "root"
+    ],
+    "skeletonSignature": "27c9180d47f93066db3054331ff98a13558fe2c792084f6f07a4ca772939c528",
+    "unweightedVertices": 0
+  },
+  "roundTrip": {
+    "actionsMatched": true,
+    "fbxImportPassed": true,
+    "importedActionNames": [
+      "RIG_oreblind_delver|ANIM_oreblind_delver_attack_basic_v001",
+      "RIG_oreblind_delver|ANIM_oreblind_delver_attack_special_v001",
+      "RIG_oreblind_delver|ANIM_oreblind_delver_defeat_v001",
+      "RIG_oreblind_delver|ANIM_oreblind_delver_idle_weight_shift_v001",
+      "RIG_oreblind_delver|ANIM_oreblind_delver_locomotion_run_v001",
+      "RIG_oreblind_delver|ANIM_oreblind_delver_locomotion_walk_v001",
+      "RIG_oreblind_delver|ANIM_oreblind_delver_reaction_hit_v001",
+      "RIG_oreblind_delver|ANIM_oreblind_delver_skill_anticipation_v001"
+    ],
+    "importedMaterialNames": [
+      "mat_oreblind_delver_pbr_v001"
+    ],
+    "importedTriangles": {
+      "GEO_oreblind_delver_LOD0": 45799,
+      "GEO_oreblind_delver_LOD1": 26563,
+      "GEO_oreblind_delver_LOD2": 12822
+    },
+    "lodTrianglesMatched": true,
+    "materialsMatched": true,
+    "skeletonSignatureMatched": true
+  },
+  "schemaVersion": 1,
+  "source": {
+    "inventory": [
+      {
+        "materialSlots": 1,
+        "name": "temp",
+        "triangles": 45800,
+        "uvLayers": 1,
+        "vertices": 22922
+      }
+    ],
+    "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_stonehold_oreblind_delver/elite_stonehold_oreblind_delver_source_v001.fbx",
+    "sha256": "df10a1ed7b48d3ccc0c87c0fd7c163f14be25f5e71c0c3a32de624a931534b2b"
+  },
+  "status": "PASS"
+}
