@@ -1,0 +1,347 @@
+{
+  "packetId": "stonehold_master_gruff_npc_3d_foundation_v001",
+  "schemaVersion": 1,
+  "rosterId": "rct_stonehold_npc_service_v001",
+  "displayName": "Master Gruff \u2014 Stonehold Service Worker",
+  "parentPacket": "four_realm_representative_npc_2d_source_v001",
+  "parentPr": 731,
+  "parentMergeSha": "ce25ef090d588f75f3e02f08798d8fec8dda30cd",
+  "meshy": {
+    "multiImageTaskId": "01a06a80-bfb7-7251-9b95-209e7e9e67b0",
+    "multiImageCredits": 30,
+    "remeshTaskId": "01a06a89-80f4-7317-981f-7fc07bcc2f2f",
+    "remeshCredits": 5,
+    "aiModel": "meshy-7",
+    "poseMode": "a-pose",
+    "disposition": "selected_identity_sculpt"
+  },
+  "sourceImages": [
+    {
+      "view": "front",
+      "sha256": "c3a2ca8c753c16312b3d9b62086a9e7e41946f009f4a7f0609d19252e463e755"
+    },
+    {
+      "view": "right",
+      "sha256": "7c2662767ec702cd5d96188173d8d267c1fac3cf01804637cf7a06d91d9c9e7e"
+    },
+    {
+      "view": "back",
+      "sha256": "e3625ac11dc1e0cb83d8c25594bb9645283b9fff9f5781e112077e21329bff3f"
+    },
+    {
+      "view": "left",
+      "sha256": "5a5d2764bdc800cc7921a5091eb5481430bee887b6b5283ae0ad04aec77828a8"
+    }
+  ],
+  "rig": {
+    "name": "AL_MasterRig",
+    "humanoidBones": 22,
+    "extraBones": [
+      "Beard",
+      "Apron_L",
+      "Apron_R"
+    ],
+    "bindPose": "a-pose",
+    "maxInfluences": 4
+  },
+  "buildReport": {
+    "rosterId": "rct_stonehold_npc_service_v001",
+    "builder": "tools/npc/build_stonehold_master_gruff_identity.py",
+    "sourceUsed": "meshy_remesh_planted",
+    "rawTris": 116484,
+    "remeshTris": 46742,
+    "heightMeters": 1.43,
+    "lod0Tris": 46786,
+    "lod1Tris": 7005,
+    "lod2Tris": 3741,
+    "identityTris": 46742,
+    "humanoidBones": 22,
+    "extraBones": [
+      "Beard",
+      "Apron_L",
+      "Apron_R"
+    ],
+    "geometricModuleSeparation": "incomplete_vertex_groups_only",
+    "blend": "D:/AnotherLife/.worktrees/t_0df259d8/unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/rct_stonehold_npc_service_humanoid_v001.blend",
+    "fbx": "D:/AnotherLife/.worktrees/t_0df259d8/unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Exports/rct_stonehold_npc_service_humanoid_v001.fbx",
+    "renders": [
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_front_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_back_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_left_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_right_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_threequarter_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_face_closeup_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_hands_closeup_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_front_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_back_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_left_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_right_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_threequarter_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_face_closeup_v001.png",
+      "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_hands_closeup_v001.png"
+    ],
+    "completionMarker": "MASTER_GRUFF_BUILD_OK"
+  },
+  "readiness": {
+    "productionReady": false,
+    "runtimeAuthority": false,
+    "geometricModuleSeparation": "incomplete_vertex_groups_only",
+    "unityPrefab": false,
+    "npcPlanningCeiling45kExceeded": true,
+    "remainders": [
+      "Identity mesh is still a fused occupation sculpt; body/hair/clothing/apron/tools are vertex groups, not separate manifold modules.",
+      "Close-up face UVs remain Meshy-island noisy; gameplay-distance identity is the accepted evidence.",
+      "LOD0 is 46786 tris, 1786 over the 45k important-NPC planning ceiling.",
+      "Unity Standard-lit prefab/import settings were not authored in-Editor in this run.",
+      "First-pass distance weights; shoulder squash on LeftUpperArm pose-test is expected, not production paint."
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Generation/meshy_multi_image_raw_v001.glb",
+      "role": "meshy_raw_glb",
+      "bytes": 11930724,
+      "sha256": "d934762b5b17c41571fb13512a35244cfb2f81ba800f90cf80d2f31351d671a8"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Generation/meshy_remesh_24k_v001.glb",
+      "role": "meshy_remesh_glb",
+      "bytes": 20936868,
+      "sha256": "c0dbab5eb6a749c22d619a2c7ab93ea746c4d2a4d65dd866e712570e0a1c7795"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Generation/meshy_remesh_24k_v001.fbx",
+      "role": "meshy_remesh_fbx",
+      "bytes": 19268460,
+      "sha256": "589cca1fc76544f04bfc56b245c573ce25510176d7d9ffa77ec284c252e1eae4"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/rct_stonehold_npc_service_humanoid_v001.blend",
+      "role": "dcc_blend",
+      "bytes": 23467086,
+      "sha256": "45f13e1254e6ebb0d1cef3e4e76343632254b5bb4e7caed7404ecbac1c54384d"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Exports/rct_stonehold_npc_service_humanoid_v001.fbx",
+      "role": "runtime_fbx",
+      "bytes": 3002748,
+      "sha256": "7a19f8ea2ba15d54ad3606ea7c50ef1baf606079e30dde70e54b3e0f48418c10"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Generation/source_alignment_v001.json",
+      "role": "source_alignment",
+      "bytes": 2795,
+      "sha256": "45fd49c5c8b15c4d1b326738e167d3ce6e49687d23e27b79cd88b316d322d889"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/build_report_v001.json",
+      "role": "build_report",
+      "bytes": 2917,
+      "sha256": "974de02343192dce86d945b15ffad8592f23ec1bf977dc280e015c1e5d4493d0"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/README.md",
+      "role": "readme",
+      "bytes": 1431,
+      "sha256": "cb4dcbf42905119bfa4078557141d589d96cebe8e6aa26ab21fb871581eae3cf"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Textures/base_color_1k.png",
+      "role": "texture",
+      "bytes": 1749814,
+      "sha256": "8c8418b0ab4b143a1bd9a1aa75c4c8f0070a6f44f9e80c4281cd238933dbb5ce"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Textures/base_color_2k.png",
+      "role": "texture",
+      "bytes": 7122752,
+      "sha256": "dd47a5287c93670143e641ebe56bfdc06ddd06e51d0fab1bb4bb6f79f09257d4"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Textures/metallic_2k.png",
+      "role": "texture",
+      "bytes": 493341,
+      "sha256": "e21cfeeb40719d09f97967de3247d442e3abd1e3b03968bb65480fe49b2a8434"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Textures/metallic_smoothness_1k.png",
+      "role": "texture",
+      "bytes": 1123235,
+      "sha256": "a7d1bce7659c4ced1232327a2eace6131e594752aebd1ccb2ed016d93dd8774e"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Textures/metallic_smoothness_2k.png",
+      "role": "texture",
+      "bytes": 2908604,
+      "sha256": "2727a79e190fb2b3b86dcddbc4c44abc8cdccf64d20693a402a113607ec654e0"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Textures/normal_1k.png",
+      "role": "texture",
+      "bytes": 1341083,
+      "sha256": "8395532ad8ec088171c59d75a37011c381ef69f16ede995f929f627688d90c72"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Textures/normal_2k.png",
+      "role": "texture",
+      "bytes": 4944881,
+      "sha256": "84a9a67db1b0d48d16145e94c600198a4fee7767ebaa879ba1eb8f86cb335c3b"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Textures/roughness_2k.png",
+      "role": "texture",
+      "bytes": 1434482,
+      "sha256": "d0dad7254b2792cbfac2f18f43ce8a43442291d837270cf9955a701a2a224692"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Generation/meshy_multi_image_raw_v001_textures/base_color.png",
+      "role": "meshy_source_texture",
+      "bytes": 7122752,
+      "sha256": "dd47a5287c93670143e641ebe56bfdc06ddd06e51d0fab1bb4bb6f79f09257d4"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Generation/meshy_multi_image_raw_v001_textures/emission.png",
+      "role": "meshy_source_texture",
+      "bytes": 67792,
+      "sha256": "924d4e25636ca7219bcd780a71fb876618e20b8fbbe1c9adfb7f44804d8ad006"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Generation/meshy_multi_image_raw_v001_textures/metallic.png",
+      "role": "meshy_source_texture",
+      "bytes": 493341,
+      "sha256": "e21cfeeb40719d09f97967de3247d442e3abd1e3b03968bb65480fe49b2a8434"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Generation/meshy_multi_image_raw_v001_textures/normal.png",
+      "role": "meshy_source_texture",
+      "bytes": 4944881,
+      "sha256": "84a9a67db1b0d48d16145e94c600198a4fee7767ebaa879ba1eb8f86cb335c3b"
+    },
+    {
+      "path": "unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Generation/meshy_multi_image_raw_v001_textures/roughness.png",
+      "role": "meshy_source_texture",
+      "bytes": 1434482,
+      "sha256": "d0dad7254b2792cbfac2f18f43ce8a43442291d837270cf9955a701a2a224692"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_back_v001.png",
+      "role": "review_render",
+      "bytes": 719846,
+      "sha256": "01f88fa7dd5248cd50eccbd95b23a390657794a24e0c1404a0bc1878599f1617"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_face_closeup_v001.png",
+      "role": "review_render",
+      "bytes": 1242409,
+      "sha256": "e5ed85203270b7e1a042920d57f544cfedbbf77dae8fd27e4a6ad446e73f0b35"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_front_v001.png",
+      "role": "review_render",
+      "bytes": 739142,
+      "sha256": "3e4cf73aa93bb943cbb3d7749fda5546a9037dde8410ade3b960c426eaf4e155"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_hands_closeup_v001.png",
+      "role": "review_render",
+      "bytes": 1086095,
+      "sha256": "7a7f54af002c76b9d77b4c0b1c0710d7ef8c6d653ada263364d86eb72d36f622"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_left_v001.png",
+      "role": "review_render",
+      "bytes": 598566,
+      "sha256": "3ed5d63b327fbadd1221ae628506a651c45470bc40c9dc058e0996027bbb22b5"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_back_v001.png",
+      "role": "review_render",
+      "bytes": 733410,
+      "sha256": "e95278fe9e4de8ab040d25b3035daf1b8ecf9febe43502d19c2e5644144aa9bc"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_face_closeup_v001.png",
+      "role": "review_render",
+      "bytes": 1241281,
+      "sha256": "3fcfc7129318057f06bcafd2f1d61360862317737eb27f3bff401b5e1234282a"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_front_v001.png",
+      "role": "review_render",
+      "bytes": 721018,
+      "sha256": "8b9009f80788124f635018eb63603a9969e3a36b2f18b5435e5fc03c526ef6ec"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_hands_closeup_v001.png",
+      "role": "review_render",
+      "bytes": 1086455,
+      "sha256": "c4cb4cb46d582d03b6008457661b64f19b3fe09c605816f53c6f8df46de04d9d"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_left_v001.png",
+      "role": "review_render",
+      "bytes": 628512,
+      "sha256": "4b84dfa7df88c8ecf3f76678282dfa9a69a0f77149a2463f9276f08e632087d2"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_right_v001.png",
+      "role": "review_render",
+      "bytes": 643704,
+      "sha256": "5a2faedceddf0f5dc4e76ee29b5eb31c2cf4afde5e7c13592f0c655026b0a8b2"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_threequarter_v001.png",
+      "role": "review_render",
+      "bytes": 696714,
+      "sha256": "abbd96ebb3dd5605af79dd742fd25b665aeb6fe647813dca77a26b2ac1bc772a"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_right_v001.png",
+      "role": "review_render",
+      "bytes": 616180,
+      "sha256": "de48611b5201f3a83b8c141ec0d938a013d8f769c8ccbd1ed893b72888a9d1ba"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_threequarter_v001.png",
+      "role": "review_render",
+      "bytes": 726440,
+      "sha256": "1fe5c5a969210dc1238cd38d5632f421f8902d9a37bafcf97ab626e5aad14b8a"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/meshy_raw_back_v001.png",
+      "role": "review_render",
+      "bytes": 720823,
+      "sha256": "dbf6e96ecbb60c81f222687c524a738574ccdc5142ffb381aba8b515529d8fbb"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/meshy_raw_front_v001.png",
+      "role": "review_render",
+      "bytes": 761221,
+      "sha256": "aa55af8736fd3bab2b264f8b9742d549513e3eb63ec19bad9628661644aab10f"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/meshy_raw_left_v001.png",
+      "role": "review_render",
+      "bytes": 625490,
+      "sha256": "65293005bcfcaf9ba16cf1194ce1a9eb42b427424b4633e9916dd075f671a908"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/meshy_raw_right_v001.png",
+      "role": "review_render",
+      "bytes": 636379,
+      "sha256": "d7a873cd7c416a05cca316d62d0884978f08f6601c332164fd3316898ba781a4"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/meshy_raw_threequarter_v001.png",
+      "role": "review_render",
+      "bytes": 751597,
+      "sha256": "260253fa99f15905991babca34b2f0016126e0d40bbe08a3fdae13176be3f8ec"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/meshy_remesh_front_v001.png",
+      "role": "review_render",
+      "bytes": 675724,
+      "sha256": "24552ba4fa30052e043255c8b34780435f182df9e0af2b46784a1f1aac3d6eb2"
+    }
+  ]
+}
