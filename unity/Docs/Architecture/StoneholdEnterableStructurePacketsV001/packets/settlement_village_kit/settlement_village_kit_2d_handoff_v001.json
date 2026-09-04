@@ -197,17 +197,27 @@
         "kind": "door",
         "levelId": "ground",
         "side": "south",
-        "x": 12.0,
-        "z": 0.0,
+        "x": 20.24,
+        "z": 0.3,
         "separateObject": true,
         "planOpeningId": "settlement_village_kit_main_entry"
+      },
+      {
+        "id": "settlement_village_kit_service_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "north",
+        "x": 12.0,
+        "z": 19.7,
+        "separateObject": true,
+        "planOpeningId": "settlement_village_kit_service_entry"
       },
       {
         "id": "window_ground_dwelling_living",
         "kind": "window",
         "levelId": "ground",
         "side": "south",
-        "x": 3.76,
+        "x": 1.81,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_dwelling_living"
@@ -268,7 +278,7 @@
         "levelId": "ground",
         "side": "west",
         "x": 0.0,
-        "z": 10.774,
+        "z": 10.0,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_west"
       },
@@ -278,26 +288,16 @@
         "levelId": "ground",
         "side": "east",
         "x": 24,
-        "z": 10.774,
+        "z": 10.0,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_east"
-      },
-      {
-        "id": "window_ground_cut_south",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "south",
-        "x": 18.72,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_south"
       },
       {
         "id": "window_ground_cut_north",
         "kind": "window",
         "levelId": "ground",
         "side": "north",
-        "x": 18.72,
+        "x": 4.17,
         "z": 20,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_north"
@@ -307,28 +307,18 @@
         "kind": "window",
         "levelId": "lofts",
         "side": "south",
-        "x": 3.76,
+        "x": 1.81,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_lofts_dwelling_sleeping"
       },
       {
-        "id": "window_lofts_service_landing",
-        "kind": "window",
-        "levelId": "lofts",
-        "side": "west",
-        "x": 0.0,
-        "z": 15.732,
-        "separateObject": true,
-        "planOpeningId": "window_lofts_service_landing"
-      },
-      {
         "id": "window_lofts_shop_stock_loft",
         "kind": "window",
         "levelId": "lofts",
-        "side": "south",
+        "side": "north",
         "x": 12.0,
-        "z": 0.0,
+        "z": 20,
         "separateObject": true,
         "planOpeningId": "window_lofts_shop_stock_loft"
       },
@@ -336,9 +326,9 @@
         "id": "window_lofts_hall_meeting_loft",
         "kind": "window",
         "levelId": "lofts",
-        "side": "south",
-        "x": 20.24,
-        "z": 0.0,
+        "side": "east",
+        "x": 24,
+        "z": 10.0,
         "separateObject": true,
         "planOpeningId": "window_lofts_hall_meeting_loft"
       },
@@ -348,42 +338,13 @@
         "levelId": "lofts",
         "side": "west",
         "x": 0.0,
-        "z": 10.774,
+        "z": 10.0,
         "separateObject": true,
         "planOpeningId": "window_lofts_cut_west"
-      },
-      {
-        "id": "window_lofts_cut_east",
-        "kind": "window",
-        "levelId": "lofts",
-        "side": "east",
-        "x": 24,
-        "z": 10.774,
-        "separateObject": true,
-        "planOpeningId": "window_lofts_cut_east"
-      },
-      {
-        "id": "window_lofts_cut_south",
-        "kind": "window",
-        "levelId": "lofts",
-        "side": "south",
-        "x": 18.72,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_lofts_cut_south"
-      },
-      {
-        "id": "window_lofts_cut_north",
-        "kind": "window",
-        "levelId": "lofts",
-        "side": "north",
-        "x": 18.72,
-        "z": 20,
-        "separateObject": true,
-        "planOpeningId": "window_lofts_cut_north"
       }
     ],
     "criticalFeatures": [],
+    "voids": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
@@ -419,7 +380,7 @@
           "id": "dwelling_living",
           "x": 0.3,
           "z": 0.3,
-          "width": 6.92,
+          "width": 3.02,
           "depth": 11.464,
           "kind": "room",
           "purpose": "dwelling living"
@@ -468,6 +429,15 @@
           "depth": 7.206,
           "kind": "room",
           "purpose": "covered walk"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 3.32,
+          "z": 8.7,
+          "width": 3.78,
+          "depth": 2.6,
+          "kind": "room",
+          "purpose": "vertical core hall"
         }
       ],
       "blueprintId": "settlement_village_kit:ground:detached_three",
@@ -523,15 +493,42 @@
           "accessible": true,
           "points": [
             [
-              12.0,
-              0.0
+              20.24,
+              0.3
             ],
             [
-              0.3,
+              20.24,
+              6.397
+            ],
+            [
+              20.24,
               10.0
             ],
             [
-              23.7,
+              5.21,
+              10.0
+            ]
+          ]
+        },
+        {
+          "id": "service_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              12.0,
+              19.7
+            ],
+            [
+              12.0,
+              13.968
+            ],
+            [
+              12.0,
+              10.0
+            ],
+            [
+              5.21,
               10.0
             ]
           ]
@@ -540,7 +537,11 @@
       "adjacency": [
         [
           "outside",
-          "service_shop"
+          "communal_hall"
+        ],
+        [
+          "outside",
+          "work_yard"
         ],
         [
           "dwelling_living",
@@ -565,16 +566,20 @@
         [
           "covered_walk",
           "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
+          "primary_circulation"
         ]
       ],
       "doorOpenings": [
         {
           "id": "settlement_village_kit_main_entry",
           "from": "outside",
-          "to": "service_shop",
+          "to": "communal_hall",
           "side": "south",
-          "x": 12.0,
-          "z": 0.0,
+          "x": 20.24,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -585,7 +590,27 @@
           "separateObject": true,
           "between": [
             "outside",
-            "service_shop"
+            "communal_hall"
+          ]
+        },
+        {
+          "id": "settlement_village_kit_service_entry",
+          "from": "outside",
+          "to": "work_yard",
+          "side": "north",
+          "x": 12.0,
+          "z": 19.7,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "work_yard"
           ]
         },
         {
@@ -597,7 +622,7 @@
           ],
           "to": "dwelling_living",
           "orientation": "vertical",
-          "x": 3.76,
+          "x": 1.81,
           "z": 11.764,
           "clearOpeningMeters": [
             1.2,
@@ -689,22 +714,91 @@
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_ground_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 5.21,
+          "z": 11.3,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 5.21,
+          "z": 10.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_ground_cut_BB_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 4.17,
+          "z": 10.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [
         {
           "id": "settlement_village_kit_main_entry",
           "from": "outside",
-          "to": "service_shop",
+          "to": "communal_hall",
           "side": "south",
-          "x": 12.0,
-          "z": 0.0,
+          "x": 20.24,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
             3.0
           ],
           "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true
+        },
+        {
+          "id": "settlement_village_kit_service_entry",
+          "from": "outside",
+          "to": "work_yard",
+          "side": "north",
+          "x": 12.0,
+          "z": 19.7,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
           "stepFree": true,
           "separateObject": true
         }
@@ -715,7 +809,7 @@
           "separateFrameGlassShutter": true,
           "serves": "dwelling_living",
           "side": "south",
-          "x": 3.76,
+          "x": 1.81,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -794,7 +888,7 @@
           "serves": "dwelling_living",
           "side": "west",
           "x": 0.0,
-          "z": 10.774,
+          "z": 10.0,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -808,22 +902,8 @@
           "serves": "communal_hall",
           "side": "east",
           "x": 24,
-          "z": 10.774,
+          "z": 10.0,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "communal_hall",
-          "side": "south",
-          "x": 18.72,
-          "z": 0.0,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -833,9 +913,9 @@
         {
           "id": "window_ground_cut_north",
           "separateFrameGlassShutter": true,
-          "serves": "covered_walk",
+          "serves": "shared_store",
           "side": "north",
-          "x": 18.72,
+          "x": 4.17,
           "z": 20,
           "orientation": "horizontal",
           "openingMeters": [
@@ -852,30 +932,30 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 17.82,
-            "z": 9.174,
-            "width": 1.8,
-            "depth": 3.2,
+            "x": 3.32,
+            "z": 8.7,
+            "width": 1.7,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "communal_hall"
+          "locatedInRoomId": "vertical_core_hall"
         },
         {
           "coreId": "settlement_village_kit_service_platform",
           "type": "service_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 16.9,
-            "z": 10.374,
-            "width": 2.0,
-            "depth": 2.0,
+            "x": 5.3,
+            "z": 8.7,
+            "width": 1.8,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "communal_hall"
+          "locatedInRoomId": "vertical_core_hall"
         }
       ],
       "furnishingLayouts": [
@@ -888,9 +968,9 @@
               "kind": "bed_or_cot",
               "label": "sleeping furniture",
               "symbol": "BED",
-              "x": 0.65,
-              "z": 0.65,
-              "width": 2.0,
+              "x": 0.602,
+              "z": 0.602,
+              "width": 1.74,
               "depth": 1.0,
               "orientationDegrees": 0,
               "count": 1,
@@ -900,15 +980,15 @@
           "protectedClearances": [
             {
               "id": "dwelling_living_protected_aisle",
-              "x": 0.3,
-              "z": 5.432,
-              "width": 6.92,
-              "depth": 1.2,
+              "x": 1.21,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 11.464,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "dwelling_living_door_approach",
-              "x": 3.16,
+              "x": 1.21,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -937,10 +1017,10 @@
           "protectedClearances": [
             {
               "id": "shared_store_protected_aisle",
-              "x": 0.3,
-              "z": 15.132,
-              "width": 6.92,
-              "depth": 1.2,
+              "x": 3.16,
+              "z": 11.764,
+              "width": 1.2,
+              "depth": 7.936,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -974,10 +1054,10 @@
           "protectedClearances": [
             {
               "id": "service_shop_protected_aisle",
-              "x": 8.54,
-              "z": 3.668,
-              "width": 6.92,
-              "depth": 1.2,
+              "x": 11.4,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 7.936,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1011,10 +1091,10 @@
           "protectedClearances": [
             {
               "id": "work_yard_protected_aisle",
-              "x": 8.54,
-              "z": 13.368,
-              "width": 6.92,
-              "depth": 1.2,
+              "x": 11.4,
+              "z": 8.236,
+              "width": 1.2,
+              "depth": 11.464,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1048,10 +1128,10 @@
           "protectedClearances": [
             {
               "id": "communal_hall_protected_aisle",
-              "x": 16.78,
-              "z": 5.797,
-              "width": 6.92,
-              "depth": 1.2,
+              "x": 19.64,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 12.194,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1085,16 +1165,53 @@
           "protectedClearances": [
             {
               "id": "covered_walk_protected_aisle",
-              "x": 16.78,
-              "z": 15.497,
-              "width": 6.92,
-              "depth": 1.2,
+              "x": 19.64,
+              "z": 12.494,
+              "width": 1.2,
+              "depth": 7.206,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "covered_walk_door_approach",
               "x": 19.64,
               "z": 12.494,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "ground_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 3.58,
+              "z": 8.96,
+              "width": 1.8,
+              "depth": 0.666,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 3.32,
+              "z": 9.4,
+              "width": 3.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 4.61,
+              "z": 8.7,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1137,7 +1254,7 @@
           "id": "light_ground_dwelling_living",
           "type": "lighting",
           "roomId": "dwelling_living",
-          "x": 3.76,
+          "x": 1.81,
           "z": 6.032
         },
         {
@@ -1216,6 +1333,20 @@
           "roomId": "covered_walk",
           "x": 17.38,
           "z": 13.094
+        },
+        {
+          "id": "light_ground_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 5.21,
+          "z": 10.0
+        },
+        {
+          "id": "interaction_ground_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 3.92,
+          "z": 9.3
         }
       ],
       "sectionCutLines": [
@@ -1224,11 +1355,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            10.774
+            10.0
           ],
           "to": [
             23.7,
-            10.774
+            10.0
           ],
           "cutsVerticalCoreId": "settlement_village_kit_stair_core"
         },
@@ -1236,11 +1367,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            18.72,
+            4.17,
             0.3
           ],
           "to": [
-            18.72,
+            4.17,
             19.7
           ],
           "cutsVerticalCoreId": "settlement_village_kit_stair_core"
@@ -1258,19 +1389,10 @@
           "id": "dwelling_sleeping",
           "x": 0.3,
           "z": 0.3,
-          "width": 6.92,
+          "width": 3.02,
           "depth": 11.464,
           "kind": "room",
           "purpose": "dwelling sleeping"
-        },
-        {
-          "id": "service_landing",
-          "x": 0.3,
-          "z": 11.764,
-          "width": 6.92,
-          "depth": 7.936,
-          "kind": "room",
-          "purpose": "service landing"
         },
         {
           "id": "shop_stock_loft",
@@ -1289,6 +1411,15 @@
           "depth": 19.4,
           "kind": "room",
           "purpose": "hall meeting loft"
+        },
+        {
+          "id": "service_landing",
+          "x": 3.32,
+          "z": 8.7,
+          "width": 3.78,
+          "depth": 2.6,
+          "kind": "room",
+          "purpose": "service landing"
         }
       ],
       "blueprintId": "settlement_village_kit:lofts:detached_lofts",
@@ -1348,6 +1479,10 @@
               10.0
             ],
             [
+              5.21,
+              10.0
+            ],
+            [
               23.7,
               10.0
             ]
@@ -1360,15 +1495,15 @@
           "primary_circulation"
         ],
         [
-          "service_landing",
-          "primary_circulation"
-        ],
-        [
           "shop_stock_loft",
           "primary_circulation"
         ],
         [
           "hall_meeting_loft",
+          "primary_circulation"
+        ],
+        [
+          "service_landing",
           "primary_circulation"
         ]
       ],
@@ -1382,24 +1517,7 @@
           ],
           "to": "dwelling_sleeping",
           "orientation": "vertical",
-          "x": 3.76,
-          "z": 11.764,
-          "clearOpeningMeters": [
-            1.2,
-            2.4
-          ],
-          "swing": "in"
-        },
-        {
-          "id": "door_lofts_service_landing",
-          "separateObject": true,
-          "between": [
-            "service_landing",
-            "primary_circulation"
-          ],
-          "to": "service_landing",
-          "orientation": "horizontal",
-          "x": 3.76,
+          "x": 1.81,
           "z": 11.764,
           "clearOpeningMeters": [
             1.2,
@@ -1440,6 +1558,59 @@
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_lofts_service_landing",
+          "separateObject": true,
+          "between": [
+            "service_landing",
+            "primary_circulation"
+          ],
+          "to": "service_landing",
+          "orientation": "vertical",
+          "x": 5.21,
+          "z": 11.3,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_lofts_cut_AA_service_landing",
+          "separateObject": true,
+          "between": [
+            "service_landing",
+            "primary_circulation"
+          ],
+          "to": "service_landing",
+          "orientation": "horizontal",
+          "x": 5.21,
+          "z": 10.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_lofts_cut_BB_service_landing",
+          "separateObject": true,
+          "between": [
+            "service_landing",
+            "primary_circulation"
+          ],
+          "to": "service_landing",
+          "orientation": "vertical",
+          "x": 4.17,
+          "z": 10.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [],
@@ -1449,22 +1620,9 @@
           "separateFrameGlassShutter": true,
           "serves": "dwelling_sleeping",
           "side": "south",
-          "x": 3.76,
+          "x": 1.81,
           "z": 0.0,
           "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ]
-        },
-        {
-          "id": "window_lofts_service_landing",
-          "separateFrameGlassShutter": true,
-          "serves": "service_landing",
-          "side": "west",
-          "x": 0.0,
-          "z": 15.732,
-          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -1474,9 +1632,9 @@
           "id": "window_lofts_shop_stock_loft",
           "separateFrameGlassShutter": true,
           "serves": "shop_stock_loft",
-          "side": "south",
+          "side": "north",
           "x": 12.0,
-          "z": 0.0,
+          "z": 20,
           "orientation": "horizontal",
           "openingMeters": [
             1.2,
@@ -1487,10 +1645,10 @@
           "id": "window_lofts_hall_meeting_loft",
           "separateFrameGlassShutter": true,
           "serves": "hall_meeting_loft",
-          "side": "south",
-          "x": 20.24,
-          "z": 0.0,
-          "orientation": "horizontal",
+          "side": "east",
+          "x": 24,
+          "z": 10.0,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -1502,50 +1660,8 @@
           "serves": "dwelling_sleeping",
           "side": "west",
           "x": 0.0,
-          "z": 10.774,
+          "z": 10.0,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_lofts_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "hall_meeting_loft",
-          "side": "east",
-          "x": 24,
-          "z": 10.774,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_lofts_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "hall_meeting_loft",
-          "side": "south",
-          "x": 18.72,
-          "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_lofts_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "hall_meeting_loft",
-          "side": "north",
-          "x": 18.72,
-          "z": 20,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1560,10 +1676,10 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 5.3,
-            "z": 12.0,
-            "width": 1.8,
-            "depth": 3.2,
+            "x": 3.32,
+            "z": 8.7,
+            "width": 1.7,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1575,10 +1691,10 @@
           "type": "service_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 5.1,
-            "z": 12.0,
-            "width": 2.0,
-            "depth": 2.0,
+            "x": 5.3,
+            "z": 8.7,
+            "width": 1.8,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1596,9 +1712,9 @@
               "kind": "bed_or_cot",
               "label": "sleeping furniture",
               "symbol": "BED",
-              "x": 0.65,
-              "z": 0.65,
-              "width": 2.0,
+              "x": 0.602,
+              "z": 0.602,
+              "width": 1.74,
               "depth": 1.0,
               "orientationDegrees": 0,
               "count": 1,
@@ -1608,53 +1724,16 @@
           "protectedClearances": [
             {
               "id": "dwelling_sleeping_protected_aisle",
-              "x": 0.3,
-              "z": 5.432,
-              "width": 6.92,
-              "depth": 1.2,
+              "x": 1.21,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 11.464,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "dwelling_sleeping_door_approach",
-              "x": 3.16,
+              "x": 1.21,
               "z": 0.3,
-              "width": 1.2,
-              "depth": 1.2,
-              "kind": "door_swing_clearance"
-            }
-          ]
-        },
-        {
-          "roomId": "service_landing",
-          "layoutIntent": "task table + wall storage",
-          "footprints": [
-            {
-              "id": "lofts_service_landing_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "symbol": "UTILITY",
-              "x": 0.65,
-              "z": 12.114,
-              "width": 1.2,
-              "depth": 0.6,
-              "orientationDegrees": 0,
-              "count": 1,
-              "sectionHeightMeters": 0.8
-            }
-          ],
-          "protectedClearances": [
-            {
-              "id": "service_landing_protected_aisle",
-              "x": 0.3,
-              "z": 15.132,
-              "width": 6.92,
-              "depth": 1.2,
-              "kind": "minimum_1_2m_aisle"
-            },
-            {
-              "id": "service_landing_door_approach",
-              "x": 3.16,
-              "z": 11.764,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1682,10 +1761,10 @@
           "protectedClearances": [
             {
               "id": "shop_stock_loft_protected_aisle",
-              "x": 8.54,
-              "z": 9.4,
-              "width": 6.92,
-              "depth": 1.2,
+              "x": 11.4,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 19.4,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1719,16 +1798,53 @@
           "protectedClearances": [
             {
               "id": "hall_meeting_loft_protected_aisle",
-              "x": 16.78,
-              "z": 9.4,
-              "width": 6.92,
-              "depth": 1.2,
+              "x": 19.64,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 19.4,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "hall_meeting_loft_door_approach",
               "x": 19.64,
               "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "service_landing",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "lofts_service_landing_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "symbol": "UTILITY",
+              "x": 3.58,
+              "z": 8.96,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "service_landing_protected_aisle",
+              "x": 3.32,
+              "z": 9.4,
+              "width": 3.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "service_landing_door_approach",
+              "x": 4.61,
+              "z": 8.7,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1771,7 +1887,7 @@
           "id": "light_lofts_dwelling_sleeping",
           "type": "lighting",
           "roomId": "dwelling_sleeping",
-          "x": 3.76,
+          "x": 1.81,
           "z": 6.032
         },
         {
@@ -1780,20 +1896,6 @@
           "roomId": "dwelling_sleeping",
           "x": 0.9,
           "z": 0.9
-        },
-        {
-          "id": "light_lofts_service_landing",
-          "type": "lighting",
-          "roomId": "service_landing",
-          "x": 3.76,
-          "z": 15.732
-        },
-        {
-          "id": "interaction_lofts_service_landing",
-          "type": "interaction",
-          "roomId": "service_landing",
-          "x": 0.9,
-          "z": 12.364
         },
         {
           "id": "light_lofts_shop_stock_loft",
@@ -1822,6 +1924,20 @@
           "roomId": "hall_meeting_loft",
           "x": 17.38,
           "z": 0.9
+        },
+        {
+          "id": "light_lofts_service_landing",
+          "type": "lighting",
+          "roomId": "service_landing",
+          "x": 5.21,
+          "z": 10.0
+        },
+        {
+          "id": "interaction_lofts_service_landing",
+          "type": "interaction",
+          "roomId": "service_landing",
+          "x": 3.92,
+          "z": 9.3
         }
       ],
       "sectionCutLines": [
@@ -1830,11 +1946,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            10.774
+            10.0
           ],
           "to": [
             23.7,
-            10.774
+            10.0
           ],
           "cutsVerticalCoreId": "settlement_village_kit_stair_core"
         },
@@ -1842,11 +1958,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            18.72,
+            4.17,
             0.3
           ],
           "to": [
-            18.72,
+            4.17,
             19.7
           ],
           "cutsVerticalCoreId": "settlement_village_kit_stair_core"
@@ -1862,10 +1978,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 17.82,
-        "z": 9.174,
-        "width": 1.8,
-        "depth": 3.2,
+        "x": 3.32,
+        "z": 8.7,
+        "width": 1.7,
+        "depth": 2.6,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1894,10 +2010,10 @@
       "type": "service_platform",
       "footprint": {
         "id": "lift_footprint",
-        "x": 15.47,
-        "z": 12.0,
-        "width": 2.0,
-        "depth": 2.0,
+        "x": 5.3,
+        "z": 8.7,
+        "width": 1.8,
+        "depth": 2.6,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1927,7 +2043,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 10.774,
+      "cutCoordinateMeters": 10.0,
       "spanMeters": 24,
       "levels": [
         {
@@ -1946,7 +2062,7 @@
           "levelId": "ground",
           "roomId": "dwelling_living",
           "startMeters": 0.3,
-          "endMeters": 7.22,
+          "endMeters": 3.32,
           "baseElevationMeters": 0,
           "clearHeightMeters": 2.9
         },
@@ -1967,10 +2083,18 @@
           "clearHeightMeters": 2.9
         },
         {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "startMeters": 3.32,
+          "endMeters": 7.1,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 2.9
+        },
+        {
           "levelId": "lofts",
           "roomId": "dwelling_sleeping",
           "startMeters": 0.3,
-          "endMeters": 7.22,
+          "endMeters": 3.32,
           "baseElevationMeters": 3.2,
           "clearHeightMeters": 2.5
         },
@@ -1987,6 +2111,14 @@
           "roomId": "hall_meeting_loft",
           "startMeters": 16.78,
           "endMeters": 23.700000000000003,
+          "baseElevationMeters": 3.2,
+          "clearHeightMeters": 2.5
+        },
+        {
+          "levelId": "lofts",
+          "roomId": "service_landing",
+          "startMeters": 3.32,
+          "endMeters": 7.1,
           "baseElevationMeters": 3.2,
           "clearHeightMeters": 2.5
         }
@@ -2032,8 +2164,8 @@
             "lofts"
           ],
           "direction": "UP clockwise",
-          "startMeters": 17.82,
-          "endMeters": 19.62
+          "startMeters": 3.32,
+          "endMeters": 5.02
         },
         {
           "coreId": "settlement_village_kit_service_platform",
@@ -2043,8 +2175,8 @@
             "lofts"
           ],
           "direction": "vertical platform",
-          "startMeters": 15.47,
-          "endMeters": 17.47
+          "startMeters": 5.3,
+          "endMeters": 7.1
         }
       ],
       "apertureSlices": [
@@ -2054,9 +2186,9 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 10.774,
+          "z": 10.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 10.774
+          "orthogonalMeters": 10.0
         },
         {
           "levelId": "ground",
@@ -2064,9 +2196,39 @@
           "kind": "window",
           "side": "east",
           "x": 24,
-          "z": 10.774,
+          "z": 10.0,
           "positionMeters": 24,
-          "orthogonalMeters": 10.774
+          "orthogonalMeters": 10.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 5.21,
+          "z": 10.0,
+          "positionMeters": 5.21,
+          "orthogonalMeters": 10.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 4.17,
+          "z": 10.0,
+          "positionMeters": 4.17,
+          "orthogonalMeters": 10.0
+        },
+        {
+          "levelId": "lofts",
+          "openingId": "window_lofts_hall_meeting_loft",
+          "kind": "window",
+          "side": "east",
+          "x": 24,
+          "z": 10.0,
+          "positionMeters": 24,
+          "orthogonalMeters": 10.0
         },
         {
           "levelId": "lofts",
@@ -2074,19 +2236,29 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 10.774,
+          "z": 10.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 10.774
+          "orthogonalMeters": 10.0
         },
         {
           "levelId": "lofts",
-          "openingId": "window_lofts_cut_east",
-          "kind": "window",
-          "side": "east",
-          "x": 24,
-          "z": 10.774,
-          "positionMeters": 24,
-          "orthogonalMeters": 10.774
+          "openingId": "door_lofts_cut_AA_service_landing",
+          "kind": "door",
+          "side": null,
+          "x": 5.21,
+          "z": 10.0,
+          "positionMeters": 5.21,
+          "orthogonalMeters": 10.0
+        },
+        {
+          "levelId": "lofts",
+          "openingId": "door_lofts_cut_BB_service_landing",
+          "kind": "door",
+          "side": null,
+          "x": 4.17,
+          "z": 10.0,
+          "positionMeters": 4.17,
+          "orthogonalMeters": 10.0
         }
       ],
       "furnitureSlices": [
@@ -2095,7 +2267,7 @@
           "roomId": "dwelling_living",
           "kind": "bed_or_cot",
           "symbol": "BED",
-          "positionMeters": 0.65,
+          "positionMeters": 0.602,
           "sectionHeightMeters": 0.7
         },
         {
@@ -2115,11 +2287,19 @@
           "sectionHeightMeters": 0.8
         },
         {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 3.58,
+          "sectionHeightMeters": 1.3
+        },
+        {
           "levelId": "lofts",
           "roomId": "dwelling_sleeping",
           "kind": "bed_or_cot",
           "symbol": "BED",
-          "positionMeters": 0.65,
+          "positionMeters": 0.602,
           "sectionHeightMeters": 0.7
         },
         {
@@ -2136,6 +2316,14 @@
           "kind": "table_bench",
           "symbol": "TABLE",
           "positionMeters": 17.13,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "lofts",
+          "roomId": "service_landing",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 3.58,
           "sectionHeightMeters": 0.8
         }
       ],
@@ -2157,7 +2345,7 @@
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 18.72,
+      "cutCoordinateMeters": 4.17,
       "spanMeters": 20,
       "levels": [
         {
@@ -2174,25 +2362,25 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "communal_hall",
-          "startMeters": 0.3,
-          "endMeters": 12.494000000000002,
+          "roomId": "shared_store",
+          "startMeters": 11.764,
+          "endMeters": 19.7,
           "baseElevationMeters": 0,
           "clearHeightMeters": 2.9
         },
         {
           "levelId": "ground",
-          "roomId": "covered_walk",
-          "startMeters": 12.494,
-          "endMeters": 19.7,
+          "roomId": "vertical_core_hall",
+          "startMeters": 8.7,
+          "endMeters": 11.299999999999999,
           "baseElevationMeters": 0,
           "clearHeightMeters": 2.9
         },
         {
           "levelId": "lofts",
-          "roomId": "hall_meeting_loft",
-          "startMeters": 0.3,
-          "endMeters": 19.7,
+          "roomId": "service_landing",
+          "startMeters": 8.7,
+          "endMeters": 11.299999999999999,
           "baseElevationMeters": 3.2,
           "clearHeightMeters": 2.5
         }
@@ -2219,8 +2407,8 @@
             "lofts"
           ],
           "direction": "UP clockwise",
-          "startMeters": 9.174,
-          "endMeters": 12.374
+          "startMeters": 8.7,
+          "endMeters": 11.3
         },
         {
           "coreId": "settlement_village_kit_service_platform",
@@ -2230,75 +2418,75 @@
             "lofts"
           ],
           "direction": "vertical platform",
-          "startMeters": 12.0,
-          "endMeters": 14.0
+          "startMeters": 8.7,
+          "endMeters": 11.3
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 18.72,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 18.72
-        },
-        {
-          "levelId": "ground",
           "openingId": "window_ground_cut_north",
           "kind": "window",
           "side": "north",
-          "x": 18.72,
+          "x": 4.17,
           "z": 20,
           "positionMeters": 20,
-          "orthogonalMeters": 18.72
+          "orthogonalMeters": 4.17
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_shared_store",
+          "kind": "door",
+          "side": null,
+          "x": 3.76,
+          "z": 11.764,
+          "positionMeters": 11.764,
+          "orthogonalMeters": 3.76
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 4.17,
+          "z": 10.0,
+          "positionMeters": 10.0,
+          "orthogonalMeters": 4.17
         },
         {
           "levelId": "lofts",
-          "openingId": "window_lofts_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 18.72,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 18.72
-        },
-        {
-          "levelId": "lofts",
-          "openingId": "window_lofts_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 18.72,
-          "z": 20,
-          "positionMeters": 20,
-          "orthogonalMeters": 18.72
+          "openingId": "door_lofts_cut_BB_service_landing",
+          "kind": "door",
+          "side": null,
+          "x": 4.17,
+          "z": 10.0,
+          "positionMeters": 10.0,
+          "orthogonalMeters": 4.17
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "communal_hall",
-          "kind": "table_bench",
-          "symbol": "TABLE",
-          "positionMeters": 0.65,
-          "sectionHeightMeters": 0.8
+          "roomId": "shared_store",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 12.114,
+          "sectionHeightMeters": 1.5
         },
         {
           "levelId": "ground",
-          "roomId": "covered_walk",
-          "kind": "utility_table",
-          "symbol": "UTILITY",
-          "positionMeters": 12.844,
-          "sectionHeightMeters": 0.8
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 8.96,
+          "sectionHeightMeters": 1.3
         },
         {
           "levelId": "lofts",
-          "roomId": "hall_meeting_loft",
-          "kind": "table_bench",
-          "symbol": "TABLE",
-          "positionMeters": 0.65,
+          "roomId": "service_landing",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 8.96,
           "sectionHeightMeters": 0.8
         }
       ],

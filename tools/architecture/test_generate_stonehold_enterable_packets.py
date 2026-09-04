@@ -313,6 +313,82 @@ class StoneholdEnterablePacketTests(unittest.TestCase):
             packet_shape_errors(packet),
         )
 
+    def test_vertical_cores_share_shaft_xy_and_do_not_overlap(self) -> None:
+        from tools.architecture.stonehold_packet_geometry import CORE_XY_TOLERANCE, overlaps_rect
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            by_id: dict[str, list] = {}
+            for floor in packet["floorPlans"]:
+                footprints = [item["footprint"] for item in floor["verticalCoreFootprints"]]
+                for index, left in enumerate(footprints):
+                    for right in footprints[index + 1:]:
+                        self.assertFalse(overlaps_rect(left, right), f"{packet['packetId']} {floor['id']}")
+                for item in floor["verticalCoreFootprints"]:
+                    by_id.setdefault(item["coreId"], []).append(item["footprint"])
+            for core_id, footprints in by_id.items():
+                origin = footprints[0]
+                for footprint in footprints[1:]:
+                    self.assertAlmostEqual(footprint["x"], origin["x"], delta=CORE_XY_TOLERANCE, msg=f"{packet['packetId']} {core_id}")
+                    self.assertAlmostEqual(footprint["z"], origin["z"], delta=CORE_XY_TOLERANCE, msg=f"{packet['packetId']} {core_id}")
+
+    def test_courtyard_voids_stay_open_on_every_level(self) -> None:
+        from tools.architecture.stonehold_packet_geometry import overlaps_rect
+        for slug in ("castle_enterable", "fortress_enterable", "forge", "city_capital_kit", "religious_cultural_structure"):
+            packet = packet_document(next(item for item in STRUCTURES if item["slug"] == slug), self.prop_ids)
+            for floor in packet["floorPlans"]:
+                courts = [void for void in floor["exteriorVoidsAndCourts"] if void.get("kind") == "open_to_sky"]
+                self.assertTrue(courts, f"{packet['packetId']} {floor['id']}")
+                self.assertFalse(any(overlaps_rect(room, courts[0]) for room in floor["rooms"]), f"{packet['packetId']} {floor['id']}")
+            for section in packet["sections"].values():
+                self.assertTrue(any(void.get("openToSky") for void in section["voidSlices"]), f"{packet['packetId']} {section['cutLineId']}")
+
+    def test_entries_and_cut_windows_sit_on_served_room_walls(self) -> None:
+        from tools.architecture.stonehold_packet_geometry import entry_on_destination_wall, window_on_served_room_span
+        for source in STRUCTURES:
+            packet = packet_document(source, self.prop_ids)
+            width = packet["envelopeMeters"]["width"]
+            depth = packet["envelopeMeters"]["depth"]
+            for floor in packet["floorPlans"]:
+                rooms = {room["id"]: room for room in floor["rooms"]}
+                for entry in floor["exteriorEntrances"]:
+                    self.assertTrue(entry_on_destination_wall(entry, rooms[entry["to"]], width, depth), f"{packet['packetId']} {entry['id']}")
+                for window in floor["windowOpenings"]:
+                    self.assertTrue(window_on_served_room_span(window, rooms[window["serves"]]), f"{packet['packetId']} {window['id']}")
+
+    def test_fail_closed_when_core_xy_drifts(self) -> None:
+        packet = packet_document(next(item for item in STRUCTURES if item["slug"] == "castle_enterable"), self.prop_ids)
+        packet["floorPlans"][-1]["verticalCoreFootprints"][0]["footprint"]["x"] += 8.0
+        self.assertIn("vertical cores must keep the same shaft XY across connected levels", packet_shape_errors(packet))
+
+    def test_fail_closed_when_stair_overlaps_lift(self) -> None:
+        packet = packet_document(next(item for item in STRUCTURES if item["slug"] == "castle_enterable"), self.prop_ids)
+        ground = packet["floorPlans"][1]
+        ground["verticalCoreFootprints"][1]["footprint"] = dict(ground["verticalCoreFootprints"][0]["footprint"])
+        self.assertIn("stair and lift footprints must not overlap on the same floor", packet_shape_errors(packet))
+
+    def test_fail_closed_when_courtyard_is_filled(self) -> None:
+        packet = packet_document(next(item for item in STRUCTURES if item["slug"] == "castle_enterable"), self.prop_ids)
+        packet["floorPlans"][-1]["exteriorVoidsAndCourts"] = []
+        self.assertIn("open-to-sky courtyard voids must exist on every level and match both sections", packet_shape_errors(packet))
+
+    def test_fail_closed_when_entry_misses_room_wall(self) -> None:
+        packet = packet_document(next(item for item in STRUCTURES if item["slug"] == "mill_wind_water"), self.prop_ids)
+        entry = packet["floorPlans"][1]["exteriorEntrances"][0]
+        entry["x"] = packet["envelopeMeters"]["width"] / 2
+        entry["z"] = packet["envelopeMeters"]["depth"] / 2
+        self.assertIn("every exterior entrance must sit on the destination room wall", packet_shape_errors(packet))
+
+    def test_fail_closed_when_cut_window_misses_room_span(self) -> None:
+        packet = packet_document(next(item for item in STRUCTURES if item["slug"] == "academy"), self.prop_ids)
+        window = next(item for floor in packet["floorPlans"] for item in floor["windowOpenings"] if item.get("cutAligned"))
+        window["x"] = packet["envelopeMeters"]["width"] / 2
+        window["z"] = packet["envelopeMeters"]["depth"] / 2
+        window["side"] = "south"
+        errors = packet_shape_errors(packet)
+        self.assertTrue(
+            "every window must sit on the served room wall span" in errors or "every window must sit on its claimed facade" in errors
+        )
+
     def test_output_contains_no_3d_asset_files(self) -> None:
         prohibited = {".fbx", ".blend", ".obj", ".glb", ".gltf"}
         found = [path for path in OUTPUT_ROOT.rglob("*") if path.suffix.lower() in prohibited]
