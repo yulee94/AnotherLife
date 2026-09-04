@@ -158,6 +158,7 @@ namespace AL.Core.Interfaces.Relationships
         public const string Apply = "AL-REL-APPLY";
         public const string Persistence = "AL-REL-PERSISTENCE";
         public const string EventHandler = "AL-REL-EVENT-HANDLER";
+        public const string Notification = "AL-REL-NOTIFICATION";
         public const string LegacyClassification = "AL-REL-LEGACY-CLASSIFICATION";
         public const string CatalogPending = "AL-REL-CATALOG-PENDING";
         public const string CatalogUnavailable = "AL-REL-CATALOG-UNAVAILABLE";
@@ -618,6 +619,19 @@ namespace AL.Core.Interfaces.Relationships
             return new RelationshipRawState(
                 HasCurrentSave,
                 writable,
+                NpcAffinityOmitted,
+                FactionOmitted,
+                PersonaOmitted,
+                NpcAffinityRows,
+                FactionRows,
+                Persona);
+        }
+
+        public RelationshipRawState Clone()
+        {
+            return new RelationshipRawState(
+                HasCurrentSave,
+                ProfileWritable,
                 NpcAffinityOmitted,
                 FactionOmitted,
                 PersonaOmitted,
@@ -1095,6 +1109,116 @@ namespace AL.Core.Interfaces.Relationships
         public string OperationId { get; }
         public string CorrelationId { get; }
         public string CommitRevision { get; }
+    }
+
+    public enum RelationshipStandaloneCommitStatus
+    {
+        AppliedCommitted = 0,
+        NoChange = 1,
+        RejectedValidation = 2,
+        RejectedStale = 3,
+        PersistenceFailedPreviousPreserved = 4,
+        NotificationFailedAfterCommit = 5
+    }
+
+    public enum RelationshipPersistenceStatus
+    {
+        Verified = 0,
+        Failed = 1
+    }
+
+    public sealed class RelationshipPersistenceResult
+    {
+        public RelationshipPersistenceResult(
+            RelationshipPersistenceStatus status,
+            RelationshipRawState persisted,
+            string diagnostic)
+        {
+            Status = status;
+            Persisted = persisted;
+            Diagnostic = diagnostic ?? string.Empty;
+        }
+
+        public RelationshipPersistenceStatus Status { get; }
+        public RelationshipRawState Persisted { get; }
+        public string Diagnostic { get; }
+
+        public bool IsVerified => Status == RelationshipPersistenceStatus.Verified && Persisted != null;
+    }
+
+    public sealed class RelationshipCommittedChange
+    {
+        public RelationshipCommittedChange(
+            RelationshipDomain domain,
+            string canonicalTargetId,
+            PersonaTrait? personaTrait,
+            double previousValue,
+            double newValue,
+            double appliedDelta,
+            bool wasClamped,
+            string operationId,
+            string correlationId,
+            string sourceSystemId,
+            string commitRevision,
+            DateTime committedAtUtc)
+        {
+            Domain = domain;
+            CanonicalTargetId = canonicalTargetId ?? string.Empty;
+            PersonaTrait = personaTrait;
+            PreviousValue = previousValue;
+            NewValue = newValue;
+            AppliedDelta = appliedDelta;
+            WasClamped = wasClamped;
+            OperationId = operationId ?? string.Empty;
+            CorrelationId = correlationId ?? string.Empty;
+            SourceSystemId = sourceSystemId ?? string.Empty;
+            CommitRevision = commitRevision ?? string.Empty;
+            CommittedAtUtc = committedAtUtc;
+        }
+
+        public RelationshipDomain Domain { get; }
+        public string CanonicalTargetId { get; }
+        public PersonaTrait? PersonaTrait { get; }
+        public double PreviousValue { get; }
+        public double NewValue { get; }
+        public double AppliedDelta { get; }
+        public bool WasClamped { get; }
+        public string OperationId { get; }
+        public string CorrelationId { get; }
+        public string SourceSystemId { get; }
+        public string CommitRevision { get; }
+        public DateTime CommittedAtUtc { get; }
+    }
+
+    public sealed class RelationshipStandaloneCommitResult
+    {
+        public RelationshipStandaloneCommitResult(
+            RelationshipStandaloneCommitStatus status,
+            RelationshipPreparedPlan plan,
+            RelationshipSnapshot snapshotBefore,
+            RelationshipSnapshot snapshotAfter,
+            RelationshipCommittedChange committedChange,
+            int persistAttemptCount,
+            IEnumerable<RelationshipDiagnostic> diagnostics)
+        {
+            Status = status;
+            Plan = plan;
+            SnapshotBefore = snapshotBefore;
+            SnapshotAfter = snapshotAfter;
+            CommittedChange = committedChange;
+            PersistAttemptCount = persistAttemptCount;
+            Diagnostics = RelationshipCollections.Freeze(
+                diagnostics,
+                RelationshipTechnicalLimits.MaximumDiagnostics);
+        }
+
+        public RelationshipStandaloneCommitStatus Status { get; }
+        public RelationshipPreparedPlan Plan { get; }
+        public RelationshipSnapshot SnapshotBefore { get; }
+        public RelationshipSnapshot SnapshotAfter { get; }
+        public RelationshipCommittedChange CommittedChange { get; }
+        public int PersistAttemptCount { get; }
+        public IReadOnlyList<RelationshipDiagnostic> Diagnostics { get; }
     }
 
     internal static class RelationshipCollections
