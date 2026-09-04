@@ -10,6 +10,7 @@
 /tools/game-data/validate_building_champion_art_catalogs.py text eol=lf
 
 # Canonical scene manifests are byte-compared by the fail-closed validator.
+/unity/Docs/GameDataCatalog/six-family-production-authority.v1.json           text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_enabled_scene_manifest.v1.json   text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_main_quest_line_runtime.v1.json  text eol=lf
