@@ -72,6 +72,7 @@ REAL_CATALOGS = {
     "al-rig-motion-standard": "al_rig_motion_standard.json",
     "al-model-motion-skill-vfx-harness": "al_model_motion_skill_vfx_harness.v1.json",
     "al-boss-skill-presentation": "al_boss_skill_presentation_catalog.v1.json",
+    "al-boss-reward-source": "al_boss_reward_source_catalog.json",
 }
 
 # Known source-data defects that legitimately fail their schema today. These are
