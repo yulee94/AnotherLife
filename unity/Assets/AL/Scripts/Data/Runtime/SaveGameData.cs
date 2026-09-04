@@ -19,6 +19,10 @@ namespace AL.Data.Runtime
         // remains MigrationRequired until the witnessed installer persists it.
         public string ProfileId = string.Empty;
         public RealmId SelectedRealm;
+        // Optional schema-v2 extension. Omitted identity-only or legacy
+        // schema-2 saves keep SelectedRealm unchanged until the profile-bound
+        // realm transaction installs committed metadata/receipt.
+        public RealmSelectionAuthorityState RealmSelection;
         public List<ResourceData> Resources = new List<ResourceData>();
         public List<BuildingState> Buildings = new List<BuildingState>();
         public List<TroopInventoryData> Troops = new List<TroopInventoryData>();
@@ -241,6 +245,24 @@ namespace AL.Data.Runtime
         public bool IsDropped;
         public string CarrierId;
         public long LastDroppedTimestamp;
+    }
+
+    [Serializable]
+    public sealed class RealmSelectionAuthorityState
+    {
+        public int Version;
+        public bool Committed;
+        public int SelectedRealm;
+        public string ProfileId = string.Empty;
+        public string TransactionId = string.Empty;
+        public string CorrelationId = string.Empty;
+        public string OperationId = string.Empty;
+        public string EventId = string.Empty;
+        public string CatalogVersion = string.Empty;
+        public string Provenance = string.Empty;
+        public string ReceiptFingerprint = string.Empty;
+        public string ExpectedGenerationFingerprint = string.Empty;
+        public long Revision;
     }
 
     [Serializable]
