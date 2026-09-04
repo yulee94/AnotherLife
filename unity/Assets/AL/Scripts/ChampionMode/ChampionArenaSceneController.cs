@@ -181,6 +181,11 @@ namespace AL.ChampionMode
         private ChampionHudSession _hudSession;
 
         public ChampionEncounterLoadPlan AuthoritativeEncounterLoadPlan { get; private set; }
+        public ChampionEncounterConsequencePlan AuthoritativeEncounterConsequencePlan
+        {
+            get;
+            private set;
+        }
 
         private void Start()
         {
@@ -508,6 +513,14 @@ namespace AL.ChampionMode
             {
                 _guardianTrialCleared = true;
             }
+
+            AuthoritativeEncounterConsequencePlan =
+                ChampionEncounterConsequenceGateway.ApplyBossDefeat(
+                    FirstSessionChampionStart.IsFirstSessionLanding,
+                    _realmId,
+                    AuthoritativeEncounterLoadPlan != null
+                        ? AuthoritativeEncounterLoadPlan.Receipt
+                        : null);
         }
 
         private void ApplyRuntimeQuality()
