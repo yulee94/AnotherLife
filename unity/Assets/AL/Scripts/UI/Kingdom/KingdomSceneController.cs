@@ -1187,7 +1187,17 @@ namespace AL.UI.Kingdom
                     return Nvs01RealmContext.Unavailable();
                 }
 
-                return Nvs01RealmContextAdapter.FromCommittedIdentity(realmService.Identity);
+                RealmSelectionAuthorityState receipt = null;
+                if (ServiceLocator.TryGet<ISaveGameService>(out var saveGameService) &&
+                    saveGameService != null &&
+                    saveGameService.CurrentSave != null)
+                {
+                    receipt = saveGameService.CurrentSave.RealmSelection;
+                }
+
+                return Nvs01RealmContextAdapter.FromPersistedIdentity(
+                    realmService.Identity,
+                    receipt);
             }
             catch (Exception)
             {
