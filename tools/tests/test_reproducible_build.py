@@ -582,6 +582,7 @@ class ReproducibleBuildTests(unittest.TestCase):
             workflow,
         )
         self.assertIn("artifacts/deterministic-qa/report.json", workflow)
+        self.assertIn("python tools/qa/test_realm_slice_evidence.py", workflow)
 
 
 if __name__ == "__main__":

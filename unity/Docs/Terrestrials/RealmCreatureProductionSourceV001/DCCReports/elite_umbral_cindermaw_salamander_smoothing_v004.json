@@ -1,0 +1,33 @@
+{
+  "modelId": "elite_umbral_cindermaw_salamander",
+  "sourceTaskIds": [
+    "01a05f90-dc1f-723e-9e7a-4e3feb8f3dbc",
+    "01a05fa3-16b8-70f5-a0bd-cca9f316e455",
+    "01a06569-2956-73a2-a51e-bade35802fba"
+  ],
+  "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v003.fbx",
+  "inputSha256": "adc05ab231729a2189f1d956f90384aa051932ba34bc2c5929cd897b06a25fd5",
+  "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v004.fbx",
+  "outputSha256": "9486be45241afe61ba04b4f2fedc4d751819acfd2e0d6181a97c1e4cddb2b9d6",
+  "editableBlend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/elite_umbral_cindermaw_salamander_normal_smoothing_v004.blend",
+  "status": "clean_geometry_pass_uv_bake_pass_smoothing_pass_normal_detail_rebuild_required",
+  "productionReady": false,
+  "rigged": false,
+  "runtimeIntegrationState": "Blocked",
+  "operations": [
+    "removed imported per-corner custom normals that preserved faceted triangle shading",
+    "recomputed smooth shading while retaining boundaries and deliberate 60-degree hard edges",
+    "preserved topology, clean UV coordinates, dimensions, and runtime-VFX separation"
+  ],
+  "metrics": {
+    "vertices": 27690,
+    "polygons": 55334,
+    "uvLayer": "UVMap_Clean",
+    "sharpEdgesBefore": 53054,
+    "sharpEdgesAfter": 631,
+    "smoothingAngleDegrees": 60.0,
+    "customNormalsRemoved": true
+  },
+  "diagnostics": [],
+  "editableBlendSha256": "dfd22edc0ed0ab3e9c050e815e206202db25f1f7a1f42b2447211e43452a3783"
+}

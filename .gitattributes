@@ -10,6 +10,7 @@
 /tools/game-data/validate_building_champion_art_catalogs.py text eol=lf
 
 # Canonical scene manifests are byte-compared by the fail-closed validator.
+/unity/Docs/GameDataCatalog/six-family-production-authority.v1.json           text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_enabled_scene_manifest.v1.json   text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_main_quest_line_runtime.v1.json  text eol=lf
@@ -25,6 +26,12 @@
 
 # Hash-bound approved enterable-architecture packets.
 /unity/Docs/Architecture/WorldSpaceEnterableV001/**/*.json text eol=lf
+
+# Hash-bound save schema golden fixtures.
+/unity/Assets/AL/Tests/EditMode/Fixtures/SaveSchema1/** text eol=lf
+
+# Hash-bound Fault-Crowned Colossus production-slice reports.
+/unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/**/*.json text eol=lf
 
 # GS-04 evidence hashes raw SVG bytes; keep generated artifacts byte-stable.
 /tools/ui/validate_ui_release_readiness.py text eol=lf

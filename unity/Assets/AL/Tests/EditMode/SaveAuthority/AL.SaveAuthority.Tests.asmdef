@@ -2,7 +2,8 @@
     "name": "AL.SaveAuthority.Tests",
     "rootNamespace": "AL.Tests.EditMode.SaveAuthority",
     "references": [
-        "AL.SaveAuthority"
+        "AL.SaveAuthority",
+        "AL.SaveAuthority.RuntimeBridge"
     ],
     "includePlatforms": [
         "Editor"

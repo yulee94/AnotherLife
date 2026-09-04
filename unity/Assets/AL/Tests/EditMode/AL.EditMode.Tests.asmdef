@@ -5,6 +5,7 @@
         "AL.Runtime",
         "AL.Editor",
         "AL.SaveAuthority",
+        "AL.SaveAuthority.RuntimeBridge",
         "AL.GameDataCatalog",
         "AL.NotificationCatalogAdapter",
         "Unity.InputSystem"

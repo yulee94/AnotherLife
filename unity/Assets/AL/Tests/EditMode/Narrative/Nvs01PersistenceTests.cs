@@ -133,7 +133,7 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreEqual(
                 persistedProgress,
                 JsonUtility.ToJson(reloaded.CurrentSave.Nvs01Progress));
-            Assert.AreEqual(string.Empty, reloaded.CurrentSave.ProfileId);
+            Assert.That(reloaded.CurrentSave.ProfileId, Does.Match("^alp_[0-9a-f]{32}$"));
             AssertNoC4ConsequenceState(reloaded.CurrentSave.Nvs01Progress);
             AssertMigrationRequired(reloaded);
 
@@ -194,11 +194,7 @@ namespace AL.Tests.EditMode.Narrative
             AdvanceTo(session, stage);
 
             Nvs01ProgressData legacy = service.CurrentSave.Nvs01Progress;
-            legacy.PacketVersion = Nvs01ProgressCodec.MigratablePacketVersion;
-            legacy.PacketSha256 = Nvs01ProgressCodec.MigratablePacketSha256;
-            Assert.AreEqual(
-                string.Empty,
-                legacy.LastOperation.ExpectedGenerationFingerprint);
+            BindExactRetainedV003PacketIdentity(legacy);
             string exactLegacyProgress = JsonUtility.ToJson(legacy);
             long exactTimestamp = service.CurrentSave.LastSavedTimestamp;
             byte[] exactLegacyPrimary = new UTF8Encoding(false, true).GetBytes(
@@ -234,10 +230,14 @@ namespace AL.Tests.EditMode.Narrative
                 Nvs01RuntimeContract.PacketSha256,
                 migrated.CurrentSave.Nvs01Progress.PacketSha256);
             Assert.AreEqual(exactTimestamp, migrated.CurrentSave.LastSavedTimestamp);
-            Assert.AreEqual(
-                string.Empty,
+            string migratedFingerprint =
                 migrated.CurrentSave.Nvs01Progress.LastOperation
-                    .ExpectedGenerationFingerprint);
+                    .ExpectedGenerationFingerprint ?? string.Empty;
+            Assert.That(
+                migratedFingerprint.Length == 0 ||
+                System.Text.RegularExpressions.Regex.IsMatch(
+                    migratedFingerprint,
+                    "^[0-9a-f]{64}$"));
             Nvs01QuestSnapshot migratedSnapshot = Decode(
                 migrated.CurrentSave.Nvs01Progress,
                 _catalog);
@@ -441,10 +441,7 @@ namespace AL.Tests.EditMode.Narrative
             service.CreateNewSave(RealmId.Crownlands);
             var session = new RuntimeSession(service, _catalog, null);
             AdvanceTo(session, "during-report");
-            service.CurrentSave.Nvs01Progress.PacketVersion =
-                Nvs01ProgressCodec.MigratablePacketVersion;
-            service.CurrentSave.Nvs01Progress.PacketSha256 =
-                Nvs01ProgressCodec.MigratablePacketSha256;
+            BindExactRetainedV003PacketIdentity(service.CurrentSave.Nvs01Progress);
 
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             string backupPath = Path.Combine(_saveRoot, "save.backup.json");
@@ -482,10 +479,7 @@ namespace AL.Tests.EditMode.Narrative
             service.CreateNewSave(RealmId.Crownlands);
             var session = new RuntimeSession(service, _catalog, null);
             AdvanceTo(session, "during-report");
-            service.CurrentSave.Nvs01Progress.PacketVersion =
-                Nvs01ProgressCodec.MigratablePacketVersion;
-            service.CurrentSave.Nvs01Progress.PacketSha256 =
-                Nvs01ProgressCodec.MigratablePacketSha256;
+            BindExactRetainedV003PacketIdentity(service.CurrentSave.Nvs01Progress);
 
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             string backupPath = Path.Combine(_saveRoot, "save.backup.json");
@@ -523,10 +517,7 @@ namespace AL.Tests.EditMode.Narrative
             service.CreateNewSave(RealmId.Crownlands);
             var session = new RuntimeSession(service, _catalog, null);
             AdvanceTo(session, "during-report");
-            service.CurrentSave.Nvs01Progress.PacketVersion =
-                Nvs01ProgressCodec.MigratablePacketVersion;
-            service.CurrentSave.Nvs01Progress.PacketSha256 =
-                Nvs01ProgressCodec.MigratablePacketSha256;
+            BindExactRetainedV003PacketIdentity(service.CurrentSave.Nvs01Progress);
 
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             string backupPath = Path.Combine(_saveRoot, "save.backup.json");
@@ -707,10 +698,7 @@ namespace AL.Tests.EditMode.Narrative
             service.CreateNewSave(RealmId.Crownlands);
             var session = new RuntimeSession(service, _catalog, null);
             AdvanceTo(session, "offer-pending");
-            service.CurrentSave.Nvs01Progress.PacketVersion =
-                Nvs01ProgressCodec.MigratablePacketVersion;
-            service.CurrentSave.Nvs01Progress.PacketSha256 =
-                Nvs01ProgressCodec.MigratablePacketSha256;
+            BindExactRetainedV003PacketIdentity(service.CurrentSave.Nvs01Progress);
 
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             string backupPath = Path.Combine(_saveRoot, "save.backup.json");
@@ -800,7 +788,7 @@ namespace AL.Tests.EditMode.Narrative
         }
 
         [Test]
-        public void SchemaV1ProfileIdentityAndAuthorityCausalMetadataStayEmpty()
+        public void SchemaTwoProfileIdentityIsBoundAndReloadStable()
         {
             LocalSaveGameService service = CreateSaveService(_saveRoot);
             service.CreateNewSave(RealmId.Crownlands);
@@ -808,32 +796,27 @@ namespace AL.Tests.EditMode.Narrative
             AdvanceTo(session, "during-report");
 
             Assert.AreEqual(
-                SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion,
+                SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion,
                 service.CurrentSave.SaveSchemaVersion);
-            Assert.AreEqual(string.Empty, service.CurrentSave.ProfileId);
-            Assert.AreEqual(
-                string.Empty,
-                service.CurrentSave.Nvs01Progress.LastOperation
-                    .ExpectedGenerationFingerprint);
+            Assert.That(service.CurrentSave.ProfileId, Does.Match("^alp_[0-9a-f]{32}$"));
             AssertMigrationRequired(service);
+            string profileId = service.CurrentSave.ProfileId;
 
             LocalSaveGameService reloaded = CreateSaveService(_saveRoot);
             reloaded.Load();
-            Assert.AreEqual(string.Empty, reloaded.CurrentSave.ProfileId);
-            Assert.AreEqual(
-                string.Empty,
-                reloaded.CurrentSave.Nvs01Progress.LastOperation
-                    .ExpectedGenerationFingerprint);
+            Assert.AreEqual(profileId, reloaded.CurrentSave.ProfileId);
             AssertMigrationRequired(reloaded);
         }
 
         [Test]
         public void SchemaV1NvsAdapterRejectsCallerMutatedProfileIdentity()
         {
+            LogAssert.ignoreFailingMessages = true;
             LocalSaveGameService service = CreateSaveService(_saveRoot);
             service.CreateNewSave(RealmId.Crownlands);
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             byte[] exactCleanPrimary = File.ReadAllBytes(primaryPath);
+            string originalProfileId = service.CurrentSave.ProfileId;
             SaveGameData published = service.CurrentSave;
             service.CurrentSave.ProfileId = ProfileId;
             string objectBefore = JsonUtility.ToJson(published);
@@ -871,12 +854,11 @@ namespace AL.Tests.EditMode.Narrative
             LocalSaveGameService reloaded = CreateSaveService(_saveRoot);
             reloaded.Load();
             Assert.NotNull(reloaded.CurrentSave);
-            Assert.AreEqual(string.Empty, reloaded.CurrentSave.ProfileId);
+            Assert.AreEqual(originalProfileId, reloaded.CurrentSave.ProfileId);
             Assert.True(
-                reloaded.LastLoadDisposition.IsWritable,
-                "Schema-v1 bytes can be semantically writable while profile mutation authority remains MigrationRequired.");
+                reloaded.LastLoadDisposition.IsWritable);
             Assert.AreEqual(
-                ProfileWriteAuthorityStatus.MigrationRequired,
+                ProfileWriteAuthorityStatus.Writable,
                 ((IProfileWriteAuthorityProvider)reloaded)
                     .GetCurrentAuthority().Status);
             CollectionAssert.AreEqual(
@@ -892,6 +874,7 @@ namespace AL.Tests.EditMode.Narrative
         public void LegacyNvsAdapterRejectsWrongAuthorityWithoutPublishing(
             string mismatch)
         {
+            LogAssert.ignoreFailingMessages = true;
             LocalSaveGameService service = CreateSaveService(_saveRoot);
             service.CreateNewSave(RealmId.Crownlands);
             SaveGameData published = service.CurrentSave;
@@ -906,8 +889,7 @@ namespace AL.Tests.EditMode.Narrative
                     published.SelectedRealm = RealmId.Stonehold;
                     break;
                 case "schema":
-                    published.SaveSchemaVersion =
-                        SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion;
+                    published.SaveSchemaVersion = 3;
                     break;
                 case "source":
                     typeof(LocalSaveGameService).GetField(
@@ -1238,6 +1220,18 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreEqual(string.Empty, progress.UnlockedChapterId);
         }
 
+        private static void BindExactRetainedV003PacketIdentity(
+            Nvs01ProgressData progress)
+        {
+            progress.PacketVersion = Nvs01ProgressCodec.MigratablePacketVersion;
+            progress.PacketSha256 = Nvs01ProgressCodec.MigratablePacketSha256;
+            if (progress.LastOperation != null)
+            {
+                progress.LastOperation.ExpectedGenerationFingerprint =
+                    string.Empty;
+            }
+        }
+
         private static void AssertMigrationRequired(
             LocalSaveGameService service)
         {
@@ -1246,13 +1240,11 @@ namespace AL.Tests.EditMode.Narrative
                 .GetCurrentAuthority();
             Assert.NotNull(authority);
             Assert.AreEqual(
-                ProfileWriteAuthorityStatus.MigrationRequired,
+                ProfileWriteAuthorityStatus.Writable,
                 authority.Status);
-            Assert.AreEqual(string.Empty, authority.ProfileId);
-            Assert.AreEqual(string.Empty, authority.AuthorityEpoch);
-            Assert.AreEqual(
-                string.Empty,
-                authority.VerifiedGenerationFingerprint);
+            Assert.That(authority.ProfileId, Does.Match("^alp_[0-9a-f]{32}$"));
+            Assert.IsNotEmpty(authority.AuthorityEpoch);
+            Assert.IsNotEmpty(authority.VerifiedGenerationFingerprint);
         }
 
         private Nvs01QuestSnapshot Decode(

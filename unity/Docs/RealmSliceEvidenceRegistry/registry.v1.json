@@ -1,0 +1,155 @@
+{
+  "activeRealm": "Stonehold",
+  "createdUtc": "2026-09-03T05:55:33Z",
+  "events": [],
+  "evidencePackets": {},
+  "ownerDecisions": {},
+  "policySha256": "041f663d626633e0cf6ae06004057c10e22be18c24319df2bacc851a730aa375",
+  "protocolId": "RSQ-PROTOCOL-v1.0.0",
+  "realmOrder": [
+    "Stonehold",
+    "Eldergrove",
+    "Crownlands",
+    "Umbral"
+  ],
+  "realms": {
+    "Crownlands": {
+      "creativeVisual": {
+        "record": null,
+        "status": "PENDING"
+      },
+      "entryGate": "CLOSED",
+      "modes": {
+        "Adventure3D": {
+          "contentPath": "DISABLED",
+          "currentPacket": null,
+          "lastOwnerApprovedBaseline": null,
+          "ownerApproval": "PENDING",
+          "ownerDecision": null,
+          "qualification": "EMPTY",
+          "reopenedUtc": null,
+          "rerunRequired": false
+        },
+        "Kingdom2_5D": {
+          "contentPath": "DISABLED",
+          "currentPacket": null,
+          "lastOwnerApprovedBaseline": null,
+          "ownerApproval": "PENDING",
+          "ownerDecision": null,
+          "qualification": "EMPTY",
+          "reopenedUtc": null,
+          "rerunRequired": false
+        }
+      },
+      "ownerAuthorization": {
+        "record": null,
+        "status": "PENDING"
+      }
+    },
+    "Eldergrove": {
+      "creativeVisual": {
+        "record": null,
+        "status": "PENDING"
+      },
+      "entryGate": "CLOSED",
+      "modes": {
+        "Adventure3D": {
+          "contentPath": "DISABLED",
+          "currentPacket": null,
+          "lastOwnerApprovedBaseline": null,
+          "ownerApproval": "PENDING",
+          "ownerDecision": null,
+          "qualification": "EMPTY",
+          "reopenedUtc": null,
+          "rerunRequired": false
+        },
+        "Kingdom2_5D": {
+          "contentPath": "DISABLED",
+          "currentPacket": null,
+          "lastOwnerApprovedBaseline": null,
+          "ownerApproval": "PENDING",
+          "ownerDecision": null,
+          "qualification": "EMPTY",
+          "reopenedUtc": null,
+          "rerunRequired": false
+        }
+      },
+      "ownerAuthorization": {
+        "record": null,
+        "status": "PENDING"
+      }
+    },
+    "Stonehold": {
+      "creativeVisual": {
+        "record": null,
+        "status": "PENDING"
+      },
+      "entryGate": "OPEN",
+      "modes": {
+        "Adventure3D": {
+          "contentPath": "ENABLED_UNAPPROVED",
+          "currentPacket": null,
+          "lastOwnerApprovedBaseline": null,
+          "ownerApproval": "PENDING",
+          "ownerDecision": null,
+          "qualification": "EMPTY",
+          "reopenedUtc": null,
+          "rerunRequired": false
+        },
+        "Kingdom2_5D": {
+          "contentPath": "ENABLED_UNAPPROVED",
+          "currentPacket": null,
+          "lastOwnerApprovedBaseline": null,
+          "ownerApproval": "PENDING",
+          "ownerDecision": null,
+          "qualification": "EMPTY",
+          "reopenedUtc": null,
+          "rerunRequired": false
+        }
+      },
+      "ownerAuthorization": {
+        "record": null,
+        "status": "PENDING"
+      }
+    },
+    "Umbral": {
+      "creativeVisual": {
+        "record": null,
+        "status": "PENDING"
+      },
+      "entryGate": "CLOSED",
+      "modes": {
+        "Adventure3D": {
+          "contentPath": "DISABLED",
+          "currentPacket": null,
+          "lastOwnerApprovedBaseline": null,
+          "ownerApproval": "PENDING",
+          "ownerDecision": null,
+          "qualification": "EMPTY",
+          "reopenedUtc": null,
+          "rerunRequired": false
+        },
+        "Kingdom2_5D": {
+          "contentPath": "DISABLED",
+          "currentPacket": null,
+          "lastOwnerApprovedBaseline": null,
+          "ownerApproval": "PENDING",
+          "ownerDecision": null,
+          "qualification": "EMPTY",
+          "reopenedUtc": null,
+          "rerunRequired": false
+        }
+      },
+      "ownerAuthorization": {
+        "record": null,
+        "status": "PENDING"
+      }
+    }
+  },
+  "registryId": "anotherlife-realm-slice-evidence-registry",
+  "registrySha256": "956569e647b88d5ed6ade1073ce79e99d61722df39a074a785e35070071ce6ce",
+  "reopens": {},
+  "rollbacks": {},
+  "schemaVersion": 1,
+  "updatedUtc": "2026-09-03T05:55:33Z"
+}

@@ -49,6 +49,32 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Six-family production authority gate
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/six-family-production-authority.txt"
+          try {
+            & python tools/game-data/test_validate_six_family_production_authority.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Six-family production authority tests exited with code $LASTEXITCODE."
+            }
+            & python tools/game-data/validate_six_family_production_authority.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Six-family production authority audit exited with code $LASTEXITCODE."
+            }
+            & python tools/game-data/validate_six_family_production_authority.py --require-production-eligible *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 2) {
+              throw "Blocked v1 authority gate must exit 2, received $LASTEXITCODE."
+            }
+            $global:LASTEXITCODE = 0
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Android Unity package verifier tests
         shell: pwsh
         timeout-minutes: 5
@@ -104,6 +130,97 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Realm-slice evidence harness contract
+        shell: pwsh
+        timeout-minutes: 15
+        run: |
+          $transcript = "artifacts/realm-slice-evidence-contract.txt"
+          try {
+            & python -m pip install --disable-pip-version-check jsonschema==4.26.0 *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-slice schema dependency install exited with code $LASTEXITCODE."
+            }
+            & python tools/qa/test_realm_slice_evidence.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-slice evidence contract tests exited with code $LASTEXITCODE."
+            }
+            & python tools/qa/test_realm_evidence_registry.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm evidence registry contract tests exited with code $LASTEXITCODE."
+            }
+            $registryPath = "unity/Docs/RealmSliceEvidenceRegistry/registry.v1.json"
+            & python tools/qa/realm_evidence_registry.py verify --registry $registryPath *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Canonical realm evidence registry verification exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Realm-creature production-slice qualification
+        shell: pwsh
+        timeout-minutes: 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $transcript = "artifacts/realm-creature-production-slice.txt"
+          try {
+            $include = @(
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/boss_stonehold_fault_crowned_colossus/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/boss_stonehold_fault_crowned_colossus/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/**",
+              "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/**",
+              "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_stonehold_fault_crowned_colossus_concept_sheet_v001.png"
+            ) -join ","
+            if ($env:GITHUB_TOKEN) {
+              $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x:$($env:GITHUB_TOKEN)"))
+              & git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" lfs pull --include=$include *>&1 |
+                Tee-Object -FilePath $transcript
+            } else {
+              & git lfs pull --include=$include *>&1 |
+                Tee-Object -FilePath $transcript
+            }
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-creature production-slice LFS pull exited with code $LASTEXITCODE."
+            }
+            & python -m pip install --disable-pip-version-check jsonschema==4.26.0 *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-creature production-slice schema dependency install exited with code $LASTEXITCODE."
+            }
+            & python tools/terrestrial/test_validate_realm_creature_production_slice.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-creature production-slice tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Boss and skill presentation catalog
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/boss-skill-presentation.txt"
+          try {
+            & python -m pip install --disable-pip-version-check jsonschema==4.26.0 *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Boss/skill presentation schema dependency install exited with code $LASTEXITCODE."
+            }
+            & python tools/presentation/test_validate_boss_skill_presentation.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Boss/skill presentation tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Quality-gate fixture proof
         shell: pwsh
         timeout-minutes: 10
@@ -143,12 +260,15 @@ jobs:
           name: quality-gate-evidence-${{ github.run_attempt }}
           path: |
             artifacts/repository-hygiene.txt
+            artifacts/six-family-production-authority.txt
             artifacts/android-unity-package-tests.txt
             artifacts/reproducible-build-contract.txt
             artifacts/deterministic-qa-contract.txt
             artifacts/deterministic-qa/report.json
             artifacts/deterministic-qa/junit.xml
             artifacts/deterministic-qa/logs/
+            artifacts/realm-creature-production-slice.txt
+            artifacts/boss-skill-presentation.txt
             artifacts/quality-gate-fixtures.txt
             artifacts/golden-scene-evidence-validator.txt
           if-no-files-found: error

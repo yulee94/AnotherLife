@@ -1,0 +1,199 @@
+{
+  "gameId": "another-life",
+  "catalogId": "boss_skill_presentation_v1",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "authority": {
+    "catalogOwner": "boss_skill_presentation",
+    "finalCreativeOwner": "project_owner",
+    "status": "presentation_only",
+    "ownerDecisionRef": "kanban:t_b188fd49",
+    "gameplayAuthority": false,
+    "runtimeSpawn": false
+  },
+  "semanticSeparation": {
+    "itemGradeForbidden": true,
+    "slotIndexForbidden": true,
+    "threatProgressionIndependent": true
+  },
+  "resolutionPolicy": {
+    "unknownId": "explicit_failure",
+    "sourceHashMismatch": "explicit_failure",
+    "unsupportedVersion": "explicit_failure",
+    "gameplayMutation": "forbidden",
+    "fallbackContent": "explicit_unavailable"
+  },
+  "bossProfiles": [
+    {
+      "id": "boss_presentation_stonehold_fault_crowned_colossus_v001",
+      "kind": "boss",
+      "realmId": "stonehold",
+      "sourceProfileId": "tdf_boss_stonehold_fault_crowned_colossus",
+      "modelId": "boss_stonehold_fault_crowned_colossus",
+      "qualificationId": "rcpq_boss_stonehold_fault_crowned_colossus_v001",
+      "sourceVersion": "al-rcreature-2026-09-03-v002",
+      "sourceSha256": "c06b9fc23316f6d40ff747e1bdf12b4a055633530d6dd036909a3bc2f83d70f6",
+      "prefabRef": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/fault_crowned_colossus_rig_lod_motion_v001.fbx",
+      "rigId": "RIG_fault_crowned_colossus",
+      "materialId": "mat_fault_crowned_colossus_pbr_v001",
+      "motionKeys": [
+        "locomotion.walk",
+        "locomotion.run",
+        "attack.basic",
+        "attack.special",
+        "skill.anticipation"
+      ],
+      "protectedIdentityCues": [
+        "six_load_bearing_limb_columns_in_three_distinct_pairs",
+        "low_shielded_chest_and_compact_protected_eyes",
+        "single_broad_plow_horn_with_fractured_crown",
+        "mineralized_dorsal_lamellae_rooted_to_body_anatomy"
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 16,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 48,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 96,
+          "maxLights": 2,
+          "maxTrails": 2,
+          "cameraImpulse": true,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.7,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.35,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": ["silhouette", "timing", "shape"]
+      },
+      "pooling": {
+        "maxActive": 2,
+        "maxPooled": 4,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    }
+  ],
+  "skillProfiles": [
+    {
+      "id": "skill_presentation_boss_faultline_slam_v001",
+      "skillId": "boss_faultline_slam",
+      "vfxId": "vfx_boss_faultline_slam_v001",
+      "actorFamily": "boss",
+      "presentationIndependentOfPower": true,
+      "telegraphChannel": "telegraph_boss_slam",
+      "cosmeticChannel": "active_area_shockwave",
+      "phases": {
+        "anticipation": "ANIM_fault_crowned_colossus_skill_anticipation_v001",
+        "cast": "ANIM_fault_crowned_colossus_attack_special_v001",
+        "channel": "ANIM_fault_crowned_colossus_attack_special_v001",
+        "release": "ANIM_fault_crowned_colossus_attack_special_v001",
+        "recovery": "ANIM_fault_crowned_colossus_reaction_hit_v001"
+      },
+      "effects": {
+        "telegraph": "telegraph_boss_slam",
+        "active": "active_area_shockwave",
+        "impact": "impact_hit_flash",
+        "cleanup": "cleanup_release",
+        "accessibility": "a11y_high_contrast_shape"
+      },
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": true,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": ["shape", "timing", "icon"]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    }
+  ]
+}

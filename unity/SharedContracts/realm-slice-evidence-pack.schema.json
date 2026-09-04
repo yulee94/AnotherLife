@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.example/contracts/realm-slice-evidence-pack.schema.json",
+  "title": "AnotherLife Realm-Slice Evidence Pack",
+  "description": "Thin immutable aggregator for one realm/mode cube of independently signed harness row manifests. Row evidence uses realm-slice-evidence-manifest.schema.json; this envelope only binds identity, retention, and aggregation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "protocolId", "packetId", "candidateId", "realm",
+    "realmOrdinal", "mode", "modeNamespace", "evidenceOwner", "evidenceOwnerKeyId",
+    "independentReviewer", "signatureMethod", "signedUtc", "validUntilUtc",
+    "rowManifests", "supersedes", "manifestSha256", "evidenceOwnerSignature"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "protocolId": {"const": "RSQ-PROTOCOL-v1.0.0"},
+    "packetId": {"type": "string", "pattern": "^RSQ-EV-(Stonehold|Eldergrove|Crownlands|Umbral)-(3d|2_5d)-[A-Za-z0-9._-]+-[0-9]+$"},
+    "candidateId": {"type": "string", "pattern": "^RSQ-(Stonehold|Eldergrove|Crownlands|Umbral)-(3d|2_5d)-[A-Za-z0-9._-]+-[0-9]+$"},
+    "realm": {"enum": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"]},
+    "realmOrdinal": {"type": "integer", "minimum": 1, "maximum": 4},
+    "mode": {"enum": ["Adventure3D", "Kingdom2_5D"]},
+    "modeNamespace": {"enum": ["3d", "2_5d"]},
+    "evidenceOwner": {"$ref": "#/$defs/nonBlank"},
+    "evidenceOwnerKeyId": {"$ref": "#/$defs/nonBlank"},
+    "independentReviewer": {"$ref": "#/$defs/nonBlank"},
+    "signatureMethod": {"const": "hmac-sha256-v1"},
+    "signedUtc": {"type": "string", "format": "date-time"},
+    "validUntilUtc": {"type": "string", "format": "date-time"},
+    "rowManifests": {
+      "type": "array",
+      "minItems": 72,
+      "maxItems": 72,
+      "items": {"$ref": "realm-slice-evidence-manifest.schema.json"}
+    },
+    "supersedes": {"type": ["string", "null"]},
+    "manifestSha256": {"$ref": "#/$defs/sha256"},
+    "evidenceOwnerSignature": {"$ref": "#/$defs/sha256"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "Adventure3D"}}, "required": ["mode"]},
+      "then": {"properties": {"modeNamespace": {"const": "3d"}}}
+    },
+    {
+      "if": {"properties": {"mode": {"const": "Kingdom2_5D"}}, "required": ["mode"]},
+      "then": {"properties": {"modeNamespace": {"const": "2_5d"}}}
+    }
+  ],
+  "$defs": {
+    "nonBlank": {"type": "string", "minLength": 1},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

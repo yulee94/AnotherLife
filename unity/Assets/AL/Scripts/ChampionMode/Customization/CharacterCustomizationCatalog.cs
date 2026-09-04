@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using AL.ChampionMode.Customization.Contracts;
 using AL.Data.Catalogs;
 using AL.Services.Local;
 using UnityEngine;
@@ -11,6 +13,12 @@ namespace AL.ChampionMode.Customization
     [Serializable]
     public class CharacterCustomizationCatalogData
     {
+        public string sourceCatalogId;
+        public string sourceFamily;
+        public int schemaVersion;
+        public string sourceRevision;
+        public string sourceSha256;
+        public int sourceByteLength;
         public string version;
         public string game;
         public string[] characterSlots;
@@ -152,10 +160,41 @@ namespace AL.ChampionMode.Customization
                    catalog.armorStyles.Length > 0;
         }
 
+        public static bool TryParsePlannerCatalog(
+            string json,
+            out CustomizationCatalogSnapshot catalog,
+            out IReadOnlyList<CustomizationDiagnostic> diagnostics)
+        {
+            catalog = null;
+            diagnostics = Array.Empty<CustomizationDiagnostic>();
+            if (!TryParse(json, out CharacterCustomizationCatalogData projected))
+            {
+                diagnostics = new[]
+                {
+                    new CustomizationDiagnostic(
+                        "AL-CUS-PRODUCTION-SOURCE",
+                        "catalog.source",
+                        string.Empty)
+                };
+                return false;
+            }
+
+            return ProductionCustomizationCatalogAdapter.TryAdapt(
+                projected,
+                out catalog,
+                out diagnostics);
+        }
+
         private static CharacterCustomizationCatalogData Project(GameDataFamilyCatalogSnapshot family)
         {
             var catalog = new CharacterCustomizationCatalogData
             {
+                sourceCatalogId = family.CatalogId,
+                sourceFamily = family.Family,
+                schemaVersion = family.SchemaVersion,
+                sourceRevision = family.SourceRevision,
+                sourceSha256 = family.Sha256,
+                sourceByteLength = family.ByteLength,
                 version = family.ContentVersion,
                 game = "Another Life",
                 characterSlots = ProjectSlots(family),

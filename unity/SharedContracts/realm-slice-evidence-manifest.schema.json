@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.example/contracts/realm-slice-evidence-manifest.schema.json",
+  "title": "AnotherLife Realm-Slice Evidence Row Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion","harnessId","harnessVersion","policySha256","reviewTrustSha256","protocolId","candidateId","evidencePacketId","realm","realmOrdinal","mode","modeNamespace","checkId","runId","rerunSequence","build","catalogs","scenario","saveFixture","platform","qa","locale","inputClass","accessibilityPreset","operator","independentReviewer","timing","command","executionState","technicalResult","proposedTechnicalResult","proposedReasonCode","expectedResult","observedResult","reasonCode","defectIds","artifactIds","reviewer","reviewedUtc","reviewerDisposition","reviewerSignature","signatureMethod","supersedes","metrics","artifacts","missingArtifacts","manifestSha256"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "harnessId": {"const": "anotherlife-realm-slice-evidence"},
+    "harnessVersion": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "policySha256": {"$ref": "#/$defs/sha256"},
+    "reviewTrustSha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "protocolId": {"const": "RSQ-PROTOCOL-v1.0.0"},
+    "candidateId": {"type": "string", "pattern": "^RSQ-(Stonehold|Eldergrove|Crownlands|Umbral)-(3d|2_5d)-[A-Za-z0-9._-]+-[0-9]+$"},
+    "evidencePacketId": {"type": "string", "pattern": "^RSQ-EV-(Stonehold|Eldergrove|Crownlands|Umbral)-(3d|2_5d)-[A-Za-z0-9._-]+-[0-9]+$"},
+    "realm": {"enum": ["Stonehold","Eldergrove","Crownlands","Umbral"]},
+    "realmOrdinal": {"type": "integer", "minimum": 1, "maximum": 4},
+    "mode": {"enum": ["Adventure3D","Kingdom2_5D"]},
+    "modeNamespace": {"enum": ["3d","2_5d"]},
+    "checkId": {"type": "string", "pattern": "^RSQ-(3D|2_5D)-[A-Z]+(?:-[A-Z]{2})?-[0-9]{3}$"},
+    "runId": {"type": "string", "pattern": "^rsq-run-[0-9a-f]{24}$"},
+    "rerunSequence": {"type": "integer", "minimum": 1},
+    "build": {"$ref": "#/$defs/build"},
+    "catalogs": {"$ref": "#/$defs/catalogs"},
+    "scenario": {"$ref": "#/$defs/scenario"},
+    "saveFixture": {"$ref": "#/$defs/saveFixture"},
+    "platform": {"$ref": "#/$defs/platform"},
+    "qa": {"$ref": "#/$defs/qa"},
+    "locale": {"enum": ["en-US","ko-KR"]},
+    "inputClass": {"enum": ["keyboard_mouse","controller"]},
+    "accessibilityPreset": {"enum": ["default","text-200","reduced-motion","reduced-flash","reduced-vfx","audio-off-captions","non-color"]},
+    "operator": {"type": "string", "minLength": 1},
+    "independentReviewer": {"type": "string", "minLength": 1},
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startedUtc","completedUtc"],
+      "properties": {
+        "startedUtc": {"type": "string", "format": "date-time"},
+        "completedUtc": {"type": "string", "format": "date-time"}
+      }
+    },
+    "command": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "executionState": {"enum": ["NOT_RUN","RUNNING","COMPLETE","BLOCKED"]},
+    "technicalResult": {"enum": ["PASS","FAIL","FAIL_CLOSED"]},
+    "proposedTechnicalResult": {"enum": ["PASS","FAIL","FAIL_CLOSED"]},
+    "proposedReasonCode": {"type": "string", "minLength": 1},
+    "expectedResult": {"type": "string", "minLength": 1},
+    "observedResult": {"type": "string", "minLength": 1},
+    "reasonCode": {"type": "string", "minLength": 1},
+    "defectIds": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "artifactIds": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "reviewer": {"type": "string", "minLength": 1},
+    "reviewedUtc": {"type": ["string","null"], "format": "date-time"},
+    "reviewerDisposition": {"enum": ["PASS","FAIL","FAIL_CLOSED"]},
+    "reviewerSignature": {"type": "string"},
+    "signatureMethod": {"type": "string"},
+    "supersedes": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/sha256"}},
+    "metrics": {"type": "object"},
+    "artifacts": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/artifact"}},
+    "missingArtifacts": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "manifestSha256": {"$ref": "#/$defs/sha256"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["technicalResult"],
+        "properties": {"technicalResult": {"enum": ["PASS","FAIL"]}}
+      },
+      "then": {
+        "properties": {
+          "executionState": {"const": "COMPLETE"},
+          "missingArtifacts": {"maxItems": 0},
+          "metrics": {"minProperties": 1},
+          "artifactIds": {"minItems": 1},
+          "reviewedUtc": {"type": "string", "format": "date-time"},
+          "reviewerSignature": {"minLength": 1},
+          "signatureMethod": {"const": "ssh-keygen-y"},
+          "reviewTrustSha256": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "build": {
+      "type": "object", "additionalProperties": false,
+      "required": ["buildId","sourceRevision","sourceTreeSha256","manifestSha256","artifactTreeSha256","target"],
+      "properties": {
+        "buildId": {"type": "string", "minLength": 1},
+        "sourceRevision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "sourceTreeSha256": {"$ref": "#/$defs/sha256"},
+        "manifestSha256": {"$ref": "#/$defs/sha256"},
+        "artifactTreeSha256": {"$ref": "#/$defs/sha256"},
+        "target": {"const": "windows64-development"}
+      }
+    },
+    "catalogs": {
+      "type": "object", "additionalProperties": false,
+      "required": ["enabledSceneManifestSha256","sceneCatalogSha256","contentCatalogSha256","narrativeCatalogSha256"],
+      "properties": {
+        "enabledSceneManifestSha256": {"$ref": "#/$defs/sha256"},
+        "sceneCatalogSha256": {"$ref": "#/$defs/sha256"},
+        "contentCatalogSha256": {"$ref": "#/$defs/sha256"},
+        "narrativeCatalogSha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "scenario": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id","version","fixtureVersion","catalogSha256","definitionSha256","seed","logicalClockUtc"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^RSQ-[A-Za-z0-9_{}.-]+$"},
+        "version": {"type": "string", "pattern": "^v[0-9]+$"},
+        "fixtureVersion": {"type": "string", "minLength": 1},
+        "catalogSha256": {"$ref": "#/$defs/sha256"},
+        "definitionSha256": {"$ref": "#/$defs/sha256"},
+        "seed": {"type": "integer"},
+        "logicalClockUtc": {"type": "string", "format": "date-time"}
+      }
+    },
+    "saveFixture": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id","sha256","fixtureManifestSha256","formatId","sourceSchemaVersion","expectedSchemaVersion","schemaDisposition"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "fixtureManifestSha256": {"$ref": "#/$defs/sha256"},
+        "formatId": {"type": "string", "minLength": 1},
+        "sourceSchemaVersion": {"type": "integer", "minimum": 0},
+        "expectedSchemaVersion": {"type": "integer", "minimum": 0},
+        "schemaDisposition": {"type": "string", "minLength": 1}
+      }
+    },
+    "platform": {
+      "type": "object", "additionalProperties": false,
+      "required": ["platform","deviceId","osVersion","graphicsApi","qualityPreset","viewport","renderScale","refreshRate","thresholdSetId","captureTool","captureToolVersion"],
+      "properties": {
+        "platform": {"const": "WindowsPlayer"},
+        "deviceId": {"type": "string", "minLength": 1},
+        "osVersion": {"type": "string", "minLength": 1},
+        "graphicsApi": {"type": "string", "minLength": 1},
+        "qualityPreset": {"type": "string", "minLength": 1},
+        "viewport": {
+          "type": "object", "additionalProperties": false,
+          "required": ["width","height"],
+          "properties": {
+            "width": {"type": "integer", "minimum": 1},
+            "height": {"type": "integer", "minimum": 1}
+          }
+        },
+        "renderScale": {"type": "number", "exclusiveMinimum": 0},
+        "refreshRate": {"type": "number", "exclusiveMinimum": 0},
+        "thresholdSetId": {"type": "string", "minLength": 1},
+        "captureTool": {"type": "string", "minLength": 1},
+        "captureToolVersion": {"type": "string", "minLength": 1}
+      }
+    },
+    "qa": {
+      "type": "object", "additionalProperties": false,
+      "required": ["runId","reportSha256","profile","status"],
+      "properties": {
+        "runId": {"type": ["string","null"]},
+        "reportSha256": {"$ref": "#/$defs/sha256"},
+        "profile": {"const": "full"},
+        "status": {"const": "passed"}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id","role","path","bytes","sha256","collectedUtc"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "bytes": {"type": "integer", "minimum": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "collectedUtc": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

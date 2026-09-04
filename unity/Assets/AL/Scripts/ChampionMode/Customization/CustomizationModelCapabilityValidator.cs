@@ -55,7 +55,7 @@ namespace AL.ChampionMode.Customization
                 {
                     string capability = capabilities[index];
                     string path = "model.capabilities[" + index + "]";
-                    if (!CustomizationCatalogValidator.IsTechnicalId(capability))
+                    if (!CustomizationCatalogValidator.IsCapabilityId(capability))
                     {
                         Error(diagnostics, "AL-CUS-MODEL-CAPABILITY-ID",
                             path, capability);

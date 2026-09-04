@@ -12,8 +12,8 @@ This record inventories every production call to the legacy `AddResource`, `Cons
 | --- | --- | --- | --- |
 | `unity/Assets/AL/Scripts/Utilities/DemoInitializer.cs` | `AddResource` | #178 / #150 | Keep test/demo-only; do not promote prototype grants into a production transaction. |
 | `unity/Assets/AL/Scripts/Kingdom/Quests/LocalQuestService.cs` | `AddResource` | #152 / #133 | Apply typed resource changes inside the durable quest/report consequence transaction. |
-| `unity/Assets/AL/Scripts/Kingdom/Research/LocalResearchService.cs` | `ConsumeResource` | #165 | Stage checked cost and research order, consume through the typed primitive, and persist once. |
-| `unity/Assets/AL/Scripts/Services/Local/LocalTrainingService.cs` | `ConsumeResource` | #165 | Validate count/inventory/order before typed consumption and one owning commit. |
+
+Research and training production services no longer call `ConsumeResource`. The #165 containment slice rejects unproven research/troop definitions as `CatalogUnavailable`/`CatalogInvalid` before any economy mutation.
 
 ## Warzone Credit wrappers
 

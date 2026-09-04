@@ -490,7 +490,8 @@ namespace AL.Core
             return saveGameService.LastLoadStatus == SaveLoadStatus.LoadedPrimary ||
                 saveGameService.LastLoadStatus == SaveLoadStatus.RecoveredFromBackup ||
                 saveGameService.LastLoadStatus == SaveLoadStatus.CreatedNew ||
-                saveGameService.LastLoadStatus == SaveLoadStatus.CreatedNewAfterUnrecoverableCorruption;
+                saveGameService.LastLoadStatus == SaveLoadStatus.CreatedNewAfterUnrecoverableCorruption ||
+                saveGameService.LastLoadStatus == SaveLoadStatus.MigratedSchemaOne;
         }
 
         private static Type[] GetPresentRequiredTypes()
