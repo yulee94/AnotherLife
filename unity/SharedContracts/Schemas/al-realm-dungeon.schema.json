@@ -1,0 +1,453 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-realm-dungeon.schema.json",
+  "title": "Another Life Public Realm Dungeon Catalog",
+  "description": "Catalog authority for four public open-world underground realm dungeons, two-entrance scopes, sealed outward-only manifestation portals, and kill-only 604800-second raid-dragon cooldowns. Distinct from guild closed instances (#482/#478) and Chapter-1 guardian identity/state.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "version",
+    "catalogId",
+    "game",
+    "sourceRevision",
+    "machineIdentity",
+    "consumedContracts",
+    "scope",
+    "clock",
+    "lifecycle",
+    "portal",
+    "productionGate",
+    "identityIsolation",
+    "dungeons",
+    "authorityBoundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "catalogId": { "const": "al_realm_dungeon_catalog" },
+    "game": { "const": "Another Life" },
+    "sourceRevision": { "$ref": "#/$defs/stableId" },
+    "machineIdentity": { "const": "RealmDungeon" },
+    "consumedContracts": {
+      "type": "object",
+      "required": ["realmCatalogId", "guildRaidMusterCatalogId"],
+      "properties": {
+        "realmCatalogId": { "const": "al_realm_catalog" },
+        "guildRaidMusterCatalogId": { "const": "al_guild_raid_muster_policy" }
+      },
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "kind",
+        "clientAuthority",
+        "runtimeActivation",
+        "network",
+        "save",
+        "scenes",
+        "balance",
+        "guildClosedInstanceAlias"
+      ],
+      "properties": {
+        "kind": { "const": "public_open_world_underground" },
+        "clientAuthority": { "const": false },
+        "runtimeActivation": { "const": false },
+        "network": { "const": false },
+        "save": { "const": false },
+        "scenes": { "const": false },
+        "balance": { "const": false },
+        "guildClosedInstanceAlias": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "clock": {
+      "type": "object",
+      "required": ["kind", "cooldownSeconds", "killOnly"],
+      "properties": {
+        "kind": { "const": "trusted_server_unix_seconds" },
+        "cooldownSeconds": { "const": 604800 },
+        "killOnly": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "lifecycle": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "prefixItems": [
+        { "const": "genesis_or_recovery" },
+        { "const": "alive_idle" },
+        { "const": "alive_engaged" },
+        { "const": "defeat_commit_pending" },
+        { "const": "cooldown" },
+        { "const": "respawn_eligible" },
+        { "const": "manifesting" },
+        { "const": "alive_idle" }
+      ],
+      "items": false
+    },
+    "portal": {
+      "type": "object",
+      "required": ["kind", "inwardTraversal", "ambientNavigation", "lease"],
+      "properties": {
+        "kind": { "const": "sealed_outward_only_manifestation" },
+        "inwardTraversal": { "const": false },
+        "ambientNavigation": { "const": false },
+        "lease": { "const": "fenced_spawn_cycle" }
+      },
+      "additionalProperties": false
+    },
+    "productionGate": {
+      "type": "object",
+      "required": [
+        "eligibleWithoutApprovedBundle",
+        "missingAssetPolicy",
+        "genericFallback"
+      ],
+      "properties": {
+        "eligibleWithoutApprovedBundle": { "const": false },
+        "missingAssetPolicy": { "const": "fail_closed" },
+        "genericFallback": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "identityIsolation": {
+      "type": "object",
+      "required": [
+        "raidDefeatMutatesGuardian",
+        "guardianStateMutatesRaid",
+        "guildClosedInstanceAlias",
+        "guildClosedInstanceIdPrefix",
+        "guildClosedBossProfileIds",
+        "guardianCatalogDragonIds"
+      ],
+      "properties": {
+        "raidDefeatMutatesGuardian": { "const": false },
+        "guardianStateMutatesRaid": { "const": false },
+        "guildClosedInstanceAlias": { "const": false },
+        "guildClosedInstanceIdPrefix": { "const": "closed_raid_" },
+        "guildClosedBossProfileIds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            { "const": "raid_boss_iron_colossus" },
+            { "const": "raid_boss_ash_seraph" },
+            { "const": "raid_boss_thorn_wraith" },
+            { "const": "raid_boss_veil_regent" }
+          ],
+          "items": false
+        },
+        "guardianCatalogDragonIds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            { "const": "dragon_crownlands_dawn_regent" },
+            { "const": "dragon_stonehold_iron_wyrm" },
+            { "const": "dragon_eldergrove_moonbough" },
+            { "const": "dragon_umbral_void_seraph" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "dungeons": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        { "$ref": "#/$defs/crownlandsDungeon" },
+        { "$ref": "#/$defs/stoneholdDungeon" },
+        { "$ref": "#/$defs/eldergroveDungeon" },
+        { "$ref": "#/$defs/umbralDungeon" }
+      ],
+      "items": false
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "required": ["plannerScope", "ownedDomain", "excludedImplementations"],
+      "properties": {
+        "plannerScope": { "const": "engine_free_snapshot_only" },
+        "ownedDomain": { "const": "public_realm_dungeon" },
+        "excludedImplementations": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "prefixItems": [
+            { "const": "persistence" },
+            { "const": "network" },
+            { "const": "save" },
+            { "const": "scenes" },
+            { "const": "models" },
+            { "const": "balance" },
+            { "const": "server" },
+            { "const": "runtime_activation" },
+            { "const": "guild_closed_instance" },
+            { "const": "guardian_identity_state" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 128
+    },
+    "crownlandsDungeon": {
+      "type": "object",
+      "required": [
+        "id",
+        "realmId",
+        "entrances",
+        "portalId",
+        "raidDragon",
+        "productionEligible"
+      ],
+      "properties": {
+        "id": { "const": "realm_dungeon_crownlands_deep" },
+        "realmId": { "const": "crownlands" },
+        "entrances": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": { "const": "realm_dungeon_crownlands_deep_entrance_01" }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": { "const": "realm_dungeon_crownlands_deep_entrance_02" }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "items": false
+        },
+        "portalId": { "const": "realm_dungeon_crownlands_deep_portal" },
+        "raidDragon": {
+          "type": "object",
+          "required": [
+            "id",
+            "guardianPresentationRef",
+            "presentationBundleId",
+            "presentationApproved",
+            "productionEligible"
+          ],
+          "properties": {
+            "id": { "const": "raid_dragon_crownlands_dawn_regent" },
+            "guardianPresentationRef": {
+              "const": "dragon_crownlands_dawn_regent"
+            },
+            "presentationBundleId": { "const": "" },
+            "presentationApproved": { "const": false },
+            "productionEligible": { "const": false }
+          },
+          "additionalProperties": false
+        },
+        "productionEligible": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "stoneholdDungeon": {
+      "type": "object",
+      "required": [
+        "id",
+        "realmId",
+        "entrances",
+        "portalId",
+        "raidDragon",
+        "productionEligible"
+      ],
+      "properties": {
+        "id": { "const": "realm_dungeon_stonehold_deep" },
+        "realmId": { "const": "stonehold" },
+        "entrances": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": { "const": "realm_dungeon_stonehold_deep_entrance_01" }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": { "const": "realm_dungeon_stonehold_deep_entrance_02" }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "items": false
+        },
+        "portalId": { "const": "realm_dungeon_stonehold_deep_portal" },
+        "raidDragon": {
+          "type": "object",
+          "required": [
+            "id",
+            "guardianPresentationRef",
+            "presentationBundleId",
+            "presentationApproved",
+            "productionEligible"
+          ],
+          "properties": {
+            "id": { "const": "raid_dragon_stonehold_iron_wyrm" },
+            "guardianPresentationRef": {
+              "const": "dragon_stonehold_iron_wyrm"
+            },
+            "presentationBundleId": { "const": "" },
+            "presentationApproved": { "const": false },
+            "productionEligible": { "const": false }
+          },
+          "additionalProperties": false
+        },
+        "productionEligible": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "eldergroveDungeon": {
+      "type": "object",
+      "required": [
+        "id",
+        "realmId",
+        "entrances",
+        "portalId",
+        "raidDragon",
+        "productionEligible"
+      ],
+      "properties": {
+        "id": { "const": "realm_dungeon_eldergrove_deep" },
+        "realmId": { "const": "eldergrove" },
+        "entrances": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": { "const": "realm_dungeon_eldergrove_deep_entrance_01" }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": { "const": "realm_dungeon_eldergrove_deep_entrance_02" }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "items": false
+        },
+        "portalId": { "const": "realm_dungeon_eldergrove_deep_portal" },
+        "raidDragon": {
+          "type": "object",
+          "required": [
+            "id",
+            "guardianPresentationRef",
+            "presentationBundleId",
+            "presentationApproved",
+            "productionEligible"
+          ],
+          "properties": {
+            "id": { "const": "raid_dragon_eldergrove_moonbough" },
+            "guardianPresentationRef": {
+              "const": "dragon_eldergrove_moonbough"
+            },
+            "presentationBundleId": { "const": "" },
+            "presentationApproved": { "const": false },
+            "productionEligible": { "const": false }
+          },
+          "additionalProperties": false
+        },
+        "productionEligible": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "umbralDungeon": {
+      "type": "object",
+      "required": [
+        "id",
+        "realmId",
+        "entrances",
+        "portalId",
+        "raidDragon",
+        "productionEligible"
+      ],
+      "properties": {
+        "id": { "const": "realm_dungeon_umbral_deep" },
+        "realmId": { "const": "umbral" },
+        "entrances": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": { "const": "realm_dungeon_umbral_deep_entrance_01" }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["id"],
+              "properties": {
+                "id": { "const": "realm_dungeon_umbral_deep_entrance_02" }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "items": false
+        },
+        "portalId": { "const": "realm_dungeon_umbral_deep_portal" },
+        "raidDragon": {
+          "type": "object",
+          "required": [
+            "id",
+            "guardianPresentationRef",
+            "presentationBundleId",
+            "presentationApproved",
+            "productionEligible"
+          ],
+          "properties": {
+            "id": { "const": "raid_dragon_umbral_void_seraph" },
+            "guardianPresentationRef": {
+              "const": "dragon_umbral_void_seraph"
+            },
+            "presentationBundleId": { "const": "" },
+            "presentationApproved": { "const": false },
+            "productionEligible": { "const": false }
+          },
+          "additionalProperties": false
+        },
+        "productionEligible": { "const": false }
+      },
+      "additionalProperties": false
+    }
+  }
+}

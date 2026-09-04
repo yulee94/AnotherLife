@@ -2,12 +2,12 @@
   "gameId": "another-life",
   "catalogId": "boss_skill_presentation_v1",
   "schemaVersion": 1,
-  "contentVersion": "1.0.0",
+  "contentVersion": "1.1.0",
   "authority": {
     "catalogOwner": "boss_skill_presentation",
     "finalCreativeOwner": "project_owner",
     "status": "presentation_only",
-    "ownerDecisionRef": "kanban:t_b188fd49",
+    "ownerDecisionRef": "kanban:t_326f28b9",
     "gameplayAuthority": false,
     "runtimeSpawn": false
   },
@@ -30,18 +30,28 @@
       "realmId": "stonehold",
       "sourceProfileId": "tdf_boss_stonehold_fault_crowned_colossus",
       "modelId": "boss_stonehold_fault_crowned_colossus",
+      "assetState": "source_qualified",
       "qualificationId": "rcpq_boss_stonehold_fault_crowned_colossus_v001",
       "sourceVersion": "al-rcreature-2026-09-03-v002",
       "sourceSha256": "c06b9fc23316f6d40ff747e1bdf12b4a055633530d6dd036909a3bc2f83d70f6",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_stonehold_fault_crowned_colossus_concept_sheet_v001.png",
+      "source2dSha256": "c949d4c95e00ca665f3b4e3e56cbc949810113ac4c2c936ff815af23e3519b50",
+      "sourceRequirements": [
+        "Preserve three distinct limb-pair attachment zones.",
+        "Redesign the nasal growth bed and skull so the identity does not collapse into an enlarged rhinoceros."
+      ],
       "prefabRef": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/fault_crowned_colossus_rig_lod_motion_v001.fbx",
       "rigId": "RIG_fault_crowned_colossus",
       "materialId": "mat_fault_crowned_colossus_pbr_v001",
       "motionKeys": [
+        "idle.weight_shift",
         "locomotion.walk",
         "locomotion.run",
         "attack.basic",
         "attack.special",
-        "skill.anticipation"
+        "skill.anticipation",
+        "reaction.hit",
+        "defeat"
       ],
       "protectedIdentityCues": [
         "six_load_bearing_limb_columns_in_three_distinct_pairs",
@@ -101,7 +111,11 @@
       "accessibility": {
         "reducedMotionVariantId": "a11y_reduced_motion",
         "reducedFlash": true,
-        "nonColorCues": ["silhouette", "timing", "shape"]
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
       },
       "pooling": {
         "maxActive": 2,
@@ -109,9 +123,1529 @@
         "resetOnRelease": true
       },
       "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_stonehold_oreblind_delver_v001",
+      "kind": "elite",
+      "realmId": "stonehold",
+      "sourceProfileId": "tdf_elite_stonehold_oreblind_delver",
+      "modelId": "elite_stonehold_oreblind_delver",
+      "assetState": "source_qualified",
+      "qualificationId": "rcpq_elite_stonehold_oreblind_delver_v001",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "df10a1ed7b48d3ccc0c87c0fd7c163f14be25f5e71c0c3a32de624a931534b2b",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_stonehold_oreblind_delver_concept_sheet_v001.png",
+      "source2dSha256": "86ef99a99539d6d8fdce1dbac410e0dae4b7ab0e6735dab39f37805d624c0f23",
+      "sourceRequirements": [
+        "Lock six-limb skeletal spacing before retopology.",
+        "Keep sensory plates separate from armor and VFX authority."
+      ],
+      "prefabRef": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/OreblindDelverV001/oreblind_delver_rig_lod_motion_v001.fbx",
+      "rigId": "RIG_oreblind_delver",
+      "materialId": "mat_oreblind_delver_pbr_v001",
+      "motionKeys": [
+        "idle.weight_shift",
+        "locomotion.walk",
+        "locomotion.run",
+        "attack.basic",
+        "attack.special",
+        "skill.anticipation",
+        "reaction.hit",
+        "defeat"
+      ],
+      "protectedIdentityCues": [
+        "six_load_bearing_digging_limb_columns_in_three_distinct_pairs",
+        "eyeless_wedge_skull",
+        "broad_sensory_jaw_plates",
+        "short_counterweight_tail"
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_stonehold_rimehorn_breaker_v001",
+      "kind": "elite",
+      "realmId": "stonehold",
+      "sourceProfileId": "tdf_elite_stonehold_rimehorn_breaker",
+      "modelId": "elite_stonehold_rimehorn_breaker",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "24307fb741d67c61a64ad6286757a1374aaef5f4f44443c10ea52a62c1c61eec",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_stonehold_rimehorn_breaker_concept_sheet_v001.png",
+      "source2dSha256": "f05cb4102528f430ccf1173f6dee5d0824cfcbcb9e1c858b20b731cc2ecc3bf3",
+      "sourceRequirements": [
+        "Lock horn root and central notch.",
+        "Verify braking-load anatomy in the production turnaround."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Lock horn root and central notch.",
+        "Verify braking-load anatomy in the production turnaround."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_stonehold_slaghide_gorer_v001",
+      "kind": "elite",
+      "realmId": "stonehold",
+      "sourceProfileId": "tdf_elite_stonehold_slaghide_gorer",
+      "modelId": "elite_stonehold_slaghide_gorer",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "6894fa65bb41e0a0b36ad28a3afe274d908908c56a2d46c4393b9854ad09ece7",
+      "source2dPath": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/slaghide_gorer_v003.png",
+      "source2dSha256": "caaa7a991760e2222b53e060497e0420ab840b16a9155f9a6f720399e2eea53d",
+      "sourceRequirements": [
+        "Preserve the fused vitrified dorsal shield and asymmetric tusks.",
+        "Change skull, shoulder, and gait proportions so the creature no longer reads as a normal boar."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Preserve the fused vitrified dorsal shield and asymmetric tusks.",
+        "Change skull, shoulder, and gait proportions so the creature no longer reads as a normal boar."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "boss_presentation_eldergrove_mere_root_leviathan_v001",
+      "kind": "boss",
+      "realmId": "eldergrove",
+      "sourceProfileId": "tdf_boss_eldergrove_mere_root_leviathan",
+      "modelId": "boss_eldergrove_mere_root_leviathan",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "d9aebc51f066359885444c3a1adcf061647fc1c12ae2c2fcccac68972e265356",
+      "source2dPath": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/mere_root_leviathan_v003.png",
+      "source2dSha256": "5140a3348d9660d4f0b98db8b45bc1283c44308141f298fb65b93350f7896201",
+      "sourceRequirements": [
+        "Preserve the low aquatic axis, dominant forelimbs, long rudder tail, and exactly seven cervical vanes.",
+        "Deepen the jaw-hinge, vent, and forelimb-root identity so the head no longer reads as a normal salamander."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Preserve the low aquatic axis, dominant forelimbs, long rudder tail, and exactly seven cervical vanes.",
+        "Deepen the jaw-hinge, vent, and forelimb-root identity so the head no longer reads as a normal salamander."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 16,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 48,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 96,
+          "maxLights": 2,
+          "maxTrails": 2,
+          "cameraImpulse": true,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.7,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.35,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 2,
+        "maxPooled": 4,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_eldergrove_hollowbark_stalker_v001",
+      "kind": "elite",
+      "realmId": "eldergrove",
+      "sourceProfileId": "tdf_elite_eldergrove_hollowbark_stalker",
+      "modelId": "elite_eldergrove_hollowbark_stalker",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "c41ea687d9e913705e05ff8911cdad18b65718ffb33ba2649756d05b26888c7c",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_eldergrove_hollowbark_stalker_concept_sheet_v001.png",
+      "source2dSha256": "8aa0e974fac00a2f6a0ea7d23eb8056c75e8a20f69dba6cb2153ba6501fbe6cb",
+      "sourceRequirements": [
+        "Lock the tail-fan blade count.",
+        "Verify plate-root deformation across the rig."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Lock the tail-fan blade count.",
+        "Verify plate-root deformation across the rig."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_eldergrove_mirrorfin_lurker_v001",
+      "kind": "elite",
+      "realmId": "eldergrove",
+      "sourceProfileId": "tdf_elite_eldergrove_mirrorfin_lurker",
+      "modelId": "elite_eldergrove_mirrorfin_lurker",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "655964b281e443f9f5e8219c8b2792e182b61f4806ded9ff818439edfcafd108",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_eldergrove_mirrorfin_lurker_concept_sheet_v001.png",
+      "source2dSha256": "693e7c9d62322082ac7b5375668b5f9da83cd19fb45a883be39130fe5f393f8c",
+      "sourceRequirements": [
+        "Standardize mantle scallop count and flare range in the production turnaround and rig."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Standardize mantle scallop count and flare range in the production turnaround and rig."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_eldergrove_sunmane_thornstag_v001",
+      "kind": "elite",
+      "realmId": "eldergrove",
+      "sourceProfileId": "tdf_elite_eldergrove_sunmane_thornstag",
+      "modelId": "elite_eldergrove_sunmane_thornstag",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "360fa5f2696d41840ee3c6735318c118eae15cc19726147ba36acb0363a37c42",
+      "source2dPath": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/sunmane_thornstag_v003.png",
+      "source2dSha256": "b095125c8c4d1443fdb3d1a01ad06386bf221e9a5514c509093b51eca61f6b60",
+      "sourceRequirements": [
+        "Preserve the deep chest, long lower-leg negative space, dorsal mane, and one left antler break.",
+        "Lock a single rear-facing antler tine order and push the anatomy farther from a familiar stag."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Preserve the deep chest, long lower-leg negative space, dorsal mane, and one left antler break.",
+        "Lock a single rear-facing antler tine order and push the anatomy farther from a familiar stag."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "boss_presentation_crownlands_meridian_tempest_roc_v001",
+      "kind": "boss",
+      "realmId": "crownlands",
+      "sourceProfileId": "tdf_boss_crownlands_meridian_tempest_roc",
+      "modelId": "boss_crownlands_meridian_tempest_roc",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "c57ce1d832ac87a60e648d9041f15bf35450df9dd49ae8e4067a8f067c490858",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_crownlands_meridian_tempest_roc_concept_sheet_v002.png",
+      "source2dSha256": "99d2bc5afed49937cf86cb56b5c7318e4a7f54ff4003efa0dc21148546d1af21",
+      "sourceRequirements": [
+        "Lock exactly seven separated outer primaries, left-wing damage, the low shield-skull plane, and two readable rudder-fan roots."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Lock exactly seven separated outer primaries, left-wing damage, the low shield-skull plane, and two readable rudder-fan roots."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 16,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 48,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 96,
+          "maxLights": 2,
+          "maxTrails": 2,
+          "cameraImpulse": true,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.7,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.35,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 2,
+        "maxPooled": 4,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_crownlands_crownstep_v001",
+      "kind": "elite",
+      "realmId": "crownlands",
+      "sourceProfileId": "tdf_elite_crownlands_crownstep_lion",
+      "modelId": "elite_crownlands_crownstep",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "786cb1d3b2245c76b50da2baf0fcc976f2dee8e93fa195f8d9e8d8401d37e51a",
+      "source2dPath": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/crownstep_lion_v005.png",
+      "source2dSha256": "a73f84f979ac2f349aeba37333daed7dfd70bde547d40c9909d6fc32e732c432",
+      "sourceRequirements": [
+        "Preserve the three asymmetric rows of biologically rooted mane plates and heavy tuftless tail.",
+        "Redesign skull, shoulders, and forequarter loading so the identity no longer reads as a normal lion."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Preserve the three asymmetric rows of biologically rooted mane plates and heavy tuftless tail.",
+        "Redesign skull, shoulders, and forequarter loading so the identity no longer reads as a normal lion."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_crownlands_galeclaw_courser_v001",
+      "kind": "elite",
+      "realmId": "crownlands",
+      "sourceProfileId": "tdf_elite_crownlands_galeclaw_courser",
+      "modelId": "elite_crownlands_galeclaw_courser",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "ac33cc2f1080dfbe0dd28b158efbd61e3e799ae6e185397ed87513198201e3db",
+      "source2dPath": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/galeclaw_courser_v002.png",
+      "source2dSha256": "f0d67d74bc5db49d19cdea274c697e6d6fbdc4c058535307f3b042d69b1c278b",
+      "sourceRequirements": [
+        "Preserve a flightless-bird body plan with two short balancing forewings, four-toed bird feet, a spear skull, and short pygostyle fan.",
+        "Push the anatomy away from terror-bird and theropod silhouettes."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Preserve a flightless-bird body plan with two short balancing forewings, four-toed bird feet, a spear skull, and short pygostyle fan.",
+        "Push the anatomy away from terror-bird and theropod silhouettes."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_crownlands_reliquary_basilisk_v001",
+      "kind": "elite",
+      "realmId": "crownlands",
+      "sourceProfileId": "tdf_elite_crownlands_reliquary_basilisk",
+      "modelId": "elite_crownlands_reliquary_basilisk",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "67bbf05be87fef78ba684d202621db4e0ff9984b464b08347840424817b43ff4",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_crownlands_reliquary_basilisk_concept_sheet_v001.png",
+      "source2dSha256": "a4c4385a7ad444ccb1926163b6ca9ff663cca9563cb5773fd0a245aef5c6a6d1",
+      "sourceRequirements": [
+        "Lock all three limb girdles and the tail-brace contact system in orthographic topology."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Lock all three limb girdles and the tail-brace contact system in orthographic topology."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "boss_presentation_umbral_ashvein_triarch_v001",
+      "kind": "boss",
+      "realmId": "umbral",
+      "sourceProfileId": "tdf_boss_umbral_ashvein_triarch",
+      "modelId": "boss_umbral_ashvein_triarch",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "794d603ae206c9a18a8f68b79f42e88e75c0163f90fa04216b3869d5da154f83",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_umbral_ashvein_triarch_concept_sheet_v002.png",
+      "source2dSha256": "c627ff27abc62a8d52720a6beb20e3031a03d36cc6060c3c13f95fdc6a05b72a",
+      "sourceRequirements": [
+        "Lock three separate neck roots, central shield width, left sealed-eye damage, right hook profile, and exactly one wing pair."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Lock three separate neck roots, central shield width, left sealed-eye damage, right hook profile, and exactly one wing pair."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 16,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 48,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 96,
+          "maxLights": 2,
+          "maxTrails": 2,
+          "cameraImpulse": true,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.7,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.35,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 2,
+        "maxPooled": 4,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_umbral_cindermaw_salamander_v001",
+      "kind": "elite",
+      "realmId": "umbral",
+      "sourceProfileId": "tdf_elite_umbral_cindermaw_salamander",
+      "modelId": "elite_umbral_cindermaw_salamander",
+      "assetState": "source_qualified",
+      "qualificationId": "rcpq_elite_umbral_cindermaw_salamander_v001",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "7ad41ad8ce10aeca0919008f1d99c0d9f373a37e4100b2a490cb1bc5537e3b7b",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_cindermaw_salamander_concept_sheet_v001.png",
+      "source2dSha256": "61a5ea43950826a19dc344c3e8f0413cd78457b33cb85c0aeff52a2e9eb872ee",
+      "sourceRequirements": [
+        "Lock dorsal fin count and root order; treat heat and contact steam as separate runtime VFX."
+      ],
+      "prefabRef": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/cindermaw_salamander_rig_lod_motion_v001.fbx",
+      "rigId": "RIG_cindermaw_salamander",
+      "materialId": "mat_cindermaw_salamander_pbr_v001",
+      "motionKeys": [
+        "idle.weight_shift",
+        "locomotion.walk",
+        "locomotion.run",
+        "attack.basic",
+        "attack.special",
+        "skill.anticipation",
+        "reaction.hit",
+        "defeat"
+      ],
+      "protectedIdentityCues": [
+        "four_outward_splayed_load_bearing_limbs",
+        "enormous_wedge_mouth_and_tiny_lateral_eyes",
+        "one_dorsoventrally_flattened_tail",
+        "dorsal_heat_fins_rooted_neck_to_tail"
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_umbral_gravewing_siphon_v001",
+      "kind": "elite",
+      "realmId": "umbral",
+      "sourceProfileId": "tdf_elite_umbral_gravewing_siphon",
+      "modelId": "elite_umbral_gravewing_siphon",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "370d42a5cda78561803d955629284511b67e69b5dd1f8f335f9883d48b04adfa",
+      "source2dPath": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/gravewing_siphon_v002.png",
+      "source2dSha256": "30dcc7a02c290c4536e0d744d15878dffdba092b157a61cd796557fc52a42dda",
+      "sourceRequirements": [
+        "Preserve non-humanoid horizontal quadrupedal bat anatomy with one wing pair and two hind limbs.",
+        "Lock keel, pelvis, nose leaf, thumb claws, and membrane-tab count across folded and spread views."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Preserve non-humanoid horizontal quadrupedal bat anatomy with one wing pair and two hind limbs.",
+        "Lock keel, pelvis, nose leaf, thumb claws, and membrane-tab count across folded and spread views."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "elite_presentation_umbral_veilspine_widow_v001",
+      "kind": "elite",
+      "realmId": "umbral",
+      "sourceProfileId": "tdf_elite_umbral_veilspine_widow",
+      "modelId": "elite_umbral_veilspine_widow",
+      "assetState": "source_only",
+      "qualificationId": "explicit_unavailable",
+      "sourceVersion": "al-rcreature-2026-09-03-v003",
+      "sourceSha256": "2119214bc0b1572b77309c9e759aee39a8a0bea0ceddb58bf63395581fc22ab8",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_veilspine_widow_concept_sheet_v001.png",
+      "source2dSha256": "8432d1b562689dbe55258b7213ee3ccc1baa01fbe83937c7c7ddd6ff1170590d",
+      "sourceRequirements": [
+        "Preserve exact eight-leg hierarchy and vertical spine order; webbing and sensory color remain supplemental runtime treatment."
+      ],
+      "prefabRef": "explicit_unavailable",
+      "rigId": "explicit_unavailable",
+      "materialId": "explicit_unavailable",
+      "motionKeys": [],
+      "protectedIdentityCues": [
+        "Preserve exact eight-leg hierarchy and vertical spine order; webbing and sensory color remain supplemental runtime treatment."
+      ],
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "silhouette",
+          "timing",
+          "shape"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
     }
   ],
   "skillProfiles": [
+    {
+      "id": "skill_presentation_npc_ranged_bolt_v001",
+      "skillId": "npc_ranged_bolt",
+      "vfxId": "vfx_npc_ranged_bolt_v001",
+      "actorFamily": "npc",
+      "presentationIndependentOfPower": true,
+      "telegraphChannel": "telegraph_lane",
+      "cosmeticChannel": "active_ranged_projectile",
+      "phases": {
+        "anticipation": "motion_skill_anticipation",
+        "cast": "motion_skill_cast",
+        "channel": "motion_skill_channel",
+        "release": "motion_skill_release",
+        "recovery": "motion_skill_recovery"
+      },
+      "effects": {
+        "telegraph": "telegraph_lane",
+        "active": "active_ranged_projectile",
+        "impact": "impact_hit_flash",
+        "cleanup": "cleanup_release",
+        "accessibility": "a11y_high_contrast_shape"
+      },
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "shape",
+          "timing",
+          "icon"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "skill_presentation_mage_arc_beam_v001",
+      "skillId": "mage_arc_beam",
+      "vfxId": "vfx_mage_arc_beam_v001",
+      "actorFamily": "champion",
+      "presentationIndependentOfPower": true,
+      "telegraphChannel": "telegraph_lane",
+      "cosmeticChannel": "active_magic_beam",
+      "phases": {
+        "anticipation": "motion_skill_anticipation",
+        "cast": "motion_skill_cast",
+        "channel": "motion_skill_channel",
+        "release": "motion_skill_release",
+        "recovery": "motion_skill_recovery"
+      },
+      "effects": {
+        "telegraph": "telegraph_lane",
+        "active": "active_magic_beam",
+        "impact": "impact_hit_flash",
+        "cleanup": "cleanup_release",
+        "accessibility": "a11y_high_contrast_shape"
+      },
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "shape",
+          "timing",
+          "icon"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
     {
       "id": "skill_presentation_boss_faultline_slam_v001",
       "skillId": "boss_faultline_slam",
@@ -121,11 +1655,11 @@
       "telegraphChannel": "telegraph_boss_slam",
       "cosmeticChannel": "active_area_shockwave",
       "phases": {
-        "anticipation": "ANIM_fault_crowned_colossus_skill_anticipation_v001",
-        "cast": "ANIM_fault_crowned_colossus_attack_special_v001",
-        "channel": "ANIM_fault_crowned_colossus_attack_special_v001",
-        "release": "ANIM_fault_crowned_colossus_attack_special_v001",
-        "recovery": "ANIM_fault_crowned_colossus_reaction_hit_v001"
+        "anticipation": "motion_skill_anticipation",
+        "cast": "motion_skill_cast",
+        "channel": "motion_skill_channel",
+        "release": "motion_skill_release",
+        "recovery": "motion_skill_recovery"
       },
       "effects": {
         "telegraph": "telegraph_boss_slam",
@@ -159,7 +1693,7 @@
           "maxParticles": 64,
           "maxLights": 1,
           "maxTrails": 2,
-          "cameraImpulse": true,
+          "cameraImpulse": false,
           "flashAllowed": false
         }
       ],
@@ -186,7 +1720,98 @@
       "accessibility": {
         "reducedMotionVariantId": "a11y_reduced_motion",
         "reducedFlash": true,
-        "nonColorCues": ["shape", "timing", "icon"]
+        "nonColorCues": [
+          "shape",
+          "timing",
+          "icon"
+        ]
+      },
+      "pooling": {
+        "maxActive": 4,
+        "maxPooled": 8,
+        "resetOnRelease": true
+      },
+      "unavailableFallback": "explicit_unavailable"
+    },
+    {
+      "id": "skill_presentation_slagwhistle_quarry_burst_v001",
+      "skillId": "slagwhistle_quarry_burst",
+      "vfxId": "vfx_slagwhistle_quarry_burst_v001",
+      "actorFamily": "fantasy_beast",
+      "presentationIndependentOfPower": true,
+      "telegraphChannel": "telegraph_ground_ring",
+      "cosmeticChannel": "active_summon_sigil",
+      "phases": {
+        "anticipation": "motion_skill_anticipation",
+        "cast": "motion_skill_cast",
+        "channel": "motion_skill_channel",
+        "release": "motion_skill_release",
+        "recovery": "motion_skill_recovery"
+      },
+      "effects": {
+        "telegraph": "telegraph_ground_ring",
+        "active": "active_summon_sigil",
+        "impact": "impact_hit_flash",
+        "cleanup": "cleanup_release",
+        "accessibility": "a11y_high_contrast_shape"
+      },
+      "qualityTiers": [
+        {
+          "id": "low",
+          "lodId": "LOD2",
+          "maxParticles": 12,
+          "maxLights": 0,
+          "maxTrails": 0,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "balanced",
+          "lodId": "LOD1",
+          "maxParticles": 32,
+          "maxLights": 1,
+          "maxTrails": 1,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        },
+        {
+          "id": "high",
+          "lodId": "LOD0",
+          "maxParticles": 64,
+          "maxLights": 1,
+          "maxTrails": 2,
+          "cameraImpulse": false,
+          "flashAllowed": false
+        }
+      ],
+      "distanceContexts": [
+        {
+          "id": "hero",
+          "lodId": "LOD0",
+          "cosmeticScale": 1.0,
+          "telegraphProtected": true
+        },
+        {
+          "id": "nearby",
+          "lodId": "LOD1",
+          "cosmeticScale": 0.6,
+          "telegraphProtected": true
+        },
+        {
+          "id": "distant",
+          "lodId": "LOD2",
+          "cosmeticScale": 0.25,
+          "telegraphProtected": true
+        }
+      ],
+      "accessibility": {
+        "reducedMotionVariantId": "a11y_reduced_motion",
+        "reducedFlash": true,
+        "nonColorCues": [
+          "shape",
+          "timing",
+          "icon"
+        ]
       },
       "pooling": {
         "maxActive": 4,

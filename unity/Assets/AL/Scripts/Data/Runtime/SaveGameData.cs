@@ -66,6 +66,9 @@ namespace AL.Data.Runtime
         // Optional schema-v2 extension. Missing legacy/schema-2 saves admit
         // empty Guild City seasons until a trusted-clock commit persists them.
         public AL.Guilds.GuildCitySeasonPersistentState GuildCitySeason;
+        // Optional schema-v2 extension. Missing legacy/schema-2 saves migrate
+        // to empty raid-call/closed-instance authority until a trusted command commits.
+        public AL.Guilds.GuildRaidMusterPersistentState GuildRaidMuster;
         public int WarzoneCredits;
         public long LastSavedTimestamp;
         // Optional schema-v1 extension. Missing legacy saves admit empty
