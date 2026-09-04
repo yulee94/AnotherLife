@@ -38,6 +38,10 @@
 /unity/Docs/Cinematics/Shot070VaelorynSourceV002/**/*.json text eol=lf
 /unity/Docs/Cinematics/Shot070VaelorynShotScaleV001/**/*.json text eol=lf
 
+# Hash-bound launch-cinematic packaging catalog and packet.
+/unity/Assets/AL/StreamingAssets/GameData/al_launch_cinematic_runtime.v1.json text eol=lf
+/unity/Docs/Cinematics/LaunchCinematicPacketV001/**/*.json text eol=lf
+
 # GS-04 evidence hashes raw SVG bytes; keep generated artifacts byte-stable.
 /tools/ui/validate_ui_release_readiness.py text eol=lf
 /unity/Docs/UI/Evidence/GS-04/** text eol=lf
