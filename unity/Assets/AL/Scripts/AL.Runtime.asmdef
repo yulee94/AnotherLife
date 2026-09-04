@@ -5,6 +5,7 @@
         "AL.SaveAuthority",
         "AL.SaveAuthority.RuntimeBridge",
         "AL.GameDataCatalog",
+        "AL.ChampionDeathPenalty",
         "Unity.TextMeshPro",
         "Unity.ugui",
         "Unity.InputSystem"
