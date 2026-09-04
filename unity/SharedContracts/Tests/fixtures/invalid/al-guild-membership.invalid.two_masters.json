@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "catalogId": "al_guild_membership_policy",
+  "game": "Another Life",
+  "sourceRevision": "guild_membership_policy_v1",
+  "machineIdentity": "Guild",
+  "playerFacingTerms": { "primary": "Guild", "presentationAlias": "Clan", "aliasScope": "localization_only" },
+  "membershipScope": { "subject": "account", "realmBinding": "immutable_account_realm", "sameRealmCharactersShareMembership": true, "crossGuildUniqueness": "one_active_membership_per_account", "requiredActiveMasterCount": 2, "joinedRole": "Member" },
+  "roles": [
+    { "role": "Master", "canManageInvitations": true, "canManageMembers": true, "canPromote": true, "canDemote": true, "canTransferMaster": true, "canDisband": true, "canFormAlliancesOrDeclareWar": true, "canOpenRaidCalls": true },
+    { "role": "Officer", "canManageInvitations": true, "canManageMembers": true, "canPromote": false, "canDemote": false, "canTransferMaster": false, "canDisband": false, "canFormAlliancesOrDeclareWar": false, "canOpenRaidCalls": true },
+    { "role": "Member", "canManageInvitations": false, "canManageMembers": false, "canPromote": false, "canDemote": false, "canTransferMaster": false, "canDisband": false, "canFormAlliancesOrDeclareWar": false, "canOpenRaidCalls": false }
+  ],
+  "transitions": ["create", "join", "invite", "accept", "decline", "leave", "kick", "promote", "demote", "master_transfer", "disband"],
+  "pendingRequestPolicy": { "joinApplicationResolution": "master_or_officer", "invitationResolution": "invited_account_or_manager_cancel", "membershipChangeFence": "accept_exact_guild_revision", "terminalResolution": "accept_xor_decline" },
+  "replayPolicy": { "operationIdentity": "operation_id", "sameFingerprint": "already_committed", "differentFingerprint": "conflict", "unknownOutcome": "fail_closed_until_reconciled" },
+  "excludedEffectDomains": ["combat", "economy", "perk", "city", "raid"],
+  "authorityBoundary": { "plannerScope": "engine_free_snapshot_only", "excludedImplementations": ["persistence", "network", "save", "combat", "economy", "perk", "city", "raid"] }
+}
