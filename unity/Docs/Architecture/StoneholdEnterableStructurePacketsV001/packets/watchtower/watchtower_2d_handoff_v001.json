@@ -158,17 +158,27 @@
         "kind": "door",
         "levelId": "ground",
         "side": "south",
-        "x": 4.0,
-        "z": 0.0,
+        "x": 1.47,
+        "z": 0.3,
         "separateObject": true,
         "planOpeningId": "watchtower_main_entry"
+      },
+      {
+        "id": "watchtower_service_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "north",
+        "x": 1.47,
+        "z": 7.7,
+        "separateObject": true,
+        "planOpeningId": "watchtower_service_entry"
       },
       {
         "id": "window_ground_guard_entry",
         "kind": "window",
         "levelId": "ground",
         "side": "south",
-        "x": 1.59,
+        "x": 1.47,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_guard_entry"
@@ -179,7 +189,7 @@
         "levelId": "ground",
         "side": "east",
         "x": 8,
-        "z": 1.59,
+        "z": 1.47,
         "separateObject": true,
         "planOpeningId": "window_ground_secure_store"
       },
@@ -188,67 +198,17 @@
         "kind": "window",
         "levelId": "ground",
         "side": "north",
-        "x": 1.59,
+        "x": 1.47,
         "z": 8,
         "separateObject": true,
         "planOpeningId": "window_ground_alarm_station"
-      },
-      {
-        "id": "window_ground_stair_core",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "east",
-        "x": 8,
-        "z": 6.41,
-        "separateObject": true,
-        "planOpeningId": "window_ground_stair_core"
-      },
-      {
-        "id": "window_ground_cut_west",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "west",
-        "x": 0.0,
-        "z": 6.34,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_west"
-      },
-      {
-        "id": "window_ground_cut_east",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "east",
-        "x": 8,
-        "z": 6.34,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_east"
-      },
-      {
-        "id": "window_ground_cut_south",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "south",
-        "x": 5.94,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_south"
-      },
-      {
-        "id": "window_ground_cut_north",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "north",
-        "x": 5.94,
-        "z": 8,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_north"
       },
       {
         "id": "window_mid_rest_room",
         "kind": "window",
         "levelId": "mid",
         "side": "south",
-        "x": 1.59,
+        "x": 1.47,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_mid_rest_room"
@@ -259,76 +219,26 @@
         "levelId": "mid",
         "side": "east",
         "x": 8,
-        "z": 1.59,
+        "z": 1.47,
         "separateObject": true,
         "planOpeningId": "window_mid_signal_store"
-      },
-      {
-        "id": "window_mid_landing",
-        "kind": "window",
-        "levelId": "mid",
-        "side": "north",
-        "x": 1.59,
-        "z": 8,
-        "separateObject": true,
-        "planOpeningId": "window_mid_landing"
       },
       {
         "id": "window_mid_arrow_gallery",
         "kind": "window",
         "levelId": "mid",
-        "side": "east",
-        "x": 8,
-        "z": 6.41,
-        "separateObject": true,
-        "planOpeningId": "window_mid_arrow_gallery"
-      },
-      {
-        "id": "window_mid_cut_west",
-        "kind": "window",
-        "levelId": "mid",
-        "side": "west",
-        "x": 0.0,
-        "z": 6.34,
-        "separateObject": true,
-        "planOpeningId": "window_mid_cut_west"
-      },
-      {
-        "id": "window_mid_cut_east",
-        "kind": "window",
-        "levelId": "mid",
-        "side": "east",
-        "x": 8,
-        "z": 6.34,
-        "separateObject": true,
-        "planOpeningId": "window_mid_cut_east"
-      },
-      {
-        "id": "window_mid_cut_south",
-        "kind": "window",
-        "levelId": "mid",
-        "side": "south",
-        "x": 5.94,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_mid_cut_south"
-      },
-      {
-        "id": "window_mid_cut_north",
-        "kind": "window",
-        "levelId": "mid",
         "side": "north",
-        "x": 5.94,
+        "x": 6.53,
         "z": 8,
         "separateObject": true,
-        "planOpeningId": "window_mid_cut_north"
+        "planOpeningId": "window_mid_arrow_gallery"
       },
       {
         "id": "window_crown_observation_deck",
         "kind": "window",
         "levelId": "crown",
         "side": "south",
-        "x": 1.59,
+        "x": 1.47,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_crown_observation_deck"
@@ -339,7 +249,7 @@
         "levelId": "crown",
         "side": "east",
         "x": 8,
-        "z": 1.59,
+        "z": 1.47,
         "separateObject": true,
         "planOpeningId": "window_crown_covered_signal_bay"
       },
@@ -348,7 +258,7 @@
         "kind": "window",
         "levelId": "crown",
         "side": "north",
-        "x": 1.59,
+        "x": 1.47,
         "z": 8,
         "separateObject": true,
         "planOpeningId": "window_crown_wallwalk_threshold"
@@ -359,52 +269,13 @@
         "levelId": "crown",
         "side": "east",
         "x": 8,
-        "z": 6.41,
+        "z": 6.53,
         "separateObject": true,
         "planOpeningId": "window_crown_safe_parapet_route"
-      },
-      {
-        "id": "window_crown_cut_west",
-        "kind": "window",
-        "levelId": "crown",
-        "side": "west",
-        "x": 0.0,
-        "z": 6.34,
-        "separateObject": true,
-        "planOpeningId": "window_crown_cut_west"
-      },
-      {
-        "id": "window_crown_cut_east",
-        "kind": "window",
-        "levelId": "crown",
-        "side": "east",
-        "x": 8,
-        "z": 6.34,
-        "separateObject": true,
-        "planOpeningId": "window_crown_cut_east"
-      },
-      {
-        "id": "window_crown_cut_south",
-        "kind": "window",
-        "levelId": "crown",
-        "side": "south",
-        "x": 5.94,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_crown_cut_south"
-      },
-      {
-        "id": "window_crown_cut_north",
-        "kind": "window",
-        "levelId": "crown",
-        "side": "north",
-        "x": 5.94,
-        "z": 8,
-        "separateObject": true,
-        "planOpeningId": "window_crown_cut_north"
       }
     ],
     "criticalFeatures": [],
+    "voids": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
@@ -423,35 +294,35 @@
           "id": "guard_entry",
           "x": 0.3,
           "z": 0.3,
-          "width": 2.58,
-          "depth": 2.58,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "guard entry"
         },
         {
           "id": "secure_store",
-          "x": 5.12,
+          "x": 5.36,
           "z": 0.3,
-          "width": 2.58,
-          "depth": 2.58,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "secure store"
         },
         {
           "id": "alarm_station",
           "x": 0.3,
-          "z": 5.12,
-          "width": 2.58,
-          "depth": 2.58,
+          "z": 5.36,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "alarm station"
         },
         {
           "id": "stair_core",
-          "x": 5.12,
-          "z": 5.12,
-          "width": 2.58,
-          "depth": 2.58,
+          "x": 2.4,
+          "z": 2.7,
+          "width": 3.2,
+          "depth": 2.6,
           "kind": "room",
           "purpose": "stair core"
         }
@@ -484,16 +355,43 @@
           "accessible": true,
           "points": [
             [
-              4.0,
-              0.0
-            ],
-            [
-              4.0,
+              1.47,
               0.3
             ],
             [
+              1.47,
+              1.47
+            ],
+            [
+              1.47,
+              4.0
+            ],
+            [
               4.0,
+              4.0
+            ]
+          ]
+        },
+        {
+          "id": "service_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              1.47,
               7.7
+            ],
+            [
+              1.47,
+              6.53
+            ],
+            [
+              1.47,
+              4.0
+            ],
+            [
+              4.0,
+              4.0
             ]
           ]
         }
@@ -502,6 +400,10 @@
         [
           "outside",
           "guard_entry"
+        ],
+        [
+          "outside",
+          "alarm_station"
         ],
         [
           "guard_entry",
@@ -526,8 +428,8 @@
           "from": "outside",
           "to": "guard_entry",
           "side": "south",
-          "x": 4.0,
-          "z": 0.0,
+          "x": 1.47,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -542,6 +444,26 @@
           ]
         },
         {
+          "id": "watchtower_service_entry",
+          "from": "outside",
+          "to": "alarm_station",
+          "side": "north",
+          "x": 1.47,
+          "z": 7.7,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "alarm_station"
+          ]
+        },
+        {
           "id": "door_ground_guard_entry",
           "separateObject": true,
           "between": [
@@ -550,8 +472,8 @@
           ],
           "to": "guard_entry",
           "orientation": "vertical",
-          "x": 1.59,
-          "z": 2.88,
+          "x": 1.47,
+          "z": 2.64,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -567,8 +489,8 @@
           ],
           "to": "secure_store",
           "orientation": "vertical",
-          "x": 6.41,
-          "z": 2.88,
+          "x": 6.53,
+          "z": 2.64,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -584,8 +506,8 @@
           ],
           "to": "alarm_station",
           "orientation": "horizontal",
-          "x": 1.59,
-          "z": 5.12,
+          "x": 1.47,
+          "z": 5.36,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -600,14 +522,50 @@
             "primary_circulation"
           ],
           "to": "stair_core",
-          "orientation": "horizontal",
-          "x": 6.41,
-          "z": 5.12,
+          "orientation": "vertical",
+          "x": 4.0,
+          "z": 5.3,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_stair_core",
+          "separateObject": true,
+          "between": [
+            "stair_core",
+            "primary_circulation"
+          ],
+          "to": "stair_core",
+          "orientation": "horizontal",
+          "x": 4.0,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_ground_cut_BB_stair_core",
+          "separateObject": true,
+          "between": [
+            "stair_core",
+            "primary_circulation"
+          ],
+          "to": "stair_core",
+          "orientation": "vertical",
+          "x": 3.168,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [
@@ -616,14 +574,30 @@
           "from": "outside",
           "to": "guard_entry",
           "side": "south",
-          "x": 4.0,
-          "z": 0.0,
+          "x": 1.47,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
             3.0
           ],
           "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true
+        },
+        {
+          "id": "watchtower_service_entry",
+          "from": "outside",
+          "to": "alarm_station",
+          "side": "north",
+          "x": 1.47,
+          "z": 7.7,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
           "stepFree": true,
           "separateObject": true
         }
@@ -634,7 +608,7 @@
           "separateFrameGlassShutter": true,
           "serves": "guard_entry",
           "side": "south",
-          "x": 1.59,
+          "x": 1.47,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -648,7 +622,7 @@
           "serves": "secure_store",
           "side": "east",
           "x": 8,
-          "z": 1.59,
+          "z": 1.47,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -660,82 +634,13 @@
           "separateFrameGlassShutter": true,
           "serves": "alarm_station",
           "side": "north",
-          "x": 1.59,
+          "x": 1.47,
           "z": 8,
           "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
           ]
-        },
-        {
-          "id": "window_ground_stair_core",
-          "separateFrameGlassShutter": true,
-          "serves": "stair_core",
-          "side": "east",
-          "x": 8,
-          "z": 6.41,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ]
-        },
-        {
-          "id": "window_ground_cut_west",
-          "separateFrameGlassShutter": true,
-          "serves": "alarm_station",
-          "side": "west",
-          "x": 0.0,
-          "z": 6.34,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "stair_core",
-          "side": "east",
-          "x": 8,
-          "z": 6.34,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "secure_store",
-          "side": "south",
-          "x": 5.94,
-          "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "stair_core",
-          "side": "north",
-          "x": 5.94,
-          "z": 8,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -745,10 +650,10 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 5.24,
-            "z": 5.24,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 2.4,
+            "z": 2.7,
+            "width": 1.536,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -760,10 +665,10 @@
           "type": "quest_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 5.24,
-            "z": 5.24,
-            "width": 1.6,
-            "depth": 1.6,
+            "x": 4.064,
+            "z": 2.7,
+            "width": 1.536,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -781,9 +686,9 @@
               "kind": "weapon_rack",
               "label": "weapon rack",
               "symbol": "ARMS",
-              "x": 0.558,
-              "z": 0.558,
-              "width": 1.486,
+              "x": 0.534,
+              "z": 0.534,
+              "width": 1.348,
               "depth": 0.5,
               "orientationDegrees": 0,
               "count": 1,
@@ -794,14 +699,14 @@
             {
               "id": "guard_entry_protected_aisle",
               "x": 0.3,
-              "z": 0.99,
-              "width": 2.58,
+              "z": 0.87,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "guard_entry_door_approach",
-              "x": 0.99,
+              "x": 0.87,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -818,10 +723,10 @@
               "kind": "storage_rack",
               "label": "racks / crates",
               "symbol": "RACK",
-              "x": 5.378,
-              "z": 0.558,
-              "width": 1.486,
-              "depth": 0.6,
+              "x": 5.594,
+              "z": 0.534,
+              "width": 1.348,
+              "depth": 0.599,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 1.5
@@ -830,15 +735,15 @@
           "protectedClearances": [
             {
               "id": "secure_store_protected_aisle",
-              "x": 5.12,
-              "z": 0.99,
-              "width": 2.58,
+              "x": 5.36,
+              "z": 0.87,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "secure_store_door_approach",
-              "x": 5.81,
+              "x": 5.93,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -855,10 +760,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 0.558,
-              "z": 5.378,
+              "x": 0.534,
+              "z": 5.594,
               "width": 1.2,
-              "depth": 0.6,
+              "depth": 0.599,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -868,15 +773,15 @@
             {
               "id": "alarm_station_protected_aisle",
               "x": 0.3,
-              "z": 5.81,
-              "width": 2.58,
+              "z": 5.93,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "alarm_station_door_approach",
-              "x": 0.99,
-              "z": 5.12,
+              "x": 0.87,
+              "z": 5.36,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -892,10 +797,10 @@
               "kind": "machine_bed",
               "label": "guarded machine",
               "symbol": "MACHINE",
-              "x": 5.378,
-              "z": 5.378,
-              "width": 1.486,
-              "depth": 0.66,
+              "x": 2.66,
+              "z": 2.96,
+              "width": 1.8,
+              "depth": 0.666,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 1.3
@@ -904,16 +809,16 @@
           "protectedClearances": [
             {
               "id": "stair_core_protected_aisle",
-              "x": 5.12,
-              "z": 5.81,
-              "width": 2.58,
+              "x": 2.4,
+              "z": 3.4,
+              "width": 3.2,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "stair_core_door_approach",
-              "x": 5.81,
-              "z": 5.12,
+              "x": 3.4,
+              "z": 2.7,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -933,20 +838,20 @@
         {
           "id": "ground_combat_clear",
           "kind": "combat_diameter",
-          "roomId": "guard_entry",
+          "roomId": "stair_core",
           "center": [
-            1.59,
-            1.59
+            4.0,
+            4.0
           ],
-          "diameter": 2.58
+          "diameter": 2.6
         },
         {
           "id": "ground_camera_backoff",
           "kind": "camera_backoff",
-          "roomId": "guard_entry",
+          "roomId": "stair_core",
           "center": [
-            1.59,
-            1.59
+            4.0,
+            4.0
           ],
           "radius": 2.5
         }
@@ -956,8 +861,8 @@
           "id": "light_ground_guard_entry",
           "type": "lighting",
           "roomId": "guard_entry",
-          "x": 1.59,
-          "z": 1.59
+          "x": 1.47,
+          "z": 1.47
         },
         {
           "id": "interaction_ground_guard_entry",
@@ -970,43 +875,43 @@
           "id": "light_ground_secure_store",
           "type": "lighting",
           "roomId": "secure_store",
-          "x": 6.41,
-          "z": 1.59
+          "x": 6.53,
+          "z": 1.47
         },
         {
           "id": "interaction_ground_secure_store",
           "type": "interaction",
           "roomId": "secure_store",
-          "x": 5.72,
+          "x": 5.96,
           "z": 0.9
         },
         {
           "id": "light_ground_alarm_station",
           "type": "lighting",
           "roomId": "alarm_station",
-          "x": 1.59,
-          "z": 6.41
+          "x": 1.47,
+          "z": 6.53
         },
         {
           "id": "interaction_ground_alarm_station",
           "type": "interaction",
           "roomId": "alarm_station",
           "x": 0.9,
-          "z": 5.72
+          "z": 5.96
         },
         {
           "id": "light_ground_stair_core",
           "type": "lighting",
           "roomId": "stair_core",
-          "x": 6.41,
-          "z": 6.41
+          "x": 4.0,
+          "z": 4.0
         },
         {
           "id": "interaction_ground_stair_core",
           "type": "interaction",
           "roomId": "stair_core",
-          "x": 5.72,
-          "z": 5.72
+          "x": 3.0,
+          "z": 3.3
         }
       ],
       "sectionCutLines": [
@@ -1015,11 +920,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.34
+            4.0
           ],
           "to": [
             7.7,
-            6.34
+            4.0
           ],
           "cutsVerticalCoreId": "watchtower_stair_core"
         },
@@ -1027,11 +932,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            5.94,
+            3.168,
             0.3
           ],
           "to": [
-            5.94,
+            3.168,
             7.7
           ],
           "cutsVerticalCoreId": "watchtower_stair_core"
@@ -1049,37 +954,37 @@
           "id": "rest_room",
           "x": 0.3,
           "z": 0.3,
-          "width": 2.58,
-          "depth": 2.58,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "rest room"
         },
         {
           "id": "signal_store",
-          "x": 5.12,
+          "x": 5.36,
           "z": 0.3,
-          "width": 2.58,
-          "depth": 2.58,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "signal store"
         },
         {
-          "id": "landing",
-          "x": 0.3,
-          "z": 5.12,
-          "width": 2.58,
-          "depth": 2.58,
-          "kind": "room",
-          "purpose": "landing"
-        },
-        {
           "id": "arrow_gallery",
-          "x": 5.12,
-          "z": 5.12,
-          "width": 2.58,
-          "depth": 2.58,
+          "x": 5.36,
+          "z": 5.36,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "arrow gallery"
+        },
+        {
+          "id": "landing",
+          "x": 2.4,
+          "z": 2.7,
+          "width": 3.2,
+          "depth": 2.6,
+          "kind": "room",
+          "purpose": "landing"
         }
       ],
       "blueprintId": "watchtower:mid:tower_quadrants",
@@ -1115,6 +1020,10 @@
             ],
             [
               4.0,
+              4.0
+            ],
+            [
+              4.0,
               7.7
             ]
           ]
@@ -1130,11 +1039,11 @@
           "primary_circulation"
         ],
         [
-          "landing",
+          "arrow_gallery",
           "primary_circulation"
         ],
         [
-          "arrow_gallery",
+          "landing",
           "primary_circulation"
         ]
       ],
@@ -1148,8 +1057,8 @@
           ],
           "to": "rest_room",
           "orientation": "vertical",
-          "x": 1.59,
-          "z": 2.88,
+          "x": 1.47,
+          "z": 2.64,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -1165,25 +1074,8 @@
           ],
           "to": "signal_store",
           "orientation": "vertical",
-          "x": 6.41,
-          "z": 2.88,
-          "clearOpeningMeters": [
-            1.2,
-            2.4
-          ],
-          "swing": "in"
-        },
-        {
-          "id": "door_mid_landing",
-          "separateObject": true,
-          "between": [
-            "landing",
-            "primary_circulation"
-          ],
-          "to": "landing",
-          "orientation": "horizontal",
-          "x": 1.59,
-          "z": 5.12,
+          "x": 6.53,
+          "z": 2.64,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -1199,13 +1091,66 @@
           ],
           "to": "arrow_gallery",
           "orientation": "horizontal",
-          "x": 6.41,
-          "z": 5.12,
+          "x": 6.53,
+          "z": 5.36,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_mid_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "vertical",
+          "x": 4.0,
+          "z": 5.3,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_mid_cut_AA_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "horizontal",
+          "x": 4.0,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_mid_cut_BB_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "vertical",
+          "x": 3.168,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [],
@@ -1215,7 +1160,7 @@
           "separateFrameGlassShutter": true,
           "serves": "rest_room",
           "side": "south",
-          "x": 1.59,
+          "x": 1.47,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -1229,21 +1174,8 @@
           "serves": "signal_store",
           "side": "east",
           "x": 8,
-          "z": 1.59,
+          "z": 1.47,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ]
-        },
-        {
-          "id": "window_mid_landing",
-          "separateFrameGlassShutter": true,
-          "serves": "landing",
-          "side": "north",
-          "x": 1.59,
-          "z": 8,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1253,70 +1185,14 @@
           "id": "window_mid_arrow_gallery",
           "separateFrameGlassShutter": true,
           "serves": "arrow_gallery",
-          "side": "east",
-          "x": 8,
-          "z": 6.41,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ]
-        },
-        {
-          "id": "window_mid_cut_west",
-          "separateFrameGlassShutter": true,
-          "serves": "landing",
-          "side": "west",
-          "x": 0.0,
-          "z": 6.34,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_mid_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "arrow_gallery",
-          "side": "east",
-          "x": 8,
-          "z": 6.34,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_mid_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "signal_store",
-          "side": "south",
-          "x": 5.94,
-          "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_mid_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "arrow_gallery",
           "side": "north",
-          "x": 5.94,
+          "x": 6.53,
           "z": 8,
           "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
-          ],
-          "cutAligned": true
+          ]
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -1326,10 +1202,10 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 1.36,
-            "z": 5.24,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 2.4,
+            "z": 2.7,
+            "width": 1.536,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1341,10 +1217,10 @@
           "type": "quest_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 1.16,
-            "z": 5.24,
-            "width": 1.6,
-            "depth": 1.6,
+            "x": 4.064,
+            "z": 2.7,
+            "width": 1.536,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1362,10 +1238,10 @@
               "kind": "bed_or_cot",
               "label": "sleeping furniture",
               "symbol": "BED",
-              "x": 0.558,
-              "z": 0.558,
-              "width": 1.486,
-              "depth": 0.66,
+              "x": 0.534,
+              "z": 0.534,
+              "width": 1.348,
+              "depth": 0.599,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.7
@@ -1375,14 +1251,14 @@
             {
               "id": "rest_room_protected_aisle",
               "x": 0.3,
-              "z": 0.99,
-              "width": 2.58,
+              "z": 0.87,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "rest_room_door_approach",
-              "x": 0.99,
+              "x": 0.87,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -1399,10 +1275,10 @@
               "kind": "storage_rack",
               "label": "racks / crates",
               "symbol": "RACK",
-              "x": 5.378,
-              "z": 0.558,
-              "width": 1.486,
-              "depth": 0.6,
+              "x": 5.594,
+              "z": 0.534,
+              "width": 1.348,
+              "depth": 0.599,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 1.5
@@ -1411,53 +1287,16 @@
           "protectedClearances": [
             {
               "id": "signal_store_protected_aisle",
-              "x": 5.12,
-              "z": 0.99,
-              "width": 2.58,
+              "x": 5.36,
+              "z": 0.87,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "signal_store_door_approach",
-              "x": 5.81,
+              "x": 5.93,
               "z": 0.3,
-              "width": 1.2,
-              "depth": 1.2,
-              "kind": "door_swing_clearance"
-            }
-          ]
-        },
-        {
-          "roomId": "landing",
-          "layoutIntent": "task table + wall storage",
-          "footprints": [
-            {
-              "id": "mid_landing_utility_table_1",
-              "kind": "utility_table",
-              "label": "task table + wall storage",
-              "symbol": "UTILITY",
-              "x": 0.558,
-              "z": 5.378,
-              "width": 1.2,
-              "depth": 0.6,
-              "orientationDegrees": 0,
-              "count": 1,
-              "sectionHeightMeters": 0.8
-            }
-          ],
-          "protectedClearances": [
-            {
-              "id": "landing_protected_aisle",
-              "x": 0.3,
-              "z": 5.81,
-              "width": 2.58,
-              "depth": 1.2,
-              "kind": "minimum_1_2m_aisle"
-            },
-            {
-              "id": "landing_door_approach",
-              "x": 0.99,
-              "z": 5.12,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1473,10 +1312,10 @@
               "kind": "table_bench",
               "label": "table / benches",
               "symbol": "TABLE",
-              "x": 5.378,
-              "z": 5.378,
-              "width": 1.486,
-              "depth": 0.66,
+              "x": 5.594,
+              "z": 5.594,
+              "width": 1.348,
+              "depth": 0.599,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -1485,16 +1324,53 @@
           "protectedClearances": [
             {
               "id": "arrow_gallery_protected_aisle",
-              "x": 5.12,
-              "z": 5.81,
-              "width": 2.58,
+              "x": 5.36,
+              "z": 5.93,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "arrow_gallery_door_approach",
-              "x": 5.81,
-              "z": 5.12,
+              "x": 5.93,
+              "z": 5.36,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "landing",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "mid_landing_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "symbol": "UTILITY",
+              "x": 2.66,
+              "z": 2.96,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "landing_protected_aisle",
+              "x": 2.4,
+              "z": 3.4,
+              "width": 3.2,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "landing_door_approach",
+              "x": 3.4,
+              "z": 2.7,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1514,20 +1390,20 @@
         {
           "id": "mid_combat_clear",
           "kind": "combat_diameter",
-          "roomId": "rest_room",
+          "roomId": "landing",
           "center": [
-            1.59,
-            1.59
+            4.0,
+            4.0
           ],
-          "diameter": 2.58
+          "diameter": 2.6
         },
         {
           "id": "mid_camera_backoff",
           "kind": "camera_backoff",
-          "roomId": "rest_room",
+          "roomId": "landing",
           "center": [
-            1.59,
-            1.59
+            4.0,
+            4.0
           ],
           "radius": 2.5
         }
@@ -1537,8 +1413,8 @@
           "id": "light_mid_rest_room",
           "type": "lighting",
           "roomId": "rest_room",
-          "x": 1.59,
-          "z": 1.59
+          "x": 1.47,
+          "z": 1.47
         },
         {
           "id": "interaction_mid_rest_room",
@@ -1551,43 +1427,43 @@
           "id": "light_mid_signal_store",
           "type": "lighting",
           "roomId": "signal_store",
-          "x": 6.41,
-          "z": 1.59
+          "x": 6.53,
+          "z": 1.47
         },
         {
           "id": "interaction_mid_signal_store",
           "type": "interaction",
           "roomId": "signal_store",
-          "x": 5.72,
+          "x": 5.96,
           "z": 0.9
-        },
-        {
-          "id": "light_mid_landing",
-          "type": "lighting",
-          "roomId": "landing",
-          "x": 1.59,
-          "z": 6.41
-        },
-        {
-          "id": "interaction_mid_landing",
-          "type": "interaction",
-          "roomId": "landing",
-          "x": 0.9,
-          "z": 5.72
         },
         {
           "id": "light_mid_arrow_gallery",
           "type": "lighting",
           "roomId": "arrow_gallery",
-          "x": 6.41,
-          "z": 6.41
+          "x": 6.53,
+          "z": 6.53
         },
         {
           "id": "interaction_mid_arrow_gallery",
           "type": "interaction",
           "roomId": "arrow_gallery",
-          "x": 5.72,
-          "z": 5.72
+          "x": 5.96,
+          "z": 5.96
+        },
+        {
+          "id": "light_mid_landing",
+          "type": "lighting",
+          "roomId": "landing",
+          "x": 4.0,
+          "z": 4.0
+        },
+        {
+          "id": "interaction_mid_landing",
+          "type": "interaction",
+          "roomId": "landing",
+          "x": 3.0,
+          "z": 3.3
         }
       ],
       "sectionCutLines": [
@@ -1596,11 +1472,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.34
+            4.0
           ],
           "to": [
             7.7,
-            6.34
+            4.0
           ],
           "cutsVerticalCoreId": "watchtower_stair_core"
         },
@@ -1608,11 +1484,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            5.94,
+            3.168,
             0.3
           ],
           "to": [
-            5.94,
+            3.168,
             7.7
           ],
           "cutsVerticalCoreId": "watchtower_stair_core"
@@ -1630,37 +1506,46 @@
           "id": "observation_deck",
           "x": 0.3,
           "z": 0.3,
-          "width": 2.58,
-          "depth": 2.58,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "observation deck"
         },
         {
           "id": "covered_signal_bay",
-          "x": 5.12,
+          "x": 5.36,
           "z": 0.3,
-          "width": 2.58,
-          "depth": 2.58,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "covered signal bay"
         },
         {
           "id": "wallwalk_threshold",
           "x": 0.3,
-          "z": 5.12,
-          "width": 2.58,
-          "depth": 2.58,
+          "z": 5.36,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "wallwalk threshold"
         },
         {
           "id": "safe_parapet_route",
-          "x": 5.12,
-          "z": 5.12,
-          "width": 2.58,
-          "depth": 2.58,
+          "x": 5.36,
+          "z": 5.36,
+          "width": 2.34,
+          "depth": 2.34,
           "kind": "room",
           "purpose": "safe parapet route"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 2.4,
+          "z": 2.7,
+          "width": 3.2,
+          "depth": 2.6,
+          "kind": "room",
+          "purpose": "vertical core hall"
         }
       ],
       "blueprintId": "watchtower:crown:tower_crown",
@@ -1696,6 +1581,10 @@
             ],
             [
               4.0,
+              4.0
+            ],
+            [
+              4.0,
               7.7
             ]
           ]
@@ -1717,6 +1606,10 @@
         [
           "safe_parapet_route",
           "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
+          "primary_circulation"
         ]
       ],
       "doorOpenings": [
@@ -1729,8 +1622,8 @@
           ],
           "to": "observation_deck",
           "orientation": "vertical",
-          "x": 1.59,
-          "z": 2.88,
+          "x": 1.47,
+          "z": 2.64,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -1746,8 +1639,8 @@
           ],
           "to": "covered_signal_bay",
           "orientation": "vertical",
-          "x": 6.41,
-          "z": 2.88,
+          "x": 6.53,
+          "z": 2.64,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -1763,8 +1656,8 @@
           ],
           "to": "wallwalk_threshold",
           "orientation": "horizontal",
-          "x": 1.59,
-          "z": 5.12,
+          "x": 1.47,
+          "z": 5.36,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -1780,13 +1673,66 @@
           ],
           "to": "safe_parapet_route",
           "orientation": "horizontal",
-          "x": 6.41,
-          "z": 5.12,
+          "x": 6.53,
+          "z": 5.36,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_crown_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 4.0,
+          "z": 5.3,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_crown_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 4.0,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_crown_cut_BB_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 3.168,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [],
@@ -1796,7 +1742,7 @@
           "separateFrameGlassShutter": true,
           "serves": "observation_deck",
           "side": "south",
-          "x": 1.59,
+          "x": 1.47,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -1810,7 +1756,7 @@
           "serves": "covered_signal_bay",
           "side": "east",
           "x": 8,
-          "z": 1.59,
+          "z": 1.47,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1822,7 +1768,7 @@
           "separateFrameGlassShutter": true,
           "serves": "wallwalk_threshold",
           "side": "north",
-          "x": 1.59,
+          "x": 1.47,
           "z": 8,
           "orientation": "horizontal",
           "openingMeters": [
@@ -1836,68 +1782,12 @@
           "serves": "safe_parapet_route",
           "side": "east",
           "x": 8,
-          "z": 6.41,
+          "z": 6.53,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
-        },
-        {
-          "id": "window_crown_cut_west",
-          "separateFrameGlassShutter": true,
-          "serves": "wallwalk_threshold",
-          "side": "west",
-          "x": 0.0,
-          "z": 6.34,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_crown_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "safe_parapet_route",
-          "side": "east",
-          "x": 8,
-          "z": 6.34,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_crown_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "covered_signal_bay",
-          "side": "south",
-          "x": 5.94,
-          "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_crown_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "safe_parapet_route",
-          "side": "north",
-          "x": 5.94,
-          "z": 8,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
         }
       ],
       "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
@@ -1907,30 +1797,30 @@
           "type": "u_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 1.36,
-            "z": 0.56,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 2.4,
+            "z": 2.7,
+            "width": 1.536,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "observation_deck"
+          "locatedInRoomId": "vertical_core_hall"
         },
         {
           "coreId": "watchtower_quest_platform",
           "type": "quest_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 1.16,
-            "z": 1.16,
-            "width": 1.6,
-            "depth": 1.6,
+            "x": 4.064,
+            "z": 2.7,
+            "width": 1.536,
+            "depth": 2.6,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "observation_deck"
+          "locatedInRoomId": "vertical_core_hall"
         }
       ],
       "furnishingLayouts": [
@@ -1943,10 +1833,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 0.558,
-              "z": 0.558,
+              "x": 0.534,
+              "z": 0.534,
               "width": 1.2,
-              "depth": 0.6,
+              "depth": 0.599,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -1956,14 +1846,14 @@
             {
               "id": "observation_deck_protected_aisle",
               "x": 0.3,
-              "z": 0.99,
-              "width": 2.58,
+              "z": 0.87,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "observation_deck_door_approach",
-              "x": 0.99,
+              "x": 0.87,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -1980,10 +1870,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 5.378,
-              "z": 0.558,
+              "x": 5.594,
+              "z": 0.534,
               "width": 1.2,
-              "depth": 0.6,
+              "depth": 0.599,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -1992,15 +1882,15 @@
           "protectedClearances": [
             {
               "id": "covered_signal_bay_protected_aisle",
-              "x": 5.12,
-              "z": 0.99,
-              "width": 2.58,
+              "x": 5.36,
+              "z": 0.87,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "covered_signal_bay_door_approach",
-              "x": 5.81,
+              "x": 5.93,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -2017,10 +1907,10 @@
               "kind": "storage_rack",
               "label": "racks / crates",
               "symbol": "RACK",
-              "x": 0.558,
-              "z": 5.378,
-              "width": 1.486,
-              "depth": 0.6,
+              "x": 0.534,
+              "z": 5.594,
+              "width": 1.348,
+              "depth": 0.599,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 1.5
@@ -2030,15 +1920,15 @@
             {
               "id": "wallwalk_threshold_protected_aisle",
               "x": 0.3,
-              "z": 5.81,
-              "width": 2.58,
+              "z": 5.93,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "wallwalk_threshold_door_approach",
-              "x": 0.99,
-              "z": 5.12,
+              "x": 0.87,
+              "z": 5.36,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -2054,10 +1944,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 5.378,
-              "z": 5.378,
+              "x": 5.594,
+              "z": 5.594,
               "width": 1.2,
-              "depth": 0.6,
+              "depth": 0.599,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -2066,16 +1956,53 @@
           "protectedClearances": [
             {
               "id": "safe_parapet_route_protected_aisle",
-              "x": 5.12,
-              "z": 5.81,
-              "width": 2.58,
+              "x": 5.36,
+              "z": 5.93,
+              "width": 2.34,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "safe_parapet_route_door_approach",
-              "x": 5.81,
-              "z": 5.12,
+              "x": 5.93,
+              "z": 5.36,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "crown_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 2.66,
+              "z": 2.96,
+              "width": 1.8,
+              "depth": 0.666,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 2.4,
+              "z": 3.4,
+              "width": 3.2,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 3.4,
+              "z": 2.7,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -2095,20 +2022,20 @@
         {
           "id": "crown_combat_clear",
           "kind": "combat_diameter",
-          "roomId": "observation_deck",
+          "roomId": "vertical_core_hall",
           "center": [
-            1.59,
-            1.59
+            4.0,
+            4.0
           ],
-          "diameter": 2.58
+          "diameter": 2.6
         },
         {
           "id": "crown_camera_backoff",
           "kind": "camera_backoff",
-          "roomId": "observation_deck",
+          "roomId": "vertical_core_hall",
           "center": [
-            1.59,
-            1.59
+            4.0,
+            4.0
           ],
           "radius": 2.5
         }
@@ -2118,8 +2045,8 @@
           "id": "light_crown_observation_deck",
           "type": "lighting",
           "roomId": "observation_deck",
-          "x": 1.59,
-          "z": 1.59
+          "x": 1.47,
+          "z": 1.47
         },
         {
           "id": "interaction_crown_observation_deck",
@@ -2132,43 +2059,57 @@
           "id": "light_crown_covered_signal_bay",
           "type": "lighting",
           "roomId": "covered_signal_bay",
-          "x": 6.41,
-          "z": 1.59
+          "x": 6.53,
+          "z": 1.47
         },
         {
           "id": "interaction_crown_covered_signal_bay",
           "type": "interaction",
           "roomId": "covered_signal_bay",
-          "x": 5.72,
+          "x": 5.96,
           "z": 0.9
         },
         {
           "id": "light_crown_wallwalk_threshold",
           "type": "lighting",
           "roomId": "wallwalk_threshold",
-          "x": 1.59,
-          "z": 6.41
+          "x": 1.47,
+          "z": 6.53
         },
         {
           "id": "interaction_crown_wallwalk_threshold",
           "type": "interaction",
           "roomId": "wallwalk_threshold",
           "x": 0.9,
-          "z": 5.72
+          "z": 5.96
         },
         {
           "id": "light_crown_safe_parapet_route",
           "type": "lighting",
           "roomId": "safe_parapet_route",
-          "x": 6.41,
-          "z": 6.41
+          "x": 6.53,
+          "z": 6.53
         },
         {
           "id": "interaction_crown_safe_parapet_route",
           "type": "interaction",
           "roomId": "safe_parapet_route",
-          "x": 5.72,
-          "z": 5.72
+          "x": 5.96,
+          "z": 5.96
+        },
+        {
+          "id": "light_crown_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 4.0,
+          "z": 4.0
+        },
+        {
+          "id": "interaction_crown_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 3.0,
+          "z": 3.3
         }
       ],
       "sectionCutLines": [
@@ -2177,11 +2118,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            6.34
+            4.0
           ],
           "to": [
             7.7,
-            6.34
+            4.0
           ],
           "cutsVerticalCoreId": "watchtower_stair_core"
         },
@@ -2189,11 +2130,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            5.94,
+            3.168,
             0.3
           ],
           "to": [
-            5.94,
+            3.168,
             7.7
           ],
           "cutsVerticalCoreId": "watchtower_stair_core"
@@ -2209,10 +2150,10 @@
       "type": "u_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 5.24,
-        "z": 5.24,
-        "width": 1.4,
-        "depth": 2.2,
+        "x": 2.4,
+        "z": 2.7,
+        "width": 1.536,
+        "depth": 2.6,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -2247,10 +2188,10 @@
       "type": "quest_platform",
       "footprint": {
         "id": "lift_footprint",
-        "x": 1.35,
-        "z": 2.9,
-        "width": 1.6,
-        "depth": 1.6,
+        "x": 4.064,
+        "z": 2.7,
+        "width": 1.536,
+        "depth": 2.6,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -2286,7 +2227,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 6.34,
+      "cutCoordinateMeters": 4.0,
       "spanMeters": 8,
       "levels": [
         {
@@ -2308,49 +2249,25 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "alarm_station",
-          "startMeters": 0.3,
-          "endMeters": 2.88,
-          "baseElevationMeters": 0,
-          "clearHeightMeters": 3.0
-        },
-        {
-          "levelId": "ground",
           "roomId": "stair_core",
-          "startMeters": 5.12,
-          "endMeters": 7.7,
+          "startMeters": 2.4,
+          "endMeters": 5.6,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.0
         },
         {
           "levelId": "mid",
           "roomId": "landing",
-          "startMeters": 0.3,
-          "endMeters": 2.88,
-          "baseElevationMeters": 3.3,
-          "clearHeightMeters": 2.8
-        },
-        {
-          "levelId": "mid",
-          "roomId": "arrow_gallery",
-          "startMeters": 5.12,
-          "endMeters": 7.7,
+          "startMeters": 2.4,
+          "endMeters": 5.6,
           "baseElevationMeters": 3.3,
           "clearHeightMeters": 2.8
         },
         {
           "levelId": "crown",
-          "roomId": "wallwalk_threshold",
-          "startMeters": 0.3,
-          "endMeters": 2.88,
-          "baseElevationMeters": 6.4,
-          "clearHeightMeters": 3.0
-        },
-        {
-          "levelId": "crown",
-          "roomId": "safe_parapet_route",
-          "startMeters": 5.12,
-          "endMeters": 7.7,
+          "roomId": "vertical_core_hall",
+          "startMeters": 2.4,
+          "endMeters": 5.6,
           "baseElevationMeters": 6.4,
           "clearHeightMeters": 3.0
         }
@@ -2383,8 +2300,8 @@
             "crown"
           ],
           "direction": "UP clockwise",
-          "startMeters": 5.24,
-          "endMeters": 6.64
+          "startMeters": 2.4,
+          "endMeters": 3.936
         },
         {
           "coreId": "watchtower_quest_platform",
@@ -2395,117 +2312,79 @@
             "crown"
           ],
           "direction": "vertical platform",
-          "startMeters": 1.35,
-          "endMeters": 2.95
+          "startMeters": 4.064,
+          "endMeters": 5.6
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "window_ground_stair_core",
-          "kind": "window",
-          "side": "east",
-          "x": 8,
-          "z": 6.41,
-          "positionMeters": 8,
-          "orthogonalMeters": 6.41
+          "openingId": "door_ground_cut_AA_stair_core",
+          "kind": "door",
+          "side": null,
+          "x": 4.0,
+          "z": 4.0,
+          "positionMeters": 4.0,
+          "orthogonalMeters": 4.0
         },
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_west",
-          "kind": "window",
-          "side": "west",
-          "x": 0.0,
-          "z": 6.34,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 6.34
-        },
-        {
-          "levelId": "ground",
-          "openingId": "window_ground_cut_east",
-          "kind": "window",
-          "side": "east",
-          "x": 8,
-          "z": 6.34,
-          "positionMeters": 8,
-          "orthogonalMeters": 6.34
+          "openingId": "door_ground_cut_BB_stair_core",
+          "kind": "door",
+          "side": null,
+          "x": 3.168,
+          "z": 4.0,
+          "positionMeters": 3.168,
+          "orthogonalMeters": 4.0
         },
         {
           "levelId": "mid",
-          "openingId": "window_mid_arrow_gallery",
-          "kind": "window",
-          "side": "east",
-          "x": 8,
-          "z": 6.41,
-          "positionMeters": 8,
-          "orthogonalMeters": 6.41
+          "openingId": "door_mid_cut_AA_landing",
+          "kind": "door",
+          "side": null,
+          "x": 4.0,
+          "z": 4.0,
+          "positionMeters": 4.0,
+          "orthogonalMeters": 4.0
         },
         {
           "levelId": "mid",
-          "openingId": "window_mid_cut_west",
-          "kind": "window",
-          "side": "west",
-          "x": 0.0,
-          "z": 6.34,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 6.34
-        },
-        {
-          "levelId": "mid",
-          "openingId": "window_mid_cut_east",
-          "kind": "window",
-          "side": "east",
-          "x": 8,
-          "z": 6.34,
-          "positionMeters": 8,
-          "orthogonalMeters": 6.34
+          "openingId": "door_mid_cut_BB_landing",
+          "kind": "door",
+          "side": null,
+          "x": 3.168,
+          "z": 4.0,
+          "positionMeters": 3.168,
+          "orthogonalMeters": 4.0
         },
         {
           "levelId": "crown",
-          "openingId": "window_crown_safe_parapet_route",
-          "kind": "window",
-          "side": "east",
-          "x": 8,
-          "z": 6.41,
-          "positionMeters": 8,
-          "orthogonalMeters": 6.41
+          "openingId": "door_crown_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 4.0,
+          "z": 4.0,
+          "positionMeters": 4.0,
+          "orthogonalMeters": 4.0
         },
         {
           "levelId": "crown",
-          "openingId": "window_crown_cut_west",
-          "kind": "window",
-          "side": "west",
-          "x": 0.0,
-          "z": 6.34,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 6.34
-        },
-        {
-          "levelId": "crown",
-          "openingId": "window_crown_cut_east",
-          "kind": "window",
-          "side": "east",
-          "x": 8,
-          "z": 6.34,
-          "positionMeters": 8,
-          "orthogonalMeters": 6.34
+          "openingId": "door_crown_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 3.168,
+          "z": 4.0,
+          "positionMeters": 3.168,
+          "orthogonalMeters": 4.0
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "alarm_station",
-          "kind": "utility_table",
-          "symbol": "UTILITY",
-          "positionMeters": 0.558,
-          "sectionHeightMeters": 0.8
-        },
-        {
-          "levelId": "ground",
           "roomId": "stair_core",
           "kind": "machine_bed",
           "symbol": "MACHINE",
-          "positionMeters": 5.378,
+          "positionMeters": 2.66,
           "sectionHeightMeters": 1.3
         },
         {
@@ -2513,32 +2392,16 @@
           "roomId": "landing",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 0.558,
-          "sectionHeightMeters": 0.8
-        },
-        {
-          "levelId": "mid",
-          "roomId": "arrow_gallery",
-          "kind": "table_bench",
-          "symbol": "TABLE",
-          "positionMeters": 5.378,
+          "positionMeters": 2.66,
           "sectionHeightMeters": 0.8
         },
         {
           "levelId": "crown",
-          "roomId": "wallwalk_threshold",
-          "kind": "storage_rack",
-          "symbol": "RACK",
-          "positionMeters": 0.558,
-          "sectionHeightMeters": 1.5
-        },
-        {
-          "levelId": "crown",
-          "roomId": "safe_parapet_route",
-          "kind": "utility_table",
-          "symbol": "UTILITY",
-          "positionMeters": 5.378,
-          "sectionHeightMeters": 0.8
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 2.66,
+          "sectionHeightMeters": 1.3
         }
       ],
       "featureSlices": [],
@@ -2559,7 +2422,7 @@
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 5.94,
+      "cutCoordinateMeters": 3.168,
       "spanMeters": 8,
       "levels": [
         {
@@ -2581,49 +2444,25 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "secure_store",
-          "startMeters": 0.3,
-          "endMeters": 2.88,
-          "baseElevationMeters": 0,
-          "clearHeightMeters": 3.0
-        },
-        {
-          "levelId": "ground",
           "roomId": "stair_core",
-          "startMeters": 5.12,
-          "endMeters": 7.7,
+          "startMeters": 2.7,
+          "endMeters": 5.300000000000001,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.0
         },
         {
           "levelId": "mid",
-          "roomId": "signal_store",
-          "startMeters": 0.3,
-          "endMeters": 2.88,
-          "baseElevationMeters": 3.3,
-          "clearHeightMeters": 2.8
-        },
-        {
-          "levelId": "mid",
-          "roomId": "arrow_gallery",
-          "startMeters": 5.12,
-          "endMeters": 7.7,
+          "roomId": "landing",
+          "startMeters": 2.7,
+          "endMeters": 5.300000000000001,
           "baseElevationMeters": 3.3,
           "clearHeightMeters": 2.8
         },
         {
           "levelId": "crown",
-          "roomId": "covered_signal_bay",
-          "startMeters": 0.3,
-          "endMeters": 2.88,
-          "baseElevationMeters": 6.4,
-          "clearHeightMeters": 3.0
-        },
-        {
-          "levelId": "crown",
-          "roomId": "safe_parapet_route",
-          "startMeters": 5.12,
-          "endMeters": 7.7,
+          "roomId": "vertical_core_hall",
+          "startMeters": 2.7,
+          "endMeters": 5.300000000000001,
           "baseElevationMeters": 6.4,
           "clearHeightMeters": 3.0
         }
@@ -2656,8 +2495,8 @@
             "crown"
           ],
           "direction": "UP clockwise",
-          "startMeters": 5.24,
-          "endMeters": 7.44
+          "startMeters": 2.7,
+          "endMeters": 5.3
         },
         {
           "coreId": "watchtower_quest_platform",
@@ -2668,180 +2507,66 @@
             "crown"
           ],
           "direction": "vertical platform",
-          "startMeters": 2.9,
-          "endMeters": 4.5
+          "startMeters": 2.7,
+          "endMeters": 5.3
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 5.94,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 5.94
-        },
-        {
-          "levelId": "ground",
-          "openingId": "window_ground_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 5.94,
-          "z": 8,
-          "positionMeters": 8,
-          "orthogonalMeters": 5.94
-        },
-        {
-          "levelId": "ground",
-          "openingId": "door_ground_secure_store",
+          "openingId": "door_ground_cut_BB_stair_core",
           "kind": "door",
           "side": null,
-          "x": 6.41,
-          "z": 2.88,
-          "positionMeters": 2.88,
-          "orthogonalMeters": 6.41
-        },
-        {
-          "levelId": "ground",
-          "openingId": "door_ground_stair_core",
-          "kind": "door",
-          "side": null,
-          "x": 6.41,
-          "z": 5.12,
-          "positionMeters": 5.12,
-          "orthogonalMeters": 6.41
+          "x": 3.168,
+          "z": 4.0,
+          "positionMeters": 4.0,
+          "orthogonalMeters": 3.168
         },
         {
           "levelId": "mid",
-          "openingId": "window_mid_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 5.94,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 5.94
-        },
-        {
-          "levelId": "mid",
-          "openingId": "window_mid_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 5.94,
-          "z": 8,
-          "positionMeters": 8,
-          "orthogonalMeters": 5.94
-        },
-        {
-          "levelId": "mid",
-          "openingId": "door_mid_signal_store",
+          "openingId": "door_mid_cut_BB_landing",
           "kind": "door",
           "side": null,
-          "x": 6.41,
-          "z": 2.88,
-          "positionMeters": 2.88,
-          "orthogonalMeters": 6.41
-        },
-        {
-          "levelId": "mid",
-          "openingId": "door_mid_arrow_gallery",
-          "kind": "door",
-          "side": null,
-          "x": 6.41,
-          "z": 5.12,
-          "positionMeters": 5.12,
-          "orthogonalMeters": 6.41
+          "x": 3.168,
+          "z": 4.0,
+          "positionMeters": 4.0,
+          "orthogonalMeters": 3.168
         },
         {
           "levelId": "crown",
-          "openingId": "window_crown_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 5.94,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 5.94
-        },
-        {
-          "levelId": "crown",
-          "openingId": "window_crown_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 5.94,
-          "z": 8,
-          "positionMeters": 8,
-          "orthogonalMeters": 5.94
-        },
-        {
-          "levelId": "crown",
-          "openingId": "door_crown_covered_signal_bay",
+          "openingId": "door_crown_cut_BB_vertical_core_hall",
           "kind": "door",
           "side": null,
-          "x": 6.41,
-          "z": 2.88,
-          "positionMeters": 2.88,
-          "orthogonalMeters": 6.41
-        },
-        {
-          "levelId": "crown",
-          "openingId": "door_crown_safe_parapet_route",
-          "kind": "door",
-          "side": null,
-          "x": 6.41,
-          "z": 5.12,
-          "positionMeters": 5.12,
-          "orthogonalMeters": 6.41
+          "x": 3.168,
+          "z": 4.0,
+          "positionMeters": 4.0,
+          "orthogonalMeters": 3.168
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "secure_store",
-          "kind": "storage_rack",
-          "symbol": "RACK",
-          "positionMeters": 0.558,
-          "sectionHeightMeters": 1.5
-        },
-        {
-          "levelId": "ground",
           "roomId": "stair_core",
           "kind": "machine_bed",
           "symbol": "MACHINE",
-          "positionMeters": 5.378,
+          "positionMeters": 2.96,
           "sectionHeightMeters": 1.3
         },
         {
           "levelId": "mid",
-          "roomId": "signal_store",
-          "kind": "storage_rack",
-          "symbol": "RACK",
-          "positionMeters": 0.558,
-          "sectionHeightMeters": 1.5
-        },
-        {
-          "levelId": "mid",
-          "roomId": "arrow_gallery",
-          "kind": "table_bench",
-          "symbol": "TABLE",
-          "positionMeters": 5.378,
+          "roomId": "landing",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 2.96,
           "sectionHeightMeters": 0.8
         },
         {
           "levelId": "crown",
-          "roomId": "covered_signal_bay",
-          "kind": "utility_table",
-          "symbol": "UTILITY",
-          "positionMeters": 0.558,
-          "sectionHeightMeters": 0.8
-        },
-        {
-          "levelId": "crown",
-          "roomId": "safe_parapet_route",
-          "kind": "utility_table",
-          "symbol": "UTILITY",
-          "positionMeters": 5.378,
-          "sectionHeightMeters": 0.8
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 2.96,
+          "sectionHeightMeters": 1.3
         }
       ],
       "featureSlices": [],

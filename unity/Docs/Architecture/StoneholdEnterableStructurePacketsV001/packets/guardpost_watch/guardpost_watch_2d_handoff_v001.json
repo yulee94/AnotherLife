@@ -147,8 +147,8 @@
         "kind": "door",
         "levelId": "ground",
         "side": "south",
-        "x": 5.0,
-        "z": 0.0,
+        "x": 4.764,
+        "z": 0.3,
         "separateObject": true,
         "planOpeningId": "guardpost_watch_main_entry"
       },
@@ -157,8 +157,8 @@
         "kind": "door",
         "levelId": "ground",
         "side": "north",
-        "x": 7.8,
-        "z": 8,
+        "x": 8.015,
+        "z": 7.7,
         "separateObject": true,
         "planOpeningId": "guardpost_watch_service_entry"
       },
@@ -177,7 +177,7 @@
         "kind": "window",
         "levelId": "ground",
         "side": "south",
-        "x": 5.427,
+        "x": 4.764,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_guard_muster"
@@ -187,7 +187,7 @@
         "kind": "window",
         "levelId": "ground",
         "side": "south",
-        "x": 8.739,
+        "x": 8.678,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_secure_store"
@@ -207,10 +207,20 @@
         "kind": "window",
         "levelId": "ground",
         "side": "north",
-        "x": 7.35,
+        "x": 8.015,
         "z": 8,
         "separateObject": true,
         "planOpeningId": "window_ground_rear_ready_exit"
+      },
+      {
+        "id": "window_ground_vertical_core_hall",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 10,
+        "z": 4.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_vertical_core_hall"
       },
       {
         "id": "window_ground_cut_west",
@@ -218,36 +228,16 @@
         "levelId": "ground",
         "side": "west",
         "x": 0.0,
-        "z": 3.26,
+        "z": 4.0,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_west"
-      },
-      {
-        "id": "window_ground_cut_east",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "east",
-        "x": 10,
-        "z": 3.26,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_east"
-      },
-      {
-        "id": "window_ground_cut_south",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "south",
-        "x": 6.957,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_south"
       },
       {
         "id": "window_ground_cut_north",
         "kind": "window",
         "levelId": "ground",
         "side": "north",
-        "x": 6.957,
+        "x": 7.125,
         "z": 8,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_north"
@@ -266,9 +256,9 @@
         "id": "window_upper_watch_gallery",
         "kind": "window",
         "levelId": "upper",
-        "side": "east",
-        "x": 10,
-        "z": 2.15,
+        "side": "south",
+        "x": 5.12,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_watch_gallery"
       },
@@ -288,7 +278,7 @@
         "levelId": "upper",
         "side": "east",
         "x": 10,
-        "z": 5.85,
+        "z": 4.0,
         "separateObject": true,
         "planOpeningId": "window_upper_landing"
       },
@@ -298,42 +288,13 @@
         "levelId": "upper",
         "side": "west",
         "x": 0.0,
-        "z": 3.26,
+        "z": 4.0,
         "separateObject": true,
         "planOpeningId": "window_upper_cut_west"
-      },
-      {
-        "id": "window_upper_cut_east",
-        "kind": "window",
-        "levelId": "upper",
-        "side": "east",
-        "x": 10,
-        "z": 3.26,
-        "separateObject": true,
-        "planOpeningId": "window_upper_cut_east"
-      },
-      {
-        "id": "window_upper_cut_south",
-        "kind": "window",
-        "levelId": "upper",
-        "side": "south",
-        "x": 6.957,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_upper_cut_south"
-      },
-      {
-        "id": "window_upper_cut_north",
-        "kind": "window",
-        "levelId": "upper",
-        "side": "north",
-        "x": 6.957,
-        "z": 8,
-        "separateObject": true,
-        "planOpeningId": "window_upper_cut_north"
       }
     ],
     "criticalFeatures": [],
+    "voids": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
@@ -361,7 +322,7 @@
           "id": "guard_muster",
           "x": 3.077,
           "z": 0.3,
-          "width": 4.7,
+          "width": 3.373,
           "depth": 4.18,
           "kind": "room",
           "purpose": "guard muster"
@@ -370,8 +331,8 @@
           "id": "secure_store",
           "x": 7.777,
           "z": 0.3,
-          "width": 1.923,
-          "depth": 4.18,
+          "width": 1.803,
+          "depth": 2.7,
           "kind": "room",
           "purpose": "secure store"
         },
@@ -386,12 +347,21 @@
         },
         {
           "id": "rear_ready_exit",
-          "x": 5.0,
-          "z": 4.48,
-          "width": 4.7,
-          "depth": 3.22,
+          "x": 6.45,
+          "z": 5.0,
+          "width": 3.13,
+          "depth": 2.7,
           "kind": "room",
           "purpose": "rear ready exit"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 6.45,
+          "z": 3.0,
+          "width": 3.13,
+          "depth": 2.0,
+          "kind": "room",
+          "purpose": "vertical core hall"
         }
       ],
       "blueprintId": "guardpost_watch:ground:inspection_split",
@@ -422,16 +392,20 @@
           "accessible": true,
           "points": [
             [
-              5.0,
-              0.0
-            ],
-            [
-              5.0,
+              4.764,
               0.3
             ],
             [
-              5.0,
-              7.7
+              4.764,
+              2.39
+            ],
+            [
+              4.764,
+              4.0
+            ],
+            [
+              8.015,
+              4.0
             ]
           ]
         },
@@ -441,12 +415,16 @@
           "accessible": true,
           "points": [
             [
-              7.8,
-              8
+              8.015,
+              7.7
             ],
             [
-              5.0,
-              7.7
+              8.015,
+              6.35
+            ],
+            [
+              8.015,
+              4.0
             ]
           ]
         }
@@ -454,7 +432,7 @@
       "adjacency": [
         [
           "outside",
-          "inspection_room"
+          "guard_muster"
         ],
         [
           "outside",
@@ -479,16 +457,20 @@
         [
           "rear_ready_exit",
           "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
+          "primary_circulation"
         ]
       ],
       "doorOpenings": [
         {
           "id": "guardpost_watch_main_entry",
           "from": "outside",
-          "to": "inspection_room",
+          "to": "guard_muster",
           "side": "south",
-          "x": 5.0,
-          "z": 0.0,
+          "x": 4.764,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -499,7 +481,7 @@
           "separateObject": true,
           "between": [
             "outside",
-            "inspection_room"
+            "guard_muster"
           ]
         },
         {
@@ -507,8 +489,8 @@
           "from": "outside",
           "to": "rear_ready_exit",
           "side": "north",
-          "x": 7.8,
-          "z": 8,
+          "x": 8.015,
+          "z": 7.7,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             1.4,
@@ -548,7 +530,7 @@
           ],
           "to": "guard_muster",
           "orientation": "vertical",
-          "x": 5.427,
+          "x": 4.764,
           "z": 4.48,
           "clearOpeningMeters": [
             1.2,
@@ -565,8 +547,8 @@
           ],
           "to": "secure_store",
           "orientation": "vertical",
-          "x": 8.739,
-          "z": 4.48,
+          "x": 8.678,
+          "z": 3.0,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -599,23 +581,76 @@
           ],
           "to": "rear_ready_exit",
           "orientation": "horizontal",
-          "x": 7.35,
-          "z": 4.48,
+          "x": 8.015,
+          "z": 5.0,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_ground_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 8.015,
+          "z": 5.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 8.015,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_ground_cut_BB_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 7.125,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [
         {
           "id": "guardpost_watch_main_entry",
           "from": "outside",
-          "to": "inspection_room",
+          "to": "guard_muster",
           "side": "south",
-          "x": 5.0,
-          "z": 0.0,
+          "x": 4.764,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -630,8 +665,8 @@
           "from": "outside",
           "to": "rear_ready_exit",
           "side": "north",
-          "x": 7.8,
-          "z": 8,
+          "x": 8.015,
+          "z": 7.7,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             1.4,
@@ -661,7 +696,7 @@
           "separateFrameGlassShutter": true,
           "serves": "guard_muster",
           "side": "south",
-          "x": 5.427,
+          "x": 4.764,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -674,7 +709,7 @@
           "separateFrameGlassShutter": true,
           "serves": "secure_store",
           "side": "south",
-          "x": 8.739,
+          "x": 8.678,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -700,9 +735,22 @@
           "separateFrameGlassShutter": true,
           "serves": "rear_ready_exit",
           "side": "north",
-          "x": 7.35,
+          "x": 8.015,
           "z": 8,
           "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_vertical_core_hall",
+          "separateFrameGlassShutter": true,
+          "serves": "vertical_core_hall",
+          "side": "east",
+          "x": 10,
+          "z": 4.0,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -714,36 +762,8 @@
           "serves": "inspection_room",
           "side": "west",
           "x": 0.0,
-          "z": 3.26,
+          "z": 4.0,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "secure_store",
-          "side": "east",
-          "x": 10,
-          "z": 3.26,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "guard_muster",
-          "side": "south",
-          "x": 6.957,
-          "z": 0.0,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -755,7 +775,7 @@
           "separateFrameGlassShutter": true,
           "serves": "rear_ready_exit",
           "side": "north",
-          "x": 6.957,
+          "x": 7.125,
           "z": 8,
           "orientation": "horizontal",
           "openingMeters": [
@@ -772,30 +792,30 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 6.257,
-            "z": 2.16,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 6.45,
+            "z": 3.0,
+            "width": 1.35,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "guard_muster"
+          "locatedInRoomId": "vertical_core_hall"
         },
         {
           "coreId": "guardpost_watch_duty_platform",
           "type": "duty_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 5.15,
-            "z": 2.76,
-            "width": 1.6,
-            "depth": 1.6,
+            "x": 8.08,
+            "z": 3.0,
+            "width": 1.5,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "guard_muster"
+          "locatedInRoomId": "vertical_core_hall"
         }
       ],
       "furnishingLayouts": [
@@ -820,10 +840,10 @@
           "protectedClearances": [
             {
               "id": "inspection_room_protected_aisle",
-              "x": 0.3,
-              "z": 1.79,
-              "width": 2.777,
-              "depth": 1.2,
+              "x": 1.089,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 4.18,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -845,8 +865,8 @@
               "kind": "weapon_rack",
               "label": "weapon rack",
               "symbol": "ARMS",
-              "x": 3.427,
-              "z": 0.65,
+              "x": 3.414,
+              "z": 0.637,
               "width": 1.6,
               "depth": 0.5,
               "orientationDegrees": 0,
@@ -857,15 +877,15 @@
           "protectedClearances": [
             {
               "id": "guard_muster_protected_aisle",
-              "x": 3.077,
-              "z": 1.79,
-              "width": 4.7,
-              "depth": 1.2,
+              "x": 4.163,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 4.18,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "guard_muster_door_approach",
-              "x": 4.827,
+              "x": 4.163,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -882,9 +902,9 @@
               "kind": "storage_rack",
               "label": "racks / crates",
               "symbol": "RACK",
-              "x": 7.969,
-              "z": 0.492,
-              "width": 1.108,
+              "x": 7.957,
+              "z": 0.48,
+              "width": 1.039,
               "depth": 0.6,
               "orientationDegrees": 0,
               "count": 1,
@@ -894,15 +914,15 @@
           "protectedClearances": [
             {
               "id": "secure_store_protected_aisle",
-              "x": 7.777,
-              "z": 1.79,
-              "width": 1.923,
-              "depth": 1.2,
+              "x": 8.079,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 2.7,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "secure_store_door_approach",
-              "x": 8.139,
+              "x": 8.079,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -956,8 +976,8 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 5.322,
-              "z": 4.802,
+              "x": 6.72,
+              "z": 5.27,
               "width": 1.2,
               "depth": 0.6,
               "orientationDegrees": 0,
@@ -968,16 +988,53 @@
           "protectedClearances": [
             {
               "id": "rear_ready_exit_protected_aisle",
-              "x": 5.0,
-              "z": 5.49,
-              "width": 4.7,
+              "x": 6.45,
+              "z": 5.75,
+              "width": 3.13,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "rear_ready_exit_door_approach",
-              "x": 6.75,
-              "z": 4.48,
+              "x": 7.415,
+              "z": 5.0,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "ground_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 6.65,
+              "z": 3.2,
+              "width": 1.8,
+              "depth": 0.512,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 6.45,
+              "z": 3.4,
+              "width": 3.13,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 7.415,
+              "z": 3.0,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -997,20 +1054,20 @@
         {
           "id": "ground_combat_clear",
           "kind": "combat_diameter",
-          "roomId": "guard_muster",
+          "roomId": "public_wait",
           "center": [
-            5.427,
-            2.39
+            2.65,
+            6.09
           ],
-          "diameter": 4.0
+          "diameter": 3.22
         },
         {
           "id": "ground_camera_backoff",
           "kind": "camera_backoff",
-          "roomId": "guard_muster",
+          "roomId": "public_wait",
           "center": [
-            5.427,
-            2.39
+            2.65,
+            6.09
           ],
           "radius": 2.5
         }
@@ -1034,7 +1091,7 @@
           "id": "light_ground_guard_muster",
           "type": "lighting",
           "roomId": "guard_muster",
-          "x": 5.427,
+          "x": 4.764,
           "z": 2.39
         },
         {
@@ -1048,8 +1105,8 @@
           "id": "light_ground_secure_store",
           "type": "lighting",
           "roomId": "secure_store",
-          "x": 8.739,
-          "z": 2.39
+          "x": 8.678,
+          "z": 1.65
         },
         {
           "id": "interaction_ground_secure_store",
@@ -1076,15 +1133,29 @@
           "id": "light_ground_rear_ready_exit",
           "type": "lighting",
           "roomId": "rear_ready_exit",
-          "x": 7.35,
-          "z": 6.09
+          "x": 8.015,
+          "z": 6.35
         },
         {
           "id": "interaction_ground_rear_ready_exit",
           "type": "interaction",
           "roomId": "rear_ready_exit",
-          "x": 5.6,
-          "z": 5.08
+          "x": 7.05,
+          "z": 5.6
+        },
+        {
+          "id": "light_ground_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 8.015,
+          "z": 4.0
+        },
+        {
+          "id": "interaction_ground_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 7.05,
+          "z": 3.6
         }
       ],
       "sectionCutLines": [
@@ -1093,11 +1164,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            3.26
+            4.0
           ],
           "to": [
             9.7,
-            3.26
+            4.0
           ],
           "cutsVerticalCoreId": "guardpost_watch_stair_core"
         },
@@ -1105,11 +1176,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            6.957,
+            7.125,
             0.3
           ],
           "to": [
-            6.957,
+            7.125,
             7.7
           ],
           "cutsVerticalCoreId": "guardpost_watch_stair_core"
@@ -1136,7 +1207,7 @@
           "id": "watch_gallery",
           "x": 3.791,
           "z": 0.3,
-          "width": 5.909,
+          "width": 2.659,
           "depth": 3.7,
           "kind": "room",
           "purpose": "watch gallery"
@@ -1152,10 +1223,10 @@
         },
         {
           "id": "landing",
-          "x": 5.0,
-          "z": 4.0,
-          "width": 4.7,
-          "depth": 3.7,
+          "x": 6.45,
+          "z": 3.0,
+          "width": 3.13,
+          "depth": 2.0,
           "kind": "room",
           "purpose": "landing"
         }
@@ -1189,6 +1260,18 @@
           "points": [
             [
               0.3,
+              4.16
+            ],
+            [
+              0.3,
+              4.0
+            ],
+            [
+              8.015,
+              4.0
+            ],
+            [
+              8.015,
               4.16
             ],
             [
@@ -1243,7 +1326,7 @@
           ],
           "to": "watch_gallery",
           "orientation": "vertical",
-          "x": 6.745,
+          "x": 5.12,
           "z": 4.0,
           "clearOpeningMeters": [
             1.2,
@@ -1277,13 +1360,49 @@
           ],
           "to": "landing",
           "orientation": "vertical",
-          "x": 7.35,
-          "z": 7.7,
+          "x": 8.015,
+          "z": 5.0,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_upper_cut_AA_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "horizontal",
+          "x": 8.015,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_upper_cut_BB_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "vertical",
+          "x": 7.125,
+          "z": 4.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [],
@@ -1305,10 +1424,10 @@
           "id": "window_upper_watch_gallery",
           "separateFrameGlassShutter": true,
           "serves": "watch_gallery",
-          "side": "east",
-          "x": 10,
-          "z": 2.15,
-          "orientation": "vertical",
+          "side": "south",
+          "x": 5.12,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1333,7 +1452,7 @@
           "serves": "landing",
           "side": "east",
           "x": 10,
-          "z": 5.85,
+          "z": 4.0,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1346,50 +1465,8 @@
           "serves": "rest_bunks",
           "side": "west",
           "x": 0.0,
-          "z": 3.26,
+          "z": 4.0,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_upper_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "watch_gallery",
-          "side": "east",
-          "x": 10,
-          "z": 3.26,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_upper_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "watch_gallery",
-          "side": "south",
-          "x": 6.957,
-          "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_upper_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "landing",
-          "side": "north",
-          "x": 6.957,
-          "z": 8,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1404,10 +1481,10 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 7.1,
-            "z": 4.12,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 6.45,
+            "z": 3.0,
+            "width": 1.35,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1419,10 +1496,10 @@
           "type": "duty_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 5.15,
-            "z": 4.12,
-            "width": 1.6,
-            "depth": 1.6,
+            "x": 8.08,
+            "z": 3.0,
+            "width": 1.5,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1452,10 +1529,10 @@
           "protectedClearances": [
             {
               "id": "rest_bunks_protected_aisle",
-              "x": 0.3,
-              "z": 1.55,
-              "width": 3.491,
-              "depth": 1.2,
+              "x": 1.446,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 3.7,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1477,9 +1554,9 @@
               "kind": "table_bench",
               "label": "table / benches",
               "symbol": "TABLE",
-              "x": 4.141,
-              "z": 0.65,
-              "width": 1.8,
+              "x": 4.057,
+              "z": 0.566,
+              "width": 1.532,
               "depth": 0.9,
               "orientationDegrees": 0,
               "count": 1,
@@ -1489,15 +1566,15 @@
           "protectedClearances": [
             {
               "id": "watch_gallery_protected_aisle",
-              "x": 3.791,
-              "z": 1.55,
-              "width": 5.909,
-              "depth": 1.2,
+              "x": 4.521,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 3.7,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "watch_gallery_door_approach",
-              "x": 6.146,
+              "x": 4.521,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -1551,10 +1628,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 5.35,
-              "z": 4.35,
+              "x": 6.65,
+              "z": 3.2,
               "width": 1.2,
-              "depth": 0.6,
+              "depth": 0.512,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -1563,16 +1640,16 @@
           "protectedClearances": [
             {
               "id": "landing_protected_aisle",
-              "x": 5.0,
-              "z": 5.25,
-              "width": 4.7,
+              "x": 6.45,
+              "z": 3.4,
+              "width": 3.13,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "landing_door_approach",
-              "x": 6.75,
-              "z": 4.0,
+              "x": 7.415,
+              "z": 3.0,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1592,20 +1669,20 @@
         {
           "id": "upper_combat_clear",
           "kind": "combat_diameter",
-          "roomId": "watch_gallery",
+          "roomId": "signal_store",
           "center": [
-            6.745,
-            2.15
+            2.65,
+            5.85
           ],
           "diameter": 3.7
         },
         {
           "id": "upper_camera_backoff",
           "kind": "camera_backoff",
-          "roomId": "watch_gallery",
+          "roomId": "signal_store",
           "center": [
-            6.745,
-            2.15
+            2.65,
+            5.85
           ],
           "radius": 2.5
         }
@@ -1629,7 +1706,7 @@
           "id": "light_upper_watch_gallery",
           "type": "lighting",
           "roomId": "watch_gallery",
-          "x": 6.745,
+          "x": 5.12,
           "z": 2.15
         },
         {
@@ -1657,15 +1734,15 @@
           "id": "light_upper_landing",
           "type": "lighting",
           "roomId": "landing",
-          "x": 7.35,
-          "z": 5.85
+          "x": 8.015,
+          "z": 4.0
         },
         {
           "id": "interaction_upper_landing",
           "type": "interaction",
           "roomId": "landing",
-          "x": 5.6,
-          "z": 4.6
+          "x": 7.05,
+          "z": 3.6
         }
       ],
       "sectionCutLines": [
@@ -1674,11 +1751,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            3.26
+            4.0
           ],
           "to": [
             9.7,
-            3.26
+            4.0
           ],
           "cutsVerticalCoreId": "guardpost_watch_stair_core"
         },
@@ -1686,11 +1763,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            6.957,
+            7.125,
             0.3
           ],
           "to": [
-            6.957,
+            7.125,
             7.7
           ],
           "cutsVerticalCoreId": "guardpost_watch_stair_core"
@@ -1706,10 +1783,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 6.257,
-        "z": 2.16,
-        "width": 1.4,
-        "depth": 2.2,
+        "x": 6.45,
+        "z": 3.0,
+        "width": 1.35,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1738,10 +1815,10 @@
       "type": "duty_platform",
       "footprint": {
         "id": "lift_footprint",
-        "x": 5.15,
-        "z": 3.7,
-        "width": 1.6,
-        "depth": 1.6,
+        "x": 8.08,
+        "z": 3.0,
+        "width": 1.5,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1771,7 +1848,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 3.26,
+      "cutCoordinateMeters": 4.0,
       "spanMeters": 10,
       "levels": [
         {
@@ -1798,15 +1875,15 @@
           "levelId": "ground",
           "roomId": "guard_muster",
           "startMeters": 3.077,
-          "endMeters": 7.777,
+          "endMeters": 6.45,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.0
         },
         {
           "levelId": "ground",
-          "roomId": "secure_store",
-          "startMeters": 7.777,
-          "endMeters": 9.7,
+          "roomId": "vertical_core_hall",
+          "startMeters": 6.45,
+          "endMeters": 9.58,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.0
         },
@@ -1822,7 +1899,23 @@
           "levelId": "upper",
           "roomId": "watch_gallery",
           "startMeters": 3.791,
-          "endMeters": 9.7,
+          "endMeters": 6.449999999999999,
+          "baseElevationMeters": 3.3,
+          "clearHeightMeters": 2.5
+        },
+        {
+          "levelId": "upper",
+          "roomId": "signal_store",
+          "startMeters": 0.3,
+          "endMeters": 5.0,
+          "baseElevationMeters": 3.3,
+          "clearHeightMeters": 2.5
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing",
+          "startMeters": 6.45,
+          "endMeters": 9.58,
           "baseElevationMeters": 3.3,
           "clearHeightMeters": 2.5
         }
@@ -1849,8 +1942,8 @@
             "upper"
           ],
           "direction": "UP clockwise",
-          "startMeters": 6.257,
-          "endMeters": 7.657
+          "startMeters": 6.45,
+          "endMeters": 7.8
         },
         {
           "coreId": "guardpost_watch_duty_platform",
@@ -1860,30 +1953,90 @@
             "upper"
           ],
           "direction": "vertical platform",
-          "startMeters": 5.15,
-          "endMeters": 6.75
+          "startMeters": 8.08,
+          "endMeters": 9.58
         }
       ],
       "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_vertical_core_hall",
+          "kind": "window",
+          "side": "east",
+          "x": 10,
+          "z": 4.0,
+          "positionMeters": 10,
+          "orthogonalMeters": 4.0
+        },
         {
           "levelId": "ground",
           "openingId": "window_ground_cut_west",
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 3.26,
+          "z": 4.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 3.26
+          "orthogonalMeters": 4.0
         },
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_east",
+          "openingId": "door_ground_inspection_room",
+          "kind": "door",
+          "side": null,
+          "x": 1.689,
+          "z": 4.48,
+          "positionMeters": 1.689,
+          "orthogonalMeters": 4.48
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_guard_muster",
+          "kind": "door",
+          "side": null,
+          "x": 4.764,
+          "z": 4.48,
+          "positionMeters": 4.764,
+          "orthogonalMeters": 4.48
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_public_wait",
+          "kind": "door",
+          "side": null,
+          "x": 2.65,
+          "z": 4.48,
+          "positionMeters": 2.65,
+          "orthogonalMeters": 4.48
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 8.015,
+          "z": 4.0,
+          "positionMeters": 8.015,
+          "orthogonalMeters": 4.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 7.125,
+          "z": 4.0,
+          "positionMeters": 7.125,
+          "orthogonalMeters": 4.0
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_landing",
           "kind": "window",
           "side": "east",
           "x": 10,
-          "z": 3.26,
+          "z": 4.0,
           "positionMeters": 10,
-          "orthogonalMeters": 3.26
+          "orthogonalMeters": 4.0
         },
         {
           "levelId": "upper",
@@ -1891,19 +2044,49 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 3.26,
+          "z": 4.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 3.26
+          "orthogonalMeters": 4.0
         },
         {
           "levelId": "upper",
-          "openingId": "window_upper_cut_east",
-          "kind": "window",
-          "side": "east",
-          "x": 10,
-          "z": 3.26,
-          "positionMeters": 10,
-          "orthogonalMeters": 3.26
+          "openingId": "door_upper_rest_bunks",
+          "kind": "door",
+          "side": null,
+          "x": 2.046,
+          "z": 4.0,
+          "positionMeters": 2.046,
+          "orthogonalMeters": 4.0
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_watch_gallery",
+          "kind": "door",
+          "side": null,
+          "x": 5.12,
+          "z": 4.0,
+          "positionMeters": 5.12,
+          "orthogonalMeters": 4.0
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_cut_AA_landing",
+          "kind": "door",
+          "side": null,
+          "x": 8.015,
+          "z": 4.0,
+          "positionMeters": 8.015,
+          "orthogonalMeters": 4.0
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_cut_BB_landing",
+          "kind": "door",
+          "side": null,
+          "x": 7.125,
+          "z": 4.0,
+          "positionMeters": 7.125,
+          "orthogonalMeters": 4.0
         }
       ],
       "furnitureSlices": [
@@ -1920,16 +2103,16 @@
           "roomId": "guard_muster",
           "kind": "weapon_rack",
           "symbol": "ARMS",
-          "positionMeters": 3.427,
+          "positionMeters": 3.414,
           "sectionHeightMeters": 1.8
         },
         {
           "levelId": "ground",
-          "roomId": "secure_store",
-          "kind": "storage_rack",
-          "symbol": "RACK",
-          "positionMeters": 7.969,
-          "sectionHeightMeters": 1.5
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 6.65,
+          "sectionHeightMeters": 1.3
         },
         {
           "levelId": "upper",
@@ -1944,7 +2127,23 @@
           "roomId": "watch_gallery",
           "kind": "table_bench",
           "symbol": "TABLE",
-          "positionMeters": 4.141,
+          "positionMeters": 4.057,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "upper",
+          "roomId": "signal_store",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 6.65,
           "sectionHeightMeters": 0.8
         }
       ],
@@ -1966,7 +2165,7 @@
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 6.957,
+      "cutCoordinateMeters": 7.125,
       "spanMeters": 8,
       "levels": [
         {
@@ -1983,33 +2182,25 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "guard_muster",
-          "startMeters": 0.3,
-          "endMeters": 4.4799999999999995,
+          "roomId": "rear_ready_exit",
+          "startMeters": 5.0,
+          "endMeters": 7.7,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.0
         },
         {
           "levelId": "ground",
-          "roomId": "rear_ready_exit",
-          "startMeters": 4.48,
-          "endMeters": 7.700000000000001,
+          "roomId": "vertical_core_hall",
+          "startMeters": 3.0,
+          "endMeters": 5.0,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.0
         },
         {
           "levelId": "upper",
-          "roomId": "watch_gallery",
-          "startMeters": 0.3,
-          "endMeters": 4.0,
-          "baseElevationMeters": 3.3,
-          "clearHeightMeters": 2.5
-        },
-        {
-          "levelId": "upper",
           "roomId": "landing",
-          "startMeters": 4.0,
-          "endMeters": 7.7,
+          "startMeters": 3.0,
+          "endMeters": 5.0,
           "baseElevationMeters": 3.3,
           "clearHeightMeters": 2.5
         }
@@ -2036,8 +2227,8 @@
             "upper"
           ],
           "direction": "UP clockwise",
-          "startMeters": 2.16,
-          "endMeters": 4.36
+          "startMeters": 3.0,
+          "endMeters": 5.0
         },
         {
           "coreId": "guardpost_watch_duty_platform",
@@ -2047,123 +2238,65 @@
             "upper"
           ],
           "direction": "vertical platform",
-          "startMeters": 3.7,
-          "endMeters": 5.3
+          "startMeters": 3.0,
+          "endMeters": 5.0
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "window_ground_rear_ready_exit",
-          "kind": "window",
-          "side": "north",
-          "x": 7.35,
-          "z": 8,
-          "positionMeters": 8,
-          "orthogonalMeters": 7.35
-        },
-        {
-          "levelId": "ground",
-          "openingId": "window_ground_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 6.957,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 6.957
-        },
-        {
-          "levelId": "ground",
           "openingId": "window_ground_cut_north",
           "kind": "window",
           "side": "north",
-          "x": 6.957,
+          "x": 7.125,
           "z": 8,
           "positionMeters": 8,
-          "orthogonalMeters": 6.957
+          "orthogonalMeters": 7.125
         },
         {
           "levelId": "ground",
-          "openingId": "door_ground_rear_ready_exit",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
           "kind": "door",
           "side": null,
-          "x": 7.35,
-          "z": 4.48,
-          "positionMeters": 4.48,
-          "orthogonalMeters": 7.35
-        },
-        {
-          "levelId": "upper",
-          "openingId": "window_upper_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 6.957,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 6.957
-        },
-        {
-          "levelId": "upper",
-          "openingId": "window_upper_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 6.957,
-          "z": 8,
-          "positionMeters": 8,
-          "orthogonalMeters": 6.957
-        },
-        {
-          "levelId": "upper",
-          "openingId": "door_upper_watch_gallery",
-          "kind": "door",
-          "side": null,
-          "x": 6.745,
+          "x": 7.125,
           "z": 4.0,
           "positionMeters": 4.0,
-          "orthogonalMeters": 6.745
+          "orthogonalMeters": 7.125
         },
         {
           "levelId": "upper",
-          "openingId": "door_upper_landing",
+          "openingId": "door_upper_cut_BB_landing",
           "kind": "door",
           "side": null,
-          "x": 7.35,
-          "z": 7.7,
-          "positionMeters": 7.7,
-          "orthogonalMeters": 7.35
+          "x": 7.125,
+          "z": 4.0,
+          "positionMeters": 4.0,
+          "orthogonalMeters": 7.125
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "guard_muster",
-          "kind": "weapon_rack",
-          "symbol": "ARMS",
-          "positionMeters": 0.65,
-          "sectionHeightMeters": 1.8
-        },
-        {
-          "levelId": "ground",
           "roomId": "rear_ready_exit",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 4.802,
+          "positionMeters": 5.27,
           "sectionHeightMeters": 0.8
         },
         {
-          "levelId": "upper",
-          "roomId": "watch_gallery",
-          "kind": "table_bench",
-          "symbol": "TABLE",
-          "positionMeters": 0.65,
-          "sectionHeightMeters": 0.8
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 3.2,
+          "sectionHeightMeters": 1.3
         },
         {
           "levelId": "upper",
           "roomId": "landing",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 4.35,
+          "positionMeters": 3.2,
           "sectionHeightMeters": 0.8
         }
       ],
