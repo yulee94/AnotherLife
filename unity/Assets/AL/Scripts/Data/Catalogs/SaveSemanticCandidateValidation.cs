@@ -807,6 +807,7 @@ namespace AL.Data.Catalogs
                     "FirstWorldProgress",
                     "MapDisclosure",
                     "RealmSelection",
+                    "WorldState",
                     "WarzoneCredits",
                     "LastSavedTimestamp",
                     "TerritoryCaptureLedger"
@@ -1040,6 +1041,40 @@ namespace AL.Data.Catalogs
                 "VisibleRouteIds",
                 "VisibleObjectiveIds",
                 "VisibleAllegianceMarkerIds");
+
+        private static readonly HashSet<string> WorldStateFields =
+            Fields(
+                "Version",
+                "SnapshotRevision",
+                "EffectRevision",
+                "LastTrustedUtcSeconds",
+                "PolicyRevision",
+                "CatalogRevision",
+                "HasActiveInstance",
+                "ActiveInstance",
+                "CompletedHistory",
+                "OperationReceipts");
+
+        private static readonly HashSet<string> WorldStateInstanceFields =
+            Fields(
+                "InstanceId",
+                "DefinitionId",
+                "DefinitionSchemaVersion",
+                "DefinitionContentVersion",
+                "DefinitionSourceRevision",
+                "CorrelationId",
+                "OperationId",
+                "SourceSystemId",
+                "ExclusiveGroup",
+                "State",
+                "ScheduledAtUtcSeconds",
+                "StartedAtUtcSeconds",
+                "ExpectedEndAtUtcSeconds",
+                "CompletedAtUtcSeconds",
+                "CompletionReason",
+                "Revision",
+                "CommittedEffectRevision",
+                "ResolvedEffects");
 
         private static readonly HashSet<string> Nvs01EncounterFields =
             Fields(
@@ -1477,6 +1512,7 @@ namespace AL.Data.Catalogs
             ValidateMapDisclosure(root, collector, state);
             ValidateTerritoryCaptureLedger(root, collector, state);
             ValidateRealmSelection(root, collector, state);
+            ValidateWorldState(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
@@ -4451,6 +4487,161 @@ namespace AL.Data.Catalogs
                     "SAVE_NVS01_NEUTRAL_STATE_INVALID",
                     path,
                     SaveSemanticDomain.Narrative);
+            }
+        }
+
+        private static void ValidateWorldState(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.WorldState";
+            StrictJsonValue value;
+            if (!root.TryGet("WorldState", out value) || value is StrictJsonNull)
+            {
+                // Optional schema-v2 extension. Missing legacy state is admitted.
+                return;
+            }
+
+            var worldState = value as StrictJsonObject;
+            if (worldState == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                worldState,
+                WorldStateFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    worldState,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            if (version == 0)
+            {
+                return;
+            }
+
+            ValidateWorldStateInstanceObject(
+                worldState,
+                "ActiveInstance",
+                path,
+                collector,
+                state);
+            ValidateWorldStateObjectArray(
+                worldState,
+                "CompletedHistory",
+                path,
+                collector,
+                state);
+            ValidateWorldStateObjectArray(
+                worldState,
+                "OperationReceipts",
+                path,
+                collector,
+                state);
+        }
+
+        private static void ValidateWorldStateInstanceObject(
+            StrictJsonObject parent,
+            string fieldName,
+            string parentPath,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            StrictJsonValue value;
+            if (!parent.TryGet(fieldName, out value) || value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var instance = value as StrictJsonObject;
+            string path = parentPath + "." + fieldName;
+            if (instance == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_INSTANCE_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                instance,
+                WorldStateInstanceFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+        }
+
+        private static void ValidateWorldStateObjectArray(
+            StrictJsonObject parent,
+            string fieldName,
+            string parentPath,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            StrictJsonValue value;
+            if (!parent.TryGet(fieldName, out value) || value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var array = value as StrictJsonArray;
+            string path = parentPath + "." + fieldName;
+            if (array == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_ARRAY_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
             }
         }
 

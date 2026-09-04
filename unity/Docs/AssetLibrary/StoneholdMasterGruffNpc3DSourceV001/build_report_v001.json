@@ -1,0 +1,38 @@
+{
+  "rosterId": "rct_stonehold_npc_service_v001",
+  "builder": "tools/npc/build_stonehold_master_gruff_identity.py",
+  "sourceUsed": "meshy_remesh_planted",
+  "rawTris": 116484,
+  "remeshTris": 46742,
+  "heightMeters": 1.43,
+  "lod0Tris": 46786,
+  "lod1Tris": 7005,
+  "lod2Tris": 3741,
+  "identityTris": 46742,
+  "humanoidBones": 22,
+  "extraBones": [
+    "Beard",
+    "Apron_L",
+    "Apron_R"
+  ],
+  "geometricModuleSeparation": "incomplete_vertex_groups_only",
+  "blend": "D:/AnotherLife/.worktrees/t_0df259d8/unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/rct_stonehold_npc_service_humanoid_v001.blend",
+  "fbx": "D:/AnotherLife/.worktrees/t_0df259d8/unity/ArtSource/NPCs/rct_stonehold_npc_service_v001/Exports/rct_stonehold_npc_service_humanoid_v001.fbx",
+  "renders": [
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_front_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_back_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_left_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_right_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_threequarter_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_face_closeup_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_hands_closeup_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_front_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_back_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_left_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_right_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_threequarter_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_face_closeup_v001.png",
+    "D:/AnotherLife/.worktrees/t_0df259d8/unity/Docs/AssetLibrary/StoneholdMasterGruffNpc3DSourceV001/Review/foundation_pose_leftarm_hands_closeup_v001.png"
+  ],
+  "completionMarker": "MASTER_GRUFF_BUILD_OK"
+}

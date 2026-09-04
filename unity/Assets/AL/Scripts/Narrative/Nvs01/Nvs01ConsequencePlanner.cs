@@ -100,7 +100,10 @@ namespace AL.Narrative.Nvs01
                     ComputeArenaResultFingerprint(request, candidate)) ||
                 !ValidateArenaObjectives(expected, candidate) ||
                 !HasArenaStartDialogue(expected) ||
-                !HasClearDialogue(candidate))
+                !HasClearDialogue(candidate) ||
+                !Nvs01ConsequenceContract.MatchesCatalogBackedEncounterResult(
+                    candidate.LastEncounterSnapshotVersion,
+                    candidate.LastEncounterSnapshotReference))
             {
                 return Reject(
                     Nvs01ConsequencePlanningStatus
@@ -333,7 +336,7 @@ namespace AL.Narrative.Nvs01
             {
                 resultingGold = checked(
                     context.Domain.GoldBalance +
-                    Nvs01ConsequenceContract.GoldAmount);
+                    Nvs01ConsequenceContract.OathmarkAmount);
             }
             catch (OverflowException)
             {
@@ -366,8 +369,8 @@ namespace AL.Narrative.Nvs01
                 new Nvs01ConsequenceOperation(
                     Nvs01ConsequenceContract.GoldConsequenceId,
                     Nvs01ConsequenceMutationKind.CreditResource,
-                    Nvs01ConsequenceContract.GoldResourceId,
-                    Nvs01ConsequenceContract.GoldAmount,
+                    Nvs01ConsequenceContract.OathmarkTechnicalCurrencyId,
+                    Nvs01ConsequenceContract.OathmarkAmount,
                     string.Empty),
                 new Nvs01ConsequenceOperation(
                     Nvs01ConsequenceContract.AffinityConsequenceId,
@@ -735,6 +738,8 @@ namespace AL.Narrative.Nvs01
                 context.Chapters.InputCount >
                     Nvs01ConsequenceContract.MaximumChapterDefinitionCount ||
                 domain.GoldBalance < 0 ||
+                Nvs01ConsequenceContract.IsForbiddenCurrencySubstitution(
+                    domain.TechnicalCurrencyId) ||
                 float.IsNaN(domain.ValeriusAffinity) ||
                 float.IsInfinity(domain.ValeriusAffinity) ||
                 domain.ValeriusAffinity <
@@ -802,7 +807,7 @@ namespace AL.Narrative.Nvs01
             string[] targets =
             {
                 Nvs01ConsequenceContract.TearArtifactId,
-                Nvs01ConsequenceContract.GoldResourceId,
+                Nvs01ConsequenceContract.CatalogGoldTargetId,
                 Nvs01ConsequenceContract.ValeriusNpcId,
                 Nvs01ConsequenceContract.QuestId,
                 Nvs01ConsequenceContract.AbstractChapterId
@@ -1114,7 +1119,10 @@ namespace AL.Narrative.Nvs01
             string.Equals(
                 snapshot.LastEncounterEventId,
                 Nvs01ConsequenceContract.ArenaSuccessEventId,
-                StringComparison.Ordinal);
+                StringComparison.Ordinal) &&
+            Nvs01ConsequenceContract.MatchesCatalogBackedEncounterResult(
+                snapshot.LastEncounterSnapshotVersion,
+                snapshot.LastEncounterSnapshotReference);
 
         private static bool SameLastEncounter(
             Nvs01QuestSnapshot left,
@@ -1537,6 +1545,8 @@ namespace AL.Narrative.Nvs01
                 !EffectKeysAreKnown(receipt.EffectKeys) ||
                 receipt.PreviousGoldBalance < 0 ||
                 receipt.ResultingGoldBalance < 0 ||
+                Nvs01ConsequenceContract.IsForbiddenCurrencySubstitution(
+                    receipt.TechnicalCurrencyId) ||
                 !IsBoundedAffinity(receipt.PreviousValeriusAffinity) ||
                 !IsBoundedAffinity(receipt.ResultingValeriusAffinity) ||
                 !IsOptionalIdentifier(receipt.PreviousChapterId) ||
@@ -1578,7 +1588,7 @@ namespace AL.Narrative.Nvs01
             {
                 expectedGold = checked(
                     receipt.PreviousGoldBalance +
-                    Nvs01ConsequenceContract.GoldAmount);
+                    Nvs01ConsequenceContract.OathmarkAmount);
             }
             catch (OverflowException)
             {
@@ -1878,7 +1888,8 @@ namespace AL.Narrative.Nvs01
                     context.Domain.ValeriusAffinity,
                     resultingAffinity,
                     context.Domain.CurrentChapterId,
-                    resultingChapter);
+                    resultingChapter,
+                    context.Domain.TechnicalCurrencyId);
 
             var plan = new Nvs01ConsequencePlan(
                 kind,

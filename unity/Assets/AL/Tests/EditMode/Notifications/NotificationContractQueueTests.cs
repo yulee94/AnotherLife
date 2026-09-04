@@ -1449,7 +1449,6 @@ namespace AL.Tests.EditMode.Notifications
             CollectionAssert.AreEqual(
                 new[]
                 {
-                    "Kingdom/Narrative/WorldStateService.cs",
                     "Services/Local/LocalBossLootService.cs"
                 },
                 messageCallers);
@@ -1457,7 +1456,7 @@ namespace AL.Tests.EditMode.Notifications
             CollectionAssert.IsEmpty(FindCallers(scriptsRoot, ".ShowResourceGain("));
 
             Assert.AreEqual(
-                1,
+                0,
                 CountOccurrences(
                     File.ReadAllText(Path.Combine(
                         scriptsRoot,
