@@ -18,7 +18,7 @@ namespace AL.Services.Local
         {
             // Legacy compatibility surface. Unverified events stay unavailable
             // rather than mutating in-memory state or emitting hard-coded copy.
-            // Durable start/end lives on WorldStateDurableService.
+            // Durable start/end/cancel/reconcile lives on WorldStateDurableService.
         }
 
         public float GetProductionMultiplier()
