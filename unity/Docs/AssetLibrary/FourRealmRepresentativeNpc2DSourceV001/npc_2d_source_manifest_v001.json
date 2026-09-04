@@ -18,9 +18,9 @@
   "approval": {
     "authority": "owner delegated recommended bounded 2D decisions in kanban t_123f8f3f",
     "decision": "APPROVE",
-    "independentReviewId": "owner-2026-09-04-approve-all+deleg_e6c0b493+deleg_e15af699",
+    "independentReviewId": "independent-visual-t123f8f3f-r1",
     "independentReviewVerdict": "PASS",
-    "summary": "Owner approved the presented four-realm 2D lineup and handoff sheets on 2026-09-04 (approve all). Independent reviews deleg_e6c0b493 and deleg_e15af699 passed Stonehold tools and Crownlands civic identity; flagged Umbral bilateral temple marks (revised to at most one faint left-temple mark via Meshy 01a06a39-aca8-765e-b6d6-bab0ded92862 / 01a06a39-c0b0-7285-bcd2-b4ffb620966b / 01a06a39-fd2b-705a-b8ce-de57219dc5db / 01a06a3a-077c-77c6-a84a-617e63ccf4d8) and Eldergrove satchel hip flip, accepted as 2D generation drift for modeler reconciliation per packet README. Integrity gates: unique hashes, LFS PNGs, LF text, no cache. 2D source only; no runtime, release, or automatic image-to-3D.",
+    "summary": "All 25 PNGs inspected at full resolution by independent reviewer independent-visual-t123f8f3f-r1: four distinct civilian NPCs; no wrench, blade, champion, extra temple/fracture, extra figures, fused fingers, logos, recolors, VFX, pin-up, or cartoon; downstream3DReady remains false.",
     "runtimeAuthority": false,
     "releaseAuthority": false
   },
@@ -142,7 +142,7 @@
       ],
       "decisionAuthority": "delegated-owner-approved-for-2D-concept",
       "readinessState": "approved_2d_source_only",
-      "downstream3DReady": true,
+      "downstream3DReady": false,
       "runtimeAuthority": false,
       "intendedProfiles": {
         "body": {
@@ -189,48 +189,48 @@
           "prompt": "Revise only hanging belt tools in this exact Master Gruff concept. Remove every modern open-ended wrench, combination spanner, box-end wrench, and extra long bar. Replace hanging belt tools with compact medieval-fantasy closed forge tongs and hinged calipers only. Keep held forge tongs in the right hand and modest smithing hammer in the left. Preserve exact face, beard, body, apron, compact heat guards, palette, pose, camera, gray background, visible fingers and feet. No weapon, text, logo, VFX, crop, or anatomy change."
         },
         "frontView": {
-          "provider": "Meshy",
-          "tool": "meshy_text_to_image_or_image_to_image",
-          "model": "gpt-image-2",
+          "provider": "Grok",
+          "tool": "xai_images_edits",
+          "model": "grok-imagine-image-2.0",
           "taskStatus": "SUCCEEDED",
-          "consumedCredits": 12,
+          "consumedCredits": 0,
           "seed": null,
           "seedStatus": "provider_did_not_expose_seed",
-          "taskId": "01a069aa-c0da-7172-9a5a-12f9eaf37230",
-          "prompt": "Revise only the belt tools in this exact FRONT orthographic full-body Stonehold service-worker A-pose. Remove every open-ended, double-ended, or modern wrench/spanner silhouette. Replace them with compact medieval-fantasy closed forge tongs, a modest smithing hammer, and hinged calipers secured to the belt. Preserve face, beard, body, apron, compact heat guards, palette, materials, pose, scale, camera, black background, visible hands and feet. One character only. No held tool, weapon, text, logo, VFX, crop, drift, or anatomy error."
+          "taskId": "grok-imagine-edit-t123f8f3f-stonehold-front",
+          "prompt": "Edit only occupation tools and shoulder protection on this exact FRONT orthographic full-body Stonehold dwarf service-worker A-pose. Lock belt layout: character RIGHT hip closed forge tongs; center modest hammer; character LEFT hip hinged calipers plus leather pouch. No modern wrench. Compact service heat guards. Empty hands."
         },
         "backView": {
-          "provider": "Meshy",
-          "tool": "meshy_text_to_image_or_image_to_image",
-          "model": "gpt-image-2",
+          "provider": "Grok",
+          "tool": "xai_images_edits",
+          "model": "grok-imagine-image-2.0",
           "taskStatus": "SUCCEEDED",
-          "consumedCredits": 12,
+          "consumedCredits": 0,
           "seed": null,
           "seedStatus": "provider_did_not_expose_seed",
-          "taskId": "01a069aa-cd52-7248-87e0-a68e183d19a4",
-          "prompt": "Revise only the belt tools in this exact BACK orthographic full-body Stonehold service-worker A-pose. Remove every open-ended, double-ended, or modern wrench/spanner silhouette. Replace them with compact medieval-fantasy closed forge tongs, a modest smithing hammer, and hinged calipers secured to the belt. Preserve body, beard, apron, compact heat guards, palette, materials, pose, scale, camera, black background, visible hands and feet. One character only. No held tool, weapon, text, logo, VFX, crop, drift, or anatomy error."
+          "taskId": "grok-imagine-edit-t123f8f3f-stonehold-back",
+          "prompt": "Edit only occupation tools and shoulder protection on this exact BACK orthographic full-body Stonehold dwarf service-worker A-pose. Lock belt layout to match front: tongs on character RIGHT (viewer left); hammer center; calipers and pouch on character LEFT (viewer right)."
         },
         "leftView": {
-          "provider": "Meshy",
-          "tool": "meshy_text_to_image_or_image_to_image",
-          "model": "gpt-image-2",
+          "provider": "Grok",
+          "tool": "xai_images_edits",
+          "model": "grok-imagine-image-2.0",
           "taskStatus": "SUCCEEDED",
-          "consumedCredits": 12,
+          "consumedCredits": 0,
           "seed": null,
           "seedStatus": "provider_did_not_expose_seed",
-          "taskId": "01a069aa-d704-7177-91a8-3fba8c4abec6",
-          "prompt": "Revise only the belt tools in this exact LEFT-side orthographic full-body Stonehold service-worker A-pose, still facing screen-left. Remove every open-ended, double-ended, or modern wrench/spanner silhouette. Use compact medieval-fantasy closed forge tongs, modest smithing hammer, and hinged calipers secured to belt. Preserve face/profile, beard, body, apron, compact heat guards, palette, pose, scale, camera, black background, visible hands/feet. One character only. No held tool, weapon, text, logo, VFX, crop, drift, anatomy error."
+          "taskId": "grok-imagine-edit-t123f8f3f-stonehold-left",
+          "prompt": "Edit only occupation tools on this exact LEFT-side orthographic Stonehold service-worker A-pose facing screen-left. Visible LEFT hip: hinged calipers and leather pouch only. Tongs on far/right hip. Hammer at belt center."
         },
         "rightView": {
-          "provider": "Meshy",
-          "tool": "meshy_text_to_image_or_image_to_image",
-          "model": "gpt-image-2",
+          "provider": "Grok",
+          "tool": "xai_images_edits",
+          "model": "grok-imagine-image-2.0",
           "taskStatus": "SUCCEEDED",
-          "consumedCredits": 12,
+          "consumedCredits": 0,
           "seed": null,
           "seedStatus": "provider_did_not_expose_seed",
-          "taskId": "01a069aa-e156-7652-a301-f5f4e554aa51",
-          "prompt": "Revise only the belt tools in this exact RIGHT-side orthographic full-body Stonehold service-worker A-pose, still facing screen-right. Remove every open-ended, double-ended, or modern wrench/spanner silhouette. Use compact medieval-fantasy closed forge tongs, modest smithing hammer, and hinged calipers secured to belt. Preserve face/profile, beard, body, apron, compact heat guards, palette, pose, scale, camera, black background, visible hands/feet. One character only. No held tool, weapon, text, logo, VFX, crop, drift, anatomy error."
+          "taskId": "grok-imagine-edit-t123f8f3f-stonehold-right",
+          "prompt": "Create one exact full-body RIGHT-side orthographic A-pose of this same Stonehold dwarf service worker facing screen-right. Visible RIGHT hip: compact closed forge tongs only. Modest hammer at belt center. Calipers and pouch on far/LEFT hip, not on the visible right hip."
         }
       },
       "selectionReview": {
@@ -261,7 +261,7 @@
       ],
       "decisionAuthority": "delegated-owner-approved-for-2D-concept",
       "readinessState": "approved_2d_source_only",
-      "downstream3DReady": true,
+      "downstream3DReady": false,
       "runtimeAuthority": false,
       "intendedProfiles": {
         "body": {
@@ -411,7 +411,7 @@
       ],
       "decisionAuthority": "delegated-owner-approved-for-2D-concept",
       "readinessState": "approved_2d_source_only",
-      "downstream3DReady": true,
+      "downstream3DReady": false,
       "runtimeAuthority": false,
       "intendedProfiles": {
         "body": {
@@ -530,7 +530,7 @@
       ],
       "decisionAuthority": "delegated-owner-approved-for-2D-concept",
       "readinessState": "approved_2d_source_only",
-      "downstream3DReady": true,
+      "downstream3DReady": false,
       "runtimeAuthority": false,
       "intendedProfiles": {
         "body": {
@@ -598,25 +598,25 @@
       },
       "generationProvenance": {
         "concept": {
-          "provider": "Meshy",
-          "tool": "meshy_text_to_image_or_image_to_image",
-          "model": "gpt-image-2",
+          "provider": "Grok",
+          "tool": "xai_images_edits",
+          "model": "grok-imagine-image-2.0",
           "taskStatus": "SUCCEEDED",
-          "consumedCredits": 12,
+          "consumedCredits": 0,
           "seed": null,
           "seedStatus": "provider_did_not_expose_seed",
-          "taskId": "01a06a39-aca8-765e-b6d6-bab0ded92862",
+          "taskId": "grok-imagine-edit-t123f8f3f-umbral-concept",
           "prompt": "Revise only the facial marking on this exact Umbral civilian archivist. Remove the matching dash at the right temple/outer canthus. Keep exactly ONE very faint, short, asymmetric, non-glowing matte mark on the LEFT temple only. No second mark, no brow/cheek stripe, no glow, curse, gore, makeup, or warlock effect. Preserve exact face, ears, tied hair, lean body, robes, scroll/key/index modules, palette, pose, camera, background, visible hands and feet. One character only. No armor, weapon, VFX, text, logo, crop, or anatomy change."
         },
         "frontView": {
-          "provider": "Meshy",
-          "tool": "meshy_text_to_image_or_image_to_image",
-          "model": "gpt-image-2",
+          "provider": "Grok",
+          "tool": "xai_images_edits",
+          "model": "grok-imagine-image-2.0",
           "taskStatus": "SUCCEEDED",
-          "consumedCredits": 12,
+          "consumedCredits": 0,
           "seed": null,
           "seedStatus": "provider_did_not_expose_seed",
-          "taskId": "01a06a39-c0b0-7285-bcd2-b4ffb620966b",
+          "taskId": "grok-imagine-edit-t123f8f3f-umbral-front",
           "prompt": "Revise only the facial marking in this exact FRONT orthographic full-body Umbral civilian archivist A-pose. Remove the dark long fracture across brow and cheek. Keep one very faint, short, asymmetric, non-glowing temple mark matching the concept; it must not read as a curse, warlock effect, gore, or makeup. Preserve exact mature face, ears, tied hair, lean body, robes, scroll/key/index modules, palette, pose, scale, camera, black background, visible hands/feet. No armor, weapon, VFX, text, logo, crop, drift, anatomy error."
         },
         "backView": {
@@ -631,25 +631,25 @@
           "prompt": "Preserve this exact BACK orthographic full-body Umbral civilian archivist A-pose and all modules. Ensure no facial fracture is visible from the back; no glowing mark, curse effect, armor, assassin or warlock cue. Preserve tied silver-black hair, ears, lean body, layered robes, scroll/key/index modules, palette, materials, pose, scale, camera, black background, visible hands and feet. One character only. No weapon, VFX, text, logo, crop, drift, or anatomy error."
         },
         "leftView": {
-          "provider": "Meshy",
-          "tool": "meshy_text_to_image_or_image_to_image",
-          "model": "gpt-image-2",
+          "provider": "Grok",
+          "tool": "xai_images_edits",
+          "model": "grok-imagine-image-2.0",
           "taskStatus": "SUCCEEDED",
-          "consumedCredits": 12,
+          "consumedCredits": 0,
           "seed": null,
           "seedStatus": "provider_did_not_expose_seed",
-          "taskId": "01a06a39-fd2b-705a-b8ce-de57219dc5db",
+          "taskId": "grok-imagine-edit-t123f8f3f-umbral-left",
           "prompt": "Revise only the facial marking in this exact LEFT-side orthographic full-body Umbral civilian archivist A-pose, still facing screen-left. Remove the dark long fracture across brow/cheek. Keep one very faint, short, asymmetric, non-glowing temple mark matching concept; no curse, warlock, gore, makeup read. Preserve exact face/profile, ears, tied hair, lean body, robes, archive modules, palette, pose, scale, camera, black background, visible hands/feet. No armor, weapon, VFX, text, logo, crop, drift, anatomy error."
         },
         "rightView": {
-          "provider": "Meshy",
-          "tool": "meshy_text_to_image_or_image_to_image",
-          "model": "gpt-image-2",
+          "provider": "Grok",
+          "tool": "xai_images_edits",
+          "model": "grok-imagine-image-2.0",
           "taskStatus": "SUCCEEDED",
-          "consumedCredits": 12,
+          "consumedCredits": 0,
           "seed": null,
           "seedStatus": "provider_did_not_expose_seed",
-          "taskId": "01a06a3a-077c-77c6-a84a-617e63ccf4d8",
+          "taskId": "grok-imagine-edit-t123f8f3f-umbral-right",
           "prompt": "Revise only the facial marking in this exact RIGHT-side orthographic full-body Umbral civilian archivist A-pose, still facing screen-right. Remove the dark long fracture across brow/cheek. Keep one very faint, short, asymmetric, non-glowing temple mark matching concept; no curse, warlock, gore, makeup read. Preserve exact face/profile, ears, tied hair, lean body, robes, archive modules, palette, pose, scale, camera, black background, visible hands/feet. No armor, weapon, VFX, text, logo, crop, drift, anatomy error."
         }
       },
@@ -680,8 +680,8 @@
         1024,
         1024
       ],
-      "sha256": "a60b931e022136533ded8e9305499fd6205cf0977f0b6c94cfa06728ddbe9e9b",
-      "provenance": "Meshy task 01a069aa-c0da-7172-9a5a-12f9eaf37230; deterministic 1024-square normalization by build_packet.py",
+      "sha256": "c3a2ca8c753c16312b3d9b62086a9e7e41946f009f4a7f0609d19252e463e755",
+      "provenance": "Grok task grok-imagine-edit-t123f8f3f-stonehold-front; deterministic 1024-square normalization by build_packet.py",
       "view": "front"
     },
     {
@@ -692,8 +692,8 @@
         1024,
         1024
       ],
-      "sha256": "a8c0d3c8ccb07482399183931e8e3dc60da576c4a9aa9de4fb26d0c5109d0c92",
-      "provenance": "Meshy task 01a069aa-cd52-7248-87e0-a68e183d19a4; deterministic 1024-square normalization by build_packet.py",
+      "sha256": "e3625ac11dc1e0cb83d8c25594bb9645283b9fff9f5781e112077e21329bff3f",
+      "provenance": "Grok task grok-imagine-edit-t123f8f3f-stonehold-back; deterministic 1024-square normalization by build_packet.py",
       "view": "back"
     },
     {
@@ -704,8 +704,8 @@
         1024,
         1024
       ],
-      "sha256": "970dc9560f2154fcd41355f8ceaf8a7d9b69396b7f0614d192fce9e228899a43",
-      "provenance": "Meshy task 01a069aa-d704-7177-91a8-3fba8c4abec6; deterministic 1024-square normalization by build_packet.py",
+      "sha256": "5a5d2764bdc800cc7921a5091eb5481430bee887b6b5283ae0ad04aec77828a8",
+      "provenance": "Grok task grok-imagine-edit-t123f8f3f-stonehold-left; deterministic 1024-square normalization by build_packet.py",
       "view": "left"
     },
     {
@@ -716,8 +716,8 @@
         1024,
         1024
       ],
-      "sha256": "a687a362801a744c1f903a4983a41d3e42616a10459e34a834cf6401796530f6",
-      "provenance": "Meshy task 01a069aa-e156-7652-a301-f5f4e554aa51; deterministic 1024-square normalization by build_packet.py",
+      "sha256": "7c2662767ec702cd5d96188173d8d267c1fac3cf01804637cf7a06d91d9c9e7e",
+      "provenance": "Grok task grok-imagine-edit-t123f8f3f-stonehold-right; deterministic 1024-square normalization by build_packet.py",
       "view": "right"
     },
     {
@@ -728,7 +728,7 @@
         3840,
         2160
       ],
-      "sha256": "4daf03b2978ea78158cd6fee8b7771cf90c518d5e448160bafe689c7d3c7a05b",
+      "sha256": "f7678d8674bcc0d8e4d7aeb5b3adb5f4a27781d0faddf3de38d37688db857b4d",
       "provenance": "deterministic Pillow composition by build_packet.py from manifest-bound selected images",
       "callouts": [
         "face",
@@ -908,8 +908,8 @@
         1024,
         1024
       ],
-      "sha256": "4d0702c0a9c307125b273c888b46c2c413eac42d3b887b3a96bb950b7ff0553d",
-      "provenance": "Meshy task 01a06a39-aca8-765e-b6d6-bab0ded92862; deterministic 1024-square normalization by build_packet.py",
+      "sha256": "e88002539b4efe3123b457b78f177599c3d20edd5f23e9c18c8a909518382318",
+      "provenance": "Grok task grok-imagine-edit-t123f8f3f-umbral-concept; deterministic 1024-square normalization by build_packet.py",
       "presentation": "neutral full-body front three-quarter A-pose"
     },
     {
@@ -920,8 +920,8 @@
         1024,
         1024
       ],
-      "sha256": "0ecbe74e9734821542340ea6b685e2b8bc72c0628682d23bf72130b4bfce9c89",
-      "provenance": "Meshy task 01a06a39-c0b0-7285-bcd2-b4ffb620966b; deterministic 1024-square normalization by build_packet.py",
+      "sha256": "622c055f2fbea632ae5c0d3660160f67ed3267231b365fb68b58065a1277aa15",
+      "provenance": "Grok task grok-imagine-edit-t123f8f3f-umbral-front; deterministic 1024-square normalization by build_packet.py",
       "view": "front"
     },
     {
@@ -944,8 +944,8 @@
         1024,
         1024
       ],
-      "sha256": "330d166139e71ca51737ffb70e42626ee79c01ab015f47ef562212640cc37742",
-      "provenance": "Meshy task 01a06a39-fd2b-705a-b8ce-de57219dc5db; deterministic 1024-square normalization by build_packet.py",
+      "sha256": "8a2e66e499e1b7589cf759501a31b4e30326c4473872f8fb5b1e2d832ebfc9a7",
+      "provenance": "Grok task grok-imagine-edit-t123f8f3f-umbral-left; deterministic 1024-square normalization by build_packet.py",
       "view": "left"
     },
     {
@@ -956,8 +956,8 @@
         1024,
         1024
       ],
-      "sha256": "e06c6e5692b2f810080a6632b539082ebebf0dd3182382384380d0e86a15d006",
-      "provenance": "Meshy task 01a06a3a-077c-77c6-a84a-617e63ccf4d8; deterministic 1024-square normalization by build_packet.py",
+      "sha256": "28db7fba60fad10444baa3ee715cdb2276f934882c6b71a96ecc22066178278c",
+      "provenance": "Grok task grok-imagine-edit-t123f8f3f-umbral-right; deterministic 1024-square normalization by build_packet.py",
       "view": "right"
     },
     {
@@ -968,7 +968,7 @@
         3840,
         2160
       ],
-      "sha256": "5dde3a24f614f01350c935c780140622d3dd145d9742f050acddfa6d1516f6d4",
+      "sha256": "adca95729baefa4a9d62590c87097f223339f5242b23216f88521e641d9c8a9a",
       "provenance": "deterministic Pillow composition by build_packet.py from manifest-bound selected images",
       "callouts": [
         "face",
@@ -988,7 +988,7 @@
         3840,
         2160
       ],
-      "sha256": "7414655541dfe8614bcdbd911c3027f99d38e1e2242d66a774af3554831fcbc0",
+      "sha256": "e58c6042caa7fa95a4fe021bfe0c1cbcafc9a95f9fc378985cbc0e0c7c6f7e94",
       "provenance": "deterministic Pillow composition by build_packet.py from four manifest-bound front views",
       "commonScale": true,
       "commonCamera": true,
@@ -1007,7 +1007,7 @@
       "role": "builder",
       "rosterId": null,
       "dimensions": null,
-      "sha256": "10931610d908f43140ae5a380509375c53197db7fa6f93b55da4f00593e1236d",
+      "sha256": "c995066b126e563d2e1e15762df6b10caa2a497237e5dd579ad38db7dd1f83cf",
       "provenance": "task-authored packet documentation/tooling"
     },
     {

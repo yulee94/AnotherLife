@@ -36,26 +36,46 @@ NPCS = {
         "heightMeters": 1.43,
         "conceptSource": "stonehold_master_gruff_concept_e.png",
         "viewSources": {
-            "front": "stonehold_master_gruff_front_f.png",
-            "back": "stonehold_master_gruff_back_f.png",
-            "left": "stonehold_master_gruff_left_f.png",
-            "right": "stonehold_master_gruff_right_f.png",
+            "front": "stonehold_master_gruff_front_grok.png",
+            "back": "stonehold_master_gruff_back_grok.png",
+            "left": "stonehold_master_gruff_left_grok.png",
+            "right": "stonehold_master_gruff_right_grok.png",
         },
         "viewCrops": {},
         "tasks": {
             "concept": "01a069e7-f90b-72db-8dfe-8a56c0dc96c4",
-            "frontView": "01a069aa-c0da-7172-9a5a-12f9eaf37230",
-            "backView": "01a069aa-cd52-7248-87e0-a68e183d19a4",
-            "leftView": "01a069aa-d704-7177-91a8-3fba8c4abec6",
-            "rightView": "01a069aa-e156-7652-a301-f5f4e554aa51",
+            "frontView": "grok-imagine-edit-t123f8f3f-stonehold-front",
+            "backView": "grok-imagine-edit-t123f8f3f-stonehold-back",
+            "leftView": "grok-imagine-edit-t123f8f3f-stonehold-left",
+            "rightView": "grok-imagine-edit-t123f8f3f-stonehold-right",
         },
-        "taskModels": {"concept": "gpt-image-2", "frontView": "gpt-image-2", "backView": "gpt-image-2", "leftView": "gpt-image-2", "rightView": "gpt-image-2"},
+        "taskModels": {
+            "concept": "gpt-image-2",
+            "frontView": "grok-imagine-image-2.0",
+            "backView": "grok-imagine-image-2.0",
+            "leftView": "grok-imagine-image-2.0",
+            "rightView": "grok-imagine-image-2.0",
+        },
+        "taskProviders": {
+            "concept": "Meshy",
+            "frontView": "Grok",
+            "backView": "Grok",
+            "leftView": "Grok",
+            "rightView": "Grok",
+        },
+        "taskTools": {
+            "concept": "meshy_text_to_image_or_image_to_image",
+            "frontView": "xai_images_edits",
+            "backView": "xai_images_edits",
+            "leftView": "xai_images_edits",
+            "rightView": "xai_images_edits",
+        },
         "conceptPrompt": "Revise only hanging belt tools in this exact Master Gruff concept. Remove every modern open-ended wrench, combination spanner, box-end wrench, and extra long bar. Replace hanging belt tools with compact medieval-fantasy closed forge tongs and hinged calipers only. Keep held forge tongs in the right hand and modest smithing hammer in the left. Preserve exact face, beard, body, apron, compact heat guards, palette, pose, camera, gray background, visible fingers and feet. No weapon, text, logo, VFX, crop, or anatomy change.",
         "turnaroundPrompt": "Preserve this Stonehold dwarf's face, body, beard, dark-iron/charcoal/oxblood palette and premium grounded PBR style. Convert to a clean production turnaround on flat neutral gray: consistent full-body front, left, back and right A-pose views, feet and hands fully visible, no perspective drift. Replace modern-looking spanners with medieval-fantasy forge tongs, smithing hammer and calipers; reduce pauldrons to service-weight heat protection. Keep apron and modular layers. No weapon, magic, text, logos, scene, crop, fused gear or anatomy errors.",
-        "frontPrompt": "Revise only the belt tools in this exact FRONT orthographic full-body Stonehold service-worker A-pose. Remove every open-ended, double-ended, or modern wrench/spanner silhouette. Replace them with compact medieval-fantasy closed forge tongs, a modest smithing hammer, and hinged calipers secured to the belt. Preserve face, beard, body, apron, compact heat guards, palette, materials, pose, scale, camera, black background, visible hands and feet. One character only. No held tool, weapon, text, logo, VFX, crop, drift, or anatomy error.",
-        "backPrompt": "Revise only the belt tools in this exact BACK orthographic full-body Stonehold service-worker A-pose. Remove every open-ended, double-ended, or modern wrench/spanner silhouette. Replace them with compact medieval-fantasy closed forge tongs, a modest smithing hammer, and hinged calipers secured to the belt. Preserve body, beard, apron, compact heat guards, palette, materials, pose, scale, camera, black background, visible hands and feet. One character only. No held tool, weapon, text, logo, VFX, crop, drift, or anatomy error.",
-        "leftPrompt": "Revise only the belt tools in this exact LEFT-side orthographic full-body Stonehold service-worker A-pose, still facing screen-left. Remove every open-ended, double-ended, or modern wrench/spanner silhouette. Use compact medieval-fantasy closed forge tongs, modest smithing hammer, and hinged calipers secured to belt. Preserve face/profile, beard, body, apron, compact heat guards, palette, pose, scale, camera, black background, visible hands/feet. One character only. No held tool, weapon, text, logo, VFX, crop, drift, anatomy error.",
-        "rightPrompt": "Revise only the belt tools in this exact RIGHT-side orthographic full-body Stonehold service-worker A-pose, still facing screen-right. Remove every open-ended, double-ended, or modern wrench/spanner silhouette. Use compact medieval-fantasy closed forge tongs, modest smithing hammer, and hinged calipers secured to belt. Preserve face/profile, beard, body, apron, compact heat guards, palette, pose, scale, camera, black background, visible hands/feet. One character only. No held tool, weapon, text, logo, VFX, crop, drift, anatomy error.",
+        "frontPrompt": "Edit only occupation tools and shoulder protection on this exact FRONT orthographic full-body Stonehold dwarf service-worker A-pose. Lock belt layout: character RIGHT hip closed forge tongs; center modest hammer; character LEFT hip hinged calipers plus leather pouch. No modern wrench. Compact service heat guards. Empty hands.",
+        "backPrompt": "Edit only occupation tools and shoulder protection on this exact BACK orthographic full-body Stonehold dwarf service-worker A-pose. Lock belt layout to match front: tongs on character RIGHT (viewer left); hammer center; calipers and pouch on character LEFT (viewer right).",
+        "leftPrompt": "Edit only occupation tools on this exact LEFT-side orthographic Stonehold service-worker A-pose facing screen-left. Visible LEFT hip: hinged calipers and leather pouch only. Tongs on far/right hip. Hammer at belt center.",
+        "rightPrompt": "Create one exact full-body RIGHT-side orthographic A-pose of this same Stonehold dwarf service worker facing screen-right. Visible RIGHT hip: compact closed forge tongs only. Modest hammer at belt center. Calipers and pouch on far/LEFT hip, not on the visible right hip.",
         "identity": "Compressed square craft silhouette; forge apron and compact heat guards; period smithing tools; skilled service authority, not Champion rank.",
         "modules": ["body/head/hands/feet", "hair + beard", "quilted base + sleeves", "apron + belt", "heat guards + gauntlets", "boots", "tongs/hammer/calipers + pouches"],
         "materials": [("BASALT IRON", "aged metal, medium rough", "#454747"), ("FORGE LEATHER", "worn grain, high rough", "#6d4b35"), ("CHARCOAL WOOL", "matte quilt", "#2f3132"), ("OXBLOOD TRIM", "restrained cloth accent", "#62312f")],
@@ -159,22 +179,42 @@ NPCS = {
         "role": "service",
         "roleActionKeys": ["role.archive_service"],
         "heightMeters": 1.86,
-        "conceptSource": "umbral_archivist_concept_h.png",
+        "conceptSource": "umbral_archivist_concept_grok.png",
         "viewSources": {
-            "front": "umbral_archivist_front_f.png",
+            "front": "umbral_archivist_front_grok.png",
             "back": "umbral_archivist_back_f.png",
-            "left": "umbral_archivist_left_f.png",
-            "right": "umbral_archivist_right_f.png",
+            "left": "umbral_archivist_left_grok.png",
+            "right": "umbral_archivist_right_grok.png",
         },
         "viewCrops": {},
         "tasks": {
-            "concept": "01a06a39-aca8-765e-b6d6-bab0ded92862",
-            "frontView": "01a06a39-c0b0-7285-bcd2-b4ffb620966b",
+            "concept": "grok-imagine-edit-t123f8f3f-umbral-concept",
+            "frontView": "grok-imagine-edit-t123f8f3f-umbral-front",
             "backView": "01a069aa-f655-71ec-a76b-3cfbc87653a0",
-            "leftView": "01a06a39-fd2b-705a-b8ce-de57219dc5db",
-            "rightView": "01a06a3a-077c-77c6-a84a-617e63ccf4d8",
+            "leftView": "grok-imagine-edit-t123f8f3f-umbral-left",
+            "rightView": "grok-imagine-edit-t123f8f3f-umbral-right",
         },
-        "taskModels": {"concept": "gpt-image-2", "frontView": "gpt-image-2", "backView": "gpt-image-2", "leftView": "gpt-image-2", "rightView": "gpt-image-2"},
+        "taskModels": {
+            "concept": "grok-imagine-image-2.0",
+            "frontView": "grok-imagine-image-2.0",
+            "backView": "gpt-image-2",
+            "leftView": "grok-imagine-image-2.0",
+            "rightView": "grok-imagine-image-2.0",
+        },
+        "taskProviders": {
+            "concept": "Grok",
+            "frontView": "Grok",
+            "backView": "Meshy",
+            "leftView": "Grok",
+            "rightView": "Grok",
+        },
+        "taskTools": {
+            "concept": "xai_images_edits",
+            "frontView": "xai_images_edits",
+            "backView": "meshy_text_to_image_or_image_to_image",
+            "leftView": "xai_images_edits",
+            "rightView": "xai_images_edits",
+        },
         "conceptPrompt": "Revise only the facial marking on this exact Umbral civilian archivist. Remove the matching dash at the right temple/outer canthus. Keep exactly ONE very faint, short, asymmetric, non-glowing matte mark on the LEFT temple only. No second mark, no brow/cheek stripe, no glow, curse, gore, makeup, or warlock effect. Preserve exact face, ears, tied hair, lean body, robes, scroll/key/index modules, palette, pose, camera, background, visible hands and feet. One character only. No armor, weapon, VFX, text, logo, crop, or anatomy change.",
         "turnaroundPrompt": "Preserve this Umbral dark elf's exact mature face, ears, lean proportions, ash-violet skin, tied silver-black hair and charcoal/violet grounded PBR quality. Produce consistent full-body front, back and exact side A-pose views on a flat neutral background. Civilian archivist only: remove all pointed shoulder armor and combat cues. Keep only one faint non-glowing temple mark, plus scroll cases, keys and indexing tools. Hands and feet unobstructed; modular robes identical between views. No weapon, spell VFX, text, logos, crop, fused gear or anatomy drift.",
         "frontPrompt": "Revise only the facial marking in this exact FRONT orthographic full-body Umbral civilian archivist A-pose. Remove the dark long fracture across brow and cheek. Keep one very faint, short, asymmetric, non-glowing temple mark matching the concept; it must not read as a curse, warlock effect, gore, or makeup. Preserve exact mature face, ears, tied hair, lean body, robes, scroll/key/index modules, palette, pose, scale, camera, black background, visible hands/feet. No armor, weapon, VFX, text, logo, crop, drift, anatomy error.",
@@ -401,10 +441,10 @@ def create_lineup() -> Path:
     return output
 
 
-def provenance(task_id: str, model: str, prompt: str, consumed_credits: int) -> dict:
+def provenance(task_id: str, model: str, prompt: str, consumed_credits: int, provider: str = "Meshy", tool: str = "meshy_text_to_image_or_image_to_image") -> dict:
     return {
-        "provider": "Meshy",
-        "tool": "meshy_text_to_image_or_image_to_image",
+        "provider": provider,
+        "tool": tool,
         "model": model,
         "taskStatus": "SUCCEEDED",
         "consumedCredits": consumed_credits,
@@ -449,30 +489,25 @@ def build_manifest(review_status: str, review_id: str, review_summary: str) -> d
             "sourceAuthority": SOURCE_AUTHORITIES,
             "decisionAuthority": "delegated-owner-approved-for-2D-concept" if review_status == "APPROVE" else "delegated-owner-review-pending",
             "readinessState": "approved_2d_source_only" if review_status == "APPROVE" else "review_pending_2d_only",
-            "downstream3DReady": review_status == "APPROVE",
+            "downstream3DReady": False,
             "runtimeAuthority": False,
             "intendedProfiles": profile_bindings,
             "generationProvenance": {
-                "concept": provenance(
-                    npc["tasks"]["concept"],
-                    npc["taskModels"]["concept"],
-                    npc["conceptPrompt"],
-                    12 if npc["taskModels"]["concept"] == "gpt-image-2" else 9,
-                ),
-                "frontView": provenance(
-                    npc["tasks"]["frontView"],
-                    npc["taskModels"]["frontView"],
-                    npc.get("frontPrompt", npc["turnaroundPrompt"]),
-                    12 if npc["taskModels"]["frontView"] == "gpt-image-2" else 9,
-                ),
-                "backView": provenance(
-                    npc["tasks"]["backView"],
-                    npc["taskModels"]["backView"],
-                    npc.get("backPrompt", npc["turnaroundPrompt"]),
-                    12 if npc["taskModels"]["backView"] == "gpt-image-2" else 9,
-                ),
-                "leftView": provenance(npc["tasks"]["leftView"], npc["taskModels"]["leftView"], npc["leftPrompt"], 12),
-                "rightView": provenance(npc["tasks"]["rightView"], npc["taskModels"]["rightView"], npc["rightPrompt"], 12),
+                key: provenance(
+                    npc["tasks"][key],
+                    npc["taskModels"][key],
+                    {
+                        "concept": npc["conceptPrompt"],
+                        "frontView": npc.get("frontPrompt", npc["turnaroundPrompt"]),
+                        "backView": npc.get("backPrompt", npc["turnaroundPrompt"]),
+                        "leftView": npc["leftPrompt"],
+                        "rightView": npc["rightPrompt"],
+                    }[key],
+                    0 if npc.get("taskProviders", {}).get(key, "Meshy") == "Grok" else (12 if npc["taskModels"][key] == "gpt-image-2" else 9),
+                    npc.get("taskProviders", {}).get(key, "Meshy"),
+                    npc.get("taskTools", {}).get(key, "meshy_text_to_image_or_image_to_image"),
+                )
+                for key in ("concept", "frontView", "backView", "leftView", "rightView")
             },
             "selectionReview": {
                 "workerVisualInspection": "APPROVE",
@@ -484,12 +519,13 @@ def build_manifest(review_status: str, review_id: str, review_summary: str) -> d
     for realm, npc in NPCS.items():
         roster_id = npc["rosterId"]
         concept = ROOT / "Concepts" / f"{roster_id}_concept_threequarter_v001.png"
-        artifacts.append(artifact_record(concept, "concept", roster_id, f"Meshy task {npc['tasks']['concept']}; deterministic 1024-square normalization by build_packet.py", presentation="neutral full-body front three-quarter A-pose"))
+        artifacts.append(artifact_record(concept, "concept", roster_id, f"{npc.get('taskProviders', {}).get('concept', 'Meshy')} task {npc['tasks']['concept']}; deterministic 1024-square normalization by build_packet.py", presentation="neutral full-body front three-quarter A-pose"))
         for view in ("front", "back", "left", "right"):
             path = ROOT / "Views" / f"{roster_id}_view_{view}_v001.png"
             task_key = f"{view}View"
             crop_note = f"; curated source crop {npc['viewCrops'][view]} removes adjacent non-subject content" if view in npc["viewCrops"] else ""
-            artifacts.append(artifact_record(path, "turnaround_view", roster_id, f"Meshy task {npc['tasks'][task_key]}{crop_note}; deterministic 1024-square normalization by build_packet.py", view=view))
+            provider = npc.get("taskProviders", {}).get(task_key, "Meshy")
+            artifacts.append(artifact_record(path, "turnaround_view", roster_id, f"{provider} task {npc['tasks'][task_key]}{crop_note}; deterministic 1024-square normalization by build_packet.py", view=view))
         sheet = ROOT / "HandoffSheets" / f"{roster_id}_model_handoff_v001.png"
         artifacts.append(artifact_record(sheet, "handoff_sheet", roster_id, "deterministic Pillow composition by build_packet.py from manifest-bound selected images", callouts=["face", "modules", "materials", "scale", "rig", "lod", "collider"]))
     lineup = ROOT / "Review" / "four_realm_representative_npc_lineup_v001.png"
