@@ -127,6 +127,16 @@ namespace AL.Services.Local
     }
 
     /// <summary>
+    /// Schema-v2 Wishgate mutation entry point. ProfileId cannot change.
+    /// </summary>
+    internal interface IProfileBoundWishgateCandidateStore
+    {
+        AL.RealmSelection.WishgateCommitResult TryCommitProfileBoundWishgate(
+            AL.RealmSelection.WishgateCommitRequest request,
+            AL.RealmSelection.WishgateDurableDependencies dependencies);
+    }
+
+    /// <summary>
     /// Schema-v1 3D-first MVP loop mutation entry point. It carries no
     /// caller-provided mutation callback.
     /// </summary>

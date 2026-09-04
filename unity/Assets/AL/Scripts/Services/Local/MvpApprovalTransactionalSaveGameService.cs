@@ -23,6 +23,7 @@ namespace AL.Services.Local
         ILegacyRealmSelectionCandidateStore,
         IProfileBoundRealmSelectionCandidateStore,
         IProfileBoundDeathPenaltyCandidateStore,
+        IProfileBoundWishgateCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyFirstWorldProgressCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
@@ -136,6 +137,16 @@ namespace AL.Services.Local
                 () => ((IProfileBoundDeathPenaltyCandidateStore)_inner)
                     .TryCommitProfileBoundDeathPenalty(request),
                 ResolveDeathPenalty);
+
+        WishgateCommitResult
+            IProfileBoundWishgateCandidateStore
+            .TryCommitProfileBoundWishgate(
+                WishgateCommitRequest request,
+                WishgateDurableDependencies dependencies) =>
+            Execute(
+                () => ((IProfileBoundWishgateCandidateStore)_inner)
+                    .TryCommitProfileBoundWishgate(request, dependencies),
+                ResolveWishgate);
 
         SaveCandidateCommitResult
             ILegacyMvpLoopCandidateStore.TryCommitLegacyMvpLoop(
@@ -416,6 +427,33 @@ namespace AL.Services.Local
 
             if (result.Status != DeathPenaltyCommitStatus.CommittedBelowMax &&
                 result.Status != DeathPenaltyCommitStatus.OathmarkPaymentRequired)
+            {
+                return TransactionResolution.Rollback;
+            }
+
+            return result.Persisted && result.MutationOccurred && SaveCommitVerified
+                ? TransactionResolution.Commit
+                : TransactionResolution.RollbackAndFreeze;
+        }
+
+        private TransactionResolution ResolveWishgate(WishgateCommitResult result)
+        {
+            if (InnerCommitUncertain ||
+                result.Status == WishgateCommitStatus.RejectedSaveUncertain ||
+                result.Status == WishgateCommitStatus.RecoveryRequired)
+            {
+                return TransactionResolution.RollbackAndFreeze;
+            }
+
+            if (result.Status == WishgateCommitStatus.Replayed ||
+                result.Status == WishgateCommitStatus.NoChange)
+            {
+                return result.Persisted && result.MutationOccurred && SaveCommitVerified
+                    ? TransactionResolution.Commit
+                    : TransactionResolution.Rollback;
+            }
+
+            if (result.Status != WishgateCommitStatus.Committed)
             {
                 return TransactionResolution.Rollback;
             }

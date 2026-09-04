@@ -859,6 +859,186 @@ namespace AL.Services.Local
                     : commit.Message);
         }
 
+        WishgateCommitResult
+            IProfileBoundWishgateCandidateStore
+            .TryCommitProfileBoundWishgate(
+                WishgateCommitRequest request,
+                WishgateDurableDependencies dependencies)
+        {
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.OperationId) ||
+                string.IsNullOrWhiteSpace(request.EventId) ||
+                string.IsNullOrWhiteSpace(request.CorrelationId) ||
+                string.IsNullOrWhiteSpace(request.ActorId) ||
+                dependencies == null ||
+                !dependencies.IsComplete)
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedInvalidRequest,
+                    _currentSave,
+                    WishgateCommitCodes.InvalidRequest);
+            }
+
+            if (!HasExactSchemaTwoProfile(_currentSave))
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedProfileUnavailable,
+                    _currentSave,
+                    WishgateCommitCodes.ProfileNotSchemaTwo);
+            }
+
+            ProfileWriteAuthoritySnapshot before = GetCurrentAuthority();
+            if (before == null ||
+                before.Status != ProfileWriteAuthorityStatus.Writable)
+            {
+                return MapNonWritableWishgateAuthority(before);
+            }
+
+            if (!string.IsNullOrEmpty(request.ExpectedProfileId) &&
+                !string.Equals(
+                    request.ExpectedProfileId,
+                    before.ProfileId,
+                    StringComparison.Ordinal))
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedUnauthorized,
+                    _currentSave,
+                    WishgateCommitCodes.ProfileMismatch);
+            }
+
+            if (!string.IsNullOrEmpty(request.ExpectedGenerationFingerprint) &&
+                !string.Equals(
+                    request.ExpectedGenerationFingerprint,
+                    before.VerifiedGenerationFingerprint,
+                    StringComparison.Ordinal))
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedStale,
+                    _currentSave,
+                    WishgateCommitCodes.StaleBase);
+            }
+
+            WishgateCommitResult replay = WishgateDurableTransaction.ReplayOrReject(
+                _currentSave,
+                request);
+            if (replay != null)
+            {
+                return replay;
+            }
+
+            ProfileBoundSaveCandidateCommitResult bound =
+                ((IProfileBoundSaveGameCandidateStore)this).TryCommitCandidate(
+                    ProfileAuthorityExpectation.From(before),
+                    WishgateEngineeringIds.SchemaOperationId,
+                    request.OperationId,
+                    candidate => WishgateDurableTransaction.Prepare(
+                        candidate,
+                        request,
+                        before.ProfileId,
+                        dependencies));
+
+            return MapBoundWishgateCommit(bound);
+        }
+
+        private WishgateCommitResult MapNonWritableWishgateAuthority(
+            ProfileWriteAuthoritySnapshot authority)
+        {
+            if (authority != null &&
+                authority.Status == ProfileWriteAuthorityStatus.CommitUncertain)
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedSaveUncertain,
+                    _currentSave,
+                    WishgateCommitCodes.CommitUncertain);
+            }
+
+            if (authority != null &&
+                authority.Status == ProfileWriteAuthorityStatus.ForwardSchemaReadOnly)
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedForward,
+                    _currentSave,
+                    WishgateCommitCodes.ForwardSchema);
+            }
+
+            if (authority != null &&
+                authority.Status == ProfileWriteAuthorityStatus.DegradedReadOnly)
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedDegraded,
+                    _currentSave,
+                    WishgateCommitCodes.Degraded);
+            }
+
+            return WishgateDurableTransaction.Reject(
+                WishgateCommitStatus.RejectedReadOnly,
+                _currentSave,
+                WishgateCommitCodes.NotWritable);
+        }
+
+        private WishgateCommitResult MapBoundWishgateCommit(
+            ProfileBoundSaveCandidateCommitResult bound)
+        {
+            SaveCandidateCommitResult commit = bound?.CommitResult;
+            if (commit == null)
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedReadOnly,
+                    _currentSave,
+                    WishgateCommitCodes.ReadOnly);
+            }
+
+            if (commit.Outcome == SaveCandidateCommitOutcome.Duplicate)
+            {
+                return WishgateDurableTransaction.MapPublished(
+                    commit.PublishedSave ?? _currentSave,
+                    false,
+                    false,
+                    WishgateCommitStatus.Replayed);
+            }
+
+            if (commit.Outcome == SaveCandidateCommitOutcome.Committed)
+            {
+                return WishgateDurableTransaction.MapPublished(
+                    commit.PublishedSave ?? _currentSave,
+                    true,
+                    true,
+                    WishgateCommitStatus.Committed);
+            }
+
+            if (commit.Outcome == SaveCandidateCommitOutcome.CommitUncertain)
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedSaveUncertain,
+                    _currentSave,
+                    WishgateCommitCodes.CommitUncertain);
+            }
+
+            if (commit.Outcome == SaveCandidateCommitOutcome.ReadOnly)
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.RejectedReadOnly,
+                    _currentSave,
+                    string.IsNullOrEmpty(commit.Message)
+                        ? WishgateCommitCodes.ReadOnly
+                        : commit.Message);
+            }
+
+            if (string.Equals(commit.Message, WishgateCommitCodes.NoChange, StringComparison.Ordinal))
+            {
+                return WishgateDurableTransaction.Reject(
+                    WishgateCommitStatus.NoChange,
+                    _currentSave,
+                    WishgateCommitCodes.NoChange);
+            }
+
+            return WishgateDurableTransaction.MapRejectedCode(
+                _currentSave,
+                string.IsNullOrEmpty(commit.Message)
+                    ? WishgateCommitCodes.InvalidRequest
+                    : commit.Message);
+        }
+
         private RealmSelectionResult MapBoundRealmCommit(
             RealmId requested,
             ProfileBoundSaveCandidateCommitResult bound,

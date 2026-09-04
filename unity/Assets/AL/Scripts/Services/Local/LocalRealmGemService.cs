@@ -93,39 +93,14 @@ namespace AL.Services.Local
 
         public void MarkWishgateEarned(string reason)
         {
-            if (!TryGetMutableSave(out SaveGameData save))
-            {
-                return;
-            }
-
-            var wishgate = save.Wishgate;
-            if (wishgate == null || string.IsNullOrWhiteSpace(reason))
-            {
-                return;
-            }
-
-            wishgate.IsEarned = true;
-            wishgate.EarnReason = reason;
-            _saveGameService.Save();
+            // Prototype void mutation is contained. Durable earn goes through
+            // WishgateSaveAuthority and a verified profile-bound commit.
         }
 
         public void ChooseWishReward(string rewardId)
         {
-            if (!TryGetMutableSave(out SaveGameData save))
-            {
-                return;
-            }
-
-            var wishgate = save.Wishgate;
-            if (wishgate == null || !wishgate.IsEarned || string.IsNullOrWhiteSpace(rewardId))
-            {
-                return;
-            }
-
-            wishgate.IsEarned = false;
-            wishgate.LastRewardId = rewardId;
-            wishgate.LastRewardChosenTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            _saveGameService.Save();
+            // Prototype void mutation is contained. Durable select/apply/commit
+            // goes through WishgateSaveAuthority and reports only verified results.
         }
 
         private static RealmGemState CloneGem(RealmGemState source)
