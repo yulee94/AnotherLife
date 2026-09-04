@@ -165,7 +165,7 @@ namespace AL.Services.Local
             {
                 if (!_territoryIncome.TryCaptureTerritoryIncome(
                         save.SelectedRealm,
-                        deltaSeconds,
+                        elapsedSeconds,
                         out territoryContributions,
                         out territoryDiagnostic) ||
                     territoryContributions == null)
