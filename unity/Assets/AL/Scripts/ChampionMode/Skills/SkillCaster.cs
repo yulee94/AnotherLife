@@ -7,6 +7,7 @@ using AL.ChampionMode.Presentation;
 using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Input;
+using AL.Pvp;
 using UnityEngine;
 
 namespace AL.ChampionMode.Skills
@@ -509,6 +510,7 @@ namespace AL.ChampionMode.Skills
             bool hitAnyTarget = false;
             var damagedBots = new HashSet<int>();
             var damagedBosses = new HashSet<int>();
+            var damagedPlayers = new HashSet<int>();
 
             foreach (var hitCollider in hitColliders)
             {
@@ -547,6 +549,46 @@ namespace AL.ChampionMode.Skills
                     ApplyControlAtCommit(bot.transform, skill);
                     SkillCastEffectRouter.PlayImpact(binding, bot.transform.position, attackerRealm);
                     SkillEffectFactory.SpawnFloatingCombatText(bot.transform.position + Vector3.up * 1.85f, Mathf.CeilToInt(botDamage).ToString(), new Color(1f, 0.62f, 0.22f), 0.24f, 0.82f);
+                    RuntimeCombatAudio.PlayImpact();
+                    continue;
+                }
+
+                var playerCombat = hitCollider.GetComponentInParent<ChampionCombat>();
+                if (playerCombat != null &&
+                    playerCombat != _combat &&
+                    damagedPlayers.Add(playerCombat.GetInstanceID()))
+                {
+                    PvpHarmfulEffectKind harmKind = radius > 0.01f
+                        ? PvpHarmfulEffectKind.AreaOfEffect
+                        : PvpHarmfulEffectKind.DirectHit;
+                    PvpHarmfulEffectApplicationReceipt harm =
+                        PvpHarmfulEffectRuntimeGate.ApplyOverlap(harmKind, null);
+                    if (!harm.Applied)
+                    {
+                        continue;
+                    }
+
+                    hitAnyTarget = true;
+                    playerCombat.TakeDamage(power);
+                    if (skill != null && skill.ControlKind != CrowdControlKind.None)
+                    {
+                        PvpHarmfulEffectApplicationReceipt control =
+                            PvpHarmfulEffectRuntimeGate.ApplyOverlap(
+                                PvpHarmfulEffectKind.CrowdControl,
+                                null);
+                        if (control.Applied)
+                        {
+                            ApplyControlAtCommit(playerCombat.transform, skill);
+                        }
+                    }
+
+                    SkillCastEffectRouter.PlayImpact(binding, playerCombat.transform.position, attackerRealm);
+                    SkillEffectFactory.SpawnFloatingCombatText(
+                        playerCombat.transform.position + Vector3.up * 1.85f,
+                        Mathf.CeilToInt(power).ToString(),
+                        new Color(1f, 0.42f, 0.42f),
+                        0.24f,
+                        0.82f);
                     RuntimeCombatAudio.PlayImpact();
                 }
             }
