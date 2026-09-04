@@ -206,5 +206,87 @@ class RealmCreatureProductionSliceTests(unittest.TestCase):
         )
 
 
+class CindermawRuntimeBenchmarkSliceTests(unittest.TestCase):
+    def test_committed_cindermaw_slice_passes_source_qualification(self) -> None:
+        report = VALIDATOR.validate_cindermaw_slice()
+
+        self.assertEqual("PASS", report["overall"])
+        self.assertEqual("elite_umbral_cindermaw_salamander", report["modelId"])
+        self.assertEqual("PASS", report["sourceQualification"])
+        self.assertEqual("BLOCKED", report["runtimeIntegration"])
+        self.assertEqual("BLOCKED", report["deviceQualification"])
+        self.assertFalse(report["gameplayOrSpawnActivation"])
+
+    def test_cindermaw_source_manifest_stays_not_production_ready(self) -> None:
+        manifest = VALIDATOR.load_json(VALIDATOR.SOURCE_MANIFEST)
+        model = next(
+            row
+            for row in manifest["models"]
+            if row["modelId"] == "elite_umbral_cindermaw_salamander"
+        )
+
+        self.assertFalse(model["productionReady"])
+        self.assertEqual("Blocked", model["runtimeIntegrationState"])
+        self.assertEqual(
+            "7ad41ad8ce10aeca0919008f1d99c0d9f373a37e4100b2a490cb1bc5537e3b7b",
+            model["selectedSource"]["sha256"],
+        )
+        self.assertTrue(
+            str(model["selectedSource"]["path"]).endswith(
+                "elite_umbral_cindermaw_salamander_source_v005.fbx"
+            )
+        )
+
+    def test_cindermaw_vfx_sockets_stay_off_the_clean_mesh(self) -> None:
+        qualification = VALIDATOR.load_json(VALIDATOR.DEFAULT_CINDERMAW_QUALIFICATION)
+        bones = set(qualification["rig"]["boneNames"])
+
+        self.assertIn("socket_vfx_mouth_ember", bones)
+        self.assertIn("socket_vfx_fin_heat", bones)
+        self.assertIn("socket_vfx_contact_steam", bones)
+        self.assertTrue(qualification["material"]["runtimeVfxSeparate"])
+        self.assertFalse(qualification["material"]["emissionBakedIntoCleanMesh"])
+        self.assertFalse(qualification["gameplayOrSpawnActivation"])
+
+    def test_cindermaw_runtime_asset_output_path_fails_closed(self) -> None:
+        plan = VALIDATOR.load_json(VALIDATOR.DEFAULT_CINDERMAW_PLAN)
+        plan["outputs"]["fbx"] = (
+            "unity/Assets/AL/Creatures/cindermaw_salamander.fbx"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            plan_path = Path(directory) / "unsafe-cindermaw-plan.json"
+            plan_path.write_text(json.dumps(plan), encoding="utf-8")
+            report = VALIDATOR.validate_slice(
+                plan_path=plan_path,
+                schema_path=VALIDATOR.DEFAULT_CINDERMAW_SCHEMA,
+                qualification_path=VALIDATOR.DEFAULT_CINDERMAW_QUALIFICATION,
+            )
+
+        self.assertEqual("FAIL", report["overall"])
+        self.assertIn("RuntimePathForbidden:outputs.fbx", report["issues"])
+
+    def test_cindermaw_missing_heat_fin_socket_fails_closed(self) -> None:
+        qualification = VALIDATOR.load_json(VALIDATOR.DEFAULT_CINDERMAW_QUALIFICATION)
+        qualification["rig"]["boneNames"] = [
+            name
+            for name in qualification["rig"]["boneNames"]
+            if name != "socket_vfx_fin_heat"
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            qualification_path = Path(directory) / "missing-fin-socket.json"
+            qualification_path.write_text(
+                json.dumps(qualification),
+                encoding="utf-8",
+            )
+            report = VALIDATOR.validate_slice(
+                plan_path=VALIDATOR.DEFAULT_CINDERMAW_PLAN,
+                schema_path=VALIDATOR.DEFAULT_CINDERMAW_SCHEMA,
+                qualification_path=qualification_path,
+            )
+
+        self.assertEqual("FAIL", report["overall"])
+        self.assertIn("RequiredBonesMissing", report["issues"])
+
+
 if __name__ == "__main__":
     unittest.main()
