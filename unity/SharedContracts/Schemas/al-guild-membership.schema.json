@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-guild-membership.schema.json",
+  "title": "Another Life Guild Membership Policy",
+  "description": "Catalog authority for account-scoped Guild membership and role snapshot transitions. Guild is the machine identity; Clan is localization-only presentation copy.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "version",
+    "catalogId",
+    "game",
+    "sourceRevision",
+    "machineIdentity",
+    "playerFacingTerms",
+    "membershipScope",
+    "roles",
+    "transitions",
+    "pendingRequestPolicy",
+    "replayPolicy",
+    "excludedEffectDomains",
+    "authorityBoundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "catalogId": { "const": "al_guild_membership_policy" },
+    "game": { "const": "Another Life" },
+    "sourceRevision": { "$ref": "#/$defs/stableId" },
+    "machineIdentity": { "const": "Guild" },
+    "playerFacingTerms": {
+      "type": "object",
+      "required": ["primary", "presentationAlias", "aliasScope"],
+      "properties": {
+        "primary": { "const": "Guild" },
+        "presentationAlias": { "const": "Clan" },
+        "aliasScope": { "const": "localization_only" }
+      },
+      "additionalProperties": false
+    },
+    "membershipScope": {
+      "type": "object",
+      "required": [
+        "subject",
+        "realmBinding",
+        "sameRealmCharactersShareMembership",
+        "crossGuildUniqueness",
+        "requiredActiveMasterCount",
+        "joinedRole"
+      ],
+      "properties": {
+        "subject": { "const": "account" },
+        "realmBinding": { "const": "immutable_account_realm" },
+        "sameRealmCharactersShareMembership": { "const": true },
+        "crossGuildUniqueness": { "const": "one_active_membership_per_account" },
+        "requiredActiveMasterCount": { "const": 1 },
+        "joinedRole": { "const": "Member" }
+      },
+      "additionalProperties": false
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        { "$ref": "#/$defs/masterRole" },
+        { "$ref": "#/$defs/officerRole" },
+        { "$ref": "#/$defs/memberRole" }
+      ],
+      "items": false
+    },
+    "transitions": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "prefixItems": [
+        { "const": "create" },
+        { "const": "join" },
+        { "const": "invite" },
+        { "const": "accept" },
+        { "const": "decline" },
+        { "const": "leave" },
+        { "const": "kick" },
+        { "const": "promote" },
+        { "const": "demote" },
+        { "const": "master_transfer" },
+        { "const": "disband" }
+      ],
+      "items": false
+    },
+    "pendingRequestPolicy": {
+      "type": "object",
+      "required": [
+        "joinApplicationResolution",
+        "invitationResolution",
+        "membershipChangeFence",
+        "terminalResolution"
+      ],
+      "properties": {
+        "joinApplicationResolution": { "const": "master_or_officer" },
+        "invitationResolution": { "const": "invited_account_or_manager_cancel" },
+        "membershipChangeFence": { "const": "accept_exact_guild_revision" },
+        "terminalResolution": { "const": "accept_xor_decline" }
+      },
+      "additionalProperties": false
+    },
+    "replayPolicy": {
+      "type": "object",
+      "required": [
+        "operationIdentity",
+        "sameFingerprint",
+        "differentFingerprint",
+        "unknownOutcome"
+      ],
+      "properties": {
+        "operationIdentity": { "const": "operation_id" },
+        "sameFingerprint": { "const": "already_committed" },
+        "differentFingerprint": { "const": "conflict" },
+        "unknownOutcome": { "const": "fail_closed_until_reconciled" }
+      },
+      "additionalProperties": false
+    },
+    "excludedEffectDomains": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        { "const": "combat" },
+        { "const": "economy" },
+        { "const": "perk" },
+        { "const": "city" },
+        { "const": "raid" }
+      ],
+      "items": false
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "required": ["plannerScope", "excludedImplementations"],
+      "properties": {
+        "plannerScope": { "const": "engine_free_snapshot_only" },
+        "excludedImplementations": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "prefixItems": [
+            { "const": "persistence" },
+            { "const": "network" },
+            { "const": "save" },
+            { "const": "combat" },
+            { "const": "economy" },
+            { "const": "perk" },
+            { "const": "city" },
+            { "const": "raid" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 128
+    },
+    "roleBase": {
+      "type": "object",
+      "required": [
+        "role",
+        "canManageInvitations",
+        "canManageMembers",
+        "canPromote",
+        "canDemote",
+        "canTransferMaster",
+        "canDisband",
+        "canFormAlliancesOrDeclareWar",
+        "canOpenRaidCalls"
+      ],
+      "properties": {
+        "role": { "enum": ["Master", "Officer", "Member"] },
+        "canManageInvitations": { "type": "boolean" },
+        "canManageMembers": { "type": "boolean" },
+        "canPromote": { "type": "boolean" },
+        "canDemote": { "type": "boolean" },
+        "canTransferMaster": { "type": "boolean" },
+        "canDisband": { "type": "boolean" },
+        "canFormAlliancesOrDeclareWar": { "type": "boolean" },
+        "canOpenRaidCalls": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "masterRole": {
+      "allOf": [
+        { "$ref": "#/$defs/roleBase" },
+        {
+          "properties": {
+            "role": { "const": "Master" },
+            "canManageInvitations": { "const": true },
+            "canManageMembers": { "const": true },
+            "canPromote": { "const": true },
+            "canDemote": { "const": true },
+            "canTransferMaster": { "const": true },
+            "canDisband": { "const": true },
+            "canFormAlliancesOrDeclareWar": { "const": true },
+            "canOpenRaidCalls": { "const": true }
+          }
+        }
+      ]
+    },
+    "officerRole": {
+      "allOf": [
+        { "$ref": "#/$defs/roleBase" },
+        {
+          "properties": {
+            "role": { "const": "Officer" },
+            "canManageInvitations": { "const": true },
+            "canManageMembers": { "const": true },
+            "canPromote": { "const": false },
+            "canDemote": { "const": false },
+            "canTransferMaster": { "const": false },
+            "canDisband": { "const": false },
+            "canFormAlliancesOrDeclareWar": { "const": false },
+            "canOpenRaidCalls": { "const": true }
+          }
+        }
+      ]
+    },
+    "memberRole": {
+      "allOf": [
+        { "$ref": "#/$defs/roleBase" },
+        {
+          "properties": {
+            "role": { "const": "Member" },
+            "canManageInvitations": { "const": false },
+            "canManageMembers": { "const": false },
+            "canPromote": { "const": false },
+            "canDemote": { "const": false },
+            "canTransferMaster": { "const": false },
+            "canDisband": { "const": false },
+            "canFormAlliancesOrDeclareWar": { "const": false },
+            "canOpenRaidCalls": { "const": false }
+          }
+        }
+      ]
+    }
+  }
+}
