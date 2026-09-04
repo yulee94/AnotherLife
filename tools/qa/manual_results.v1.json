@@ -16,21 +16,57 @@
     "worldCatalogSha256": "32d310ef5710674a1173b3d540836bbd933216accc8c0b74e735caba1afecda8",
     "narrativeCatalogSha256": "254e60de33a3d0e5ce9b686e2ed6f35d605d056bbd714bfbc92ff3a5809a064b",
     "saveFormatId": "anotherlife.local-save",
-    "saveSchemaVersion": 1,
-    "saveFixtureManifestSha256": "d8dc9250eb1b8599abcd205e0f2515a8bd75ea9fceaa7c66bb6d1f0cce78a939"
+    "saveSchemaVersion": 2,
+    "saveFixtureManifestSha256": "3e23c62b27ec70423959a2deb6d254c22eb867d94d6aac292b90b9c91c04708b"
   },
   "results": [
-    {"id": "unit", "expectedStatus": "passed"},
-    {"id": "integration", "expectedStatus": "passed"},
-    {"id": "play-mode", "expectedStatus": "passed"},
-    {"id": "build-smoke", "expectedStatus": "passed"},
-    {"id": "scene-manifest", "expectedStatus": "passed"},
-    {"id": "content-manifest", "expectedStatus": "passed"},
-    {"id": "save-round-trip", "expectedStatus": "passed"},
-    {"id": "save-migration", "expectedStatus": "passed"},
-    {"id": "save-downgrade-rejection", "expectedStatus": "passed"},
-    {"id": "save-corruption-recovery", "expectedStatus": "passed"},
-    {"id": "save-crash-recovery", "expectedStatus": "passed"},
-    {"id": "packaged-narrative", "expectedStatus": "passed"}
+    {
+      "id": "unit",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "integration",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "play-mode",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "build-smoke",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "scene-manifest",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "content-manifest",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "save-round-trip",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "save-migration",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "save-downgrade-rejection",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "save-corruption-recovery",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "save-crash-recovery",
+      "expectedStatus": "passed"
+    },
+    {
+      "id": "packaged-narrative",
+      "expectedStatus": "passed"
+    }
   ]
 }
