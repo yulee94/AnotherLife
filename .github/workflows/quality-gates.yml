@@ -49,6 +49,32 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Six-family production authority gate
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/six-family-production-authority.txt"
+          try {
+            & python tools/game-data/test_validate_six_family_production_authority.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Six-family production authority tests exited with code $LASTEXITCODE."
+            }
+            & python tools/game-data/validate_six_family_production_authority.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Six-family production authority audit exited with code $LASTEXITCODE."
+            }
+            & python tools/game-data/validate_six_family_production_authority.py --require-production-eligible *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 2) {
+              throw "Blocked v1 authority gate must exit 2, received $LASTEXITCODE."
+            }
+            $global:LASTEXITCODE = 0
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Android Unity package verifier tests
         shell: pwsh
         timeout-minutes: 5
@@ -143,6 +169,7 @@ jobs:
           name: quality-gate-evidence-${{ github.run_attempt }}
           path: |
             artifacts/repository-hygiene.txt
+            artifacts/six-family-production-authority.txt
             artifacts/android-unity-package-tests.txt
             artifacts/reproducible-build-contract.txt
             artifacts/deterministic-qa-contract.txt
