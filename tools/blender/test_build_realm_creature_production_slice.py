@@ -73,6 +73,22 @@ class RealmCreatureProductionSliceBuilderTests(unittest.TestCase):
             BUILDER.triangle_vertex_order_preserved((1, 2, 3), (1, 3, 2))
         )
 
+    def test_six_limb_delver_profile_weights_wedge_skull(self) -> None:
+        from mathutils import Vector
+
+        names = BUILDER.candidate_bones(
+            Vector((-2.8, 0.0, 0.6)),
+            Vector((7.2, 2.4, 1.8)),
+            "rmc_skeleton_oreblind_six_limb_delver_v001",
+        )
+        self.assertIn("wedge_skull", names)
+        limb_names = BUILDER.candidate_bones(
+            Vector((0.0, 0.5, 0.2)),
+            Vector((7.2, 2.4, 1.8)),
+            "rmc_skeleton_oreblind_six_limb_delver_v001",
+        )
+        self.assertTrue(any(name.startswith("middle_") for name in limb_names))
+
 
 if __name__ == "__main__":
     unittest.main(argv=[__file__])

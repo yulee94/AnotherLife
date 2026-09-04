@@ -304,6 +304,58 @@ def build_six_limb_armature(plan: dict[str, Any], dimensions: Vector) -> bpy.typ
     return armature
 
 
+def build_six_limb_delver_armature(plan: dict[str, Any], dimensions: Vector) -> bpy.types.Object:
+    length, width, height = dimensions
+    armature_data = bpy.data.armatures.new("ARM_" + plan["rig"]["armatureObject"].removeprefix("RIG_"))
+    armature = bpy.data.objects.new(plan["rig"]["armatureObject"], armature_data)
+    bpy.context.scene.collection.objects.link(armature)
+    select_only([armature], armature)
+    bpy.ops.object.mode_set(mode="EDIT")
+    body_z = height * 0.42
+    add_edit_bone(armature, "root", (0, 0, 0), (0, 0, max(0.16, height * 0.06)), None, False)
+    add_edit_bone(armature, "motion_root", (0, 0, 0), (0, 0, max(0.2, height * 0.08)), "root", False)
+    add_edit_bone(armature, "body_root", (0, 0, body_z), (-length * 0.05, 0, body_z), "motion_root", True)
+    add_edit_bone(armature, "spine_front", (0, 0, body_z), (-length * 0.24, 0, body_z * 1.02), "body_root", True)
+    add_edit_bone(armature, "neck_01", (-length * 0.24, 0, body_z * 1.02), (-length * 0.34, 0, body_z * 0.88), "spine_front", True)
+    add_edit_bone(armature, "head", (-length * 0.34, 0, body_z * 0.88), (-length * 0.44, 0, body_z * 0.7), "neck_01", True)
+    add_edit_bone(armature, "wedge_skull", (-length * 0.44, 0, body_z * 0.7), (-length * 0.52, 0, body_z * 0.5), "head", True)
+    add_edit_bone(armature, "spine_rear", (0, 0, body_z), (length * 0.28, 0, body_z * 0.96), "body_root", True)
+    add_edit_bone(armature, "tail_01", (length * 0.28, 0, body_z * 0.96), (length * 0.4, 0, body_z * 0.62), "spine_rear", True)
+    for name, x in (("sensory_plate_front", -length * 0.3), ("sensory_plate_mid", -length * 0.08), ("sensory_plate_rear", length * 0.14)):
+        parent = "spine_front" if x < 0 else ("spine_rear" if x > 0 else "body_root")
+        add_edit_bone(armature, name, (x, 0, height * 0.52), (x, 0, height * 0.78), parent, True)
+
+    x_positions = {"front": -length * 0.22, "middle": 0.0, "rear": length * 0.22}
+    for pair, x in x_positions.items():
+        parent = "spine_front" if pair == "front" else ("spine_rear" if pair == "rear" else "body_root")
+        for side, sign in (("l", 1.0), ("r", -1.0)):
+            y = sign * width * 0.28
+            upper = f"{pair}_upper_{side}"
+            lower = f"{pair}_lower_{side}"
+            foot = f"{pair}_foot_{side}"
+            add_edit_bone(armature, upper, (x, y * 0.68, body_z), (x, y, height * 0.24), parent, True)
+            add_edit_bone(armature, lower, (x, y, height * 0.24), (x - length * 0.02, y * 1.05, height * 0.08), upper, True)
+            add_edit_bone(armature, foot, (x - length * 0.02, y * 1.05, height * 0.08), (x - length * 0.06, y * 1.05, 0.004), lower, True)
+            socket_prefix = "forefoot" if pair == "front" else f"{pair}_foot"
+            add_edit_bone(
+                armature,
+                f"socket_{socket_prefix}_contact_{side}",
+                (x - length * 0.06, y * 1.05, 0.004),
+                (x - length * 0.06, y * 1.05, max(0.045, height * 0.02)),
+                foot,
+                False,
+            )
+    add_edit_bone(armature, "socket_attack_origin", (-length * 0.52, 0, body_z * 0.5), (-length * 0.56, 0, body_z * 0.5), "wedge_skull", False)
+    add_edit_bone(armature, "socket_camera_focus", (-length * 0.08, 0, height * 0.68), (-length * 0.08, 0, height * 0.78), "body_root", False)
+    add_edit_bone(armature, "socket_vfx_gallery_dust", (-length * 0.1, 0, height * 0.12), (-length * 0.1, 0, height * 0.2), "body_root", False)
+    add_edit_bone(armature, "socket_vfx_plate_stress", (-length * 0.08, 0, height * 0.78), (-length * 0.08, 0, height * 0.9), "sensory_plate_mid", False)
+    add_edit_bone(armature, "socket_vfx_jaw_sensor", (-length * 0.5, 0, body_z * 0.58), (-length * 0.5, 0, body_z * 0.68), "wedge_skull", False)
+    add_edit_bone(armature, "socket_vfx_claw_spark", (-length * 0.22, width * 0.28, 0.01), (-length * 0.22, width * 0.28, max(0.05, height * 0.04)), "front_foot_l", False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    armature.show_in_front = True
+    return armature
+
+
 def build_quadruped_heat_fin_armature(plan: dict[str, Any], dimensions: Vector) -> bpy.types.Object:
     length, width, height = dimensions
     armature_data = bpy.data.armatures.new("ARM_" + plan["rig"]["armatureObject"].removeprefix("RIG_"))
@@ -368,6 +420,8 @@ def build_armature(plan: dict[str, Any], dimensions: Vector) -> bpy.types.Object
     profile = str(plan["rig"]["skeletonProfileId"])
     if "quadruped_heat_fin" in profile:
         return build_quadruped_heat_fin_armature(plan, dimensions)
+    if "six_limb_delver" in profile:
+        return build_six_limb_delver_armature(plan, dimensions)
     return build_six_limb_armature(plan, dimensions)
 
 
@@ -396,6 +450,27 @@ def candidate_bones(point: Vector, dimensions: Vector, profile: str = "") -> lis
         if point.z > height * 0.5:
             index = min(6, max(1, int((point.x / max(length, 1e-6) + 0.5) * 6) + 1))
             return [f"heat_fin_{index:02d}", "spine_front" if point.x < 0 else "spine_rear", "body_root"]
+        return ["body_root", "spine_front" if point.x < 0 else "spine_rear"]
+    if "six_limb_delver" in profile:
+        if point.z < height * 0.5 and abs(point.y) > width * 0.08:
+            pair = min(
+                (("front", -length * 0.22), ("middle", 0.0), ("rear", length * 0.22)),
+                key=lambda row: abs(point.x - row[1]),
+            )[0]
+            side = "l" if point.y >= 0 else "r"
+            return [f"{pair}_upper_{side}", f"{pair}_lower_{side}", f"{pair}_foot_{side}", "body_root"]
+        if point.x < -length * 0.36:
+            return ["wedge_skull", "head", "neck_01", "spine_front"]
+        if point.x < -length * 0.16:
+            return ["head", "neck_01", "spine_front", "body_root"]
+        if point.x > length * 0.32:
+            return ["tail_01", "spine_rear", "body_root"]
+        if point.z > height * 0.5:
+            if point.x < -length * 0.16:
+                return ["sensory_plate_front", "spine_front", "body_root"]
+            if point.x > length * 0.08:
+                return ["sensory_plate_rear", "spine_rear", "body_root"]
+            return ["sensory_plate_mid", "body_root", "spine_front", "spine_rear"]
         return ["body_root", "spine_front" if point.x < 0 else "spine_rear"]
     if point.z < height * 0.58 and abs(point.y) > width * 0.08:
         pair = min(
@@ -555,6 +630,9 @@ def apply_motion_pose(armature: bpy.types.Object, key: str, normalized: float) -
         try_rotate(armature, "jaw", y=0.02 * cycle)
         for index in range(1, 7):
             try_rotate(armature, f"heat_fin_{index:02d}", x=0.03 * cycle)
+        try_rotate(armature, "sensory_plate_front", x=0.025 * cycle)
+        try_rotate(armature, "sensory_plate_mid", x=0.02 * cycle)
+        try_rotate(armature, "sensory_plate_rear", x=0.015 * cycle)
     elif key in {"locomotion.walk", "locomotion.run"}:
         amplitude = 0.16 if key.endswith("walk") else 0.25
         for index, pair in enumerate(limb_pairs):
@@ -573,6 +651,7 @@ def apply_motion_pose(armature: bpy.types.Object, key: str, normalized: float) -
         try_rotate(armature, "neck_01", y=0.18 * envelope)
         try_rotate(armature, "head", y=0.24 * envelope)
         try_rotate(armature, "horn_plow", y=0.18 * envelope)
+        try_rotate(armature, "wedge_skull", y=0.2 * envelope)
         try_rotate(armature, "jaw", y=0.32 * envelope)
     elif key == "attack.special":
         try_rotate(armature, "body_root", z=0.12 * envelope)
@@ -592,6 +671,8 @@ def apply_motion_pose(armature: bpy.types.Object, key: str, normalized: float) -
             try_rotate(armature, f"{pair}_upper_r", y=-0.055 * envelope)
         for index in range(1, 7):
             try_rotate(armature, f"heat_fin_{index:02d}", x=0.08 * envelope)
+        try_rotate(armature, "wedge_skull", y=-0.1 * envelope)
+        try_rotate(armature, "sensory_plate_front", x=0.06 * envelope)
     elif key == "reaction.hit":
         try_rotate(armature, "body_root", z=-0.10 * envelope)
         try_rotate(armature, "head", z=0.12 * envelope)
