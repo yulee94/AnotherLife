@@ -371,6 +371,7 @@ namespace AL.Guilds
         public const string CommandSourceUntrustedCode = "AL-RAID-COMMAND-SOURCE-UNTRUSTED";
         public const string PlannerUnavailableCode = "AL-RAID-PLANNER-UNAVAILABLE";
         public const string InstanceLoaderUnavailableCode = "AL-RAID-INSTANCE-LOADER-UNAVAILABLE";
+        public const string TransferReplayStaleCode = "AL-RAID-TRANSFER-REPLAY-STALE";
         public const string SaveUnavailableCode = "AL-RAID-SAVE-UNAVAILABLE";
         public const string SaveCommitFailedCode = "AL-RAID-SAVE-COMMIT-FAILED";
         public const string SaveVersionUnsupportedCode = GuildRaidMusterSaveCodec.UnsupportedVersionCode;
@@ -441,6 +442,17 @@ namespace AL.Guilds
                  envelope.Command.Operation == RaidOperation.TransferOut))
             {
                 RaidInstanceCommandEnvelope replayCommand = BuildTransferCommand(envelope.Command, raids);
+                if (!IsTransferReplayCurrent(envelope.Command, raids))
+                {
+                    return Result(
+                        GuildPlanningStatus.Conflict,
+                        current,
+                        planning,
+                        replayCommand,
+                        TransferReplayStaleCode,
+                        false);
+                }
+
                 if (!deferTransferLoad && loader == null)
                 {
                     return Result(
@@ -828,6 +840,23 @@ namespace AL.Guilds
                 direction,
                 envelopeId,
                 call.ClosedDungeonTopologyId);
+        }
+
+        private static bool IsTransferReplayCurrent(
+            GuildRaidMusterTransitionRequest request,
+            RaidAuthoritySnapshot raids)
+        {
+            RaidCallSnapshot call = raids?.Calls?.FirstOrDefault(value =>
+                value != null &&
+                string.Equals(value.CallId, request.CallId, StringComparison.Ordinal) &&
+                string.Equals(value.GuildId, request.GuildId, StringComparison.Ordinal));
+            RaidParticipantSnapshot participant = call?.Participants?.FirstOrDefault(value =>
+                value != null &&
+                string.Equals(value.AccountId, request.TargetAccountId, StringComparison.Ordinal));
+            RaidTransferState expected = request.Operation == RaidOperation.TransferIn
+                ? RaidTransferState.InInstance
+                : RaidTransferState.Returned;
+            return participant?.Transfer == expected;
         }
 
         private static GuildRaidMusterUiAction Action(

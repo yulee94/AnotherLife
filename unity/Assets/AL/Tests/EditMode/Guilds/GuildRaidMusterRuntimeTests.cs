@@ -273,6 +273,55 @@ namespace AL.Tests.EditMode.Guilds
         }
 
         [Test]
+        public void StaleTransferInReplayCannotReloadAfterParticipantReturned()
+        {
+            GuildRaidMusterRuntime runtime = Runtime();
+            var save = new RecordingSaveGameService(SaveOperationStatus.SavedPrimary);
+            save.CurrentSave.GuildRaidMuster = BuildCountdown(runtime);
+            GuildRaidNetworkCommandEnvelope transferIn = Envelope(
+                TransferIn(
+                    "operation_transfer_in_then_return",
+                    save.CurrentSave.GuildRaidMuster.Revision,
+                    ClockStart + 90));
+            Assert.That(runtime.ApplyToSaveService(
+                transferIn,
+                Membership(),
+                EmptyAlliance(),
+                save,
+                new RecordingLoader(true)).Status,
+                Is.EqualTo(GuildPlanningStatus.Prepared));
+
+            GuildRaidMusterTransitionRequest transferOut = Request(
+                RaidOperation.TransferOut,
+                "operation_return_before_stale_replay",
+                AccountMemberA,
+                save.CurrentSave.GuildRaidMuster.Revision,
+                ClockStart + 90,
+                AccountMemberA,
+                EnvelopeIn,
+                EnvelopeReturn);
+            Assert.That(runtime.ApplyToSaveService(
+                Envelope(transferOut),
+                Membership(),
+                EmptyAlliance(),
+                save,
+                new RecordingLoader(true)).Status,
+                Is.EqualTo(GuildPlanningStatus.Prepared));
+
+            var staleLoader = new RecordingLoader(true);
+            GuildRaidMusterRuntimeResult stale = runtime.ApplyToSaveService(
+                transferIn,
+                Membership(),
+                EmptyAlliance(),
+                save,
+                staleLoader);
+
+            Assert.That(stale.Status, Is.EqualTo(GuildPlanningStatus.Conflict));
+            Assert.That(stale.DiagnosticCode, Is.EqualTo("AL-RAID-TRANSFER-REPLAY-STALE"));
+            Assert.That(staleLoader.LastCommand, Is.Null);
+        }
+
+        [Test]
         public void InstanceEnvelopeLoaderResolvesOpaqueDestinationBeforeLoading()
         {
             var resolver = new RecordingDestinationResolver();
