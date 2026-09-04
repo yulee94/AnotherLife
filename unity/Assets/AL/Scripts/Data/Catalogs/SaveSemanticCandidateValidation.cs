@@ -813,6 +813,7 @@ namespace AL.Data.Catalogs
                     "WorldState",
                     "NotificationHistory",
                     "GuildCitySeason",
+                    "GuildRaidMuster",
                     "WarzoneCredits",
                     "LastSavedTimestamp",
                     "TerritoryCaptureLedger",
