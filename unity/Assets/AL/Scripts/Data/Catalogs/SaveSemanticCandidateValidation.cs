@@ -988,7 +988,35 @@ namespace AL.Data.Catalogs
                 "ConsequenceIntentIds",
                 "AcquiredArtifactIds",
                 "AppliedEffectKeys",
+                "AppliedOperationIds",
+                "ApplicationReceipts",
                 "UnlockedChapterId");
+
+        private static readonly HashSet<string> Nvs01ApplicationReceiptFields =
+            Fields(
+                "ContractVersion",
+                "Kind",
+                "OperationId",
+                "ProfileId",
+                "ExpectedGenerationFingerprint",
+                "CausalOperationId",
+                "CausalPayloadFingerprint",
+                "PredecessorReceiptFingerprint",
+                "PredecessorExpectedGenerationFingerprint",
+                "RealmId",
+                "CorrelationId",
+                "ExpectedQuestRevision",
+                "CandidateQuestRevision",
+                "EffectKeys",
+                "TargetChapterId",
+                "TechnicalCurrencyId",
+                "PreviousGoldBalance",
+                "ResultingGoldBalance",
+                "PreviousValeriusAffinity",
+                "ResultingValeriusAffinity",
+                "PreviousChapterId",
+                "ResultingChapterId",
+                "PlanFingerprint");
 
         private static readonly HashSet<string> Nvs01ObjectiveFields =
             Fields("ObjectiveId", "Status");
@@ -4784,6 +4812,22 @@ namespace AL.Data.Catalogs
                 16,
                 collector,
                 state);
+            StrictJsonValue ignoredLedger;
+            if (progress.TryGet("AppliedOperationIds", out ignoredLedger))
+            {
+                ValidateNvs01StringArray(
+                    progress,
+                    "AppliedOperationIds",
+                    2,
+                    collector,
+                    state);
+            }
+
+            if (progress.TryGet("ApplicationReceipts", out ignoredLedger))
+            {
+                ValidateNvs01ApplicationReceipts(progress, collector, state);
+            }
+
             ValidateNvs01Encounter(progress, collector, state);
             ValidateNvs01Operation(progress, schemaVersion, collector, state);
 
@@ -5799,6 +5843,25 @@ namespace AL.Data.Catalogs
                 }
             }
 
+            foreach (string field in new[]
+                     {
+                         "AppliedOperationIds",
+                         "ApplicationReceipts"
+                     })
+            {
+                StrictJsonValue optional;
+                if (!progress.TryGet(field, out optional))
+                {
+                    continue;
+                }
+
+                var optionalRows = optional as StrictJsonArray;
+                if (optionalRows == null || optionalRows.Items.Count != 0)
+                {
+                    return false;
+                }
+            }
+
             StrictJsonValue encounterValue;
             var encounter = progress.TryGet("CurrentEncounter", out encounterValue)
                 ? encounterValue as StrictJsonObject
@@ -5979,6 +6042,84 @@ namespace AL.Data.Catalogs
                         collector,
                         "SAVE_NVS01_OBJECTIVE_STATUS_INVALID",
                         rowPath + ".Status",
+                        SaveSemanticDomain.Narrative);
+                }
+            }
+        }
+
+        private static void ValidateNvs01ApplicationReceipts(
+            StrictJsonObject progress,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.Nvs01Progress.ApplicationReceipts";
+            StrictJsonValue value;
+            var rows = progress.TryGet("ApplicationReceipts", out value)
+                ? value as StrictJsonArray
+                : null;
+            if (rows == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_APPLICATION_RECEIPTS_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            if (rows.Items.Count > 2)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_APPLICATION_RECEIPT_LIMIT",
+                    path,
+                    SaveSemanticDomain.Narrative);
+            }
+
+            var count = Math.Min(rows.Items.Count, 2);
+            for (var index = 0; index < count; index++)
+            {
+                string rowPath = path + "[" +
+                                 index.ToString(CultureInfo.InvariantCulture) + "]";
+                var row = rows.Items[index] as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_APPLICATION_RECEIPT_INVALID",
+                        rowPath,
+                        SaveSemanticDomain.Narrative);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    Nvs01ApplicationReceiptFields,
+                    rowPath,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state);
+                string currency;
+                if (TryReadRequiredString(
+                        row,
+                        "TechnicalCurrencyId",
+                        rowPath,
+                        SaveSemanticDomain.Narrative,
+                        allowBlank: true,
+                        collector,
+                        state,
+                        out currency) &&
+                    currency.Length != 0 &&
+                    !string.Equals(currency, "oathmark", StringComparison.Ordinal))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_APPLICATION_RECEIPT_CURRENCY_INVALID",
+                        rowPath + ".TechnicalCurrencyId",
                         SaveSemanticDomain.Narrative);
                 }
             }
