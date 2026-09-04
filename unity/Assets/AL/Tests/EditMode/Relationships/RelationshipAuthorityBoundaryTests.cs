@@ -74,8 +74,11 @@ namespace AL.Tests.EditMode.Relationships
             Assert.IsFalse(bootloader.Contains("IRelationshipIdentityResolver"));
             Assert.IsFalse(bootloader.Contains("RelationshipMutationPlanner"));
             Assert.IsFalse(bootloader.Contains("InjectedRelationshipIdentityResolver"));
+            Assert.IsFalse(bootloader.Contains("RelationshipDurableService"));
+            Assert.IsFalse(bootloader.Contains("RelationshipLegacyCompatibilityAdapter"));
             Assert.IsFalse(gameData.Contains("IRelationshipIdentityResolver"));
             Assert.IsFalse(gameData.Contains("RelationshipMutationPlanner"));
+            Assert.IsFalse(gameData.Contains("RelationshipDurableService"));
         }
 
         [Test]

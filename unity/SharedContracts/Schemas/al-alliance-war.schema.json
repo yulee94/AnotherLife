@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-alliance-war.schema.json",
+  "title": "Another Life Alliance and War Policy",
+  "description": "Catalog authority for same-realm Alliance proposal, membership, derived leadership, and war snapshots. Consumes the Guild membership snapshot contract; does not duplicate Guild identity or roles.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "version",
+    "catalogId",
+    "game",
+    "sourceRevision",
+    "machineIdentity",
+    "consumedContracts",
+    "scope",
+    "relationStates",
+    "warStates",
+    "durations",
+    "hostility",
+    "transitions",
+    "pendingRequestPolicy",
+    "replayPolicy",
+    "authorityBoundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "catalogId": { "const": "al_alliance_war_policy" },
+    "game": { "const": "Another Life" },
+    "sourceRevision": { "$ref": "#/$defs/stableId" },
+    "machineIdentity": { "const": "Alliance" },
+    "consumedContracts": {
+      "type": "object",
+      "required": ["guildCatalogId", "guildIdentity", "guildRoles"],
+      "properties": {
+        "guildCatalogId": { "const": "al_guild_membership_policy" },
+        "guildIdentity": { "const": "external_guild_snapshot" },
+        "guildRoles": { "const": "external_guild_roles" }
+      },
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "realmBinding",
+        "memberSubject",
+        "proposalAuthority",
+        "acceptanceAuthority",
+        "leadership",
+        "warDeclarationAuthority",
+        "officersCanFormAlliancesOrDeclareWar",
+        "crossRealmWar"
+      ],
+      "properties": {
+        "realmBinding": { "const": "same_realm_only" },
+        "memberSubject": { "const": "guild" },
+        "proposalAuthority": { "const": "guild_master_only" },
+        "acceptanceAuthority": { "const": "invited_guild_master_only" },
+        "leadership": { "const": "derived_from_member_master" },
+        "warDeclarationAuthority": { "const": "derived_alliance_leader_only" },
+        "officersCanFormAlliancesOrDeclareWar": { "const": false },
+        "crossRealmWar": { "const": "rejected" }
+      },
+      "additionalProperties": false
+    },
+    "relationStates": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        { "const": "ABSENT" },
+        { "const": "PROPOSED" },
+        { "const": "ACTIVE" },
+        { "const": "COOLDOWN" },
+        { "const": "SUSPENDED" }
+      ],
+      "items": false
+    },
+    "warStates": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        { "const": "NONE" },
+        { "const": "DECLARED" },
+        { "const": "ACTIVE" },
+        { "const": "RECONCILIATION_PENDING" },
+        { "const": "COOLING" }
+      ],
+      "items": false
+    },
+    "durations": {
+      "type": "object",
+      "required": ["warNoticeHours", "warActiveHours"],
+      "properties": {
+        "warNoticeHours": { "const": 24 },
+        "warActiveHours": { "const": 168 }
+      },
+      "additionalProperties": false
+    },
+    "hostility": {
+      "type": "object",
+      "required": ["forceHostilityWarState", "neverOverride"],
+      "properties": {
+        "forceHostilityWarState": { "const": "ACTIVE" },
+        "neverOverride": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "prefixItems": [
+            { "const": "same_guild" },
+            { "const": "same_alliance" },
+            { "const": "city" },
+            { "const": "beginner" },
+            { "const": "accordant" },
+            { "const": "forced_safe" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "transitions": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "prefixItems": [
+        { "const": "propose" },
+        { "const": "accept" },
+        { "const": "decline" },
+        { "const": "leave" },
+        { "const": "disband" },
+        { "const": "declare_war" },
+        { "const": "propose_war_end" },
+        { "const": "accept_war_end" },
+        { "const": "decline_war_end" }
+      ],
+      "items": false
+    },
+    "pendingRequestPolicy": {
+      "type": "object",
+      "required": [
+        "proposalResolution",
+        "warEndResolution",
+        "membershipChangeFence",
+        "terminalResolution"
+      ],
+      "properties": {
+        "proposalResolution": { "const": "invited_guild_master_or_proposer_cancel" },
+        "warEndResolution": { "const": "opposing_derived_leader" },
+        "membershipChangeFence": { "const": "accept_exact_alliance_and_guild_revisions" },
+        "terminalResolution": { "const": "accept_xor_decline" }
+      },
+      "additionalProperties": false
+    },
+    "replayPolicy": {
+      "type": "object",
+      "required": [
+        "operationIdentity",
+        "sameFingerprint",
+        "differentFingerprint",
+        "unknownOutcome"
+      ],
+      "properties": {
+        "operationIdentity": { "const": "operation_id" },
+        "sameFingerprint": { "const": "already_committed" },
+        "differentFingerprint": { "const": "conflict" },
+        "unknownOutcome": { "const": "fail_closed_until_reconciled" }
+      },
+      "additionalProperties": false
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "required": ["plannerScope", "excludedImplementations"],
+      "properties": {
+        "plannerScope": { "const": "engine_free_snapshot_only" },
+        "excludedImplementations": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "prefixItems": [
+            { "const": "persistence" },
+            { "const": "network" },
+            { "const": "save" },
+            { "const": "combat" },
+            { "const": "ui" },
+            { "const": "economy" },
+            { "const": "city" },
+            { "const": "raid" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 128
+    }
+  }
+}
