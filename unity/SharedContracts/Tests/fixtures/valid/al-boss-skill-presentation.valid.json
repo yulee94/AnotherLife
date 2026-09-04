@@ -30,9 +30,16 @@
       "realmId": "stonehold",
       "sourceProfileId": "tdf_boss_stonehold_fault_crowned_colossus",
       "modelId": "boss_stonehold_fault_crowned_colossus",
+      "assetState": "source_qualified",
       "qualificationId": "rcpq_boss_stonehold_fault_crowned_colossus_v001",
       "sourceVersion": "al-rcreature-2026-09-03-v002",
       "sourceSha256": "c06b9fc23316f6d40ff747e1bdf12b4a055633530d6dd036909a3bc2f83d70f6",
+      "source2dPath": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_stonehold_fault_crowned_colossus_concept_sheet_v001.png",
+      "source2dSha256": "c949d4c95e00ca665f3b4e3e56cbc949810113ac4c2c936ff815af23e3519b50",
+      "sourceRequirements": [
+        "Preserve three distinct limb-pair attachment zones.",
+        "Redesign the nasal growth bed and skull so the identity does not collapse into an enlarged rhinoceros."
+      ],
       "prefabRef": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/fault_crowned_colossus_rig_lod_motion_v001.fbx",
       "rigId": "RIG_fault_crowned_colossus",
       "materialId": "mat_fault_crowned_colossus_pbr_v001",

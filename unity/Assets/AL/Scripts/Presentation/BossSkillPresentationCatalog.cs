@@ -85,6 +85,9 @@ namespace AL.Presentation
         public string qualificationId;
         public string sourceVersion;
         public string sourceSha256;
+        public string source2dPath;
+        public string source2dSha256;
+        public string assetState;
         public string prefabRef;
         public string rigId;
         public string materialId;
@@ -145,6 +148,7 @@ namespace AL.Presentation
     public sealed class ResolvedPresentation
     {
         public ResolvedPresentation(
+            string modelId,
             string quality,
             string distance,
             FrozenGameplaySnapshot gameplay,
@@ -152,6 +156,7 @@ namespace AL.Presentation
             float cosmeticScale,
             int maxActive)
         {
+            ModelId = modelId;
             Quality = quality;
             Distance = distance;
             Gameplay = gameplay;
@@ -161,6 +166,7 @@ namespace AL.Presentation
             ProtectedCuesPreserved = true;
         }
 
+        public string ModelId { get; }
         public string Quality { get; }
         public string Distance { get; }
         public FrozenGameplaySnapshot Gameplay { get; }
@@ -227,13 +233,19 @@ namespace AL.Presentation
     public sealed class BossSkillPresentationSnapshot
     {
         internal BossSkillPresentationSnapshot(
+            BossPresentationProfile[] bosses,
+            SkillPresentationProfile[] skills,
             BossPresentationProfile boss,
             SkillPresentationProfile skill)
         {
+            Bosses = bosses;
+            Skills = skills;
             Boss = boss;
             Skill = skill;
         }
 
+        public BossPresentationProfile[] Bosses { get; }
+        public SkillPresentationProfile[] Skills { get; }
         public BossPresentationProfile Boss { get; }
         public SkillPresentationProfile Skill { get; }
     }
@@ -326,21 +338,55 @@ namespace AL.Presentation
                 file.authority.gameplayAuthority ||
                 file.authority.runtimeSpawn ||
                 file.bossProfiles == null ||
-                file.bossProfiles.Length != 1 ||
+                file.bossProfiles.Length == 0 ||
                 file.skillProfiles == null ||
-                file.skillProfiles.Length != 1)
+                file.skillProfiles.Length == 0 ||
+                !HasUniqueProfileIds(file.bossProfiles) ||
+                !HasUniqueProfileIds(file.skillProfiles))
             {
                 return false;
             }
 
-            BossPresentationProfile boss = file.bossProfiles[0];
-            SkillPresentationProfile skill = file.skillProfiles[0];
-            if (!IsValidBoss(boss) || !IsValidSkill(skill))
+            BossPresentationProfile boss = null;
+            for (int index = 0; index < file.bossProfiles.Length; index++)
+            {
+                BossPresentationProfile candidate = file.bossProfiles[index];
+                if (!IsValidBoss(candidate))
+                {
+                    return false;
+                }
+
+                if (candidate.id == ExpectedBossId)
+                {
+                    boss = candidate;
+                }
+            }
+
+            SkillPresentationProfile skill = null;
+            for (int index = 0; index < file.skillProfiles.Length; index++)
+            {
+                SkillPresentationProfile candidate = file.skillProfiles[index];
+                if (!IsValidSkill(candidate))
+                {
+                    return false;
+                }
+
+                if (candidate.id == ExpectedSkillProfileId)
+                {
+                    skill = candidate;
+                }
+            }
+
+            if (boss == null || skill == null)
             {
                 return false;
             }
 
-            snapshot = new BossSkillPresentationSnapshot(boss, skill);
+            snapshot = new BossSkillPresentationSnapshot(
+                file.bossProfiles,
+                file.skillProfiles,
+                boss,
+                skill);
             return true;
         }
 
@@ -350,28 +396,55 @@ namespace AL.Presentation
             string distance,
             out ResolvedPresentation resolved)
         {
+            return TryResolve(
+                snapshot,
+                ExpectedModelId,
+                ExpectedSkillId,
+                quality,
+                distance,
+                out resolved);
+        }
+
+        public static bool TryResolve(
+            BossSkillPresentationSnapshot snapshot,
+            string modelId,
+            string skillId,
+            string quality,
+            string distance,
+            out ResolvedPresentation resolved)
+        {
             resolved = null;
             if (snapshot == null ||
+                string.IsNullOrWhiteSpace(modelId) ||
+                string.IsNullOrWhiteSpace(skillId) ||
                 string.IsNullOrWhiteSpace(quality) ||
                 string.IsNullOrWhiteSpace(distance))
             {
                 return false;
             }
 
-            PresentationQualityTier qualityTier = FindQuality(snapshot.Boss.qualityTiers, quality);
-            PresentationDistanceContext distanceContext = FindDistance(snapshot.Skill.distanceContexts, distance);
+            BossPresentationProfile boss = FindBoss(snapshot.Bosses, modelId);
+            SkillPresentationProfile skill = FindSkill(snapshot.Skills, skillId);
+            if (boss == null || skill == null || boss.assetState != "source_qualified")
+            {
+                return false;
+            }
+
+            PresentationQualityTier qualityTier = FindQuality(boss.qualityTiers, quality);
+            PresentationDistanceContext distanceContext = FindDistance(skill.distanceContexts, distance);
             if (qualityTier == null || distanceContext == null || !distanceContext.telegraphProtected)
             {
                 return false;
             }
 
             resolved = new ResolvedPresentation(
+                boss.modelId,
                 quality,
                 distance,
-                new FrozenGameplaySnapshot(snapshot.Skill.skillId),
+                new FrozenGameplaySnapshot(skill.skillId),
                 qualityTier.lodId,
                 distanceContext.cosmeticScale,
-                snapshot.Skill.pooling.maxActive);
+                skill.pooling.maxActive);
             return true;
         }
 
@@ -391,10 +464,10 @@ namespace AL.Presentation
         private static bool IsValidBoss(BossPresentationProfile boss)
         {
             return boss != null &&
-                   boss.id == ExpectedBossId &&
-                   boss.modelId == ExpectedModelId &&
-                   boss.sourceProfileId == "tdf_boss_stonehold_fault_crowned_colossus" &&
-                   HasMotion(boss.motionKeys) &&
+                   !string.IsNullOrWhiteSpace(boss.id) &&
+                   !string.IsNullOrWhiteSpace(boss.modelId) &&
+                   !string.IsNullOrWhiteSpace(boss.sourceProfileId) &&
+                   IsValidAssetState(boss) &&
                    HasTiers(boss.qualityTiers) &&
                    HasDistances(boss.distanceContexts) &&
                    IsValidPooling(boss.pooling) &&
@@ -405,8 +478,9 @@ namespace AL.Presentation
         private static bool IsValidSkill(SkillPresentationProfile skill)
         {
             return skill != null &&
-                   skill.id == ExpectedSkillProfileId &&
-                   skill.skillId == ExpectedSkillId &&
+                   !string.IsNullOrWhiteSpace(skill.id) &&
+                   !string.IsNullOrWhiteSpace(skill.skillId) &&
+                   skill.id == "skill_presentation_" + skill.skillId + "_v001" &&
                    skill.presentationIndependentOfPower &&
                    skill.phases != null &&
                    !string.IsNullOrWhiteSpace(skill.phases.anticipation) &&
@@ -425,6 +499,64 @@ namespace AL.Presentation
                    IsValidPooling(skill.pooling) &&
                    skill.accessibility != null &&
                    skill.accessibility.reducedFlash;
+        }
+
+        private static bool IsValidAssetState(BossPresentationProfile boss)
+        {
+            if (boss.assetState == "source_qualified")
+            {
+                return !string.IsNullOrWhiteSpace(boss.qualificationId) &&
+                       !string.IsNullOrWhiteSpace(boss.sourceVersion) &&
+                       !string.IsNullOrWhiteSpace(boss.sourceSha256) &&
+                       !string.IsNullOrWhiteSpace(boss.prefabRef) &&
+                       !string.IsNullOrWhiteSpace(boss.rigId) &&
+                       !string.IsNullOrWhiteSpace(boss.materialId) &&
+                       HasMotion(boss.motionKeys);
+            }
+
+            return boss.assetState == "source_only" &&
+                   boss.qualificationId == "explicit_unavailable" &&
+                   boss.prefabRef == "explicit_unavailable" &&
+                   boss.rigId == "explicit_unavailable" &&
+                   boss.materialId == "explicit_unavailable" &&
+                   boss.motionKeys != null &&
+                   boss.motionKeys.Length == 0;
+        }
+
+        private static bool HasUniqueProfileIds(BossPresentationProfile[] profiles)
+        {
+            var ids = new HashSet<string>(StringComparer.Ordinal);
+            var modelIds = new HashSet<string>(StringComparer.Ordinal);
+            var sourceIds = new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0; index < profiles.Length; index++)
+            {
+                BossPresentationProfile profile = profiles[index];
+                if (profile == null ||
+                    !ids.Add(profile.id) ||
+                    !modelIds.Add(profile.modelId) ||
+                    !sourceIds.Add(profile.sourceProfileId))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool HasUniqueProfileIds(SkillPresentationProfile[] profiles)
+        {
+            var ids = new HashSet<string>(StringComparer.Ordinal);
+            var skillIds = new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0; index < profiles.Length; index++)
+            {
+                SkillPresentationProfile profile = profiles[index];
+                if (profile == null || !ids.Add(profile.id) || !skillIds.Add(profile.skillId))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static bool HasMotion(string[] keys)
@@ -489,6 +621,44 @@ namespace AL.Presentation
                 if (tiers[index] != null && string.Equals(tiers[index].id, id, StringComparison.Ordinal))
                 {
                     return tiers[index];
+                }
+            }
+
+            return null;
+        }
+
+        private static BossPresentationProfile FindBoss(BossPresentationProfile[] profiles, string modelId)
+        {
+            if (profiles == null)
+            {
+                return null;
+            }
+
+            for (int index = 0; index < profiles.Length; index++)
+            {
+                if (profiles[index] != null &&
+                    string.Equals(profiles[index].modelId, modelId, StringComparison.Ordinal))
+                {
+                    return profiles[index];
+                }
+            }
+
+            return null;
+        }
+
+        private static SkillPresentationProfile FindSkill(SkillPresentationProfile[] profiles, string skillId)
+        {
+            if (profiles == null)
+            {
+                return null;
+            }
+
+            for (int index = 0; index < profiles.Length; index++)
+            {
+                if (profiles[index] != null &&
+                    string.Equals(profiles[index].skillId, skillId, StringComparison.Ordinal))
+                {
+                    return profiles[index];
                 }
             }
 

@@ -13,7 +13,42 @@ namespace AL.Tests.EditMode.Presentation
             Assert.True(BossSkillPresentationCatalog.TryParse(ReadPackaged(), out BossSkillPresentationSnapshot snapshot));
             Assert.That(snapshot.Boss.modelId, Is.EqualTo(BossSkillPresentationCatalog.ExpectedModelId));
             Assert.That(snapshot.Skill.skillId, Is.EqualTo(BossSkillPresentationCatalog.ExpectedSkillId));
+            Assert.That(snapshot.Bosses.Length, Is.EqualTo(16));
+            Assert.That(snapshot.Skills.Length, Is.EqualTo(4));
             Assert.False(snapshot.Boss.pooling.maxActive < 1);
+        }
+
+        [Test]
+        public void StableModelAndSkillIdsResolveQualifiedProfilesOnly()
+        {
+            Assert.True(BossSkillPresentationCatalog.TryParse(ReadPackaged(), out BossSkillPresentationSnapshot snapshot));
+
+            Assert.True(BossSkillPresentationCatalog.TryResolve(
+                snapshot,
+                "elite_stonehold_oreblind_delver",
+                "npc_ranged_bolt",
+                "low",
+                "distant",
+                out ResolvedPresentation resolved));
+            Assert.That(resolved.ModelId, Is.EqualTo("elite_stonehold_oreblind_delver"));
+            Assert.That(resolved.Gameplay.SkillId, Is.EqualTo("npc_ranged_bolt"));
+            Assert.True(resolved.Gameplay.PresentationCannotMutate);
+            Assert.True(resolved.ProtectedCuesPreserved);
+
+            Assert.False(BossSkillPresentationCatalog.TryResolve(
+                snapshot,
+                "elite_stonehold_rimehorn_breaker",
+                "npc_ranged_bolt",
+                "low",
+                "hero",
+                out _));
+            Assert.False(BossSkillPresentationCatalog.TryResolve(
+                snapshot,
+                "unknown_model",
+                "npc_ranged_bolt",
+                "low",
+                "hero",
+                out _));
         }
 
         [Test]
