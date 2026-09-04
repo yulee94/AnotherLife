@@ -809,7 +809,8 @@ namespace AL.Data.Catalogs
                     "RealmSelection",
                     "WarzoneCredits",
                     "LastSavedTimestamp",
-                    "TerritoryCaptureLedger"
+                    "TerritoryCaptureLedger",
+                    "OfflineProductionCatchUp"
                 },
                 StringComparer.Ordinal);
 
@@ -1079,6 +1080,24 @@ namespace AL.Data.Catalogs
                 "Revisions",
                 "Receipts",
                 "Outbox");
+
+        private static readonly HashSet<string> OfflineProductionCatchUpFields =
+            Fields(
+                "Version",
+                "OperationId",
+                "ReceiptId",
+                "ProfileId",
+                "VerifiedGenerationFingerprint",
+                "LastVerifiedTimestamp",
+                "CatchUpUntilTimestamp",
+                "CappedElapsedSeconds",
+                "CatalogId",
+                "CatalogSha256",
+                "SourceRevision",
+                "Deltas");
+
+        private static readonly HashSet<string> OfflineProductionDeltaFields =
+            Fields("ResourceType", "Amount");
 
         private static readonly HashSet<string> TerritoryRevisionFields =
             Fields("TerritoryId", "Revision");
@@ -1476,6 +1495,7 @@ namespace AL.Data.Catalogs
             ValidateFirstWorldProgress(root, collector, state);
             ValidateMapDisclosure(root, collector, state);
             ValidateTerritoryCaptureLedger(root, collector, state);
+            ValidateOfflineProductionCatchUp(root, collector, state);
             ValidateRealmSelection(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
@@ -1785,6 +1805,225 @@ namespace AL.Data.Catalogs
                 new[] { "PreviousRevision", "NewRevision" },
                 collector,
                 state);
+        }
+
+        private static void ValidateOfflineProductionCatchUp(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.OfflineProductionCatchUp";
+            StrictJsonValue value;
+            if (!root.TryGet("OfflineProductionCatchUp", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var catchUp = value as StrictJsonObject;
+            if (catchUp == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_OFFLINE_PRODUCTION_CATCHUP_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                catchUp,
+                OfflineProductionCatchUpFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    catchUp,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_OFFLINE_PRODUCTION_CATCHUP_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version == 0)
+            {
+                // JsonUtility emits a default empty object for a null
+                // optional field. Admit it as absent.
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_OFFLINE_PRODUCTION_CATCHUP_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            string ignored;
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "OperationId",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "ReceiptId",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "ProfileId",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "VerifiedGenerationFingerprint",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "CatalogId",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "CatalogSha256",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "SourceRevision",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+
+            long ignoredInt64;
+            TryReadRequiredInt64(
+                catchUp,
+                "LastVerifiedTimestamp",
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state,
+                out ignoredInt64);
+            TryReadRequiredInt64(
+                catchUp,
+                "CatchUpUntilTimestamp",
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state,
+                out ignoredInt64);
+            TryReadRequiredInt64(
+                catchUp,
+                "CappedElapsedSeconds",
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state,
+                out ignoredInt64);
+
+            StrictJsonValue deltasValue;
+            var deltas = catchUp.TryGet("Deltas", out deltasValue)
+                ? deltasValue as StrictJsonArray
+                : null;
+            if (deltas == null)
+            {
+                return;
+            }
+
+            for (var index = 0; index < deltas.Items.Count; index++)
+            {
+                string deltaPath = path + ".Deltas[" +
+                    index.ToString(CultureInfo.InvariantCulture) + "]";
+                var row = deltas.Items[index] as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_OFFLINE_PRODUCTION_CATCHUP_DELTA_INVALID",
+                        deltaPath,
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    OfflineProductionDeltaFields,
+                    deltaPath,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state);
+                int resourceType;
+                TryReadRequiredInt32(
+                    row,
+                    "ResourceType",
+                    deltaPath,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out resourceType);
+                TryReadRequiredInt64(
+                    row,
+                    "Amount",
+                    deltaPath,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out ignoredInt64);
+            }
         }
 
         private static void ValidateTerritoryLedgerRows(

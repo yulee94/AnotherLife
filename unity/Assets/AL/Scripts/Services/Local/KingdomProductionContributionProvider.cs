@@ -31,6 +31,27 @@ namespace AL.Services.Local
                     "Production.DeltaSeconds");
             }
 
+            return BuildElapsedContributions(deltaSeconds, capPerTickScale: 1d);
+        }
+
+        public EconomyProductionContributionSnapshot BuildCatchUpContributions(long elapsedSeconds)
+        {
+            if (elapsedSeconds <= 0L ||
+                _profile.MaxOfflineElapsedSeconds <= 0L ||
+                elapsedSeconds > _profile.MaxOfflineElapsedSeconds)
+            {
+                return Unavailable(
+                    EconomyDiagnosticCodes.ProductionElapsed,
+                    "Production.CatchUp.ElapsedSeconds");
+            }
+
+            return BuildElapsedContributions(elapsedSeconds, capPerTickScale: elapsedSeconds);
+        }
+
+        private EconomyProductionContributionSnapshot BuildElapsedContributions(
+            double elapsedSeconds,
+            double capPerTickScale)
+        {
             SaveGameData save;
             try
             {
@@ -103,10 +124,14 @@ namespace AL.Services.Local
                     continue;
                 }
 
-                double amount = rule.RatePerLevelPerSecond * level * deltaSeconds;
-                if (rule.CapPerTick > 0d && amount > rule.CapPerTick)
+                double amount = rule.RatePerLevelPerSecond * level * elapsedSeconds;
+                if (rule.CapPerTick > 0d)
                 {
-                    amount = rule.CapPerTick;
+                    double cap = rule.CapPerTick * capPerTickScale;
+                    if (amount > cap)
+                    {
+                        amount = cap;
+                    }
                 }
 
                 if (double.IsNaN(amount) || double.IsInfinity(amount) || amount < 0d)

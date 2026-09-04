@@ -6349,6 +6349,26 @@ namespace AL.Services.Local
                 rawEvidencePreserved: true);
         }
 
+        internal void PublishOfflineProgressApplied()
+        {
+            if (LastLoadDisposition == null ||
+                !LastLoadDisposition.IsWritable ||
+                LastLoadDisposition.OfflineProgressApplied)
+            {
+                return;
+            }
+
+            LastLoadDisposition = new SaveLoadDisposition(
+                LastLoadDisposition.CandidateSummaries,
+                LastLoadDisposition.SelectedSource,
+                LastLoadDisposition.SelectorReason,
+                LastLoadDisposition.IsWritable,
+                LastLoadDisposition.IsRuntimeUsable,
+                offlineProgressApplied: true,
+                diskChanged: true,
+                LastLoadDisposition.RawEvidencePreserved);
+        }
+
         private static bool TryMapAuthoritySource(
             SaveCandidateSourceGeneration source,
             out ProfileAuthoritySourceGeneration mapped)
