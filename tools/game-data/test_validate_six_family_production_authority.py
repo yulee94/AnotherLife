@@ -160,6 +160,40 @@ class SixFamilyProductionAuthorityTests(unittest.TestCase):
         with self.assertRaisesRegex(target.ValidationError, "requires pending approval"):
             target.validate_ledger(ledger, REPOSITORY_ROOT)
 
+    def test_ledger_file_accepts_checkout_crlf_as_canonical_lf(self) -> None:
+        ledger_path = REPOSITORY_ROOT / target.DEFAULT_LEDGER_PATH
+        lf = ledger_path.read_bytes().replace(b"\r\n", b"\n")
+        crlf = lf.replace(b"\n", b"\r\n")
+
+        with tempfile.TemporaryDirectory(prefix="anotherlife-authority-") as directory:
+            path = Path(directory) / "crlf.json"
+            path.write_bytes(crlf)
+            result = target.validate_ledger_file(path, REPOSITORY_ROOT)
+
+        self.assertFalse(result.production_eligible)
+        self.assertEqual(22, result.checked_source_count)
+
+    def test_ledger_file_rejects_bare_carriage_returns(self) -> None:
+        ledger_path = REPOSITORY_ROOT / target.DEFAULT_LEDGER_PATH
+        malformed = ledger_path.read_bytes().replace(b"\n", b"\r", 1)
+
+        with tempfile.TemporaryDirectory(prefix="anotherlife-authority-") as directory:
+            path = Path(directory) / "bare-cr.json"
+            path.write_bytes(malformed)
+            with self.assertRaisesRegex(target.ValidationError, "bare carriage return"):
+                target.validate_ledger_file(path, REPOSITORY_ROOT)
+
+    def test_ledger_is_pinned_to_lf_in_gitattributes(self) -> None:
+        attributes = (REPOSITORY_ROOT / ".gitattributes").read_text(encoding="utf-8")
+        self.assertIn(
+            [
+                "/unity/Docs/GameDataCatalog/six-family-production-authority.v1.json",
+                "text",
+                "eol=lf",
+            ],
+            [line.split() for line in attributes.splitlines()],
+        )
+
     def test_ledger_file_rejects_duplicate_json_properties(self) -> None:
         ledger_path = REPOSITORY_ROOT / target.DEFAULT_LEDGER_PATH
         raw = ledger_path.read_text(encoding="utf-8")

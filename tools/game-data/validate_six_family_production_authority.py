@@ -340,8 +340,14 @@ def load_ledger_file(path: Path) -> dict[str, Any]:
         fail(f"ledger is not strict JSON: {error}")
     if not isinstance(value, dict):
         fail("ledger root must be an object")
-    if canonical_json(value) != raw:
-        fail("ledger bytes must be canonical deterministic JSON with one trailing LF")
+    normalized_text = text.replace("\r\n", "\n")
+    if "\r" in normalized_text:
+        fail("ledger contains a bare carriage return")
+    if canonical_json(value) != normalized_text.encode("utf-8"):
+        fail(
+            "ledger bytes must be newline-normalized canonical deterministic JSON "
+            "with one trailing LF"
+        )
     return value
 
 
