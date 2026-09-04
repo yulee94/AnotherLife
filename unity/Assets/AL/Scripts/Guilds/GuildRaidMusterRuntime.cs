@@ -386,6 +386,10 @@ namespace AL.Guilds
             planner = policy == null ? null : new GuildRaidMusterPlanner(policy);
         }
 
+        /// <summary>
+        /// Prepares a candidate without saving or loading an instance. Execute transfers through
+        /// ApplyToSaveService so durable authority is committed before the instance is loaded.
+        /// </summary>
         public GuildRaidMusterRuntimeResult Apply(
             GuildRaidNetworkCommandEnvelope envelope,
             GuildAuthoritySnapshot membership,
@@ -441,18 +445,18 @@ namespace AL.Guilds
                 (envelope.Command.Operation == RaidOperation.TransferIn ||
                  envelope.Command.Operation == RaidOperation.TransferOut))
             {
-                RaidInstanceCommandEnvelope replayCommand = BuildTransferCommand(envelope.Command, raids);
                 if (!IsTransferReplayCurrent(envelope.Command, raids))
                 {
                     return Result(
                         GuildPlanningStatus.Conflict,
                         current,
                         planning,
-                        replayCommand,
+                        null,
                         TransferReplayStaleCode,
                         false);
                 }
 
+                RaidInstanceCommandEnvelope replayCommand = BuildTransferCommand(envelope.Command, raids);
                 if (!deferTransferLoad && loader == null)
                 {
                     return Result(
@@ -537,6 +541,10 @@ namespace AL.Guilds
                 true);
         }
 
+        /// <summary>
+        /// Stages a candidate in memory only; this does not durably save or load an instance.
+        /// Execute transfers through ApplyToSaveService with a durable save authority.
+        /// </summary>
         public GuildRaidMusterRuntimeResult ApplyToSave(
             GuildRaidNetworkCommandEnvelope envelope,
             GuildAuthoritySnapshot membership,

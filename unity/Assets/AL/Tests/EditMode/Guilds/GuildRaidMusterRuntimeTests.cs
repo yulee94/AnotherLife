@@ -273,6 +273,48 @@ namespace AL.Tests.EditMode.Guilds
         }
 
         [Test]
+        public void TransferReplayWithRetainedReceiptAndMissingCallReturnsConflictWithoutSideEffects()
+        {
+            GuildRaidMusterRuntime runtime = Runtime();
+            var save = new RecordingSaveGameService(SaveOperationStatus.SavedPrimary);
+            save.CurrentSave.GuildRaidMuster = BuildCountdown(runtime);
+            GuildRaidNetworkCommandEnvelope transferIn = Envelope(
+                TransferIn(
+                    "operation_transfer_receipt_without_call",
+                    save.CurrentSave.GuildRaidMuster.Revision,
+                    ClockStart + 90));
+            Assert.That(runtime.ApplyToSaveService(
+                transferIn,
+                Membership(),
+                EmptyAlliance(),
+                save,
+                new RecordingLoader(true)).Status,
+                Is.EqualTo(GuildPlanningStatus.Prepared));
+
+            GuildRaidMusterPersistentState retained = save.CurrentSave.GuildRaidMuster;
+            retained.Calls.Clear();
+            Assert.That(GuildRaidMusterSaveCodec.TryRead(retained, out _, out _), Is.True,
+                "Retained receipts without calls remain valid save data.");
+            int saveCalls = save.SaveCalls;
+            var replayLoader = new RecordingLoader(true);
+
+            GuildRaidMusterRuntimeResult replay = runtime.ApplyToSaveService(
+                transferIn,
+                Membership(),
+                EmptyAlliance(),
+                save,
+                replayLoader);
+
+            Assert.That(replay.Status, Is.EqualTo(GuildPlanningStatus.Conflict));
+            Assert.That(replay.DiagnosticCode, Is.EqualTo(GuildRaidMusterRuntime.TransferReplayStaleCode));
+            Assert.That(replay.TransferCommand, Is.Null);
+            Assert.That(replay.Mutated, Is.False);
+            Assert.That(save.CurrentSave.GuildRaidMuster, Is.SameAs(retained));
+            Assert.That(save.SaveCalls, Is.EqualTo(saveCalls));
+            Assert.That(replayLoader.LastCommand, Is.Null);
+        }
+
+        [Test]
         public void StaleTransferInReplayCannotReloadAfterParticipantReturned()
         {
             GuildRaidMusterRuntime runtime = Runtime();
