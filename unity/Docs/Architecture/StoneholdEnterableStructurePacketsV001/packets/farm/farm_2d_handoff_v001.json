@@ -146,8 +146,8 @@
         "kind": "door",
         "levelId": "ground",
         "side": "south",
-        "x": 7.0,
-        "z": 0.0,
+        "x": 3.02,
+        "z": 0.3,
         "separateObject": true,
         "planOpeningId": "farm_main_entry"
       },
@@ -156,8 +156,8 @@
         "kind": "door",
         "levelId": "ground",
         "side": "north",
-        "x": 10.92,
-        "z": 10,
+        "x": 10.98,
+        "z": 9.7,
         "separateObject": true,
         "planOpeningId": "farm_service_entry"
       },
@@ -202,24 +202,24 @@
         "planOpeningId": "window_ground_cart_bay"
       },
       {
-        "id": "window_ground_wash_service",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "east",
-        "x": 14,
-        "z": 4.999,
-        "separateObject": true,
-        "planOpeningId": "window_ground_wash_service"
-      },
-      {
         "id": "window_ground_yard_threshold",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
-        "x": 14,
-        "z": 7.954,
+        "side": "north",
+        "x": 10.98,
+        "z": 10,
         "separateObject": true,
         "planOpeningId": "window_ground_yard_threshold"
+      },
+      {
+        "id": "window_ground_vertical_core_hall",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 14,
+        "z": 5.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_vertical_core_hall"
       },
       {
         "id": "window_ground_cut_west",
@@ -227,26 +227,16 @@
         "levelId": "ground",
         "side": "west",
         "x": 0.0,
-        "z": 3.78,
+        "z": 5.0,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_west"
-      },
-      {
-        "id": "window_ground_cut_east",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "east",
-        "x": 14,
-        "z": 3.78,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_east"
       },
       {
         "id": "window_ground_cut_south",
         "kind": "window",
         "levelId": "ground",
         "side": "south",
-        "x": 4.92,
+        "x": 11.125,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_south"
@@ -256,7 +246,7 @@
         "kind": "window",
         "levelId": "ground",
         "side": "north",
-        "x": 4.92,
+        "x": 11.125,
         "z": 10,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_north"
@@ -277,7 +267,7 @@
         "levelId": "loft",
         "side": "east",
         "x": 14,
-        "z": 2.65,
+        "z": 2.15,
         "separateObject": true,
         "planOpeningId": "window_loft_seasonal_store"
       },
@@ -297,7 +287,7 @@
         "levelId": "loft",
         "side": "east",
         "x": 14,
-        "z": 7.35,
+        "z": 5.0,
         "separateObject": true,
         "planOpeningId": "window_loft_landing"
       },
@@ -307,42 +297,23 @@
         "levelId": "loft",
         "side": "west",
         "x": 0.0,
-        "z": 3.78,
+        "z": 5.0,
         "separateObject": true,
         "planOpeningId": "window_loft_cut_west"
-      },
-      {
-        "id": "window_loft_cut_east",
-        "kind": "window",
-        "levelId": "loft",
-        "side": "east",
-        "x": 14,
-        "z": 3.78,
-        "separateObject": true,
-        "planOpeningId": "window_loft_cut_east"
       },
       {
         "id": "window_loft_cut_south",
         "kind": "window",
         "levelId": "loft",
         "side": "south",
-        "x": 4.92,
+        "x": 11.125,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_loft_cut_south"
-      },
-      {
-        "id": "window_loft_cut_north",
-        "kind": "window",
-        "levelId": "loft",
-        "side": "north",
-        "x": 4.92,
-        "z": 10,
-        "separateObject": true,
-        "planOpeningId": "window_loft_cut_north"
       }
     ],
     "criticalFeatures": [],
+    "voids": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
@@ -397,7 +368,7 @@
           "id": "wash_service",
           "x": 8.26,
           "z": 3.791,
-          "width": 5.44,
+          "width": 2.19,
           "depth": 2.417,
           "kind": "room",
           "purpose": "wash service"
@@ -410,6 +381,15 @@
           "depth": 3.491,
           "kind": "room",
           "purpose": "yard threshold"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 10.45,
+          "z": 4.0,
+          "width": 3.13,
+          "depth": 2.0,
+          "kind": "room",
+          "purpose": "vertical core hall"
         }
       ],
       "blueprintId": "farm:ground:barn_side_aisle",
@@ -440,16 +420,20 @@
           "accessible": true,
           "points": [
             [
-              7.0,
-              0.0
-            ],
-            [
-              7.0,
+              3.02,
               0.3
             ],
             [
-              7.0,
-              9.7
+              3.02,
+              2.65
+            ],
+            [
+              3.02,
+              5.0
+            ],
+            [
+              12.015,
+              5.0
             ]
           ]
         },
@@ -459,12 +443,20 @@
           "accessible": true,
           "points": [
             [
-              10.92,
-              10
+              10.98,
+              9.7
             ],
             [
-              7.0,
-              9.7
+              10.98,
+              7.954
+            ],
+            [
+              10.98,
+              5.0
+            ],
+            [
+              12.015,
+              5.0
             ]
           ]
         }
@@ -476,7 +468,7 @@
         ],
         [
           "outside",
-          "tool_issue"
+          "yard_threshold"
         ],
         [
           "processing_floor",
@@ -501,6 +493,10 @@
         [
           "yard_threshold",
           "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
+          "primary_circulation"
         ]
       ],
       "doorOpenings": [
@@ -509,8 +505,8 @@
           "from": "outside",
           "to": "processing_floor",
           "side": "south",
-          "x": 7.0,
-          "z": 0.0,
+          "x": 3.02,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -527,10 +523,10 @@
         {
           "id": "farm_service_entry",
           "from": "outside",
-          "to": "tool_issue",
+          "to": "yard_threshold",
           "side": "north",
-          "x": 10.92,
-          "z": 10,
+          "x": 10.98,
+          "z": 9.7,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             1.4,
@@ -541,7 +537,7 @@
           "separateObject": true,
           "between": [
             "outside",
-            "tool_issue"
+            "yard_threshold"
           ]
         },
         {
@@ -621,7 +617,7 @@
           ],
           "to": "wash_service",
           "orientation": "vertical",
-          "x": 10.98,
+          "x": 9.355,
           "z": 6.208,
           "clearOpeningMeters": [
             1.2,
@@ -645,6 +641,59 @@
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_ground_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 12.015,
+          "z": 6.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 12.015,
+          "z": 5.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_ground_cut_BB_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 11.125,
+          "z": 5.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [
@@ -653,8 +702,8 @@
           "from": "outside",
           "to": "processing_floor",
           "side": "south",
-          "x": 7.0,
-          "z": 0.0,
+          "x": 3.02,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -667,10 +716,10 @@
         {
           "id": "farm_service_entry",
           "from": "outside",
-          "to": "tool_issue",
+          "to": "yard_threshold",
           "side": "north",
-          "x": 10.92,
-          "z": 10,
+          "x": 10.98,
+          "z": 9.7,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             1.4,
@@ -735,25 +784,25 @@
           ]
         },
         {
-          "id": "window_ground_wash_service",
+          "id": "window_ground_yard_threshold",
           "separateFrameGlassShutter": true,
-          "serves": "wash_service",
-          "side": "east",
-          "x": 14,
-          "z": 4.999,
-          "orientation": "vertical",
+          "serves": "yard_threshold",
+          "side": "north",
+          "x": 10.98,
+          "z": 10,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
           ]
         },
         {
-          "id": "window_ground_yard_threshold",
+          "id": "window_ground_vertical_core_hall",
           "separateFrameGlassShutter": true,
-          "serves": "yard_threshold",
+          "serves": "vertical_core_hall",
           "side": "east",
           "x": 14,
-          "z": 7.954,
+          "z": 5.0,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -766,21 +815,7 @@
           "serves": "processing_floor",
           "side": "west",
           "x": 0.0,
-          "z": 3.78,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "wash_service",
-          "side": "east",
-          "x": 14,
-          "z": 3.78,
+          "z": 5.0,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -791,9 +826,9 @@
         {
           "id": "window_ground_cut_south",
           "separateFrameGlassShutter": true,
-          "serves": "processing_floor",
+          "serves": "cart_bay",
           "side": "south",
-          "x": 4.92,
+          "x": 11.125,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -805,9 +840,9 @@
         {
           "id": "window_ground_cut_north",
           "separateFrameGlassShutter": true,
-          "serves": "feed_store",
+          "serves": "yard_threshold",
           "side": "north",
-          "x": 4.92,
+          "x": 11.125,
           "z": 10,
           "orientation": "horizontal",
           "openingMeters": [
@@ -824,30 +859,30 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 4.22,
-            "z": 2.68,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 10.45,
+            "z": 4.0,
+            "width": 1.35,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "processing_floor"
+          "locatedInRoomId": "vertical_core_hall"
         },
         {
           "coreId": "farm_goods_platform",
           "type": "goods_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 4.02,
-            "z": 3.28,
-            "width": 1.6,
-            "depth": 1.6,
+            "x": 12.08,
+            "z": 4.0,
+            "width": 1.5,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "processing_floor"
+          "locatedInRoomId": "vertical_core_hall"
         }
       ],
       "furnishingLayouts": [
@@ -1008,9 +1043,9 @@
               "kind": "wash_trough",
               "label": "wash trough",
               "symbol": "WASH",
-              "x": 8.502,
-              "z": 4.033,
-              "width": 1.4,
+              "x": 8.479,
+              "z": 4.01,
+              "width": 1.261,
               "depth": 0.55,
               "orientationDegrees": 0,
               "count": 1,
@@ -1020,15 +1055,15 @@
           "protectedClearances": [
             {
               "id": "wash_service_protected_aisle",
-              "x": 8.26,
-              "z": 4.399,
-              "width": 5.44,
-              "depth": 1.2,
+              "x": 8.755,
+              "z": 3.791,
+              "width": 1.2,
+              "depth": 2.417,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "wash_service_door_approach",
-              "x": 10.38,
+              "x": 8.755,
               "z": 3.791,
               "width": 1.2,
               "depth": 1.2,
@@ -1067,6 +1102,43 @@
               "id": "yard_threshold_door_approach",
               "x": 10.38,
               "z": 6.209,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "ground_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 10.65,
+              "z": 4.2,
+              "width": 1.8,
+              "depth": 0.512,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 10.45,
+              "z": 4.4,
+              "width": 3.13,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 11.415,
+              "z": 4.0,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1165,7 +1237,7 @@
           "id": "light_ground_wash_service",
           "type": "lighting",
           "roomId": "wash_service",
-          "x": 10.98,
+          "x": 9.355,
           "z": 4.999
         },
         {
@@ -1188,6 +1260,20 @@
           "roomId": "yard_threshold",
           "x": 8.86,
           "z": 6.809
+        },
+        {
+          "id": "light_ground_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 12.015,
+          "z": 5.0
+        },
+        {
+          "id": "interaction_ground_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 11.05,
+          "z": 4.6
         }
       ],
       "sectionCutLines": [
@@ -1196,11 +1282,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            3.78
+            5.0
           ],
           "to": [
             13.7,
-            3.78
+            5.0
           ],
           "cutsVerticalCoreId": "farm_stair_core"
         },
@@ -1208,11 +1294,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            4.92,
+            11.125,
             0.3
           ],
           "to": [
-            4.92,
+            11.125,
             9.7
           ],
           "cutsVerticalCoreId": "farm_stair_core"
@@ -1237,10 +1323,10 @@
         },
         {
           "id": "seasonal_store",
-          "x": 8.218,
+          "x": 10.45,
           "z": 0.3,
-          "width": 5.482,
-          "depth": 4.7,
+          "width": 3.13,
+          "depth": 3.7,
           "kind": "room",
           "purpose": "seasonal store"
         },
@@ -1255,10 +1341,10 @@
         },
         {
           "id": "landing",
-          "x": 8.218,
-          "z": 5.0,
-          "width": 5.482,
-          "depth": 4.7,
+          "x": 10.45,
+          "z": 4.0,
+          "width": 3.13,
+          "depth": 2.0,
           "kind": "room",
           "purpose": "landing"
         }
@@ -1292,6 +1378,18 @@
           "points": [
             [
               0.3,
+              5.2
+            ],
+            [
+              0.3,
+              5.0
+            ],
+            [
+              12.015,
+              5.0
+            ],
+            [
+              12.015,
               5.2
             ],
             [
@@ -1346,8 +1444,8 @@
           ],
           "to": "seasonal_store",
           "orientation": "vertical",
-          "x": 10.959,
-          "z": 5.0,
+          "x": 12.015,
+          "z": 4.0,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -1380,13 +1478,49 @@
           ],
           "to": "landing",
           "orientation": "vertical",
-          "x": 10.959,
-          "z": 9.7,
+          "x": 12.015,
+          "z": 6.0,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_loft_cut_AA_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "horizontal",
+          "x": 12.015,
+          "z": 5.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_loft_cut_BB_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "vertical",
+          "x": 11.125,
+          "z": 5.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [],
@@ -1410,7 +1544,7 @@
           "serves": "seasonal_store",
           "side": "east",
           "x": 14,
-          "z": 2.65,
+          "z": 2.15,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1436,7 +1570,7 @@
           "serves": "landing",
           "side": "east",
           "x": 14,
-          "z": 7.35,
+          "z": 5.0,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1449,21 +1583,7 @@
           "serves": "drying_loft",
           "side": "west",
           "x": 0.0,
-          "z": 3.78,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_loft_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "seasonal_store",
-          "side": "east",
-          "x": 14,
-          "z": 3.78,
+          "z": 5.0,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1474,24 +1594,10 @@
         {
           "id": "window_loft_cut_south",
           "separateFrameGlassShutter": true,
-          "serves": "drying_loft",
+          "serves": "seasonal_store",
           "side": "south",
-          "x": 4.92,
+          "x": 11.125,
           "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_loft_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "staff_rest",
-          "side": "north",
-          "x": 4.92,
-          "z": 10,
           "orientation": "horizontal",
           "openingMeters": [
             1.2,
@@ -1507,10 +1613,10 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 10.78,
-            "z": 5.7,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 10.45,
+            "z": 4.0,
+            "width": 1.35,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1522,10 +1628,10 @@
           "type": "goods_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 8.83,
-            "z": 5.7,
-            "width": 1.6,
-            "depth": 1.6,
+            "x": 12.08,
+            "z": 4.0,
+            "width": 1.5,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1580,8 +1686,8 @@
               "kind": "storage_rack",
               "label": "racks / crates",
               "symbol": "RACK",
-              "x": 8.568,
-              "z": 0.65,
+              "x": 10.763,
+              "z": 0.613,
               "width": 1.6,
               "depth": 0.6,
               "orientationDegrees": 0,
@@ -1592,15 +1698,15 @@
           "protectedClearances": [
             {
               "id": "seasonal_store_protected_aisle",
-              "x": 8.218,
-              "z": 2.05,
-              "width": 5.482,
-              "depth": 1.2,
+              "x": 11.415,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 3.7,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "seasonal_store_door_approach",
-              "x": 10.359,
+              "x": 11.415,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -1654,10 +1760,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 8.568,
-              "z": 5.35,
+              "x": 10.65,
+              "z": 4.2,
               "width": 1.2,
-              "depth": 0.6,
+              "depth": 0.512,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -1666,16 +1772,16 @@
           "protectedClearances": [
             {
               "id": "landing_protected_aisle",
-              "x": 8.218,
-              "z": 6.75,
-              "width": 5.482,
+              "x": 10.45,
+              "z": 4.4,
+              "width": 3.13,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "landing_door_approach",
-              "x": 10.359,
-              "z": 5.0,
+              "x": 11.415,
+              "z": 4.0,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1732,14 +1838,14 @@
           "id": "light_loft_seasonal_store",
           "type": "lighting",
           "roomId": "seasonal_store",
-          "x": 10.959,
-          "z": 2.65
+          "x": 12.015,
+          "z": 2.15
         },
         {
           "id": "interaction_loft_seasonal_store",
           "type": "interaction",
           "roomId": "seasonal_store",
-          "x": 8.818,
+          "x": 11.05,
           "z": 0.9
         },
         {
@@ -1760,15 +1866,15 @@
           "id": "light_loft_landing",
           "type": "lighting",
           "roomId": "landing",
-          "x": 10.959,
-          "z": 7.35
+          "x": 12.015,
+          "z": 5.0
         },
         {
           "id": "interaction_loft_landing",
           "type": "interaction",
           "roomId": "landing",
-          "x": 8.818,
-          "z": 5.6
+          "x": 11.05,
+          "z": 4.6
         }
       ],
       "sectionCutLines": [
@@ -1777,11 +1883,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            3.78
+            5.0
           ],
           "to": [
             13.7,
-            3.78
+            5.0
           ],
           "cutsVerticalCoreId": "farm_stair_core"
         },
@@ -1789,11 +1895,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            4.92,
+            11.125,
             0.3
           ],
           "to": [
-            4.92,
+            11.125,
             9.7
           ],
           "cutsVerticalCoreId": "farm_stair_core"
@@ -1809,10 +1915,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 4.22,
-        "z": 2.68,
-        "width": 1.4,
-        "depth": 2.2,
+        "x": 10.45,
+        "z": 4.0,
+        "width": 1.35,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1841,10 +1947,10 @@
       "type": "goods_platform",
       "footprint": {
         "id": "lift_footprint",
-        "x": 8.83,
-        "z": 5.7,
-        "width": 1.6,
-        "depth": 1.6,
+        "x": 12.08,
+        "z": 4.0,
+        "width": 1.5,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1874,7 +1980,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 3.78,
+      "cutCoordinateMeters": 5.0,
       "spanMeters": 14,
       "levels": [
         {
@@ -1899,9 +2005,25 @@
         },
         {
           "levelId": "ground",
-          "roomId": "cart_bay",
+          "roomId": "tool_issue",
+          "startMeters": 0.3,
+          "endMeters": 5.74,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "wash_service",
           "startMeters": 8.26,
-          "endMeters": 13.7,
+          "endMeters": 10.45,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "startMeters": 10.45,
+          "endMeters": 13.579999999999998,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.2
         },
@@ -1915,9 +2037,17 @@
         },
         {
           "levelId": "loft",
-          "roomId": "seasonal_store",
-          "startMeters": 8.218,
-          "endMeters": 13.7,
+          "roomId": "staff_rest",
+          "startMeters": 0.3,
+          "endMeters": 8.218,
+          "baseElevationMeters": 3.5,
+          "clearHeightMeters": 2.6
+        },
+        {
+          "levelId": "loft",
+          "roomId": "landing",
+          "startMeters": 10.45,
+          "endMeters": 13.579999999999998,
           "baseElevationMeters": 3.5,
           "clearHeightMeters": 2.6
         }
@@ -1944,8 +2074,8 @@
             "loft"
           ],
           "direction": "UP clockwise",
-          "startMeters": 4.22,
-          "endMeters": 5.62
+          "startMeters": 10.45,
+          "endMeters": 11.8
         },
         {
           "coreId": "farm_goods_platform",
@@ -1955,40 +2085,70 @@
             "loft"
           ],
           "direction": "vertical platform",
-          "startMeters": 8.83,
-          "endMeters": 10.43
+          "startMeters": 12.08,
+          "endMeters": 13.58
         }
       ],
       "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_vertical_core_hall",
+          "kind": "window",
+          "side": "east",
+          "x": 14,
+          "z": 5.0,
+          "positionMeters": 14,
+          "orthogonalMeters": 5.0
+        },
         {
           "levelId": "ground",
           "openingId": "window_ground_cut_west",
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 3.78,
+          "z": 5.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 3.78
+          "orthogonalMeters": 5.0
         },
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_east",
+          "openingId": "door_ground_processing_floor",
+          "kind": "door",
+          "side": null,
+          "x": 3.02,
+          "z": 5.0,
+          "positionMeters": 3.02,
+          "orthogonalMeters": 5.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 12.015,
+          "z": 5.0,
+          "positionMeters": 12.015,
+          "orthogonalMeters": 5.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 11.125,
+          "z": 5.0,
+          "positionMeters": 11.125,
+          "orthogonalMeters": 5.0
+        },
+        {
+          "levelId": "loft",
+          "openingId": "window_loft_landing",
           "kind": "window",
           "side": "east",
           "x": 14,
-          "z": 3.78,
+          "z": 5.0,
           "positionMeters": 14,
-          "orthogonalMeters": 3.78
-        },
-        {
-          "levelId": "ground",
-          "openingId": "door_ground_cart_bay",
-          "kind": "door",
-          "side": null,
-          "x": 10.98,
-          "z": 3.791,
-          "positionMeters": 10.98,
-          "orthogonalMeters": 3.791
+          "orthogonalMeters": 5.0
         },
         {
           "levelId": "loft",
@@ -1996,19 +2156,39 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 3.78,
+          "z": 5.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 3.78
+          "orthogonalMeters": 5.0
         },
         {
           "levelId": "loft",
-          "openingId": "window_loft_cut_east",
-          "kind": "window",
-          "side": "east",
-          "x": 14,
-          "z": 3.78,
-          "positionMeters": 14,
-          "orthogonalMeters": 3.78
+          "openingId": "door_loft_drying_loft",
+          "kind": "door",
+          "side": null,
+          "x": 4.259,
+          "z": 5.0,
+          "positionMeters": 4.259,
+          "orthogonalMeters": 5.0
+        },
+        {
+          "levelId": "loft",
+          "openingId": "door_loft_cut_AA_landing",
+          "kind": "door",
+          "side": null,
+          "x": 12.015,
+          "z": 5.0,
+          "positionMeters": 12.015,
+          "orthogonalMeters": 5.0
+        },
+        {
+          "levelId": "loft",
+          "openingId": "door_loft_cut_BB_landing",
+          "kind": "door",
+          "side": null,
+          "x": 11.125,
+          "z": 5.0,
+          "positionMeters": 11.125,
+          "orthogonalMeters": 5.0
         }
       ],
       "furnitureSlices": [
@@ -2022,11 +2202,27 @@
         },
         {
           "levelId": "ground",
-          "roomId": "cart_bay",
+          "roomId": "tool_issue",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 8.609,
+          "positionMeters": 0.578,
           "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "wash_service",
+          "kind": "wash_trough",
+          "symbol": "WASH",
+          "positionMeters": 8.479,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 10.65,
+          "sectionHeightMeters": 1.3
         },
         {
           "levelId": "loft",
@@ -2038,11 +2234,19 @@
         },
         {
           "levelId": "loft",
-          "roomId": "seasonal_store",
-          "kind": "storage_rack",
-          "symbol": "RACK",
-          "positionMeters": 8.568,
-          "sectionHeightMeters": 1.5
+          "roomId": "staff_rest",
+          "kind": "bed_or_cot",
+          "symbol": "BED",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.7
+        },
+        {
+          "levelId": "loft",
+          "roomId": "landing",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 10.65,
+          "sectionHeightMeters": 0.8
         }
       ],
       "featureSlices": [],
@@ -2063,7 +2267,7 @@
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 4.92,
+      "cutCoordinateMeters": 11.125,
       "spanMeters": 10,
       "levels": [
         {
@@ -2080,41 +2284,41 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "processing_floor",
+          "roomId": "cart_bay",
           "startMeters": 0.3,
-          "endMeters": 5.0,
+          "endMeters": 3.791,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.2
         },
         {
           "levelId": "ground",
-          "roomId": "tool_issue",
-          "startMeters": 5.0,
-          "endMeters": 7.777,
-          "baseElevationMeters": 0,
-          "clearHeightMeters": 3.2
-        },
-        {
-          "levelId": "ground",
-          "roomId": "feed_store",
-          "startMeters": 7.777,
+          "roomId": "yard_threshold",
+          "startMeters": 6.209,
           "endMeters": 9.7,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.2
         },
         {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "startMeters": 4.0,
+          "endMeters": 6.0,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.2
+        },
+        {
           "levelId": "loft",
-          "roomId": "drying_loft",
+          "roomId": "seasonal_store",
           "startMeters": 0.3,
-          "endMeters": 5.0,
+          "endMeters": 4.0,
           "baseElevationMeters": 3.5,
           "clearHeightMeters": 2.6
         },
         {
           "levelId": "loft",
-          "roomId": "staff_rest",
-          "startMeters": 5.0,
-          "endMeters": 9.7,
+          "roomId": "landing",
+          "startMeters": 4.0,
+          "endMeters": 6.0,
           "baseElevationMeters": 3.5,
           "clearHeightMeters": 2.6
         }
@@ -2141,8 +2345,8 @@
             "loft"
           ],
           "direction": "UP clockwise",
-          "startMeters": 2.68,
-          "endMeters": 4.88
+          "startMeters": 4.0,
+          "endMeters": 6.0
         },
         {
           "coreId": "farm_goods_platform",
@@ -2152,92 +2356,152 @@
             "loft"
           ],
           "direction": "vertical platform",
-          "startMeters": 5.7,
-          "endMeters": 7.3
+          "startMeters": 4.0,
+          "endMeters": 6.0
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
+          "openingId": "farm_service_entry",
+          "kind": "door",
+          "side": "north",
+          "x": 10.98,
+          "z": 9.7,
+          "positionMeters": 9.7,
+          "orthogonalMeters": 10.98
+        },
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_yard_threshold",
+          "kind": "window",
+          "side": "north",
+          "x": 10.98,
+          "z": 10,
+          "positionMeters": 10,
+          "orthogonalMeters": 10.98
+        },
+        {
+          "levelId": "ground",
           "openingId": "window_ground_cut_south",
           "kind": "window",
           "side": "south",
-          "x": 4.92,
+          "x": 11.125,
           "z": 0.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 4.92
+          "orthogonalMeters": 11.125
         },
         {
           "levelId": "ground",
           "openingId": "window_ground_cut_north",
           "kind": "window",
           "side": "north",
-          "x": 4.92,
+          "x": 11.125,
           "z": 10,
           "positionMeters": 10,
-          "orthogonalMeters": 4.92
+          "orthogonalMeters": 11.125
+        },
+        {
+          "levelId": "ground",
+          "openingId": "farm_service_entry",
+          "kind": "door",
+          "side": "north",
+          "x": 10.98,
+          "z": 9.7,
+          "positionMeters": 9.7,
+          "orthogonalMeters": 10.98
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cart_bay",
+          "kind": "door",
+          "side": null,
+          "x": 10.98,
+          "z": 3.791,
+          "positionMeters": 3.791,
+          "orthogonalMeters": 10.98
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_yard_threshold",
+          "kind": "door",
+          "side": null,
+          "x": 10.98,
+          "z": 6.209,
+          "positionMeters": 6.209,
+          "orthogonalMeters": 10.98
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 11.125,
+          "z": 5.0,
+          "positionMeters": 5.0,
+          "orthogonalMeters": 11.125
         },
         {
           "levelId": "loft",
           "openingId": "window_loft_cut_south",
           "kind": "window",
           "side": "south",
-          "x": 4.92,
+          "x": 11.125,
           "z": 0.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 4.92
+          "orthogonalMeters": 11.125
         },
         {
           "levelId": "loft",
-          "openingId": "window_loft_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 4.92,
-          "z": 10,
-          "positionMeters": 10,
-          "orthogonalMeters": 4.92
+          "openingId": "door_loft_cut_BB_landing",
+          "kind": "door",
+          "side": null,
+          "x": 11.125,
+          "z": 5.0,
+          "positionMeters": 5.0,
+          "orthogonalMeters": 11.125
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "processing_floor",
+          "roomId": "cart_bay",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 0.65,
+          "positionMeters": 0.649,
           "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
-          "roomId": "tool_issue",
-          "kind": "utility_table",
-          "symbol": "UTILITY",
-          "positionMeters": 5.278,
-          "sectionHeightMeters": 0.8
-        },
-        {
-          "levelId": "ground",
-          "roomId": "feed_store",
+          "roomId": "yard_threshold",
           "kind": "storage_rack",
           "symbol": "RACK",
-          "positionMeters": 7.969,
+          "positionMeters": 6.558,
+          "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 4.2,
+          "sectionHeightMeters": 1.3
+        },
+        {
+          "levelId": "loft",
+          "roomId": "seasonal_store",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 0.613,
           "sectionHeightMeters": 1.5
         },
         {
           "levelId": "loft",
-          "roomId": "drying_loft",
+          "roomId": "landing",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 0.65,
+          "positionMeters": 4.2,
           "sectionHeightMeters": 0.8
-        },
-        {
-          "levelId": "loft",
-          "roomId": "staff_rest",
-          "kind": "bed_or_cot",
-          "symbol": "BED",
-          "positionMeters": 5.35,
-          "sectionHeightMeters": 0.7
         }
       ],
       "featureSlices": [],

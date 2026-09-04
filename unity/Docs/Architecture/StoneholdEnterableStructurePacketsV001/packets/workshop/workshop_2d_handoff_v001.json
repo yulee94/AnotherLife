@@ -148,20 +148,10 @@
         "kind": "door",
         "levelId": "ground",
         "side": "south",
-        "x": 6.0,
-        "z": 0.0,
+        "x": 3.87,
+        "z": 0.3,
         "separateObject": true,
         "planOpeningId": "workshop_main_entry"
-      },
-      {
-        "id": "workshop_service_entry",
-        "kind": "door",
-        "levelId": "ground",
-        "side": "north",
-        "x": 9.36,
-        "z": 9,
-        "separateObject": true,
-        "planOpeningId": "workshop_service_entry"
       },
       {
         "id": "window_ground_workfloor",
@@ -194,22 +184,12 @@
         "planOpeningId": "window_ground_tool_wall"
       },
       {
-        "id": "window_ground_material_store",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "east",
-        "x": 12,
-        "z": 3.673,
-        "separateObject": true,
-        "planOpeningId": "window_ground_material_store"
-      },
-      {
         "id": "window_ground_rear_loading",
         "kind": "window",
         "levelId": "ground",
         "side": "east",
         "x": 12,
-        "z": 5.645,
+        "z": 6.272,
         "separateObject": true,
         "planOpeningId": "window_ground_rear_loading"
       },
@@ -217,11 +197,21 @@
         "id": "window_ground_safe_aisle",
         "kind": "window",
         "levelId": "ground",
-        "side": "east",
-        "x": 12,
-        "z": 7.872,
+        "side": "north",
+        "x": 9.57,
+        "z": 9,
         "separateObject": true,
         "planOpeningId": "window_ground_safe_aisle"
+      },
+      {
+        "id": "window_ground_vertical_core_hall",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 12,
+        "z": 4.5,
+        "separateObject": true,
+        "planOpeningId": "window_ground_vertical_core_hall"
       },
       {
         "id": "window_ground_cut_west",
@@ -229,26 +219,16 @@
         "levelId": "ground",
         "side": "west",
         "x": 0.0,
-        "z": 5.94,
+        "z": 4.5,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_west"
-      },
-      {
-        "id": "window_ground_cut_east",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "east",
-        "x": 12,
-        "z": 5.94,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_east"
       },
       {
         "id": "window_ground_cut_south",
         "kind": "window",
         "levelId": "ground",
         "side": "south",
-        "x": 6.62,
+        "x": 9.125,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_south"
@@ -258,7 +238,7 @@
         "kind": "window",
         "levelId": "ground",
         "side": "north",
-        "x": 6.62,
+        "x": 9.125,
         "z": 9,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_north"
@@ -277,9 +257,9 @@
         "id": "window_mezzanine_foreman_desk",
         "kind": "window",
         "levelId": "mezzanine",
-        "side": "east",
-        "x": 12,
-        "z": 2.4,
+        "side": "south",
+        "x": 7.225,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_mezzanine_foreman_desk"
       },
@@ -299,7 +279,7 @@
         "levelId": "mezzanine",
         "side": "east",
         "x": 12,
-        "z": 6.6,
+        "z": 4.5,
         "separateObject": true,
         "planOpeningId": "window_mezzanine_landing"
       },
@@ -309,42 +289,13 @@
         "levelId": "mezzanine",
         "side": "west",
         "x": 0.0,
-        "z": 5.94,
+        "z": 4.5,
         "separateObject": true,
         "planOpeningId": "window_mezzanine_cut_west"
-      },
-      {
-        "id": "window_mezzanine_cut_east",
-        "kind": "window",
-        "levelId": "mezzanine",
-        "side": "east",
-        "x": 12,
-        "z": 5.94,
-        "separateObject": true,
-        "planOpeningId": "window_mezzanine_cut_east"
-      },
-      {
-        "id": "window_mezzanine_cut_south",
-        "kind": "window",
-        "levelId": "mezzanine",
-        "side": "south",
-        "x": 6.62,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_mezzanine_cut_south"
-      },
-      {
-        "id": "window_mezzanine_cut_north",
-        "kind": "window",
-        "levelId": "mezzanine",
-        "side": "north",
-        "x": 6.62,
-        "z": 9,
-        "separateObject": true,
-        "planOpeningId": "window_mezzanine_cut_north"
       }
     ],
     "criticalFeatures": [],
+    "voids": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
@@ -387,20 +338,11 @@
           "purpose": "tool wall"
         },
         {
-          "id": "material_store",
-          "x": 7.44,
-          "z": 3.1,
-          "width": 4.26,
-          "depth": 1.145,
-          "kind": "room",
-          "purpose": "material store"
-        },
-        {
           "id": "rear_loading",
-          "x": 7.44,
-          "z": 4.245,
-          "width": 4.26,
-          "depth": 2.8,
+          "x": 8.45,
+          "z": 5.5,
+          "width": 3.13,
+          "depth": 1.545,
           "kind": "room",
           "purpose": "rear loading"
         },
@@ -412,6 +354,15 @@
           "depth": 1.655,
           "kind": "room",
           "purpose": "safe aisle"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 8.45,
+          "z": 3.5,
+          "width": 3.13,
+          "depth": 2.0,
+          "kind": "room",
+          "purpose": "vertical core hall"
         }
       ],
       "blueprintId": "workshop:ground:workshop_bay",
@@ -442,31 +393,16 @@
           "accessible": true,
           "points": [
             [
-              6.0,
-              0.0
+              3.87,
+              0.3
             ],
             [
-              11.7,
-              4.68
+              3.87,
+              4.5
             ],
             [
-              0.3,
-              4.68
-            ]
-          ]
-        },
-        {
-          "id": "service_accessible_route",
-          "widthMeters": 1.5,
-          "accessible": true,
-          "points": [
-            [
-              9.36,
-              9
-            ],
-            [
-              11.7,
-              4.68
+              10.015,
+              4.5
             ]
           ]
         }
@@ -475,10 +411,6 @@
         [
           "outside",
           "workfloor"
-        ],
-        [
-          "outside",
-          "public_service_counter"
         ],
         [
           "workfloor",
@@ -493,15 +425,15 @@
           "primary_circulation"
         ],
         [
-          "material_store",
-          "primary_circulation"
-        ],
-        [
           "rear_loading",
           "primary_circulation"
         ],
         [
           "safe_aisle",
+          "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
           "primary_circulation"
         ]
       ],
@@ -511,8 +443,8 @@
           "from": "outside",
           "to": "workfloor",
           "side": "south",
-          "x": 6.0,
-          "z": 0.0,
+          "x": 3.87,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -524,26 +456,6 @@
           "between": [
             "outside",
             "workfloor"
-          ]
-        },
-        {
-          "id": "workshop_service_entry",
-          "from": "outside",
-          "to": "public_service_counter",
-          "side": "north",
-          "x": 9.36,
-          "z": 9,
-          "orientation": "horizontal",
-          "clearOpeningMeters": [
-            1.4,
-            2.4
-          ],
-          "swing": "out",
-          "stepFree": true,
-          "separateObject": true,
-          "between": [
-            "outside",
-            "public_service_counter"
           ]
         },
         {
@@ -598,23 +510,6 @@
           "swing": "in"
         },
         {
-          "id": "door_ground_material_store",
-          "separateObject": true,
-          "between": [
-            "material_store",
-            "primary_circulation"
-          ],
-          "to": "material_store",
-          "orientation": "vertical",
-          "x": 9.57,
-          "z": 4.245,
-          "clearOpeningMeters": [
-            1.2,
-            2.4
-          ],
-          "swing": "in"
-        },
-        {
           "id": "door_ground_rear_loading",
           "separateObject": true,
           "between": [
@@ -622,9 +517,9 @@
             "primary_circulation"
           ],
           "to": "rear_loading",
-          "orientation": "vertical",
-          "x": 9.57,
-          "z": 7.045,
+          "orientation": "horizontal",
+          "x": 10.015,
+          "z": 5.5,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -647,6 +542,59 @@
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_ground_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 10.015,
+          "z": 5.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 10.015,
+          "z": 4.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_ground_cut_BB_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 9.125,
+          "z": 4.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [
@@ -655,30 +603,14 @@
           "from": "outside",
           "to": "workfloor",
           "side": "south",
-          "x": 6.0,
-          "z": 0.0,
+          "x": 3.87,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
             3.0
           ],
           "swing": "double_out",
-          "stepFree": true,
-          "separateObject": true
-        },
-        {
-          "id": "workshop_service_entry",
-          "from": "outside",
-          "to": "public_service_counter",
-          "side": "north",
-          "x": 9.36,
-          "z": 9,
-          "orientation": "horizontal",
-          "clearOpeningMeters": [
-            1.4,
-            2.4
-          ],
-          "swing": "out",
           "stepFree": true,
           "separateObject": true
         }
@@ -724,25 +656,12 @@
           ]
         },
         {
-          "id": "window_ground_material_store",
-          "separateFrameGlassShutter": true,
-          "serves": "material_store",
-          "side": "east",
-          "x": 12,
-          "z": 3.673,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ]
-        },
-        {
           "id": "window_ground_rear_loading",
           "separateFrameGlassShutter": true,
           "serves": "rear_loading",
           "side": "east",
           "x": 12,
-          "z": 5.645,
+          "z": 6.272,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -753,9 +672,22 @@
           "id": "window_ground_safe_aisle",
           "separateFrameGlassShutter": true,
           "serves": "safe_aisle",
+          "side": "north",
+          "x": 9.57,
+          "z": 9,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_vertical_core_hall",
+          "separateFrameGlassShutter": true,
+          "serves": "vertical_core_hall",
           "side": "east",
           "x": 12,
-          "z": 7.872,
+          "z": 4.5,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -768,21 +700,7 @@
           "serves": "workfloor",
           "side": "west",
           "x": 0.0,
-          "z": 5.94,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "rear_loading",
-          "side": "east",
-          "x": 12,
-          "z": 5.94,
+          "z": 4.5,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -795,7 +713,7 @@
           "separateFrameGlassShutter": true,
           "serves": "public_service_counter",
           "side": "south",
-          "x": 6.62,
+          "x": 9.125,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -809,7 +727,7 @@
           "separateFrameGlassShutter": true,
           "serves": "safe_aisle",
           "side": "north",
-          "x": 6.62,
+          "x": 9.125,
           "z": 9,
           "orientation": "horizontal",
           "openingMeters": [
@@ -826,30 +744,30 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 5.92,
-            "z": 4.84,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 8.45,
+            "z": 3.5,
+            "width": 1.35,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "workfloor"
+          "locatedInRoomId": "vertical_core_hall"
         },
         {
           "coreId": "workshop_goods_platform",
           "type": "goods_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 5.72,
-            "z": 4.84,
-            "width": 1.6,
-            "depth": 1.6,
+            "x": 10.08,
+            "z": 3.5,
+            "width": 1.5,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "workfloor"
+          "locatedInRoomId": "vertical_core_hall"
         }
       ],
       "furnishingLayouts": [
@@ -887,10 +805,10 @@
           "protectedClearances": [
             {
               "id": "workfloor_protected_aisle",
-              "x": 0.3,
-              "z": 3.9,
-              "width": 7.14,
-              "depth": 1.2,
+              "x": 3.27,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 8.4,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -978,43 +896,6 @@
           ]
         },
         {
-          "roomId": "material_store",
-          "layoutIntent": "racks / crates",
-          "footprints": [
-            {
-              "id": "ground_material_store_storage_rack_1",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "symbol": "RACK",
-              "x": 7.554,
-              "z": 3.215,
-              "width": 1.6,
-              "depth": 0.293,
-              "orientationDegrees": 0,
-              "count": 1,
-              "sectionHeightMeters": 1.5
-            }
-          ],
-          "protectedClearances": [
-            {
-              "id": "material_store_protected_aisle",
-              "x": 7.44,
-              "z": 3.1,
-              "width": 4.26,
-              "depth": 1.145,
-              "kind": "minimum_1_2m_aisle"
-            },
-            {
-              "id": "material_store_door_approach",
-              "x": 8.97,
-              "z": 3.1,
-              "width": 1.2,
-              "depth": 1.145,
-              "kind": "door_swing_clearance"
-            }
-          ]
-        },
-        {
           "roomId": "rear_loading",
           "layoutIntent": "task table + wall storage",
           "footprints": [
@@ -1023,10 +904,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 7.72,
-              "z": 4.525,
+              "x": 8.604,
+              "z": 5.654,
               "width": 1.2,
-              "depth": 0.6,
+              "depth": 0.396,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -1035,16 +916,16 @@
           "protectedClearances": [
             {
               "id": "rear_loading_protected_aisle",
-              "x": 7.44,
-              "z": 5.045,
-              "width": 4.26,
+              "x": 8.45,
+              "z": 5.673,
+              "width": 3.13,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "rear_loading_door_approach",
-              "x": 8.97,
-              "z": 4.245,
+              "x": 9.415,
+              "z": 5.5,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1082,6 +963,43 @@
               "id": "safe_aisle_door_approach",
               "x": 8.97,
               "z": 7.045,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "ground_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 8.65,
+              "z": 3.7,
+              "width": 1.8,
+              "depth": 0.512,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 8.45,
+              "z": 3.9,
+              "width": 3.13,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 9.415,
+              "z": 3.5,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1163,32 +1081,18 @@
           "z": 1.997
         },
         {
-          "id": "light_ground_material_store",
-          "type": "lighting",
-          "roomId": "material_store",
-          "x": 9.57,
-          "z": 3.673
-        },
-        {
-          "id": "interaction_ground_material_store",
-          "type": "interaction",
-          "roomId": "material_store",
-          "x": 8.04,
-          "z": 3.482
-        },
-        {
           "id": "light_ground_rear_loading",
           "type": "lighting",
           "roomId": "rear_loading",
-          "x": 9.57,
-          "z": 5.645
+          "x": 10.015,
+          "z": 6.272
         },
         {
           "id": "interaction_ground_rear_loading",
           "type": "interaction",
           "roomId": "rear_loading",
-          "x": 8.04,
-          "z": 4.845
+          "x": 9.05,
+          "z": 6.015
         },
         {
           "id": "light_ground_safe_aisle",
@@ -1203,6 +1107,20 @@
           "roomId": "safe_aisle",
           "x": 8.04,
           "z": 7.597
+        },
+        {
+          "id": "light_ground_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 10.015,
+          "z": 4.5
+        },
+        {
+          "id": "interaction_ground_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 9.05,
+          "z": 4.1
         }
       ],
       "sectionCutLines": [
@@ -1211,11 +1129,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            5.94
+            4.5
           ],
           "to": [
             11.7,
-            5.94
+            4.5
           ],
           "cutsVerticalCoreId": "workshop_stair_core"
         },
@@ -1223,11 +1141,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            6.62,
+            9.125,
             0.3
           ],
           "to": [
-            6.62,
+            9.125,
             8.7
           ],
           "cutsVerticalCoreId": "workshop_stair_core"
@@ -1254,7 +1172,7 @@
           "id": "foreman_desk",
           "x": 6.0,
           "z": 0.3,
-          "width": 5.7,
+          "width": 2.45,
           "depth": 4.2,
           "kind": "room",
           "purpose": "foreman desk"
@@ -1270,10 +1188,10 @@
         },
         {
           "id": "landing",
-          "x": 8.39,
-          "z": 4.5,
-          "width": 3.31,
-          "depth": 4.2,
+          "x": 8.45,
+          "z": 3.5,
+          "width": 3.13,
+          "depth": 2.0,
           "kind": "room",
           "purpose": "landing"
         }
@@ -1307,6 +1225,18 @@
           "points": [
             [
               0.3,
+              4.68
+            ],
+            [
+              0.3,
+              4.5
+            ],
+            [
+              10.015,
+              4.5
+            ],
+            [
+              10.015,
               4.68
             ],
             [
@@ -1361,7 +1291,7 @@
           ],
           "to": "foreman_desk",
           "orientation": "vertical",
-          "x": 8.85,
+          "x": 7.225,
           "z": 4.5,
           "clearOpeningMeters": [
             1.2,
@@ -1395,13 +1325,49 @@
           ],
           "to": "landing",
           "orientation": "vertical",
-          "x": 10.045,
-          "z": 8.7,
+          "x": 10.015,
+          "z": 5.5,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_mezzanine_cut_AA_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "horizontal",
+          "x": 10.015,
+          "z": 4.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_mezzanine_cut_BB_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "vertical",
+          "x": 9.125,
+          "z": 4.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [],
@@ -1423,10 +1389,10 @@
           "id": "window_mezzanine_foreman_desk",
           "separateFrameGlassShutter": true,
           "serves": "foreman_desk",
-          "side": "east",
-          "x": 12,
-          "z": 2.4,
-          "orientation": "vertical",
+          "side": "south",
+          "x": 7.225,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1451,7 +1417,7 @@
           "serves": "landing",
           "side": "east",
           "x": 12,
-          "z": 6.6,
+          "z": 4.5,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1461,53 +1427,11 @@
         {
           "id": "window_mezzanine_cut_west",
           "separateFrameGlassShutter": true,
-          "serves": "parts_gallery",
+          "serves": "pattern_store",
           "side": "west",
           "x": 0.0,
-          "z": 5.94,
+          "z": 4.5,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_mezzanine_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "landing",
-          "side": "east",
-          "x": 12,
-          "z": 5.94,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_mezzanine_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "foreman_desk",
-          "side": "south",
-          "x": 6.62,
-          "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_mezzanine_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "parts_gallery",
-          "side": "north",
-          "x": 6.62,
-          "z": 9,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1522,10 +1446,10 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 9.14,
-            "z": 4.84,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 8.45,
+            "z": 3.5,
+            "width": 1.35,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1537,10 +1461,10 @@
           "type": "goods_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 8.51,
-            "z": 4.84,
-            "width": 1.6,
-            "depth": 1.6,
+            "x": 10.08,
+            "z": 3.5,
+            "width": 1.5,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1595,8 +1519,8 @@
               "kind": "desk",
               "label": "desk + chair",
               "symbol": "DESK",
-              "x": 6.35,
-              "z": 0.65,
+              "x": 6.245,
+              "z": 0.545,
               "width": 1.4,
               "depth": 0.7,
               "orientationDegrees": 0,
@@ -1607,15 +1531,15 @@
           "protectedClearances": [
             {
               "id": "foreman_desk_protected_aisle",
-              "x": 6.0,
-              "z": 1.8,
-              "width": 5.7,
-              "depth": 1.2,
+              "x": 6.625,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 4.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "foreman_desk_door_approach",
-              "x": 8.25,
+              "x": 6.625,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -1669,10 +1593,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 8.721,
-              "z": 4.831,
+              "x": 8.65,
+              "z": 3.7,
               "width": 1.2,
-              "depth": 0.6,
+              "depth": 0.512,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -1681,16 +1605,16 @@
           "protectedClearances": [
             {
               "id": "landing_protected_aisle",
-              "x": 8.39,
-              "z": 6.0,
-              "width": 3.31,
+              "x": 8.45,
+              "z": 3.9,
+              "width": 3.13,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "landing_door_approach",
-              "x": 9.445,
-              "z": 4.5,
+              "x": 9.415,
+              "z": 3.5,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1747,7 +1671,7 @@
           "id": "light_mezzanine_foreman_desk",
           "type": "lighting",
           "roomId": "foreman_desk",
-          "x": 8.85,
+          "x": 7.225,
           "z": 2.4
         },
         {
@@ -1775,15 +1699,15 @@
           "id": "light_mezzanine_landing",
           "type": "lighting",
           "roomId": "landing",
-          "x": 10.045,
-          "z": 6.6
+          "x": 10.015,
+          "z": 4.5
         },
         {
           "id": "interaction_mezzanine_landing",
           "type": "interaction",
           "roomId": "landing",
-          "x": 8.99,
-          "z": 5.1
+          "x": 9.05,
+          "z": 4.1
         }
       ],
       "sectionCutLines": [
@@ -1792,11 +1716,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            5.94
+            4.5
           ],
           "to": [
             11.7,
-            5.94
+            4.5
           ],
           "cutsVerticalCoreId": "workshop_stair_core"
         },
@@ -1804,11 +1728,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            6.62,
+            9.125,
             0.3
           ],
           "to": [
-            6.62,
+            9.125,
             8.7
           ],
           "cutsVerticalCoreId": "workshop_stair_core"
@@ -1824,10 +1748,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 5.92,
-        "z": 4.84,
-        "width": 1.4,
-        "depth": 2.2,
+        "x": 8.45,
+        "z": 3.5,
+        "width": 1.35,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1856,10 +1780,10 @@
       "type": "goods_platform",
       "footprint": {
         "id": "lift_footprint",
-        "x": 7.19,
-        "z": 4.84,
-        "width": 1.6,
-        "depth": 1.6,
+        "x": 10.08,
+        "z": 3.5,
+        "width": 1.5,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1889,7 +1813,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 5.94,
+      "cutCoordinateMeters": 4.5,
       "spanMeters": 12,
       "levels": [
         {
@@ -1914,11 +1838,27 @@
         },
         {
           "levelId": "ground",
-          "roomId": "rear_loading",
-          "startMeters": 7.44,
-          "endMeters": 11.7,
+          "roomId": "vertical_core_hall",
+          "startMeters": 8.45,
+          "endMeters": 11.579999999999998,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.4
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "pattern_store",
+          "startMeters": 0.3,
+          "endMeters": 6.0,
+          "baseElevationMeters": 3.7,
+          "clearHeightMeters": 2.4
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "foreman_desk",
+          "startMeters": 6.0,
+          "endMeters": 8.45,
+          "baseElevationMeters": 3.7,
+          "clearHeightMeters": 2.4
         },
         {
           "levelId": "mezzanine",
@@ -1931,8 +1871,8 @@
         {
           "levelId": "mezzanine",
           "roomId": "landing",
-          "startMeters": 8.39,
-          "endMeters": 11.700000000000001,
+          "startMeters": 8.45,
+          "endMeters": 11.579999999999998,
           "baseElevationMeters": 3.7,
           "clearHeightMeters": 2.4
         }
@@ -1959,8 +1899,8 @@
             "mezzanine"
           ],
           "direction": "UP clockwise",
-          "startMeters": 5.92,
-          "endMeters": 7.32
+          "startMeters": 8.45,
+          "endMeters": 9.8
         },
         {
           "coreId": "workshop_goods_platform",
@@ -1970,20 +1910,20 @@
             "mezzanine"
           ],
           "direction": "vertical platform",
-          "startMeters": 7.19,
-          "endMeters": 8.79
+          "startMeters": 10.08,
+          "endMeters": 11.58
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "window_ground_rear_loading",
+          "openingId": "window_ground_vertical_core_hall",
           "kind": "window",
           "side": "east",
           "x": 12,
-          "z": 5.645,
+          "z": 4.5,
           "positionMeters": 12,
-          "orthogonalMeters": 5.645
+          "orthogonalMeters": 4.5
         },
         {
           "levelId": "ground",
@@ -1991,19 +1931,39 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 5.94,
+          "z": 4.5,
           "positionMeters": 0.0,
-          "orthogonalMeters": 5.94
+          "orthogonalMeters": 4.5
         },
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_east",
+          "openingId": "door_ground_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 10.015,
+          "z": 4.5,
+          "positionMeters": 10.015,
+          "orthogonalMeters": 4.5
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 9.125,
+          "z": 4.5,
+          "positionMeters": 9.125,
+          "orthogonalMeters": 4.5
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "window_mezzanine_landing",
           "kind": "window",
           "side": "east",
           "x": 12,
-          "z": 5.94,
+          "z": 4.5,
           "positionMeters": 12,
-          "orthogonalMeters": 5.94
+          "orthogonalMeters": 4.5
         },
         {
           "levelId": "mezzanine",
@@ -2011,19 +1971,49 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 5.94,
+          "z": 4.5,
           "positionMeters": 0.0,
-          "orthogonalMeters": 5.94
+          "orthogonalMeters": 4.5
         },
         {
           "levelId": "mezzanine",
-          "openingId": "window_mezzanine_cut_east",
-          "kind": "window",
-          "side": "east",
-          "x": 12,
-          "z": 5.94,
-          "positionMeters": 12,
-          "orthogonalMeters": 5.94
+          "openingId": "door_mezzanine_pattern_store",
+          "kind": "door",
+          "side": null,
+          "x": 3.15,
+          "z": 4.5,
+          "positionMeters": 3.15,
+          "orthogonalMeters": 4.5
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "door_mezzanine_foreman_desk",
+          "kind": "door",
+          "side": null,
+          "x": 7.225,
+          "z": 4.5,
+          "positionMeters": 7.225,
+          "orthogonalMeters": 4.5
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "door_mezzanine_cut_AA_landing",
+          "kind": "door",
+          "side": null,
+          "x": 10.015,
+          "z": 4.5,
+          "positionMeters": 10.015,
+          "orthogonalMeters": 4.5
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "door_mezzanine_cut_BB_landing",
+          "kind": "door",
+          "side": null,
+          "x": 9.125,
+          "z": 4.5,
+          "positionMeters": 9.125,
+          "orthogonalMeters": 4.5
         }
       ],
       "furnitureSlices": [
@@ -2045,10 +2035,26 @@
         },
         {
           "levelId": "ground",
-          "roomId": "rear_loading",
-          "kind": "utility_table",
-          "symbol": "UTILITY",
-          "positionMeters": 7.72,
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 8.65,
+          "sectionHeightMeters": 1.3
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "pattern_store",
+          "kind": "shelf_bay",
+          "symbol": "SHELF",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 2.0
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "foreman_desk",
+          "kind": "desk",
+          "symbol": "DESK",
+          "positionMeters": 6.245,
           "sectionHeightMeters": 0.8
         },
         {
@@ -2064,7 +2070,7 @@
           "roomId": "landing",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 8.721,
+          "positionMeters": 8.65,
           "sectionHeightMeters": 0.8
         }
       ],
@@ -2086,7 +2092,7 @@
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 6.62,
+      "cutCoordinateMeters": 9.125,
       "spanMeters": 9,
       "levels": [
         {
@@ -2103,25 +2109,49 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "workfloor",
+          "roomId": "public_service_counter",
           "startMeters": 0.3,
-          "endMeters": 8.700000000000001,
+          "endMeters": 1.445,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.4
+        },
+        {
+          "levelId": "ground",
+          "roomId": "tool_wall",
+          "startMeters": 1.445,
+          "endMeters": 3.1,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.4
+        },
+        {
+          "levelId": "ground",
+          "roomId": "rear_loading",
+          "startMeters": 5.5,
+          "endMeters": 7.045,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.4
+        },
+        {
+          "levelId": "ground",
+          "roomId": "safe_aisle",
+          "startMeters": 7.045,
+          "endMeters": 8.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.4
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "startMeters": 3.5,
+          "endMeters": 5.5,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.4
         },
         {
           "levelId": "mezzanine",
-          "roomId": "foreman_desk",
-          "startMeters": 0.3,
-          "endMeters": 4.5,
-          "baseElevationMeters": 3.7,
-          "clearHeightMeters": 2.4
-        },
-        {
-          "levelId": "mezzanine",
-          "roomId": "parts_gallery",
-          "startMeters": 4.5,
-          "endMeters": 8.7,
+          "roomId": "landing",
+          "startMeters": 3.5,
+          "endMeters": 5.5,
           "baseElevationMeters": 3.7,
           "clearHeightMeters": 2.4
         }
@@ -2148,8 +2178,8 @@
             "mezzanine"
           ],
           "direction": "UP clockwise",
-          "startMeters": 4.84,
-          "endMeters": 7.04
+          "startMeters": 3.5,
+          "endMeters": 5.5
         },
         {
           "coreId": "workshop_goods_platform",
@@ -2159,83 +2189,139 @@
             "mezzanine"
           ],
           "direction": "vertical platform",
-          "startMeters": 4.84,
-          "endMeters": 6.44
+          "startMeters": 3.5,
+          "endMeters": 5.5
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
+          "openingId": "window_ground_safe_aisle",
+          "kind": "window",
+          "side": "north",
+          "x": 9.57,
+          "z": 9,
+          "positionMeters": 9,
+          "orthogonalMeters": 9.57
+        },
+        {
+          "levelId": "ground",
           "openingId": "window_ground_cut_south",
           "kind": "window",
           "side": "south",
-          "x": 6.62,
+          "x": 9.125,
           "z": 0.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 6.62
+          "orthogonalMeters": 9.125
         },
         {
           "levelId": "ground",
           "openingId": "window_ground_cut_north",
           "kind": "window",
           "side": "north",
-          "x": 6.62,
+          "x": 9.125,
           "z": 9,
           "positionMeters": 9,
-          "orthogonalMeters": 6.62
+          "orthogonalMeters": 9.125
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_public_service_counter",
+          "kind": "door",
+          "side": null,
+          "x": 9.57,
+          "z": 1.445,
+          "positionMeters": 1.445,
+          "orthogonalMeters": 9.57
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_tool_wall",
+          "kind": "door",
+          "side": null,
+          "x": 9.57,
+          "z": 3.1,
+          "positionMeters": 3.1,
+          "orthogonalMeters": 9.57
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_safe_aisle",
+          "kind": "door",
+          "side": null,
+          "x": 9.57,
+          "z": 7.045,
+          "positionMeters": 7.045,
+          "orthogonalMeters": 9.57
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 9.125,
+          "z": 4.5,
+          "positionMeters": 4.5,
+          "orthogonalMeters": 9.125
         },
         {
           "levelId": "mezzanine",
-          "openingId": "window_mezzanine_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 6.62,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 6.62
-        },
-        {
-          "levelId": "mezzanine",
-          "openingId": "window_mezzanine_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 6.62,
-          "z": 9,
-          "positionMeters": 9,
-          "orthogonalMeters": 6.62
+          "openingId": "door_mezzanine_cut_BB_landing",
+          "kind": "door",
+          "side": null,
+          "x": 9.125,
+          "z": 4.5,
+          "positionMeters": 4.5,
+          "orthogonalMeters": 9.125
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "workfloor",
-          "kind": "work_bench",
-          "symbol": "BENCH",
-          "positionMeters": 0.65,
-          "sectionHeightMeters": 0.9
-        },
-        {
-          "levelId": "ground",
-          "roomId": "workfloor",
-          "kind": "vise_station",
-          "symbol": "VISE",
-          "positionMeters": 7.65,
+          "roomId": "public_service_counter",
+          "kind": "service_counter",
+          "symbol": "COUNTER",
+          "positionMeters": 0.414,
           "sectionHeightMeters": 1.1
         },
         {
-          "levelId": "mezzanine",
-          "roomId": "foreman_desk",
-          "kind": "desk",
-          "symbol": "DESK",
-          "positionMeters": 0.65,
+          "levelId": "ground",
+          "roomId": "tool_wall",
+          "kind": "tool_rack",
+          "symbol": "TOOLS",
+          "positionMeters": 1.611,
+          "sectionHeightMeters": 1.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "rear_loading",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 5.654,
           "sectionHeightMeters": 0.8
         },
         {
+          "levelId": "ground",
+          "roomId": "safe_aisle",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 7.21,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 3.7,
+          "sectionHeightMeters": 1.3
+        },
+        {
           "levelId": "mezzanine",
-          "roomId": "parts_gallery",
-          "kind": "table_bench",
-          "symbol": "TABLE",
-          "positionMeters": 4.85,
+          "roomId": "landing",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 3.7,
           "sectionHeightMeters": 0.8
         }
       ],

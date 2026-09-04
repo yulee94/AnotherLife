@@ -170,8 +170,8 @@
         "kind": "door",
         "levelId": "ground",
         "side": "east",
-        "x": 18,
-        "z": 6.0,
+        "x": 17.7,
+        "z": 7.92,
         "separateObject": true,
         "planOpeningId": "lumber_mill_main_entry"
       },
@@ -180,8 +180,8 @@
         "kind": "door",
         "levelId": "ground",
         "side": "west",
-        "x": 0.0,
-        "z": 9.36,
+        "x": 0.3,
+        "z": 7.069,
         "separateObject": true,
         "planOpeningId": "lumber_mill_service_entry"
       },
@@ -190,30 +190,40 @@
         "kind": "window",
         "levelId": "ground",
         "side": "south",
-        "x": 3.84,
+        "x": 3.7,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_saw_floor"
       },
       {
-        "id": "window_ground_timber_sort",
+        "id": "window_ground_tool_room",
         "kind": "window",
         "levelId": "ground",
         "side": "west",
         "x": 0.0,
         "z": 7.069,
         "separateObject": true,
-        "planOpeningId": "window_ground_timber_sort"
+        "planOpeningId": "window_ground_tool_room"
       },
       {
-        "id": "window_ground_tool_room",
+        "id": "window_ground_crew_room",
         "kind": "window",
         "levelId": "ground",
         "side": "north",
-        "x": 3.84,
+        "x": 5.52,
         "z": 12,
         "separateObject": true,
-        "planOpeningId": "window_ground_tool_room"
+        "planOpeningId": "window_ground_crew_room"
+      },
+      {
+        "id": "window_ground_timber_sort",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 18,
+        "z": 3.295,
+        "separateObject": true,
+        "planOpeningId": "window_ground_timber_sort"
       },
       {
         "id": "window_ground_dry_store",
@@ -221,19 +231,9 @@
         "levelId": "ground",
         "side": "east",
         "x": 18,
-        "z": 1.466,
+        "z": 5.215,
         "separateObject": true,
         "planOpeningId": "window_ground_dry_store"
-      },
-      {
-        "id": "window_ground_crew_room",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "east",
-        "x": 18,
-        "z": 4.316,
-        "separateObject": true,
-        "planOpeningId": "window_ground_crew_room"
       },
       {
         "id": "window_ground_yard_loading_threshold",
@@ -241,7 +241,7 @@
         "levelId": "ground",
         "side": "east",
         "x": 18,
-        "z": 8.85,
+        "z": 7.92,
         "separateObject": true,
         "planOpeningId": "window_ground_yard_loading_threshold"
       },
@@ -251,7 +251,7 @@
         "levelId": "ground",
         "side": "west",
         "x": 0.0,
-        "z": 7.8,
+        "z": 6.0,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_west"
       },
@@ -261,26 +261,16 @@
         "levelId": "ground",
         "side": "east",
         "x": 18,
-        "z": 7.8,
+        "z": 6.0,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_east"
-      },
-      {
-        "id": "window_ground_cut_south",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "south",
-        "x": 14.4,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_south"
       },
       {
         "id": "window_ground_cut_north",
         "kind": "window",
         "levelId": "ground",
         "side": "north",
-        "x": 14.4,
+        "x": 7.91,
         "z": 12,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_north"
@@ -290,40 +280,30 @@
         "kind": "window",
         "levelId": "loft",
         "side": "south",
-        "x": 2.079,
+        "x": 5.52,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_loft_blade_store"
       },
       {
-        "id": "window_loft_pattern_rack",
-        "kind": "window",
-        "levelId": "loft",
-        "side": "south",
-        "x": 6.429,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_loft_pattern_rack"
-      },
-      {
         "id": "window_loft_foreman_gallery",
         "kind": "window",
         "levelId": "loft",
-        "side": "south",
-        "x": 13.35,
-        "z": 0.0,
+        "side": "west",
+        "x": 0.0,
+        "z": 7.655,
         "separateObject": true,
         "planOpeningId": "window_loft_foreman_gallery"
       },
       {
-        "id": "window_loft_landing",
+        "id": "window_loft_pattern_rack",
         "kind": "window",
         "levelId": "loft",
-        "side": "north",
-        "x": 9.0,
-        "z": 12,
+        "side": "east",
+        "x": 18,
+        "z": 4.429,
         "separateObject": true,
-        "planOpeningId": "window_loft_landing"
+        "planOpeningId": "window_loft_pattern_rack"
       },
       {
         "id": "window_loft_cut_west",
@@ -331,7 +311,7 @@
         "levelId": "loft",
         "side": "west",
         "x": 0.0,
-        "z": 7.8,
+        "z": 6.0,
         "separateObject": true,
         "planOpeningId": "window_loft_cut_west"
       },
@@ -341,7 +321,7 @@
         "levelId": "loft",
         "side": "east",
         "x": 18,
-        "z": 7.8,
+        "z": 6.0,
         "separateObject": true,
         "planOpeningId": "window_loft_cut_east"
       },
@@ -350,23 +330,14 @@
         "kind": "window",
         "levelId": "loft",
         "side": "south",
-        "x": 14.4,
+        "x": 7.91,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_loft_cut_south"
-      },
-      {
-        "id": "window_loft_cut_north",
-        "kind": "window",
-        "levelId": "loft",
-        "side": "north",
-        "x": 14.4,
-        "z": 12,
-        "separateObject": true,
-        "planOpeningId": "window_loft_cut_north"
       }
     ],
     "criticalFeatures": [],
+    "voids": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "east",
@@ -385,55 +356,64 @@
           "id": "saw_floor",
           "x": 0.3,
           "z": 0.3,
-          "width": 7.08,
+          "width": 6.8,
           "depth": 5.225,
           "kind": "room",
           "purpose": "saw floor"
         },
         {
-          "id": "timber_sort",
-          "x": 0.3,
-          "z": 5.525,
-          "width": 7.08,
-          "depth": 3.088,
-          "kind": "room",
-          "purpose": "timber sort"
-        },
-        {
           "id": "tool_room",
           "x": 0.3,
-          "z": 8.613,
-          "width": 7.08,
+          "z": 5.525,
+          "width": 6.8,
           "depth": 3.088,
           "kind": "room",
           "purpose": "tool room"
         },
         {
-          "id": "dry_store",
-          "x": 10.62,
-          "z": 0.3,
-          "width": 7.08,
-          "depth": 2.332,
-          "kind": "room",
-          "purpose": "dry store"
-        },
-        {
           "id": "crew_room",
-          "x": 10.62,
-          "z": 2.632,
-          "width": 7.08,
-          "depth": 3.368,
+          "x": 0.3,
+          "z": 8.613,
+          "width": 10.44,
+          "depth": 3.088,
           "kind": "room",
           "purpose": "crew room"
         },
         {
+          "id": "timber_sort",
+          "x": 11.82,
+          "z": 2.16,
+          "width": 5.88,
+          "depth": 2.269,
+          "kind": "room",
+          "purpose": "timber sort"
+        },
+        {
+          "id": "dry_store",
+          "x": 11.82,
+          "z": 4.429,
+          "width": 5.88,
+          "depth": 1.571,
+          "kind": "room",
+          "purpose": "dry store"
+        },
+        {
           "id": "yard_loading_threshold",
-          "x": 10.62,
+          "x": 11.82,
           "z": 6.0,
-          "width": 7.08,
-          "depth": 5.7,
+          "width": 5.88,
+          "depth": 3.84,
           "kind": "room",
           "purpose": "yard loading threshold"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 7.1,
+          "z": 5.0,
+          "width": 3.52,
+          "depth": 2.0,
+          "kind": "room",
+          "purpose": "vertical core hall"
         }
       ],
       "blueprintId": "lumber_mill:ground:saw_canopy",
@@ -459,7 +439,7 @@
       "exteriorVoidsAndCourts": [],
       "circulation": {
         "id": "primary_circulation",
-        "x": 9.0,
+        "x": 5.52,
         "z": 0.3,
         "width": 1.5,
         "depth": 11.4,
@@ -472,16 +452,20 @@
           "accessible": true,
           "points": [
             [
-              18,
+              17.7,
+              7.92
+            ],
+            [
+              14.76,
+              7.92
+            ],
+            [
+              14.76,
               6.0
             ],
             [
-              9.0,
-              0.3
-            ],
-            [
-              9.0,
-              11.7
+              8.86,
+              6.0
             ]
           ]
         },
@@ -491,12 +475,20 @@
           "accessible": true,
           "points": [
             [
-              0.0,
-              9.36
+              0.3,
+              7.069
             ],
             [
-              9.0,
-              11.7
+              3.7,
+              7.069
+            ],
+            [
+              3.7,
+              6.0
+            ],
+            [
+              8.86,
+              6.0
             ]
           ]
         }
@@ -504,7 +496,7 @@
       "adjacency": [
         [
           "outside",
-          "saw_floor"
+          "yard_loading_threshold"
         ],
         [
           "outside",
@@ -515,15 +507,7 @@
           "primary_circulation"
         ],
         [
-          "timber_sort",
-          "primary_circulation"
-        ],
-        [
           "tool_room",
-          "primary_circulation"
-        ],
-        [
-          "dry_store",
           "primary_circulation"
         ],
         [
@@ -531,7 +515,19 @@
           "primary_circulation"
         ],
         [
+          "timber_sort",
+          "primary_circulation"
+        ],
+        [
+          "dry_store",
+          "primary_circulation"
+        ],
+        [
           "yard_loading_threshold",
+          "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
           "primary_circulation"
         ]
       ],
@@ -539,10 +535,10 @@
         {
           "id": "lumber_mill_main_entry",
           "from": "outside",
-          "to": "saw_floor",
+          "to": "yard_loading_threshold",
           "side": "east",
-          "x": 18,
-          "z": 6.0,
+          "x": 17.7,
+          "z": 7.92,
           "orientation": "vertical",
           "clearOpeningMeters": [
             2.5,
@@ -553,7 +549,7 @@
           "separateObject": true,
           "between": [
             "outside",
-            "saw_floor"
+            "yard_loading_threshold"
           ]
         },
         {
@@ -561,8 +557,8 @@
           "from": "outside",
           "to": "tool_room",
           "side": "west",
-          "x": 0.0,
-          "z": 9.36,
+          "x": 0.3,
+          "z": 7.069,
           "orientation": "vertical",
           "clearOpeningMeters": [
             1.4,
@@ -585,8 +581,42 @@
           ],
           "to": "saw_floor",
           "orientation": "vertical",
-          "x": 3.84,
+          "x": 3.7,
           "z": 5.525,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_tool_room",
+          "separateObject": true,
+          "between": [
+            "tool_room",
+            "primary_circulation"
+          ],
+          "to": "tool_room",
+          "orientation": "vertical",
+          "x": 3.7,
+          "z": 8.613,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_crew_room",
+          "separateObject": true,
+          "between": [
+            "crew_room",
+            "primary_circulation"
+          ],
+          "to": "crew_room",
+          "orientation": "horizontal",
+          "x": 5.52,
+          "z": 8.613,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -602,25 +632,8 @@
           ],
           "to": "timber_sort",
           "orientation": "vertical",
-          "x": 3.84,
-          "z": 8.613,
-          "clearOpeningMeters": [
-            1.2,
-            2.4
-          ],
-          "swing": "in"
-        },
-        {
-          "id": "door_ground_tool_room",
-          "separateObject": true,
-          "between": [
-            "tool_room",
-            "primary_circulation"
-          ],
-          "to": "tool_room",
-          "orientation": "horizontal",
-          "x": 3.84,
-          "z": 8.613,
+          "x": 14.76,
+          "z": 4.429,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -636,24 +649,7 @@
           ],
           "to": "dry_store",
           "orientation": "vertical",
-          "x": 14.16,
-          "z": 2.632,
-          "clearOpeningMeters": [
-            1.2,
-            2.4
-          ],
-          "swing": "in"
-        },
-        {
-          "id": "door_ground_crew_room",
-          "separateObject": true,
-          "between": [
-            "crew_room",
-            "primary_circulation"
-          ],
-          "to": "crew_room",
-          "orientation": "vertical",
-          "x": 14.16,
+          "x": 14.76,
           "z": 6.0,
           "clearOpeningMeters": [
             1.2,
@@ -670,23 +666,76 @@
           ],
           "to": "yard_loading_threshold",
           "orientation": "vertical",
-          "x": 14.16,
-          "z": 11.7,
+          "x": 14.76,
+          "z": 9.84,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_ground_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 8.86,
+          "z": 7.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 8.86,
+          "z": 6.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_ground_cut_BB_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 7.91,
+          "z": 6.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [
         {
           "id": "lumber_mill_main_entry",
           "from": "outside",
-          "to": "saw_floor",
+          "to": "yard_loading_threshold",
           "side": "east",
-          "x": 18,
-          "z": 6.0,
+          "x": 17.7,
+          "z": 7.92,
           "orientation": "vertical",
           "clearOpeningMeters": [
             2.5,
@@ -701,8 +750,8 @@
           "from": "outside",
           "to": "tool_room",
           "side": "west",
-          "x": 0.0,
-          "z": 9.36,
+          "x": 0.3,
+          "z": 7.069,
           "orientation": "vertical",
           "clearOpeningMeters": [
             1.4,
@@ -719,7 +768,7 @@
           "separateFrameGlassShutter": true,
           "serves": "saw_floor",
           "side": "south",
-          "x": 3.84,
+          "x": 3.7,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -728,9 +777,9 @@
           ]
         },
         {
-          "id": "window_ground_timber_sort",
+          "id": "window_ground_tool_room",
           "separateFrameGlassShutter": true,
-          "serves": "timber_sort",
+          "serves": "tool_room",
           "side": "west",
           "x": 0.0,
           "z": 7.069,
@@ -741,13 +790,26 @@
           ]
         },
         {
-          "id": "window_ground_tool_room",
+          "id": "window_ground_crew_room",
           "separateFrameGlassShutter": true,
-          "serves": "tool_room",
+          "serves": "crew_room",
           "side": "north",
-          "x": 3.84,
+          "x": 5.52,
           "z": 12,
           "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_timber_sort",
+          "separateFrameGlassShutter": true,
+          "serves": "timber_sort",
+          "side": "east",
+          "x": 18,
+          "z": 3.295,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -759,20 +821,7 @@
           "serves": "dry_store",
           "side": "east",
           "x": 18,
-          "z": 1.466,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ]
-        },
-        {
-          "id": "window_ground_crew_room",
-          "separateFrameGlassShutter": true,
-          "serves": "crew_room",
-          "side": "east",
-          "x": 18,
-          "z": 4.316,
+          "z": 5.215,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -785,7 +834,7 @@
           "serves": "yard_loading_threshold",
           "side": "east",
           "x": 18,
-          "z": 8.85,
+          "z": 7.92,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -795,10 +844,10 @@
         {
           "id": "window_ground_cut_west",
           "separateFrameGlassShutter": true,
-          "serves": "timber_sort",
+          "serves": "tool_room",
           "side": "west",
           "x": 0.0,
-          "z": 7.8,
+          "z": 6.0,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -809,25 +858,11 @@
         {
           "id": "window_ground_cut_east",
           "separateFrameGlassShutter": true,
-          "serves": "yard_loading_threshold",
+          "serves": "dry_store",
           "side": "east",
           "x": 18,
-          "z": 7.8,
+          "z": 6.0,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "dry_store",
-          "side": "south",
-          "x": 14.4,
-          "z": 0.0,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -837,9 +872,9 @@
         {
           "id": "window_ground_cut_north",
           "separateFrameGlassShutter": true,
-          "serves": "yard_loading_threshold",
+          "serves": "crew_room",
           "side": "north",
-          "x": 14.4,
+          "x": 7.91,
           "z": 12,
           "orientation": "horizontal",
           "openingMeters": [
@@ -856,30 +891,30 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 13.5,
-            "z": 6.7,
-            "width": 1.8,
-            "depth": 2.2,
+            "x": 7.1,
+            "z": 5.0,
+            "width": 1.62,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "yard_loading_threshold"
+          "locatedInRoomId": "vertical_core_hall"
         },
         {
           "coreId": "lumber_mill_goods_platform",
           "type": "goods_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 11.35,
-            "z": 6.7,
-            "width": 1.8,
-            "depth": 1.6,
+            "x": 9.0,
+            "z": 5.0,
+            "width": 1.62,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "yard_loading_threshold"
+          "locatedInRoomId": "vertical_core_hall"
         }
       ],
       "furnishingLayouts": [
@@ -919,51 +954,14 @@
               "id": "saw_floor_protected_aisle",
               "x": 0.3,
               "z": 2.312,
-              "width": 7.08,
+              "width": 6.8,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "saw_floor_door_approach",
-              "x": 3.24,
+              "x": 3.1,
               "z": 0.3,
-              "width": 1.2,
-              "depth": 1.2,
-              "kind": "door_swing_clearance"
-            }
-          ]
-        },
-        {
-          "roomId": "timber_sort",
-          "layoutIntent": "sorted timber",
-          "footprints": [
-            {
-              "id": "ground_timber_sort_timber_rack_1",
-              "kind": "timber_rack",
-              "label": "sorted timber",
-              "symbol": "TIMBER",
-              "x": 0.609,
-              "z": 5.834,
-              "width": 2.0,
-              "depth": 0.791,
-              "orientationDegrees": 0,
-              "count": 1,
-              "sectionHeightMeters": 1.2
-            }
-          ],
-          "protectedClearances": [
-            {
-              "id": "timber_sort_protected_aisle",
-              "x": 0.3,
-              "z": 6.469,
-              "width": 7.08,
-              "depth": 1.2,
-              "kind": "minimum_1_2m_aisle"
-            },
-            {
-              "id": "timber_sort_door_approach",
-              "x": 3.24,
-              "z": 5.525,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -980,7 +978,7 @@
               "label": "task table + wall storage",
               "symbol": "UTILITY",
               "x": 0.609,
-              "z": 8.922,
+              "z": 5.834,
               "width": 1.2,
               "depth": 0.6,
               "orientationDegrees": 0,
@@ -992,52 +990,15 @@
             {
               "id": "tool_room_protected_aisle",
               "x": 0.3,
-              "z": 9.557,
-              "width": 7.08,
+              "z": 6.469,
+              "width": 6.8,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "tool_room_door_approach",
-              "x": 3.24,
-              "z": 8.613,
-              "width": 1.2,
-              "depth": 1.2,
-              "kind": "door_swing_clearance"
-            }
-          ]
-        },
-        {
-          "roomId": "dry_store",
-          "layoutIntent": "racks / crates",
-          "footprints": [
-            {
-              "id": "ground_dry_store_storage_rack_1",
-              "kind": "storage_rack",
-              "label": "racks / crates",
-              "symbol": "RACK",
-              "x": 10.853,
-              "z": 0.533,
-              "width": 1.6,
-              "depth": 0.597,
-              "orientationDegrees": 0,
-              "count": 1,
-              "sectionHeightMeters": 1.5
-            }
-          ],
-          "protectedClearances": [
-            {
-              "id": "dry_store_protected_aisle",
-              "x": 10.62,
-              "z": 0.866,
-              "width": 7.08,
-              "depth": 1.2,
-              "kind": "minimum_1_2m_aisle"
-            },
-            {
-              "id": "dry_store_door_approach",
-              "x": 13.56,
-              "z": 0.3,
+              "x": 3.1,
+              "z": 5.525,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1053,8 +1014,8 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 10.957,
-              "z": 2.969,
+              "x": 0.609,
+              "z": 8.922,
               "width": 1.2,
               "depth": 0.6,
               "orientationDegrees": 0,
@@ -1065,16 +1026,90 @@
           "protectedClearances": [
             {
               "id": "crew_room_protected_aisle",
-              "x": 10.62,
-              "z": 3.716,
-              "width": 7.08,
+              "x": 0.3,
+              "z": 9.557,
+              "width": 10.44,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "crew_room_door_approach",
-              "x": 13.56,
-              "z": 2.632,
+              "x": 4.92,
+              "z": 8.613,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "timber_sort",
+          "layoutIntent": "sorted timber",
+          "footprints": [
+            {
+              "id": "ground_timber_sort_timber_rack_1",
+              "kind": "timber_rack",
+              "label": "sorted timber",
+              "symbol": "TIMBER",
+              "x": 12.047,
+              "z": 2.387,
+              "width": 2.0,
+              "depth": 0.581,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.2
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "timber_sort_protected_aisle",
+              "x": 11.82,
+              "z": 2.695,
+              "width": 5.88,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "timber_sort_door_approach",
+              "x": 14.16,
+              "z": 2.16,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "dry_store",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "ground_dry_store_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 11.977,
+              "z": 4.586,
+              "width": 1.6,
+              "depth": 0.402,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "dry_store_protected_aisle",
+              "x": 11.82,
+              "z": 4.615,
+              "width": 5.88,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "dry_store_door_approach",
+              "x": 14.16,
+              "z": 4.429,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1090,7 +1125,7 @@
               "kind": "storage_rack",
               "label": "racks / crates",
               "symbol": "RACK",
-              "x": 10.97,
+              "x": 12.17,
               "z": 6.35,
               "width": 1.6,
               "depth": 0.6,
@@ -1102,16 +1137,53 @@
           "protectedClearances": [
             {
               "id": "yard_loading_threshold_protected_aisle",
-              "x": 10.62,
-              "z": 8.25,
-              "width": 7.08,
+              "x": 11.82,
+              "z": 7.32,
+              "width": 5.88,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "yard_loading_threshold_door_approach",
-              "x": 13.56,
+              "x": 14.16,
               "z": 6.0,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "ground_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 7.3,
+              "z": 5.2,
+              "width": 1.8,
+              "depth": 0.512,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 7.1,
+              "z": 5.4,
+              "width": 3.52,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 8.26,
+              "z": 5.0,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1122,7 +1194,7 @@
       "clearanceZones": [
         {
           "id": "ground_accessible_route",
-          "x": 9.0,
+          "x": 5.52,
           "z": 0.3,
           "width": 1.5,
           "depth": 11.4,
@@ -1131,20 +1203,20 @@
         {
           "id": "ground_combat_clear",
           "kind": "combat_diameter",
-          "roomId": "yard_loading_threshold",
+          "roomId": "saw_floor",
           "center": [
-            14.16,
-            8.85
+            3.7,
+            2.912
           ],
           "diameter": 4.0
         },
         {
           "id": "ground_camera_backoff",
           "kind": "camera_backoff",
-          "roomId": "yard_loading_threshold",
+          "roomId": "saw_floor",
           "center": [
-            14.16,
-            8.85
+            3.7,
+            2.912
           ],
           "radius": 2.5
         }
@@ -1154,7 +1226,7 @@
           "id": "light_ground_saw_floor",
           "type": "lighting",
           "roomId": "saw_floor",
-          "x": 3.84,
+          "x": 3.7,
           "z": 2.912
         },
         {
@@ -1165,74 +1237,88 @@
           "z": 0.9
         },
         {
-          "id": "light_ground_timber_sort",
-          "type": "lighting",
-          "roomId": "timber_sort",
-          "x": 3.84,
-          "z": 7.069
-        },
-        {
-          "id": "interaction_ground_timber_sort",
-          "type": "interaction",
-          "roomId": "timber_sort",
-          "x": 0.9,
-          "z": 6.125
-        },
-        {
           "id": "light_ground_tool_room",
           "type": "lighting",
           "roomId": "tool_room",
-          "x": 3.84,
-          "z": 10.157
+          "x": 3.7,
+          "z": 7.069
         },
         {
           "id": "interaction_ground_tool_room",
           "type": "interaction",
           "roomId": "tool_room",
           "x": 0.9,
-          "z": 9.213
-        },
-        {
-          "id": "light_ground_dry_store",
-          "type": "lighting",
-          "roomId": "dry_store",
-          "x": 14.16,
-          "z": 1.466
-        },
-        {
-          "id": "interaction_ground_dry_store",
-          "type": "interaction",
-          "roomId": "dry_store",
-          "x": 11.22,
-          "z": 0.9
+          "z": 6.125
         },
         {
           "id": "light_ground_crew_room",
           "type": "lighting",
           "roomId": "crew_room",
-          "x": 14.16,
-          "z": 4.316
+          "x": 5.52,
+          "z": 10.157
         },
         {
           "id": "interaction_ground_crew_room",
           "type": "interaction",
           "roomId": "crew_room",
-          "x": 11.22,
-          "z": 3.232
+          "x": 0.9,
+          "z": 9.213
+        },
+        {
+          "id": "light_ground_timber_sort",
+          "type": "lighting",
+          "roomId": "timber_sort",
+          "x": 14.76,
+          "z": 3.295
+        },
+        {
+          "id": "interaction_ground_timber_sort",
+          "type": "interaction",
+          "roomId": "timber_sort",
+          "x": 12.42,
+          "z": 2.76
+        },
+        {
+          "id": "light_ground_dry_store",
+          "type": "lighting",
+          "roomId": "dry_store",
+          "x": 14.76,
+          "z": 5.215
+        },
+        {
+          "id": "interaction_ground_dry_store",
+          "type": "interaction",
+          "roomId": "dry_store",
+          "x": 12.42,
+          "z": 4.953
         },
         {
           "id": "light_ground_yard_loading_threshold",
           "type": "lighting",
           "roomId": "yard_loading_threshold",
-          "x": 14.16,
-          "z": 8.85
+          "x": 14.76,
+          "z": 7.92
         },
         {
           "id": "interaction_ground_yard_loading_threshold",
           "type": "interaction",
           "roomId": "yard_loading_threshold",
-          "x": 11.22,
+          "x": 12.42,
           "z": 6.6
+        },
+        {
+          "id": "light_ground_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 8.86,
+          "z": 6.0
+        },
+        {
+          "id": "interaction_ground_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 7.7,
+          "z": 5.6
         }
       ],
       "sectionCutLines": [
@@ -1241,11 +1327,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            7.8
+            6.0
           ],
           "to": [
             17.7,
-            7.8
+            6.0
           ],
           "cutsVerticalCoreId": "lumber_mill_stair_core"
         },
@@ -1253,11 +1339,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            14.4,
+            7.91,
             0.3
           ],
           "to": [
-            14.4,
+            7.91,
             11.7
           ],
           "cutsVerticalCoreId": "lumber_mill_stair_core"
@@ -1275,35 +1361,35 @@
           "id": "blade_store",
           "x": 0.3,
           "z": 0.3,
-          "width": 3.559,
-          "depth": 5.7,
+          "width": 10.44,
+          "depth": 3.31,
           "kind": "room",
           "purpose": "blade store"
         },
         {
-          "id": "pattern_rack",
-          "x": 3.859,
-          "z": 0.3,
-          "width": 5.141,
-          "depth": 5.7,
-          "kind": "room",
-          "purpose": "pattern rack"
-        },
-        {
           "id": "foreman_gallery",
-          "x": 9.0,
-          "z": 0.3,
-          "width": 8.7,
-          "depth": 5.7,
+          "x": 0.3,
+          "z": 3.61,
+          "width": 6.8,
+          "depth": 8.09,
           "kind": "room",
           "purpose": "foreman gallery"
         },
         {
+          "id": "pattern_rack",
+          "x": 11.82,
+          "z": 2.16,
+          "width": 5.88,
+          "depth": 4.538,
+          "kind": "room",
+          "purpose": "pattern rack"
+        },
+        {
           "id": "landing",
-          "x": 0.3,
-          "z": 6.0,
-          "width": 17.4,
-          "depth": 5.7,
+          "x": 7.1,
+          "z": 5.0,
+          "width": 3.52,
+          "depth": 2.0,
           "kind": "room",
           "purpose": "landing"
         }
@@ -1331,10 +1417,10 @@
       "exteriorVoidsAndCourts": [],
       "circulation": {
         "id": "primary_circulation",
-        "x": 0.3,
-        "z": 6.24,
-        "width": 17.4,
-        "depth": 1.5,
+        "x": 5.52,
+        "z": 0.3,
+        "width": 1.5,
+        "depth": 11.4,
         "kind": "accessible_route_envelope"
       },
       "circulationRoutes": [
@@ -1344,12 +1430,24 @@
           "accessible": true,
           "points": [
             [
-              0.3,
-              6.24
+              5.52,
+              0.3
             ],
             [
-              17.7,
-              6.24
+              5.52,
+              6.0
+            ],
+            [
+              8.86,
+              6.0
+            ],
+            [
+              8.86,
+              11.7
+            ],
+            [
+              5.52,
+              11.7
             ]
           ]
         }
@@ -1360,11 +1458,11 @@
           "primary_circulation"
         ],
         [
-          "pattern_rack",
+          "foreman_gallery",
           "primary_circulation"
         ],
         [
-          "foreman_gallery",
+          "pattern_rack",
           "primary_circulation"
         ],
         [
@@ -1382,25 +1480,8 @@
           ],
           "to": "blade_store",
           "orientation": "vertical",
-          "x": 2.079,
-          "z": 6.0,
-          "clearOpeningMeters": [
-            1.2,
-            2.4
-          ],
-          "swing": "in"
-        },
-        {
-          "id": "door_loft_pattern_rack",
-          "separateObject": true,
-          "between": [
-            "pattern_rack",
-            "primary_circulation"
-          ],
-          "to": "pattern_rack",
-          "orientation": "vertical",
-          "x": 6.429,
-          "z": 6.0,
+          "x": 5.52,
+          "z": 3.61,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -1416,8 +1497,25 @@
           ],
           "to": "foreman_gallery",
           "orientation": "vertical",
-          "x": 13.35,
-          "z": 6.0,
+          "x": 3.7,
+          "z": 11.7,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_loft_pattern_rack",
+          "separateObject": true,
+          "between": [
+            "pattern_rack",
+            "primary_circulation"
+          ],
+          "to": "pattern_rack",
+          "orientation": "vertical",
+          "x": 14.76,
+          "z": 6.698,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -1433,13 +1531,49 @@
           ],
           "to": "landing",
           "orientation": "vertical",
-          "x": 9.0,
-          "z": 11.7,
+          "x": 8.86,
+          "z": 7.0,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_loft_cut_AA_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "horizontal",
+          "x": 8.86,
+          "z": 6.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_loft_cut_BB_landing",
+          "separateObject": true,
+          "between": [
+            "landing",
+            "primary_circulation"
+          ],
+          "to": "landing",
+          "orientation": "vertical",
+          "x": 7.91,
+          "z": 6.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [],
@@ -1449,20 +1583,7 @@
           "separateFrameGlassShutter": true,
           "serves": "blade_store",
           "side": "south",
-          "x": 2.079,
-          "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ]
-        },
-        {
-          "id": "window_loft_pattern_rack",
-          "separateFrameGlassShutter": true,
-          "serves": "pattern_rack",
-          "side": "south",
-          "x": 6.429,
+          "x": 5.52,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -1474,23 +1595,23 @@
           "id": "window_loft_foreman_gallery",
           "separateFrameGlassShutter": true,
           "serves": "foreman_gallery",
-          "side": "south",
-          "x": 13.35,
-          "z": 0.0,
-          "orientation": "horizontal",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.655,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
           ]
         },
         {
-          "id": "window_loft_landing",
+          "id": "window_loft_pattern_rack",
           "separateFrameGlassShutter": true,
-          "serves": "landing",
-          "side": "north",
-          "x": 9.0,
-          "z": 12,
-          "orientation": "horizontal",
+          "serves": "pattern_rack",
+          "side": "east",
+          "x": 18,
+          "z": 4.429,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -1499,10 +1620,10 @@
         {
           "id": "window_loft_cut_west",
           "separateFrameGlassShutter": true,
-          "serves": "blade_store",
+          "serves": "foreman_gallery",
           "side": "west",
           "x": 0.0,
-          "z": 7.8,
+          "z": 6.0,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1513,10 +1634,10 @@
         {
           "id": "window_loft_cut_east",
           "separateFrameGlassShutter": true,
-          "serves": "foreman_gallery",
+          "serves": "pattern_rack",
           "side": "east",
           "x": 18,
-          "z": 7.8,
+          "z": 6.0,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1527,24 +1648,10 @@
         {
           "id": "window_loft_cut_south",
           "separateFrameGlassShutter": true,
-          "serves": "foreman_gallery",
+          "serves": "blade_store",
           "side": "south",
-          "x": 14.4,
+          "x": 7.91,
           "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_loft_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "landing",
-          "side": "north",
-          "x": 14.4,
-          "z": 12,
           "orientation": "horizontal",
           "openingMeters": [
             1.2,
@@ -1560,10 +1667,10 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 13.5,
-            "z": 6.7,
-            "width": 1.8,
-            "depth": 2.2,
+            "x": 7.1,
+            "z": 5.0,
+            "width": 1.62,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1575,10 +1682,10 @@
           "type": "goods_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 11.35,
-            "z": 6.7,
-            "width": 1.8,
-            "depth": 1.6,
+            "x": 9.0,
+            "z": 5.0,
+            "width": 1.62,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1596,8 +1703,8 @@
               "kind": "storage_rack",
               "label": "racks / crates",
               "symbol": "RACK",
-              "x": 0.65,
-              "z": 0.65,
+              "x": 0.631,
+              "z": 0.631,
               "width": 1.6,
               "depth": 0.6,
               "orientationDegrees": 0,
@@ -1609,51 +1716,14 @@
             {
               "id": "blade_store_protected_aisle",
               "x": 0.3,
-              "z": 2.55,
-              "width": 3.559,
+              "z": 1.355,
+              "width": 10.44,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "blade_store_door_approach",
-              "x": 1.48,
-              "z": 0.3,
-              "width": 1.2,
-              "depth": 1.2,
-              "kind": "door_swing_clearance"
-            }
-          ]
-        },
-        {
-          "roomId": "pattern_rack",
-          "layoutIntent": "archive shelving",
-          "footprints": [
-            {
-              "id": "loft_pattern_rack_shelf_bay_1",
-              "kind": "shelf_bay",
-              "label": "archive shelving",
-              "symbol": "SHELF",
-              "x": 4.209,
-              "z": 0.65,
-              "width": 1.6,
-              "depth": 0.45,
-              "orientationDegrees": 0,
-              "count": 1,
-              "sectionHeightMeters": 2.0
-            }
-          ],
-          "protectedClearances": [
-            {
-              "id": "pattern_rack_protected_aisle",
-              "x": 3.859,
-              "z": 2.55,
-              "width": 5.141,
-              "depth": 1.2,
-              "kind": "minimum_1_2m_aisle"
-            },
-            {
-              "id": "pattern_rack_door_approach",
-              "x": 5.829,
+              "x": 4.92,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -1670,8 +1740,8 @@
               "kind": "desk",
               "label": "desk + chair",
               "symbol": "DESK",
-              "x": 9.35,
-              "z": 0.65,
+              "x": 0.65,
+              "z": 3.96,
               "width": 1.4,
               "depth": 0.7,
               "orientationDegrees": 0,
@@ -1682,16 +1752,53 @@
           "protectedClearances": [
             {
               "id": "foreman_gallery_protected_aisle",
-              "x": 9.0,
-              "z": 2.55,
-              "width": 8.7,
-              "depth": 1.2,
+              "x": 3.1,
+              "z": 3.61,
+              "width": 1.2,
+              "depth": 8.09,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "foreman_gallery_door_approach",
-              "x": 12.75,
-              "z": 0.3,
+              "x": 3.1,
+              "z": 3.61,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "pattern_rack",
+          "layoutIntent": "archive shelving",
+          "footprints": [
+            {
+              "id": "loft_pattern_rack_shelf_bay_1",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "symbol": "SHELF",
+              "x": 12.17,
+              "z": 2.51,
+              "width": 1.6,
+              "depth": 0.45,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 2.0
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "pattern_rack_protected_aisle",
+              "x": 11.82,
+              "z": 3.829,
+              "width": 5.88,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "pattern_rack_door_approach",
+              "x": 14.16,
+              "z": 2.16,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1707,10 +1814,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 0.65,
-              "z": 6.35,
+              "x": 7.3,
+              "z": 5.2,
               "width": 1.2,
-              "depth": 0.6,
+              "depth": 0.512,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -1719,16 +1826,16 @@
           "protectedClearances": [
             {
               "id": "landing_protected_aisle",
-              "x": 0.3,
-              "z": 8.25,
-              "width": 17.4,
+              "x": 7.1,
+              "z": 5.4,
+              "width": 3.52,
               "depth": 1.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "landing_door_approach",
-              "x": 8.4,
-              "z": 6.0,
+              "x": 8.26,
+              "z": 5.0,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1739,29 +1846,29 @@
       "clearanceZones": [
         {
           "id": "loft_accessible_route",
-          "x": 0.3,
-          "z": 6.24,
-          "width": 17.4,
-          "depth": 1.5,
+          "x": 5.52,
+          "z": 0.3,
+          "width": 1.5,
+          "depth": 11.4,
           "kind": "primary_accessible_route"
         },
         {
           "id": "loft_combat_clear",
           "kind": "combat_diameter",
-          "roomId": "landing",
+          "roomId": "foreman_gallery",
           "center": [
-            9.0,
-            8.85
+            3.7,
+            7.655
           ],
           "diameter": 4.0
         },
         {
           "id": "loft_camera_backoff",
           "kind": "camera_backoff",
-          "roomId": "landing",
+          "roomId": "foreman_gallery",
           "center": [
-            9.0,
-            8.85
+            3.7,
+            7.655
           ],
           "radius": 2.5
         }
@@ -1771,8 +1878,8 @@
           "id": "light_loft_blade_store",
           "type": "lighting",
           "roomId": "blade_store",
-          "x": 2.079,
-          "z": 3.15
+          "x": 5.52,
+          "z": 1.955
         },
         {
           "id": "interaction_loft_blade_store",
@@ -1782,46 +1889,46 @@
           "z": 0.9
         },
         {
-          "id": "light_loft_pattern_rack",
-          "type": "lighting",
-          "roomId": "pattern_rack",
-          "x": 6.429,
-          "z": 3.15
-        },
-        {
-          "id": "interaction_loft_pattern_rack",
-          "type": "interaction",
-          "roomId": "pattern_rack",
-          "x": 4.459,
-          "z": 0.9
-        },
-        {
           "id": "light_loft_foreman_gallery",
           "type": "lighting",
           "roomId": "foreman_gallery",
-          "x": 13.35,
-          "z": 3.15
+          "x": 3.7,
+          "z": 7.655
         },
         {
           "id": "interaction_loft_foreman_gallery",
           "type": "interaction",
           "roomId": "foreman_gallery",
-          "x": 9.6,
-          "z": 0.9
+          "x": 0.9,
+          "z": 4.21
+        },
+        {
+          "id": "light_loft_pattern_rack",
+          "type": "lighting",
+          "roomId": "pattern_rack",
+          "x": 14.76,
+          "z": 4.429
+        },
+        {
+          "id": "interaction_loft_pattern_rack",
+          "type": "interaction",
+          "roomId": "pattern_rack",
+          "x": 12.42,
+          "z": 2.76
         },
         {
           "id": "light_loft_landing",
           "type": "lighting",
           "roomId": "landing",
-          "x": 9.0,
-          "z": 8.85
+          "x": 8.86,
+          "z": 6.0
         },
         {
           "id": "interaction_loft_landing",
           "type": "interaction",
           "roomId": "landing",
-          "x": 0.9,
-          "z": 6.6
+          "x": 7.7,
+          "z": 5.6
         }
       ],
       "sectionCutLines": [
@@ -1830,11 +1937,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            7.8
+            6.0
           ],
           "to": [
             17.7,
-            7.8
+            6.0
           ],
           "cutsVerticalCoreId": "lumber_mill_stair_core"
         },
@@ -1842,11 +1949,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            14.4,
+            7.91,
             0.3
           ],
           "to": [
-            14.4,
+            7.91,
             11.7
           ],
           "cutsVerticalCoreId": "lumber_mill_stair_core"
@@ -1862,10 +1969,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 13.5,
-        "z": 6.7,
-        "width": 1.8,
-        "depth": 2.2,
+        "x": 7.1,
+        "z": 5.0,
+        "width": 1.62,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1894,10 +2001,10 @@
       "type": "goods_platform",
       "footprint": {
         "id": "lift_footprint",
-        "x": 11.35,
-        "z": 6.7,
-        "width": 1.8,
-        "depth": 1.6,
+        "x": 9.0,
+        "z": 5.0,
+        "width": 1.62,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1927,7 +2034,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 7.8,
+      "cutCoordinateMeters": 6.0,
       "spanMeters": 18,
       "levels": [
         {
@@ -1944,25 +2051,57 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "timber_sort",
+          "roomId": "tool_room",
           "startMeters": 0.3,
-          "endMeters": 7.38,
+          "endMeters": 7.1,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "dry_store",
+          "startMeters": 11.82,
+          "endMeters": 17.7,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.5
         },
         {
           "levelId": "ground",
           "roomId": "yard_loading_threshold",
-          "startMeters": 10.62,
+          "startMeters": 11.82,
           "endMeters": 17.7,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.5
         },
         {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "startMeters": 7.1,
+          "endMeters": 10.62,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "levelId": "loft",
+          "roomId": "foreman_gallery",
+          "startMeters": 0.3,
+          "endMeters": 7.1,
+          "baseElevationMeters": 3.8,
+          "clearHeightMeters": 2.4
+        },
+        {
+          "levelId": "loft",
+          "roomId": "pattern_rack",
+          "startMeters": 11.82,
+          "endMeters": 17.7,
+          "baseElevationMeters": 3.8,
+          "clearHeightMeters": 2.4
+        },
+        {
           "levelId": "loft",
           "roomId": "landing",
-          "startMeters": 0.3,
-          "endMeters": 17.7,
+          "startMeters": 7.1,
+          "endMeters": 10.62,
           "baseElevationMeters": 3.8,
           "clearHeightMeters": 2.4
         }
@@ -1989,8 +2128,8 @@
             "loft"
           ],
           "direction": "UP clockwise",
-          "startMeters": 13.5,
-          "endMeters": 15.3
+          "startMeters": 7.1,
+          "endMeters": 8.72
         },
         {
           "coreId": "lumber_mill_goods_platform",
@@ -2000,8 +2139,8 @@
             "loft"
           ],
           "direction": "vertical platform",
-          "startMeters": 11.35,
-          "endMeters": 13.15
+          "startMeters": 9.0,
+          "endMeters": 10.62
         }
       ],
       "apertureSlices": [
@@ -2011,9 +2150,9 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 7.8,
+          "z": 6.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 7.8
+          "orthogonalMeters": 6.0
         },
         {
           "levelId": "ground",
@@ -2021,9 +2160,49 @@
           "kind": "window",
           "side": "east",
           "x": 18,
-          "z": 7.8,
+          "z": 6.0,
           "positionMeters": 18,
-          "orthogonalMeters": 7.8
+          "orthogonalMeters": 6.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_saw_floor",
+          "kind": "door",
+          "side": null,
+          "x": 3.7,
+          "z": 5.525,
+          "positionMeters": 3.7,
+          "orthogonalMeters": 5.525
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_dry_store",
+          "kind": "door",
+          "side": null,
+          "x": 14.76,
+          "z": 6.0,
+          "positionMeters": 14.76,
+          "orthogonalMeters": 6.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 8.86,
+          "z": 6.0,
+          "positionMeters": 8.86,
+          "orthogonalMeters": 6.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 7.91,
+          "z": 6.0,
+          "positionMeters": 7.91,
+          "orthogonalMeters": 6.0
         },
         {
           "levelId": "loft",
@@ -2031,9 +2210,9 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 7.8,
+          "z": 6.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 7.8
+          "orthogonalMeters": 6.0
         },
         {
           "levelId": "loft",
@@ -2041,34 +2220,86 @@
           "kind": "window",
           "side": "east",
           "x": 18,
-          "z": 7.8,
+          "z": 6.0,
           "positionMeters": 18,
-          "orthogonalMeters": 7.8
+          "orthogonalMeters": 6.0
+        },
+        {
+          "levelId": "loft",
+          "openingId": "door_loft_cut_AA_landing",
+          "kind": "door",
+          "side": null,
+          "x": 8.86,
+          "z": 6.0,
+          "positionMeters": 8.86,
+          "orthogonalMeters": 6.0
+        },
+        {
+          "levelId": "loft",
+          "openingId": "door_loft_cut_BB_landing",
+          "kind": "door",
+          "side": null,
+          "x": 7.91,
+          "z": 6.0,
+          "positionMeters": 7.91,
+          "orthogonalMeters": 6.0
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "timber_sort",
-          "kind": "timber_rack",
-          "symbol": "TIMBER",
+          "roomId": "tool_room",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
           "positionMeters": 0.609,
-          "sectionHeightMeters": 1.2
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "dry_store",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 11.977,
+          "sectionHeightMeters": 1.5
         },
         {
           "levelId": "ground",
           "roomId": "yard_loading_threshold",
           "kind": "storage_rack",
           "symbol": "RACK",
-          "positionMeters": 10.97,
+          "positionMeters": 12.17,
           "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 7.3,
+          "sectionHeightMeters": 1.3
+        },
+        {
+          "levelId": "loft",
+          "roomId": "foreman_gallery",
+          "kind": "desk",
+          "symbol": "DESK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "loft",
+          "roomId": "pattern_rack",
+          "kind": "shelf_bay",
+          "symbol": "SHELF",
+          "positionMeters": 12.17,
+          "sectionHeightMeters": 2.0
         },
         {
           "levelId": "loft",
           "roomId": "landing",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 0.65,
+          "positionMeters": 7.3,
           "sectionHeightMeters": 0.8
         }
       ],
@@ -2090,7 +2321,7 @@
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 14.4,
+      "cutCoordinateMeters": 7.91,
       "spanMeters": 12,
       "levels": [
         {
@@ -2107,41 +2338,33 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "dry_store",
-          "startMeters": 0.3,
-          "endMeters": 2.6319999999999997,
-          "baseElevationMeters": 0,
-          "clearHeightMeters": 3.5
-        },
-        {
-          "levelId": "ground",
           "roomId": "crew_room",
-          "startMeters": 2.632,
-          "endMeters": 6.0,
+          "startMeters": 8.613,
+          "endMeters": 11.701,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.5
         },
         {
           "levelId": "ground",
-          "roomId": "yard_loading_threshold",
-          "startMeters": 6.0,
-          "endMeters": 11.7,
+          "roomId": "vertical_core_hall",
+          "startMeters": 5.0,
+          "endMeters": 7.0,
           "baseElevationMeters": 0,
           "clearHeightMeters": 3.5
         },
         {
           "levelId": "loft",
-          "roomId": "foreman_gallery",
+          "roomId": "blade_store",
           "startMeters": 0.3,
-          "endMeters": 6.0,
+          "endMeters": 3.61,
           "baseElevationMeters": 3.8,
           "clearHeightMeters": 2.4
         },
         {
           "levelId": "loft",
           "roomId": "landing",
-          "startMeters": 6.0,
-          "endMeters": 11.7,
+          "startMeters": 5.0,
+          "endMeters": 7.0,
           "baseElevationMeters": 3.8,
           "clearHeightMeters": 2.4
         }
@@ -2168,8 +2391,8 @@
             "loft"
           ],
           "direction": "UP clockwise",
-          "startMeters": 6.7,
-          "endMeters": 8.9
+          "startMeters": 5.0,
+          "endMeters": 7.0
         },
         {
           "coreId": "lumber_mill_goods_platform",
@@ -2179,121 +2402,83 @@
             "loft"
           ],
           "direction": "vertical platform",
-          "startMeters": 6.7,
-          "endMeters": 8.3
+          "startMeters": 5.0,
+          "endMeters": 7.0
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 14.4,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 14.4
-        },
-        {
-          "levelId": "ground",
           "openingId": "window_ground_cut_north",
           "kind": "window",
           "side": "north",
-          "x": 14.4,
+          "x": 7.91,
           "z": 12,
           "positionMeters": 12,
-          "orthogonalMeters": 14.4
+          "orthogonalMeters": 7.91
         },
         {
           "levelId": "ground",
-          "openingId": "door_ground_dry_store",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
           "kind": "door",
           "side": null,
-          "x": 14.16,
-          "z": 2.632,
-          "positionMeters": 2.632,
-          "orthogonalMeters": 14.16
-        },
-        {
-          "levelId": "ground",
-          "openingId": "door_ground_crew_room",
-          "kind": "door",
-          "side": null,
-          "x": 14.16,
+          "x": 7.91,
           "z": 6.0,
           "positionMeters": 6.0,
-          "orthogonalMeters": 14.16
-        },
-        {
-          "levelId": "ground",
-          "openingId": "door_ground_yard_loading_threshold",
-          "kind": "door",
-          "side": null,
-          "x": 14.16,
-          "z": 11.7,
-          "positionMeters": 11.7,
-          "orthogonalMeters": 14.16
+          "orthogonalMeters": 7.91
         },
         {
           "levelId": "loft",
           "openingId": "window_loft_cut_south",
           "kind": "window",
           "side": "south",
-          "x": 14.4,
+          "x": 7.91,
           "z": 0.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 14.4
+          "orthogonalMeters": 7.91
         },
         {
           "levelId": "loft",
-          "openingId": "window_loft_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 14.4,
-          "z": 12,
-          "positionMeters": 12,
-          "orthogonalMeters": 14.4
+          "openingId": "door_loft_cut_BB_landing",
+          "kind": "door",
+          "side": null,
+          "x": 7.91,
+          "z": 6.0,
+          "positionMeters": 6.0,
+          "orthogonalMeters": 7.91
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "dry_store",
-          "kind": "storage_rack",
-          "symbol": "RACK",
-          "positionMeters": 0.533,
-          "sectionHeightMeters": 1.5
-        },
-        {
-          "levelId": "ground",
           "roomId": "crew_room",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 2.969,
+          "positionMeters": 8.922,
           "sectionHeightMeters": 0.8
         },
         {
           "levelId": "ground",
-          "roomId": "yard_loading_threshold",
-          "kind": "storage_rack",
-          "symbol": "RACK",
-          "positionMeters": 6.35,
-          "sectionHeightMeters": 1.5
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 5.2,
+          "sectionHeightMeters": 1.3
         },
         {
           "levelId": "loft",
-          "roomId": "foreman_gallery",
-          "kind": "desk",
-          "symbol": "DESK",
-          "positionMeters": 0.65,
-          "sectionHeightMeters": 0.8
+          "roomId": "blade_store",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 0.631,
+          "sectionHeightMeters": 1.5
         },
         {
           "levelId": "loft",
           "roomId": "landing",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 6.35,
+          "positionMeters": 5.2,
           "sectionHeightMeters": 0.8
         }
       ],
