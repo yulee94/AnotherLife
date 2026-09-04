@@ -22,9 +22,25 @@ SLICE_DIR = (
     / "ProductionSlices"
     / "FaultCrownedColossusV001"
 )
+CINDERMAW_SLICE_DIR = (
+    REPO_ROOT
+    / "unity"
+    / "Docs"
+    / "Terrestrials"
+    / "RealmCreatureProductionSourceV001"
+    / "ProductionSlices"
+    / "CindermawSalamanderV001"
+)
 DEFAULT_PLAN = SLICE_DIR / "fault_crowned_colossus_production_slice_plan_v001.json"
 DEFAULT_SCHEMA = SLICE_DIR / "realm_creature_production_slice.schema.json"
 DEFAULT_QUALIFICATION = SLICE_DIR / "fault_crowned_colossus_qualification_manifest_v001.json"
+DEFAULT_CINDERMAW_PLAN = (
+    CINDERMAW_SLICE_DIR / "cindermaw_salamander_production_slice_plan_v001.json"
+)
+DEFAULT_CINDERMAW_SCHEMA = CINDERMAW_SLICE_DIR / "realm_creature_production_slice.schema.json"
+DEFAULT_CINDERMAW_QUALIFICATION = (
+    CINDERMAW_SLICE_DIR / "cindermaw_salamander_qualification_manifest_v001.json"
+)
 SOURCE_MANIFEST = (
     REPO_ROOT
     / "unity"
@@ -42,15 +58,29 @@ EXPECTED_REQUIRED_MOTIONS = {
     "attack.special",
     "skill.anticipation",
 }
-EXPECTED_REVIEW_FILES = {
-    "lod0_bind": "fault_crowned_colossus_lod0_bind_v001.png",
-    "lod1_bind": "fault_crowned_colossus_lod1_bind_v001.png",
-    "lod2_bind": "fault_crowned_colossus_lod2_bind_v001.png",
-    "locomotion_walk": "fault_crowned_colossus_locomotion_walk_v001.png",
-    "attack_basic": "fault_crowned_colossus_attack_basic_v001.png",
-    "attack_special": "fault_crowned_colossus_attack_special_v001.png",
-    "skill_anticipation": "fault_crowned_colossus_skill_anticipation_v001.png",
-}
+
+
+def review_slug_from_plan(plan: dict[str, Any]) -> str:
+    lod0 = str((plan.get("lodPolicy") or {}).get("levels", [{}])[0].get("object") or "")
+    name = lod0[4:] if lod0.startswith("GEO_") else lod0
+    if name.endswith("_LOD0"):
+        name = name[:-5]
+    return name
+
+
+def expected_review_files(slug: str) -> dict[str, str]:
+    return {
+        "lod0_bind": f"{slug}_lod0_bind_v001.png",
+        "lod1_bind": f"{slug}_lod1_bind_v001.png",
+        "lod2_bind": f"{slug}_lod2_bind_v001.png",
+        "locomotion_walk": f"{slug}_locomotion_walk_v001.png",
+        "attack_basic": f"{slug}_attack_basic_v001.png",
+        "attack_special": f"{slug}_attack_special_v001.png",
+        "skill_anticipation": f"{slug}_skill_anticipation_v001.png",
+    }
+
+
+EXPECTED_REVIEW_FILES = expected_review_files("fault_crowned_colossus")
 
 
 class SliceValidationError(RuntimeError):
@@ -324,7 +354,8 @@ def _validate_qualification(
         path.replace("\\", "/").rsplit("/", 1)[-1]
         for path in review_paths
     }
-    for label, expected_name in EXPECTED_REVIEW_FILES.items():
+    required_reviews = expected_review_files(review_slug_from_plan(plan))
+    for label, expected_name in required_reviews.items():
         if expected_name not in review_names:
             issues.append(f"RequiredReviewEvidenceMissing:{label}")
     review_root = str(plan["outputs"]["reviewDirectory"]).replace("\\", "/").rstrip("/") + "/"
@@ -470,6 +501,14 @@ def validate_slice(
 
 def validate_default_slice() -> dict[str, Any]:
     return validate_slice()
+
+
+def validate_cindermaw_slice() -> dict[str, Any]:
+    return validate_slice(
+        plan_path=DEFAULT_CINDERMAW_PLAN,
+        schema_path=DEFAULT_CINDERMAW_SCHEMA,
+        qualification_path=DEFAULT_CINDERMAW_QUALIFICATION,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
