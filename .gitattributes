@@ -14,6 +14,7 @@
 /unity/Assets/AL/StreamingAssets/GameData/al_enabled_scene_manifest.v1.json   text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_main_quest_line_runtime.v1.json  text eol=lf
+/unity/Assets/AL/StreamingAssets/GameData/al_boss_reward_source_catalog.json  text eol=lf
 /unity/Packages/packages-lock.json                                            text eol=lf
 
 # Deterministic QA policy, baseline, evidence schema, and captured reports.
