@@ -17,7 +17,7 @@ namespace AL.Tests.EditMode
     {
         private const string ProfileId = "alp_0123456789abcdef0123456789abcdef";
         private const string EligibleCatalogJson =
-            "{\"schemaVersion\":1,\"catalogId\":\"kingdom_production_profile_v1\",\"productionEligible\":true,\"sourceRevision\":\"test-source-v1\",\"authorityLedgerId\":\"al_six_family_production_authority_v1\",\"contributions\":[{\"id\":\"farm_food\",\"resourceId\":\"food\",\"buildingId\":\"farm\",\"minBuildingLevel\":1,\"ratePerLevelPerSecond\":2.0,\"capPerTick\":1.5,\"realmIds\":[\"stonehold\"]},{\"id\":\"gold_mine_gold\",\"resourceId\":\"gold\",\"buildingId\":\"gold_mine\",\"minBuildingLevel\":1,\"ratePerLevelPerSecond\":1.0,\"capPerTick\":0.0,\"realmIds\":[\"stonehold\"]}]}";
+            "{\"schemaVersion\":1,\"catalogId\":\"kingdom_production_profile_v1\",\"productionEligible\":true,\"sourceRevision\":\"test-source-v1\",\"authorityLedgerId\":\"al_six_family_production_authority_v1\",\"maxOfflineElapsedSeconds\":3600,\"contributions\":[{\"id\":\"farm_food\",\"resourceId\":\"food\",\"buildingId\":\"farm\",\"minBuildingLevel\":1,\"ratePerLevelPerSecond\":2.0,\"capPerTick\":1.5,\"realmIds\":[\"stonehold\"]},{\"id\":\"gold_mine_gold\",\"resourceId\":\"gold\",\"buildingId\":\"gold_mine\",\"minBuildingLevel\":1,\"ratePerLevelPerSecond\":1.0,\"capPerTick\":0.0,\"realmIds\":[\"stonehold\"]}]}";
 
         [Test]
         public void LiveAuthorityLedgerIsBoundAndNotProductionEligible()
@@ -110,6 +110,35 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(first.Contributions.Count, second.Contributions.Count);
             Assert.AreEqual(first.Contributions[0].Amount, second.Contributions[0].Amount, 1e-12);
             Assert.AreEqual(first.Contributions[1].Amount, second.Contributions[1].Amount, 1e-12);
+        }
+
+        [Test]
+        public void CatchUpContributionsScaleAndHonorElapsedCap()
+        {
+            KingdomProductionProfileSnapshot catalog = LoadEligibleCatalog();
+            FakeSaveGameService save = CreateWritableSave();
+            var provider = new KingdomProductionContributionProvider(save, catalog);
+
+            EconomyProductionContributionSnapshot snapshot = provider.BuildCatchUpContributions(10);
+
+            Assert.AreEqual(EconomyProductionSourceStatus.Available, snapshot.Status);
+            Assert.AreEqual(2, snapshot.Contributions.Count);
+            Assert.AreEqual(15d, snapshot.Contributions[0].Amount, 1e-12);
+            Assert.AreEqual(10d, snapshot.Contributions[1].Amount, 1e-12);
+        }
+
+        [Test]
+        public void CatchUpRejectsElapsedAboveCatalogPolicy()
+        {
+            KingdomProductionProfileSnapshot catalog = LoadEligibleCatalog();
+            FakeSaveGameService save = CreateWritableSave();
+            var provider = new KingdomProductionContributionProvider(save, catalog);
+
+            EconomyProductionContributionSnapshot snapshot =
+                provider.BuildCatchUpContributions(3601);
+
+            Assert.AreEqual(EconomyProductionSourceStatus.Unavailable, snapshot.Status);
+            Assert.AreEqual(EconomyDiagnosticCodes.ProductionElapsed, snapshot.Diagnostics[0].Code);
         }
 
         [Test]
