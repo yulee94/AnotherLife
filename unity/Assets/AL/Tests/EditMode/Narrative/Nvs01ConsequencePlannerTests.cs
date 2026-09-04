@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using AL.ChampionMode.Encounter;
 using AL.Core.SaveAuthority;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
@@ -51,6 +52,27 @@ namespace AL.Tests.EditMode.Narrative
                 "25a5170334fca571abe1035eacf448955e8eab1124ff08643f7d16be9a1b69dd",
                 Nvs01ConsequenceContract.PacketSha256);
             Assert.AreEqual(8247, Nvs01ConsequenceContract.PacketByteLength);
+            Assert.AreEqual(
+                "oathmark",
+                Nvs01ConsequenceContract.OathmarkTechnicalCurrencyId);
+            Assert.AreEqual(
+                500,
+                Nvs01ConsequenceContract.OathmarkAmount);
+            Assert.AreEqual(
+                "RESOURCE_GOLD",
+                Nvs01ConsequenceContract.CatalogGoldTargetId);
+            Assert.AreEqual(
+                ChampionEncounterSourceSet.CurrentSourceSetVersion,
+                Nvs01ConsequenceContract.EncounterResultSnapshotVersion);
+            Assert.AreEqual(
+                ChampionEncounterSourceSet.CurrentSourceSetSha256,
+                Nvs01ConsequenceContract.EncounterResultSnapshotReference);
+            Assert.False(
+                Nvs01ConsequenceContract.IsAuthoritativeOathmarkCurrency(
+                    Nvs01ConsequenceContract.ForbiddenLegacyGoldResourceId));
+            Assert.True(
+                Nvs01ConsequenceContract.IsForbiddenCurrencySubstitution(
+                    Nvs01ConsequenceContract.ForbiddenKingdomResourceId));
             CollectionAssert.AreEqual(
                 new[]
                 {
@@ -162,7 +184,7 @@ namespace AL.Tests.EditMode.Narrative
                 plan.Operations[0],
                 Nvs01ConsequenceContract.GoldConsequenceId,
                 Nvs01ConsequenceMutationKind.CreditResource,
-                Nvs01ConsequenceContract.GoldResourceId,
+                Nvs01ConsequenceContract.OathmarkTechnicalCurrencyId,
                 500,
                 string.Empty);
             AssertOperation(
@@ -187,6 +209,118 @@ namespace AL.Tests.EditMode.Narrative
                 0,
                 expectedChapterId);
             AssertReadOnly(plan.Operations);
+            Assert.AreEqual(
+                Nvs01ConsequenceContract.OathmarkTechnicalCurrencyId,
+                result.Plan.ApplicationReceipt.TechnicalCurrencyId);
+        }
+
+        [Test]
+        public void LegacyGoldAndKingdomResourceSubstitutionFailClosed()
+        {
+            Nvs01MutationPlan mutation =
+                new RuntimeFixture().ReportMutation("crownlands");
+
+            AssertRejected(
+                Nvs01ConsequencePlanner.Plan(
+                    Context(
+                        mutation,
+                        domain: ReportDomain(
+                            mutation,
+                            technicalCurrencyId: Nvs01ConsequenceContract
+                                .ForbiddenLegacyGoldResourceId))),
+                Nvs01ConsequencePlanningStatus.RejectedDependencyMalformed,
+                Nvs01ConsequenceDiagnosticCodes.DependencyMalformed);
+
+            AssertRejected(
+                Nvs01ConsequencePlanner.Plan(
+                    Context(
+                        mutation,
+                        domain: ReportDomain(
+                            mutation,
+                            technicalCurrencyId: Nvs01ConsequenceContract
+                                .ForbiddenKingdomResourceId))),
+                Nvs01ConsequencePlanningStatus.RejectedDependencyMalformed,
+                Nvs01ConsequenceDiagnosticCodes.DependencyMalformed);
+        }
+
+        [Test]
+        public void CatalogOathmarkTargetForgeryFailsClosedAgainstV004Source()
+        {
+            Nvs01MutationPlan mutation =
+                new RuntimeFixture().ArenaSuccessMutation("crownlands");
+            Nvs01VerifiedCatalog forged =
+                ForgedGoldTargetCatalog(
+                    Nvs01ConsequenceContract.OathmarkTechnicalCurrencyId);
+            AssertRejected(
+                Nvs01ConsequencePlanner.Plan(
+                    Context(mutation, catalog: forged)),
+                Nvs01ConsequencePlanningStatus.RejectedContractMismatch,
+                Nvs01ConsequenceDiagnosticCodes.ContractMismatch);
+        }
+
+        [Test]
+        public void ArenaSuccessRejectsNonCatalogBackedEncounterResultIdentity()
+        {
+            Nvs01MutationPlan unbound =
+                new RuntimeFixture().ArenaSuccessMutation(
+                    "crownlands",
+                    bindAuthority: false);
+            Nvs01QuestSnapshot forgedCandidate = CopySnapshot(
+                unbound.Candidate,
+                snapshotVersion: "arena-v1",
+                snapshotReference: "snapshot://authoritative");
+            AssertTransitionRejected(
+                BindMutation(
+                    new Nvs01MutationPlan(
+                        unbound.Expected,
+                        forgedCandidate,
+                        unbound.TriggerEventId,
+                        unbound.ConsequenceIntentIds.ToList())));
+        }
+
+        [Test]
+        public void MixedCatalogProfileEncounterAuthorityFailClosed()
+        {
+            Nvs01MutationPlan mutation =
+                new RuntimeFixture().ArenaSuccessMutation("crownlands");
+            Nvs01ConsequencePlanningContext baseline = Context(mutation);
+
+            ProfileWriteAuthoritySnapshot schemaOne =
+                ProfileWriteAuthoritySnapshotFactory.MigrationRequired(
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>());
+            AssertRejected(
+                Nvs01ConsequencePlanner.Plan(
+                    With(baseline, authority: schemaOne)),
+                Nvs01ConsequencePlanningStatus.RejectedAuthorityUnavailable,
+                Nvs01ConsequenceDiagnosticCodes.AuthorityUnavailable);
+
+            var wrongHash = new Nvs01VerifiedCatalog(
+                VerifiedCatalog().Catalog,
+                Nvs01ConsequenceContract.PacketByteLength,
+                AlternateFingerprint);
+            AssertRejected(
+                Nvs01ConsequencePlanner.Plan(
+                    Context(mutation, catalog: wrongHash)),
+                Nvs01ConsequencePlanningStatus.RejectedContractMismatch,
+                Nvs01ConsequenceDiagnosticCodes.ContractMismatch);
+
+            Nvs01MutationPlan unbound =
+                new RuntimeFixture().ArenaSuccessMutation(
+                    "crownlands",
+                    bindAuthority: false);
+            Nvs01QuestSnapshot mixedEncounter = CopySnapshot(
+                unbound.Candidate,
+                snapshotVersion: ChampionEncounterSourceSet
+                    .CurrentSourceSetVersion,
+                snapshotReference: AlternateFingerprint);
+            AssertTransitionRejected(
+                BindMutation(
+                    new Nvs01MutationPlan(
+                        unbound.Expected,
+                        mixedEncounter,
+                        unbound.TriggerEventId,
+                        unbound.ConsequenceIntentIds.ToList())));
         }
 
         [Test]
@@ -1804,7 +1938,8 @@ namespace AL.Tests.EditMode.Narrative
             IList<string> artifacts = null,
             IList<string> operations = null,
             IList<string> effects = null,
-            IList<Nvs01ConsequenceApplicationReceipt> receipts = null)
+            IList<Nvs01ConsequenceApplicationReceipt> receipts = null,
+            string technicalCurrencyId = null)
         {
             string correlationId =
                 mutation.Candidate.LastEncounterCorrelationId;
@@ -1836,7 +1971,8 @@ namespace AL.Tests.EditMode.Narrative
                         gold,
                         affinity,
                         currentChapterId)
-                });
+                },
+                technicalCurrencyId);
         }
 
         private static Nvs01ConsequenceDomainSnapshot ReportAppliedDomain(
@@ -1858,7 +1994,7 @@ namespace AL.Tests.EditMode.Narrative
                 realmId,
                 correlationId,
                 mutation.Candidate.Revision - 2,
-                gold - Nvs01ConsequenceContract.GoldAmount,
+                gold - Nvs01ConsequenceContract.OathmarkAmount,
                 affinity - Nvs01ConsequenceContract.AffinityAmount,
                 string.Empty);
             Nvs01ConsequenceApplicationReceipt reportReceipt = ReportReceipt(
@@ -1871,7 +2007,7 @@ namespace AL.Tests.EditMode.Narrative
                 mutation.Expected.LastOperation
                     .ExpectedGenerationFingerprint,
                 mutation.Candidate.Revision - 1,
-                gold - Nvs01ConsequenceContract.GoldAmount,
+                gold - Nvs01ConsequenceContract.OathmarkAmount,
                 gold,
                 affinity - Nvs01ConsequenceContract.AffinityAmount,
                 affinity,
@@ -1974,8 +2110,8 @@ namespace AL.Tests.EditMode.Narrative
                 realmId,
                 NvsEncounterOutcome.Success.ToString(),
                 Nvs01ConsequenceContract.ArenaSuccessEventId,
-                "arena-v1",
-                "snapshot://authoritative");
+                Nvs01ConsequenceContract.EncounterResultSnapshotVersion,
+                Nvs01ConsequenceContract.EncounterResultSnapshotReference);
 
         private static string TestFingerprint(params string[] parts)
         {
@@ -2149,13 +2285,68 @@ namespace AL.Tests.EditMode.Narrative
                 Nvs01ConsequenceContract.PacketSha256);
         }
 
+        private static Nvs01VerifiedCatalog ForgedGoldTargetCatalog(
+            string goldTarget) =>
+            ForgedConsequenceCatalogAt(1, goldTarget);
+
+        private static Nvs01VerifiedCatalog ForgedConsequenceCatalogAt(
+            int index,
+            string target)
+        {
+            Nvs01Catalog source = VerifiedCatalog().Catalog;
+            var consequences = source.Consequences
+                .Select(consequence => new Nvs01Consequence(
+                    consequence.Id,
+                    consequence.Target,
+                    consequence.Trigger,
+                    consequence.Repeatability,
+                    consequence.Retained,
+                    consequence.Amount))
+                .ToList();
+            Nvs01Consequence row = consequences[index];
+            consequences[index] = new Nvs01Consequence(
+                row.Id,
+                target,
+                row.Trigger,
+                row.Repeatability,
+                row.Retained,
+                row.Amount);
+            var forged = new Nvs01Catalog(
+                source.SchemaVersion,
+                source.PacketVersion,
+                source.MilestoneId,
+                source.QuestId,
+                source.TitleKey,
+                source.DescriptionKey,
+                source.Approval,
+                source.Placement,
+                source.Speaker,
+                source.States.ToList(),
+                source.Objectives.ToList(),
+                source.Dialogue.ToList(),
+                source.Transitions.ToList(),
+                source.ExternalCapabilities.ToList(),
+                consequences,
+                source.Abandonment,
+                source.Localization.ToDictionary(
+                    entry => entry.Key,
+                    entry => entry.Value,
+                    StringComparer.Ordinal));
+            return new Nvs01VerifiedCatalog(
+                forged,
+                Nvs01ConsequenceContract.PacketByteLength,
+                Nvs01ConsequenceContract.PacketSha256);
+        }
+
         private static Nvs01QuestSnapshot CopySnapshot(
             Nvs01QuestSnapshot source,
             IList<Nvs01ObjectiveSnapshot> objectives = null,
             NvsEncounterRequest currentEncounter = null,
             bool replaceEncounter = false,
             Nvs01OperationReceipt lastOperation = null,
-            bool replaceLastOperation = false) =>
+            bool replaceLastOperation = false,
+            string snapshotVersion = null,
+            string snapshotReference = null) =>
             new Nvs01QuestSnapshot(
                 source.PacketVersion,
                 source.PacketSha256,
@@ -2172,8 +2363,8 @@ namespace AL.Tests.EditMode.Narrative
                 source.LastEncounterCorrelationId,
                 source.LastEncounterOutcome,
                 source.LastEncounterEventId,
-                source.LastEncounterSnapshotVersion,
-                source.LastEncounterSnapshotReference,
+                snapshotVersion ?? source.LastEncounterSnapshotVersion,
+                snapshotReference ?? source.LastEncounterSnapshotReference,
                 replaceLastOperation ? lastOperation : source.LastOperation,
                 source.ConsequenceIntentIds.ToList());
 
@@ -2196,7 +2387,8 @@ namespace AL.Tests.EditMode.Narrative
                 artifacts ?? source.AcquiredArtifactIds.ToArray(),
                 operations ?? source.AppliedOperationIds.ToArray(),
                 effects ?? source.AppliedEffectKeys.ToArray(),
-                receipts ?? source.ApplicationReceipts.ToArray());
+                receipts ?? source.ApplicationReceipts.ToArray(),
+                source.TechnicalCurrencyId);
 
         private static Nvs01ConsequenceApplicationReceipt CloneReceipt(
             Nvs01ConsequenceApplicationReceipt source,
@@ -2223,7 +2415,8 @@ namespace AL.Tests.EditMode.Narrative
                 source.ResultingValeriusAffinity,
                 source.PreviousChapterId,
                 source.ResultingChapterId,
-                planFingerprint ?? source.PlanFingerprint);
+                planFingerprint ?? source.PlanFingerprint,
+                source.TechnicalCurrencyId);
 
         private static Nvs01ConsequenceApplicationReceipt ReissueReceipt(
             Nvs01ConsequenceApplicationReceipt source,
@@ -2263,7 +2456,8 @@ namespace AL.Tests.EditMode.Narrative
                 source.PreviousValeriusAffinity,
                 source.ResultingValeriusAffinity,
                 source.PreviousChapterId,
-                source.ResultingChapterId);
+                source.ResultingChapterId,
+                source.TechnicalCurrencyId);
         }
 
         private static Nvs01MutationPlan ForgeMutation(
@@ -2598,6 +2792,9 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreEqual(
                 expected.ResultingChapterId,
                 actual.ResultingChapterId);
+            Assert.AreEqual(
+                expected.TechnicalCurrencyId,
+                actual.TechnicalCurrencyId);
             Assert.AreEqual(
                 expected.PlanFingerprint,
                 actual.PlanFingerprint);
@@ -2960,8 +3157,8 @@ namespace AL.Tests.EditMode.Narrative
                     request.RealmId,
                     NvsEncounterOutcome.Success,
                     request.SuccessEventId,
-                    "arena-v1",
-                    "snapshot://authoritative");
+                    Nvs01ConsequenceContract.EncounterResultSnapshotVersion,
+                    Nvs01ConsequenceContract.EncounterResultSnapshotReference);
                 _committer.Clear();
                 AssertCommitted(Runtime.ApplyEncounterResult(result));
                 Assert.NotNull(_committer.LastPlan);
