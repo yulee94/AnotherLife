@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "packetId": "tdf_packet_vaeloryn_wish_dragon_shot_scale_v001",
+  "sourceVersion": "tdf-cinematic-vaeloryn-shot-scale-2026-09-04-v001",
+  "authority": {
+    "finalCinematicApproval": false,
+    "gameplayAuthority": false,
+    "ownerVisualApprovalRequired": true,
+    "runtimeAuthority": false,
+    "runtimeVfxSeparate": true,
+    "status": "MOTION_REVIEW_CANDIDATE",
+    "didNotRegenerateLockedSource": true
+  },
+  "cost": {
+    "incrementalUsd": 0.0,
+    "paidProviderCalls": 0,
+    "rechargeOrBillingMutation": false,
+    "tools": [
+      "repository-local locked V002 packet",
+      "python fail-closed validator"
+    ]
+  },
+  "lockedSource": {
+    "packetId": "tdf_packet_vaeloryn_wish_dragon_shot070_source_v002",
+    "blend": {
+      "bytes": 18966857,
+      "path": "unity/ArtSource/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_motion_source_v002.blend",
+      "sha256": "10bf9f96380632c983b523172913de8aa31b3187b785bd0b35b23757c7681b89"
+    },
+    "landscapeMotion": {
+      "bytes": 246640,
+      "path": "unity/Docs/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_motion_review_v002.mp4",
+      "sha256": "0f7b66dc3fd6450405cec9cbf5840ba82fd1589ab5fbe73148b1381527169122"
+    }
+  },
+  "rejectedSource": {
+    "basename": "wish_dragon_review_master.glb",
+    "bytes": 53457548,
+    "disposition": "REJECTED_FOR_EXACT_SOURCE_FIDELITY",
+    "inputEligible": false,
+    "negativeChecks": [
+      "duplicate_head",
+      "fused_monolithic_mesh",
+      "identity_wing_emission_drift",
+      "lineage_gap",
+      "single_material",
+      "unskinned"
+    ],
+    "sha256": "5a846774341c6e38a8f59df617cbec0b52135f5898a591db271094b3d4bb1270",
+    "triangles": 777338,
+    "usedAsInput": false
+  },
+  "firstRunReuse": [
+    {
+      "boundCandidate": null,
+      "eligible": false,
+      "reason": "Material awaken has no Wish Dragon identity",
+      "shotId": "Shot010"
+    },
+    {
+      "boundCandidate": null,
+      "eligible": false,
+      "reason": "Four-realm aerial travel does not use Vaeloryn",
+      "shotId": "Shot020"
+    },
+    {
+      "boundCandidate": null,
+      "eligible": false,
+      "reason": "Party cast/impact is five anonymous adults, not Vaeloryn",
+      "shotId": "Shot030"
+    },
+    {
+      "boundCandidate": null,
+      "eligible": false,
+      "reason": "Main-gate patrol/threshold does not use Vaeloryn",
+      "shotId": "Shot040"
+    },
+    {
+      "boundCandidate": null,
+      "eligible": false,
+      "reason": "Separated-bridge rivalry does not use Vaeloryn",
+      "shotId": "Shot050"
+    },
+    {
+      "boundCandidate": null,
+      "eligible": false,
+      "reason": "Stronghold conflict cannot substitute Wish Dragon for realm dragons",
+      "shotId": "Shot060"
+    },
+    {
+      "boundCandidate": "tdf_packet_vaeloryn_wish_dragon_shot070_source_v002",
+      "eligible": true,
+      "reason": "Wish Dragon / Vaeloryn locked V002 may only bind CTMA-BEAT-07 Shot070",
+      "shotId": "Shot070"
+    },
+    {
+      "boundCandidate": null,
+      "eligible": false,
+      "reason": "End card is the approved AL mark, not Vaeloryn",
+      "shotId": "Shot080"
+    }
+  ],
+  "remainingShots": [
+    {
+      "animatedBones": [
+        "jaw",
+        "neck_01",
+        "tail_01",
+        "wing_l_01",
+        "wing_r_01"
+      ],
+      "aspect": "16:9",
+      "beatId": "CTMA-BEAT-07",
+      "clipId": "AL_FR_MOTION_SRC_070_EIGHTFOLD_WISH_V001",
+      "codec": "h264",
+      "contactSheet": {
+        "bytes": 155113,
+        "path": "unity/Docs/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_motion_contact_v002.png",
+        "sha256": "57c1112cc92934d8f6f75475a515b799f1f54cdde55cb6cbe67e5978cadf3eb7"
+      },
+      "croppedFromLandscape": false,
+      "derivedFromLockedV002Action": true,
+      "durationSeconds": 7.0,
+      "file": {
+        "bytes": 246640,
+        "path": "unity/Docs/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_motion_review_v002.mp4",
+        "sha256": "0f7b66dc3fd6450405cec9cbf5840ba82fd1589ab5fbe73148b1381527169122"
+      },
+      "fps": 24,
+      "frameCount": 168,
+      "genuineArticulation": true,
+      "height": 540,
+      "newPixelGeneration": false,
+      "shotId": "Shot070",
+      "stillImageMotionSubstitute": false,
+      "width": 960
+    }
+  ]
+}

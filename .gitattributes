@@ -36,6 +36,7 @@
 
 # Hash-bound Shot070 Vaeloryn motion-source reports.
 /unity/Docs/Cinematics/Shot070VaelorynSourceV002/**/*.json text eol=lf
+/unity/Docs/Cinematics/Shot070VaelorynShotScaleV001/**/*.json text eol=lf
 
 # GS-04 evidence hashes raw SVG bytes; keep generated artifacts byte-stable.
 /tools/ui/validate_ui_release_readiness.py text eol=lf
