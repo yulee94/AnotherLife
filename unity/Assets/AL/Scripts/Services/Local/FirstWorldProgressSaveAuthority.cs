@@ -1,5 +1,6 @@
 using AL.ChampionMode.Quests;
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.Data.Runtime;
 
 namespace AL.Services.Local
@@ -25,14 +26,19 @@ namespace AL.Services.Local
     }
 
     /// <summary>
-    /// Typed schema-v1 mutation boundary for first-world tutorial and Proof
+    /// Typed mutation boundary for first-world tutorial and Proof
     /// progression. Generic save mutation remains contained by the save root.
     /// </summary>
     public static class FirstWorldProgressSaveAuthority
     {
         public static bool CanCommit(ISaveGameService saveGameService) =>
             saveGameService?.CurrentSave != null &&
-            saveGameService is ILegacyFirstWorldProgressCandidateStore;
+            (saveGameService.CurrentSave.SaveSchemaVersion ==
+                SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion
+                ? saveGameService is IProfileBoundFirstSessionCandidateStore
+                : saveGameService.CurrentSave.SaveSchemaVersion ==
+                    SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
+                  saveGameService is ILegacyFirstWorldProgressCandidateStore);
 
         public static bool TryRead(
             ISaveGameService saveGameService,
@@ -76,19 +82,6 @@ namespace AL.Services.Local
                 return Rejected(expected, "AL-FIRST-WORLD-PROOF-UNAVAILABLE");
             }
 
-            ProofOfWorthTransition preview =
-                ProofOfWorthPlanner.Apply(expected.Proof, command);
-            if (!preview.Changed)
-            {
-                return preview.Status == ProofOfWorthStatus.DuplicateIgnored
-                    ? new FirstWorldProgressCommitResult(
-                        true,
-                        false,
-                        expected,
-                        "AL-FIRST-WORLD-PROOF-DUPLICATE")
-                    : Rejected(expected, "AL-FIRST-WORLD-PROOF-REJECTED");
-            }
-
             return TryCommit(
                 saveGameService,
                 expected,
@@ -106,7 +99,7 @@ namespace AL.Services.Local
         {
             if (saveGameService?.CurrentSave == null ||
                 expected == null ||
-                !(saveGameService is ILegacyFirstWorldProgressCandidateStore store))
+                !CanCommit(saveGameService))
             {
                 return Rejected(expected, "AL-FIRST-WORLD-PROFILE-READ-ONLY");
             }
@@ -129,7 +122,12 @@ namespace AL.Services.Local
                 blockTaught,
                 proofCommand);
             SaveCandidateCommitResult commit =
-                store.TryCommitLegacyFirstWorldProgress(request);
+                saveGameService.CurrentSave.SaveSchemaVersion ==
+                    SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion
+                    ? ((IProfileBoundFirstSessionCandidateStore)saveGameService)
+                        .TryCommitFirstSessionProgress(request)
+                    : ((ILegacyFirstWorldProgressCandidateStore)saveGameService)
+                        .TryCommitLegacyFirstWorldProgress(request);
             if (commit == null || !commit.IsCommitted)
             {
                 return Rejected(
