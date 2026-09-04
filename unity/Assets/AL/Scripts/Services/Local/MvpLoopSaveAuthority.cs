@@ -1,4 +1,5 @@
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.Data.Runtime;
 
 namespace AL.Services.Local
@@ -18,8 +19,8 @@ namespace AL.Services.Local
     }
 
     /// <summary>
-    /// Production write boundary for the 3D-first MVP loop. Schema-v1 accepts
-    /// this typed adapter only; generic Save() stays contained.
+    /// Typed boundary for the 3D-first loop. Schema-v2 admits only first-session
+    /// identity and earned lordship; general writes remain contained.
     /// </summary>
     public static class MvpLoopSaveAuthority
     {
@@ -27,7 +28,20 @@ namespace AL.Services.Local
             ISaveGameService saveGameService,
             MvpLoopCommitRequest request)
         {
-            if (!(saveGameService is ILegacyMvpLoopCandidateStore store))
+            SaveCandidateCommitResult commit;
+            if (saveGameService?.CurrentSave?.SaveSchemaVersion ==
+                    SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion &&
+                saveGameService is IProfileBoundFirstSessionCandidateStore bound)
+            {
+                commit = bound.TryCommitFirstSessionIdentity(request);
+            }
+            else if (saveGameService?.CurrentSave?.SaveSchemaVersion ==
+                         SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
+                     saveGameService is ILegacyMvpLoopCandidateStore legacy)
+            {
+                commit = legacy.TryCommitLegacyMvpLoop(request);
+            }
+            else
             {
                 return new MvpLoopCommitResult(
                     false,
@@ -35,7 +49,6 @@ namespace AL.Services.Local
                     "AL-MVP-LOOP-PROFILE-READ-ONLY");
             }
 
-            SaveCandidateCommitResult commit = store.TryCommitLegacyMvpLoop(request);
             if (commit == null)
             {
                 return new MvpLoopCommitResult(

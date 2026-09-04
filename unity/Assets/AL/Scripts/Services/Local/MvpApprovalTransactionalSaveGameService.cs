@@ -26,6 +26,7 @@ namespace AL.Services.Local
         IProfileBoundWishgateCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyFirstWorldProgressCandidateStore,
+        IProfileBoundFirstSessionCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
         INvs01LegacyCandidateStore,
         IProfileWriteAuthorityProvider
@@ -163,6 +164,20 @@ namespace AL.Services.Local
             Execute(
                 () => ((ILegacyFirstWorldProgressCandidateStore)_inner)
                     .TryCommitLegacyFirstWorldProgress(request),
+                ResolveCandidateCommit);
+
+        SaveCandidateCommitResult IProfileBoundFirstSessionCandidateStore
+            .TryCommitFirstSessionIdentity(MvpLoopCommitRequest request) =>
+            Execute(
+                () => ((IProfileBoundFirstSessionCandidateStore)_inner)
+                    .TryCommitFirstSessionIdentity(request),
+                ResolveCandidateCommit);
+
+        SaveCandidateCommitResult IProfileBoundFirstSessionCandidateStore
+            .TryCommitFirstSessionProgress(FirstWorldProgressCommitRequest request) =>
+            Execute(
+                () => ((IProfileBoundFirstSessionCandidateStore)_inner)
+                    .TryCommitFirstSessionProgress(request),
                 ResolveCandidateCommit);
 
         SaveCandidateCommitResult
