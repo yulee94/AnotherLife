@@ -97,12 +97,21 @@ namespace AL.Services.Local
     }
 
     /// <summary>
-    /// The only schema-v1 realm/bootstrap mutation entry point. It carries no
+    /// Schema-v1 realm/bootstrap mutation entry point. It carries no
     /// caller-provided mutation callback.
     /// </summary>
     internal interface ILegacyRealmSelectionCandidateStore
     {
         RealmSelectionResult TryCommitLegacyRealmSelection(
+            RealmSelectionRequest request);
+    }
+
+    /// <summary>
+    /// Schema-v2 realm mutation entry point. ProfileId cannot change.
+    /// </summary>
+    internal interface IProfileBoundRealmSelectionCandidateStore
+    {
+        RealmSelectionResult TryCommitProfileBoundRealmSelection(
             RealmSelectionRequest request);
     }
 

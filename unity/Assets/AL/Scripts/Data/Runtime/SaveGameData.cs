@@ -9,14 +9,14 @@ namespace AL.Data.Runtime
     public class SaveGameData
     {
         public const string CurrentSaveFormatId = "anotherlife.local-save";
-        public const int CurrentSaveSchemaVersion = 1;
+        public const int CurrentSaveSchemaVersion = 2;
         public const int CurrentProfileInitializationVersion = 1;
 
         public string SaveFormatId;
         public int SaveSchemaVersion;
         public int ProfileInitializationVersion;
-        // Reserved for the witnessed schema-v2 migration. Schema v1 must
-        // serialize this as blank and remains MigrationRequired.
+        // Canonical schema-v2 identity. Schema v1 serializes this as blank and
+        // remains MigrationRequired until the witnessed installer persists it.
         public string ProfileId = string.Empty;
         public RealmId SelectedRealm;
         public List<ResourceData> Resources = new List<ResourceData>();
