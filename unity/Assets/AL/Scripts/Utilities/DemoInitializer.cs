@@ -252,8 +252,12 @@ namespace AL.Utilities
 
             CreateButton(canvasObj.transform, "MUSTER INFANTRY", new Vector2(44, -608), () =>
             {
-                ServiceLocator.Get<ITrainingService>().StartTraining(TroopType.Infantry, 25);
-                SetStatus($"Infantry muster order resolved. Total: {ServiceLocator.Get<ITrainingService>().GetTroopCount(TroopType.Infantry)}");
+                ResearchTroopMutationResult result =
+                    ServiceLocator.Get<ITrainingService>().TryStartTraining(TroopType.Infantry, 25);
+                SetStatus(
+                    result.Status == ResearchTroopCatalogStatus.CatalogUnavailable
+                        ? "INFANTRY MUSTER UNAVAILABLE: troop definition is not approved."
+                        : "INFANTRY MUSTER REJECTED: " + result.DiagnosticCode);
             });
 
             CreateButton(canvasObj.transform, "WARZONE STIPEND", new Vector2(44, -662), () =>

@@ -4,7 +4,6 @@ using System.Linq;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
-using UnityEngine;
 
 namespace AL.Services.Local
 {
@@ -41,17 +40,20 @@ namespace AL.Services.Local
         public ResearchState GetResearchState(string researchId)
         {
             List<ResearchState> researches = Researches;
-            if (researches == null) return null;
+            if (researches == null || string.IsNullOrWhiteSpace(researchId))
+            {
+                return null;
+            }
 
-            ResearchState state = researches.FirstOrDefault(
-                candidate => candidate?.ResearchId == researchId);
-            return state == null
-                ? new ResearchState
-                {
-                    ResearchId = researchId,
-                    Level = 0
-                }
-                : CloneState(state);
+            ResearchState[] matches = researches
+                .Where(candidate => candidate != null && candidate.ResearchId == researchId)
+                .ToArray();
+            return matches.Length == 1 ? CloneState(matches[0]) : null;
+        }
+
+        public ResearchTroopCatalogQueryResult QueryResearch(string researchId)
+        {
+            return ResearchTroopCatalogAuthority.QueryResearch(researchId);
         }
 
         public IEnumerable<ResearchState> GetAllResearchStates()
@@ -74,70 +76,24 @@ namespace AL.Services.Local
                 CompleteTimestamp = state.CompleteTimestamp
             };
 
+        public ResearchTroopMutationResult TryStartResearch(string researchId)
+        {
+            return ResearchTroopCatalogAuthority.RejectResearch(researchId);
+        }
+
+        public ResearchTroopMutationResult TryCompleteResearch(string researchId)
+        {
+            return ResearchTroopCatalogAuthority.RejectResearch(researchId);
+        }
+
         public void StartResearch(string researchId)
         {
-            if (!_writeAuthorityGate.TryGetWritableSave(out _))
-            {
-                Debug.LogWarning(
-                    "[AL-RSCH-PROFILE-READ-ONLY] Research start rejected before any profile mutation.");
-                return;
-            }
-
-            List<ResearchState> researches = Researches;
-            if (researches == null) return;
-
-            ResearchState state = researches.FirstOrDefault(
-                candidate => candidate?.ResearchId == researchId);
-            bool stateExists = state != null;
-            state ??= new ResearchState { ResearchId = researchId, Level = 0 };
-            if (state.IsResearching) return;
-
-            long cost = (state.Level + 1) * 200; // Gold cost
-            if (_resourceService.ConsumeResource(ResourceType.Gold, cost))
-            {
-                if (!stateExists)
-                {
-                    researches.Add(state);
-                }
-
-                state.IsResearching = true;
-                state.CompleteTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + ((state.Level + 1) * 15);
-                _saveGameService.Save();
-                Debug.Log($"Started research for {researchId}. Completes in {(state.Level + 1) * 15}s");
-            }
+            TryStartResearch(researchId);
         }
 
         public void CompleteResearch(string researchId)
         {
-            if (!_writeAuthorityGate.TryGetWritableSave(out _))
-            {
-                Debug.LogWarning(
-                    "[AL-RSCH-PROFILE-READ-ONLY] Research completion rejected before any profile mutation.");
-                return;
-            }
-
-            ResearchState state = Researches?.FirstOrDefault(
-                candidate => candidate?.ResearchId == researchId);
-            if (state == null || !state.IsResearching) return;
-
-            if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() >= state.CompleteTimestamp)
-            {
-                state.Level++;
-                state.IsResearching = false;
-
-                // Trigger Quest Update
-                try
-                {
-                    ServiceLocator.Get<IQuestService>().UpdateProgress(QuestType.ResearchTech, 1);
-                }
-                catch (Exception)
-                {
-                    // Quest service is optional in early scene tests.
-                }
-
-                _saveGameService.Save();
-                Debug.Log($"Research {researchId} completed. Level: {state.Level}");
-            }
+            TryCompleteResearch(researchId);
         }
 
         public float GetStatBonus(StatType statType)
