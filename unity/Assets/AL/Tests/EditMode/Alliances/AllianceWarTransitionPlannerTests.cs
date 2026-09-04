@@ -329,24 +329,33 @@ namespace AL.Tests.EditMode.Alliances
                 Leave(policy, state, "leave_during_war", AccountMasterBeta, GuildBeta),
                 state,
                 guilds));
-            Assert.That(left.Alliances.Any(row =>
-                    row.AllianceId == AllianceStone &&
-                    row.Relation == AllianceRelationState.Active),
-                Is.False);
+            AllianceSnapshot suspendedStone = left.Alliances.Single(row =>
+                row.AllianceId == AllianceStone);
+            Assert.That(suspendedStone.Relation, Is.EqualTo(AllianceRelationState.Suspended));
+            Assert.That(suspendedStone.MemberGuilds.Select(row => row.GuildId),
+                Is.EqualTo(new[] { GuildAlpha }));
+            Assert.That(left.Wars.Single().CommittedState,
+                Is.EqualTo(AllianceWarState.ReconciliationPending));
             Assert.That(
                 Hostility(planner, left, guilds, ClockZero + (24 * Hour), GuildAlpha, GuildGamma)
                     .ForcedByActiveWar,
                 Is.False);
+            Assert.That(
+                Hostility(planner, left, guilds, ClockZero + (24 * Hour), GuildAlpha, GuildGamma)
+                    .EffectiveWarState,
+                Is.EqualTo(AllianceWarState.None));
 
+            AllianceAuthoritySnapshot liveForge = FormPairedAlliances(planner, policy, guilds);
             AllianceAuthoritySnapshot disbanded = Apply(planner.Plan(
-                Disband(policy, FormPairedAlliances(planner, policy, guilds),
+                Disband(policy, liveForge,
                     "disband_forge", AccountMasterGamma, GuildGamma, AllianceForge),
-                FormPairedAlliances(planner, policy, guilds),
+                liveForge,
                 guilds));
-            Assert.That(disbanded.Alliances.Any(row =>
-                    row.AllianceId == AllianceForge &&
-                    row.Relation == AllianceRelationState.Active),
-                Is.False);
+            AllianceSnapshot cooledForge = disbanded.Alliances.Single(row =>
+                row.AllianceId == AllianceForge);
+            Assert.That(cooledForge.Relation, Is.EqualTo(AllianceRelationState.Cooldown));
+            Assert.That(cooledForge.MemberGuilds.Select(row => row.GuildId),
+                Is.EqualTo(new[] { GuildDelta, GuildGamma }));
 
             GuildAuthoritySnapshot missingMember = ReplaceGuild(
                 guilds,
@@ -370,6 +379,14 @@ namespace AL.Tests.EditMode.Alliances
             Assert.That(
                 Hostility(planner, livePair, missingMember, ClockZero + (24 * Hour)).Kind,
                 Is.EqualTo(AllianceHostilityKind.Indeterminate));
+
+            AllianceAuthoritySnapshot raceLeft = Apply(planner.Plan(
+                Leave(policy, livePair, "leave_missing_peer", AccountMasterAlpha, GuildAlpha),
+                livePair,
+                missingMember));
+            Assert.That(
+                raceLeft.Alliances.Single(row => row.AllianceId == AllianceStone).Relation,
+                Is.EqualTo(AllianceRelationState.Cooldown));
         }
 
         [Test]
@@ -409,13 +426,68 @@ namespace AL.Tests.EditMode.Alliances
                     activeClock),
                 state,
                 guilds));
-            Assert.That(ended.Wars.Single().CommittedState, Is.EqualTo(AllianceWarState.None));
+            Assert.That(ended.Wars.Single().CommittedState,
+                Is.EqualTo(AllianceWarState.ReconciliationPending));
             Assert.That(
                 Hostility(planner, ended, guilds, activeClock).ForcedByActiveWar,
                 Is.False);
             Assert.That(
                 Hostility(planner, ended, guilds, activeClock).EffectiveWarState,
-                Is.EqualTo(AllianceWarState.None));
+                Is.EqualTo(AllianceWarState.ReconciliationPending));
+            Assert.That(planner.Plan(
+                DeclareWar(policy, ended, "redeclare_after_reconcile", AccountMasterAlpha,
+                    GuildAlpha, AllianceForge, warId: "war_stone_002"),
+                ended,
+                guilds).Status, Is.EqualTo(AlliancePlanningStatus.Prepared));
+        }
+
+        [Test]
+        public void SuspendedMembershipBlocksProposeUntilFinalLeaveCoolsTheAlliance()
+        {
+            AllianceWarPolicySnapshot policy = Policy();
+            var planner = new AllianceWarTransitionPlanner(policy);
+            GuildAuthoritySnapshot guilds = FourStoneholdGuilds();
+            AllianceAuthoritySnapshot state = Apply(planner.Plan(
+                Propose(policy, "propose_suspend", AccountMasterAlpha, GuildAlpha, GuildBeta, 1, 1, 0),
+                EmptySnapshot(policy.Binding),
+                guilds));
+            state = Apply(planner.Plan(
+                AcceptProposal(policy, state, "accept_suspend", AccountMasterBeta, GuildBeta),
+                state,
+                guilds));
+
+            state = Apply(planner.Plan(
+                Leave(policy, state, "beta_leave_to_suspend", AccountMasterBeta, GuildBeta),
+                state,
+                guilds));
+            AllianceSnapshot suspended = state.Alliances.Single();
+            Assert.That(suspended.Relation, Is.EqualTo(AllianceRelationState.Suspended));
+            Assert.That(suspended.LeadGuildId, Is.EqualTo(GuildAlpha));
+            Assert.That(planner.Plan(
+                Propose(policy, "alpha_blocked_while_suspended", AccountMasterAlpha, GuildAlpha,
+                    GuildGamma, 1, 1, state.Revision, allianceId: "alliance_stone_003",
+                    pendingRequestId: "pending_blocked_suspend"),
+                state,
+                guilds).Status, Is.EqualTo(AlliancePlanningStatus.Conflict));
+            Assert.That(planner.Plan(
+                Propose(policy, "gamma_delta_unrelated", AccountMasterGamma, GuildGamma,
+                    GuildDelta, 1, 1, state.Revision, allianceId: AllianceForge,
+                    pendingRequestId: "pending_unrelated_gd"),
+                state,
+                guilds).Status, Is.EqualTo(AlliancePlanningStatus.Prepared));
+
+            state = Apply(planner.Plan(
+                Leave(policy, state, "alpha_leave_to_cooldown", AccountMasterAlpha, GuildAlpha),
+                state,
+                guilds));
+            Assert.That(state.Alliances.Single().Relation, Is.EqualTo(AllianceRelationState.Cooldown));
+            Assert.That(state.Alliances.Single().MemberGuilds, Is.Empty);
+            Assert.That(planner.Plan(
+                Propose(policy, "alpha_gamma_after_cooldown", AccountMasterAlpha, GuildAlpha,
+                    GuildGamma, 1, 1, state.Revision, allianceId: "alliance_stone_003",
+                    pendingRequestId: "pending_after_cooldown"),
+                state,
+                guilds).Status, Is.EqualTo(AlliancePlanningStatus.Prepared));
         }
 
         [Test]
@@ -679,7 +751,8 @@ namespace AL.Tests.EditMode.Alliances
             string actorAccountId,
             string actorGuildId,
             string targetAllianceId,
-            long? actorGuildRevision = null)
+            long? actorGuildRevision = null,
+            string warId = "war_stone_001")
         {
             AllianceSnapshot actorAlliance = state.Alliances.Single(row =>
                 row.MemberGuilds.Any(member => member.GuildId == actorGuildId) &&
@@ -694,7 +767,7 @@ namespace AL.Tests.EditMode.Alliances
                 string.Empty,
                 targetAllianceId,
                 string.Empty,
-                "war_stone_001",
+                warId,
                 state.Revision,
                 actorAlliance.Revision,
                 actorGuildRevision ?? actorAlliance.MemberGuilds.Single(row =>
@@ -714,7 +787,8 @@ namespace AL.Tests.EditMode.Alliances
         {
             AllianceSnapshot alliance = state.Alliances.Single(row =>
                 row.MemberGuilds.Any(member => member.GuildId == actorGuildId) &&
-                row.Relation == AllianceRelationState.Active);
+                (row.Relation == AllianceRelationState.Active ||
+                 row.Relation == AllianceRelationState.Suspended));
             return new AllianceTransitionRequest(
                 AllianceOperation.Leave,
                 operationId,
