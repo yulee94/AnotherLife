@@ -75,6 +75,26 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Boss reward source catalog gate
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/boss-reward-source-catalog.txt"
+          try {
+            & python tools/game-data/test_validate_boss_reward_source.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Boss reward source catalog tests exited with code $LASTEXITCODE."
+            }
+            & python tools/game-data/validate_boss_reward_source.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Boss reward source catalog audit exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Android Unity package verifier tests
         shell: pwsh
         timeout-minutes: 5
