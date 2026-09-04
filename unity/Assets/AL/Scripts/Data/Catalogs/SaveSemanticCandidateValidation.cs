@@ -808,6 +808,7 @@ namespace AL.Data.Catalogs
                     "MapDisclosure",
                     "RealmSelection",
                     "WorldState",
+                    "NotificationHistory",
                     "WarzoneCredits",
                     "LastSavedTimestamp",
                     "TerritoryCaptureLedger"
@@ -1114,6 +1115,33 @@ namespace AL.Data.Catalogs
                 "Revisions",
                 "Receipts",
                 "Outbox");
+
+        private static readonly HashSet<string> NotificationHistoryFields =
+            Fields("Version", "Records", "Outbox");
+
+        private static readonly HashSet<string> NotificationHistoryRecordFields =
+            Fields(
+                "RecordId",
+                "NotificationSchemaVersion",
+                "DefinitionId",
+                "DefinitionVersion",
+                "SourceSystemId",
+                "CorrelationId",
+                "OccurredAtUtcTicks",
+                "Parameters",
+                "State",
+                "AcknowledgedAtUtcTicks",
+                "DismissedAtUtcTicks",
+                "ExpiresAtUtcTicks",
+                "LastDeliveryAttemptUtcTicks",
+                "DeliveryAttemptCount",
+                "SupersededByRecordId",
+                "DurabilityPolicy",
+                "PrivacyClass",
+                "RequiresAcknowledgement");
+
+        private static readonly HashSet<string> NotificationHistoryParameterFields =
+            Fields("Name", "Kind", "TextValue");
 
         private static readonly HashSet<string> TerritoryRevisionFields =
             Fields("TerritoryId", "Revision");
@@ -1513,6 +1541,7 @@ namespace AL.Data.Catalogs
             ValidateTerritoryCaptureLedger(root, collector, state);
             ValidateRealmSelection(root, collector, state);
             ValidateWorldState(root, collector, state);
+            ValidateNotificationHistory(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
@@ -4487,6 +4516,231 @@ namespace AL.Data.Catalogs
                     "SAVE_NVS01_NEUTRAL_STATE_INVALID",
                     path,
                     SaveSemanticDomain.Narrative);
+            }
+        }
+
+        private static void ValidateNotificationHistory(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.NotificationHistory";
+            StrictJsonValue value;
+            if (!root.TryGet("NotificationHistory", out value) || value is StrictJsonNull)
+            {
+                // Optional schema-v2 extension. Missing legacy state is admitted.
+                return;
+            }
+
+            var history = value as StrictJsonObject;
+            if (history == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                history,
+                NotificationHistoryFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    history,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            if (version == 0)
+            {
+                return;
+            }
+
+            ValidateNotificationHistoryRows(history, "Records", collector, state);
+            ValidateNotificationHistoryRows(history, "Outbox", collector, state);
+        }
+
+        private static void ValidateNotificationHistoryRows(
+            StrictJsonObject history,
+            string collectionName,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            StrictJsonValue value;
+            if (!history.TryGet(collectionName, out value) || value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var rows = value as StrictJsonArray;
+            string collectionPath = "$.NotificationHistory." + collectionName;
+            if (rows == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_ARRAY_INVALID",
+                    collectionPath,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            for (int index = 0; index < rows.Items.Count; index++)
+            {
+                string path = collectionPath +
+                    "[" + index.ToString(CultureInfo.InvariantCulture) + "]";
+                var row = rows.Items[index] as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NOTIFICATION_HISTORY_RECORD_INVALID",
+                        path,
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    NotificationHistoryRecordFields,
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state);
+
+                string ignored;
+                TryReadRequiredOpaqueString(
+                    row,
+                    "RecordId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state,
+                    out ignored);
+                TryReadRequiredOpaqueString(
+                    row,
+                    "DefinitionId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state,
+                    out ignored);
+                TryReadRequiredOpaqueString(
+                    row,
+                    "CorrelationId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state,
+                    out ignored);
+
+                int privacyClass;
+                if (TryReadRequiredInt32(
+                        row,
+                        "PrivacyClass",
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state,
+                        out privacyClass) &&
+                    privacyClass == 2)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NOTIFICATION_HISTORY_SENSITIVE_TECHNICAL",
+                        path + ".PrivacyClass",
+                        SaveSemanticDomain.Envelope);
+                }
+
+                StrictJsonValue parametersValue;
+                if (!row.TryGet("Parameters", out parametersValue) ||
+                    parametersValue is StrictJsonNull)
+                {
+                    continue;
+                }
+
+                var parameters = parametersValue as StrictJsonArray;
+                if (parameters == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NOTIFICATION_HISTORY_PARAMETERS_INVALID",
+                        path + ".Parameters",
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                for (int parameterIndex = 0;
+                     parameterIndex < parameters.Items.Count;
+                     parameterIndex++)
+                {
+                    string parameterPath = path +
+                        ".Parameters[" +
+                        parameterIndex.ToString(CultureInfo.InvariantCulture) +
+                        "]";
+                    var parameter = parameters.Items[parameterIndex] as StrictJsonObject;
+                    if (parameter == null)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_NOTIFICATION_HISTORY_PARAMETER_INVALID",
+                            parameterPath,
+                            SaveSemanticDomain.Envelope);
+                        continue;
+                    }
+
+                    InspectUnexpectedProperties(
+                        parameter,
+                        NotificationHistoryParameterFields,
+                        parameterPath,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state);
+                }
             }
         }
 
