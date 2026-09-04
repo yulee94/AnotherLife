@@ -2,22 +2,36 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://another-life.local/schemas/al-world-atlas-narrative.schema.json",
   "title": "Another Life World Atlas Narrative Catalog",
-  "description": "Schema for al_world_atlas_narrative_catalog.json. Enforces Decision 5 (lowercase realm IDs) across topology, transition zones, walls, boundaries, and zones. Zones additionally accept the neutral 'shared' realm. Topology counts (5 nodes, 4 adjacency, 12 bridges, 24 endpoints, 4 transition zones, 8 walls, 4 boundaries, 11 zones, 5 objectives) are bounded.",
+  "description": "Schema for al_world_atlas_narrative_catalog.json. Enforces lowercase realm IDs and bounded v003 protected city, beginner, and town subzone policy authority while preserving the v002 topology counts.",
   "type": "object",
   "required": [
     "version", "catalogId", "game", "sourcePacketId", "idFormat",
-    "sourceAuthorities", "atlasPolicy", "abstractTopology",
+    "sourceAuthorities", "atlasPolicy", "protectedZonePolicies", "protectedSubzones", "abstractTopology",
     "transitionZones", "walls", "boundaries", "zones", "objectives",
     "draftLocalization", "engineeringHandoff"
   ],
   "properties": {
-    "version": { "type": "string" },
+    "version": { "const": "0.3.0" },
     "catalogId": { "const": "al_world_atlas_narrative_catalog" },
     "game": { "const": "Another Life" },
-    "sourcePacketId": { "type": "string" },
+    "sourcePacketId": { "const": "al_narrative_world_atlas_source_v003" },
     "idFormat": { "const": "lowercase_snake_case" },
     "sourceAuthorities": { "type": "object" },
     "atlasPolicy": { "type": "object" },
+    "protectedZonePolicies": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/protectedZonePolicyRecord" }
+    },
+    "protectedSubzones": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/protectedSubzoneRecord" }
+    },
     "abstractTopology": { "$ref": "#/$defs/abstractTopology" },
     "transitionZones": {
       "type": "array",
@@ -73,6 +87,40 @@
     "stableId": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "protectedZoneKind": {
+      "type": "string",
+      "enum": ["city", "beginner", "town"]
+    },
+    "protectedZonePolicyRecord": {
+      "type": "object",
+      "required": ["id", "zoneKind", "protection", "appliesTo", "applicationRecheck", "warOverride", "enforcementStatus", "mutationAuthority"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "zoneKind": { "$ref": "#/$defs/protectedZoneKind" },
+        "protection": { "const": "forced_non_pvp" },
+        "appliesTo": { "const": "all_player_harmful_effects" },
+        "applicationRecheck": { "const": "required" },
+        "warOverride": { "const": "blocked" },
+        "enforcementStatus": { "const": "contract_only" },
+        "mutationAuthority": { "const": "none" }
+      },
+      "additionalProperties": false
+    },
+    "protectedSubzoneRecord": {
+      "type": "object",
+      "required": ["id", "realmId", "parentAtlasZoneId", "zoneKind", "policyId", "sceneReferenceStatus", "boundaryStatus", "mutationAuthority"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "parentAtlasZoneId": { "$ref": "#/$defs/stableId" },
+        "zoneKind": { "$ref": "#/$defs/protectedZoneKind" },
+        "policyId": { "$ref": "#/$defs/stableId" },
+        "sceneReferenceStatus": { "const": "requested" },
+        "boundaryStatus": { "const": "requested" },
+        "mutationAuthority": { "const": "none" }
+      },
+      "additionalProperties": false
     },
     "localizationEntry": {
       "type": "object",
