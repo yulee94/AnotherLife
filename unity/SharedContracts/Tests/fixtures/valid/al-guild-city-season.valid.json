@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "catalogId": "al_guild_city_season_policy",
+  "game": "Another Life",
+  "sourceRevision": "guild_city_season_policy_v1",
+  "machineIdentity": "Guild",
+  "playerFacingTerms": {
+    "primary": "Guild",
+    "presentationAlias": "Clan",
+    "aliasScope": "localization_only"
+  },
+  "consumedContracts": {
+    "guildCatalogId": "al_guild_membership_policy",
+    "guildIdentity": "external_guild_snapshot",
+    "guildRoles": "external_guild_roles",
+    "realmCatalogId": "al_realm_catalog"
+  },
+  "seasonPolicy": {
+    "weekBoundary": "monday_00_00_utc",
+    "clock": "trusted_server_unix_seconds",
+    "citiesPerRealm": 3,
+    "cityIdPattern": "{realm_id}_guild_city_01..03",
+    "capitalsContestable": false,
+    "ownersPerCityPerWeek": 1,
+    "sameRealmParticipantsOnly": true,
+    "neutralizeBeforeContest": true
+  },
+  "realms": [
+    {
+      "realmId": "crownlands",
+      "capitalId": "capital_crownspire",
+      "realmSymbolId": "realm_symbol_crownlands",
+      "cityIds": [
+        "crownlands_guild_city_01",
+        "crownlands_guild_city_02",
+        "crownlands_guild_city_03"
+      ]
+    },
+    {
+      "realmId": "stonehold",
+      "capitalId": "capital_anvildeep",
+      "realmSymbolId": "realm_symbol_stonehold",
+      "cityIds": [
+        "stonehold_guild_city_01",
+        "stonehold_guild_city_02",
+        "stonehold_guild_city_03"
+      ]
+    },
+    {
+      "realmId": "eldergrove",
+      "capitalId": "capital_worldroot",
+      "realmSymbolId": "realm_symbol_eldergrove",
+      "cityIds": [
+        "eldergrove_guild_city_01",
+        "eldergrove_guild_city_02",
+        "eldergrove_guild_city_03"
+      ]
+    },
+    {
+      "realmId": "umbral",
+      "capitalId": "capital_veilspire",
+      "realmSymbolId": "realm_symbol_umbral",
+      "cityIds": [
+        "umbral_guild_city_01",
+        "umbral_guild_city_02",
+        "umbral_guild_city_03"
+      ]
+    }
+  ],
+  "bannerPolicy": {
+    "neutralPresentation": "realm_symbol",
+    "ownedPresentation": "moderated_hash_bound_guild_banner",
+    "invalidFallback": "safe_text_mark",
+    "foreignBanner": "never"
+  },
+  "benefitPolicy": {
+    "kind": "city_control_perk_profile_ref",
+    "consumer": "downstream_3d_dungeon_reward_modifier",
+    "mintOathmarksInKingdomManagement": false,
+    "mintOathmarksIn25d": false
+  },
+  "reservedAuthorities": {
+    "strongholdCastleCapture": ["castle_capture_stronghold"],
+    "publicRealmDungeon": [
+      "public_realm_dungeon_entrance",
+      "public_realm_dungeon_cooldown",
+      "public_realm_dungeon_quest",
+      "public_realm_dungeon_reward",
+      "public_realm_dungeon_coordinate"
+    ]
+  },
+  "statuses": [
+    "NEUTRAL",
+    "CONTESTING",
+    "OWNED",
+    "NEUTRALIZING",
+    "RESETTING_PENDING",
+    "LOCKOUT"
+  ],
+  "contestPhases": [
+    "IDLE",
+    "OPEN_FOR_PARTICIPATION",
+    "WINDOW_CLOSED",
+    "RESOLVED",
+    "LOCKED"
+  ],
+  "commitStates": [
+    "REALM_CITY_SEASON_PENDING",
+    "REALM_CITY_SEASON_COMMITTED",
+    "REALM_CITY_SEASON_TERMINAL"
+  ],
+  "transitions": [
+    "reset_week",
+    "open_contest",
+    "enter_contest",
+    "close_window",
+    "resolve",
+    "commit_ownership",
+    "cancel",
+    "reconcile"
+  ],
+  "replayPolicy": {
+    "operationIdentity": "operation_id",
+    "sameFingerprint": "already_committed",
+    "differentFingerprint": "conflict",
+    "unknownOutcome": "fail_closed_until_reconciled"
+  },
+  "recovery": {
+    "terminalResolution": "xor",
+    "unknownOutcome": "fail_closed_until_reconciled",
+    "tie": "no_owner"
+  },
+  "authorityBoundary": {
+    "plannerScope": "engine_free_snapshot_only",
+    "excludedImplementations": [
+      "persistence",
+      "network",
+      "save",
+      "combat",
+      "ui",
+      "economy",
+      "runtime_map",
+      "oathmark_mint",
+      "stronghold_capture",
+      "public_realm_dungeon"
+    ]
+  }
+}

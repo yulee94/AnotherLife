@@ -48,6 +48,7 @@ REAL_CATALOGS = {
     "al-guild-membership": "al_guild_membership_policy.json",
     "al-guild-progression": "al_guild_progression_policy.json",
     "al-guild-raid-muster": "al_guild_raid_muster_policy.json",
+    "al-guild-city-season": "al_guild_city_season_policy.json",
     "al-oathmark-marketplace": "al_oathmark_marketplace_policy.json",
     "al-map-disclosure": "al_map_disclosure_catalog.json",
     "al-realm": "al_realm_catalog.json",
@@ -71,6 +72,7 @@ REAL_CATALOGS = {
     "al-rig-motion-standard": "al_rig_motion_standard.json",
     "al-model-motion-skill-vfx-harness": "al_model_motion_skill_vfx_harness.v1.json",
     "al-boss-skill-presentation": "al_boss_skill_presentation_catalog.v1.json",
+    "al-boss-reward-source": "al_boss_reward_source_catalog.json",
 }
 
 # Known source-data defects that legitimately fail their schema today. These are

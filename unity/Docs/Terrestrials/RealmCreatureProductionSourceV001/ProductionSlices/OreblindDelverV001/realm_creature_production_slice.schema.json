@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.example/schemas/realm-creature-production-slice-v1.schema.json",
+  "title": "AnotherLife Realm Creature Production Source Slice V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packetId",
+    "qualificationId",
+    "sourceVersion",
+    "authority",
+    "source",
+    "approved2D",
+    "scale",
+    "protectedIdentityCues",
+    "rig",
+    "lodPolicy",
+    "materialPolicy",
+    "motionPolicy",
+    "outputs"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "packetId": { "const": "anotherlife-realm-creature-production-slice" },
+    "qualificationId": { "const": "rcpq_elite_stonehold_oreblind_delver_v001" },
+    "sourceVersion": { "const": "al-rcreature-2026-09-03-v003" },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source2dId", "modelId", "sourceQualificationOnly", "runtimeAuthority", "gameplayAuthority", "spawnActivation", "runtimeVfxSeparate"],
+      "properties": {
+        "source2dId": { "const": "tdf_elite_stonehold_oreblind_delver" },
+        "modelId": { "const": "elite_stonehold_oreblind_delver" },
+        "sourceQualificationOnly": { "const": true },
+        "runtimeAuthority": { "const": false },
+        "gameplayAuthority": { "const": false },
+        "spawnActivation": { "const": false },
+        "runtimeVfxSeparate": { "const": true }
+      }
+    },
+    "source": { "$ref": "#/$defs/file" },
+    "approved2D": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifestPath", "entryId", "source"],
+      "properties": {
+        "manifestPath": { "type": "string", "minLength": 1 },
+        "entryId": { "const": "tdf_elite_stonehold_oreblind_delver" },
+        "source": { "$ref": "#/$defs/image" }
+      }
+    },
+    "scale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["longitudinalAxis", "frontDirection", "targetLengthMeters", "mappingState"],
+      "properties": {
+        "longitudinalAxis": { "const": "X" },
+        "frontDirection": { "const": "-X" },
+        "targetLengthMeters": { "type": "number", "exclusiveMinimum": 0 },
+        "mappingState": { "const": "engineering_review_scale_not_gameplay_authority" }
+      }
+    },
+    "protectedIdentityCues": {
+      "type": "array",
+      "minItems": 4,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "rig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["armatureObject", "skeletonProfileId", "bindPoseId", "rootBones", "deformBones", "socketBones", "minimumDeformationPoses", "maximumInfluencesPerVertex"],
+      "properties": {
+        "armatureObject": { "const": "RIG_oreblind_delver" },
+        "skeletonProfileId": { "const": "rmc_skeleton_oreblind_six_limb_delver_v001" },
+        "bindPoseId": { "const": "rmc_bind_nonhumanoid_neutral_contact_v001" },
+        "rootBones": { "const": ["root", "motion_root", "body_root"] },
+        "deformBones": { "type": "array", "minItems": 22, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" } },
+        "socketBones": { "type": "array", "minItems": 10, "uniqueItems": true, "items": { "type": "string", "pattern": "^socket_[a-z0-9_]+$" } },
+        "minimumDeformationPoses": { "type": "integer", "minimum": 16 },
+        "maximumInfluencesPerVertex": { "const": 4 }
+      }
+    },
+    "lodPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["levels", "normalPlayUsesReducedLod", "protectedCuesRequiredEveryLevel"],
+      "properties": {
+        "levels": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "object", "maximumTriangles"],
+            "properties": {
+              "id": { "enum": ["LOD0", "LOD1", "LOD2"] },
+              "object": { "type": "string", "minLength": 1 },
+              "maximumTriangles": { "type": "integer", "minimum": 1 }
+            }
+          }
+        },
+        "normalPlayUsesReducedLod": { "const": true },
+        "protectedCuesRequiredEveryLevel": { "const": true }
+      }
+    },
+    "materialPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["materialId", "maximumSlots", "maximumTextureLongEdge", "textures", "emissionBakedIntoCleanMesh"],
+      "properties": {
+        "materialId": { "const": "mat_oreblind_delver_pbr_v001" },
+        "maximumSlots": { "type": "integer", "minimum": 1, "maximum": 2 },
+        "maximumTextureLongEdge": { "type": "integer", "minimum": 1, "maximum": 2048 },
+        "textures": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/$defs/texture" } },
+        "emissionBakedIntoCleanMesh": { "const": false }
+      }
+    },
+    "motionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sampleRateHz", "requiredKeys", "motions", "rootMotionPolicy", "gameplayResultsFromAnimation"],
+      "properties": {
+        "sampleRateHz": { "const": 30 },
+        "requiredKeys": { "type": "array", "minItems": 5, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "motions": {
+          "type": "array",
+          "minItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["motionKey", "actionName", "durationFrames", "loop", "sourceIntent"],
+            "properties": {
+              "motionKey": { "type": "string", "minLength": 1 },
+              "actionName": { "type": "string", "pattern": "^ANIM_[A-Za-z0-9_]+$" },
+              "durationFrames": { "type": "integer", "minimum": 2 },
+              "loop": { "type": "boolean" },
+              "sourceIntent": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "rootMotionPolicy": { "const": "in_place_presentation_only" },
+        "gameplayResultsFromAnimation": { "const": false }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blend", "fbx", "dccReport", "qualificationManifest", "reviewDirectory"],
+      "properties": {
+        "blend": { "type": "string", "minLength": 1 },
+        "fbx": { "type": "string", "minLength": 1 },
+        "dccReport": { "type": "string", "minLength": 1 },
+        "qualificationManifest": { "type": "string", "minLength": 1 },
+        "reviewDirectory": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256", "dimensions"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "dimensions": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "texture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "path", "bytes", "sha256", "dimensions"],
+      "properties": {
+        "role": { "enum": ["base_color", "normal", "metallic_smoothness", "ambient_occlusion"] },
+        "path": { "type": "string", "minLength": 1 },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "dimensions": { "const": [2048, 2048] }
+      }
+    }
+  }
+}
