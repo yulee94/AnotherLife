@@ -279,6 +279,25 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void GuildRaidMusterCurrentVersionIsRecognizedAndWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"GuildRaidMuster\":{\"Version\":1,\"Revision\":0," +
+                    "\"Calls\":[],\"Receipts\":[]}"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
         public void NotificationHistoryForwardVersionStaysPreservedReadOnly()
         {
             string forward = EmptyNotificationHistoryJson.Replace(
