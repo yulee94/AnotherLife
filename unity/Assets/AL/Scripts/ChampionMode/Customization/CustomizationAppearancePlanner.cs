@@ -190,7 +190,20 @@ namespace AL.ChampionMode.Customization
         }
     }
 
-    public sealed class FakeReversibleAppearanceAdapter
+    public interface IReversibleAppearanceAdapter
+    {
+        EffectiveAppearanceSnapshot Current { get; }
+        bool IsDisposed { get; }
+        bool HasPreview { get; }
+        AppearanceApplyStatus ApplyAndVerify(
+            AppearancePlan plan,
+            ModelCapabilitySnapshot currentModel);
+        AppearanceRollbackStatus Rollback(AppearancePlan plan);
+        AppearanceRollbackStatus DisposePreview();
+    }
+
+    public sealed class FakeReversibleAppearanceAdapter :
+        IReversibleAppearanceAdapter
     {
         private EffectiveAppearanceSnapshot _current;
         private AppearancePlan _appliedPlan;
