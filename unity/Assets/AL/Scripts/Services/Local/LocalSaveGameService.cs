@@ -226,6 +226,7 @@ namespace AL.Services.Local
         ILegacyRealmSelectionCandidateStore,
         IProfileBoundRealmSelectionCandidateStore,
         IProfileBoundDeathPenaltyCandidateStore,
+        IProfileBoundWishgateCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
         ILegacyFirstWorldProgressCandidateStore,

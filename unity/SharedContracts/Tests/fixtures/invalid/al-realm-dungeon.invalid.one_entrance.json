@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "catalogId": "al_realm_dungeon_catalog",
+  "game": "Another Life",
+  "sourceRevision": "realm_dungeon_catalog_v1",
+  "machineIdentity": "RealmDungeon",
+  "consumedContracts": {
+    "realmCatalogId": "al_realm_catalog",
+    "guildRaidMusterCatalogId": "al_guild_raid_muster_policy"
+  },
+  "scope": {
+    "kind": "public_open_world_underground",
+    "clientAuthority": false,
+    "runtimeActivation": false,
+    "network": false,
+    "save": false,
+    "scenes": false,
+    "balance": false,
+    "guildClosedInstanceAlias": false
+  },
+  "clock": {
+    "kind": "trusted_server_unix_seconds",
+    "cooldownSeconds": 604800,
+    "killOnly": true
+  },
+  "lifecycle": [
+    "genesis_or_recovery",
+    "alive_idle",
+    "alive_engaged",
+    "defeat_commit_pending",
+    "cooldown",
+    "respawn_eligible",
+    "manifesting",
+    "alive_idle"
+  ],
+  "portal": {
+    "kind": "sealed_outward_only_manifestation",
+    "inwardTraversal": false,
+    "ambientNavigation": false,
+    "lease": "fenced_spawn_cycle"
+  },
+  "productionGate": {
+    "eligibleWithoutApprovedBundle": false,
+    "missingAssetPolicy": "fail_closed",
+    "genericFallback": false
+  },
+  "identityIsolation": {
+    "raidDefeatMutatesGuardian": false,
+    "guardianStateMutatesRaid": false,
+    "guildClosedInstanceAlias": false,
+    "guildClosedInstanceIdPrefix": "closed_raid_",
+    "guildClosedBossProfileIds": [
+      "raid_boss_iron_colossus",
+      "raid_boss_ash_seraph",
+      "raid_boss_thorn_wraith",
+      "raid_boss_veil_regent"
+    ],
+    "guardianCatalogDragonIds": [
+      "dragon_crownlands_dawn_regent",
+      "dragon_stonehold_iron_wyrm",
+      "dragon_eldergrove_moonbough",
+      "dragon_umbral_void_seraph"
+    ]
+  },
+  "dungeons": [
+    {
+      "id": "realm_dungeon_crownlands_deep",
+      "realmId": "crownlands",
+      "entrances": [
+        {
+          "id": "realm_dungeon_crownlands_deep_entrance_01"
+        }
+      ],
+      "portalId": "realm_dungeon_crownlands_deep_portal",
+      "raidDragon": {
+        "id": "raid_dragon_crownlands_dawn_regent",
+        "guardianPresentationRef": "dragon_crownlands_dawn_regent",
+        "presentationBundleId": "",
+        "presentationApproved": false,
+        "productionEligible": false
+      },
+      "productionEligible": false
+    },
+    {
+      "id": "realm_dungeon_stonehold_deep",
+      "realmId": "stonehold",
+      "entrances": [
+        {
+          "id": "realm_dungeon_stonehold_deep_entrance_01"
+        },
+        {
+          "id": "realm_dungeon_stonehold_deep_entrance_02"
+        }
+      ],
+      "portalId": "realm_dungeon_stonehold_deep_portal",
+      "raidDragon": {
+        "id": "raid_dragon_stonehold_iron_wyrm",
+        "guardianPresentationRef": "dragon_stonehold_iron_wyrm",
+        "presentationBundleId": "",
+        "presentationApproved": false,
+        "productionEligible": false
+      },
+      "productionEligible": false
+    },
+    {
+      "id": "realm_dungeon_eldergrove_deep",
+      "realmId": "eldergrove",
+      "entrances": [
+        {
+          "id": "realm_dungeon_eldergrove_deep_entrance_01"
+        },
+        {
+          "id": "realm_dungeon_eldergrove_deep_entrance_02"
+        }
+      ],
+      "portalId": "realm_dungeon_eldergrove_deep_portal",
+      "raidDragon": {
+        "id": "raid_dragon_eldergrove_moonbough",
+        "guardianPresentationRef": "dragon_eldergrove_moonbough",
+        "presentationBundleId": "",
+        "presentationApproved": false,
+        "productionEligible": false
+      },
+      "productionEligible": false
+    },
+    {
+      "id": "realm_dungeon_umbral_deep",
+      "realmId": "umbral",
+      "entrances": [
+        {
+          "id": "realm_dungeon_umbral_deep_entrance_01"
+        },
+        {
+          "id": "realm_dungeon_umbral_deep_entrance_02"
+        }
+      ],
+      "portalId": "realm_dungeon_umbral_deep_portal",
+      "raidDragon": {
+        "id": "raid_dragon_umbral_void_seraph",
+        "guardianPresentationRef": "dragon_umbral_void_seraph",
+        "presentationBundleId": "",
+        "presentationApproved": false,
+        "productionEligible": false
+      },
+      "productionEligible": false
+    }
+  ],
+  "authorityBoundary": {
+    "plannerScope": "engine_free_snapshot_only",
+    "ownedDomain": "public_realm_dungeon",
+    "excludedImplementations": [
+      "persistence",
+      "network",
+      "save",
+      "scenes",
+      "models",
+      "balance",
+      "server",
+      "runtime_activation",
+      "guild_closed_instance",
+      "guardian_identity_state"
+    ]
+  }
+}

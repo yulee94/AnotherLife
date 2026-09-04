@@ -264,6 +264,11 @@ jobs:
             if ($LASTEXITCODE -ne 0) {
               throw "Shot070 Vaeloryn motion-source tests exited with code $LASTEXITCODE."
             }
+            & python tools/cinematics/test_validate_shot070_vaeloryn_shot_scale.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Shot070 Vaeloryn shot-scale tests exited with code $LASTEXITCODE."
+            }
           } catch {
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
