@@ -17,6 +17,8 @@ namespace AL.Tests.EditMode.WorldState
         private const string StartOperationId = "world-operation-veil-start-001";
         private const string EndCorrelationId = "world-correlation-veil-end-001";
         private const string EndOperationId = "world-operation-veil-end-001";
+        private const string CancelCorrelationId = "world-correlation-veil-cancel-001";
+        private const string CancelOperationId = "world-operation-veil-cancel-001";
 
         [Test]
         public void VeilOmenStartPersistsOncePreparesConsumerAndNotifiesAfterCommit()
@@ -268,6 +270,247 @@ namespace AL.Tests.EditMode.WorldState
         }
 
         [Test]
+        public void VeilOmenCancelPersistsOnceAndStagesTypedCancelIntent()
+        {
+            var persistence = new InMemoryWorldStateCandidatePersistence();
+            var events = new RecordingWorldStateCommitEventSink();
+            var outbox = new RecordingWorldStateNotificationOutbox();
+            WorldStateDurableService service = CreateService(persistence, events, outbox);
+            service.CommitStart(StartRequest());
+
+            WorldStateStandaloneCommitResult cancelled = service.CommitCancel(CancelRequest(1L));
+
+            Assert.AreEqual(WorldStateStandaloneCommitStatus.AppliedCommitted, cancelled.Status);
+            Assert.AreEqual(1, cancelled.PersistAttemptCount);
+            Assert.AreEqual(2, persistence.AttemptCount);
+            Assert.AreEqual(
+                WorldStateSnapshotStatus.AvailableNoActiveEvent,
+                service.Snapshot().Status);
+            Assert.AreEqual(1, service.Snapshot().CompletedHistory.Count);
+            Assert.AreEqual(
+                WorldEventInstanceState.Cancelled,
+                service.Snapshot().CompletedHistory[0].State);
+            Assert.AreEqual(
+                WorldEventCompletionReason.CancelledByOwner,
+                service.Snapshot().CompletedHistory[0].CompletionReason);
+            Assert.AreEqual(2, events.Published.Count);
+            Assert.AreEqual(WorldStateTransitionKind.Cancel, events.Published[1].TransitionKind);
+            Assert.AreEqual(2, outbox.Enqueued.Count);
+            Assert.AreEqual(
+                WorldStateAuthoredCatalog.CancelNotificationId,
+                outbox.Enqueued[1].DefinitionId);
+            Assert.AreEqual(1, cancelled.Plan.PreparedEffectPlans.Count);
+            Assert.AreEqual(
+                WorldStateAuthoredCatalog.PresentationConsumerId,
+                cancelled.Plan.PreparedEffectPlans[0].ConsumerId);
+            Assert.AreEqual(
+                WorldStateTransitionKind.Cancel,
+                cancelled.Plan.PreparedEffectPlans[0].TransitionKind);
+        }
+
+        [Test]
+        public void ExactCancelReplayDoesNotPersistOrNotifyAgain()
+        {
+            var persistence = new InMemoryWorldStateCandidatePersistence();
+            var events = new RecordingWorldStateCommitEventSink();
+            var outbox = new RecordingWorldStateNotificationOutbox();
+            WorldStateDurableService service = CreateService(persistence, events, outbox);
+            service.CommitStart(StartRequest());
+            service.CommitCancel(CancelRequest(1L));
+
+            WorldStateStandaloneCommitResult replay = service.CommitCancel(CancelRequest(1L));
+
+            Assert.AreEqual(WorldStateStandaloneCommitStatus.AlreadyCommitted, replay.Status);
+            Assert.AreEqual(0, replay.PersistAttemptCount);
+            Assert.AreEqual(2, persistence.AttemptCount);
+            Assert.AreEqual(2, events.Published.Count);
+            Assert.AreEqual(2, outbox.Enqueued.Count);
+            Assert.AreEqual(
+                WorldStateSnapshotStatus.AvailableNoActiveEvent,
+                service.Snapshot().Status);
+        }
+
+        [Test]
+        public void StaleCancelRevisionRejectsWithoutPersisting()
+        {
+            var persistence = new InMemoryWorldStateCandidatePersistence();
+            WorldStateDurableService service = CreateService(persistence);
+            service.CommitStart(StartRequest());
+
+            WorldStateStandaloneCommitResult stale = service.CommitCancel(CancelRequest(9L));
+
+            Assert.AreEqual(WorldStateStandaloneCommitStatus.RejectedStale, stale.Status);
+            Assert.AreEqual(0, stale.PersistAttemptCount);
+            Assert.AreEqual(1, persistence.AttemptCount);
+            Assert.AreEqual(
+                WorldStateAuthoredCatalog.VeilOmenDefinitionId,
+                service.Snapshot().ActiveInstance.DefinitionId);
+        }
+
+        [Test]
+        public void CancelPersistenceFailurePreservesActiveEvent()
+        {
+            var persistence = new InMemoryWorldStateCandidatePersistence();
+            var events = new RecordingWorldStateCommitEventSink();
+            var outbox = new RecordingWorldStateNotificationOutbox();
+            WorldStateDurableService service = CreateService(persistence, events, outbox);
+            service.CommitStart(StartRequest());
+            persistence.FailNext = true;
+
+            WorldStateStandaloneCommitResult failed = service.CommitCancel(CancelRequest(1L));
+
+            Assert.AreEqual(
+                WorldStateStandaloneCommitStatus.PersistenceFailedPreviousPreserved,
+                failed.Status);
+            Assert.AreEqual(1, failed.PersistAttemptCount);
+            Assert.AreEqual(2, persistence.AttemptCount);
+            Assert.AreEqual(
+                WorldStateAuthoredCatalog.VeilOmenDefinitionId,
+                service.Snapshot().ActiveInstance.DefinitionId);
+            Assert.AreEqual(1, events.Published.Count);
+            Assert.AreEqual(1, outbox.Enqueued.Count);
+        }
+
+        [Test]
+        public void UnauthorizedCancelRejectsWithoutPersisting()
+        {
+            var persistence = new InMemoryWorldStateCandidatePersistence();
+            WorldStateDurableService service = CreateService(persistence);
+            service.CommitStart(StartRequest());
+
+            WorldStateStandaloneCommitResult rejected = service.CommitCancel(
+                new WorldStateCancelRequest(
+                    InstanceId,
+                    CancelCorrelationId,
+                    CancelOperationId,
+                    "al_world_source_unknown",
+                    WorldEventCompletionReason.CancelledByOwner,
+                    NowUtcSeconds,
+                    1L));
+
+            Assert.AreEqual(WorldStateStandaloneCommitStatus.RejectedValidation, rejected.Status);
+            Assert.AreEqual(0, rejected.PersistAttemptCount);
+            Assert.AreEqual(1, persistence.AttemptCount);
+            Assert.AreEqual(
+                WorldStateAuthoredCatalog.VeilOmenDefinitionId,
+                service.Snapshot().ActiveInstance.DefinitionId);
+        }
+
+        [Test]
+        public void ReconcileBeforeEndIsNoChangeWithoutPersisting()
+        {
+            var persistence = new InMemoryWorldStateCandidatePersistence();
+            var events = new RecordingWorldStateCommitEventSink();
+            var outbox = new RecordingWorldStateNotificationOutbox();
+            WorldStateDurableService service = CreateService(persistence, events, outbox);
+            service.CommitStart(StartRequest());
+
+            WorldStateStandaloneCommitResult reconcile = service.CommitReconcile();
+
+            Assert.AreEqual(WorldStateStandaloneCommitStatus.NoChange, reconcile.Status);
+            Assert.AreEqual(0, reconcile.PersistAttemptCount);
+            Assert.AreEqual(1, persistence.AttemptCount);
+            Assert.AreEqual(
+                WorldStateAuthoredCatalog.VeilOmenDefinitionId,
+                service.Snapshot().ActiveInstance.DefinitionId);
+            Assert.AreEqual(1, events.Published.Count);
+            Assert.AreEqual(1, outbox.Enqueued.Count);
+        }
+
+        [Test]
+        public void ReconcileAtEndPersistsOnceAsNaturalEnd()
+        {
+            var persistence = new InMemoryWorldStateCandidatePersistence();
+            var events = new RecordingWorldStateCommitEventSink();
+            var outbox = new RecordingWorldStateNotificationOutbox();
+            var clock = new MutableClock(NowUtcSeconds);
+            WorldStateDurableService service = CreateService(
+                persistence,
+                events,
+                outbox,
+                clock);
+            service.CommitStart(StartRequest());
+            clock.UtcNowSeconds = NowUtcSeconds + DurationSeconds;
+
+            WorldStateStandaloneCommitResult ended = service.CommitReconcile();
+
+            Assert.AreEqual(WorldStateStandaloneCommitStatus.AppliedCommitted, ended.Status);
+            Assert.AreEqual(1, ended.PersistAttemptCount);
+            Assert.AreEqual(2, persistence.AttemptCount);
+            Assert.AreEqual(
+                WorldStateSnapshotStatus.AvailableNoActiveEvent,
+                service.Snapshot().Status);
+            Assert.AreEqual(1, service.Snapshot().CompletedHistory.Count);
+            Assert.AreEqual(
+                WorldEventInstanceState.Ended,
+                service.Snapshot().CompletedHistory[0].State);
+            Assert.AreEqual(
+                WorldEventCompletionReason.NaturalExpiry,
+                service.Snapshot().CompletedHistory[0].CompletionReason);
+            Assert.AreEqual(2, events.Published.Count);
+            Assert.AreEqual(WorldStateTransitionKind.End, events.Published[1].TransitionKind);
+            Assert.AreEqual(2, outbox.Enqueued.Count);
+            Assert.AreEqual(
+                WorldStateAuthoredCatalog.EndNotificationId,
+                outbox.Enqueued[1].DefinitionId);
+        }
+
+        [Test]
+        public void ReconcileAfterCommitIsNoChangeWithoutPersisting()
+        {
+            var persistence = new InMemoryWorldStateCandidatePersistence();
+            var events = new RecordingWorldStateCommitEventSink();
+            var outbox = new RecordingWorldStateNotificationOutbox();
+            var clock = new MutableClock(NowUtcSeconds);
+            WorldStateDurableService service = CreateService(
+                persistence,
+                events,
+                outbox,
+                clock);
+            service.CommitStart(StartRequest());
+            clock.UtcNowSeconds = NowUtcSeconds + DurationSeconds;
+            service.CommitReconcile();
+
+            WorldStateStandaloneCommitResult replay = service.CommitReconcile();
+
+            Assert.AreEqual(WorldStateStandaloneCommitStatus.NoChange, replay.Status);
+            Assert.AreEqual(0, replay.PersistAttemptCount);
+            Assert.AreEqual(2, persistence.AttemptCount);
+            Assert.AreEqual(2, events.Published.Count);
+            Assert.AreEqual(2, outbox.Enqueued.Count);
+        }
+
+        [Test]
+        public void ReconcilePersistenceFailurePreservesActiveEvent()
+        {
+            var persistence = new InMemoryWorldStateCandidatePersistence();
+            var events = new RecordingWorldStateCommitEventSink();
+            var outbox = new RecordingWorldStateNotificationOutbox();
+            var clock = new MutableClock(NowUtcSeconds);
+            WorldStateDurableService service = CreateService(
+                persistence,
+                events,
+                outbox,
+                clock);
+            service.CommitStart(StartRequest());
+            clock.UtcNowSeconds = NowUtcSeconds + DurationSeconds;
+            persistence.FailNext = true;
+
+            WorldStateStandaloneCommitResult failed = service.CommitReconcile();
+
+            Assert.AreEqual(
+                WorldStateStandaloneCommitStatus.PersistenceFailedPreviousPreserved,
+                failed.Status);
+            Assert.AreEqual(1, failed.PersistAttemptCount);
+            Assert.AreEqual(2, persistence.AttemptCount);
+            Assert.AreEqual(
+                WorldStateAuthoredCatalog.VeilOmenDefinitionId,
+                service.Snapshot().ActiveInstance.DefinitionId);
+            Assert.AreEqual(1, events.Published.Count);
+            Assert.AreEqual(1, outbox.Enqueued.Count);
+        }
+
+        [Test]
         public void ProductionWorldStateServiceHasNoHardCodedCopyOrRawNotify()
         {
             string path = System.IO.Path.Combine(
@@ -330,6 +573,18 @@ namespace AL.Tests.EditMode.WorldState
                 EndOperationId,
                 WorldStateAuthoredCatalog.SourceSystemId,
                 now,
+                expectedRevision);
+        }
+
+        private static WorldStateCancelRequest CancelRequest(long expectedRevision)
+        {
+            return new WorldStateCancelRequest(
+                InstanceId,
+                CancelCorrelationId,
+                CancelOperationId,
+                WorldStateAuthoredCatalog.SourceSystemId,
+                WorldEventCompletionReason.CancelledByOwner,
+                NowUtcSeconds,
                 expectedRevision);
         }
 
