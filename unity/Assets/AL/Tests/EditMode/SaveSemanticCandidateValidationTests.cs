@@ -1330,13 +1330,14 @@ namespace AL.Tests.EditMode
                 SaveCandidateSourceGeneration.Primary,
                 futurePolicy);
 
-            Assert.AreEqual(SaveSemanticCandidateOutcome.DegradedMalformed, candidate.Outcome);
+            Assert.AreEqual(SaveSemanticCandidateOutcome.MigrationRequired, candidate.Outcome);
             Assert.AreNotEqual(
                 SaveSemanticCandidateOutcome.RepairableWithDataChange,
                 candidate.Outcome);
+            Assert.False(candidate.IsWritable);
             Assert.That(
                 candidate.Diagnostics.Select(item => item.Code),
-                Does.Contain("SAVE_LOWER_SCHEMA_UNSUPPORTED"));
+                Does.Contain("SAVE_PROFILE_ID_MIGRATION_REQUIRED"));
         }
 
         [Test]
@@ -1352,7 +1353,8 @@ namespace AL.Tests.EditMode
                     SaveSemanticCandidateOutcome.RepairableWithDataChange,
                     SaveSemanticCandidateOutcome.Invalid,
                     SaveSemanticCandidateOutcome.ForwardSchemaReadOnly,
-                    SaveSemanticCandidateOutcome.OversizePreservedReadOnly
+                    SaveSemanticCandidateOutcome.OversizePreservedReadOnly,
+                    SaveSemanticCandidateOutcome.MigrationRequired
                 },
                 Enum.GetValues(typeof(SaveSemanticCandidateOutcome)));
         }
