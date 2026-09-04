@@ -27,7 +27,8 @@ namespace AL.Data.Catalogs
         CompatibleNormalized = 4,
         Valid = 5,
         ForwardSchemaReadOnly = 6,
-        OversizePreservedReadOnly = 7
+        OversizePreservedReadOnly = 7,
+        MigrationRequired = 8
     }
 
     [Flags]
@@ -503,7 +504,8 @@ namespace AL.Data.Catalogs
             bool writable,
             byte[] rawBytes,
             int originalRawByteCount,
-            IReadOnlyList<SaveSemanticDiagnostic> diagnostics)
+            IReadOnlyList<SaveSemanticDiagnostic> diagnostics,
+            string profileId = "")
         {
             SourceGeneration = sourceGeneration;
             Outcome = outcome;
@@ -518,6 +520,7 @@ namespace AL.Data.Catalogs
             this.rawBytes = Copy(rawBytes);
             OriginalRawByteCount = originalRawByteCount < 0 ? 0 : originalRawByteCount;
             Diagnostics = diagnostics ?? Array.AsReadOnly(new SaveSemanticDiagnostic[0]);
+            ProfileId = profileId ?? string.Empty;
         }
 
         public SaveCandidateSourceGeneration SourceGeneration { get; }
@@ -533,6 +536,7 @@ namespace AL.Data.Catalogs
         public int OriginalRawByteCount { get; }
         public bool HasRetainedRawBytes => rawBytes != null;
         public IReadOnlyList<SaveSemanticDiagnostic> Diagnostics { get; }
+        public string ProfileId { get; }
 
         /// <summary>
         /// Returns a new copy on every call. Accepted-size inputs are retained exactly;
@@ -565,6 +569,8 @@ namespace AL.Data.Catalogs
                         return 7;
                     case SaveSemanticCandidateOutcome.OversizePreservedReadOnly:
                         return 0;
+                    case SaveSemanticCandidateOutcome.MigrationRequired:
+                        return 5;
                     default:
                         return 0;
                 }
@@ -670,6 +676,17 @@ namespace AL.Data.Catalogs
                 return new SaveSemanticCandidateSelection(
                     primary,
                     "SAVE_SELECT_REPAIRABLE_PRIMARY");
+            }
+
+            // A clean schema-1 identity candidate must reach the atomic schema-2
+            // installer instead of being ranked below a current-schema backup.
+            if (primary != null &&
+                primary.Outcome == SaveSemanticCandidateOutcome.MigrationRequired &&
+                primary.HasRetainedRawBytes)
+            {
+                return new SaveSemanticCandidateSelection(
+                    primary,
+                    "SAVE_SELECT_SCHEMA_ONE_MIGRATION_REQUIRED");
             }
 
             // A supported primary is authoritative even when a backup has a nominally
@@ -1283,7 +1300,8 @@ namespace AL.Data.Catalogs
                     return CreateInvalid(sourceGeneration, rawBytes, originalByteCount, collector);
                 }
 
-                if (schemaVersion < policy.CurrentSaveSchemaVersion)
+                if (schemaVersion < policy.CurrentSaveSchemaVersion &&
+                    !(schemaVersion == 1 && policy.CurrentSaveSchemaVersion == 2))
                 {
                     state.HasMalformedData = true;
                     state.DisabledDomains |= SaveSemanticDomain.All;
@@ -1375,13 +1393,30 @@ namespace AL.Data.Catalogs
                 state);
             ValidateEquipmentRows(root, policy.Authority, collector, state);
             ValidateAppliedBossLootRewardRows(root, policy.Authority, collector, state);
-            ValidateNvs01Progress(root, policy.Nvs01Rule, collector, state);
+            ValidateNvs01Progress(root, policy.Nvs01Rule, schemaVersion, collector, state);
             ValidateFirstWorldProgress(root, collector, state);
             ValidateMapDisclosure(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
-            if (state.HasMalformedData)
+            bool requiresProfileIdentityMigration =
+                schemaVersion == 1 &&
+                policy.CurrentSaveSchemaVersion == 2 &&
+                !state.HasMalformedData &&
+                !state.HasPreservedUnknown &&
+                !state.NeedsDataChange &&
+                !state.NeedsNormalization;
+            if (requiresProfileIdentityMigration)
+            {
+                collector.Add(
+                    "SAVE_PROFILE_ID_MIGRATION_REQUIRED",
+                    "$.ProfileId",
+                    SaveSemanticDomain.Metadata,
+                    SaveSemanticDiagnosticSeverity.Information);
+                outcome = SaveSemanticCandidateOutcome.MigrationRequired;
+                writable = false;
+            }
+            else if (state.HasMalformedData)
             {
                 outcome = SaveSemanticCandidateOutcome.DegradedMalformed;
                 writable = false;
@@ -1420,7 +1455,17 @@ namespace AL.Data.Catalogs
                 writable,
                 rawBytes,
                 originalByteCount,
-                collector);
+                collector,
+                ReadProfileId(root));
+        }
+
+        private static string ReadProfileId(StrictJsonObject root)
+        {
+            StrictJsonValue value;
+            var profileId = root != null && root.TryGet("ProfileId", out value)
+                ? value as StrictJsonString
+                : null;
+            return profileId == null ? string.Empty : profileId.Value;
         }
 
         private static void InspectUnknownTopLevelFields(
@@ -1573,6 +1618,39 @@ namespace AL.Data.Catalogs
             }
 
             return anyNonZero;
+        }
+
+        private static bool IsAllowedNvs01ExpectedGenerationFingerprint(
+            int schemaVersion,
+            string value)
+        {
+            if (value == null)
+            {
+                return false;
+            }
+
+            if (value.Length == 0)
+            {
+                return true;
+            }
+
+            if (schemaVersion < IdentityAwareSaveSchemaVersion ||
+                value.Length != 64)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (!(character >= '0' && character <= '9' ||
+                      character >= 'a' && character <= 'f'))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static void ValidateTopLevelShape(
@@ -3762,6 +3840,7 @@ namespace AL.Data.Catalogs
         private static void ValidateNvs01Progress(
             StrictJsonObject root,
             SaveSemanticNvs01Rule rule,
+            int schemaVersion,
             DiagnosticCollector collector,
             ValidationState state)
         {
@@ -4044,7 +4123,7 @@ namespace AL.Data.Catalogs
                 collector,
                 state);
             ValidateNvs01Encounter(progress, collector, state);
-            ValidateNvs01Operation(progress, collector, state);
+            ValidateNvs01Operation(progress, schemaVersion, collector, state);
 
             if (version == 0 && !IsNeutralNvs01Progress(progress))
             {
@@ -4690,6 +4769,7 @@ namespace AL.Data.Catalogs
 
         private static void ValidateNvs01Operation(
             StrictJsonObject progress,
+            int schemaVersion,
             DiagnosticCollector collector,
             ValidationState state)
         {
@@ -4745,12 +4825,16 @@ namespace AL.Data.Catalogs
                 var expectedFingerprint =
                     expectedFingerprintValue as StrictJsonString;
                 if (expectedFingerprint == null ||
-                    expectedFingerprint.Value.Length != 0)
+                    !IsAllowedNvs01ExpectedGenerationFingerprint(
+                        schemaVersion,
+                        expectedFingerprint.Value))
                 {
                     MarkMalformed(
                         state,
                         collector,
-                        "SAVE_SCHEMA_V1_NVS01_EXPECTED_GENERATION_INVALID",
+                        schemaVersion >= IdentityAwareSaveSchemaVersion
+                            ? "SAVE_SCHEMA_V2_NVS01_EXPECTED_GENERATION_INVALID"
+                            : "SAVE_SCHEMA_V1_NVS01_EXPECTED_GENERATION_INVALID",
                         path + ".ExpectedGenerationFingerprint",
                         SaveSemanticDomain.Narrative);
                 }
@@ -5750,7 +5834,8 @@ namespace AL.Data.Catalogs
             bool writable,
             byte[] rawBytes,
             int originalByteCount,
-            DiagnosticCollector collector)
+            DiagnosticCollector collector,
+            string profileId = "")
         {
             return new SaveSemanticCandidate(
                 sourceGeneration,
@@ -5765,7 +5850,8 @@ namespace AL.Data.Catalogs
                 writable,
                 rawBytes,
                 originalByteCount,
-                collector.Freeze());
+                collector.Freeze(),
+                profileId);
         }
 
         private static string AppendPropertyPath(string path, string name)

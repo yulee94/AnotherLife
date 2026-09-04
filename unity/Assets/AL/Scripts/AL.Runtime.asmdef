@@ -3,6 +3,7 @@
     "rootNamespace": "AL",
     "references": [
         "AL.SaveAuthority",
+        "AL.SaveAuthority.RuntimeBridge",
         "AL.GameDataCatalog",
         "Unity.TextMeshPro",
         "Unity.ugui",
