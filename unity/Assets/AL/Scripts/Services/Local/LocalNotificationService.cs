@@ -37,6 +37,23 @@ namespace AL.Services.Local
             INotificationClock clock,
             INotificationActionRegistry actionRegistry,
             INotificationDiagnosticSink diagnosticSink)
+            : this(
+                definitionResolver,
+                localizationReferenceAuthority,
+                clock,
+                actionRegistry,
+                diagnosticSink,
+                null)
+        {
+        }
+
+        public LocalNotificationService(
+            INotificationDefinitionResolver definitionResolver,
+            INotificationLocalizationReferenceAuthority localizationReferenceAuthority,
+            INotificationClock clock,
+            INotificationActionRegistry actionRegistry,
+            INotificationDiagnosticSink diagnosticSink,
+            INotificationDurableStore durableStore)
         {
             _diagnosticSink = diagnosticSink ?? new UnityNotificationDiagnosticSink();
             _queue = new NotificationSessionQueue(
@@ -44,7 +61,8 @@ namespace AL.Services.Local
                 localizationReferenceAuthority,
                 clock,
                 actionRegistry,
-                _diagnosticSink);
+                _diagnosticSink,
+                durableStore);
         }
 
         public NotificationEnqueueResult Enqueue(NotificationRequest request) =>

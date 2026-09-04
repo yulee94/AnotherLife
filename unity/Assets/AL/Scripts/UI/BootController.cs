@@ -58,7 +58,11 @@ namespace AL.UI
             Debug.Log("AL Boot Sequence Started...");
             _readiness = new LaunchReadinessCoordinator();
             _launchLifecycle = new LaunchCinematicLifecycle();
-            _launchLifecycle.MarkPreparing();
+            LaunchCinematicPlatform launchPlatform = LaunchCinematicCatalog.CurrentBuildPlatform();
+            LaunchCinematicCatalog.TryLoadForPlatform(
+                launchPlatform,
+                out LaunchCinematicRuntimeRecord launchRecord);
+            bool reducedMotion = launchRecord == null || launchRecord.ReducedMotionFallbackOnly;
 
             if (_buildRuntimeSplash)
             {
@@ -71,7 +75,12 @@ namespace AL.UI
                 BuildRuntimeSplash();
             }
 
-            _launchLifecycle.FailToFallback("approved-media-unavailable");
+            LaunchCinematicBootBinding.EstablishStaticFallback(
+                _launchLifecycle,
+                launchRecord,
+                launchPlatform,
+                releaseBuild: !Debug.isDebugBuild,
+                reducedMotion: reducedMotion);
             _readiness.TryEstablishMedia(
                 _readiness.AttemptGeneration,
                 LaunchMediaPresentation.StaticFallbackEstablished);
@@ -589,8 +598,16 @@ namespace AL.UI
             _focusedGeneration = 0;
             _focusedAction = null;
             _launchLifecycle = new LaunchCinematicLifecycle();
-            _launchLifecycle.MarkPreparing();
-            _launchLifecycle.FailToFallback("approved-media-unavailable");
+            LaunchCinematicPlatform retryPlatform = LaunchCinematicCatalog.CurrentBuildPlatform();
+            LaunchCinematicCatalog.TryLoadForPlatform(
+                retryPlatform,
+                out LaunchCinematicRuntimeRecord retryRecord);
+            LaunchCinematicBootBinding.EstablishStaticFallback(
+                _launchLifecycle,
+                retryRecord,
+                retryPlatform,
+                releaseBuild: !Debug.isDebugBuild,
+                reducedMotion: retryRecord == null || retryRecord.ReducedMotionFallbackOnly);
             _readiness.TryEstablishMedia(
                 _readiness.AttemptGeneration,
                 LaunchMediaPresentation.StaticFallbackEstablished);
