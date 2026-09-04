@@ -8,11 +8,12 @@ namespace AL.Data.Catalogs.WorldAtlas
 {
     public static class WorldAtlasContract
     {
-        public const string SupportedVersion = "0.2.0";
+        public const string SupportedVersion = "0.3.0";
         public const string CatalogId = "al_world_atlas_narrative_catalog";
         public const string FileName = CatalogId + ".json";
-        public const string SourcePacketId = "al_narrative_world_atlas_source_v002";
+        public const string SourcePacketId = "al_narrative_world_atlas_source_v003";
         public const string TopologyContractId = "al_world_atlas_topology_query_contract_v001";
+        public const string ProtectedZoneContractId = "al_world_atlas_protected_zone_query_contract_v001";
         public const int MaximumBytes = 64 * 1024;
         public const int MaximumDiagnostics = 128;
     }
@@ -139,6 +140,70 @@ namespace AL.Data.Catalogs.WorldAtlas
         public string SceneReferenceStatus { get; }
     }
 
+    public sealed class WorldAtlasProtectedZonePolicy
+    {
+        internal WorldAtlasProtectedZonePolicy(
+            string id,
+            string zoneKind,
+            string protection,
+            string appliesTo,
+            string applicationRecheck,
+            string warOverride,
+            string enforcementStatus,
+            string mutationAuthority)
+        {
+            Id = id;
+            ZoneKind = zoneKind;
+            Protection = protection;
+            AppliesTo = appliesTo;
+            ApplicationRecheck = applicationRecheck;
+            WarOverride = warOverride;
+            EnforcementStatus = enforcementStatus;
+            MutationAuthority = mutationAuthority;
+        }
+
+        public string Id { get; }
+        public string ZoneKind { get; }
+        public string Protection { get; }
+        public string AppliesTo { get; }
+        public string ApplicationRecheck { get; }
+        public string WarOverride { get; }
+        public string EnforcementStatus { get; }
+        public string MutationAuthority { get; }
+    }
+
+    public sealed class WorldAtlasProtectedSubzone
+    {
+        internal WorldAtlasProtectedSubzone(
+            string id,
+            string realmId,
+            string parentAtlasZoneId,
+            string zoneKind,
+            string policyId,
+            string sceneReferenceStatus,
+            string boundaryStatus,
+            string mutationAuthority)
+        {
+            Id = id;
+            RealmId = realmId;
+            ParentAtlasZoneId = parentAtlasZoneId;
+            ZoneKind = zoneKind;
+            PolicyId = policyId;
+            SceneReferenceStatus = sceneReferenceStatus;
+            BoundaryStatus = boundaryStatus;
+            MutationAuthority = mutationAuthority;
+        }
+
+        public string Id { get; }
+        public string RealmId { get; }
+        public string ParentAtlasZoneId { get; }
+        public string ZoneKind { get; }
+        public string PolicyId { get; }
+        public string SceneReferenceStatus { get; }
+        public string BoundaryStatus { get; }
+        public string MutationAuthority { get; }
+    }
+
     public sealed class WorldAtlasObjective
     {
         internal WorldAtlasObjective(
@@ -169,11 +234,13 @@ namespace AL.Data.Catalogs.WorldAtlas
         internal WorldAtlasSnapshot(string version, string topologyId, string sourceSha256, bool placementResolved,
             IList<WorldAtlasNode> nodes, IList<WorldAtlasAdjacency> adjacencies, IList<WorldAtlasBridge> bridges,
             IList<WorldAtlasEndpoint> endpoints, IList<WorldAtlasBoundary> boundaries, IList<WorldAtlasZone> zones,
-            IList<WorldAtlasObjective> objectives)
+            IList<WorldAtlasObjective> objectives, IList<WorldAtlasProtectedZonePolicy> protectedZonePolicies,
+            IList<WorldAtlasProtectedSubzone> protectedSubzones)
         {
             Version = version; TopologyId = topologyId; SourceSha256 = sourceSha256; PlacementResolved = placementResolved;
             Nodes = Frozen(nodes); Adjacencies = Frozen(adjacencies); Bridges = Frozen(bridges); Endpoints = Frozen(endpoints);
             Boundaries = Frozen(boundaries); Zones = Frozen(zones); Objectives = Frozen(objectives);
+            ProtectedZonePolicies = Frozen(protectedZonePolicies); ProtectedSubzones = Frozen(protectedSubzones);
         }
         public string Version { get; }
         public string TopologyId { get; }
@@ -186,6 +253,8 @@ namespace AL.Data.Catalogs.WorldAtlas
         public IReadOnlyList<WorldAtlasBoundary> Boundaries { get; }
         public IReadOnlyList<WorldAtlasZone> Zones { get; }
         public IReadOnlyList<WorldAtlasObjective> Objectives { get; }
+        public IReadOnlyList<WorldAtlasProtectedZonePolicy> ProtectedZonePolicies { get; }
+        public IReadOnlyList<WorldAtlasProtectedSubzone> ProtectedSubzones { get; }
         private static IReadOnlyList<T> Frozen<T>(IList<T> values) => Array.AsReadOnly((values ?? Array.Empty<T>()).ToArray());
     }
 
@@ -196,6 +265,9 @@ namespace AL.Data.Catalogs.WorldAtlas
         private readonly IReadOnlyDictionary<string, WorldAtlasBridge> bridges;
         private readonly IReadOnlyDictionary<string, WorldAtlasBoundary> boundaries;
         private readonly IReadOnlyDictionary<string, WorldAtlasZone> zones;
+        private readonly IReadOnlyDictionary<string, WorldAtlasProtectedZonePolicy> protectedZonePolicies;
+        private readonly IReadOnlyDictionary<string, WorldAtlasProtectedSubzone> protectedSubzones;
+        private readonly IReadOnlyDictionary<string, IReadOnlyList<WorldAtlasProtectedSubzone>> protectedSubzonesByRealm;
         private readonly IReadOnlyDictionary<string, IReadOnlyList<WorldAtlasBridge>> bridgesByNode;
         private readonly IReadOnlyDictionary<string, IReadOnlyList<string>> neighborsByNode;
 
@@ -206,6 +278,15 @@ namespace AL.Data.Catalogs.WorldAtlas
             bridges = Index(snapshot.Bridges, value => value.Id);
             boundaries = Index(snapshot.Boundaries, value => value.RealmId);
             zones = Index(snapshot.Zones, value => value.Id);
+            protectedZonePolicies = Index(snapshot.ProtectedZonePolicies, value => value.Id);
+            protectedSubzones = Index(snapshot.ProtectedSubzones, value => value.Id);
+            protectedSubzonesByRealm = new ReadOnlyDictionary<string, IReadOnlyList<WorldAtlasProtectedSubzone>>(
+                snapshot.ProtectedSubzones
+                    .GroupBy(value => value.RealmId, StringComparer.Ordinal)
+                    .ToDictionary(
+                        group => group.Key,
+                        group => (IReadOnlyList<WorldAtlasProtectedSubzone>)Array.AsReadOnly(group.ToArray()),
+                        StringComparer.Ordinal));
             var bridgeMap = new Dictionary<string, List<WorldAtlasBridge>>(StringComparer.Ordinal);
             var neighborMap = new Dictionary<string, List<string>>(StringComparer.Ordinal);
             foreach (WorldAtlasNode node in snapshot.Nodes) { bridgeMap[node.Id] = new List<WorldAtlasBridge>(); neighborMap[node.Id] = new List<string>(); }
@@ -222,6 +303,18 @@ namespace AL.Data.Catalogs.WorldAtlas
         public bool TryGetBridge(string id, out WorldAtlasBridge value) => TryGet(bridges, id, out value);
         public bool TryGetBoundary(string realmId, out WorldAtlasBoundary value) => TryGet(boundaries, realmId, out value);
         public bool TryGetZone(string id, out WorldAtlasZone value) => TryGet(zones, id, out value);
+        public WorldAtlasQueryResult<WorldAtlasProtectedZonePolicy> GetProtectedZonePolicy(string id) =>
+            Get(protectedZonePolicies, id);
+        public WorldAtlasQueryResult<WorldAtlasProtectedSubzone> GetProtectedSubzone(string id) =>
+            Get(protectedSubzones, id);
+        public WorldAtlasQueryResult<IReadOnlyList<WorldAtlasProtectedSubzone>> GetProtectedSubzonesForRealm(string realmId)
+        {
+            if (!ValidId(realmId))
+                return new WorldAtlasQueryResult<IReadOnlyList<WorldAtlasProtectedSubzone>>(WorldAtlasQueryStatus.InvalidId, null, "AL-ATLAS-ID-INVALID");
+            return protectedSubzonesByRealm.TryGetValue(realmId, out var values)
+                ? new WorldAtlasQueryResult<IReadOnlyList<WorldAtlasProtectedSubzone>>(WorldAtlasQueryStatus.Found, values, string.Empty)
+                : new WorldAtlasQueryResult<IReadOnlyList<WorldAtlasProtectedSubzone>>(WorldAtlasQueryStatus.UnknownId, null, "AL-ATLAS-ID-UNKNOWN");
+        }
         public IReadOnlyList<WorldAtlasBridge> GetBridgesForNode(string nodeId) => ValidId(nodeId) && bridgesByNode.TryGetValue(nodeId, out var values) ? values : Array.Empty<WorldAtlasBridge>();
         public IReadOnlyList<string> GetNeighborNodeIds(string nodeId) => ValidId(nodeId) && neighborsByNode.TryGetValue(nodeId, out var values) ? values : Array.Empty<string>();
         public WorldAtlasQueryResult<WorldAtlasNode> GetNodeForRealm(string realmId)
@@ -232,6 +325,13 @@ namespace AL.Data.Catalogs.WorldAtlas
         }
         private static bool TryGet<T>(IReadOnlyDictionary<string, T> index, string id, out T value) where T : class
         { if (ValidId(id)) return index.TryGetValue(id, out value); value = null; return false; }
+        private static WorldAtlasQueryResult<T> Get<T>(IReadOnlyDictionary<string, T> index, string id) where T : class
+        {
+            if (!ValidId(id)) return new WorldAtlasQueryResult<T>(WorldAtlasQueryStatus.InvalidId, null, "AL-ATLAS-ID-INVALID");
+            return index.TryGetValue(id, out var value)
+                ? new WorldAtlasQueryResult<T>(WorldAtlasQueryStatus.Found, value, string.Empty)
+                : new WorldAtlasQueryResult<T>(WorldAtlasQueryStatus.UnknownId, null, "AL-ATLAS-ID-UNKNOWN");
+        }
         private static IReadOnlyDictionary<string, T> Index<T>(IEnumerable<T> values, Func<T, string> key) => new ReadOnlyDictionary<string, T>(values.ToDictionary(key, StringComparer.Ordinal));
         private static void AddUnique(ICollection<string> values, string value) { if (!values.Contains(value)) values.Add(value); }
         internal static bool ValidId(string value)
@@ -251,6 +351,13 @@ namespace AL.Data.Catalogs.WorldAtlas
     {
         private static readonly string[] RealmOrder = { "crownlands", "stonehold", "eldergrove", "umbral" };
         private static readonly string[] BoundaryStages = { "protected_inner_safe_zone", "inner_wall", "controlled_main_gate_transition", "outer_wall", "outer_warzone" };
+        private static readonly string[] ProtectedZoneKindOrder = { "city", "beginner", "town" };
+        private static readonly string[] ProtectedZonePolicyOrder =
+        {
+            "zone_policy_city_safe_v001",
+            "zone_policy_beginner_safe_v001",
+            "zone_policy_town_safe_v001"
+        };
 
         public static WorldAtlasLoadResult Validate(byte[] bytes)
         {
@@ -274,6 +381,8 @@ namespace AL.Data.Catalogs.WorldAtlas
             {
                 StrictJsonObject contract = Object(authorities, "topologyContract", "$.sourceAuthorities", diagnostics);
                 if (contract != null) RequireEqual(contract, "id", WorldAtlasContract.TopologyContractId, "$.sourceAuthorities.topologyContract", diagnostics);
+                StrictJsonObject protectedZoneContract = Object(authorities, "protectedZoneContract", "$.sourceAuthorities", diagnostics);
+                if (protectedZoneContract != null) RequireEqual(protectedZoneContract, "id", WorldAtlasContract.ProtectedZoneContractId, "$.sourceAuthorities.protectedZoneContract", diagnostics);
             }
             StrictJsonObject topology = Object(root, "abstractTopology", "$", diagnostics);
             var nodes = ParseNodes(topology, diagnostics);
@@ -287,17 +396,20 @@ namespace AL.Data.Catalogs.WorldAtlas
             var boundaries = ParseBoundaries(root, diagnostics);
             var zones = ParseZones(root, diagnostics);
             var objectives = ParseObjectives(root, diagnostics);
+            var protectedZonePolicies = ParseProtectedZonePolicies(root, diagnostics);
+            var protectedSubzones = ParseProtectedSubzones(root, diagnostics);
 
             ValidateTopology(nodes, adjacencies, bridges, endpoints, diagnostics);
             ValidateBoundaries(transitions, walls, boundaries, zones, diagnostics);
             ValidateObjectives(objectives, zones, diagnostics);
-            ValidateGlobalIds(nodes, adjacencies, bridges, endpoints, transitions.Keys, walls.Keys, boundaries, diagnostics);
+            ValidateProtectedZoneAuthority(protectedZonePolicies, protectedSubzones, zones, diagnostics);
+            ValidateGlobalIds(nodes, adjacencies, bridges, endpoints, transitions.Keys, walls.Keys, boundaries, zones, objectives, protectedZonePolicies, protectedSubzones, diagnostics);
             SortDiagnostics(diagnostics);
             if (diagnostics.Count != 0) return new WorldAtlasLoadResult(WorldAtlasLoadStatus.Rejected, null, diagnostics.Take(WorldAtlasContract.MaximumDiagnostics).ToArray());
             string hash;
             using (SHA256 sha = SHA256.Create()) hash = string.Concat(sha.ComputeHash(bytes).Select(value => value.ToString("x2")));
             return new WorldAtlasLoadResult(WorldAtlasLoadStatus.Accepted,
-                new WorldAtlasSnapshot(version, topologyId, hash, placementResolved, nodes, adjacencies, bridges, endpoints, boundaries, zones, objectives), diagnostics);
+                new WorldAtlasSnapshot(version, topologyId, hash, placementResolved, nodes, adjacencies, bridges, endpoints, boundaries, zones, objectives, protectedZonePolicies, protectedSubzones), diagnostics);
         }
 
         private static List<WorldAtlasNode> ParseNodes(StrictJsonObject topology, List<WorldAtlasDiagnostic> d)
@@ -373,6 +485,42 @@ namespace AL.Data.Catalogs.WorldAtlas
             Count(result.Count,5,"$.objectives",d); return result;
         }
 
+        private static List<WorldAtlasProtectedZonePolicy> ParseProtectedZonePolicies(StrictJsonObject root, List<WorldAtlasDiagnostic> d)
+        {
+            var result = new List<WorldAtlasProtectedZonePolicy>();
+            var array = Array(root, "protectedZonePolicies", "$", d);
+            ParseObjects(array, "$.protectedZonePolicies", d, (o, p) => result.Add(
+                new WorldAtlasProtectedZonePolicy(
+                    String(o, "id", p, d),
+                    String(o, "zoneKind", p, d),
+                    String(o, "protection", p, d),
+                    String(o, "appliesTo", p, d),
+                    String(o, "applicationRecheck", p, d),
+                    String(o, "warOverride", p, d),
+                    String(o, "enforcementStatus", p, d),
+                    String(o, "mutationAuthority", p, d))));
+            Count(result.Count, 3, "$.protectedZonePolicies", d);
+            return result;
+        }
+
+        private static List<WorldAtlasProtectedSubzone> ParseProtectedSubzones(StrictJsonObject root, List<WorldAtlasDiagnostic> d)
+        {
+            var result = new List<WorldAtlasProtectedSubzone>();
+            var array = Array(root, "protectedSubzones", "$", d);
+            ParseObjects(array, "$.protectedSubzones", d, (o, p) => result.Add(
+                new WorldAtlasProtectedSubzone(
+                    String(o, "id", p, d),
+                    String(o, "realmId", p, d),
+                    String(o, "parentAtlasZoneId", p, d),
+                    String(o, "zoneKind", p, d),
+                    String(o, "policyId", p, d),
+                    String(o, "sceneReferenceStatus", p, d),
+                    String(o, "boundaryStatus", p, d),
+                    String(o, "mutationAuthority", p, d))));
+            Count(result.Count, 12, "$.protectedSubzones", d);
+            return result;
+        }
+
         private static void ValidateTopology(IList<WorldAtlasNode> nodes,IList<WorldAtlasAdjacency> adj,IList<WorldAtlasBridge> bridges,IList<WorldAtlasEndpoint>endpoints,List<WorldAtlasDiagnostic>d)
         {
             var nodeIds=Unique(nodes.Select(v=>v.Id),"$.abstractTopology.nodes",d); var adjacencyPairs=new HashSet<string>(adj.Select(v=>Pair(v.NodeAId,v.NodeBId)),StringComparer.Ordinal);
@@ -418,9 +566,53 @@ namespace AL.Data.Catalogs.WorldAtlas
                         Add(d, "AL-ATLAS-REFERENCE-MISSING", "$.objectives", objective.Id, "missing zone type: " + zoneType);
             }
         }
-        private static void ValidateGlobalIds(IList<WorldAtlasNode>n,IList<WorldAtlasAdjacency>a,IList<WorldAtlasBridge>b,IList<WorldAtlasEndpoint>e,IEnumerable<string>t,IEnumerable<string>w,IList<WorldAtlasBoundary>bounds,List<WorldAtlasDiagnostic>d)
+
+        private static void ValidateProtectedZoneAuthority(
+            IList<WorldAtlasProtectedZonePolicy> policies,
+            IList<WorldAtlasProtectedSubzone> subzones,
+            IList<WorldAtlasZone> zones,
+            List<WorldAtlasDiagnostic> d)
         {
-            var seen=new HashSet<string>(StringComparer.Ordinal); foreach(string id in n.Select(v=>v.Id).Concat(a.Select(v=>v.Id)).Concat(b.Select(v=>v.Id)).Concat(e.Select(v=>v.Id)).Concat(t).Concat(w).Concat(bounds.Select(v=>v.Id)))if(!WorldAtlasTopologyQuery.ValidId(id)||!seen.Add(id))Add(d,"AL-ATLAS-ID-DUPLICATE","$",id,"invalid or duplicate global topology id");
+            var policyIds = Unique(policies.Select(value => value.Id), "$.protectedZonePolicies", d);
+            var zoneIds = new HashSet<string>(zones.Select(value => value.Id), StringComparer.Ordinal);
+            Unique(subzones.Select(value => value.Id), "$.protectedSubzones", d);
+            if (!policies.Select(value => value.Id).SequenceEqual(ProtectedZonePolicyOrder))
+                Add(d, "AL-ATLAS-PROTECTED-ZONE-INVALID", "$.protectedZonePolicies", string.Empty, "protected-zone policy order or identity mismatch");
+            for (int index = 0; index < policies.Count; index++)
+            {
+                WorldAtlasProtectedZonePolicy policy = policies[index];
+                string expectedKind = index < ProtectedZoneKindOrder.Length ? ProtectedZoneKindOrder[index] : string.Empty;
+                if (policy.ZoneKind != expectedKind || policy.Protection != "forced_non_pvp" ||
+                    policy.AppliesTo != "all_player_harmful_effects" || policy.ApplicationRecheck != "required" ||
+                    policy.WarOverride != "blocked" || policy.EnforcementStatus != "contract_only" ||
+                    policy.MutationAuthority != "none")
+                    Add(d, "AL-ATLAS-PROTECTED-ZONE-INVALID", "$.protectedZonePolicies", policy.Id, "protected-zone policy metadata mismatch");
+            }
+
+            int subzoneIndex = 0;
+            foreach (string realmId in RealmOrder)
+            {
+                foreach (string zoneKind in ProtectedZoneKindOrder)
+                {
+                    if (subzoneIndex >= subzones.Count) break;
+                    WorldAtlasProtectedSubzone subzone = subzones[subzoneIndex++];
+                    string expectedId = "zone_protected_" + realmId + "_" + zoneKind;
+                    string expectedParentId = "zone_inner_" + realmId;
+                    string expectedPolicyId = "zone_policy_" + zoneKind + "_safe_v001";
+                    if (subzone.Id != expectedId || subzone.RealmId != realmId ||
+                        subzone.ParentAtlasZoneId != expectedParentId || subzone.ZoneKind != zoneKind ||
+                        subzone.PolicyId != expectedPolicyId || subzone.SceneReferenceStatus != "requested" ||
+                        subzone.BoundaryStatus != "requested" || subzone.MutationAuthority != "none")
+                        Add(d, "AL-ATLAS-PROTECTED-ZONE-INVALID", "$.protectedSubzones", subzone.Id, "protected subzone identity, order, or metadata mismatch");
+                    Ref(zoneIds, subzone.ParentAtlasZoneId, "$.protectedSubzones", subzone.Id, d);
+                    Ref(policyIds, subzone.PolicyId, "$.protectedSubzones", subzone.Id, d);
+                }
+            }
+        }
+
+        private static void ValidateGlobalIds(IList<WorldAtlasNode>n,IList<WorldAtlasAdjacency>a,IList<WorldAtlasBridge>b,IList<WorldAtlasEndpoint>e,IEnumerable<string>t,IEnumerable<string>w,IList<WorldAtlasBoundary>bounds,IList<WorldAtlasZone>zones,IList<WorldAtlasObjective>objectives,IList<WorldAtlasProtectedZonePolicy>policies,IList<WorldAtlasProtectedSubzone>subzones,List<WorldAtlasDiagnostic>d)
+        {
+            var seen=new HashSet<string>(StringComparer.Ordinal); foreach(string id in n.Select(v=>v.Id).Concat(a.Select(v=>v.Id)).Concat(b.Select(v=>v.Id)).Concat(e.Select(v=>v.Id)).Concat(t).Concat(w).Concat(bounds.Select(v=>v.Id)).Concat(zones.Select(v=>v.Id)).Concat(objectives.Select(v=>v.Id)).Concat(policies.Select(v=>v.Id)).Concat(subzones.Select(v=>v.Id)))if(!WorldAtlasTopologyQuery.ValidId(id)||!seen.Add(id))Add(d,"AL-ATLAS-ID-DUPLICATE","$",id,"invalid or duplicate global atlas id");
         }
 
         private static StrictJsonObject Object(StrictJsonObject owner,string name,string path,List<WorldAtlasDiagnostic>d){if(owner!=null&&owner.TryGet(name,out var v)&&v is StrictJsonObject o)return o;Add(d,"AL-ATLAS-SCHEMA-INVALID",path+"."+name,string.Empty,"object required");return null;}

@@ -10,6 +10,8 @@
 
 **Approval dependency:** `t_0648ce23`
 
+**Operator implementation:** [Realm-Slice Evidence Capture Harness](Realm_Slice_Evidence_Capture_Harness.md)
+
 ## 1. Purpose and authority
 
 This protocol defines the reusable, fail-closed qualification contract for exactly four
