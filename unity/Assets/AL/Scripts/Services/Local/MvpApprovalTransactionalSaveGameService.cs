@@ -20,6 +20,7 @@ namespace AL.Services.Local
         ISaveOperationDispositionProvider,
         ISaveGameCandidateStore,
         ILegacyRealmSelectionCandidateStore,
+        IProfileBoundRealmSelectionCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyFirstWorldProgressCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
@@ -114,6 +115,15 @@ namespace AL.Services.Local
             Execute(
                 () => ((ILegacyRealmSelectionCandidateStore)_inner)
                     .TryCommitLegacyRealmSelection(request),
+                ResolveRealmSelection);
+
+        RealmSelectionResult
+            IProfileBoundRealmSelectionCandidateStore
+            .TryCommitProfileBoundRealmSelection(
+                RealmSelectionRequest request) =>
+            Execute(
+                () => ((IProfileBoundRealmSelectionCandidateStore)_inner)
+                    .TryCommitProfileBoundRealmSelection(request),
                 ResolveRealmSelection);
 
         SaveCandidateCommitResult
@@ -354,14 +364,17 @@ namespace AL.Services.Local
 
         private TransactionResolution ResolveRealmSelection(RealmSelectionResult result)
         {
-            if (InnerCommitUncertain)
+            if (InnerCommitUncertain ||
+                result.Status == RealmSelectionStatus.CommitUncertain)
             {
                 return TransactionResolution.RollbackAndFreeze;
             }
 
             if (result.Status == RealmSelectionStatus.AlreadyCommittedSameRealm)
             {
-                return TransactionResolution.Rollback;
+                return result.Persisted && result.MutationOccurred && SaveCommitVerified
+                    ? TransactionResolution.Commit
+                    : TransactionResolution.Rollback;
             }
 
             if (result.Status != RealmSelectionStatus.Committed)
