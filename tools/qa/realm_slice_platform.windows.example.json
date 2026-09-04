@@ -1,0 +1,16 @@
+{
+  "platform": "WindowsPlayer",
+  "deviceId": "replace-with-pseudonymous-device-id",
+  "osVersion": "replace-with-exact-windows-version",
+  "graphicsApi": "Direct3D11",
+  "qualityPreset": "replace-with-admitted-quality-preset",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "renderScale": 1.0,
+  "refreshRate": 60,
+  "thresholdSetId": "replace-with-accepted-threshold-set-id",
+  "captureTool": "replace-with-capture-tool",
+  "captureToolVersion": "replace-with-exact-version"
+}

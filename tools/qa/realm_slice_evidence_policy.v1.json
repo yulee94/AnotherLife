@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "harnessId": "anotherlife-realm-slice-evidence",
+  "harnessVersion": "1.0.0",
+  "protocolId": "RSQ-PROTOCOL-v1.0.0",
+  "realmOrder": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"],
+  "modeNamespaces": {"Adventure3D": "3d", "Kingdom2_5D": "2_5d"},
+  "locales": ["en-US", "ko-KR"],
+  "inputClasses": ["keyboard_mouse", "controller"],
+  "accessibilityPresets": ["default", "text-200", "reduced-motion", "reduced-flash", "reduced-vfx", "audio-off-captions", "non-color"],
+  "defaultAccessibilityPresets": ["default"],
+  "fixtureVersion": "rsq-fixtures-v1",
+  "scenarioCatalog": "realm_slice_scenarios.v1.json",
+  "scenarioCatalogSha256": "b73929faaddae23677929ed5bf2be36d2a466d2f62b43ed7574eb48e11d01c4c",
+  "reviewAllowedSigners": "realm_slice_reviewers.allowed_signers",
+  "seed": 1618033988,
+  "logicalClockUtc": "2026-01-01T00:00:00Z",
+  "platformScope": "WindowsPlayer",
+  "requiredArtifacts": ["player_log", "harness_log", "structured_log", "screenshots", "video", "result"],
+  "performanceArtifacts": ["telemetry", "profiler"],
+  "metricSemantics": {
+    "falseOnPass": ["liveSaveTouched"],
+    "zeroOnPass": ["missingAssetCount", "fallbackCount", "lodInvalidCount", "streamingErrorCount", "residencyErrorCount", "anchorFailCount", "criticalOcclusionCount", "teleportCount", "stuckCount", "bypassCount", "hiddenThreatCount", "criticalOverlapCount", "clippedCriticalTextCount", "invalidSpaceVisibleCount", "unauthorizedMutationCount", "duplicateCount", "wrongRealmCount", "missedCount", "rawKeyCount", "fallbackGlyphCount", "criticalTruncationCount", "unintendedEnglishCount", "unauthorizedUnlockCount"],
+    "positiveOnPass": ["anchorPassCount", "snapshotPassCount", "sampleCount", "keysExpected", "keysResolved"],
+    "equalPairsOnPass": [["requiredAnchors", "visitedAnchors"], ["telegraphsExpected", "telegraphsObserved"], ["expectedCheckpointIds", "observedCheckpointIds"], ["requiredActions", "observedActions"], ["keysExpected", "keysResolved"], ["expectedStates", "observedStates"], ["requiredSemanticStates", "observedSemanticStates"]],
+    "trueSuffixes": ["Pass", "Match", "Preserved", "Stable", "Successful", "Reachable"],
+    "resultSuffix": "Result",
+    "positiveSuffixes": ["Seconds"],
+    "minimumOnPass": {"warmupSeconds": 30, "measuredSeconds": 300},
+    "rangeOnPass": {"worldVisibleShare": {"minimumExclusive": 0, "maximum": 1}},
+    "envelopeMatches": {"locale": "locale", "fixtureId": "saveFixture.id", "thresholdSetId": "platform.thresholdSetId", "schemaBefore": "saveFixture.sourceSchemaVersion", "schemaAfter": "saveFixture.expectedSchemaVersion"},
+    "nonEmptyOnPass": {
+      "nonEmptyStringArray": ["requiredAnchors", "visitedAnchors", "telegraphsExpected", "telegraphsObserved", "expectedCheckpointIds", "observedCheckpointIds", "requiredActions", "observedActions", "expectedStates", "observedStates", "requiredSemanticStates", "observedSemanticStates", "receiptIds"],
+      "positiveNumberMap": ["frameTimePercentiles"],
+      "nonNegativeInteger": [],
+      "sha256": ["stateDigestBefore", "stateDigestAfter", "snapshotDigestBefore", "snapshotDigestAfter"],
+      "nonEmptyString": ["worldVisibleThresholdId", "requiredPredicateId"]
+    }
+  },
+  "playerTimeoutSeconds": 1800,
+  "checksByMode": {
+    "Adventure3D": [
+      {"id":"RSQ-3D-REN-001","scenarioId":"RSQ-3D-ARRIVAL","scenarioVersion":"v1","structuredLog":"render.jsonl","metrics":["missingAssetCount","fallbackCount","lodInvalidCount","streamingErrorCount","materialReadPass","realmIdentityPass"]},
+      {"id":"RSQ-3D-CAM-001","scenarioId":"RSQ-3D-ARRIVAL","scenarioVersion":"v1","structuredLog":"camera.jsonl","metrics":["anchorPassCount","anchorFailCount","targetVisiblePass","criticalOcclusionCount","restoreDigestMatch","reducedMotionPass"]},
+      {"id":"RSQ-3D-NAV-001","scenarioId":"RSQ-3D-ARRIVAL","scenarioVersion":"v1","structuredLog":"navigation.jsonl","metrics":["requiredAnchors","visitedAnchors","orderMatch","teleportCount","stuckCount","bypassCount","criticalInteractionReachable"]},
+      {"id":"RSQ-3D-CMB-001","scenarioId":"RSQ-3D-COMBAT","scenarioVersion":"v1","structuredLog":"combat_readability.jsonl","metrics":["telegraphsExpected","telegraphsObserved","hiddenThreatCount","actionStatePass","supportFieldPass","objectiveTruthPass","inputResponsePass"]},
+      {"id":"RSQ-3D-UI-001","scenarioId":"RSQ-3D-ARRIVAL","scenarioVersion":"v1","structuredLog":"ui_composition.jsonl","metrics":["viewportPass","safeAreaPass","protectedScanPathPass","criticalOverlapCount","clippedCriticalTextCount","focusPathPass"]},
+      {"id":"RSQ-3D-PERF-001","scenarioId":"RSQ-3D-COMBAT","scenarioVersion":"v1","structuredLog":"performance.jsonl","performance":true,"metrics":["thresholdSetId","warmupSeconds","measuredSeconds","sampleCount","frameTimePercentiles","hitchResult","memoryResult","streamingResult","thermalResult","inputResponseResult"]},
+      {"id":"RSQ-3D-SAVE-001","scenarioId":"RSQ-SAVE-CONTINUITY","scenarioVersion":"v1","structuredLog":"save_continuity.jsonl","metrics":["fixtureId","schemaBefore","schemaAfter","stateDigestBefore","stateDigestAfter","generationHashesPreserved","idempotencePass","liveSaveTouched"]},
+      {"id":"RSQ-3D-NAR-001","scenarioId":"RSQ-NARRATIVE-{realm}","scenarioVersion":"v1","structuredLog":"narrative.jsonl","metrics":["expectedCheckpointIds","observedCheckpointIds","orderMatch","duplicateCount","wrongRealmCount","persistResumeMatch","catalogMatch"]},
+      {"id":"RSQ-3D-INP-001","scenarioId":"RSQ-CROSS-MODE","scenarioVersion":"v1","structuredLog":"input.jsonl","metrics":["requiredActions","observedActions","missedCount","duplicateCount","glyphPass","deviceSwitchPass","exclusiveInputMapPass"]},
+      {"id":"RSQ-3D-ACC-001","scenarioId":"RSQ-LOCALE","scenarioVersion":"v1","structuredLog":"accessibility.jsonl","allAccessibilityPresets":true,"metrics":["text200Pass","focusPass","nonColorPass","reducedMotionPass","reducedFlashPass","reducedVfxPass","audioOffCaptionPass","remapPass"]},
+      {"id":"RSQ-3D-LOC-EN-001","scenarioId":"RSQ-LOCALE","scenarioVersion":"v1","structuredLog":"localization.jsonl","metrics":["locale","keysExpected","keysResolved","rawKeyCount","fallbackGlyphCount","criticalTruncationCount","captionTimingPass","semanticReviewPass"]},
+      {"id":"RSQ-3D-LOC-KO-001","scenarioId":"RSQ-LOCALE","scenarioVersion":"v1","structuredLog":"localization.jsonl","metrics":["locale","keysExpected","keysResolved","hangulCoveragePass","unintendedEnglishCount","fallbackGlyphCount","criticalTruncationCount","captionTimingPass","semanticReviewPass"]}
+    ],
+    "Kingdom2_5D": [
+      {"id":"RSQ-2_5D-REN-001","scenarioId":"RSQ-2_5D-KINGDOM","scenarioVersion":"v1","structuredLog":"render.jsonl","metrics":["snapshotPassCount","missingAssetCount","fallbackCount","lodInvalidCount","residencyErrorCount","stateTruthPass","realmIdentityPass"]},
+      {"id":"RSQ-2_5D-CAM-001","scenarioId":"RSQ-2_5D-KINGDOM","scenarioVersion":"v1","structuredLog":"camera.jsonl","metrics":["panBoundsPass","zoomBoundsPass","invalidSpaceVisibleCount","selectionVisibilityPass","occlusionPass","restoreDigestMatch","reducedMotionPass"]},
+      {"id":"RSQ-2_5D-NAV-001","scenarioId":"RSQ-CROSS-MODE","scenarioVersion":"v1","structuredLog":"navigation.jsonl","metrics":["expectedStates","observedStates","orderMatch","unauthorizedMutationCount","activeWorldCountPass","exclusiveInputMapPass","focusRestorePass","snapshotDigestMatch"]},
+      {"id":"RSQ-2_5D-CMB-001","scenarioId":"RSQ-2_5D-STRATEGIC-COMBAT","scenarioVersion":"v1","structuredLog":"combat_readability.jsonl","metrics":["requiredSemanticStates","observedSemanticStates","hiddenThreatCount","objectiveTruthPass","routeTruthPass","nonColorPass","authorityDigestMatch"]},
+      {"id":"RSQ-2_5D-UI-001","scenarioId":"RSQ-2_5D-KINGDOM","scenarioVersion":"v1","structuredLog":"ui_composition.jsonl","metrics":["worldVisibleShare","worldVisibleThresholdId","dockPass","inspectorPass","queueTruthPass","criticalOverlapCount","textScalePass","hudRestorePass"]},
+      {"id":"RSQ-2_5D-PERF-001","scenarioId":"RSQ-2_5D-KINGDOM","scenarioVersion":"v1","structuredLog":"performance.jsonl","performance":true,"metrics":["thresholdSetId","warmupSeconds","measuredSeconds","sampleCount","frameTimePercentiles","hitchResult","memoryResult","residencyResult","thermalResult","interactionResponseResult"]},
+      {"id":"RSQ-2_5D-SAVE-001","scenarioId":"RSQ-SAVE-CONTINUITY","scenarioVersion":"v1","structuredLog":"save_continuity.jsonl","metrics":["fixtureId","receiptIds","snapshotDigestBefore","snapshotDigestAfter","generationHashesPreserved","privatePublicIsolationPass","idempotencePass","liveSaveTouched"]},
+      {"id":"RSQ-2_5D-NAR-001","scenarioId":"RSQ-NARRATIVE-{realm}","scenarioVersion":"v1","structuredLog":"narrative.jsonl","metrics":["requiredPredicateId","predicateSourcePass","expectedCheckpointIds","observedCheckpointIds","orderMatch","unauthorizedUnlockCount","persistResumeMatch"]},
+      {"id":"RSQ-2_5D-INP-001","scenarioId":"RSQ-CROSS-MODE","scenarioVersion":"v1","structuredLog":"input.jsonl","metrics":["requiredActions","observedActions","missedCount","duplicateCount","keyboardBPass","controllerBPass","informationParityPass","exclusiveInputMapPass"]},
+      {"id":"RSQ-2_5D-ACC-001","scenarioId":"RSQ-LOCALE","scenarioVersion":"v1","structuredLog":"accessibility.jsonl","allAccessibilityPresets":true,"metrics":["text200Pass","safeAreaPass","focusContainRestorePass","nonColorPass","reducedMotionPass","reducedFlashPass","reducedVfxPass","audioOffCaptionPass","remapPass"]},
+      {"id":"RSQ-2_5D-LOC-EN-001","scenarioId":"RSQ-LOCALE","scenarioVersion":"v1","structuredLog":"localization.jsonl","metrics":["locale","keysExpected","keysResolved","rawKeyCount","fallbackGlyphCount","criticalTruncationCount","parameterFormatPass","captionTimingPass","semanticReviewPass"]},
+      {"id":"RSQ-2_5D-LOC-KO-001","scenarioId":"RSQ-LOCALE","scenarioVersion":"v1","structuredLog":"localization.jsonl","metrics":["locale","keysExpected","keysResolved","hangulCoveragePass","unintendedEnglishCount","fallbackGlyphCount","criticalTruncationCount","parameterFormatPass","captionTimingPass","semanticReviewPass"]}
+    ]
+  }
+}
