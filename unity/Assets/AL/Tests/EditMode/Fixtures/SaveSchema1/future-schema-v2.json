@@ -1,6 +1,6 @@
 {
   "SaveFormatId": "anotherlife.local-save",
-  "SaveSchemaVersion": 2,
+  "SaveSchemaVersion": 3,
   "ProfileInitializationVersion": 1,
   "ProfileId": "future-profile-must-not-be-downgraded",
   "SelectedRealm": 4,

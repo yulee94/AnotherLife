@@ -27,6 +27,9 @@
 # Hash-bound approved enterable-architecture packets.
 /unity/Docs/Architecture/WorldSpaceEnterableV001/**/*.json text eol=lf
 
+# Hash-bound save schema golden fixtures.
+/unity/Assets/AL/Tests/EditMode/Fixtures/SaveSchema1/** text eol=lf
+
 # Hash-bound Fault-Crowned Colossus production-slice reports.
 /unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/**/*.json text eol=lf
 

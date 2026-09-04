@@ -425,6 +425,7 @@ namespace AL.Services.Local
                     case SaveLoadStatus.CreatedNew:
                     case SaveLoadStatus.LoadedPrimaryNormalized:
                     case SaveLoadStatus.LoadedPrimaryWithPreservedUnknown:
+                    case SaveLoadStatus.MigratedSchemaOne:
                         return true;
                     default:
                         return false;
@@ -493,6 +494,7 @@ namespace AL.Services.Local
                 case SaveLoadStatus.CreatedNew:
                 case SaveLoadStatus.LoadedPrimaryNormalized:
                 case SaveLoadStatus.LoadedPrimaryWithPreservedUnknown:
+                case SaveLoadStatus.MigratedSchemaOne:
                     break;
                 default:
                     return false;
