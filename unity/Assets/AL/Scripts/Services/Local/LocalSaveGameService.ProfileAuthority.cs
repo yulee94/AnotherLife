@@ -10,6 +10,7 @@ using AL.Core.SaveAuthority.RuntimeBridge;
 using AL.Data.Catalogs;
 using AL.Data.Runtime;
 using AL.RealmSelection;
+using AL.ChampionMode.Death;
 
 namespace AL.Services.Local
 {
@@ -687,6 +688,175 @@ namespace AL.Services.Local
                 request.RequestedRealmId,
                 bound,
                 legacyMigration);
+        }
+
+        DeathPenaltyCommitResult
+            IProfileBoundDeathPenaltyCandidateStore
+            .TryCommitProfileBoundDeathPenalty(DeathPenaltyCommitRequest request)
+        {
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.OperationId) ||
+                string.IsNullOrWhiteSpace(request.DeathEventId) ||
+                string.IsNullOrWhiteSpace(request.CombatSessionId) ||
+                string.IsNullOrWhiteSpace(request.EncounterAttemptId) ||
+                string.IsNullOrWhiteSpace(request.InstanceId))
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedInvalidRequest,
+                    _currentSave,
+                    DeathPenaltyCommitCodes.InvalidRequest);
+            }
+
+            if (!HasExactSchemaTwoProfile(_currentSave))
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedProfileUnavailable,
+                    _currentSave,
+                    DeathPenaltyCommitCodes.ProfileNotSchemaTwo);
+            }
+
+            ProfileWriteAuthoritySnapshot before = GetCurrentAuthority();
+            if (before == null ||
+                before.Status != ProfileWriteAuthorityStatus.Writable)
+            {
+                return MapNonWritableDeathAuthority(before);
+            }
+
+            if (!string.IsNullOrEmpty(request.ExpectedProfileId) &&
+                !string.Equals(
+                    request.ExpectedProfileId,
+                    before.ProfileId,
+                    StringComparison.Ordinal))
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedWrongProfile,
+                    _currentSave,
+                    DeathPenaltyCommitCodes.ProfileMismatch);
+            }
+
+            if (!string.IsNullOrEmpty(request.ExpectedGenerationFingerprint) &&
+                !string.Equals(
+                    request.ExpectedGenerationFingerprint,
+                    before.VerifiedGenerationFingerprint,
+                    StringComparison.Ordinal))
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedStale,
+                    _currentSave,
+                    DeathPenaltyCommitCodes.StaleBase);
+            }
+
+            DeathPenaltyCommitResult replay = DeathPenaltyTransaction.ReplayOrReject(
+                _currentSave,
+                request,
+                before.ProfileId);
+            if (replay != null)
+            {
+                return replay;
+            }
+
+            ProfileBoundSaveCandidateCommitResult bound =
+                ((IProfileBoundSaveGameCandidateStore)this).TryCommitCandidate(
+                    ProfileAuthorityExpectation.From(before),
+                    DeathPenaltyIds.SchemaOperationId,
+                    request.OperationId,
+                    candidate => DeathPenaltyTransaction.Prepare(
+                        candidate,
+                        request,
+                        before.ProfileId,
+                        before.VerifiedGenerationFingerprint));
+
+            return MapBoundDeathCommit(bound);
+        }
+
+        private DeathPenaltyCommitResult MapNonWritableDeathAuthority(
+            ProfileWriteAuthoritySnapshot authority)
+        {
+            if (authority != null &&
+                authority.Status == ProfileWriteAuthorityStatus.CommitUncertain)
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedSaveUncertain,
+                    _currentSave,
+                    DeathPenaltyCommitCodes.CommitUncertain);
+            }
+
+            if (authority != null &&
+                authority.Status == ProfileWriteAuthorityStatus.ForwardSchemaReadOnly)
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedForward,
+                    _currentSave,
+                    DeathPenaltyCommitCodes.ForwardSchema);
+            }
+
+            if (authority != null &&
+                authority.Status == ProfileWriteAuthorityStatus.DegradedReadOnly)
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedDegraded,
+                    _currentSave,
+                    DeathPenaltyCommitCodes.Degraded);
+            }
+
+            return DeathPenaltyTransaction.Reject(
+                DeathPenaltyCommitStatus.RejectedReadOnly,
+                _currentSave,
+                DeathPenaltyCommitCodes.NotWritable);
+        }
+
+        private DeathPenaltyCommitResult MapBoundDeathCommit(
+            ProfileBoundSaveCandidateCommitResult bound)
+        {
+            SaveCandidateCommitResult commit = bound?.CommitResult;
+            if (commit == null)
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedReadOnly,
+                    _currentSave,
+                    DeathPenaltyCommitCodes.ReadOnly);
+            }
+
+            if (commit.Outcome == SaveCandidateCommitOutcome.Duplicate)
+            {
+                return DeathPenaltyTransaction.MapPublished(
+                    commit.PublishedSave ?? _currentSave,
+                    false,
+                    false);
+            }
+
+            if (commit.Outcome == SaveCandidateCommitOutcome.Committed)
+            {
+                return DeathPenaltyTransaction.MapPublished(
+                    commit.PublishedSave ?? _currentSave,
+                    true,
+                    true);
+            }
+
+            if (commit.Outcome == SaveCandidateCommitOutcome.CommitUncertain)
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedSaveUncertain,
+                    _currentSave,
+                    DeathPenaltyCommitCodes.CommitUncertain);
+            }
+
+            if (commit.Outcome == SaveCandidateCommitOutcome.ReadOnly)
+            {
+                return DeathPenaltyTransaction.Reject(
+                    DeathPenaltyCommitStatus.RejectedReadOnly,
+                    _currentSave,
+                    string.IsNullOrEmpty(commit.Message)
+                        ? DeathPenaltyCommitCodes.ReadOnly
+                        : commit.Message);
+            }
+
+            return DeathPenaltyTransaction.Reject(
+                DeathPenaltyCommitStatus.RejectedPlanner,
+                _currentSave,
+                string.IsNullOrEmpty(commit.Message)
+                    ? DeathPenaltyCommitCodes.InvalidRequest
+                    : commit.Message);
         }
 
         private RealmSelectionResult MapBoundRealmCommit(
