@@ -20,6 +20,7 @@ EXPECTED_DEFECTS do not fail the run (they are the known data defects the
 downstream data-generation task must correct).
 """
 
+import copy
 import io
 import json
 import pathlib
@@ -42,8 +43,9 @@ GAMEDATA_DIR = (
     ROOT.parent / "Assets" / "AL" / "StreamingAssets" / "GameData"
 )
 
-# schema-name -> real catalog file (for the ten content catalogs)
+# schema-name -> registered real catalog file
 REAL_CATALOGS = {
+    "al-item-power-ladders": "al_item_power_ladders_catalog.json",
     "al-alliance-war": "al_alliance_war_policy.json",
     "al-pvp-harmful-effect-gate": "al_pvp_harmful_effect_gate_policy.json",
     "al-realm-dungeon": "al_realm_dungeon_catalog.json",
@@ -91,6 +93,57 @@ EXPECTED_DEFECTS = {
 def load_json(path):
     with open(path, "r", encoding="utf-8") as fh:
         return json.load(fh, parse_float=Decimal)
+
+
+def expect_item_power_ladder_rejected(validator, canonical, name, mutate):
+    sabotaged = copy.deepcopy(canonical)
+    mutate(sabotaged)
+    if not list(validator.iter_errors(sabotaged)):
+        raise AssertionError(f"sabotage unexpectedly passed: {name}")
+    print(f"PASS reject {name}")
+
+
+def swap_adjacent(document, key, index):
+    items = document[key]
+    items[index], items[index + 1] = items[index + 1], items[index]
+
+
+def validate_item_power_ladders():
+    schema = load_json(SCHEMAS_DIR / "al-item-power-ladders.schema.json")
+    catalog = load_json(GAMEDATA_DIR / "al_item_power_ladders_catalog.json")
+    Draft202012Validator.check_schema(schema)
+    validator = Draft202012Validator(schema)
+
+    errors = list(validator.iter_errors(catalog))
+    if errors:
+        first = errors[0]
+        path = ".".join(str(part) for part in first.absolute_path) or "<root>"
+        raise AssertionError(f"canonical catalog failed at {path}: {first.message}")
+    print("PASS canonical item power ladders")
+
+    cases = [
+        ("inverted PvP ranks", lambda value: swap_adjacent(value, "pvpGearLadder", 0)),
+        ("outer dungeon outranks dragon", lambda value: swap_adjacent(value, "pvpGearLadder", 1)),
+        ("inner dungeon outranks outer dungeon", lambda value: swap_adjacent(value, "pvpGearLadder", 2)),
+        ("PvP gear is not awakened", lambda value: value["pvpGearLadder"][1].update(awakening="standard")),
+        ("inverted PvE ranks", lambda value: swap_adjacent(value, "pveGearLadder", 0)),
+        ("Warmaster loses PvP", lambda value: value["pvpGearLadder"][0].update(rank=2)),
+        ("Warmaster loses PvE", lambda value: value["pveGearLadder"][0].update(rank=2)),
+        ("inverted embed gem ranks", lambda value: swap_adjacent(value, "embedGemLadder", 0)),
+        ("inverted accessory ranks", lambda value: swap_adjacent(value, "accessoryLadder", 0)),
+        ("quest accessory trades", lambda value: value["accessoryLadder"][3].update(tradable=True)),
+        ("special heart slots as gear", lambda value: value["specialHearts"][0].update(regularGearSlotEligible=True)),
+        ("Wish Dragon heart accepts seven gems", lambda value: value["specialHearts"][0]["acquisition"].update(realmUniqueGemCount=7)),
+        ("Wish Dragon heart waives arena victory", lambda value: value["specialHearts"][0]["acquisition"].update(requirementsMode="any")),
+        ("world-boss heart drop is not extremely low", lambda value: value["specialHearts"][1]["acquisition"].update(dropFrequency="low")),
+        ("world-boss contributor loot is unequal", lambda value: value["specialHearts"][1]["acquisition"].update(contributorLootPercentagePolicy="weighted")),
+        ("dragon gem band lowered", lambda value: value["embedGemLadder"][0].update(minimumPercent=90)),
+        ("crafted gem becomes a range", lambda value: value["embedGemLadder"][2].update(maximumPercent=76)),
+    ]
+    for name, mutate in cases:
+        expect_item_power_ladder_rejected(validator, catalog, name, mutate)
+
+    print(f"ALL ITEM POWER LADDER CHECKS PASSED ({len(cases)} sabotage cases)")
 
 
 def first_error_message(errors):
@@ -180,7 +233,13 @@ def main():
         if not ok:
             failures.append(f"INVALID fixture {fixture_path.name} unexpectedly PASSED (should be rejected)")
 
-    # 4. Cross-record inventory semantics and canonical byte stability.
+    # 4. Semantic sabotage cases that invert owner-locked item ladders or permissions.
+    try:
+        validate_item_power_ladders()
+    except Exception as exc:
+        failures.append(f"item power ladder sabotage validation failed: {exc}")
+
+    # 5. Cross-record inventory semantics and canonical byte stability.
     repo_root = ROOT.parents[1]
     try:
         _, evidence = world_asset_inventory.validate_committed_outputs(repo_root)
@@ -198,7 +257,7 @@ def main():
         reports["inventory"].append((False, str(exc)))
         failures.append(f"world asset inventory cross-validation failed: {exc}")
 
-    # 5. Realm character/creature cross-record and fail-closed semantics.
+    # 6. Realm character/creature cross-record and fail-closed semantics.
     suite = unittest.defaultTestLoader.loadTestsFromModule(test_realm_character_taxonomy)
     realm_test_output = io.StringIO()
     realm_result = unittest.TextTestRunner(
@@ -217,7 +276,7 @@ def main():
             + realm_test_output.getvalue().strip()
         )
 
-    # 6. Integrated four-realm production taxonomy and acceptance audit.
+    # 7. Integrated four-realm production taxonomy and acceptance audit.
     suite = unittest.defaultTestLoader.loadTestsFromModule(
         test_four_realm_production_taxonomy
     )
@@ -239,7 +298,7 @@ def main():
             + integrated_test_output.getvalue().strip()
         )
 
-    # 7. Rig, motion, anatomy-exception, and required-coverage acceptance audit.
+    # 8. Rig, motion, anatomy-exception, and required-coverage acceptance audit.
     suite = unittest.defaultTestLoader.loadTestsFromModule(test_rig_motion_standard)
     rig_motion_test_output = io.StringIO()
     rig_motion_result = unittest.TextTestRunner(
@@ -259,7 +318,7 @@ def main():
             + rig_motion_test_output.getvalue().strip()
         )
 
-    # 8. Model/motion/skill-VFX harness: explicit PASS/FAIL/BLOCKED, no scores.
+    # 9. Model/motion/skill-VFX harness: explicit PASS/FAIL/BLOCKED, no scores.
     suite = unittest.defaultTestLoader.loadTestsFromModule(
         test_model_motion_skill_vfx_harness
     )
@@ -280,7 +339,6 @@ def main():
             "model/motion/skill-VFX harness fail-closed tests failed: "
             + harness_test_output.getvalue().strip()
         )
-
     # ---- Report ----
     print("== Schema compilation ==")
     for key, ok, msg in reports["schemas"]:

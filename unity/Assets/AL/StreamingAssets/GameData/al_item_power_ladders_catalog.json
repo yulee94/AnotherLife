@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "al_item_power_ladders_catalog",
+  "gameId": "another-life",
+  "rankingRule": "lower_rank_is_stronger",
+  "universalBestGearSource": "awakened_warmaster",
+  "unspecifiedPolicies": [
+    "drop_rates",
+    "gem_roll_curves",
+    "stat_budgets"
+  ],
+  "pvpGearLadder": [
+    { "rank": 1, "source": "awakened_warmaster", "awakening": "awakened" },
+    { "rank": 2, "source": "dragon", "awakening": "awakened" },
+    { "rank": 3, "source": "outer_realm_dungeon_loot", "awakening": "awakened" },
+    { "rank": 4, "source": "inner_realm_dungeon_loot", "awakening": "awakened" },
+    { "rank": 5, "source": "level_50_creature_loot", "awakening": "awakened" }
+  ],
+  "pveGearLadder": [
+    { "rank": 1, "source": "awakened_warmaster", "awakening": "awakened" },
+    { "rank": 2, "source": "user_crafted", "awakening": "awakened" },
+    { "rank": 3, "source": "elite_boss_loot", "awakening": "awakened" }
+  ],
+  "specialHearts": [
+    {
+      "id": "center_isle_wish_dragon_heart",
+      "itemCategory": "center_inventory_equipment",
+      "regularGearSlotEligible": false,
+      "acquisition": {
+        "requirementsMode": "all",
+        "realmUniqueGemCount": 8,
+        "arenaVictory": "accordant_center_isle_realm_ffa",
+        "championMayWishForItem": true
+      }
+    },
+    {
+      "id": "world_boss_event_boss_heart",
+      "itemCategory": "center_inventory_equipment",
+      "regularGearSlotEligible": false,
+      "acquisition": {
+        "dropFrequency": "extremely_low",
+        "contributorLootPercentagePolicy": "equal_for_every_contributor"
+      }
+    }
+  ],
+  "attributeCapacityPercent": {
+    "minimum": 1,
+    "maximum": 100
+  },
+  "embedGemLadder": [
+    { "rank": 1, "source": "dragon", "minimumPercent": 91, "maximumPercent": 100, "rollPolicy": "range" },
+    { "rank": 2, "source": "elite_boss", "minimumPercent": 51, "maximumPercent": 90, "rollPolicy": "range" },
+    { "rank": 3, "source": "crafted", "minimumPercent": 75, "maximumPercent": 75, "rollPolicy": "fixed" },
+    { "rank": 4, "source": "regular_creature", "minimumPercent": 30, "maximumPercent": 50, "rollPolicy": "range" }
+  ],
+  "accessoryLadder": [
+    { "rank": 1, "source": "dragon" },
+    { "rank": 2, "source": "elite_boss" },
+    { "rank": 3, "source": "crafted" },
+    { "rank": 4, "source": "quest_given", "tradable": false },
+    { "rank": 5, "source": "regular_creature" }
+  ],
+  "nonClaims": [
+    "2.5d_gameplay",
+    "mobile_readiness",
+    "live_numeric_economy"
+  ]
+}
