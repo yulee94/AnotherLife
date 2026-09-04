@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate one boss + one skill presentation catalog without gameplay authority."""
+"""Validate scaled boss/elite and skill presentation without gameplay authority."""
 
 from __future__ import annotations
 
@@ -27,16 +27,16 @@ SCHEMA_PATH = (
     / "Schemas"
     / "al-boss-skill-presentation.schema.json"
 )
-QUALIFICATION_PATH = (
+SOURCE_ROOT = (
     REPO_ROOT
     / "unity"
     / "Docs"
     / "Terrestrials"
     / "RealmCreatureProductionSourceV001"
-    / "ProductionSlices"
-    / "FaultCrownedColossusV001"
-    / "fault_crowned_colossus_qualification_manifest_v001.json"
 )
+APPROVAL_PATH = SOURCE_ROOT / "realm_creature_2d_approval_manifest_v002.json"
+SOURCE_MANIFEST_PATH = SOURCE_ROOT / "realm_creature_3d_source_manifest_v001.json"
+QUALIFICATION_ROOT = SOURCE_ROOT / "ProductionSlices"
 SKILL_WEATHER_PATH = (
     REPO_ROOT
     / "unity"
@@ -126,19 +126,44 @@ def _schema_issues(payload: dict[str, Any]) -> list[str]:
 
 
 def _weather_skill_ids() -> set[str]:
+    return set(_weather_skill_bindings())
+
+
+def _weather_skill_bindings() -> dict[str, dict[str, Any]]:
     weather = load_json(SKILL_WEATHER_PATH)
-    ids: set[str] = set()
-    for record in weather.get("records") or []:
-        if record.get("kind") != "skill_cast_binding":
-            continue
-        skill_id = record.get("skill_id") or record.get("id")
-        if isinstance(skill_id, str) and skill_id:
-            ids.add(skill_id)
-    return ids
+    return {
+        str(record["skill_id"]): record
+        for record in weather.get("records") or []
+        if record.get("kind") == "skill_cast_binding" and record.get("skill_id")
+    }
 
 
-def _qualification() -> dict[str, Any]:
-    return load_json(QUALIFICATION_PATH)
+def _approved_sources() -> dict[str, dict[str, Any]]:
+    approval = load_json(APPROVAL_PATH)
+    return {
+        str(row["id"]): row
+        for row in approval.get("entries") or []
+        if str(row.get("id") or "").startswith(("tdf_boss_", "tdf_elite_"))
+        and row.get("status") == "APPROVED_2D"
+    }
+
+
+def _source_models() -> dict[str, dict[str, Any]]:
+    source = load_json(SOURCE_MANIFEST_PATH)
+    return {
+        str(row["source2dId"]): {**row, "sourceVersion": source.get("sourceVersion")}
+        for row in source.get("models") or []
+        if row.get("source2dId")
+    }
+
+
+def _qualifications() -> dict[str, dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    for path in sorted(QUALIFICATION_ROOT.glob("*/*_qualification_manifest_v001.json")):
+        qualification = load_json(path)
+        if qualification.get("sourceQualification") == "PASS":
+            rows[str(qualification["source2dId"])] = qualification
+    return rows
 
 
 def _motion_axis_verdict(present: set[str]) -> tuple[str, list[str]]:
@@ -156,7 +181,7 @@ def _motion_axis_verdict(present: set[str]) -> tuple[str, list[str]]:
     return ("FAIL" if issues else "PASS", issues)
 
 
-def _skill_harness_report(skill_profile: dict[str, Any]) -> dict[str, Any]:
+def _skill_harness_report(skill_profiles: list[dict[str, Any]]) -> dict[str, Any]:
     sys.path.insert(0, str(HARNESS_TESTS))
     import model_motion_skill_vfx_harness as harness
 
@@ -164,29 +189,33 @@ def _skill_harness_report(skill_profile: dict[str, Any]) -> dict[str, Any]:
         harness.load_json(REPO_ROOT / harness.HARNESS_PATH),
         REPO_ROOT,
     )
-    phases = {
-        name: str((skill_profile.get("phases") or {}).get(name) or "")
-        for name in REQUIRED_PHASES
-    }
-    effects = {
-        name: str((skill_profile.get("effects") or {}).get(name) or "")
-        for name in REQUIRED_EFFECTS
-    }
-    skill_report = harness.evaluate_skill(
-        catalog,
-        {
-            "id": skill_profile.get("skillId"),
-            "actorFamily": skill_profile.get("actorFamily") or "boss",
-            "phases": phases,
-            "effects": effects,
-        },
-    )
+    skill_reports = []
+    for skill_profile in skill_profiles:
+        phases = {
+            name: str((skill_profile.get("phases") or {}).get(name) or "")
+            for name in REQUIRED_PHASES
+        }
+        effects = {
+            name: str((skill_profile.get("effects") or {}).get(name) or "")
+            for name in REQUIRED_EFFECTS
+        }
+        skill_reports.append(
+            harness.evaluate_skill(
+                catalog,
+                {
+                    "id": skill_profile.get("skillId"),
+                    "actorFamily": skill_profile.get("actorFamily") or "boss",
+                    "phases": phases,
+                    "effects": effects,
+                },
+            )
+        )
     return {
         "harnessId": catalog.get("harnessId"),
         "schemaVersion": 1,
-        "packetId": "boss-skill-presentation-slice",
-        "overall": skill_report["verdict"],
-        "skills": [skill_report],
+        "packetId": "boss-skill-presentation-scale-out",
+        "overall": "PASS" if all(row["verdict"] == "PASS" for row in skill_reports) else "FAIL",
+        "skills": skill_reports,
         "weightedScore": None,
     }
 
@@ -197,7 +226,8 @@ def validate_catalog_payload(catalog: dict[str, Any]) -> dict[str, Any]:
     _collect_forbidden(catalog, issues)
     if catalog.get("schemaVersion") != 1:
         issues.append(f"UnsupportedSchemaVersion:{catalog.get('schemaVersion')}")
-    if catalog.get("gameplayAuthority") is True or catalog.get("runtimeSpawn") is True:
+    authority = catalog.get("authority") or {}
+    if authority.get("gameplayAuthority") is True or authority.get("runtimeSpawn") is True:
         issues.append("GameplayOrSpawnAuthorityForbidden")
 
     bosses = list(catalog.get("bossProfiles") or [])
@@ -210,24 +240,94 @@ def validate_catalog_payload(catalog: dict[str, Any]) -> dict[str, Any]:
     boss_ids = [row.get("id") for row in bosses]
     if len(boss_ids) != len(set(boss_ids)):
         issues.append("DuplicateBossProfile")
+    source_ids = [row.get("sourceProfileId") for row in bosses]
+    if len(source_ids) != len(set(source_ids)):
+        issues.append("DuplicateBossSourceProfile")
+    model_ids = [row.get("modelId") for row in bosses]
+    if len(model_ids) != len(set(model_ids)):
+        issues.append("DuplicateBossModel")
     skill_ids = [row.get("id") for row in skills]
     if len(skill_ids) != len(set(skill_ids)):
         issues.append("DuplicateSkillProfile")
+    gameplay_skill_ids = [row.get("skillId") for row in skills]
+    if len(gameplay_skill_ids) != len(set(gameplay_skill_ids)):
+        issues.append("DuplicateSkillId")
 
-    weather_skills = _weather_skill_ids()
-    qualification = _qualification()
-    expected_hash = str(qualification.get("sourceSha256") or "")
+    approved_sources = _approved_sources()
+    source_models = _source_models()
+    qualifications = _qualifications()
+    if set(source_ids) != set(approved_sources):
+        issues.append("ApprovedBossEliteCoverageMismatch")
+
     boss_report: dict[str, Any] = {}
-    present_motion: set[str] = set()
+    qualified_motion_sets: list[tuple[str, set[str]]] = []
     for boss in bosses:
-        if boss.get("id") != EXPECTED_BOSS_ID:
-            issues.append(f"UnexpectedBossProfile:{boss.get('id')}")
-        if boss.get("modelId") != EXPECTED_MODEL_ID:
-            issues.append(f"UnexpectedModelId:{boss.get('modelId')}")
-        if boss.get("sourceProfileId") != EXPECTED_SOURCE_ID:
-            issues.append(f"UnexpectedSourceProfileId:{boss.get('sourceProfileId')}")
-        if boss.get("sourceSha256") != expected_hash:
+        source_id = str(boss.get("sourceProfileId") or "")
+        approved = approved_sources.get(source_id)
+        source = source_models.get(source_id)
+        qualification = qualifications.get(source_id)
+        if approved is None or source is None:
+            issues.append(f"UnknownBossEliteSource:{source_id}")
+            continue
+        expected_kind = "boss" if source_id.startswith("tdf_boss_") else "elite"
+        expected_realm = source_id.split("_")[2]
+        if boss.get("kind") != expected_kind:
+            issues.append(f"KindMismatch:{source_id}")
+        if boss.get("realmId") != expected_realm:
+            issues.append(f"RealmMismatch:{source_id}")
+        if boss.get("modelId") != source.get("modelId"):
+            issues.append(f"ModelIdMismatch:{source_id}")
+        selected_source = source.get("selectedSource") or {}
+        if boss.get("sourceSha256") != selected_source.get("sha256"):
+            issues.append(f"SourceHashMismatch:{source_id}")
             issues.append("SourceHashMismatch")
+        approved_asset = (approved.get("sources") or [{}])[0]
+        if boss.get("source2dPath") != approved_asset.get("path"):
+            issues.append(f"Source2dPathMismatch:{source_id}")
+        if boss.get("source2dSha256") != approved_asset.get("sha256"):
+            issues.append(f"Source2dHashMismatch:{source_id}")
+        if boss.get("sourceRequirements") != approved.get("requirements"):
+            issues.append(f"SourceRequirementsMismatch:{source_id}")
+
+        motion = {
+            str(key) for key in (boss.get("motionKeys") or []) if isinstance(key, str)
+        }
+        if qualification is None:
+            if boss.get("assetState") != "source_only":
+                issues.append(f"UnqualifiedAssetStateMismatch:{source_id}")
+            if boss.get("sourceVersion") != source.get("sourceVersion"):
+                issues.append(f"SourceVersionMismatch:{source_id}")
+            for field in ("qualificationId", "prefabRef", "rigId", "materialId"):
+                if boss.get(field) != "explicit_unavailable":
+                    issues.append(f"UnavailableAssetMustFailClosed:{source_id}:{field}")
+            if motion:
+                issues.append(f"UnavailableAssetHasMotion:{source_id}")
+        else:
+            if boss.get("assetState") != "source_qualified":
+                issues.append(f"QualifiedAssetStateMismatch:{source_id}")
+            expected_fields = {
+                "qualificationId": qualification.get("qualificationId"),
+                "sourceVersion": qualification.get("sourceVersion"),
+                "sourceSha256": qualification.get("sourceSha256"),
+                "prefabRef": (qualification.get("artifacts") or {}).get("fbx", {}).get("path"),
+                "rigId": (qualification.get("rig") or {}).get("armatureObject"),
+                "materialId": (qualification.get("material") or {}).get("id"),
+            }
+            for field, expected in expected_fields.items():
+                if boss.get(field) != expected:
+                    issues.append(f"QualificationMismatch:{source_id}:{field}")
+            expected_motion = {
+                str(row.get("motionKey"))
+                for row in qualification.get("motions") or []
+                if row.get("motionKey")
+            }
+            if motion != expected_motion:
+                issues.append(f"MotionSetMismatch:{source_id}")
+            for key in REQUIRED_MOTION:
+                if key not in motion:
+                    issues.append(f"MissingMotionKey:{source_id}:{key}")
+            qualified_motion_sets.append((source_id, motion))
+
         if "pooling" not in boss:
             issues.append("MissingPooling")
         if "accessibility" not in boss:
@@ -238,28 +338,52 @@ def validate_catalog_payload(catalog: dict[str, Any]) -> dict[str, Any]:
             issues.append(f"QualityTierMismatch:{quality}")
         if tuple(distance) != REQUIRED_DISTANCE:
             issues.append(f"DistanceContextMismatch:{distance}")
-        present_motion = {
-            str(key) for key in (boss.get("motionKeys") or []) if isinstance(key, str)
-        }
-        for key in REQUIRED_MOTION:
-            if key not in present_motion:
-                issues.append(f"MissingMotionKey:{key}")
-        boss_report = {
-            "id": boss.get("id"),
-            "modelId": boss.get("modelId"),
-            "sourceProfileId": boss.get("sourceProfileId"),
-        }
+        accessibility = boss.get("accessibility") or {}
+        if not accessibility.get("reducedFlash") or len(accessibility.get("nonColorCues") or []) < 2:
+            issues.append(f"AccessibilityCueMismatch:{source_id}")
+        if boss.get("modelId") == EXPECTED_MODEL_ID:
+            boss_report = {
+                "id": boss.get("id"),
+                "modelId": boss.get("modelId"),
+                "sourceProfileId": source_id,
+            }
 
     skill_report: dict[str, Any] = {}
-    skill_profile: dict[str, Any] = {}
+    weather_bindings = _weather_skill_bindings()
+    if set(gameplay_skill_ids) != set(weather_bindings):
+        issues.append("SkillBindingCoverageMismatch")
     for skill in skills:
-        skill_profile = skill
-        if skill.get("id") != EXPECTED_SKILL_PROFILE_ID:
-            issues.append(f"UnexpectedSkillProfile:{skill.get('id')}")
-        if skill.get("skillId") not in weather_skills:
+        skill_id = str(skill.get("skillId") or "")
+        binding = weather_bindings.get(skill_id)
+        if binding is None:
             issues.append("UnknownSkillId")
-        if skill.get("skillId") != EXPECTED_SKILL_ID:
-            issues.append(f"UnexpectedSkillId:{skill.get('skillId')}")
+            continue
+        if skill.get("id") != f"skill_presentation_{skill_id}_v001":
+            issues.append(f"SkillProfileIdMismatch:{skill_id}")
+        if skill.get("actorFamily") != binding.get("actor_family"):
+            issues.append(f"SkillActorFamilyMismatch:{skill_id}")
+        expected_phases = {
+            "anticipation": binding.get("motion_anticipation_id"),
+            "cast": binding.get("motion_cast_id"),
+            "channel": binding.get("motion_channel_id"),
+            "release": binding.get("motion_release_id"),
+            "recovery": binding.get("motion_recovery_id"),
+        }
+        expected_effects = {
+            "telegraph": binding.get("telegraph_module_id"),
+            "active": binding.get("active_effect_module_id"),
+            "impact": binding.get("impact_module_id"),
+            "cleanup": binding.get("cleanup_module_id"),
+            "accessibility": binding.get("accessibility_variant_id"),
+        }
+        if skill.get("phases") != expected_phases:
+            issues.append(f"SkillPhaseBindingMismatch:{skill_id}")
+        if skill.get("effects") != expected_effects:
+            issues.append(f"SkillEffectBindingMismatch:{skill_id}")
+        if skill.get("telegraphChannel") != binding.get("telegraph_module_id"):
+            issues.append(f"TelegraphChannelMismatch:{skill_id}")
+        if skill.get("cosmeticChannel") != binding.get("active_effect_module_id"):
+            issues.append(f"CosmeticChannelMismatch:{skill_id}")
         if "pooling" not in skill:
             issues.append("MissingPooling")
         if "accessibility" not in skill:
@@ -278,10 +402,14 @@ def validate_catalog_payload(catalog: dict[str, Any]) -> dict[str, Any]:
         for axis in REQUIRED_EFFECTS:
             if not str(effects.get(axis) or "").strip():
                 issues.append(f"MissingSkillEffect:{axis}")
-        skill_report = {
-            "id": skill.get("id"),
-            "skillId": skill.get("skillId"),
-        }
+        accessibility = skill.get("accessibility") or {}
+        if not accessibility.get("reducedFlash") or len(accessibility.get("nonColorCues") or []) < 2:
+            issues.append(f"AccessibilityCueMismatch:{skill_id}")
+        if skill_id == EXPECTED_SKILL_ID:
+            skill_report = {
+                "id": skill.get("id"),
+                "skillId": skill_id,
+            }
 
     motion_verdict = "FAIL"
     motion_issues: list[str] = []
@@ -291,13 +419,18 @@ def validate_catalog_payload(catalog: dict[str, Any]) -> dict[str, Any]:
         "overall": "FAIL",
     }
     skill_verdict = "FAIL"
-    if not issues and skill_profile:
-        motion_verdict, motion_issues = _motion_axis_verdict(present_motion)
+    if not issues and skills and qualified_motion_sets:
+        for source_id, present_motion in qualified_motion_sets:
+            _, axis_issues = _motion_axis_verdict(present_motion)
+            motion_issues.extend(f"{source_id}:{issue}" for issue in axis_issues)
         issues.extend(motion_issues)
-        packet_report = _skill_harness_report(skill_profile)
-        skill_verdict = str(packet_report.get("skills", [{}])[0].get("verdict") or "FAIL")
+        motion_verdict = "PASS" if not motion_issues else "FAIL"
+        packet_report = _skill_harness_report(skills)
+        skill_verdict = str(packet_report.get("overall") or "FAIL")
         if skill_verdict != "PASS":
-            issues.extend(packet_report.get("skills", [{}])[0].get("reasons") or ["HarnessSkillFail"])
+            for row in packet_report.get("skills") or []:
+                if row.get("verdict") != "PASS":
+                    issues.extend(row.get("reasons") or [f"HarnessSkillFail:{row.get('id')}"])
         if packet_report.get("weightedScore") is not None:
             issues.append("weighted_score_forbidden")
 
@@ -310,7 +443,13 @@ def validate_catalog_payload(catalog: dict[str, Any]) -> dict[str, Any]:
         "skill": skill_report,
         "gameplayAuthority": False,
         "runtimeSpawn": False,
-        "deferred": ["device_evidence", "user_readability", "scale_out"],
+        "scaled": {
+            "bossEliteProfiles": len(bosses),
+            "skillProfiles": len(skills),
+            "sourceQualifiedProfiles": len(qualified_motion_sets),
+            "sourceOnlyProfiles": len(bosses) - len(qualified_motion_sets),
+        },
+        "deferred": ["device_evidence", "player_build_capture", "user_readability"],
         "harness": {
             "motionAxes": motion_verdict if overall == "PASS" else ("FAIL" if motion_issues or issues else motion_verdict),
             "skill": skill_verdict if overall == "PASS" else skill_verdict,
@@ -331,18 +470,43 @@ def resolve_presentation(
     quality: str,
     distance: str,
     gameplay: dict[str, Any] | None = None,
+    *,
+    model_id: str = EXPECTED_MODEL_ID,
+    skill_id: str = EXPECTED_SKILL_ID,
 ) -> dict[str, Any]:
     if quality not in REQUIRED_QUALITY:
         raise ValueError(f"unknown quality: {quality}")
     if distance not in REQUIRED_DISTANCE:
         raise ValueError(f"unknown distance: {distance}")
-    boss = (catalog.get("bossProfiles") or [None])[0] or {}
-    skill = (catalog.get("skillProfiles") or [None])[0] or {}
+    boss = next(
+        (row for row in catalog.get("bossProfiles") or [] if row.get("modelId") == model_id),
+        None,
+    )
+    if boss is None:
+        raise ValueError(f"unknown model id: {model_id}")
+    if boss.get("assetState") != "source_qualified":
+        raise ValueError(f"source-only presentation asset: {model_id}")
+    skill = next(
+        (row for row in catalog.get("skillProfiles") or [] if row.get("skillId") == skill_id),
+        None,
+    )
+    if skill is None:
+        raise ValueError(f"unknown skill id: {skill_id}")
     pooling = skill.get("pooling") or boss.get("pooling") or {}
+    gameplay_snapshot = dict(
+        gameplay
+        or {
+            "skillId": skill_id,
+            "source": "skill_weather_cast_binding",
+            "presentationCannotMutate": True,
+        }
+    )
     return {
         "quality": quality,
         "distance": distance,
-        "gameplay": dict(gameplay or FROZEN_GAMEPLAY),
+        "modelId": model_id,
+        "skillId": skill_id,
+        "gameplay": gameplay_snapshot,
         "protectedCuesPreserved": True,
         "bossLod": next(
             (
