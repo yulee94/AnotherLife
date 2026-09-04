@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.Data.Runtime;
 
 namespace AL.Services.Local
@@ -10,13 +11,42 @@ namespace AL.Services.Local
     {
         private readonly ISaveGameService _saveGameService;
         private readonly KingdomProductionProfileSnapshot _profile;
+        private readonly IEconomyBuildingLevelSnapshotSource _buildingLevels;
+        private readonly IEconomyTerritoryIncomeSnapshotSource _territoryIncome;
+        private readonly IProfileWriteAuthorityProvider _writeAuthority;
 
         public KingdomProductionContributionProvider(
             ISaveGameService saveGameService,
             KingdomProductionProfileSnapshot profile)
+            : this(
+                saveGameService,
+                profile,
+                new SaveBuildingLevelSnapshotSource(saveGameService),
+                AvailableEmptyTerritoryIncomeSnapshotSource.Instance,
+                saveGameService as IProfileWriteAuthorityProvider)
+        {
+        }
+
+        public KingdomProductionContributionProvider(
+            ISaveGameService saveGameService,
+            KingdomProductionProfileSnapshot profile,
+            IEconomyBuildingLevelSnapshotSource buildingLevels,
+            IEconomyTerritoryIncomeSnapshotSource territoryIncome,
+            IProfileWriteAuthorityProvider writeAuthority)
         {
             _saveGameService = saveGameService ?? throw new ArgumentNullException(nameof(saveGameService));
             _profile = profile ?? throw new ArgumentNullException(nameof(profile));
+            _buildingLevels = buildingLevels ?? throw new ArgumentNullException(nameof(buildingLevels));
+            _territoryIncome = territoryIncome ?? throw new ArgumentNullException(nameof(territoryIncome));
+            _writeAuthority = writeAuthority;
+        }
+
+        internal void BindBuildingService(IBuildingService buildingService)
+        {
+            if (_buildingLevels is BuildingServiceProductionLevelSnapshotSource live)
+            {
+                live.Bind(buildingService);
+            }
         }
 
         public EconomyProductionContributionSnapshot BuildContributions(double deltaSeconds)
@@ -87,6 +117,14 @@ namespace AL.Services.Local
                     "Production.Profile");
             }
 
+            if (_writeAuthority != null &&
+                !ProfileWriteAuthorityProviderGuard.IsCurrentWritable(_writeAuthority))
+            {
+                return Unavailable(
+                    EconomyDiagnosticCodes.ProductionProfile,
+                    "Production.Profile.Writable");
+            }
+
             if (!ResourceRules.TryGetRareResourceForRealm(save.SelectedRealm, out _))
             {
                 return Unavailable(
@@ -104,12 +142,46 @@ namespace AL.Services.Local
                     "Production.Catalog");
             }
 
-            if (!TryReadBuildingLevels(save, out Dictionary<string, int> buildingLevels, out EconomyDiagnostic buildingDiagnostic))
+            IReadOnlyDictionary<string, int> buildingLevels;
+            EconomyDiagnostic buildingDiagnostic;
+            try
             {
-                return Unavailable(buildingDiagnostic.Code, buildingDiagnostic.RecordPath);
+                if (!_buildingLevels.TryCaptureBuildingLevels(out buildingLevels, out buildingDiagnostic) ||
+                    buildingLevels == null)
+                {
+                    return Unavailable(buildingDiagnostic.Code, buildingDiagnostic.RecordPath);
+                }
+            }
+            catch (Exception)
+            {
+                return Unavailable(
+                    EconomyDiagnosticCodes.ProductionCatalog,
+                    "Production.Buildings");
             }
 
-            var contributions = new List<EconomyProductionContribution>(_profile.Contributions.Count);
+            IReadOnlyList<EconomyProductionContribution> territoryContributions;
+            EconomyDiagnostic territoryDiagnostic;
+            try
+            {
+                if (!_territoryIncome.TryCaptureTerritoryIncome(
+                        save.SelectedRealm,
+                        deltaSeconds,
+                        out territoryContributions,
+                        out territoryDiagnostic) ||
+                    territoryContributions == null)
+                {
+                    return Unavailable(territoryDiagnostic.Code, territoryDiagnostic.RecordPath);
+                }
+            }
+            catch (Exception)
+            {
+                return Unavailable(
+                    EconomyDiagnosticCodes.ProductionCatalog,
+                    "Production.Territory");
+            }
+
+            var contributions = new List<EconomyProductionContribution>(
+                _profile.Contributions.Count + territoryContributions.Count);
             for (int index = 0; index < _profile.Contributions.Count; index++)
             {
                 KingdomProductionContributionRule rule = _profile.Contributions[index];
@@ -149,12 +221,77 @@ namespace AL.Services.Local
                 contributions.Add(new EconomyProductionContribution(rule.ResourceType, amount));
             }
 
+            for (int index = 0; index < territoryContributions.Count; index++)
+            {
+                EconomyProductionContribution territory = territoryContributions[index];
+                if (double.IsNaN(territory.Amount) ||
+                    double.IsInfinity(territory.Amount) ||
+                    territory.Amount < 0d)
+                {
+                    return Unavailable(
+                        EconomyDiagnosticCodes.ProductionInvalidContribution,
+                        $"Production.Territory[{index}]");
+                }
+
+                if (territory.Amount == 0d)
+                {
+                    continue;
+                }
+
+                contributions.Add(territory);
+            }
+
             return new EconomyProductionContributionSnapshot(
                 EconomyProductionSourceStatus.Available,
                 save.ProfileId,
                 _profile.SourceSha256,
                 contributions,
                 Array.Empty<EconomyDiagnostic>());
+        }
+
+        internal static bool TryCaptureBuildingLevelSnapshot(
+            IEnumerable<BuildingState> buildings,
+            out IReadOnlyDictionary<string, int> buildingLevels,
+            out EconomyDiagnostic diagnostic)
+        {
+            var captured = new Dictionary<string, int>(StringComparer.Ordinal);
+            buildingLevels = captured;
+            diagnostic = default;
+            if (buildings == null)
+            {
+                diagnostic = new EconomyDiagnostic(
+                    EconomyDiagnosticCodes.ProductionCatalog,
+                    "Production.Buildings");
+                return false;
+            }
+
+            int index = 0;
+            foreach (BuildingState state in buildings)
+            {
+                string path = $"Production.Buildings[{index}]";
+                if (state == null ||
+                    !KingdomProductionProfileCatalog.TryCanonicalBuildingId(state.BuildingId, out string canonical) ||
+                    state.Level < 0)
+                {
+                    diagnostic = new EconomyDiagnostic(
+                        EconomyDiagnosticCodes.ProductionCatalog,
+                        path);
+                    return false;
+                }
+
+                if (captured.ContainsKey(canonical))
+                {
+                    diagnostic = new EconomyDiagnostic(
+                        EconomyDiagnosticCodes.ProductionCatalog,
+                        path);
+                    return false;
+                }
+
+                captured[canonical] = state.Level;
+                index++;
+            }
+
+            return true;
         }
 
         private static bool IsUncertainOrDegraded(ISaveGameService saveGameService)
@@ -177,50 +314,6 @@ namespace AL.Services.Local
             {
                 return true;
             }
-        }
-
-        private static bool TryReadBuildingLevels(
-            SaveGameData save,
-            out Dictionary<string, int> buildingLevels,
-            out EconomyDiagnostic diagnostic)
-        {
-            buildingLevels = new Dictionary<string, int>(StringComparer.Ordinal);
-            diagnostic = default;
-            IList<BuildingState> buildings = save.Buildings;
-            if (buildings == null)
-            {
-                diagnostic = new EconomyDiagnostic(
-                    EconomyDiagnosticCodes.ProductionCatalog,
-                    "Production.Buildings");
-                return false;
-            }
-
-            for (int index = 0; index < buildings.Count; index++)
-            {
-                BuildingState state = buildings[index];
-                string path = $"Production.Buildings[{index}]";
-                if (state == null ||
-                    !KingdomProductionProfileCatalog.TryCanonicalBuildingId(state.BuildingId, out string canonical) ||
-                    state.Level < 0)
-                {
-                    diagnostic = new EconomyDiagnostic(
-                        EconomyDiagnosticCodes.ProductionCatalog,
-                        path);
-                    return false;
-                }
-
-                if (buildingLevels.ContainsKey(canonical))
-                {
-                    diagnostic = new EconomyDiagnostic(
-                        EconomyDiagnosticCodes.ProductionCatalog,
-                        path);
-                    return false;
-                }
-
-                buildingLevels[canonical] = state.Level;
-            }
-
-            return true;
         }
 
         private static bool RuleAppliesToRealm(

@@ -287,6 +287,119 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(EconomyDiagnosticCodes.ProductionElapsed, snapshot.Diagnostics[0].Code);
         }
 
+        [Test]
+        public void LiveConsumerCannotMintFromIneligibleLedger()
+        {
+            FakeSaveGameService save = CreateWritableSave();
+            KingdomProductionContributionProvider provider = KingdomProductionConsumer.CreateLive(save);
+
+            EconomyProductionContributionSnapshot snapshot = provider.BuildContributions(1d);
+
+            Assert.AreEqual(EconomyProductionSourceStatus.Unavailable, snapshot.Status);
+            Assert.AreEqual(EconomyDiagnosticCodes.ProductionCatalog, snapshot.Diagnostics[0].Code);
+            Assert.AreEqual(0, snapshot.Contributions.Count);
+        }
+
+        [Test]
+        public void FailClosedTerritorySnapshotBlocksEligibleCatalogMint()
+        {
+            KingdomProductionProfileSnapshot catalog = LoadEligibleCatalog();
+            FakeSaveGameService save = CreateWritableSave();
+            var provider = new KingdomProductionContributionProvider(
+                save,
+                catalog,
+                new SaveBuildingLevelSnapshotSource(save),
+                FailClosedTerritoryIncomeSnapshotSource.Instance,
+                null);
+
+            EconomyProductionContributionSnapshot snapshot = provider.BuildContributions(1d);
+
+            Assert.AreEqual(EconomyProductionSourceStatus.Unavailable, snapshot.Status);
+            Assert.AreEqual(EconomyDiagnosticCodes.ProductionCatalog, snapshot.Diagnostics[0].Code);
+            Assert.AreEqual("Production.Territory", snapshot.Diagnostics[0].RecordPath);
+            Assert.AreEqual(0, snapshot.Contributions.Count);
+        }
+
+        [Test]
+        public void BuildingServiceSnapshotUsesGetAllStatesAndNeverGetBuildingState()
+        {
+            KingdomProductionProfileSnapshot catalog = LoadEligibleCatalog();
+            FakeSaveGameService save = CreateWritableSave();
+            var spy = new SpyBuildingService(save.CurrentSave.Buildings);
+            var buildings = new BuildingServiceProductionLevelSnapshotSource();
+            buildings.Bind(spy);
+            var provider = new KingdomProductionContributionProvider(
+                save,
+                catalog,
+                buildings,
+                AvailableEmptyTerritoryIncomeSnapshotSource.Instance,
+                null);
+
+            EconomyProductionContributionSnapshot snapshot = provider.BuildContributions(1d);
+
+            Assert.AreEqual(EconomyProductionSourceStatus.Available, snapshot.Status);
+            Assert.AreEqual(2, snapshot.Contributions.Count);
+            Assert.AreEqual(1, spy.GetAllBuildingStatesCalls);
+            Assert.AreEqual(0, spy.GetBuildingStateCalls);
+        }
+
+        [Test]
+        public void UnboundBuildingServiceSnapshotFailsClosed()
+        {
+            KingdomProductionProfileSnapshot catalog = LoadEligibleCatalog();
+            FakeSaveGameService save = CreateWritableSave();
+            var provider = new KingdomProductionContributionProvider(
+                save,
+                catalog,
+                new BuildingServiceProductionLevelSnapshotSource(),
+                AvailableEmptyTerritoryIncomeSnapshotSource.Instance,
+                null);
+
+            EconomyProductionContributionSnapshot snapshot = provider.BuildContributions(1d);
+
+            Assert.AreEqual(EconomyProductionSourceStatus.Unavailable, snapshot.Status);
+            Assert.AreEqual(EconomyDiagnosticCodes.ProductionCatalog, snapshot.Diagnostics[0].Code);
+            Assert.AreEqual("Production.Buildings", snapshot.Diagnostics[0].RecordPath);
+        }
+
+        [Test]
+        public void NullBuildingRowFailsClosedWithoutMint()
+        {
+            KingdomProductionProfileSnapshot catalog = LoadEligibleCatalog();
+            FakeSaveGameService save = CreateWritableSave();
+            save.CurrentSave.Buildings.Add(null);
+            var provider = new KingdomProductionContributionProvider(save, catalog);
+
+            EconomyProductionContributionSnapshot snapshot = provider.BuildContributions(1d);
+
+            Assert.AreEqual(EconomyProductionSourceStatus.Unavailable, snapshot.Status);
+            Assert.AreEqual(EconomyDiagnosticCodes.ProductionCatalog, snapshot.Diagnostics[0].Code);
+            Assert.AreEqual(0, snapshot.Contributions.Count);
+        }
+
+        [Test]
+        public void OfflineServiceStackInjectsLiveProvider()
+        {
+            Type stackType = typeof(LocalResourceService).Assembly.GetType("AL.Core.OfflineServiceStack");
+            Assert.NotNull(stackType);
+            object stack = stackType
+                .GetMethod("Create", BindingFlags.Public | BindingFlags.Static)
+                .Invoke(null, new object[] { 1 });
+            var instances = (IReadOnlyDictionary<Type, object>)stackType
+                .GetProperty("RequiredInstances")
+                .GetValue(stack);
+            var resources = (LocalResourceService)instances[typeof(IResourceService)];
+            FieldInfo field = typeof(LocalResourceService).GetField(
+                "_injectedProductionProvider",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field);
+            object injected = field.GetValue(resources);
+            Assert.IsInstanceOf<KingdomProductionContributionProvider>(injected);
+
+            EconomyProductionTickResult tick = resources.TryTickProduction(1d);
+            Assert.AreNotEqual(EconomyMutationStatus.Applied, tick.Status);
+        }
+
         private static KingdomProductionProfileSnapshot LoadEligibleCatalog()
         {
             return LoadCatalog(EligibleCatalogJson);
@@ -433,6 +546,76 @@ namespace AL.Tests.EditMode
                     new string('a', 64),
                     ProfileAuthoritySourceGeneration.Primary,
                     Array.Empty<string>());
+            }
+        }
+
+        private sealed class SpyBuildingService : IBuildingService
+        {
+            private readonly IReadOnlyList<BuildingState> _states;
+
+            public SpyBuildingService(IReadOnlyList<BuildingState> states)
+            {
+                _states = states;
+            }
+
+            public int GetAllBuildingStatesCalls { get; private set; }
+            public int GetBuildingStateCalls { get; private set; }
+
+            public BuildingState GetBuildingState(string buildingId)
+            {
+                GetBuildingStateCalls++;
+                return null;
+            }
+
+            public IEnumerable<BuildingState> GetAllBuildingStates()
+            {
+                GetAllBuildingStatesCalls++;
+                return _states;
+            }
+
+            public BuildingConstructionQuote GetConstructionQuote(string buildingId)
+            {
+                return new BuildingConstructionQuote(
+                    BuildingConstructionStatus.NotReady,
+                    buildingId,
+                    0,
+                    0,
+                    0,
+                    0,
+                    Array.Empty<BuildingConstructionCost>(),
+                    string.Empty);
+            }
+
+            public BuildingConstructionResult TryStartConstruction(string buildingId, long requestedAtTimestamp)
+            {
+                return new BuildingConstructionResult(
+                    BuildingConstructionStatus.NotReady,
+                    GetConstructionQuote(buildingId),
+                    false,
+                    false,
+                    string.Empty);
+            }
+
+            public BuildingConstructionResult TryCompleteConstruction(string buildingId, long observedAtTimestamp)
+            {
+                return TryStartConstruction(buildingId, observedAtTimestamp);
+            }
+
+            public BuildingConstructionReconcileResult ReconcileCompletedConstructions(long observedAtTimestamp)
+            {
+                return new BuildingConstructionReconcileResult(
+                    BuildingConstructionStatus.NotReady,
+                    Array.Empty<string>(),
+                    false,
+                    string.Empty);
+            }
+
+            public void StartUpgrade(string buildingId)
+            {
+            }
+
+            public void CompleteUpgrade(string buildingId)
+            {
             }
         }
 

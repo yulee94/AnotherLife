@@ -276,6 +276,22 @@ namespace AL.Core.Interfaces
         EconomyProductionContributionSnapshot BuildContributions(double deltaSeconds);
     }
 
+    public interface IEconomyBuildingLevelSnapshotSource
+    {
+        bool TryCaptureBuildingLevels(
+            out IReadOnlyDictionary<string, int> buildingLevels,
+            out EconomyDiagnostic diagnostic);
+    }
+
+    public interface IEconomyTerritoryIncomeSnapshotSource
+    {
+        bool TryCaptureTerritoryIncome(
+            RealmId realmId,
+            double deltaSeconds,
+            out IReadOnlyList<EconomyProductionContribution> contributions,
+            out EconomyDiagnostic diagnostic);
+    }
+
     internal static class EconomyContractCollections
     {
         private const int MaxDiagnostics = 32;
