@@ -25,6 +25,7 @@ namespace AL.Core.Interfaces.Notifications
         private readonly INotificationClock _clock;
         private readonly INotificationActionRegistry _actionRegistry;
         private readonly INotificationDiagnosticSink _diagnosticSink;
+        private readonly INotificationDurableStore _durableStore;
         private readonly List<Record> _records = new List<Record>();
         private readonly Dictionary<NotificationChannel, Registration> _presenters =
             new Dictionary<NotificationChannel, Registration>();
@@ -47,12 +48,31 @@ namespace AL.Core.Interfaces.Notifications
             INotificationClock clock,
             INotificationActionRegistry actionRegistry,
             INotificationDiagnosticSink diagnosticSink)
+            : this(
+                definitionResolver,
+                localizationReferenceAuthority,
+                clock,
+                actionRegistry,
+                diagnosticSink,
+                null)
+        {
+        }
+
+        public NotificationSessionQueue(
+            INotificationDefinitionResolver definitionResolver,
+            INotificationLocalizationReferenceAuthority localizationReferenceAuthority,
+            INotificationClock clock,
+            INotificationActionRegistry actionRegistry,
+            INotificationDiagnosticSink diagnosticSink,
+            INotificationDurableStore durableStore)
         {
             _definitionResolver = definitionResolver;
             _localizationReferenceAuthority = localizationReferenceAuthority;
             _clock = clock;
             _actionRegistry = actionRegistry;
             _diagnosticSink = diagnosticSink;
+            _durableStore = durableStore;
+            HydrateDurableRecords();
         }
 
         public NotificationEnqueueResult Enqueue(NotificationRequest request)
@@ -114,14 +134,31 @@ namespace AL.Core.Interfaces.Notifications
                         definitionValidation.DiagnosticCode);
                 }
 
-                if (definition.DurabilityPolicy ==
-                    NotificationDurabilityPolicy.DurableUntilAcknowledged ||
-                    definition.DurabilityPolicy == NotificationDurabilityPolicy.DurableHistory)
+                if (NotificationDurablePrivacy.IsDurable(definition.DurabilityPolicy))
                 {
-                    return Rejected(
-                        NotificationEnqueueStatus.RejectedDurabilityUnavailable,
-                        request,
-                        "AL-NTF-PERSISTENCE");
+                    if (!DurableStoreAvailable())
+                    {
+                        return Rejected(
+                            NotificationEnqueueStatus.RejectedDurabilityUnavailable,
+                            request,
+                            NotificationDurablePrivacy.PersistenceDiagnostic);
+                    }
+
+                    NotificationDurableRecord existingDurable = FindDurableCorrelation(
+                        request.CorrelationId,
+                        definition.DefinitionId);
+                    if (existingDurable != null)
+                    {
+                        return new NotificationEnqueueResult(
+                            NotificationEnqueueStatus.AcceptedAlreadyPresent,
+                            definition.DefinitionId,
+                            request.CorrelationId,
+                            existingDurable.RecordId,
+                            0L,
+                            existingDurable.RecordId,
+                            null,
+                            false);
+                    }
                 }
 
                 NotificationValidationResult requestValidation =
@@ -226,6 +263,28 @@ namespace AL.Core.Interfaces.Notifications
                 long sequence = checked(++_nextSequence);
                 string instanceId = "al_notification_session_" +
                                     sequence.ToString("D20", CultureInfo.InvariantCulture);
+                if (NotificationDurablePrivacy.IsDurable(definition.DurabilityPolicy))
+                {
+                    NotificationDurableRecord durable = NotificationDurablePrivacy.FromQueue(
+                        null,
+                        definition,
+                        request,
+                        NotificationDeliveryState.PendingPresenter,
+                        null,
+                        null,
+                        0);
+                    if (!TryCommitDurable(durable, out string persistDiagnostic))
+                    {
+                        return Rejected(
+                            NotificationEnqueueStatus.RejectedDurabilityUnavailable,
+                            request,
+                            string.IsNullOrWhiteSpace(persistDiagnostic)
+                                ? NotificationDurablePrivacy.PersistenceDiagnostic
+                                : persistDiagnostic);
+                    }
+
+                    instanceId = durable.RecordId;
+                }
                 var record = new Record(
                     instanceId,
                     sequence,
@@ -540,6 +599,18 @@ namespace AL.Core.Interfaces.Notifications
                         NotificationReceiptUpdateStatus.RejectedPolicy,
                         record,
                         PresenterFailedDiagnostic);
+                }
+
+                if (!TryPersistDurableTransition(
+                        record,
+                        NotificationDeliveryState.Acknowledged,
+                        _clock.UtcNow,
+                        null))
+                {
+                    return Updated(
+                        NotificationReceiptUpdateStatus.Failed,
+                        record,
+                        NotificationDurablePrivacy.PersistenceDiagnostic);
                 }
 
                 Complete(record, NotificationDeliveryState.Acknowledged, null);
@@ -1001,6 +1072,190 @@ namespace AL.Core.Interfaces.Notifications
 
             rejected = null;
             return true;
+        }
+
+        private bool DurableStoreAvailable()
+        {
+            try
+            {
+                return _durableStore != null && _durableStore.IsAvailable;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private NotificationDurableRecord FindDurableCorrelation(
+            string correlationId,
+            string definitionId)
+        {
+            if (!DurableStoreAvailable())
+            {
+                return null;
+            }
+
+            try
+            {
+                return _durableStore.FindByCorrelation(correlationId, definitionId);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private bool TryCommitDurable(NotificationDurableRecord record, out string diagnostic)
+        {
+            diagnostic = NotificationDurablePrivacy.PersistenceDiagnostic;
+            if (!DurableStoreAvailable() || record == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                return _durableStore.TryCommit(record, out diagnostic);
+            }
+            catch
+            {
+                diagnostic = NotificationDurablePrivacy.PersistenceDiagnostic;
+                return false;
+            }
+        }
+
+        private bool TryPersistDurableTransition(
+            Record record,
+            NotificationDeliveryState state,
+            DateTime? acknowledgedAtUtc,
+            DateTime? dismissedAtUtc)
+        {
+            if (record == null ||
+                record.Definition == null ||
+                !NotificationDurablePrivacy.IsDurable(record.Definition.DurabilityPolicy))
+            {
+                return true;
+            }
+
+            if (!DurableStoreAvailable())
+            {
+                return false;
+            }
+
+            NotificationDurableRecord durable = NotificationDurablePrivacy.FromQueue(
+                record.InstanceId,
+                record.Definition,
+                record.Request,
+                state,
+                acknowledgedAtUtc,
+                dismissedAtUtc,
+                record.DeliveryAttempt);
+            try
+            {
+                return _durableStore.TryUpdate(durable, out _);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void HydrateDurableRecords()
+        {
+            if (!DurableStoreAvailable())
+            {
+                return;
+            }
+
+            IReadOnlyList<NotificationDurableRecord> records;
+            try
+            {
+                records = _durableStore.LoadAll();
+            }
+            catch
+            {
+                return;
+            }
+
+            if (records == null)
+            {
+                return;
+            }
+
+            for (int index = 0; index < records.Count; index++)
+            {
+                NotificationDurableRecord durable = records[index];
+                if (durable == null ||
+                    NotificationDurableRecord.IsCompleted(durable.State) ||
+                    string.IsNullOrWhiteSpace(durable.DefinitionId))
+                {
+                    continue;
+                }
+
+                NotificationDefinitionResolution resolution;
+                try
+                {
+                    resolution = _definitionResolver == null
+                        ? null
+                        : _definitionResolver.Resolve(durable.DefinitionId);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (resolution == null ||
+                    resolution.Status != NotificationDefinitionResolutionStatus.Found ||
+                    resolution.Definition == null)
+                {
+                    continue;
+                }
+
+                var parameters = new List<NotificationParameter>();
+                if (durable.Parameters != null)
+                {
+                    for (int parameterIndex = 0;
+                         parameterIndex < durable.Parameters.Count;
+                         parameterIndex++)
+                    {
+                        NotificationDurableParameter parameter = durable.Parameters[parameterIndex];
+                        if (parameter == null || string.IsNullOrWhiteSpace(parameter.Name))
+                        {
+                            continue;
+                        }
+
+                        parameters.Add(
+                            new NotificationParameter(
+                                parameter.Name,
+                                NotificationParameterValue.FromSafeDisplayText(
+                                    parameter.TextValue ?? string.Empty)));
+                    }
+                }
+
+                DateTime occurred = durable.OccurredAtUtcTicks <= 0
+                    ? (_clock == null ? DateTime.UtcNow : _clock.UtcNow)
+                    : new DateTime(durable.OccurredAtUtcTicks, DateTimeKind.Utc);
+                var request = new NotificationRequest(
+                    durable.DefinitionId,
+                    durable.SourceSystemId,
+                    durable.CorrelationId,
+                    occurred,
+                    parameters,
+                    null,
+                    null,
+                    null);
+                long sequence = checked(++_nextSequence);
+                _records.Add(
+                    new Record(
+                        durable.RecordId,
+                        sequence,
+                        resolution.Definition,
+                        request,
+                        resolution.Definition.DefaultChannel,
+                        string.Empty,
+                        occurred,
+                        _clock == null ? 0d : _clock.RealtimeSeconds));
+            }
         }
 
         private Record FindCorrelationMatch(
