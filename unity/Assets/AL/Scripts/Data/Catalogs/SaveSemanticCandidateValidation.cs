@@ -787,6 +787,8 @@ namespace AL.Data.Catalogs
                     "OwnedEquipment",
                     "AppliedBossLootRewards",
                     "Nvs01Progress",
+                    "FirstWorldProgress",
+                    "MapDisclosure",
                     "WarzoneCredits",
                     "LastSavedTimestamp"
                 },
@@ -967,6 +969,42 @@ namespace AL.Data.Catalogs
 
         private static readonly HashSet<string> Nvs01ObjectiveFields =
             Fields("ObjectiveId", "Status");
+
+        private static readonly HashSet<string> FirstWorldProgressFields =
+            Fields(
+                "Version",
+                "Revision",
+                "TutorialStep",
+                "TeachingBeat",
+                "MovementConfirmationCount",
+                "BasicAttackConfirmationCount",
+                "CompletionEventCount",
+                "OmenOfferCount",
+                "BlockTaught",
+                "HandoffCommitted",
+                "ProofPhase",
+                "ProofQuestId",
+                "ProofQuestStateId",
+                "ProofObjectiveId",
+                "ProofDialogueId",
+                "ProofLastEventId",
+                "ProofChapterVariantId",
+                "ProofOmenAccepted",
+                "ProofAutoAccept",
+                "LastOperationId");
+
+        private static readonly HashSet<string> MapDisclosureFields =
+            Fields(
+                "Version",
+                "AuthorityEpoch",
+                "AuthorityRevision",
+                "CatalogVersion",
+                "CatalogSha256",
+                "StateDigest",
+                "DiscoveredFeatureIds",
+                "VisibleRouteIds",
+                "VisibleObjectiveIds",
+                "VisibleAllegianceMarkerIds");
 
         private static readonly HashSet<string> Nvs01EncounterFields =
             Fields(
@@ -1338,6 +1376,8 @@ namespace AL.Data.Catalogs
             ValidateEquipmentRows(root, policy.Authority, collector, state);
             ValidateAppliedBossLootRewardRows(root, policy.Authority, collector, state);
             ValidateNvs01Progress(root, policy.Nvs01Rule, collector, state);
+            ValidateFirstWorldProgress(root, collector, state);
+            ValidateMapDisclosure(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
@@ -1404,6 +1444,75 @@ namespace AL.Data.Catalogs
                     AppendPropertyPath("$", property.Name),
                     SaveSemanticDomain.Envelope,
                     SaveSemanticDiagnosticSeverity.Warning);
+            }
+        }
+
+        private static void ValidateMapDisclosure(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.MapDisclosure";
+            StrictJsonValue value;
+            if (!root.TryGet("MapDisclosure", out value) || value is StrictJsonNull)
+            {
+                // Optional schema-v1 extension. Missing legacy state is admitted.
+                return;
+            }
+
+            var disclosure = value as StrictJsonObject;
+            if (disclosure == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_MAP_DISCLOSURE_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                disclosure,
+                MapDisclosureFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    disclosure,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_MAP_DISCLOSURE_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_MAP_DISCLOSURE_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
             }
         }
 
@@ -3946,6 +4055,278 @@ namespace AL.Data.Catalogs
                     path,
                     SaveSemanticDomain.Narrative);
             }
+        }
+
+        private static void ValidateFirstWorldProgress(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.FirstWorldProgress";
+            StrictJsonValue value;
+            if (!root.TryGet("FirstWorldProgress", out value) ||
+                value is StrictJsonNull)
+            {
+                // Optional schema-v1 extension. Runtime reconciliation maps an
+                // omitted legacy value from already committed lordship evidence.
+                return;
+            }
+
+            var progress = value as StrictJsonObject;
+            if (progress == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_PROGRESS_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                progress,
+                FirstWorldProgressFields,
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    progress,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Narrative,
+                    rawOnly: true);
+                return;
+            }
+
+            long revision;
+            bool hasRevision = TryReadRequiredInt64(
+                progress,
+                "Revision",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out revision);
+            if (hasRevision &&
+                (revision < 0 || version == 1 && revision == 0))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_REVISION_INVALID",
+                    path + ".Revision",
+                    SaveSemanticDomain.Narrative);
+            }
+
+            ValidateFirstWorldInteger(
+                progress,
+                "TutorialStep",
+                version == 0 ? 0 : 1,
+                version == 0 ? 0 : 3,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "TeachingBeat",
+                version == 0 ? 0 : 1,
+                version == 0 ? 0 : 5,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "MovementConfirmationCount",
+                0,
+                version == 0 ? 0 : 1,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "BasicAttackConfirmationCount",
+                0,
+                version == 0 ? 0 : 1,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "CompletionEventCount",
+                0,
+                version == 0 ? 0 : 1,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "OmenOfferCount",
+                0,
+                version == 0 ? 0 : 1,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "ProofPhase",
+                0,
+                version == 0 ? 0 : 10,
+                collector,
+                state);
+
+            bool blockTaught;
+            bool hasBlockTaught = TryReadRequiredBoolean(
+                progress,
+                "BlockTaught",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out blockTaught);
+            bool handoffCommitted;
+            bool hasHandoff = TryReadRequiredBoolean(
+                progress,
+                "HandoffCommitted",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out handoffCommitted);
+            bool omenAccepted;
+            bool hasOmenAccepted = TryReadRequiredBoolean(
+                progress,
+                "ProofOmenAccepted",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out omenAccepted);
+            bool autoAccept;
+            bool hasAutoAccept = TryReadRequiredBoolean(
+                progress,
+                "ProofAutoAccept",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out autoAccept);
+
+            bool neutralStrings = true;
+            foreach (string field in new[]
+                     {
+                         "ProofQuestId",
+                         "ProofQuestStateId",
+                         "ProofObjectiveId",
+                         "ProofDialogueId",
+                         "ProofLastEventId",
+                         "ProofChapterVariantId"
+                     })
+            {
+                string text;
+                bool valid = TryReadRequiredString(
+                    progress,
+                    field,
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    allowBlank: true,
+                    collector,
+                    state,
+                    out text);
+                neutralStrings &= valid && text.Length == 0;
+            }
+
+            string operationId;
+            bool hasOperationId = TryReadRequiredString(
+                progress,
+                "LastOperationId",
+                path,
+                SaveSemanticDomain.Narrative,
+                allowBlank: true,
+                collector,
+                state,
+                out operationId);
+            if (hasOperationId &&
+                (version == 0 && operationId.Length != 0 ||
+                 version == 1 &&
+                 (string.IsNullOrWhiteSpace(operationId) ||
+                  operationId.Length > 96)))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_OPERATION_ID_INVALID",
+                    path + ".LastOperationId",
+                    SaveSemanticDomain.Narrative);
+            }
+
+            if (version == 0 &&
+                (hasBlockTaught && blockTaught ||
+                 hasHandoff && handoffCommitted ||
+                 hasOmenAccepted && omenAccepted ||
+                 hasAutoAccept && autoAccept ||
+                 !neutralStrings))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_NEUTRAL_STATE_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+            }
+        }
+
+        private static void ValidateFirstWorldInteger(
+            StrictJsonObject progress,
+            string fieldName,
+            int minimum,
+            int maximum,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            int value;
+            if (!TryReadRequiredInt32(
+                    progress,
+                    fieldName,
+                    "$.FirstWorldProgress",
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out value) ||
+                value >= minimum && value <= maximum)
+            {
+                return;
+            }
+
+            MarkMalformed(
+                state,
+                collector,
+                "SAVE_FIRST_WORLD_VALUE_INVALID",
+                "$.FirstWorldProgress." + fieldName,
+                SaveSemanticDomain.Narrative);
         }
 
         private static bool IsNeutralNvs01Progress(StrictJsonObject progress)

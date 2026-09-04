@@ -42,6 +42,7 @@ namespace AL.Editor.Development.FirstUserGameTest
     internal sealed class FirstUserOnboardingFixedAssetInventoryVerifier :
         IFirstUserOnboardingAssetInventoryVerifier
     {
+        private const string OwnedCombatAudioChannelName = "OwnedRuntimeCombatAudio";
         private const string EnvironmentPath =
             "Assets/AL/Art/Production/FirstUserOnboarding/Environment/" +
             "Neutral_Covenant_Hall_Kit_v001.fbx";
@@ -396,7 +397,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             {
                 Component component = components[index];
                 Type type = component == null ? null : component.GetType();
-                if (type == null || IsAllowedComponent(type))
+                if (type == null || IsAllowedComponent(lease, component, type))
                 {
                     continue;
                 }
@@ -446,7 +447,10 @@ namespace AL.Editor.Development.FirstUserGameTest
             return Manifest.Single(record => record.Role == role).Path;
         }
 
-        private static bool IsAllowedComponent(Type type)
+        private static bool IsAllowedComponent(
+            IFirstUserOnboardingEnvironmentLease lease,
+            Component component,
+            Type type)
         {
             if (type == typeof(Transform) || type == typeof(MeshFilter) ||
                 type == typeof(MeshRenderer) || type == typeof(SkinnedMeshRenderer) ||
@@ -465,6 +469,13 @@ namespace AL.Editor.Development.FirstUserGameTest
                 return true;
             }
 
+            if (type == typeof(AudioSource))
+            {
+                return IsExactOwnedCombatAudioSource(
+                    lease,
+                    component as AudioSource);
+            }
+
             string fullName = type.FullName ?? string.Empty;
             return string.Equals(
                        fullName,
@@ -478,6 +489,30 @@ namespace AL.Editor.Development.FirstUserGameTest
                        fullName,
                        "AL.ChampionMode.Control.ChampionCombat",
                        StringComparison.Ordinal);
+        }
+
+        private static bool IsExactOwnedCombatAudioSource(
+            IFirstUserOnboardingEnvironmentLease lease,
+            AudioSource source)
+        {
+            Transform player = lease == null || lease.PlayerChampion == null
+                ? null
+                : lease.PlayerChampion.transform;
+            Transform channel = source == null ? null : source.transform;
+            return player != null && channel != null &&
+                   channel.parent == player &&
+                   string.Equals(
+                       channel.name,
+                       OwnedCombatAudioChannelName,
+                       StringComparison.Ordinal) &&
+                   player.Find(OwnedCombatAudioChannelName) == channel &&
+                   channel.GetComponents<AudioSource>().Length == 1 &&
+                   channel.localPosition == Vector3.zero &&
+                   channel.localRotation == Quaternion.identity &&
+                   channel.localScale == Vector3.one &&
+                   source.enabled && !source.playOnAwake &&
+                   Mathf.Approximately(source.spatialBlend, 0f) &&
+                   source.priority == 80;
         }
 
         private static ManifestRecord Role(

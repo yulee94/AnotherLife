@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.dev/schemas/al-model-motion-skill-vfx-harness.schema.json",
+  "title": "Another Life model, motion, and skill-VFX validation harness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gameId",
+    "harnessId",
+    "schemaVersion",
+    "contentVersion",
+    "authority",
+    "verdictPolicy",
+    "requiredKinds",
+    "modelCheckFamilies",
+    "requiredMotionAxes",
+    "requiredSkillEffectAxes",
+    "requiredSkillMotionPhases",
+    "playerBuildChecks",
+    "acceptance"
+  ],
+  "properties": {
+    "gameId": { "const": "another-life" },
+    "harnessId": { "const": "mmv_harness_model_motion_skill_vfx_v001" },
+    "schemaVersion": { "const": 1 },
+    "contentVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["catalogOwner", "finalCreativeOwner", "status", "ownerDecisionRef"],
+      "properties": {
+        "catalogOwner": { "const": "model_motion_skill_vfx_harness" },
+        "finalCreativeOwner": { "const": "project_owner" },
+        "status": { "const": "validation_only" },
+        "ownerDecisionRef": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "verdictPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowedVerdicts",
+        "weightedScoreForbidden",
+        "aggregateRule",
+        "missingRequiredAxis",
+        "missingEvidence",
+        "ownerCreativeApproval"
+      ],
+      "properties": {
+        "allowedVerdicts": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "enum": ["PASS", "FAIL", "BLOCKED"] }
+        },
+        "weightedScoreForbidden": { "const": true },
+        "aggregateRule": {
+          "const": "any_fail_then_fail_else_any_blocked_then_blocked_else_pass"
+        },
+        "missingRequiredAxis": { "const": "FAIL" },
+        "missingEvidence": { "const": "BLOCKED" },
+        "ownerCreativeApproval": { "const": "separate_gate_not_harness_pass" }
+      }
+    },
+    "requiredKinds": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "enum": ["champion", "npc", "beast", "monster"] }
+    },
+    "modelCheckFamilies": {
+      "type": "array",
+      "minItems": 13,
+      "items": { "$ref": "#/$defs/checkFamily" }
+    },
+    "requiredMotionAxes": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/motionAxis" }
+    },
+    "requiredSkillEffectAxes": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/skillEffectAxis" }
+    },
+    "requiredSkillMotionPhases": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "enum": ["anticipation", "cast", "channel", "release", "recovery"]
+      }
+    },
+    "playerBuildChecks": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "$ref": "#/$defs/nonBlank" }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiredKindCount",
+        "requiredMotionAxisCount",
+        "requiredSkillEffectAxisCount",
+        "weightedScoreForbidden"
+      ],
+      "properties": {
+        "requiredKindCount": { "const": 4 },
+        "requiredMotionAxisCount": { "const": 5 },
+        "requiredSkillEffectAxisCount": { "const": 5 },
+        "weightedScoreForbidden": { "const": true }
+      }
+    }
+  },
+  "$defs": {
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "checkFamily": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "stage"],
+      "properties": {
+        "id": {
+          "enum": [
+            "mesh_topology",
+            "uv_material",
+            "scale_pivot",
+            "skeleton_bind_pose",
+            "skin_deformation",
+            "animation_clips",
+            "equipment_sockets",
+            "colliders_hitboxes",
+            "lod_impostor_budget",
+            "catalog_references",
+            "pooling_cleanup",
+            "capture_anchors",
+            "performance_memory_thermal_overdraw"
+          ]
+        },
+        "stage": {
+          "enum": [
+            "blender_source",
+            "blender_unity",
+            "unity_import",
+            "catalog",
+            "runtime",
+            "player_build"
+          ]
+        }
+      }
+    },
+    "motionAxis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "keys", "rule"],
+      "properties": {
+        "id": {
+          "enum": ["walking", "running", "attacking", "special_attack", "cast_use"]
+        },
+        "keys": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        },
+        "rule": { "enum": ["all", "at_least_one"] }
+      }
+    },
+    "skillEffectAxis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "fields"],
+      "properties": {
+        "id": {
+          "enum": ["telegraph", "result_active", "impact", "cleanup", "accessibility"]
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        }
+      }
+    }
+  }
+}

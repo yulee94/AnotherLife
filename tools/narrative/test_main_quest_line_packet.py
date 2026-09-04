@@ -176,7 +176,7 @@ def validate_model(manifest: dict[str, Any], chapters: list[dict[str, Any]]) -> 
         "OMEN_1 authority version drift",
     )
     require(
-        manifest["sourceStatus"] == "canonical_narrative_source_complete_runtime_not_wired",
+        manifest["sourceStatus"] == "canonical_narrative_source_complete_runtime_wired",
         "source status drift",
     )
     require(manifest["requiredProductMilestones"] == MILESTONES, "required milestone inventory drift")

@@ -1,0 +1,36 @@
+{
+  "assetId": "rmc_cleanup_beast_slagwhistle_v002",
+  "export": {
+    "addLeafBones": false,
+    "animationsIncluded": true,
+    "axisForward": "-Z",
+    "axisUp": "Y",
+    "determinismLevel": "byte_exact",
+    "fixedCreationTimeUtc": "2000-01-01T00:00:00Z",
+    "globalScale": 1.0,
+    "path": "unity/ArtSource/RigPipeline/Exports/slagwhistle_burrower_rig_clean_v002.fbx",
+    "presetId": "rmc_export_fbx_unity_rig_v001",
+    "sha256": "3bbf59bafc689600da9f6c8cb7283c8d45a071958ae92f5e78ae20e7d7720dad",
+    "uuidPolicy": "best_effort_sha256_repr_int63_v1"
+  },
+  "pipelineId": "rmc_pipeline_blender_rig_cleanup_v001",
+  "roundTrip": {
+    "actions": 1,
+    "armatures": 1,
+    "bones": 47,
+    "errors": [],
+    "meshes": 1,
+    "triangles": 9200,
+    "trianglesByMesh": {
+      "SM_Slagwhistle_LOD0": 9200
+    }
+  },
+  "schemaVersion": 1,
+  "source": {
+    "actionSignature": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "blendContentSignature": "c60044aa09248900864ae2c1cb63a77929dca25d4ff94ec9b8b24828c8326b40",
+    "blendPath": "unity/ArtSource/RigPipeline/Representatives/slagwhistle_burrower_rig_clean_v002.blend",
+    "skeletonSignature": "6538a26bfca72eb8a8c8acd485e2f6474abf7f44f3137baf3184ca1c541b8338"
+  },
+  "status": "export_valid"
+}

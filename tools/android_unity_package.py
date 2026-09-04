@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build, verify, and stage Unity's generated Android AAR.
+"""Build, verify, and stage Unity's generated Android package inputs.
 
 This script intentionally keeps Unity's generated Gradle project outside the
 host Gradle graph. It assembles with the generated wrapper, validates the AAR
-boundary, then atomically stages the matching debug/release artifact and a
-machine-readable inventory for the Android host.
+boundary, atomically stages the matching debug/release artifact and inventory,
+and verifies that the final host APK retained the required Unity runtime.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -45,6 +46,16 @@ REQUIRED_ENTRIES = (
     "proguard.txt",
 )
 UNITY_PLAYER_CLASS = "com/unity3d/player/UnityPlayer.class"
+UNITY_PLAYER_DESCRIPTOR = "Lcom/unity3d/player/UnityPlayer;"
+REQUIRED_APK_ENTRIES = (
+    "AndroidManifest.xml",
+    "classes.dex",
+    "assets/bin/Data/globalgamemanagers",
+    "lib/arm64-v8a/libmain.so",
+    "lib/arm64-v8a/libunity.so",
+    "lib/arm64-v8a/libil2cpp.so",
+)
+DEX_ENTRY_PATTERN = re.compile(r"classes(?:[2-9]|[1-9][0-9]+)?\.dex\Z")
 
 
 class PackageError(RuntimeError):
@@ -63,15 +74,23 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _validated_entries(archive: zipfile.ZipFile) -> dict[str, zipfile.ZipInfo]:
+def _archive_entries(
+    archive: zipfile.ZipFile,
+    package_kind: str,
+) -> dict[str, zipfile.ZipInfo]:
     entries: dict[str, zipfile.ZipInfo] = {}
     for info in archive.infolist():
         name = info.filename.replace("\\", "/")
         if name.startswith("/") or ".." in Path(name).parts:
-            raise PackageError(f"unsafe AAR entry: {name}")
+            raise PackageError(f"unsafe {package_kind} entry: {name}")
         if name in entries:
-            raise PackageError(f"duplicate AAR entry: {name}")
+            raise PackageError(f"duplicate {package_kind} entry: {name}")
         entries[name] = info
+    return entries
+
+
+def _validated_entries(archive: zipfile.ZipFile) -> dict[str, zipfile.ZipInfo]:
+    entries = _archive_entries(archive, "AAR")
     missing = [name for name in REQUIRED_ENTRIES if name not in entries]
     if missing:
         raise PackageError("missing required AAR entries: " + ", ".join(missing))
@@ -90,6 +109,69 @@ def _verify_elf(name: str, data: bytes) -> None:
     machine = struct.unpack_from(endian + "H", data, 18)[0]
     if machine != 183:
         raise PackageError(f"{name} must target AArch64 (EM_AARCH64=183); found {machine}")
+
+
+def _checked_dex_region(
+    data: bytes,
+    offset: int,
+    count: int,
+    item_size: int,
+    label: str,
+) -> None:
+    if offset < 0 or count < 0 or item_size <= 0:
+        raise PackageError(f"invalid {label} region in DEX")
+    size = count * item_size
+    if offset > len(data) or size > len(data) - offset:
+        raise PackageError(f"out-of-bounds {label} region in DEX")
+
+
+def _dex_string(data: bytes, offset: int) -> bytes:
+    if offset < 0 or offset >= len(data):
+        raise PackageError("out-of-bounds string data in DEX")
+    cursor = offset
+    for _ in range(5):
+        if cursor >= len(data):
+            raise PackageError("truncated string length in DEX")
+        value = data[cursor]
+        cursor += 1
+        if value & 0x80 == 0:
+            break
+    else:
+        raise PackageError("oversized string length in DEX")
+    end = data.find(b"\0", cursor)
+    if end < 0:
+        raise PackageError("unterminated string data in DEX")
+    return data[cursor:end]
+
+
+def _dex_declares_class(name: str, data: bytes, descriptor: str) -> bool:
+    if len(data) < 112 or data[:4] != b"dex\n" or data[7] != 0:
+        raise PackageError(f"{name} is not a supported DEX file")
+    file_size, header_size, endian_tag = struct.unpack_from("<III", data, 32)
+    if file_size != len(data) or header_size != 112 or endian_tag != 0x12345678:
+        raise PackageError(f"{name} has an invalid DEX header")
+
+    string_count, string_offset = struct.unpack_from("<II", data, 56)
+    type_count, type_offset = struct.unpack_from("<II", data, 64)
+    class_count, class_offset = struct.unpack_from("<II", data, 96)
+    _checked_dex_region(data, string_offset, string_count, 4, "string IDs")
+    _checked_dex_region(data, type_offset, type_count, 4, "type IDs")
+    _checked_dex_region(data, class_offset, class_count, 32, "class definitions")
+
+    expected = descriptor.encode("ascii")
+    for index in range(class_count):
+        class_index = struct.unpack_from("<I", data, class_offset + (index * 32))[0]
+        if class_index >= type_count:
+            raise PackageError(f"{name} has an invalid class type index")
+        descriptor_index = struct.unpack_from("<I", data, type_offset + (class_index * 4))[0]
+        if descriptor_index >= string_count:
+            raise PackageError(f"{name} has an invalid descriptor string index")
+        descriptor_offset = struct.unpack_from(
+            "<I", data, string_offset + (descriptor_index * 4)
+        )[0]
+        if _dex_string(data, descriptor_offset) == expected:
+            return True
+    return False
 
 
 def inspect_aar(source: Path) -> tuple[list[dict[str, object]], list[str]]:
@@ -138,6 +220,70 @@ def inspect_aar(source: Path) -> tuple[list[dict[str, object]], list[str]]:
         raise PackageError(f"invalid AAR ZIP: {source}") from error
 
 
+def inspect_apk(source: Path, variant: str) -> dict[str, object]:
+    if variant not in SUPPORTED_VARIANTS:
+        raise PackageError(f"unsupported variant {variant!r}; expected debug or release")
+    if not source.is_file():
+        raise PackageError(f"APK does not exist: {source}")
+    try:
+        with zipfile.ZipFile(source) as archive:
+            entries = _archive_entries(archive, "APK")
+            missing = [name for name in REQUIRED_APK_ENTRIES if name not in entries]
+            if missing:
+                raise PackageError("missing required APK entries: " + ", ".join(missing))
+            empty = [name for name in REQUIRED_APK_ENTRIES if entries[name].file_size <= 0]
+            if empty:
+                raise PackageError("empty required APK entries: " + ", ".join(empty))
+
+            abi_names = sorted(
+                {
+                    name.split("/")[1]
+                    for name in entries
+                    if name.startswith("lib/") and len(name.split("/")) >= 3
+                }
+            )
+            unsupported = [abi for abi in abi_names if abi not in SUPPORTED_ABIS]
+            if unsupported:
+                raise PackageError("unsupported ABI directories in APK: " + ", ".join(unsupported))
+            if abi_names != list(SUPPORTED_ABIS):
+                raise PackageError(f"APK ABI set must be {list(SUPPORTED_ABIS)}; found {abi_names}")
+
+            unity_entries = []
+            for name in REQUIRED_APK_ENTRIES[2:]:
+                data = archive.read(name)
+                if name.startswith("lib/"):
+                    _verify_elf(name, data)
+                unity_entries.append(
+                    {"path": name, "bytes": len(data), "sha256": sha256_bytes(data)}
+                )
+
+            dex_names = sorted(name for name in entries if DEX_ENTRY_PATTERN.fullmatch(name))
+            if not dex_names:
+                raise PackageError("APK contains no classes DEX entries")
+            declares_unity_player = False
+            for name in dex_names:
+                if _dex_declares_class(name, archive.read(name), UNITY_PLAYER_DESCRIPTOR):
+                    declares_unity_player = True
+            if not declares_unity_player:
+                raise PackageError(f"APK DEX files do not declare {UNITY_PLAYER_DESCRIPTOR}")
+
+            return {
+                "schemaVersion": 1,
+                "variant": variant,
+                "abis": abi_names,
+                "apk": {
+                    "path": source.name,
+                    "bytes": source.stat().st_size,
+                    "sha256": sha256_file(source),
+                },
+                "unityEntries": unity_entries,
+                "dexEntries": dex_names,
+                "unityPlayerClass": UNITY_PLAYER_DESCRIPTOR,
+            }
+    except zipfile.BadZipFile as error:
+        raise PackageError(f"invalid APK ZIP: {source}") from error
+
+
 def verify_staged(
     artifacts_root: Path,
     variant: str,
@@ -175,6 +321,50 @@ def verify_staged(
     if inventory.get("requiredEntries") != required:
         raise PackageError(f"inventory required-entry mismatch: {inventory_path}")
     return target, inventory_path
+
+
+def verify_packaged_apk(
+    source: Path,
+    artifacts_root: Path,
+    variant: str,
+    expected_repository_sha: str | None = None,
+    expected_unity_version: str | None = None,
+) -> dict[str, object]:
+    aar_path, inventory_path = verify_staged(
+        artifacts_root,
+        variant,
+        expected_repository_sha,
+        expected_unity_version,
+    )
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    report = inspect_apk(source, variant)
+
+    staged_entries = {item["path"]: item for item in inventory["requiredEntries"]}
+    packaged_entries = {item["path"]: item for item in report["unityEntries"]}
+    identity_pairs = {
+        "assets/bin/Data/globalgamemanagers": "assets/bin/Data/globalgamemanagers",
+        "jni/arm64-v8a/libmain.so": "lib/arm64-v8a/libmain.so",
+        "jni/arm64-v8a/libunity.so": "lib/arm64-v8a/libunity.so",
+        "jni/arm64-v8a/libil2cpp.so": "lib/arm64-v8a/libil2cpp.so",
+    }
+    for aar_entry, apk_entry in identity_pairs.items():
+        staged = staged_entries[aar_entry]
+        packaged = packaged_entries[apk_entry]
+        if (
+            packaged["bytes"] != staged["bytes"]
+            or packaged["sha256"] != staged["sha256"]
+        ):
+            raise PackageError(
+                f"APK entry {apk_entry} does not match staged AAR entry {aar_entry}"
+            )
+
+    report["sourceAar"] = {
+        **inventory["aar"],
+        "repositorySha": inventory["repositorySha"],
+        "unityVersion": inventory["unityVersion"],
+        "stagedPath": str(aar_path),
+    }
+    return report
 
 
 def verify_and_stage(
@@ -248,11 +438,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--export-dir", type=Path, default=Path("unity/Builds/AndroidExport"))
     parser.add_argument("--artifacts-dir", type=Path, default=Path("unity/Builds/AndroidArtifacts"))
     parser.add_argument("--unity-version", default="2022.3.62f3")
-    parser.add_argument("--source-aar", type=Path, help="verify/stage an existing AAR instead of assembling")
-    parser.add_argument("--verify-only", action="store_true", help="verify an already staged AAR and inventory")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--source-aar", type=Path, help="verify/stage an existing AAR instead of assembling")
+    mode.add_argument("--verify-only", action="store_true", help="verify an already staged AAR and inventory")
+    mode.add_argument("--verify-apk", type=Path, help="verify a final host APK against its staged AAR")
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     args = parser.parse_args(argv)
     try:
+        if args.verify_apk:
+            report = verify_packaged_apk(
+                args.verify_apk.resolve(),
+                args.artifacts_dir.resolve(),
+                args.variant,
+                repository_sha(args.repo_root.resolve()),
+                args.unity_version,
+            )
+            print(f"verified_apk={args.verify_apk.resolve()}")
+            print(f"apk_sha256={report['apk']['sha256']}")
+            print(f"source_aar_sha256={report['sourceAar']['sha256']}")
+            print(f"unity_player_class={report['unityPlayerClass']}")
+            return 0
         if args.verify_only:
             target, inventory = verify_staged(
                 args.artifacts_dir.resolve(),

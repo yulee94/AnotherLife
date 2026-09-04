@@ -728,8 +728,8 @@ namespace AL.EditorTools
                 return false;
             }
 
-            if (!string.Equals(Path.GetFileName(developerLocalLow), "LocalLow", StringComparison.OrdinalIgnoreCase) ||
-                !string.Equals(Path.GetFileName(launchLocalLow), "LocalLow", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(WindowsFileName(developerLocalLow), "LocalLow", StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(WindowsFileName(launchLocalLow), "LocalLow", StringComparison.OrdinalIgnoreCase))
             {
                 failure = "developer and launch profile paths must resolve to observed LocalLow directories";
                 return false;
@@ -741,11 +741,10 @@ namespace AL.EditorTools
                 return false;
             }
 
-            string expectedPersistentData = Path.GetFullPath(Path.Combine(
-                    launchLocalLow,
-                    ExpectedCompanyName,
-                    ExpectedProductName))
-                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            string expectedPersistentData = CombineWindowsPath(
+                launchLocalLow,
+                ExpectedCompanyName,
+                ExpectedProductName);
             if (!string.Equals(
                     launchPersistentData,
                     expectedPersistentData,
@@ -938,23 +937,88 @@ namespace AL.EditorTools
         private static bool TryCanonicalAbsolutePath(string value, out string canonical)
         {
             canonical = string.Empty;
-            if (string.IsNullOrWhiteSpace(value) || !Path.IsPathRooted(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
                 return false;
             }
 
-            try
-            {
-                canonical = Path.GetFullPath(value.Trim()).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                return canonical.Length > 0;
-            }
-            catch (Exception ex) when (
-                ex is ArgumentException ||
-                ex is NotSupportedException ||
-                ex is PathTooLongException)
+            string normalized = value.Trim().Replace('/', '\\');
+            if (normalized.IndexOf('\0') >= 0)
             {
                 return false;
             }
+
+            string root;
+            int segmentStart;
+            if (normalized.Length >= 3 &&
+                char.IsLetter(normalized[0]) &&
+                normalized[1] == ':' &&
+                normalized[2] == '\\')
+            {
+                root = char.ToUpperInvariant(normalized[0]) + ":\\";
+                segmentStart = 3;
+            }
+            else if (normalized.StartsWith("\\\\", StringComparison.Ordinal))
+            {
+                string[] uncParts = normalized.Substring(2)
+                    .Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                if (uncParts.Length < 2 ||
+                    !IsValidWindowsPathSegment(uncParts[0]) ||
+                    !IsValidWindowsPathSegment(uncParts[1]))
+                {
+                    return false;
+                }
+
+                root = "\\\\" + uncParts[0] + "\\" + uncParts[1] + "\\";
+                int serverEnd = normalized.IndexOf('\\', 2);
+                int shareEnd = serverEnd < 0
+                    ? -1
+                    : normalized.IndexOf('\\', serverEnd + 1);
+                segmentStart = shareEnd < 0 ? normalized.Length : shareEnd + 1;
+            }
+            else
+            {
+                return false;
+            }
+
+            var segments = new List<string>();
+            string remainder = segmentStart >= normalized.Length
+                ? string.Empty
+                : normalized.Substring(segmentStart);
+            string[] candidates = remainder.Split(
+                new[] { '\\' },
+                StringSplitOptions.RemoveEmptyEntries);
+            for (int index = 0; index < candidates.Length; index++)
+            {
+                string segment = candidates[index];
+                if (segment == ".")
+                {
+                    continue;
+                }
+
+                if (segment == "..")
+                {
+                    if (segments.Count == 0)
+                    {
+                        return false;
+                    }
+
+                    segments.RemoveAt(segments.Count - 1);
+                    continue;
+                }
+
+                if (!IsValidWindowsPathSegment(segment))
+                {
+                    return false;
+                }
+
+                segments.Add(segment);
+            }
+
+            canonical = segments.Count == 0
+                ? root
+                : root + string.Join("\\", segments);
+            return true;
         }
 
         private static bool IsPathInside(string candidate, string root)
@@ -964,14 +1028,54 @@ namespace AL.EditorTools
                 return false;
             }
 
-            string rootWithSeparator = root + Path.DirectorySeparatorChar;
-            if (candidate.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase))
+            string rootWithSeparator = root.EndsWith("\\", StringComparison.Ordinal)
+                ? root
+                : root + "\\";
+            return candidate.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string WindowsFileName(string canonicalPath)
+        {
+            if (string.IsNullOrEmpty(canonicalPath))
             {
-                return true;
+                return string.Empty;
             }
 
-            rootWithSeparator = root + Path.AltDirectorySeparatorChar;
-            return candidate.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase);
+            string withoutTrailingSeparator = canonicalPath.TrimEnd('\\');
+            int separator = withoutTrailingSeparator.LastIndexOf('\\');
+            return separator < 0
+                ? withoutTrailingSeparator
+                : withoutTrailingSeparator.Substring(separator + 1);
+        }
+
+        private static string CombineWindowsPath(string root, params string[] segments)
+        {
+            string combined = root.EndsWith("\\", StringComparison.Ordinal)
+                ? root
+                : root + "\\";
+            return combined + string.Join("\\", segments);
+        }
+
+        private static bool IsValidWindowsPathSegment(string segment)
+        {
+            if (string.IsNullOrEmpty(segment) ||
+                segment.EndsWith(" ", StringComparison.Ordinal) ||
+                segment.EndsWith(".", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            const string invalid = "<>:\"|?*";
+            for (int index = 0; index < segment.Length; index++)
+            {
+                char character = segment[index];
+                if (character < 32 || invalid.IndexOf(character) >= 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static string MissingEvidence(int sequenceState)

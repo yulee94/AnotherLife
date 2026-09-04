@@ -95,6 +95,7 @@ namespace AL.Tests.EditMode
         [Test]
         public void RepresentativePreviewRendererExportsInspectableImages()
         {
+            RequirePreviewGraphics();
             Assert.That(EditorApplication.ExecuteMenuItem(GenerateMenu), Is.True);
             Assert.That(EditorApplication.ExecuteMenuItem(RenderPreviewsMenu), Is.True);
 
@@ -116,6 +117,7 @@ namespace AL.Tests.EditMode
         [Test]
         public void AdventureCapitalPreviewKeepsTerrainReadableInFrame()
         {
+            RequirePreviewGraphics();
             Assert.That(EditorApplication.ExecuteMenuItem(GenerateMenu), Is.True);
             Assert.That(EditorApplication.ExecuteMenuItem(RenderPreviewsMenu), Is.True);
 
@@ -126,12 +128,47 @@ namespace AL.Tests.EditMode
             {
                 Assert.That(image.LoadImage(bytes), Is.True);
                 Color32[] pixels = image.GetPixels32();
-                int terrainPixels = pixels.Count(
-                    pixel => pixel.g > pixel.r + 5 && pixel.g > pixel.b + 5);
+                Color32 background = pixels[0];
+                int scenePixels = 0;
+                int minX = image.width;
+                int minY = image.height;
+                int maxX = -1;
+                int maxY = -1;
+                for (int index = 0; index < pixels.Length; index++)
+                {
+                    Color32 pixel = pixels[index];
+                    int distanceFromBackground =
+                        Mathf.Abs(pixel.r - background.r) +
+                        Mathf.Abs(pixel.g - background.g) +
+                        Mathf.Abs(pixel.b - background.b);
+                    if (distanceFromBackground <= 24)
+                    {
+                        continue;
+                    }
+
+                    scenePixels++;
+                    int x = index % image.width;
+                    int y = index / image.width;
+                    minX = Mathf.Min(minX, x);
+                    minY = Mathf.Min(minY, y);
+                    maxX = Mathf.Max(maxX, x);
+                    maxY = Mathf.Max(maxY, y);
+                }
+
+                float sceneCoverage = (float)scenePixels / pixels.Length;
                 Assert.That(
-                    (float)terrainPixels / pixels.Length,
-                    Is.GreaterThan(0.015f),
-                    "Capital framing collapsed the kilometer-scale terrain to an unreadable patch.");
+                    sceneCoverage,
+                    Is.InRange(0.15f, 0.75f),
+                    "Capital framing must keep substantial scene geometry visible without cropping " +
+                    "the frame down to geometry alone.");
+                Assert.That(
+                    (float)(maxX - minX + 1) / image.width,
+                    Is.GreaterThan(0.60f),
+                    "Capital terrain and landmarks must remain readable across the frame width.");
+                Assert.That(
+                    (float)(maxY - minY + 1) / image.height,
+                    Is.GreaterThan(0.30f),
+                    "Capital terrain and landmarks must retain readable depth in the frame.");
             }
             finally
             {
@@ -277,6 +314,7 @@ namespace AL.Tests.EditMode
         [Test]
         public void PreviewRendererRestoresTheEditorsLoadedSceneSetup()
         {
+            RequirePreviewGraphics();
             const string sentinel = "Assets/AL/Scenes/Boot.unity";
             EditorSceneManager.OpenScene(sentinel, OpenSceneMode.Single);
 
@@ -284,6 +322,53 @@ namespace AL.Tests.EditMode
 
             Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(sentinel));
             Assert.That(SceneManager.sceneCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void PreviewRendererFailsClosedBeforeOverwritingUnderNullGraphics()
+        {
+            if (SystemInfo.graphicsDeviceType !=
+                UnityEngine.Rendering.GraphicsDeviceType.Null)
+            {
+                Assert.Ignore(
+                    "This guard is specific to command-line runs using -nographics.");
+            }
+
+            const string previewPath =
+                "Assets/AL/Worlds/Generated/Previews/adventure_capital.png";
+            byte[] retained = File.ReadAllBytes(previewPath);
+
+            Type rendererType = AppDomain.CurrentDomain.GetAssemblies()
+                .Select(assembly => assembly.GetType(
+                    "AL.Editor.World.WorldBlockoutPreviewRenderer"))
+                .FirstOrDefault(type => type != null);
+            Assert.NotNull(rendererType);
+            System.Reflection.MethodInfo renderMethod = rendererType.GetMethod(
+                "RenderRepresentativePreviews",
+                System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.Static);
+            Assert.NotNull(renderMethod);
+            System.Reflection.TargetInvocationException invocation =
+                Assert.Throws<System.Reflection.TargetInvocationException>(
+                    () => renderMethod.Invoke(null, null));
+            var error = invocation.InnerException as InvalidOperationException;
+            Assert.NotNull(error);
+
+            StringAssert.Contains("requires a graphics device", error.Message);
+            CollectionAssert.AreEqual(
+                retained,
+                File.ReadAllBytes(previewPath),
+                "A headless tooling invocation must not replace an inspectable preview with a NullGfx clear frame.");
+        }
+
+        private static void RequirePreviewGraphics()
+        {
+            if (SystemInfo.graphicsDeviceType ==
+                UnityEngine.Rendering.GraphicsDeviceType.Null)
+            {
+                Assert.Ignore(
+                    "Image-framing validation requires a real graphics device; run this test without -nographics.");
+            }
         }
 
         private static WorldStreamingSnapshot LoadSnapshot()

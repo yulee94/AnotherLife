@@ -56,6 +56,15 @@ namespace AL.UI.CharacterCreation
             new[] { 0.42f, 0.34f, 0.40f }
         };
 
+        public static readonly float[][] EyeColors =
+        {
+            new[] { 0.25f, 0.58f, 0.92f },
+            new[] { 0.24f, 0.72f, 0.42f },
+            new[] { 0.74f, 0.48f, 0.18f },
+            new[] { 0.62f, 0.28f, 0.88f },
+            new[] { 0.82f, 0.84f, 0.88f }
+        };
+
         public static readonly string[] BodyPresets =
         {
             "average", "slim", "broad", "tall", "stout"
@@ -181,6 +190,7 @@ namespace AL.UI.CharacterCreation
             }
 
             CopyRgb(HairColors[0], out state.HairR, out state.HairG, out state.HairB);
+            CopyRgb(EyeColors[0], out state.EyeR, out state.EyeG, out state.EyeB);
             state.CapeEnabled = true;
             state.HelmetEnabled = false;
             state.ArmorStyleId = "realm_basic";
@@ -240,6 +250,16 @@ namespace AL.UI.CharacterCreation
             target.SkinR = source.SkinR;
             target.SkinG = source.SkinG;
             target.SkinB = source.SkinB;
+            if (Math.Abs(source.EyeR) + Math.Abs(source.EyeG) + Math.Abs(source.EyeB) < 0.001f)
+            {
+                CopyRgb(EyeColors[0], out target.EyeR, out target.EyeG, out target.EyeB);
+            }
+            else
+            {
+                target.EyeR = source.EyeR;
+                target.EyeG = source.EyeG;
+                target.EyeB = source.EyeB;
+            }
             target.CapeEnabled = source.CapeEnabled;
             target.HelmetEnabled = source.HelmetEnabled;
         }
@@ -269,6 +289,9 @@ namespace AL.UI.CharacterCreation
                    NearlyEqual(left.SkinR, right.SkinR) &&
                    NearlyEqual(left.SkinG, right.SkinG) &&
                    NearlyEqual(left.SkinB, right.SkinB) &&
+                   NearlyEqual(left.EyeR, right.EyeR) &&
+                   NearlyEqual(left.EyeG, right.EyeG) &&
+                   NearlyEqual(left.EyeB, right.EyeB) &&
                    left.CapeEnabled == right.CapeEnabled &&
                    left.HelmetEnabled == right.HelmetEnabled;
         }
@@ -304,6 +327,16 @@ namespace AL.UI.CharacterCreation
             }
 
             return 0;
+        }
+
+        public static int NormalizePaletteIndex(int index, int count)
+        {
+            if (count <= 0)
+            {
+                return 0;
+            }
+
+            return Math.Max(0, Math.Min(index, count - 1));
         }
 
         public static string NormalizeBodyBaseId(string id)

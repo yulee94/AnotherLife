@@ -23,6 +23,7 @@ namespace AL.UI.QuestHud
         private UnityAction _onPrimary;
         private UnityAction _onAutoQuestToggled;
         private string _lastAutoSignature;
+        private bool _allowImmediateAutoFire = true;
         private bool _built;
 
         public static QuestHudOverlay Mount(Transform parent = null)
@@ -56,14 +57,22 @@ namespace AL.UI.QuestHud
             return root.AddComponent<QuestHudOverlay>();
         }
 
-        public void Bind(QuestHudModel model, UnityAction onPrimary, UnityAction onAutoQuestToggled = null)
+        public void Bind(
+            QuestHudModel model,
+            UnityAction onPrimary,
+            UnityAction onAutoQuestToggled = null,
+            bool allowImmediateAutoFire = true)
         {
             Model = model;
             _onPrimary = onPrimary;
             _onAutoQuestToggled = onAutoQuestToggled;
+            _allowImmediateAutoFire = allowImmediateAutoFire;
             EnsureBuilt();
             Apply(model);
-            ConsiderAutoQuest();
+            if (_allowImmediateAutoFire)
+            {
+                ConsiderAutoQuest();
+            }
         }
 
         public void FirePrimary()
@@ -94,13 +103,16 @@ namespace AL.UI.QuestHud
                         Model.Surface,
                         QuestHudAutoQuest.Enabled),
                     _onPrimary,
-                    _onAutoQuestToggled);
+                    _onAutoQuestToggled,
+                    _allowImmediateAutoFire);
             }
         }
 
         public void ConsiderAutoQuest()
         {
-            if (Model == null || !QuestHudAutoQuest.ShouldFire(Model))
+            if (!_allowImmediateAutoFire ||
+                Model == null ||
+                !QuestHudAutoQuest.ShouldFire(Model))
             {
                 return;
             }

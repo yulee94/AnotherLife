@@ -40,20 +40,20 @@ namespace AL.UI.FirstUserIdentity
     {
         public string Disclosure => "DEVELOPMENT PREVIEW — IDENTITY DRAFT IS NOT SAVED";
         public string Title => "Shape your beginning";
-        public string RealmHeading => "Choose a realm";
+        public string RealmHeading => "1 of 2 · Choose a realm";
         public string RealmInstruction =>
-            "Preview one realm. Its people are derived automatically.";
+            "Choose the realm your first Champion will call home. Its people are set by the realm.";
         public string RealmSelectionRequired =>
-            "Choose a realm preview before continuing.";
-        public string ConfirmRealmAction => "Continue with this realm draft";
-        public string ClassHeading => "Choose a class path";
+            "Choose a realm to continue.";
+        public string ConfirmRealmAction => "Continue to class";
+        public string ClassHeading => "2 of 2 · Choose a class";
         public string ClassInstruction =>
-            "No class is preselected. Choose one path explicitly.";
+            "Choose how your first Champion will fight.";
         public string ClassSelectionRequired =>
-            "Choose a class path before confirming the draft.";
-        public string ReturnToRealmAction => "Back to realm preview";
-        public string ConfirmDraftAction => "Confirm draft for customization";
-        public string CustomizationReadyHeading => "Customization is next";
+            "Choose a class to continue.";
+        public string ReturnToRealmAction => "Change realm";
+        public string ConfirmDraftAction => "Continue to appearance";
+        public string CustomizationReadyHeading => "Your origin is ready";
 
         public bool TryGetRealmLabel(RealmId realm, out string label)
         {
@@ -123,18 +123,18 @@ namespace AL.UI.FirstUserIdentity
 
         public string SelectedChoice(string choiceLabel)
         {
-            return "Selected — " + RequireVisibleCopy(choiceLabel, nameof(choiceLabel));
+            return "Selected: " + RequireVisibleCopy(choiceLabel, nameof(choiceLabel));
         }
 
         public string RealmAndRaceSummary(string realmLabel, string raceLabel)
         {
-            return "Realm preview: " + RequireVisibleCopy(realmLabel, nameof(realmLabel)) +
-                   "\nDerived people: " + RequireVisibleCopy(raceLabel, nameof(raceLabel));
+            return "Realm: " + RequireVisibleCopy(realmLabel, nameof(realmLabel)) +
+                   "\nPeople: " + RequireVisibleCopy(raceLabel, nameof(raceLabel));
         }
 
         public string ClassSummary(string classLabel)
         {
-            return "Class preview: " + RequireVisibleCopy(classLabel, nameof(classLabel));
+            return "Class: " + RequireVisibleCopy(classLabel, nameof(classLabel));
         }
 
         public string CustomizationReadySummary(
@@ -142,7 +142,7 @@ namespace AL.UI.FirstUserIdentity
             string raceLabel,
             string classLabel)
         {
-            return "Draft ready: " + RequireVisibleCopy(realmLabel, nameof(realmLabel)) +
+            return "Origin ready: " + RequireVisibleCopy(realmLabel, nameof(realmLabel)) +
                    " • " + RequireVisibleCopy(raceLabel, nameof(raceLabel)) +
                    " • " + RequireVisibleCopy(classLabel, nameof(classLabel)) +
                    ". Nothing has been saved.";

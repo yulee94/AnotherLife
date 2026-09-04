@@ -1,0 +1,855 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-realm-character-taxonomy.schema.json",
+  "title": "Another Life Realm Character, Creature, Motion, and VFX Catalog",
+  "description": "Gated per-realm production contract. Catalog data describes proposed or approved production identity; it never authorizes gameplay timing, generation, activation, or release by itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gameId",
+    "catalogId",
+    "schemaVersion",
+    "contentVersion",
+    "realmId",
+    "idFormat",
+    "authority",
+    "gatePolicy",
+    "provenance",
+    "decisionPackets",
+    "platformProfiles",
+    "budgetProfiles",
+    "motionMatrixTemplates",
+    "playableRaces",
+    "npcArchetypes",
+    "championFamilies",
+    "beastFamilies",
+    "monsterFamilies",
+    "bodyModules",
+    "equipmentModules",
+    "rigFamilies",
+    "facialSystems",
+    "secondaryPhysicsProfiles",
+    "lodProfiles",
+    "colliderProfiles",
+    "hitboxProfiles",
+    "platformVariants",
+    "skills",
+    "motions",
+    "vfxEffects",
+    "skillTraceability"
+  ],
+  "properties": {
+    "gameId": { "const": "another-life" },
+    "catalogId": { "$ref": "#/$defs/catalogId" },
+    "schemaVersion": { "const": 1 },
+    "contentVersion": { "$ref": "#/$defs/semanticVersion" },
+    "realmId": { "$ref": "#/$defs/realmId" },
+    "idFormat": { "const": "rct_scope_kind_slug_vNNN" },
+    "authority": { "$ref": "#/$defs/catalogAuthority" },
+    "gatePolicy": { "$ref": "#/$defs/gatePolicy" },
+    "provenance": { "type": "array", "items": { "$ref": "#/$defs/provenanceRecord" } },
+    "decisionPackets": { "type": "array", "items": { "$ref": "#/$defs/decisionPacket" } },
+    "platformProfiles": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/platformProfile" } },
+    "budgetProfiles": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/budgetProfile" } },
+    "motionMatrixTemplates": { "type": "array", "minItems": 5, "items": { "$ref": "#/$defs/motionMatrixTemplate" } },
+    "playableRaces": { "type": "array", "items": { "$ref": "#/$defs/playableRace" } },
+    "npcArchetypes": { "type": "array", "items": { "$ref": "#/$defs/npcArchetype" } },
+    "championFamilies": { "type": "array", "items": { "$ref": "#/$defs/championFamily" } },
+    "beastFamilies": { "type": "array", "items": { "$ref": "#/$defs/beastFamily" } },
+    "monsterFamilies": { "type": "array", "items": { "$ref": "#/$defs/monsterFamily" } },
+    "bodyModules": { "type": "array", "items": { "$ref": "#/$defs/bodyModule" } },
+    "equipmentModules": { "type": "array", "items": { "$ref": "#/$defs/equipmentModule" } },
+    "rigFamilies": { "type": "array", "items": { "$ref": "#/$defs/rigFamily" } },
+    "facialSystems": { "type": "array", "items": { "$ref": "#/$defs/facialSystem" } },
+    "secondaryPhysicsProfiles": { "type": "array", "items": { "$ref": "#/$defs/secondaryPhysicsProfile" } },
+    "lodProfiles": { "type": "array", "items": { "$ref": "#/$defs/lodProfile" } },
+    "colliderProfiles": { "type": "array", "items": { "$ref": "#/$defs/colliderProfile" } },
+    "hitboxProfiles": { "type": "array", "items": { "$ref": "#/$defs/hitboxProfile" } },
+    "platformVariants": { "type": "array", "items": { "$ref": "#/$defs/platformVariant" } },
+    "skills": { "type": "array", "items": { "$ref": "#/$defs/skillRecord" } },
+    "motions": { "type": "array", "items": { "$ref": "#/$defs/motionRecord" } },
+    "vfxEffects": { "type": "array", "items": { "$ref": "#/$defs/vfxRecord" } },
+    "skillTraceability": { "type": "array", "items": { "$ref": "#/$defs/skillTraceability" } }
+  },
+  "$defs": {
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!.*[\\r\\n]).*\\S.*$"
+    },
+    "semanticVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "utcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?(?:Z|\\+00:00)$"
+    },
+    "realmId": { "enum": ["stonehold", "eldergrove", "crownlands", "umbral"] },
+    "catalogId": {
+      "type": "string",
+      "pattern": "^rct_(?:stonehold|eldergrove|crownlands|umbral)_catalog_[a-z0-9]+(?:_[a-z0-9]+)*_v[0-9]{3}$"
+    },
+    "stableId": {
+      "type": "string",
+      "maxLength": 192,
+      "pattern": "^rct_(?:shared|stonehold|eldergrove|crownlands|umbral)_(?:race|npc|champion|beast|monster|body|equipment|rig|face|physics|lod|collider|hitbox|platform|budget|skill|motion|vfx|motion_matrix|provenance|decision)_[a-z0-9]+(?:_[a-z0-9]+)*_v[0-9]{3}$"
+    },
+    "stableIdArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    },
+    "catalogAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["catalogOwner", "finalCreativeOwner", "ownerDecisionRef", "status"],
+      "properties": {
+        "catalogOwner": { "$ref": "#/$defs/nonBlank" },
+        "finalCreativeOwner": { "const": "project_owner" },
+        "ownerDecisionRef": { "$ref": "#/$defs/nonBlank" },
+        "status": { "enum": ["preparation_held", "owner_review", "approved", "retired"] }
+      }
+    },
+    "gatePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generationState", "activationState", "requiredGateIds", "gateEvidence"],
+      "properties": {
+        "generationState": { "enum": ["held", "owner_approved"] },
+        "activationState": { "enum": ["held", "release_approved"] },
+        "requiredGateIds": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["owner_creative", "technical", "provenance", "motion_effect_coverage", "performance_mobile_floor", "accessibility", "release"]
+          }
+        },
+        "gateEvidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ownerCreative", "technical", "provenance", "motionEffectCoverage", "performanceMobileFloor", "accessibility", "release"],
+          "properties": {
+            "ownerCreative": { "$ref": "#/$defs/gateEvidence" },
+            "technical": { "$ref": "#/$defs/gateEvidence" },
+            "provenance": { "$ref": "#/$defs/gateEvidence" },
+            "motionEffectCoverage": { "$ref": "#/$defs/gateEvidence" },
+            "performanceMobileFloor": { "$ref": "#/$defs/gateEvidence" },
+            "accessibility": { "$ref": "#/$defs/gateEvidence" },
+            "release": { "$ref": "#/$defs/gateEvidence" }
+          }
+        }
+      }
+    },
+    "gateEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reviewer", "decidedAtUtc", "evidenceRefs", "openIssues"],
+      "properties": {
+        "state": { "enum": ["held", "blocked", "passed", "approved", "cleared", "admitted", "revise", "rejected"] },
+        "reviewer": { "anyOf": [{ "$ref": "#/$defs/nonBlank" }, { "type": "null" }] },
+        "decidedAtUtc": { "anyOf": [{ "$ref": "#/$defs/utcTimestamp" }, { "type": "null" }] },
+        "evidenceRefs": { "type": "array", "items": { "$ref": "#/$defs/nonBlank" } },
+        "openIssues": { "type": "array", "items": { "$ref": "#/$defs/nonBlank" } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "enum": ["passed", "approved", "cleared", "admitted"] } }, "required": ["state"] },
+          "then": { "properties": { "reviewer": { "$ref": "#/$defs/nonBlank" }, "decidedAtUtc": { "$ref": "#/$defs/utcTimestamp" }, "evidenceRefs": { "minItems": 1 }, "openIssues": { "maxItems": 0 } } }
+        }
+      ]
+    },
+    "recordAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "ownerStatus", "provenanceIds", "decisionPacketIds", "approvalEvidenceRefs"],
+      "properties": {
+        "status": { "enum": ["approved_fact", "proposal", "owner_decision_required", "rejected"] },
+        "ownerStatus": { "enum": ["PENDING", "APPROVE", "REVISE", "REJECT"] },
+        "provenanceIds": { "$ref": "#/$defs/stableIdArray" },
+        "decisionPacketIds": { "$ref": "#/$defs/stableIdArray" },
+        "approvalEvidenceRefs": { "type": "array", "items": { "$ref": "#/$defs/nonBlank" } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "approved_fact" } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "ownerStatus": { "const": "APPROVE" },
+              "provenanceIds": { "minItems": 1 },
+              "approvalEvidenceRefs": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "enum": ["proposal", "owner_decision_required"] } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "ownerStatus": { "enum": ["PENDING", "REVISE"] },
+              "provenanceIds": { "minItems": 1 },
+              "decisionPacketIds": { "minItems": 1 },
+              "approvalEvidenceRefs": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "rejected" } }, "required": ["status"] },
+          "then": { "properties": { "ownerStatus": { "const": "REJECT" }, "decisionPacketIds": { "minItems": 1 } } }
+        }
+      ]
+    },
+    "recordHeader": {
+      "type": "object",
+      "required": ["id", "displayName", "authority"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "displayName": { "$ref": "#/$defs/nonBlank" },
+        "authority": { "$ref": "#/$defs/recordAuthority" }
+      }
+    },
+    "provenanceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sourceKind", "sourceRef", "creator", "tool", "toolVersion", "createdAtUtc", "rightsState", "promptOrBriefRef", "sha256", "notes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "sourceKind": { "enum": ["repo_document", "runtime_catalog", "human_authored", "ai_assisted", "ai_generated", "external_reference"] },
+        "sourceRef": { "$ref": "#/$defs/nonBlank" },
+        "creator": { "$ref": "#/$defs/nonBlank" },
+        "tool": { "$ref": "#/$defs/nonBlank" },
+        "toolVersion": { "$ref": "#/$defs/nonBlank" },
+        "createdAtUtc": { "type": ["string", "null"], "format": "date-time" },
+        "rightsState": { "enum": ["project_internal", "cleared", "restricted", "unknown", "rejected"] },
+        "promptOrBriefRef": { "anyOf": [{ "$ref": "#/$defs/nonBlank" }, { "type": "null" }] },
+        "sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+        "notes": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "decisionPacket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "displayName", "subjectIds", "decisionDimensions", "question", "provenanceIds", "alternatives", "downstreamImpacts", "ownerStatus", "approvedAlternativeId", "ownerResponse", "decidedAtUtc"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "displayName": { "$ref": "#/$defs/nonBlank" },
+        "subjectIds": { "$ref": "#/$defs/stableIdArray" },
+        "decisionDimensions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["morphology", "culture", "silhouette", "anatomy", "clothing", "armor", "animation_personality", "magical_grammar"] }
+        },
+        "question": { "$ref": "#/$defs/nonBlank" },
+        "provenanceIds": { "$ref": "#/$defs/stableIdArray" },
+        "alternatives": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["alternativeId", "summary", "evidenceRefs", "risks"],
+            "properties": {
+              "alternativeId": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$" },
+              "summary": { "$ref": "#/$defs/nonBlank" },
+              "evidenceRefs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonBlank" } },
+              "risks": { "type": "array", "items": { "$ref": "#/$defs/nonBlank" } }
+            }
+          }
+        },
+        "downstreamImpacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["discipline", "impact"],
+            "properties": {
+              "discipline": { "enum": ["concept", "modeling", "rigging", "animation", "vfx", "gameplay", "audio", "accessibility", "performance", "runtime", "qa"] },
+              "impact": { "$ref": "#/$defs/nonBlank" }
+            }
+          }
+        },
+        "ownerStatus": { "enum": ["PENDING", "APPROVE", "REVISE", "REJECT"] },
+        "approvedAlternativeId": { "type": ["string", "null"], "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$" },
+        "ownerResponse": { "anyOf": [{ "$ref": "#/$defs/nonBlank" }, { "type": "null" }] },
+        "decidedAtUtc": { "type": ["string", "null"], "format": "date-time" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "ownerStatus": { "const": "PENDING" } }, "required": ["ownerStatus"] },
+          "then": { "properties": { "approvedAlternativeId": { "type": "null" }, "ownerResponse": { "type": "null" }, "decidedAtUtc": { "type": "null" } } }
+        },
+        {
+          "if": { "properties": { "ownerStatus": { "const": "APPROVE" } }, "required": ["ownerStatus"] },
+          "then": { "properties": { "approvedAlternativeId": { "type": "string" }, "ownerResponse": { "$ref": "#/$defs/nonBlank" }, "decidedAtUtc": { "type": "string", "format": "date-time" } } }
+        },
+        {
+          "if": { "properties": { "ownerStatus": { "enum": ["REVISE", "REJECT"] } }, "required": ["ownerStatus"] },
+          "then": { "properties": { "approvedAlternativeId": { "type": "null" }, "ownerResponse": { "$ref": "#/$defs/nonBlank" }, "decidedAtUtc": { "type": "string", "format": "date-time" } } }
+        }
+      ]
+    },
+    "platformProfile": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["tier", "targetFps", "hardwareFloor", "qualityIntent"],
+          "properties": {
+            "tier": { "enum": ["mobile_floor", "mobile_high", "pc_high", "cinematic_offline"] },
+            "targetFps": { "type": ["integer", "null"], "minimum": 1 },
+            "hardwareFloor": { "anyOf": [{ "$ref": "#/$defs/nonBlank" }, { "type": "null" }] },
+            "qualityIntent": { "$ref": "#/$defs/nonBlank" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "budgetMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "limitKind", "value", "secondaryValue", "unit", "sourceRefs", "decisionPacketIds", "rationale"],
+      "properties": {
+        "state": { "enum": ["documented_provisional", "approved_limit", "owner_decision_required", "not_applicable"] },
+        "limitKind": { "enum": ["maximum_inclusive", "strictly_less_than", "target", "range_inclusive", "owner_decision_required", "not_applicable"] },
+        "value": { "type": ["number", "null"], "minimum": 0 },
+        "secondaryValue": { "type": ["number", "null"], "minimum": 0 },
+        "unit": { "enum": ["count", "triangles", "percent", "pixels", "bytes", "mib", "milliseconds", "layers", "lights"] },
+        "sourceRefs": { "type": "array", "items": { "$ref": "#/$defs/nonBlank" } },
+        "decisionPacketIds": { "$ref": "#/$defs/stableIdArray" },
+        "rationale": { "$ref": "#/$defs/nonBlank" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "enum": ["documented_provisional", "approved_limit"] } }, "required": ["state"] },
+          "then": {
+            "properties": {
+              "limitKind": { "enum": ["maximum_inclusive", "strictly_less_than", "target", "range_inclusive"] },
+              "value": { "type": "number" },
+              "sourceRefs": { "minItems": 1 },
+              "decisionPacketIds": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "const": "owner_decision_required" } }, "required": ["state"] },
+          "then": { "properties": { "limitKind": { "const": "owner_decision_required" }, "value": { "type": "null" }, "secondaryValue": { "type": "null" }, "decisionPacketIds": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "state": { "const": "not_applicable" } }, "required": ["state"] },
+          "then": { "properties": { "limitKind": { "const": "not_applicable" }, "value": { "type": "null" }, "secondaryValue": { "type": "null" }, "decisionPacketIds": { "maxItems": 0 } } }
+        },
+        {
+          "if": { "properties": { "limitKind": { "const": "range_inclusive" } }, "required": ["limitKind"] },
+          "then": { "properties": { "secondaryValue": { "type": "number" } } },
+          "else": { "properties": { "secondaryValue": { "type": "null" } } }
+        }
+      ]
+    },
+    "budgetMetricObject": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "budgetProfile": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["platformProfileId", "scopeKinds", "geometry", "materials", "textures", "bones", "physics", "animation", "vfx", "colliders", "hitboxes"],
+          "properties": {
+            "platformProfileId": { "$ref": "#/$defs/stableId" },
+            "scopeKinds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["playable_race", "npc", "champion", "beast", "monster", "boss", "body_module", "equipment_module"] } },
+            "geometry": {
+              "type": "object", "additionalProperties": false,
+              "required": ["lod0Triangles", "lod1ReductionPercent", "lod2ReductionPercent", "lod3ReductionPercent"],
+              "properties": { "lod0Triangles": { "$ref": "#/$defs/budgetMetric" }, "lod1ReductionPercent": { "$ref": "#/$defs/budgetMetric" }, "lod2ReductionPercent": { "$ref": "#/$defs/budgetMetric" }, "lod3ReductionPercent": { "$ref": "#/$defs/budgetMetric" } }
+            },
+            "materials": {
+              "type": "object", "additionalProperties": false,
+              "required": ["materialSlots", "shaderPasses"],
+              "properties": { "materialSlots": { "$ref": "#/$defs/budgetMetric" }, "shaderPasses": { "$ref": "#/$defs/budgetMetric" } }
+            },
+            "textures": {
+              "type": "object", "additionalProperties": false,
+              "required": ["textureLongEdge", "residentTextureMemory"],
+              "properties": { "textureLongEdge": { "$ref": "#/$defs/budgetMetric" }, "residentTextureMemory": { "$ref": "#/$defs/budgetMetric" } }
+            },
+            "bones": {
+              "type": "object", "additionalProperties": false,
+              "required": ["deformingBones", "influencesPerVertex"],
+              "properties": { "deformingBones": { "$ref": "#/$defs/budgetMetric" }, "influencesPerVertex": { "$ref": "#/$defs/budgetMetric" } }
+            },
+            "physics": {
+              "type": "object", "additionalProperties": false,
+              "required": ["simulatedBones", "clothVertices", "activeRigidbodies"],
+              "properties": { "simulatedBones": { "$ref": "#/$defs/budgetMetric" }, "clothVertices": { "$ref": "#/$defs/budgetMetric" }, "activeRigidbodies": { "$ref": "#/$defs/budgetMetric" } }
+            },
+            "animation": {
+              "type": "object", "additionalProperties": false,
+              "required": ["compressedMemoryTarget", "compressedMemoryMaximum", "clipCount", "runtimeAnimatorLayers"],
+              "properties": { "compressedMemoryTarget": { "$ref": "#/$defs/budgetMetric" }, "compressedMemoryMaximum": { "$ref": "#/$defs/budgetMetric" }, "clipCount": { "$ref": "#/$defs/budgetMetric" }, "runtimeAnimatorLayers": { "$ref": "#/$defs/budgetMetric" } }
+            },
+            "vfx": {
+              "type": "object", "additionalProperties": false,
+              "required": ["liveParticles", "transparentLayers", "overdrawCoveragePercent", "concurrentEffects", "dynamicLights"],
+              "properties": { "liveParticles": { "$ref": "#/$defs/budgetMetric" }, "transparentLayers": { "$ref": "#/$defs/budgetMetric" }, "overdrawCoveragePercent": { "$ref": "#/$defs/budgetMetric" }, "concurrentEffects": { "$ref": "#/$defs/budgetMetric" }, "dynamicLights": { "$ref": "#/$defs/budgetMetric" } }
+            },
+            "colliders": {
+              "type": "object", "additionalProperties": false,
+              "required": ["primitiveColliders", "proxyTriangles"],
+              "properties": { "primitiveColliders": { "$ref": "#/$defs/budgetMetric" }, "proxyTriangles": { "$ref": "#/$defs/budgetMetric" } }
+            },
+            "hitboxes": {
+              "type": "object", "additionalProperties": false,
+              "required": ["activeHitboxes"],
+              "properties": { "activeHitboxes": { "$ref": "#/$defs/budgetMetric" } }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "motionMatrixTemplate": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["subjectKind", "requiredMotionKeys", "requiredSkillPhases", "requiredEffectCategories", "roleSpecificPolicy"],
+          "properties": {
+            "subjectKind": { "enum": ["champion", "npc", "beast", "monster", "boss"] },
+            "requiredMotionKeys": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._][a-z0-9]+)*$" } },
+            "requiredSkillPhases": { "type": "array", "minItems": 5, "uniqueItems": true, "items": { "enum": ["anticipation", "cast", "channel", "release", "recovery"] } },
+            "requiredEffectCategories": { "type": "array", "minItems": 12, "uniqueItems": true, "items": { "$ref": "#/$defs/vfxCategory" } },
+            "roleSpecificPolicy": { "$ref": "#/$defs/nonBlank" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "creativeDimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "summary", "sourceRefs", "decisionPacketIds"],
+      "properties": {
+        "state": { "enum": ["approved", "owner_decision_required", "not_applicable"] },
+        "summary": { "anyOf": [{ "$ref": "#/$defs/nonBlank" }, { "type": "null" }] },
+        "sourceRefs": { "type": "array", "items": { "$ref": "#/$defs/nonBlank" } },
+        "decisionPacketIds": { "$ref": "#/$defs/stableIdArray" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "approved" } }, "required": ["state"] },
+          "then": { "properties": { "summary": { "$ref": "#/$defs/nonBlank" }, "sourceRefs": { "minItems": 1 }, "decisionPacketIds": { "maxItems": 0 } } }
+        },
+        {
+          "if": { "properties": { "state": { "const": "owner_decision_required" } }, "required": ["state"] },
+          "then": { "properties": { "summary": { "type": "null" }, "decisionPacketIds": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "state": { "const": "not_applicable" } }, "required": ["state"] },
+          "then": { "properties": { "summary": { "$ref": "#/$defs/nonBlank" }, "decisionPacketIds": { "maxItems": 0 } } }
+        }
+      ]
+    },
+    "creativeDecisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["morphology", "culture", "silhouette", "anatomy", "clothing", "armor", "animationPersonality", "magicalGrammar"],
+      "properties": {
+        "morphology": { "$ref": "#/$defs/creativeDimension" },
+        "culture": { "$ref": "#/$defs/creativeDimension" },
+        "silhouette": { "$ref": "#/$defs/creativeDimension" },
+        "anatomy": { "$ref": "#/$defs/creativeDimension" },
+        "clothing": { "$ref": "#/$defs/creativeDimension" },
+        "armor": { "$ref": "#/$defs/creativeDimension" },
+        "animationPersonality": { "$ref": "#/$defs/creativeDimension" },
+        "magicalGrammar": { "$ref": "#/$defs/creativeDimension" }
+      }
+    },
+    "entityRefs": {
+      "type": "object",
+      "required": ["creativeDecisions", "bodyModuleIds", "equipmentModuleIds", "rigFamilyIds", "facialSystemIds", "secondaryPhysicsProfileIds", "lodProfileIds", "colliderProfileIds", "hitboxProfileIds", "platformVariantIds", "budgetProfileIds", "motionMatrixTemplateIds"],
+      "properties": {
+        "creativeDecisions": { "$ref": "#/$defs/creativeDecisions" },
+        "bodyModuleIds": { "$ref": "#/$defs/stableIdArray" },
+        "equipmentModuleIds": { "$ref": "#/$defs/stableIdArray" },
+        "rigFamilyIds": { "$ref": "#/$defs/stableIdArray" },
+        "facialSystemIds": { "$ref": "#/$defs/stableIdArray" },
+        "secondaryPhysicsProfileIds": { "$ref": "#/$defs/stableIdArray" },
+        "lodProfileIds": { "$ref": "#/$defs/stableIdArray" },
+        "colliderProfileIds": { "$ref": "#/$defs/stableIdArray" },
+        "hitboxProfileIds": { "$ref": "#/$defs/stableIdArray" },
+        "platformVariantIds": { "$ref": "#/$defs/stableIdArray" },
+        "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" },
+        "motionMatrixTemplateIds": { "$ref": "#/$defs/stableIdArray" }
+      }
+    },
+    "playableRace": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" }, { "$ref": "#/$defs/entityRefs" },
+        {
+          "type": "object",
+          "required": ["customizationContractRef"],
+          "properties": {
+            "customizationContractRef": { "$ref": "#/$defs/nonBlank" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "npcArchetype": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" }, { "$ref": "#/$defs/entityRefs" },
+        {
+          "type": "object",
+          "required": ["role", "roleActionKeys", "skillIds"],
+          "properties": {
+            "role": { "$ref": "#/$defs/nonBlank" },
+            "roleActionKeys": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^role\\.[a-z][a-z0-9]*(?:_[a-z0-9]+)*$" } },
+            "skillIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "championFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" }, { "$ref": "#/$defs/entityRefs" },
+        {
+          "type": "object",
+          "required": ["playableRaceIds", "classSourceIds", "skillIds", "weaponFamilyIds"],
+          "properties": {
+            "playableRaceIds": { "$ref": "#/$defs/stableIdArray" },
+            "classSourceIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonBlank" } },
+            "skillIds": { "$ref": "#/$defs/stableIdArray" },
+            "weaponFamilyIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "beastFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" }, { "$ref": "#/$defs/entityRefs" },
+        {
+          "type": "object",
+          "required": ["habitatSourceRef", "locomotionModes", "skillIds"],
+          "properties": {
+            "habitatSourceRef": { "$ref": "#/$defs/nonBlank" },
+            "locomotionModes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["walk", "run", "fly", "swim", "crawl"] } },
+            "skillIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "monsterFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" }, { "$ref": "#/$defs/entityRefs" },
+        {
+          "type": "object",
+          "required": ["rank", "habitatSourceRef", "locomotionModes", "skillIds", "bossTransitionKeys"],
+          "properties": {
+            "rank": { "enum": ["common", "elite", "boss"] },
+            "habitatSourceRef": { "$ref": "#/$defs/nonBlank" },
+            "locomotionModes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["walk", "run", "fly", "swim", "crawl"] } },
+            "skillIds": { "$ref": "#/$defs/stableIdArray" },
+            "bossTransitionKeys": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^boss\\.transition(?:\\.[a-z0-9_]+)?$" } }
+          },
+          "allOf": [
+            { "if": { "properties": { "rank": { "const": "boss" } }, "required": ["rank"] }, "then": { "properties": { "bossTransitionKeys": { "minItems": 1 } } }, "else": { "properties": { "bossTransitionKeys": { "maxItems": 0 } } } }
+          ]
+        }
+      ], "unevaluatedProperties": false
+    },
+    "bodyModule": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["slot", "compatibleEntityIds", "rigFamilyIds", "meshSourceRef", "hiddenSurfaceMaskIds", "budgetProfileIds"],
+          "properties": {
+            "slot": { "enum": ["base_body", "head", "hair", "facial_hair", "hands", "feet", "tail", "wings", "horns", "other"] },
+            "compatibleEntityIds": { "$ref": "#/$defs/stableIdArray" },
+            "rigFamilyIds": { "$ref": "#/$defs/stableIdArray" },
+            "meshSourceRef": { "anyOf": [{ "$ref": "#/$defs/nonBlank" }, { "type": "null" }] },
+            "hiddenSurfaceMaskIds": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/nonBlank" } },
+            "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "equipmentModule": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["slot", "compatibleEntityIds", "compatibleBodyModuleIds", "rigFamilyIds", "attachmentSocketIds", "meshSourceRef", "budgetProfileIds"],
+          "properties": {
+            "slot": { "enum": ["head", "shoulders", "chest", "arms", "hands", "waist", "legs", "feet", "back", "main_hand", "off_hand", "two_hand", "accessory"] },
+            "compatibleEntityIds": { "$ref": "#/$defs/stableIdArray" },
+            "compatibleBodyModuleIds": { "$ref": "#/$defs/stableIdArray" },
+            "rigFamilyIds": { "$ref": "#/$defs/stableIdArray" },
+            "attachmentSocketIds": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/nonBlank" } },
+            "meshSourceRef": { "anyOf": [{ "$ref": "#/$defs/nonBlank" }, { "type": "null" }] },
+            "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "rigFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["skeletonFamily", "bindPoseRef", "rootBone", "rootMotionPolicy", "deformingBoneCount", "socketIds", "retargetGroup", "budgetProfileIds"],
+          "properties": {
+            "skeletonFamily": { "$ref": "#/$defs/nonBlank" },
+            "bindPoseRef": { "anyOf": [{ "$ref": "#/$defs/nonBlank" }, { "type": "null" }] },
+            "rootBone": { "$ref": "#/$defs/nonBlank" },
+            "rootMotionPolicy": { "enum": ["in_place", "authored_root_motion", "mixed_by_motion"] },
+            "deformingBoneCount": { "type": ["integer", "null"], "minimum": 0 },
+            "socketIds": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/nonBlank" } },
+            "retargetGroup": { "$ref": "#/$defs/nonBlank" },
+            "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "facialSystem": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["systemType", "rigFamilyIds", "expressionSetIds", "visemeCount", "gazeSupported", "budgetProfileIds"],
+          "properties": {
+            "systemType": { "enum": ["blendshape", "bone", "hybrid", "none"] },
+            "rigFamilyIds": { "$ref": "#/$defs/stableIdArray" },
+            "expressionSetIds": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/nonBlank" } },
+            "visemeCount": { "type": ["integer", "null"], "minimum": 0 },
+            "gazeSupported": { "type": "boolean" },
+            "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "secondaryPhysicsProfile": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["kind", "solver", "affectedIds", "disableFallback", "collisionPolicy", "budgetProfileIds"],
+          "properties": {
+            "kind": { "enum": ["cloth", "hair", "secondary_bone", "hybrid"] },
+            "solver": { "$ref": "#/$defs/nonBlank" },
+            "affectedIds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/nonBlank" } },
+            "disableFallback": { "$ref": "#/$defs/nonBlank" },
+            "collisionPolicy": { "$ref": "#/$defs/nonBlank" },
+            "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "lodProfile": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["levels", "protectedCues", "normalPlayUsesReducedLod"],
+          "properties": {
+            "levels": {
+              "type": "array", "minItems": 1, "maxItems": 8,
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["index", "triangleRatio", "screenRelativeTransitionHeight", "boneReductionPolicy", "materialReductionPolicy"],
+                "properties": {
+                  "index": { "type": "integer", "minimum": 0, "maximum": 7 },
+                  "triangleRatio": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+                  "screenRelativeTransitionHeight": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "boneReductionPolicy": { "$ref": "#/$defs/nonBlank" },
+                  "materialReductionPolicy": { "$ref": "#/$defs/nonBlank" }
+                }
+              }
+            },
+            "protectedCues": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/nonBlank" } },
+            "normalPlayUsesReducedLod": { "type": "boolean" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "colliderProfile": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["rigFamilyIds", "lodIndependent", "renderMeshColliderForbidden", "colliders", "budgetProfileIds"],
+          "properties": {
+            "rigFamilyIds": { "$ref": "#/$defs/stableIdArray" },
+            "lodIndependent": { "const": true },
+            "renderMeshColliderForbidden": { "const": true },
+            "colliders": {
+              "type": "array", "minItems": 1,
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["colliderId", "shape", "purpose", "boneOrSocket"],
+                "properties": {
+                  "colliderId": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$" },
+                  "shape": { "enum": ["capsule", "box", "sphere", "convex_proxy"] },
+                  "purpose": { "enum": ["movement", "ragdoll", "environment", "interaction", "secondary_physics"] },
+                  "boneOrSocket": { "$ref": "#/$defs/nonBlank" }
+                }
+              }
+            },
+            "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "hitboxProfile": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["rigFamilyIds", "gameplayAuthorityRef", "hitboxes", "budgetProfileIds"],
+          "properties": {
+            "rigFamilyIds": { "$ref": "#/$defs/stableIdArray" },
+            "gameplayAuthorityRef": { "$ref": "#/$defs/nonBlank" },
+            "hitboxes": {
+              "type": "array", "minItems": 1,
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["hitboxId", "shape", "purpose", "boneOrSocket", "activationAuthority"],
+                "properties": {
+                  "hitboxId": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$" },
+                  "shape": { "enum": ["capsule", "box", "sphere"] },
+                  "purpose": { "enum": ["hurt", "attack", "target", "interaction"] },
+                  "boneOrSocket": { "$ref": "#/$defs/nonBlank" },
+                  "activationAuthority": { "enum": ["gameplay_timing", "always_on", "interaction_state"] }
+                }
+              }
+            },
+            "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "platformVariant": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["platformProfileId", "subjectIds", "budgetProfileIds", "meshPolicy", "texturePolicy", "rigPolicy", "physicsPolicy", "vfxPolicy", "protectedCues"],
+          "properties": {
+            "platformProfileId": { "$ref": "#/$defs/stableId" },
+            "subjectIds": { "allOf": [{ "$ref": "#/$defs/stableIdArray" }, { "minItems": 1 }] },
+            "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" },
+            "meshPolicy": { "$ref": "#/$defs/nonBlank" },
+            "texturePolicy": { "$ref": "#/$defs/nonBlank" },
+            "rigPolicy": { "$ref": "#/$defs/nonBlank" },
+            "physicsPolicy": { "$ref": "#/$defs/nonBlank" },
+            "vfxPolicy": { "$ref": "#/$defs/nonBlank" },
+            "protectedCues": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/nonBlank" } }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "skillRecord": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["externalSourceId", "sourceCatalogRef", "subjectIds", "timingAuthorityRef", "resultAuthorityRef"],
+          "properties": {
+            "externalSourceId": { "$ref": "#/$defs/nonBlank" },
+            "sourceCatalogRef": { "$ref": "#/$defs/nonBlank" },
+            "subjectIds": { "allOf": [{ "$ref": "#/$defs/stableIdArray" }, { "minItems": 1 }] },
+            "timingAuthorityRef": { "$ref": "#/$defs/nonBlank" },
+            "resultAuthorityRef": { "$ref": "#/$defs/nonBlank" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "motionRecord": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["subjectIds", "skillId", "motionKey", "skillPhase", "rigFamilyId", "clipRef", "rootMotionMode", "timingAuthority", "eventMarkers"],
+          "properties": {
+            "subjectIds": { "allOf": [{ "$ref": "#/$defs/stableIdArray" }, { "minItems": 1 }] },
+            "skillId": { "anyOf": [{ "$ref": "#/$defs/stableId" }, { "type": "null" }] },
+            "motionKey": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._][a-z0-9]+)*$" },
+            "skillPhase": { "type": ["string", "null"], "enum": ["anticipation", "cast", "channel", "release", "recovery", null] },
+            "rigFamilyId": { "$ref": "#/$defs/stableId" },
+            "clipRef": { "anyOf": [{ "$ref": "#/$defs/nonBlank" }, { "type": "null" }] },
+            "rootMotionMode": { "enum": ["in_place", "authored_root_motion", "gameplay_driven"] },
+            "timingAuthority": { "enum": ["gameplay_committed", "presentation_only"] },
+            "eventMarkers": { "type": "array", "uniqueItems": true, "items": { "enum": ["commit", "release", "impact", "recovery_start", "complete", "foot_contact", "audio", "camera"] } }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "vfxCategory": { "enum": ["telegraph", "cast", "channel", "release", "trail", "projectile", "impact", "area", "buff", "debuff", "status", "environmental", "result", "cleanup"] },
+    "vfxRecord": {
+      "allOf": [
+        { "$ref": "#/$defs/recordHeader" },
+        {
+          "type": "object",
+          "required": ["category", "subjectIds", "skillIds", "source", "direction", "timing", "area", "endState", "gameplayAuthorityRef", "qualityVariants", "reducedMotionVariant", "offStateCue", "budgetProfileIds"],
+          "properties": {
+            "category": { "$ref": "#/$defs/vfxCategory" },
+            "subjectIds": { "allOf": [{ "$ref": "#/$defs/stableIdArray" }, { "minItems": 1 }] },
+            "skillIds": { "$ref": "#/$defs/stableIdArray" },
+            "source": { "$ref": "#/$defs/nonBlank" },
+            "direction": { "$ref": "#/$defs/nonBlank" },
+            "timing": { "$ref": "#/$defs/nonBlank" },
+            "area": { "$ref": "#/$defs/nonBlank" },
+            "endState": { "$ref": "#/$defs/nonBlank" },
+            "gameplayAuthorityRef": { "$ref": "#/$defs/nonBlank" },
+            "qualityVariants": {
+              "type": "object", "additionalProperties": false,
+              "required": ["off", "low", "balanced", "high"],
+              "properties": { "off": { "$ref": "#/$defs/nonBlank" }, "low": { "$ref": "#/$defs/nonBlank" }, "balanced": { "$ref": "#/$defs/nonBlank" }, "high": { "$ref": "#/$defs/nonBlank" } }
+            },
+            "reducedMotionVariant": { "$ref": "#/$defs/nonBlank" },
+            "offStateCue": { "$ref": "#/$defs/nonBlank" },
+            "budgetProfileIds": { "$ref": "#/$defs/stableIdArray" }
+          }
+        }
+      ], "unevaluatedProperties": false
+    },
+    "traceRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "recordIds", "rationale"],
+      "properties": {
+        "state": { "enum": ["required", "not_applicable"] },
+        "recordIds": { "$ref": "#/$defs/stableIdArray" },
+        "rationale": { "$ref": "#/$defs/nonBlank" }
+      },
+      "allOf": [
+        { "if": { "properties": { "state": { "const": "required" } }, "required": ["state"] }, "then": { "properties": { "recordIds": { "minItems": 1 } } }, "else": { "properties": { "recordIds": { "maxItems": 0 } } } }
+      ]
+    },
+    "skillTraceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skillId", "motionPhases", "effects", "audioSyncRefs", "cameraSyncRefs", "accessibilityEvidenceRefs"],
+      "properties": {
+        "skillId": { "$ref": "#/$defs/stableId" },
+        "motionPhases": {
+          "type": "object", "additionalProperties": false,
+          "required": ["anticipation", "cast", "channel", "release", "recovery"],
+          "properties": { "anticipation": { "$ref": "#/$defs/traceRequirement" }, "cast": { "$ref": "#/$defs/traceRequirement" }, "channel": { "$ref": "#/$defs/traceRequirement" }, "release": { "$ref": "#/$defs/traceRequirement" }, "recovery": { "$ref": "#/$defs/traceRequirement" } }
+        },
+        "effects": {
+          "type": "object", "additionalProperties": false,
+          "required": ["telegraph", "cast", "channel", "release", "trail", "projectile", "impact", "area", "buff", "debuff", "status", "environmental", "result", "cleanup"],
+          "properties": {
+            "telegraph": { "$ref": "#/$defs/traceRequirement" }, "cast": { "$ref": "#/$defs/traceRequirement" }, "channel": { "$ref": "#/$defs/traceRequirement" }, "release": { "$ref": "#/$defs/traceRequirement" }, "trail": { "$ref": "#/$defs/traceRequirement" }, "projectile": { "$ref": "#/$defs/traceRequirement" }, "impact": { "$ref": "#/$defs/traceRequirement" }, "area": { "$ref": "#/$defs/traceRequirement" }, "buff": { "$ref": "#/$defs/traceRequirement" }, "debuff": { "$ref": "#/$defs/traceRequirement" }, "status": { "$ref": "#/$defs/traceRequirement" }, "environmental": { "$ref": "#/$defs/traceRequirement" }, "result": { "$ref": "#/$defs/traceRequirement" }, "cleanup": { "$ref": "#/$defs/traceRequirement" }
+          }
+        },
+        "audioSyncRefs": { "type": "array", "items": { "$ref": "#/$defs/nonBlank" } },
+        "cameraSyncRefs": { "type": "array", "items": { "$ref": "#/$defs/nonBlank" } },
+        "accessibilityEvidenceRefs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonBlank" } }
+      }
+    }
+  }
+}

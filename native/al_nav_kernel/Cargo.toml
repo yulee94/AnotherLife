@@ -1,0 +1,12 @@
+[package]
+name = "al_nav_kernel"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+publish = false
+description = "Deterministic caller-buffer-owned navigation kernel for AnotherLife"
+
+[lib]
+crate-type = ["rlib", "cdylib", "staticlib"]
+
+[dependencies]

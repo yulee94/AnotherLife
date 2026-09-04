@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "libraryId": "rmc_motion_library_representative_v001",
+  "contentVersion": "1.0.0",
+  "authorityState": "bounded_engineering",
+  "requiredManifestPath": "unity/Assets/AL/StreamingAssets/GameData/al_required_motion_manifest.json",
+  "rigManifestPath": "unity/ArtSource/RigPipeline/al_rig_cleanup_manifest.v1.json",
+  "catalogPath": "unity/ArtSource/MotionLibrary/al_motion_library_catalog.v1.json",
+  "repeatabilityReceiptPath": "unity/ArtSource/MotionLibrary/al_motion_library_repeatability.v1.json",
+  "sampleRateHz": 30,
+  "representatives": [
+    {
+      "representativeProfileId": "rmc_representative_champion_vanguard_v001",
+      "requiredSetId": "rmc_set_champion_complete_v001",
+      "coverageMode": "required_and_conditional",
+      "skeletonProfileId": "rmc_skeleton_humanoid_shared_v001",
+      "assetId": "rmc_motion_asset_champion_vanguard_v001",
+      "sourceBlendPath": "unity/ArtSource/RigPipeline/Representatives/champion_vanguard_rig_clean_v002.blend",
+      "outputBlendPath": "unity/ArtSource/MotionLibrary/Representatives/champion_vanguard_motion_v001.blend",
+      "outputFbxPath": "unity/ArtSource/MotionLibrary/Exports/champion_vanguard_motion_v001.fbx",
+      "sidecarPath": "unity/ArtSource/MotionLibrary/Representatives/champion_vanguard_motion_v001.motion.json",
+      "armatureObject": "RIG_champion_vanguard_v002",
+      "contactBones": [
+        "foot_l",
+        "foot_r"
+      ],
+      "catalogSource": true,
+      "sourceRightsState": "project_authored_motion_on_bounded_engineering_rig",
+      "licensingEvidence": [
+        "unity/ArtSource/RigPipeline/al_rig_source_provenance.v1.json",
+        "unity/ArtSource/RigPipeline/Representatives/champion_vanguard_rig_clean_v002.rig.json"
+      ],
+      "knownRestrictions": [
+        "Engineering motion candidate only; character mesh production admission remains blocked by its rights record.",
+        "Owner visual and combat-readability approval is required before runtime admission."
+      ]
+    },
+    {
+      "representativeProfileId": "rmc_representative_npc_covenant_sentinel_v001",
+      "requiredSetId": "rmc_set_npc_complete_v001",
+      "coverageMode": "required_and_conditional",
+      "skeletonProfileId": "rmc_skeleton_humanoid_shared_v001",
+      "assetId": "rmc_motion_asset_npc_covenant_sentinel_v001",
+      "sourceBlendPath": "unity/ArtSource/RigPipeline/Representatives/covenant_sentinel_rig_clean_v003.blend",
+      "outputBlendPath": "unity/ArtSource/MotionLibrary/Representatives/covenant_sentinel_motion_v001.blend",
+      "outputFbxPath": "unity/ArtSource/MotionLibrary/Exports/covenant_sentinel_motion_v001.fbx",
+      "sidecarPath": "unity/ArtSource/MotionLibrary/Representatives/covenant_sentinel_motion_v001.motion.json",
+      "armatureObject": "RIG_covenant_sentinel_v003",
+      "contactBones": [
+        "foot_l",
+        "foot_r"
+      ],
+      "catalogSource": false,
+      "sourceRightsState": "project_authored_motion_preview_on_bounded_engineering_rig",
+      "licensingEvidence": [
+        "unity/ArtSource/RigPipeline/al_rig_source_provenance.v1.json",
+        "unity/ArtSource/RigPipeline/Representatives/covenant_sentinel_rig_clean_v003.rig.json"
+      ],
+      "knownRestrictions": [
+        "Uses the stable shared-humanoid clip identifiers authored on the Champion skeleton profile; this file is the NPC retarget preview evidence.",
+        "NPC mesh rights and visual/deformation approval remain blocked outside this motion-library scope."
+      ]
+    },
+    {
+      "representativeProfileId": "rmc_representative_beast_slagwhistle_v001",
+      "requiredSetId": "rmc_set_slagwhistle_source_bounded_v001",
+      "coverageMode": "required_only",
+      "skeletonProfileId": "rmc_skeleton_nonhumanoid_grounded_v001",
+      "assetId": "rmc_motion_asset_slagwhistle_v001",
+      "sourceBlendPath": "unity/ArtSource/RigPipeline/Representatives/slagwhistle_burrower_rig_clean_v002.blend",
+      "outputBlendPath": "unity/ArtSource/MotionLibrary/Representatives/slagwhistle_motion_v001.blend",
+      "outputFbxPath": "unity/ArtSource/MotionLibrary/Exports/slagwhistle_motion_v001.fbx",
+      "sidecarPath": "unity/ArtSource/MotionLibrary/Representatives/slagwhistle_motion_v001.motion.json",
+      "armatureObject": "RIG_slagwhistle_burrower_v002",
+      "contactBones": [
+        "contact_front_l",
+        "contact_front_r",
+        "contact_rear_l",
+        "contact_rear_r"
+      ],
+      "catalogSource": true,
+      "sourceRightsState": "project_authored_motion_with_source_bounded_authority",
+      "licensingEvidence": [
+        "unity/ArtSource/RigPipeline/al_rig_source_provenance.v1.json",
+        "unity/ArtSource/RigPipeline/Representatives/slagwhistle_burrower_rig_clean_v002.rig.json"
+      ],
+      "knownRestrictions": [
+        "Exactly six source-authorized presentation slots are authored; attack, special attack, defeat, burrow, standing rest, and any seventh clip remain blocked pending owner authorization.",
+        "Slagwhistle is a fantasy beast with exact-rig anatomy-specific motion; it is not humanoid-retargetable."
+      ],
+      "explainedBlockedMotionKeys": [
+        "attack.basic",
+        "attack.special",
+        "defeat"
+      ]
+    }
+  ],
+  "motionRules": [
+    {
+      "id": "rmc_motion_rule_locomotion_cycle_v001",
+      "pattern": "^locomotion\\.(crawl|fly|run|sprint|strafe_l|strafe_r|swim|turn|walk)$",
+      "style": "locomotion_cycle",
+      "durationFrames": 24,
+      "loop": true,
+      "rootTreatment": "in_place_motor_owned",
+      "eventTemplate": "contact_cycle"
+    },
+    {
+      "id": "rmc_motion_rule_idle_cycle_v001",
+      "pattern": "^idle\\..+$",
+      "style": "idle_cycle",
+      "durationFrames": 60,
+      "loop": true,
+      "rootTreatment": "in_place_motor_owned",
+      "eventTemplate": "phase_loop"
+    },
+    {
+      "id": "rmc_motion_rule_channel_cycle_v001",
+      "pattern": "^skill\\.channel_loop$",
+      "style": "channel_cycle",
+      "durationFrames": 36,
+      "loop": true,
+      "rootTreatment": "in_place_motor_owned",
+      "eventTemplate": "phase_loop"
+    },
+    {
+      "id": "rmc_motion_rule_attack_v001",
+      "pattern": "^(attack\\..+|skill\\.(cast|commit|impact|release)|interaction\\.cut)$",
+      "style": "attack_action",
+      "durationFrames": 30,
+      "loop": false,
+      "rootTreatment": "in_place_motor_owned",
+      "eventTemplate": "attack_window"
+    },
+    {
+      "id": "rmc_motion_rule_collapse_v001",
+      "pattern": "^(defeat|reaction\\.knockdown)$",
+      "style": "collapse_action",
+      "durationFrames": 36,
+      "loop": false,
+      "rootTreatment": "in_place_motor_owned",
+      "eventTemplate": "phase_once"
+    },
+    {
+      "id": "rmc_motion_rule_rise_v001",
+      "pattern": "^reaction\\.get_up$",
+      "style": "rise_action",
+      "durationFrames": 36,
+      "loop": false,
+      "rootTreatment": "in_place_motor_owned",
+      "eventTemplate": "phase_once"
+    },
+    {
+      "id": "rmc_motion_rule_jump_v001",
+      "pattern": "^locomotion\\.(jump|land)$",
+      "style": "vertical_action",
+      "durationFrames": 24,
+      "loop": false,
+      "rootTreatment": "vertical_root_visual_horizontal_motor",
+      "eventTemplate": "phase_once"
+    },
+    {
+      "id": "rmc_motion_rule_life_cycle_v001",
+      "pattern": "^(daily\\.sleep|social\\.talk)$",
+      "style": "idle_cycle",
+      "durationFrames": 60,
+      "loop": true,
+      "rootTreatment": "in_place_motor_owned",
+      "eventTemplate": "phase_loop"
+    },
+    {
+      "id": "rmc_motion_rule_fall_cycle_v001",
+      "pattern": "^locomotion\\.fall$",
+      "style": "vertical_action",
+      "durationFrames": 24,
+      "loop": true,
+      "rootTreatment": "vertical_root_visual_horizontal_motor",
+      "eventTemplate": "phase_loop"
+    },
+    {
+      "id": "rmc_motion_rule_generic_v001",
+      "pattern": ".*",
+      "style": "gesture_action",
+      "durationFrames": 30,
+      "loop": false,
+      "rootTreatment": "in_place_motor_owned",
+      "eventTemplate": "phase_once"
+    }
+  ],
+  "eventTemplates": {
+    "phase_once": [
+      {
+        "eventName": "al.motion.phase.enter",
+        "normalizedTime": 0.0
+      },
+      {
+        "eventName": "al.motion.interruptible.begin",
+        "normalizedTime": 0.7
+      },
+      {
+        "eventName": "al.motion.phase.exit",
+        "normalizedTime": 1.0
+      }
+    ],
+    "phase_loop": [
+      {
+        "eventName": "al.motion.phase.enter",
+        "normalizedTime": 0.0
+      },
+      {
+        "eventName": "al.motion.phase.exit",
+        "normalizedTime": 1.0
+      }
+    ],
+    "contact_cycle": [
+      {
+        "eventName": "al.motion.phase.enter",
+        "normalizedTime": 0.0
+      },
+      {
+        "eventName": "al.motion.contact.begin",
+        "normalizedTime": 0.2,
+        "contactIndex": 0
+      },
+      {
+        "eventName": "al.motion.contact.end",
+        "normalizedTime": 0.3,
+        "contactIndex": 0
+      },
+      {
+        "eventName": "al.motion.contact.begin",
+        "normalizedTime": 0.7,
+        "contactIndex": 1
+      },
+      {
+        "eventName": "al.motion.contact.end",
+        "normalizedTime": 0.8,
+        "contactIndex": 1
+      },
+      {
+        "eventName": "al.motion.phase.exit",
+        "normalizedTime": 1.0
+      }
+    ],
+    "attack_window": [
+      {
+        "eventName": "al.motion.phase.enter",
+        "normalizedTime": 0.0
+      },
+      {
+        "eventName": "al.motion.hitbox.request_begin",
+        "normalizedTime": 0.36,
+        "windowId": "primary"
+      },
+      {
+        "eventName": "al.motion.hitbox.request_end",
+        "normalizedTime": 0.62,
+        "windowId": "primary"
+      },
+      {
+        "eventName": "al.motion.interruptible.begin",
+        "normalizedTime": 0.72,
+        "windowId": "recovery"
+      },
+      {
+        "eventName": "al.motion.phase.exit",
+        "normalizedTime": 1.0
+      }
+    ]
+  },
+  "cleanupThresholds": {
+    "maximumLoopPositionErrorMeters": 0.01,
+    "maximumLoopRotationErrorDegrees": 1.0,
+    "maximumContactDriftMeters": 0.02,
+    "maximumTransitionPositionDeltaMeters": 0.03,
+    "maximumTransitionRotationDeltaDegrees": 6.0
+  }
+}

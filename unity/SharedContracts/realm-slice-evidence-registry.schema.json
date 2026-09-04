@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.example/contracts/realm-slice-evidence-registry.schema.json",
+  "title": "AnotherLife Realm-Slice Evidence Registry",
+  "description": "Hash-sealed current state and append-only audit history for sequential realm qualification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "registryId", "protocolId", "realmOrder", "createdUtc",
+    "policySha256", "updatedUtc", "activeRealm", "realms", "evidencePackets", "ownerDecisions",
+    "reopens", "rollbacks", "events", "registrySha256"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "registryId": {"const": "anotherlife-realm-slice-evidence-registry"},
+    "protocolId": {"const": "RSQ-PROTOCOL-v1.0.0"},
+    "policySha256": {"$ref": "#/$defs/sha256"},
+    "realmOrder": {
+      "const": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"]
+    },
+    "createdUtc": {"type": "string", "format": "date-time"},
+    "updatedUtc": {"type": "string", "format": "date-time"},
+    "activeRealm": {"type": ["string", "null"], "enum": ["Stonehold", "Eldergrove", "Crownlands", "Umbral", null]},
+    "realms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"],
+      "properties": {
+        "Stonehold": {"$ref": "#/$defs/realmState"},
+        "Eldergrove": {"$ref": "#/$defs/realmState"},
+        "Crownlands": {"$ref": "#/$defs/realmState"},
+        "Umbral": {"$ref": "#/$defs/realmState"}
+      }
+    },
+    "evidencePackets": {"type": "object", "additionalProperties": {"$ref": "realm-slice-evidence-pack.schema.json"}},
+    "ownerDecisions": {"type": "object", "additionalProperties": {"$ref": "#/$defs/ownerDecision"}},
+    "reopens": {"type": "object", "additionalProperties": {"$ref": "#/$defs/reopen"}},
+    "rollbacks": {"type": "object", "additionalProperties": {"$ref": "#/$defs/rollback"}},
+    "events": {"type": "array", "items": {"$ref": "#/$defs/event"}},
+    "registrySha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "packetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packetId", "manifestSha256", "candidateId"],
+      "properties": {
+        "packetId": {"type": "string", "minLength": 1},
+        "manifestSha256": {"$ref": "#/$defs/sha256"},
+        "candidateId": {"type": "string", "minLength": 1}
+      }
+    },
+    "baseline": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["baselineId", "packet", "decisionId"],
+      "properties": {
+        "baselineId": {"type": "string", "minLength": 1},
+        "packet": {"$ref": "#/$defs/packetRef"},
+        "decisionId": {"type": "string", "minLength": 1}
+      }
+    },
+    "modeState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["qualification", "currentPacket", "ownerApproval", "ownerDecision", "lastOwnerApprovedBaseline", "contentPath", "rerunRequired", "reopenedUtc"],
+      "properties": {
+        "qualification": {"enum": ["EMPTY", "QUALIFIED", "REOPENED"]},
+        "currentPacket": {"anyOf": [{"$ref": "#/$defs/packetRef"}, {"type": "null"}]},
+        "ownerApproval": {"enum": ["PENDING", "APPROVED", "REVISE", "REJECT", "REOPENED"]},
+        "ownerDecision": {"type": ["string", "null"]},
+        "lastOwnerApprovedBaseline": {"anyOf": [{"$ref": "#/$defs/baseline"}, {"type": "null"}]},
+        "contentPath": {"enum": ["DISABLED", "ENABLED_UNAPPROVED", "ENABLED_APPROVED", "DISABLED_PENDING_RERUN", "DISABLED_PENDING_REAPPROVAL", "ROLLED_BACK_TO_APPROVED_BASELINE"]},
+        "rerunRequired": {"type": "boolean"},
+        "reopenedUtc": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "decisionState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "record"],
+      "properties": {
+        "status": {"enum": ["PENDING", "APPROVED", "REVISE", "REJECT", "REOPENED", "SUSPENDED"]},
+        "record": {"type": ["string", "null"]}
+      }
+    },
+    "realmState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entryGate", "modes", "creativeVisual", "ownerAuthorization"],
+      "properties": {
+        "entryGate": {"enum": ["CLOSED", "OPEN", "APPROVED", "SUSPENDED"]},
+        "modes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["Adventure3D", "Kingdom2_5D"],
+          "properties": {
+            "Adventure3D": {"$ref": "#/$defs/modeState"},
+            "Kingdom2_5D": {"$ref": "#/$defs/modeState"}
+          }
+        },
+        "creativeVisual": {"$ref": "#/$defs/decisionState"},
+        "ownerAuthorization": {"$ref": "#/$defs/decisionState"}
+      }
+    },
+    "ownerDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "protocolId", "decisionId", "realm", "kind", "mode", "action", "owner", "ownerKeyId", "authorityTaskId", "authorityEventId", "packetRefs", "baselineId", "limitations", "signedUtc", "signatureMethod", "supersedes", "decisionSha256", "decisionSignature"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "protocolId": {"const": "RSQ-PROTOCOL-v1.0.0"},
+        "decisionId": {"type": "string", "minLength": 1},
+        "realm": {"enum": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"]},
+        "kind": {"enum": ["MODE", "CREATIVE_VISUAL", "AUTHORIZATION"]},
+        "mode": {"type": ["string", "null"], "enum": ["Adventure3D", "Kingdom2_5D", null]},
+        "action": {"enum": ["APPROVE", "REVISE", "REJECT", "ADVANCE_TO_ELDERGROVE", "ADVANCE_TO_CROWNLANDS", "ADVANCE_TO_UMBRAL", "COMPLETE_REALM_SEQUENCE"]},
+        "owner": {"const": "game-owner"},
+        "ownerKeyId": {"const": "anotherlife-game-owner-v1"},
+        "authorityTaskId": {"type": "string", "minLength": 1},
+        "authorityEventId": {"type": "string", "minLength": 1},
+        "packetRefs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/packetRef"}},
+        "baselineId": {"type": "string", "minLength": 1},
+        "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "signedUtc": {"type": "string", "format": "date-time"},
+        "signatureMethod": {"const": "hmac-sha256-v1"},
+        "supersedes": {"type": ["string", "null"]},
+        "decisionSha256": {"$ref": "#/$defs/sha256"},
+        "decisionSignature": {"$ref": "#/$defs/sha256"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "MODE"}}},
+          "then": {
+            "properties": {
+              "mode": {"enum": ["Adventure3D", "Kingdom2_5D"]},
+              "action": {"enum": ["APPROVE", "REVISE", "REJECT"]}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "CREATIVE_VISUAL"}}},
+          "then": {
+            "properties": {
+              "mode": {"const": null},
+              "action": {"enum": ["APPROVE", "REVISE", "REJECT"]}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "AUTHORIZATION"}}},
+          "then": {
+            "properties": {
+              "mode": {"const": null},
+              "action": {"enum": ["ADVANCE_TO_ELDERGROVE", "ADVANCE_TO_CROWNLANDS", "ADVANCE_TO_UMBRAL", "COMPLETE_REALM_SEQUENCE"]}
+            }
+          }
+        }
+      ]
+    },
+    "reopen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reopenId", "trigger", "realm", "affectedModes", "dependentRealms", "impactReason", "authorityTaskId", "authorityEventId", "occurredUtc", "authorizedBy", "ownerKeyId", "signatureMethod", "signedUtc", "transitionSha256", "transitionSignature"],
+      "properties": {
+        "reopenId": {"type": "string", "minLength": 1},
+        "trigger": {"enum": ["renderer", "camera", "realm_art", "combat", "narrative", "platform", "accessibility", "save", "evidence_control", "artifact_failure", "owner_reopen"]},
+        "realm": {"enum": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"]},
+        "affectedModes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["Adventure3D", "Kingdom2_5D"]}},
+        "dependentRealms": {"type": "array", "uniqueItems": true, "items": {"enum": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"]}},
+        "impactReason": {"type": "string", "minLength": 1},
+        "authorityTaskId": {"type": "string", "minLength": 1},
+        "authorityEventId": {"type": "string", "minLength": 1},
+        "occurredUtc": {"type": "string", "format": "date-time"},
+        "authorizedBy": {"const": "game-owner"},
+        "ownerKeyId": {"const": "anotherlife-game-owner-v1"},
+        "signatureMethod": {"const": "hmac-sha256-v1"},
+        "signedUtc": {"type": "string", "format": "date-time"},
+        "transitionSha256": {"$ref": "#/$defs/sha256"},
+        "transitionSignature": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "rollbackTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "baselineId", "packetId", "manifestSha256", "ownerDecisionId"],
+      "properties": {
+        "mode": {"enum": ["Adventure3D", "Kingdom2_5D"]},
+        "baselineId": {"type": "string", "minLength": 1},
+        "packetId": {"type": "string", "minLength": 1},
+        "manifestSha256": {"$ref": "#/$defs/sha256"},
+        "ownerDecisionId": {"type": "string", "minLength": 1}
+      }
+    },
+    "saveSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "saveFixtureId", "saveFixtureSha256"],
+      "properties": {
+        "mode": {"enum": ["Adventure3D", "Kingdom2_5D"]},
+        "saveFixtureId": {"type": "string", "minLength": 1},
+        "saveFixtureSha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rollbackId", "realm", "affectedModes", "reason", "executedBy", "preserveEvidence", "preserveSaves", "disableOnlyAffectedPaths", "authorityTaskId", "authorityEventId", "baselineRefs", "saveSnapshots", "occurredUtc", "authorizedBy", "ownerKeyId", "signatureMethod", "signedUtc", "transitionSha256", "transitionSignature", "targets", "completeImpactedPackRerunRequired"],
+      "properties": {
+        "rollbackId": {"type": "string", "minLength": 1},
+        "realm": {"enum": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"]},
+        "affectedModes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["Adventure3D", "Kingdom2_5D"]}},
+        "reason": {"type": "string", "minLength": 1},
+        "executedBy": {"type": "string", "minLength": 1},
+        "preserveEvidence": {"const": true},
+        "preserveSaves": {"const": true},
+        "disableOnlyAffectedPaths": {"const": true},
+        "authorityTaskId": {"type": "string", "minLength": 1},
+        "authorityEventId": {"type": "string", "minLength": 1},
+        "baselineRefs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/rollbackTarget"}},
+        "saveSnapshots": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/saveSnapshot"}},
+        "occurredUtc": {"type": "string", "format": "date-time"},
+        "authorizedBy": {"const": "game-owner"},
+        "ownerKeyId": {"const": "anotherlife-game-owner-v1"},
+        "signatureMethod": {"const": "hmac-sha256-v1"},
+        "signedUtc": {"type": "string", "format": "date-time"},
+        "transitionSha256": {"$ref": "#/$defs/sha256"},
+        "transitionSignature": {"$ref": "#/$defs/sha256"},
+        "targets": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/rollbackTarget"}},
+        "completeImpactedPackRerunRequired": {"const": true}
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "eventId", "occurredUtc", "kind", "realm", "mode", "data", "previousEventSha256", "resultStateSha256", "signerKeyId", "signatureMethod", "eventSignature", "eventSha256"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "eventId": {"type": "string", "pattern": "^RSQ-REG-[0-9]{6}$"},
+        "occurredUtc": {"type": "string", "format": "date-time"},
+        "kind": {"enum": ["EVIDENCE_INGESTED", "OWNER_DECISION_RECORDED", "SCOPE_REOPENED", "ROLLBACK_RECORDED"]},
+        "realm": {"enum": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"]},
+        "mode": {"type": ["string", "null"], "enum": ["Adventure3D", "Kingdom2_5D", null]},
+        "data": {"type": "object"},
+        "previousEventSha256": {"$ref": "#/$defs/sha256"},
+        "resultStateSha256": {"$ref": "#/$defs/sha256"},
+        "signerKeyId": {"enum": ["anotherlife-evidence-owner-v1", "anotherlife-game-owner-v1"]},
+        "signatureMethod": {"const": "hmac-sha256-v1"},
+        "eventSignature": {"$ref": "#/$defs/sha256"},
+        "eventSha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

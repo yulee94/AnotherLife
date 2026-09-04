@@ -1,0 +1,9 @@
+{
+  "uvLayer": "UVMap",
+  "uvFacesOutsideUnit": 0,
+  "uvZeroAreaFaces": 0,
+  "uvOverlappingFaces": 259,
+  "diagnostics": [
+    "uvOverlappingFaces must be 0 (overlapping UV faces); got 259"
+  ]
+}

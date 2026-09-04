@@ -1,0 +1,63 @@
+{
+  "SelectedRealm": 3,
+  "Resources": [
+    { "Type": 0, "Amount": 1033546 },
+    { "Type": 1, "Amount": 517898 },
+    { "Type": 2, "Amount": 259349 },
+    { "Type": 3, "Amount": 130473 }
+  ],
+  "Buildings": [],
+  "Troops": [],
+  "Researches": [],
+  "Quests": [
+    {
+      "QuestId": "Q1",
+      "CurrentValue": 0,
+      "IsCompleted": false,
+      "IsClaimed": false
+    }
+  ],
+  "Reputation": [],
+  "FactionReputations": [],
+  "LordPersona": {
+    "Warlord": 0,
+    "Diplomat": 0,
+    "Sage": 0,
+    "Rogue": 0
+  },
+  "Territories": [],
+  "RealmGems": [],
+  "Wishgate": {
+    "IsEarned": false,
+    "EarnReason": "",
+    "LastRewardId": "",
+    "LastRewardChosenTimestamp": 0
+  },
+  "CurrentChapterId": "C1",
+  "Warmaster": {
+    "EquippedSetId": "",
+    "UnlockedSetIds": [],
+    "PurchasedPieceIds": [],
+    "IsTrueWarmaster": false,
+    "Level": 0,
+    "Experience": 0
+  },
+  "ChampionCustomization": {
+    "BodyPresetId": "average",
+    "HairStyleId": "short",
+    "ArmorStyleId": "realm_basic",
+    "FaceMarkId": "none",
+    "WeaponStyleId": "sword",
+    "OffhandStyleId": "shield",
+    "PrimaryR": 0.2,
+    "PrimaryG": 0.4,
+    "PrimaryB": 1.0,
+    "HairR": 0.08,
+    "HairG": 0.06,
+    "HairB": 0.04,
+    "CapeEnabled": true,
+    "HelmetEnabled": false
+  },
+  "WarzoneCredits": 4300,
+  "LastSavedTimestamp": 1784868853
+}

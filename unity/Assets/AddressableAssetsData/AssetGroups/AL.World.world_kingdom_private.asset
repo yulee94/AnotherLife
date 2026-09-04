@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: AL.World.world_kingdom_private
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: AL.World.world_kingdom_private
+  m_GUID: 5c5f562cc5695054e80a042170c830a4
+  m_SerializeEntries:
+  - m_GUID: 18dc9d792ba55654aadd2a6195419977
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1b97ac59677b25040b91b5800803e703
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_02
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 395636665a984b54d8104f75fed353fd
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_03
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 464815165f124b34a8719d074c4a605a
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_12
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4b13469456bfac14e814797cfcdc7d1e
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_11
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c20761e234a4f44dbfc93b2b50e823c
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_07
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7ccc6dfa1b61781499695edb02f8b214
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_06
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ab775bb9d445e04ea41a4f274791ebe
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_08
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9db4b4070309c2d46afd409e090c76bb
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_10
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a3acea0a7c3c7e14989ac384cdbc4b98
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_09
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7073bf7de18b7e48806ffab22d74964
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_05
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ec98da7d7364218408c37f5bdc89c339
+    m_Address: scene/world_kingdom_private/chunk_kingdom_area_04
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ef508cf66906cbb4c8247cd634dc7f09
+    m_Address: scene/world_kingdom_private/chunk_kingdom_castle_core
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - al-generated-scene
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: cf3bb32b8466c0a40aad4591db5490df, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 7c8979d0aa7121d418936e92581145ab, type: 2}

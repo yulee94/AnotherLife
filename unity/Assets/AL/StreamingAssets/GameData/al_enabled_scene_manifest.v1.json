@@ -1,0 +1,1253 @@
+{
+  "accountingFingerprintSha256": "69bde1c10261830c458de15dad3449d6cf973dd2a563f0c3373d559de914e936",
+  "contentFingerprintSha256": "7c1a9018b7843bc728a097952b6cf6f0cb72db6255b642a7d4747043384a6f05",
+  "decisionId": "DEC-SCENE-DELIVERY-002",
+  "deliveryDependencies": {
+    "addressablesVersion": "2.9.1",
+    "packagesLockSha256": "87899072e8b43a6c6e46ce4623026617239520c481b814a2bfc0ba88f82c8f6d",
+    "unityVersion": "6000.3.22f1"
+  },
+  "deliveryStrategy": {
+    "contentOnlyUpdatesEnabled": false,
+    "generatedScenes": "local_addressables_by_world",
+    "remoteCatalogsEnabled": false,
+    "shellScenes": "direct_build_inclusion"
+  },
+  "enabledScenes": [
+    {
+      "assetPath": "Assets/AL/Scenes/Boot.unity",
+      "buildIndex": 0,
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
+          "guid": "373eb8627471831489396976562eb9b1",
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
+        },
+        {
+          "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
+          "guid": "4f231c4fb786f3946a6b90b886c48677",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Scenes/SceneStartupMarker.cs",
+          "guid": "5577def205214c62961f7dea4569c2c4",
+          "sha256": "ba1affcf6503d9f1338ec9aa0dd3b3c52752952309db8dce8019371a1e555e93"
+        },
+        {
+          "assetPath": "unity-external://76c392e42b5098c458856cdf6ecaaaa1",
+          "guid": "76c392e42b5098c458856cdf6ecaaaa1",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/UI/BootController.cs",
+          "guid": "a6bcae63b59f3ac47b172b4520cd0675",
+          "sha256": "cd4f5e1c1b34850250f6d21c66c641d5024907edb9ed6a376726666a2671634f"
+        }
+      ],
+      "dependencyProjectionSha256": "eab461ed4c71064433f32b6e3c4370bc286bbac2e9d9727ea19da77a0ca416ff",
+      "guid": "14733c561820e497a96a3f2467d247cc",
+      "metaSha256": "5e2a739cb92edbfaa1dcc3d0d064ae40e7235fa4fbfb80b0a54f9b3ea60292ea",
+      "ownership": {
+        "domain": "bootstrap"
+      },
+      "purpose": "production_entry",
+      "reachability": {
+        "entry": true,
+        "mode": "direct_build_scene_transition"
+      },
+      "sceneId": "al_scene_boot",
+      "sceneName": "Boot",
+      "sceneSha256": "3e6564484001583cd1eafc77f86ac8e885ca4cd58a6d4ce791d66a348661afdd",
+      "shippingStatus": "direct_build"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/RealmSelection.unity",
+      "buildIndex": 1,
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
+          "guid": "373eb8627471831489396976562eb9b1",
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
+        },
+        {
+          "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
+          "guid": "4f231c4fb786f3946a6b90b886c48677",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Eldergrove_Flat_256_v001.png",
+          "guid": "53001b27fd9d14914984211765be4391",
+          "sha256": "1d45fc8fba82ebb3fdc1c4f819026ea8e45b11c248378371c7b2b6923c6e0cac"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Scenes/SceneStartupMarker.cs",
+          "guid": "5577def205214c62961f7dea4569c2c4",
+          "sha256": "ba1affcf6503d9f1338ec9aa0dd3b3c52752952309db8dce8019371a1e555e93"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/UI/RealmSelection/RealmSelectionController.cs",
+          "guid": "6fea01d187dc36e43a7f6bbb6fd2d7da",
+          "sha256": "86a9bff28ba4f90895ac10f3d3f8bcde24407347fa0806d910a932e62407dcac"
+        },
+        {
+          "assetPath": "Assets/AL/Prefabs/UI/RealmSelection/AL_UI_RealmSelection_Screen.prefab",
+          "guid": "762efc31c84ff154d9a7d421703ebc44",
+          "sha256": "723c5d2f770c0961bab198b9c072d1b61fd04e78edaeca766f33d43bf5ea7663"
+        },
+        {
+          "assetPath": "unity-external://76c392e42b5098c458856cdf6ecaaaa1",
+          "guid": "76c392e42b5098c458856cdf6ecaaaa1",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Stonehold_Flat_256_v001.png",
+          "guid": "94d8d9e2cf04a4b769c213a13c164b8e",
+          "sha256": "53d220dc8b938d212963286133ca39e1968fa1421126559dd56bdfde9c437946"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Umbral_Flat_256_v001.png",
+          "guid": "a426041e03b0742999a34b8b5e198406",
+          "sha256": "a9daefa3ea6445ba2db680dad92a456db75becebec8848c678b29d5ea2c85aaa"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Crownlands_Flat_256_v001.png",
+          "guid": "ba4dfcc7b514049f79f6ec3424193b46",
+          "sha256": "f5c7e351ec930aac69f6df02d03034bc38c465ed8dfa787dd4feba044f33f82b"
+        }
+      ],
+      "dependencyProjectionSha256": "8ce28f8a5ff12d7c7e2342aaf07dab789beaf67e1adc7d5746a5add9d7125982",
+      "guid": "5c580ae0acb5e4b4db4b57a93077e308",
+      "metaSha256": "e580527f283dc5df832d15ceeae00557463f5f3f53f63e0a5a5ae274e539a020",
+      "ownership": {
+        "domain": "onboarding"
+      },
+      "purpose": "onboarding_selection",
+      "reachability": {
+        "entry": false,
+        "mode": "direct_build_scene_transition"
+      },
+      "sceneId": "al_scene_realm_selection",
+      "sceneName": "RealmSelection",
+      "sceneSha256": "e24935df9bfcdf805ac612b67534d070dfd25b535f6ebf754204284ffca5fbc6",
+      "shippingStatus": "direct_build"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/CharacterCreation.unity",
+      "buildIndex": 2,
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
+          "guid": "373eb8627471831489396976562eb9b1",
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
+        },
+        {
+          "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
+          "guid": "4f231c4fb786f3946a6b90b886c48677",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Scenes/SceneStartupMarker.cs",
+          "guid": "5577def205214c62961f7dea4569c2c4",
+          "sha256": "ba1affcf6503d9f1338ec9aa0dd3b3c52752952309db8dce8019371a1e555e93"
+        },
+        {
+          "assetPath": "unity-external://76c392e42b5098c458856cdf6ecaaaa1",
+          "guid": "76c392e42b5098c458856cdf6ecaaaa1",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/UI/CharacterCreation/CharacterCreationController.cs",
+          "guid": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+          "sha256": "61e55a86f4e74bc13d1452574b6bc0a896f106d834cea15c5119eaa5f48a5e8f"
+        }
+      ],
+      "dependencyProjectionSha256": "2ecf3f9663edef2bfbc0bdad80b219b3879b4cc2d4397bab66d2fd647bf27b29",
+      "guid": "c3d4e5f60718293a4b5c6d7e8f901234",
+      "metaSha256": "e7a51fc6b54b1cad420f29705ba46c17d176b18201cbb5853762076bae42e745",
+      "ownership": {
+        "domain": "onboarding"
+      },
+      "purpose": "onboarding_creation",
+      "reachability": {
+        "entry": false,
+        "mode": "direct_build_scene_transition"
+      },
+      "sceneId": "al_scene_character_creation",
+      "sceneName": "CharacterCreation",
+      "sceneSha256": "18c7ea19b6b241f9d6f9a000d7fa6e727683f34c56e4ba7ec4fbea1674caec00",
+      "shippingStatus": "direct_build"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/ChampionArena.unity",
+      "buildIndex": 3,
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
+          "guid": "373eb8627471831489396976562eb9b1",
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
+        },
+        {
+          "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
+          "guid": "4f231c4fb786f3946a6b90b886c48677",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Scenes/SceneStartupMarker.cs",
+          "guid": "5577def205214c62961f7dea4569c2c4",
+          "sha256": "ba1affcf6503d9f1338ec9aa0dd3b3c52752952309db8dce8019371a1e555e93"
+        },
+        {
+          "assetPath": "unity-external://76c392e42b5098c458856cdf6ecaaaa1",
+          "guid": "76c392e42b5098c458856cdf6ecaaaa1",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/ChampionMode/ChampionArenaSceneController.cs",
+          "guid": "d1b51d977c4e478c970a023b1c018edb",
+          "sha256": "d35014cb9ddf7b8db7e24aacd49d05387759e9fca135f18d21cd2f6e5c93d0b9"
+        }
+      ],
+      "dependencyProjectionSha256": "32cfa24b4ad4d937dd149edf19ee5a6e923e043ef34f2dc2520fa2d693b8a043",
+      "guid": "9c8e973279bb149b49b9938b1781c775",
+      "metaSha256": "2100665ef47d52685ebd308f4380535542bcee01e11d73684721c6e5bf18f98a",
+      "ownership": {
+        "domain": "champion_mode"
+      },
+      "purpose": "first_session_gameplay",
+      "reachability": {
+        "entry": false,
+        "mode": "direct_build_scene_transition"
+      },
+      "sceneId": "al_scene_champion_arena",
+      "sceneName": "ChampionArena",
+      "sceneSha256": "5ae4d7ce819ce875fa34b4bdbc8c079b437d4c9b7312665488df9f34596b9d73",
+      "shippingStatus": "direct_build"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Kingdom.unity",
+      "buildIndex": 4,
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
+          "guid": "373eb8627471831489396976562eb9b1",
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
+        },
+        {
+          "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
+          "guid": "4f231c4fb786f3946a6b90b886c48677",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Scenes/SceneStartupMarker.cs",
+          "guid": "5577def205214c62961f7dea4569c2c4",
+          "sha256": "ba1affcf6503d9f1338ec9aa0dd3b3c52752952309db8dce8019371a1e555e93"
+        },
+        {
+          "assetPath": "unity-external://76c392e42b5098c458856cdf6ecaaaa1",
+          "guid": "76c392e42b5098c458856cdf6ecaaaa1",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/UI/Kingdom/KingdomSceneController.cs",
+          "guid": "f0fabeeedbbf4c4c833a0591113bd399",
+          "sha256": "bae53ee49c14a60865cb191ded543577e6092d520581fba7519a6e511ef9bd37"
+        }
+      ],
+      "dependencyProjectionSha256": "e71820b3bf72380dce062c5aed210fd8636ab9c8c8aaa864fd941eeeabe62659",
+      "guid": "dea6fe75315c3402fbfa8de764bd9873",
+      "metaSha256": "57fc04d7c2e1f9606bc1fc0c4c65f033a5b3f0a32d27abe364ada1bdfc0a875b",
+      "ownership": {
+        "domain": "kingdom"
+      },
+      "purpose": "production_hub",
+      "reachability": {
+        "entry": false,
+        "mode": "direct_build_scene_transition"
+      },
+      "sceneId": "al_scene_kingdom",
+      "sceneName": "Kingdom",
+      "sceneSha256": "0c7a37e473177558e271390541b24726ef38482ddd42a675cf3ed7a8151b04fb",
+      "shippingStatus": "direct_build"
+    }
+  ],
+  "excludedScenes": [
+    {
+      "assetPath": "Assets/AL/Scenes/InnerRealmWorld.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Core/Bootloader.cs",
+          "guid": "373eb8627471831489396976562eb9b1",
+          "sha256": "f0e23764d18ba51f90d618c43b65c72d2cff7c6b6fd73eeb354fcaca64215a23"
+        },
+        {
+          "assetPath": "unity-external://4f231c4fb786f3946a6b90b886c48677",
+          "guid": "4f231c4fb786f3946a6b90b886c48677",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/World/InnerRealmWorldSceneController.cs",
+          "guid": "5e17b4c90a8d4f2ea6c3d1b87540e29f",
+          "sha256": "796339ecf41ef0649e949a5f7ed8c5d43ec8cd5cc2ac3ab3f42afef2b4ae2387"
+        },
+        {
+          "assetPath": "unity-external://76c392e42b5098c458856cdf6ecaaaa1",
+          "guid": "76c392e42b5098c458856cdf6ecaaaa1",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        }
+      ],
+      "dependencyProjectionSha256": "39a02be556b8498aa159ec5f1948bc0132ee4e539e00757214b6d216c2d622a2",
+      "guid": "2a8f6c14d9e347b0a5c1e8d73620b4fa",
+      "metaSha256": "686784a1c7c6cbd56caa248775f1c69e23b85d7b351740b8ef16a5a103c7c8ff",
+      "ownership": {
+        "domain": "world_streaming"
+      },
+      "purpose": "legacy_monolithic_world",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "al_scene_inner_realm_world_legacy",
+      "sceneName": "InnerRealmWorld",
+      "sceneSha256": "3034b3ccc242907db6868a3bfd85d8f4b9ff16a242a4904b92763545185de89d",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototype/Terrestrials/SlagfallQuarryRepresentativeSlice.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Prefabs/tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.prefab",
+          "guid": "10414d1e3afe5ec43be0ad68ec4336ce",
+          "sha256": "c104200a97b59e860f61c1e6c385e077fd572e0984c00c49ac56a67ea35cafea"
+        }
+      ],
+      "dependencyProjectionSha256": "3ad6801be2fb1024194b66c328ed42a34033fd0a2dd11c3d1efd11ee378b8e21",
+      "guid": "5cfeef1ccb7b15743aa67873f076254d",
+      "metaSha256": "2de423810c7277a0990d93599d77131cc88a47efa982a2c6da59b523b30a16f3",
+      "ownership": {
+        "domain": "terrestrials"
+      },
+      "purpose": "terrestrial_representative_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_slagfallquarryrepresentativeslice",
+      "sceneName": "SlagfallQuarryRepresentativeSlice",
+      "sceneSha256": "14bf40f36330aa798e0d3c7557a1ec1de4f1621be548e5a9f82a81b6dea97877",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/CrownlandsStormwrightAnimationPrototype.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Crownlands/Crownlands_Stormwright_AnimationPrototype.prefab",
+          "guid": "2bd87d71c1e6e4fc4a20bea9acd4949a",
+          "sha256": "64fe4cdee69e377888c059a6ae51d760f6989d98d4879d86125dab6425049e73"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Crownlands/Materials/MAT_Crownlands_Stormwright_Ground.mat",
+          "guid": "3103020647920497ca975ca01da0f1f1",
+          "sha256": "f4a3c9331164a0112933b936bf65e4fa93e60ece9969265586ce52b4076c16eb"
+        }
+      ],
+      "dependencyProjectionSha256": "86c8c163e2d459749e4ce9086d6748073d263dcb39c027142c2c48223d9cf9be",
+      "guid": "6e86f9796f31948efb401d80dfac594b",
+      "metaSha256": "8224f943fd4995f36b1dda0ef5a3734091068c50654034788f6b45142c88522e",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_crownlands_stormwright_animation_prototype",
+      "sceneName": "CrownlandsStormwrightAnimationPrototype",
+      "sceneSha256": "90b7960b96e9c30bd0bc16ff8d05f88979478487a409c3681d77d437b82e59ae",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/CrownlandsStormwrightProductionModel.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/Runtime/Crownlands_Stormwright_Production.prefab",
+          "guid": "af08230ec23a84ed59fe22cb35dc22df",
+          "sha256": "e6af605f86ae0f3ad2986d70070a6dbe72b5f9560d2ef92c104af812d55c7cb5"
+        }
+      ],
+      "dependencyProjectionSha256": "6ee026068c75b1ec7c1c5dc1047389b4ea95255cd36438c550c2e68e165c5bab",
+      "guid": "cce61c27e957740da97ae0e3c8136139",
+      "metaSha256": "8dccdbc4e22f046f7d7e6bf56bdcb99bcf46fec655c4f48b8bc72c02f21fff6f",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_crownlands_stormwright_production_model",
+      "sceneName": "CrownlandsStormwrightProductionModel",
+      "sceneSha256": "6648d2968e76610f436a02b2d729bf00b8a3c3ae1a157db1bfe14c31d091cd04",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/CrownlandsTownHallLevelBlockout.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Crownlands/Materials/MAT_Crownlands_Stormwright_Ground.mat",
+          "guid": "3103020647920497ca975ca01da0f1f1",
+          "sha256": "f4a3c9331164a0112933b936bf65e4fa93e60ece9969265586ce52b4076c16eb"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Crownlands_TownHall_Level10_Blockout.prefab",
+          "guid": "554956ba8e5d14c01bc3490184491c95",
+          "sha256": "d85184b32e90586444b0918fe46e8a3f2f7eb4bbcb4cea078eeca90c3fd3b175"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Crownlands_TownHall_Level01_Blockout.prefab",
+          "guid": "75dc40f38f11044fb8038628a4208e43",
+          "sha256": "0430f4956fa0b394dd4b1d5bdc9d3ac4de8ac030d8590d996dc98bc420ad4c97"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Crownlands_TownHall_Level06_Blockout.prefab",
+          "guid": "814b58c9bcec44abf99eb827b48473c1",
+          "sha256": "812dcbfe438d413459d836ec373f3f5ac093ad5f85488d5cc9017d47eb720e77"
+        }
+      ],
+      "dependencyProjectionSha256": "f4ae6a4cfe29ef1743343e4484bbda10da17fdb5ef09397e6c0c13c547e4480a",
+      "guid": "eea98b8160fed49fcab84e736184a247",
+      "metaSha256": "a068a65c975b90719b111ae9ac460afcba19393d619c47f1ca71b29f0e7fe4cf",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_crownlands_town_hall_level_blockout",
+      "sceneName": "CrownlandsTownHallLevelBlockout",
+      "sceneSha256": "a92e66dd89944bd461349c6a7ead5385d1d6038e08341f2d1d21535abb91cb68",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/CrownlandsTownHallProductionModel.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Runtime/Crownlands_TownHall_Production.prefab",
+          "guid": "40d5f7687fed640fd8c0d4b1868ff0ef",
+          "sha256": "71ea52234ec8aea93b91bf39ae41d111fa1a7d54cf181f54894e895d23463b46"
+        }
+      ],
+      "dependencyProjectionSha256": "2528154b407bc09a721d24bf944c0aa00389d97506650040d5869f54c3fe8cb4",
+      "guid": "35fbbf77c96cd44cf94cbddeb266296d",
+      "metaSha256": "0405b9cd562aa8e28426cbcc678d9282c3ae74dbc0d7e8a2d1021fa0e68792ef",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_crownlands_town_hall_production_model",
+      "sceneName": "CrownlandsTownHallProductionModel",
+      "sceneSha256": "4133bfc9e87e4949a3882e625490835a3b26baf655bff82a6862eb460f4df313",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/EldergroveAtelierAnimationPrototype.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Eldergrove_Atelier_AnimationPrototype.prefab",
+          "guid": "a4e352f78f66d4540879743a76ccc276",
+          "sha256": "5ffb1550d489d7746d2e6c65481687a32315bd5523041748e81c3c5f7c0682bb"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Materials/MAT_Eldergrove_Ground.mat",
+          "guid": "cbf14208c610348748bfb45512c5c999",
+          "sha256": "f83b6abdf21a003077a72578368b3b047320281c865860e0c6eeb14094fa36f7"
+        }
+      ],
+      "dependencyProjectionSha256": "aac8de7b222d366b20dbee7aa2950281a76cddd0abb46d21c9f8a3cfaf19a635",
+      "guid": "90b46c3ef38c64252bd6fcc03256c81f",
+      "metaSha256": "a34f0557b13a8e7cd3bd706beff55431ffd6cd7b19f27f8485d99de189ced277",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_eldergrove_atelier_animation_prototype",
+      "sceneName": "EldergroveAtelierAnimationPrototype",
+      "sceneSha256": "dcca91e2a31c5f3aa014e4a21271c3b35251c6fa71172b337f25ed28cf4207c6",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/EldergroveTownHallLevelBlockout.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/TownHall/Eldergrove_TownHall_Level01_Blockout.prefab",
+          "guid": "0ff0ee925ebc74e9bbc6d4abd8c3958f",
+          "sha256": "450040e2424c2f773f714a8c19d89fa61580c44c486e09e6fe05f452b94615c3"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/TownHall/Eldergrove_TownHall_Level10_Blockout.prefab",
+          "guid": "1093d6efb2111418cad658ce61c14bf2",
+          "sha256": "e5bafe1567684aeb86bbb8b55a6df920dd8fe47b7fce1c7f959f88dad850661f"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/TownHall/Eldergrove_TownHall_Level06_Blockout.prefab",
+          "guid": "6140ec69a7b2b40bb88b719561fe6bcd",
+          "sha256": "69d7ad4cf225902075696ef58a1440723bada62bca1793f4c38f317859204576"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Materials/MAT_Eldergrove_Ground.mat",
+          "guid": "cbf14208c610348748bfb45512c5c999",
+          "sha256": "f83b6abdf21a003077a72578368b3b047320281c865860e0c6eeb14094fa36f7"
+        }
+      ],
+      "dependencyProjectionSha256": "f33fdae2ef3e4909c059f0d7130d57386176bde1a4f5434e25bb3b68c10304b7",
+      "guid": "88d4f51694c9c470d90147ac6ac205b9",
+      "metaSha256": "6569a6ca126026767365b4fd257bf21dd3a8258dfb973893740303eaf6cacc1b",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_eldergrove_town_hall_level_blockout",
+      "sceneName": "EldergroveTownHallLevelBlockout",
+      "sceneSha256": "a7cebb681c82429cf90691a268a4b827c5fbd476e1f7d614878a93ed8d7a395f",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/EldergroveTownHallProductionModel.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/TownHall/Runtime/Eldergrove_TownHall_Production.prefab",
+          "guid": "64552283a5bd040f08d3f41d6a94ca5a",
+          "sha256": "2d91fc0a7cf825facabe995ef9d04204b0cc1471ad19fded3093f9602699b16e"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Materials/MAT_Eldergrove_Ground.mat",
+          "guid": "cbf14208c610348748bfb45512c5c999",
+          "sha256": "f83b6abdf21a003077a72578368b3b047320281c865860e0c6eeb14094fa36f7"
+        }
+      ],
+      "dependencyProjectionSha256": "947c44e0cda4f0e1e42f86c47a1af37e11bbd6ad2f19b171c7bd3b6045c1b739",
+      "guid": "64de69cf1459248b19a3d7dedd25ef1e",
+      "metaSha256": "83b9306a3e988bcb5987ef11bb6fc73d88f8b63025fdf1d620e66e9970c752c2",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_eldergrove_town_hall_production_model",
+      "sceneName": "EldergroveTownHallProductionModel",
+      "sceneSha256": "fc96dc4fd6a14a2641f1d68914db8232507ea7f06a061f4033a83076382303dc",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/EldergroveWorkshopLevelBlockout.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/Eldergrove_Workshop_Level06_Blockout.prefab",
+          "guid": "436e9e39421cf4f75b94f762a6daa5fc",
+          "sha256": "8d6859f4742351a1798c365f0848e40e6c72590016f68cfa3547473b104302bd"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/Eldergrove_Workshop_Level10_Blockout.prefab",
+          "guid": "531816af1b5354b7da8f3ab38670ff91",
+          "sha256": "51a4c26765f9bdfd4eb1e65baf4718ecfd5af9710d7b644b3f8159a1e1e9c310"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Materials/MAT_Eldergrove_Ground.mat",
+          "guid": "cbf14208c610348748bfb45512c5c999",
+          "sha256": "f83b6abdf21a003077a72578368b3b047320281c865860e0c6eeb14094fa36f7"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/Eldergrove_Workshop_Level01_Blockout.prefab",
+          "guid": "de343cd6c01744306894397173ce2afa",
+          "sha256": "1e1ed4ac8e57d1cb39a1496a31ce18f62c145e2cd7aea6841d39fd8f1b43318a"
+        }
+      ],
+      "dependencyProjectionSha256": "552d1d0dab3d21aeee6025f72ad8700eed7bae116de7b683cc723f627998ad46",
+      "guid": "04a4ffb473ce540cfb3cabee95faa1a8",
+      "metaSha256": "0951b31ef5cd22381738fddc39968fc0728ddaae4d838f9ad8448c6ce47cdd12",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_eldergrove_workshop_level_blockout",
+      "sceneName": "EldergroveWorkshopLevelBlockout",
+      "sceneSha256": "0da27f0361ba3cb7623eb8da6c53f03f38b54dcd66771e7e35df2c038d7bd15a",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/EldergroveWorkshopProductionModel.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/Runtime/Eldergrove_Workshop_Production.prefab",
+          "guid": "856e9f0cea18f4647812c4467a05d991",
+          "sha256": "d6756aa97c2e92b0d2b59806ce67de03d6500e25e2e3a44a463cdcb28a92daf1"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Eldergrove/Materials/MAT_Eldergrove_Ground.mat",
+          "guid": "cbf14208c610348748bfb45512c5c999",
+          "sha256": "f83b6abdf21a003077a72578368b3b047320281c865860e0c6eeb14094fa36f7"
+        }
+      ],
+      "dependencyProjectionSha256": "9efba5f390e9728cceaef18857923f43ee27fc35009ec07489a8b607c0cd9d09",
+      "guid": "8b5c4a80406784311afaaecf19b6edb8",
+      "metaSha256": "1932b9f6be7236c76f46891755d1f6029f35c69af429373e02310e0c16f9090e",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_eldergrove_workshop_production_model",
+      "sceneName": "EldergroveWorkshopProductionModel",
+      "sceneSha256": "cef8b433f88c04219291db04cb23cf009fcbe08caa20c7d809926c215dc82459",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/StoneholdTownHallLevelBlockout.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Production/TownHall/Stonehold_TownHall_Level10_Blockout.prefab",
+          "guid": "1fb2d7248b69449989e933e49662ca91",
+          "sha256": "6ac038579f66108967f849f2811ff2bce2e635ed9701b07d8459add867b49ee1"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Materials/MAT_Stonehold_Ground.mat",
+          "guid": "ac2a2ee15d8e34f929bb1f8d6de9eff7",
+          "sha256": "56a9e900d711272190ee3f125b35773e2ed51ed3dfba411ea3eecf2b89c7735a"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Production/TownHall/Stonehold_TownHall_Level06_Blockout.prefab",
+          "guid": "d691e35f665bc41ff8cfeadbb6e0d8fb",
+          "sha256": "49e2ff191f2aeb101655fccd623636d212cc0b063a38256cbd528a594dc61ebc"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Production/TownHall/Stonehold_TownHall_Level01_Blockout.prefab",
+          "guid": "dddcc11480e424a5aaa65005de6fd7ba",
+          "sha256": "f2f007e4b6f9d3d317daa707aa1aa8409af6c7ab7fdb9098a7d2a85a78b370b5"
+        }
+      ],
+      "dependencyProjectionSha256": "4d1df50ef64a14796ae0551000ca3f86d5ce67bde5147ce60fa53f171350d06a",
+      "guid": "0f318ceaec74245de8da293de045678f",
+      "metaSha256": "61d67646d7828eeb139be66fa0941f9d7d0cee9417086403eb8e3685da6c7a40",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_stonehold_town_hall_level_blockout",
+      "sceneName": "StoneholdTownHallLevelBlockout",
+      "sceneSha256": "787c8611eebc684bcb98f477fbc28562e30e9b438dfb58b4dbb6c46bbb041775",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/StoneholdTownHallProductionModel.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Production/TownHall/Runtime/Stonehold_TownHall_Production.prefab",
+          "guid": "8efaf25037c3b444f86bfe62ea193ed7",
+          "sha256": "6dfcab4c4f36fceae06bb83b56a2a7034c74a53f6d027370f5eca830f96341b2"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Materials/MAT_Stonehold_Ground.mat",
+          "guid": "ac2a2ee15d8e34f929bb1f8d6de9eff7",
+          "sha256": "56a9e900d711272190ee3f125b35773e2ed51ed3dfba411ea3eecf2b89c7735a"
+        }
+      ],
+      "dependencyProjectionSha256": "f45d26a54b6739d811de78195ba5367e7b819e5549866398d06bd4f8576d8cf0",
+      "guid": "56e835b0f39e542c8aacdc96bd42d365",
+      "metaSha256": "4da5e4b4b66b97786a561cb72a549872286de169939fbb8fc30f650b83b5efde",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_stonehold_town_hall_production_model",
+      "sceneName": "StoneholdTownHallProductionModel",
+      "sceneSha256": "80da46d5a4dd6d0ecffc9b90976d388d137e0e21bc2d83b0ac502574567cfe7b",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/StoneholdWorkshopAnimationPrototype.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Materials/MAT_Stonehold_Ground.mat",
+          "guid": "ac2a2ee15d8e34f929bb1f8d6de9eff7",
+          "sha256": "56a9e900d711272190ee3f125b35773e2ed51ed3dfba411ea3eecf2b89c7735a"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Stonehold_Workshop_AnimationPrototype.prefab",
+          "guid": "e95513fba320e4df5b90ba33cacac524",
+          "sha256": "d1b36a7fad54818b39ce51c39b961bf4977984866f8ef9f8088c86f338961e54"
+        }
+      ],
+      "dependencyProjectionSha256": "979863ea901658efbfaafcdf0b49f477a52125ea9cae5df0f609b25d463e450e",
+      "guid": "7a263d1813a0c4db5906bbfd093f5ce3",
+      "metaSha256": "91ed3db64917a8463ee7f06ae7ee2a212310bc89e250c7f9632c3c22da414394",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_stonehold_workshop_animation_prototype",
+      "sceneName": "StoneholdWorkshopAnimationPrototype",
+      "sceneSha256": "5d87552d1e8219778a59ba8fe96a7f526c69925c2c681cff79c5efb5a9afd601",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/StoneholdWorkshopProductionModel.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Materials/MAT_Stonehold_Ground.mat",
+          "guid": "ac2a2ee15d8e34f929bb1f8d6de9eff7",
+          "sha256": "56a9e900d711272190ee3f125b35773e2ed51ed3dfba411ea3eecf2b89c7735a"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Stonehold/Production/Runtime/Stonehold_Workshop_Production.prefab",
+          "guid": "fa8beffdd2c1045579a3fbd5c25ef181",
+          "sha256": "388b56eeb5cfb1cefd19bcdc188fe4beeff5fa817860e37a876b7315ac002106"
+        }
+      ],
+      "dependencyProjectionSha256": "333bdb86a3c007d2bde10d53e8c3b04e1e972cf967c3b0a31e7271bc15bf56e3",
+      "guid": "964e5b4a0317d4888b8b84c3e1fe4453",
+      "metaSha256": "741d30e126e5b03242a8897e713d21fced5850b20de6881f8af351dc83de9952",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_stonehold_workshop_production_model",
+      "sceneName": "StoneholdWorkshopProductionModel",
+      "sceneSha256": "7bf2207bf15a9371f86047053581c13016d26cd4906ab75184d92de815c49292",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/UmbralTownHallLevelBlockout.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Materials/MAT_Umbral_Ground.mat",
+          "guid": "3b428318954264555b916ce95ddeb459",
+          "sha256": "cfc823163b41d34d34bb64004c6cdf69bd5b76374aa58a5e267fa240adcbb534"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Production/TownHall/Umbral_TownHall_Level06_Blockout.prefab",
+          "guid": "5eba7779cb780477ab79807db8134e5a",
+          "sha256": "d0c6cce536883204ece8905746d67e2d4c7eed4920e8652420ef25329ff20fe1"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Production/TownHall/Umbral_TownHall_Level01_Blockout.prefab",
+          "guid": "61d5d1e5d9fe24448a473407548424da",
+          "sha256": "dc722c297c355caa60e4a6d7021bbd671dd60d10191eabe228c6f7b0e24855df"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Production/TownHall/Umbral_TownHall_Level10_Blockout.prefab",
+          "guid": "669c9e69849a64dd8b09b00fec81f138",
+          "sha256": "3050faa680af5187528a88b12f5e88352565e00d54703a64f805589f03d277e1"
+        }
+      ],
+      "dependencyProjectionSha256": "4a0c5c5dfec61d0738b818058513383b4e07dddd2aa67623eaa63c9aba052b53",
+      "guid": "2e33670caa27c4e869226f951b3e71a2",
+      "metaSha256": "04bd0570894adeffa03176a5c890899c5c1eb3d418fe4023ec5b3033fc9f544f",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_umbral_town_hall_level_blockout",
+      "sceneName": "UmbralTownHallLevelBlockout",
+      "sceneSha256": "cf4e4face812ddcbcc361a95792ce2611678619fd5b762ae0cdb690007e6c121",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/UmbralTownHallProductionModel.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Production/TownHall/Runtime/Umbral_TownHall_Production.prefab",
+          "guid": "1a01ccaafe3d44864b31d30ef7091279",
+          "sha256": "252665d5d111fdafdf95f11996a28f49ab5381e836802e8e0aa1fba3aa3a953e"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Materials/MAT_Umbral_Ground.mat",
+          "guid": "3b428318954264555b916ce95ddeb459",
+          "sha256": "cfc823163b41d34d34bb64004c6cdf69bd5b76374aa58a5e267fa240adcbb534"
+        }
+      ],
+      "dependencyProjectionSha256": "b09af6b2d8c1e8039b5ba6edebfe368338b7368a0380b2d1723e2937b83b8b1b",
+      "guid": "3df7b934632d64640996e166cee7da4b",
+      "metaSha256": "1d4a69e057e383397a963a9bcbc147336037c268d1fe00b690114b64006d6391",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_umbral_town_hall_production_model",
+      "sceneName": "UmbralTownHallProductionModel",
+      "sceneSha256": "51c49c4b22e7fc26275a9248e117b2e9d8001fbfd84fd4a5e5422f4156f3f7e1",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/UmbralVeilwrightAnimationPrototype.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Materials/MAT_Umbral_Ground.mat",
+          "guid": "3b428318954264555b916ce95ddeb459",
+          "sha256": "cfc823163b41d34d34bb64004c6cdf69bd5b76374aa58a5e267fa240adcbb534"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Umbral_Veilwright_AnimationPrototype.prefab",
+          "guid": "414fa83d865854907b7665f69304e33a",
+          "sha256": "7416ed729a2fd71062d9595b8d139bc6d0c194a228fa25823c4ab360c412e7d4"
+        }
+      ],
+      "dependencyProjectionSha256": "8bdd3338653ece92bc39e72b5324043f141a4399d0ca2d20ef4cedf37b2b6da3",
+      "guid": "43c60a72857a74584a2261b1f3620594",
+      "metaSha256": "01c2dcd9d72930b09724909acc98693ace3ecb2e7e07e649d357281604417944",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_umbral_veilwright_animation_prototype",
+      "sceneName": "UmbralVeilwrightAnimationPrototype",
+      "sceneSha256": "9310e7f5791ecc1621d673f759b131155b4744673151d298839bd9a96ad46a1b",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Prototypes/UmbralVeilwrightProductionModel.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Production/Runtime/Umbral_Veilwright_Production.prefab",
+          "guid": "197149fd997cd4a59b110b4722bc7e68",
+          "sha256": "c4f559a4c572f63b5a4136ca74d1d2fb9b77c4f042cb9a2166d2e1d931e1a691"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Generated/Architecture/Umbral/Materials/MAT_Umbral_Ground.mat",
+          "guid": "3b428318954264555b916ce95ddeb459",
+          "sha256": "cfc823163b41d34d34bb64004c6cdf69bd5b76374aa58a5e267fa240adcbb534"
+        }
+      ],
+      "dependencyProjectionSha256": "f3251a24551fa14423f364eab928027ac6057d78fe7d876983e0df23cfe8784b",
+      "guid": "347352cfc8f4b43c3b07815c72120e1a",
+      "metaSha256": "aa4b53ac7cd4dcf0767a41a28a8d0661eefd69babe611bd5d0e6fcf49f7be743",
+      "ownership": {
+        "domain": "architecture"
+      },
+      "purpose": "architecture_review_prototype",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "excluded_umbral_veilwright_production_model",
+      "sceneName": "UmbralVeilwrightProductionModel",
+      "sceneSha256": "1492f4eb96f9c4424d4097e00c46c17a094a626b9345f26c46782dcc6db4ad1a",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/AL/Scenes/Review/Terrestrials/SlagfallEnvironmentKitReview.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_broken_fracture_raft_v001.prefab",
+          "guid": "050e315c37567074c8c3815f8c1c9386",
+          "sha256": "d701d3d46c8db8e37f8f222ec52dec1373222c53171a506956f55baf81001c68"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_diagonal_fault_slab_v001.prefab",
+          "guid": "13cfffac67a52e9439654cf0a9193d31",
+          "sha256": "67824090a9313e25cc4ee1d3896d5622cc01b5680388a56b15c36681380fda6c"
+        },
+        {
+          "assetPath": "Assets/AL/Scenes/Review/Materials/SlagfallReviewSurface.mat",
+          "guid": "45e0a23365ff85c42877d664394b88af",
+          "sha256": "ec9ca35cc46f20d0f2201478a362980db3694305f2a3a79120a4f105beaf8282"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_collapsed_gallery_mouth_v001.prefab",
+          "guid": "5e07ad535a2549943abfa59112152a0d",
+          "sha256": "655a39b00f8f419338525e00cd39df0894cf95c0dac98a2f5113fc715233cd00"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_braided_runoff_pool_v001.prefab",
+          "guid": "679539947cf7a8a43af4acd9fe46cecf",
+          "sha256": "0577e9f48933dc11392675ea94f7bc48917b2af735bb5c590f189e487dad5201"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_iron_soil_wedge_v001.prefab",
+          "guid": "a9960e57f18711449a97b494913de9a7",
+          "sha256": "09e5f762447deab7821ce7ae5884a477add6c0b95e484aa028184ede5681dd86"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_irregular_fracture_raft_v001.prefab",
+          "guid": "aae30ddda5d7169439b52b1360ac1b77",
+          "sha256": "89eb4741ee89950d86730a577ed6135153a6bb53858f1ef2a9d7af9d12ea2a57"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_undercut_extraction_ledge_v001.prefab",
+          "guid": "b38e991c17b0dcd4e846afce7c0deda5",
+          "sha256": "c9f7a530aea22b0230d8358f1ac9de612b83bd23c60132c39bedeae19a2bdc37"
+        },
+        {
+          "assetPath": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/tdf_prop_stonehold_slagfall_talus_apron_v001.prefab",
+          "guid": "bd3dcdd8949b71d4eae5af186dc164a4",
+          "sha256": "732230949cc5c7c91e147940cd19778a5f71ea73db8d7d1a0be1754bfe1a402e"
+        }
+      ],
+      "dependencyProjectionSha256": "34fd262cfce3e0f3b91071ec3b720771e79595bf808b021c6e9752f229787db1",
+      "guid": "9bf1a4fe1fb57fe4db0e96437105aab3",
+      "metaSha256": "ff666ed07bdea52ac5867e55dae248a96f949676aec741c389ab1a7958204219",
+      "ownership": {
+        "domain": "terrestrials"
+      },
+      "purpose": "terrestrial_environment_review",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "al_scene_slagfall_environment_kit_review",
+      "sceneName": "SlagfallEnvironmentKitReview",
+      "sceneSha256": "7a329e63188a241dfb4638f0381e40b15eb29ebada5d3c178768e1fff85c99da",
+      "shippingStatus": "non_shipping"
+    },
+    {
+      "assetPath": "Assets/Test.unity",
+      "dependencies": [
+        {
+          "assetPath": "unity-builtin://0000000000000000e000000000000000",
+          "guid": "0000000000000000e000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "unity-builtin://0000000000000000f000000000000000",
+          "guid": "0000000000000000f000000000000000",
+          "sha256": "resolved_by_pinned_unity_and_package_lock"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Utilities/DemoInitializer.cs",
+          "guid": "0f9c4845538d65c458fb24ff536dcc97",
+          "sha256": "9bf0d22909105ed4a5e0af6b77332282e4cac69aa019a858e68dba2fd531ff37"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/Utilities/WorldBuilder.cs",
+          "guid": "a147e92c38adee4489f73a7c157369f5",
+          "sha256": "be20f0c8a4a8a27a758d50bde5b54ec4d11b063e9b1cf43f682f330d6d231e4e"
+        },
+        {
+          "assetPath": "Assets/AL/Scripts/ChampionMode/Camera/CameraFollow.cs",
+          "guid": "f37514be767c61b4fa799cee17860b84",
+          "sha256": "f759d84ddd1e60200682f22ba93ea3c978792a097f0fd4ddbfc9771d35c62de5"
+        }
+      ],
+      "dependencyProjectionSha256": "cb6a47bdd33811edefcee4b4ed180ed82e0de5317d3494e350c45f5eb5b64d8b",
+      "guid": "30477a26c93c85546a8612b1c5716a60",
+      "metaSha256": "a5dcb8783b2e969066bb4261bae6f69bca732050fa2ec9ac860cb7b2066313ef",
+      "ownership": {
+        "domain": "qa"
+      },
+      "purpose": "representative_test_only",
+      "reachability": {
+        "entry": false,
+        "mode": "not_runtime_reachable"
+      },
+      "sceneId": "al_scene_test_representative",
+      "sceneName": "Test",
+      "sceneSha256": "0a83edc9c59b75bfea2c00eb01d4cf523467727e6d037c80ffb617d230a721b4",
+      "shippingStatus": "non_shipping"
+    }
+  ],
+  "knownSceneCount": 104,
+  "schemaVersion": 1,
+  "supersedesDecisionId": "DEC-SCENE-DELIVERY-001"
+}

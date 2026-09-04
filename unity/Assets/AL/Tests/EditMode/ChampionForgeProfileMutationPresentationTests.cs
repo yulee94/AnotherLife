@@ -63,6 +63,7 @@ namespace AL.Tests.EditMode
         [SetUp]
         public void SetUp()
         {
+            FirstSessionChampionStart.EnableEncounterHarness();
             ServicesDictionary().Clear();
             DestroyImmediateIfPresent(GameObject.Find("ChampionMode_HUD"));
             DestroyImmediateIfPresent(GameObject.Find("EventSystem"));
@@ -71,6 +72,7 @@ namespace AL.Tests.EditMode
         [TearDown]
         public void TearDown()
         {
+            FirstSessionChampionStart.ResetToFirstSessionLanding();
             ServicesDictionary().Clear();
             DestroyImmediateIfPresent(_controllerHost);
             DestroyImmediateIfPresent(_championHost);
@@ -266,9 +268,11 @@ namespace AL.Tests.EditMode
             AssertButtonsInteractable(hud, "<", 1);
             AssertButtonsInteractable(hud, ">", 1);
             AssertButtonsInteractable(hud, "v", 1);
-            AssertButtonsInteractable(hud, "Inspect", 3);
-            AssertButtonsInteractable(hud, "Retry", 2);
-            AssertButtonsInteractable(hud, "Kingdom", 3);
+            AssertButtonsInteractable(hud, "Inspect", 2);
+            AssertButtonsInteractable(hud, "Retry", 1);
+            AssertButtonsInteractable(hud, "Kingdom", 1);
+            bool skillLoadoutReady = skills != null &&
+                                     skills.LoadoutState == SkillLoadoutState.Ready;
             for (int slot = 1; slot <= 4; slot++)
             {
                 Button[] skillButtons = hud.GetComponentsInChildren<Button>(true)
@@ -277,7 +281,11 @@ namespace AL.Tests.EditMode
                         StringComparison.Ordinal))
                     .ToArray();
                 Assert.AreEqual(1, skillButtons.Length, "skill " + slot);
-                Assert.True(skillButtons[0].interactable, "skill " + slot);
+                Assert.AreEqual(
+                    skillLoadoutReady,
+                    skillButtons[0].interactable,
+                    "Skill controls are preserved by the Forge guard but must " +
+                    "remain gated by their independent catalog readiness authority.");
             }
 
             var swatches = (Image[])GetField(controller, "_appearanceSwatches");

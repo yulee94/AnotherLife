@@ -49,6 +49,132 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Android Unity package verifier tests
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/android-unity-package-tests.txt"
+          try {
+            & py -3 -m unittest -v tools.tests.test_android_unity_package *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Android Unity package verifier tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Reproducible build contract
+        shell: pwsh
+        timeout-minutes: 10
+        run: |
+          $transcript = "artifacts/reproducible-build-contract.txt"
+          try {
+            & python -m unittest tools.tests.test_reproducible_build tools.tests.test_android_unity_package *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Reproducible build contract tests exited with code $LASTEXITCODE."
+            }
+            & python tools/reproducible_build.py --repo-root . inventory *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Reproducible build inventory exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Integrated deterministic QA contract
+        shell: pwsh
+        timeout-minutes: 15
+        run: |
+          $transcript = "artifacts/deterministic-qa-contract.txt"
+          try {
+            & python tools/qa/test_run_deterministic_qa.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Deterministic QA contract tests exited with code $LASTEXITCODE."
+            }
+            & python tools/qa/run_deterministic_qa.py --repo-root . --profile contract --output-dir artifacts/deterministic-qa *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Deterministic QA fixture profile exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Realm-slice evidence harness contract
+        shell: pwsh
+        timeout-minutes: 15
+        run: |
+          $transcript = "artifacts/realm-slice-evidence-contract.txt"
+          try {
+            & python -m pip install --disable-pip-version-check jsonschema==4.26.0 *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-slice schema dependency install exited with code $LASTEXITCODE."
+            }
+            & python tools/qa/test_realm_slice_evidence.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-slice evidence contract tests exited with code $LASTEXITCODE."
+            }
+            & python tools/qa/test_realm_evidence_registry.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm evidence registry contract tests exited with code $LASTEXITCODE."
+            }
+            $registryPath = "unity/Docs/RealmSliceEvidenceRegistry/registry.v1.json"
+            & python tools/qa/realm_evidence_registry.py verify --registry $registryPath *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Canonical realm evidence registry verification exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Realm-creature production-slice qualification
+        shell: pwsh
+        timeout-minutes: 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $transcript = "artifacts/realm-creature-production-slice.txt"
+          try {
+            $include = @(
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/boss_stonehold_fault_crowned_colossus/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/boss_stonehold_fault_crowned_colossus/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/**",
+              "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/**",
+              "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_stonehold_fault_crowned_colossus_concept_sheet_v001.png"
+            ) -join ","
+            if ($env:GITHUB_TOKEN) {
+              $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x:$($env:GITHUB_TOKEN)"))
+              & git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" lfs pull --include=$include *>&1 |
+                Tee-Object -FilePath $transcript
+            } else {
+              & git lfs pull --include=$include *>&1 |
+                Tee-Object -FilePath $transcript
+            }
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-creature production-slice LFS pull exited with code $LASTEXITCODE."
+            }
+            & python -m pip install --disable-pip-version-check jsonschema==4.26.0 *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-creature production-slice schema dependency install exited with code $LASTEXITCODE."
+            }
+            & python tools/terrestrial/test_validate_realm_creature_production_slice.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-creature production-slice tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Quality-gate fixture proof
         shell: pwsh
         timeout-minutes: 10
@@ -65,6 +191,21 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Golden-scene evidence validator fixtures
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/golden-scene-evidence-validator.txt"
+          try {
+            & python ./tools/benchmarks/test_validate_golden_scene_evidence.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Golden-scene evidence validator fixtures exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Upload quality-gate evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -73,7 +214,15 @@ jobs:
           name: quality-gate-evidence-${{ github.run_attempt }}
           path: |
             artifacts/repository-hygiene.txt
+            artifacts/android-unity-package-tests.txt
+            artifacts/reproducible-build-contract.txt
+            artifacts/deterministic-qa-contract.txt
+            artifacts/deterministic-qa/report.json
+            artifacts/deterministic-qa/junit.xml
+            artifacts/deterministic-qa/logs/
+            artifacts/realm-creature-production-slice.txt
             artifacts/quality-gate-fixtures.txt
+            artifacts/golden-scene-evidence-validator.txt
           if-no-files-found: error
           retention-days: 90
 

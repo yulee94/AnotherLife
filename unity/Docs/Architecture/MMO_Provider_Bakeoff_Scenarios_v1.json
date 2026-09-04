@@ -1,0 +1,665 @@
+{
+  "plan_id": "MMO-BAKEOFF-v1.0.0",
+  "record_version": "1.0.0",
+  "status": "common_definition_not_run",
+  "consumes": [
+    "MMO-BL-20260831-001",
+    "MMO-CONTRACTS-v1.0.0",
+    "ADR-0001",
+    "ADR-0002",
+    "ADR-0003",
+    "ADR-0004"
+  ],
+  "candidates": [
+    {
+      "id": "amazon_gamelift",
+      "display_name": "Amazon GameLift",
+      "spike_task_id": "t_ff702849"
+    },
+    {
+      "id": "microsoft_playfab",
+      "display_name": "Microsoft PlayFab",
+      "spike_task_id": "t_27759e01"
+    }
+  ],
+  "decision": {
+    "winner_preselected": false,
+    "decision_owner": "game_owner",
+    "allowed_outcomes": [
+      "select_amazon_gamelift",
+      "select_microsoft_playfab",
+      "no_selection",
+      "blocked_pending_evidence"
+    ],
+    "spike_workers_may_recommend_winner": false
+  },
+  "claim_classes": [
+    "requirement",
+    "observed_sandbox_fact",
+    "vendor_documented_limit",
+    "measured_limit",
+    "unknown_measurement_required",
+    "unproven_scale_target"
+  ],
+  "data_classes": [
+    {
+      "id": "D-GID-01",
+      "name": "minimized_global_identity",
+      "authority_scope": "global_minimized",
+      "sole_authority": "identity_domain",
+      "globally_replicable_fields": [
+        "canonical_account_id",
+        "platform_link_reference",
+        "eligibility_reference",
+        "restriction_reference",
+        "consent_reference",
+        "owning_region_id",
+        "durable_realm_reference"
+      ],
+      "prohibited_global_fields": [
+        "character",
+        "progression",
+        "inventory",
+        "currency",
+        "market",
+        "guild_membership",
+        "moderation_case",
+        "communications_content",
+        "raw_assertion",
+        "receipt_payload",
+        "credential_material"
+      ],
+      "provider_copy": "opaque_adapter_mapping_only",
+      "required_scenarios": ["SCN-03", "SCN-10", "SCN-15", "SCN-16"]
+    },
+    {
+      "id": "D-ENT-01",
+      "name": "minimized_pregrant_entitlement_reference",
+      "authority_scope": "global_minimized",
+      "sole_authority": "identity_platform_reconciliation_boundary",
+      "globally_replicable_fields": [
+        "opaque_entitlement_evidence_reference",
+        "owning_region_id",
+        "reconciliation_state"
+      ],
+      "prohibited_global_fields": [
+        "granted_value",
+        "ledger_entries",
+        "inventory_mutation",
+        "settlement_history",
+        "raw_receipt",
+        "credential_material"
+      ],
+      "provider_copy": "opaque_evidence_handle_only",
+      "required_scenarios": ["SCN-03", "SCN-04", "SCN-06", "SCN-10", "SCN-15"]
+    },
+    {
+      "id": "D-SES-01",
+      "name": "session_route_and_fenced_lease",
+      "authority_scope": "region_local",
+      "sole_authority": "regional_gateway_session_and_placement_controllers",
+      "globally_replicable_fields": ["non_authoritative_owning_region_hint"],
+      "prohibited_global_fields": ["session_secret", "writable_route", "lease_authority", "realm_assignment"],
+      "provider_copy": "ephemeral_adapter_private_allocation_mapping",
+      "required_scenarios": ["SCN-02", "SCN-03", "SCN-08", "SCN-11", "SCN-12", "SCN-15"]
+    },
+    {
+      "id": "D-PLY-01",
+      "name": "authoritative_gameplay",
+      "authority_scope": "region_local",
+      "sole_authority": "regional_persistence_and_single_active_simulation_owner",
+      "globally_replicable_fields": ["approved_minimized_read_only_public_projection"],
+      "prohibited_global_fields": [
+        "character",
+        "progression",
+        "inventory",
+        "kingdom",
+        "territory",
+        "objective",
+        "reward",
+        "checkpoint",
+        "committed_outcome"
+      ],
+      "provider_copy": "none_authoritative",
+      "required_scenarios": ["SCN-08", "SCN-10", "SCN-11", "SCN-12", "SCN-15", "SCN-16"]
+    },
+    {
+      "id": "D-ECO-01",
+      "name": "authoritative_economy",
+      "authority_scope": "region_local",
+      "sole_authority": "regional_transactional_economy_ledger",
+      "globally_replicable_fields": ["approved_minimized_read_only_aggregate"],
+      "prohibited_global_fields": [
+        "currency",
+        "market_order",
+        "trade",
+        "inventory_value",
+        "settlement",
+        "granted_entitlement",
+        "outbox",
+        "deduplication_record"
+      ],
+      "provider_copy": "none_authoritative",
+      "required_scenarios": ["SCN-04", "SCN-05", "SCN-06", "SCN-10", "SCN-15"]
+    },
+    {
+      "id": "D-SOC-01",
+      "name": "authoritative_social",
+      "authority_scope": "region_local",
+      "sole_authority": "regional_social_domain",
+      "globally_replicable_fields": ["approved_minimized_read_only_public_projection"],
+      "prohibited_global_fields": [
+        "guild_membership",
+        "alliance_membership",
+        "role",
+        "moderation_case",
+        "sanction",
+        "regional_communications_state"
+      ],
+      "provider_copy": "transport_receipt_only",
+      "required_scenarios": ["SCN-08", "SCN-10", "SCN-14", "SCN-15"]
+    },
+    {
+      "id": "D-BAK-01",
+      "name": "backup_and_recovery",
+      "authority_scope": "region_local",
+      "sole_authority": "regional_recovery_domain",
+      "globally_replicable_fields": ["approved_backup_health_summary_without_payload"],
+      "prohibited_global_fields": ["regional_snapshot", "operation_log", "outbox_position", "restore_payload"],
+      "provider_copy": "only_if_same_approved_region_boundary_and_observed",
+      "required_scenarios": ["SCN-08", "SCN-10", "SCN-16"]
+    },
+    {
+      "id": "D-AUD-01",
+      "name": "security_and_value_audit",
+      "authority_scope": "region_local",
+      "sole_authority": "producing_regional_domain_and_append_only_audit_boundary",
+      "globally_replicable_fields": ["approved_sanitized_incident_summary"],
+      "prohibited_global_fields": ["private_payload", "raw_payment_data", "raw_assertion", "credential_material"],
+      "provider_copy": "sanitized_evidence_handle_only",
+      "required_scenarios": ["SCN-06", "SCN-10", "SCN-13", "SCN-14", "SCN-16"]
+    },
+    {
+      "id": "D-TEL-01",
+      "name": "sanitized_telemetry",
+      "authority_scope": "region_privacy_scoped",
+      "sole_authority": "producing_service_until_bounded_pipeline_acceptance",
+      "globally_replicable_fields": ["approved_low_cardinality_aggregate"],
+      "prohibited_global_fields": [
+        "account_id_label",
+        "character_id_label",
+        "item_id_label",
+        "message_id_label",
+        "receipt_label",
+        "assertion_label",
+        "credential_material",
+        "endpoint_label"
+      ],
+      "provider_copy": "sanitized_bounded_observation_only",
+      "required_scenarios": ["SCN-07", "SCN-08", "SCN-14", "SCN-16"]
+    },
+    {
+      "id": "D-PRV-01",
+      "name": "provider_private_metadata",
+      "authority_scope": "adapter_private_regional",
+      "sole_authority": "disposable_candidate_adapter",
+      "globally_replicable_fields": [],
+      "prohibited_global_fields": ["canonical_account_id_as_provider_id", "durable_realm_id_as_allocation", "gameplay_result"],
+      "provider_copy": "environment_and_region_scoped_adapter_metadata",
+      "required_scenarios": ["SCN-01", "SCN-02", "SCN-13", "SCN-15", "SCN-16"]
+    }
+  ],
+  "workload_profiles": [
+    {
+      "id": "WF-FUNCTIONAL-v1",
+      "classification": "functional_equivalence_not_capacity_evidence",
+      "synthetic_only": true,
+      "deterministic_seed": "anotherlife-mmo-bakeoff-v1",
+      "realm_count": 4,
+      "logical_region_slots": ["home_region", "forbidden_region"],
+      "realm_home_region_policy": "all_four_realms_are_preassigned_to_home_region",
+      "cross_region_probe_policy": "every_realm_is_probed_against_forbidden_region_without_reassignment",
+      "synthetic_accounts_per_realm": 8,
+      "identity_cycles_per_account": 1,
+      "placement_cycles_per_account": 2,
+      "gameplay_canaries_per_account": 1,
+      "economy_canaries_per_account": 1,
+      "social_canaries_per_account": 1,
+      "excluded_warmups": 1,
+      "measured_repetitions": 3,
+      "candidate_override_permitted": false
+    },
+    {
+      "id": "WF-QUOTA-LADDER-v1",
+      "classification": "sandbox_limit_discovery_not_production_capacity_evidence",
+      "synthetic_only": true,
+      "step_source": "identical_steps_up_to_lowest_mutually_authorized_sandbox_boundary",
+      "dimensions": [
+        "concurrent_neutral_operations",
+        "placement_requests",
+        "lifecycle_requests",
+        "administrative_requests"
+      ],
+      "step_algorithm": {
+        "initial_units": 1,
+        "multiplier": 2,
+        "maximum_steps_per_dimension": 12,
+        "measurement_window_seconds": 60,
+        "recovery_probe_interval_seconds": 5,
+        "common_ceiling_rule": "minimum_of_both_documented_or_measured_authorized_sandbox_boundaries",
+        "unknown_boundary_rule": "block_that_dimension_after_functional_baseline_without_extrapolation",
+        "final_boundary_probe": "one_increment_beyond_last_common_accepted_step_only_when_both_candidates_are_authorized"
+      },
+      "required_step_counters": [
+        "attempted",
+        "accepted",
+        "pending",
+        "succeeded",
+        "duplicate",
+        "reconciled",
+        "rejected",
+        "throttled",
+        "unavailable",
+        "ambiguous",
+        "cancelled"
+      ],
+      "stop_conditions": [
+        "throttled",
+        "unavailable",
+        "safety_or_budget_guard",
+        "sandbox_limit",
+        "missing_authorization"
+      ],
+      "candidate_override_permitted": false
+    }
+  ],
+  "common_driver": {
+    "same_for_every_candidate": true,
+    "required_equal_inputs": [
+      "driver_commit",
+      "server_artifact_fingerprint",
+      "adapter_contract_version",
+      "workload_manifest_hash",
+      "configuration_shape",
+      "synthetic_fixture_seed",
+      "request_envelopes",
+      "operation_ids",
+      "payload_bytes",
+      "topology",
+      "fault_schedule",
+      "observation_schema",
+      "repetitions",
+      "warmup_rule",
+      "teardown_assertions"
+    ],
+    "difference_handling": "new_workload_id_and_both_candidates_rerun"
+  },
+  "threats": [
+    {
+      "id": "TM-01",
+      "name": "provider_lock_in",
+      "required_scenarios": ["SCN-02", "SCN-15", "SCN-16"],
+      "hard_gate": true
+    },
+    {
+      "id": "TM-02",
+      "name": "regional_data_leakage",
+      "required_scenarios": ["SCN-01", "SCN-10", "SCN-14", "SCN-16"],
+      "hard_gate": true
+    },
+    {
+      "id": "TM-03",
+      "name": "hidden_global_state_coupling",
+      "required_scenarios": ["SCN-03", "SCN-08", "SCN-12"],
+      "hard_gate": true
+    },
+    {
+      "id": "TM-04",
+      "name": "incompatible_authority_model",
+      "required_scenarios": ["SCN-04", "SCN-05", "SCN-06", "SCN-11"],
+      "hard_gate": true
+    },
+    {
+      "id": "TM-05",
+      "name": "quota_surprise",
+      "required_scenarios": ["SCN-01", "SCN-07"],
+      "hard_gate": true
+    },
+    {
+      "id": "TM-06",
+      "name": "failed_region_control_plane_dependence",
+      "required_scenarios": ["SCN-08", "SCN-09"],
+      "hard_gate": true
+    },
+    {
+      "id": "TM-07",
+      "name": "credential_compromise_or_rotation",
+      "required_scenarios": ["SCN-01", "SCN-13", "SCN-16"],
+      "hard_gate": true
+    },
+    {
+      "id": "TM-08",
+      "name": "prototype_assumption_leaks_into_production",
+      "required_scenarios": ["SCN-01", "SCN-02", "SCN-15", "SCN-16"],
+      "hard_gate": true
+    }
+  ],
+  "scenario_statuses": ["pass", "fail", "blocked", "not_run"],
+  "scenarios": [
+    {
+      "id": "SCN-01",
+      "name": "preflight_inventory",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-PLC-01", "C-CAP-01", "C-SEC-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["clean_nonproduction_sandbox", "synthetic_data_only", "spend_and_exposure_guard_active"],
+      "actions": ["inventory_regions_features_quotas_credentials_resources_data_paths", "capture_dated_vendor_sources", "hash_environment_and_configuration"],
+      "required_observations": ["region_matrix", "quota_inventory", "credential_scope", "data_location_inventory", "unknowns", "environment_fingerprint"],
+      "pass_conditions": ["all_inventory_fields_have_evidence_or_unknown_measurement_required", "no_production_resource_or_data", "no_unapproved_spend_or_exposure"],
+      "rollback": ["revoke_preflight_credentials_if_scope_is_wrong", "remove_unapproved_resources", "restore_clean_sandbox"]
+    },
+    {
+      "id": "SCN-02",
+      "name": "clean_lifecycle_and_placement",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-PLC-01", "C-DEP-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["SCN-01_complete", "immutable_artifact_available", "neutral_route_baseline_captured"],
+      "actions": ["provision", "verify_artifact", "ensure_ready", "place_all_functional_cycles", "drain", "retire"],
+      "required_observations": ["lifecycle_transitions", "placement_receipts", "artifact_fingerprint", "operation_burden", "raw_provider_events"],
+      "pass_conditions": ["all_cycles_use_neutral_requests", "artifact_identity_is_immutable", "drain_precedes_retire", "provider_chooses_neither_region_nor_realm"],
+      "rollback": ["stop_new_placements", "drain_or_cancel", "restore_neutral_route", "delete_candidate_resources"]
+    },
+    {
+      "id": "SCN-03",
+      "name": "identity_session_region_and_realm_preservation",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-IDN-01", "C-PLC-01", "C-ECO-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["synthetic_canonical_accounts_exist", "regional_realm_membership_preassigned"],
+      "actions": ["normalize_external_identity", "issue_session", "place_in_preassigned_region_and_realm", "reconcile_entitlement_reference", "isolate_global_plane"],
+      "required_observations": ["canonical_mapping", "allowed_global_fields", "regional_grant_receipt", "realm_before_after", "outage_behavior"],
+      "pass_conditions": ["provider_id_is_not_canonical", "realm_and_region_are_unchanged", "granted_value_is_regional", "global_loss_cannot_rewrite_regional_state"],
+      "rollback": ["revoke_session", "remove_opaque_mapping", "verify_regional_state_hash_unchanged"]
+    },
+    {
+      "id": "SCN-04",
+      "name": "duplicate_operation_same_payload",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-PLC-01", "C-ECO-01", "C-DEP-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["stable_operation_id_reserved"],
+      "actions": ["submit_mutation", "repeat_same_operation_and_payload"],
+      "required_observations": ["original_receipt", "duplicate_receipt", "lifecycle_count", "ledger_count", "stable_observations"],
+      "pass_conditions": ["same_result_or_reconciliation_handle", "no_duplicate_lifecycle_or_value_mutation"],
+      "rollback": ["reconcile_operation", "restore_neutral_route"]
+    },
+    {
+      "id": "SCN-05",
+      "name": "operation_payload_or_scope_drift",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-PLC-01", "C-ECO-01", "C-SEC-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["SCN-04_original_operation_exists"],
+      "actions": ["reuse_operation_id_with_changed_payload", "reuse_operation_id_with_changed_region_realm_or_authorization"],
+      "required_observations": ["conflict_failure", "no_new_receipt", "state_hash_before_after"],
+      "pass_conditions": ["all_drift_fails_closed_as_conflict", "authoritative_state_unchanged"],
+      "rollback": ["retain_original_result", "discard_drifted_attempt"]
+    },
+    {
+      "id": "SCN-06",
+      "name": "ambiguous_completion_reconciliation",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-PLC-01", "C-ECO-01", "C-DEP-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["response_loss_fault_seam_ready"],
+      "actions": ["drop_response_at_commit_boundary", "query_by_operation_or_receipt", "retry_only_after_reconciliation"],
+      "required_observations": ["ambiguous_completion", "reconciliation_query", "final_receipt", "mutation_count"],
+      "pass_conditions": ["no_blind_value_retry", "one_final_mutation", "stable_outcome_recorded"],
+      "rollback": ["freeze_if_unknown", "reconcile_before_neutral_restore"]
+    },
+    {
+      "id": "SCN-07",
+      "name": "quota_throttle_and_recovery",
+      "workload_profile": "WF-QUOTA-LADDER-v1",
+      "contracts": ["C-PLC-01", "C-CAP-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["SCN-01_quota_inventory_complete", "lowest_mutual_authorized_boundary_known_or_recorded_unknown"],
+      "actions": ["run_identical_request_ladder", "observe_first_throttle_or_stop_guard", "honor_explicit_recovery_signal", "verify_bounded_admission"],
+      "required_observations": ["all_step_counters", "provider_quota_signal", "external_measurements", "recovery_timing", "unknown_limits"],
+      "pass_conditions": ["throttle_maps_to_stable_class", "queues_remain_bounded", "recovery_is_evidenced", "no_sandbox_to_production_extrapolation"],
+      "rollback": ["stop_ladder", "drain_accepted_work", "restore_baseline_capacity", "invoke_RB-QUOTA-01"]
+    },
+    {
+      "id": "SCN-08",
+      "name": "control_plane_outage_with_established_owner",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-IDN-01", "C-PLC-01", "C-SIM-01", "C-SOC-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["established_regional_owner_and_sessions", "approved_fault_seam_or_documented_blocker"],
+      "actions": ["isolate_provider_or_global_control_plane", "observe_established_data_plane", "attempt_new_session_and_placement", "restore_control_plane"],
+      "required_observations": ["owner_epoch", "established_session_behavior", "new_work_behavior", "regional_state_hash", "recovery_sequence"],
+      "pass_conditions": ["no_second_owner", "no_implicit_cross_region_placement", "new_work_fails_or_degrades_explicitly", "regional_state_preserved"],
+      "rollback": ["invoke_RB-OUTAGE-01", "reconcile_routes_and_operations", "verify_one_owner_before_new_work"]
+    },
+    {
+      "id": "SCN-09",
+      "name": "failed_and_partial_lifecycle",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-PLC-01", "C-DEP-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["lifecycle_fault_seams_ready_or_blocker_recorded"],
+      "actions": ["inject_launch_failure", "interrupt_ready_transition", "hold_stuck_drain", "cancel_each_operation"],
+      "required_observations": ["explicit_lifecycle_states", "cancellation_receipts", "placement_rejection", "residual_resource_inventory"],
+      "pass_conditions": ["no_placement_to_unready_artifact", "cancellation_is_idempotent", "last_compatible_manifest_preserved"],
+      "rollback": ["stop_placements", "cancel_or_retire_partial_resources", "restore_last_compatible_manifest"]
+    },
+    {
+      "id": "SCN-10",
+      "name": "regional_isolation_and_residency",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-IDN-01", "C-PLC-01", "C-PER-01", "C-SOC-01", "C-ECO-01", "C-SEC-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["unique_canary_per_data_class", "location_inventory_started"],
+      "actions": ["attempt_cross_region_placement", "attempt_cross_region_write", "search_provider_stores_logs_backups_exports", "inspect_support_and_deletion_paths"],
+      "required_observations": ["denied_operations", "canary_copy_inventory", "backup_location", "log_and_export_location", "unknown_location_fields"],
+      "pass_conditions": ["regional_operations_fail_closed", "only_enumerated_global_fields_exist_globally", "no_authoritative_cross_region_copy", "unknowns_not_claimed_as_pass"],
+      "rollback": ["stop_run_on_leak", "contain_and_delete_synthetic_copy", "revoke_access", "restore_regional_only_configuration"]
+    },
+    {
+      "id": "SCN-11",
+      "name": "lease_epoch_and_duplicate_owner",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-PLC-01", "C-SIM-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["one_active_owner_and_epoch"],
+      "actions": ["send_stale_epoch", "send_future_epoch", "attempt_duplicate_active_route_and_owner"],
+      "required_observations": ["epoch_failures", "owner_inventory", "authoritative_state_hash"],
+      "pass_conditions": ["stale_future_and_duplicate_owner_fail_separately", "exactly_one_writer_remains"],
+      "rollback": ["fence_invalid_routes", "retain_original_owner", "reconcile_lease_journal"]
+    },
+    {
+      "id": "SCN-12",
+      "name": "adapter_restart_and_reconciliation",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-PLC-01", "C-DEP-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["pending_and_completed_operations_exist"],
+      "actions": ["restart_adapter", "query_all_known_operations", "retry_same_operation_only", "rebuild_non_authoritative_routes"],
+      "required_observations": ["pre_post_operation_inventory", "reconciled_receipts", "owner_epoch", "route_rebuild"],
+      "pass_conditions": ["completed_results_retained", "pending_status_explicit", "no_duplicate_owner_or_mutation"],
+      "rollback": ["disable_restarted_adapter_if_reconciliation_fails", "restore_neutral_path", "freeze_unknown_mutations"]
+    },
+    {
+      "id": "SCN-13",
+      "name": "credential_rotation_and_compromise_containment",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-SEC-01", "C-DEP-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["least_privilege_scope_inventory", "credential_material_absent_from_packet"],
+      "actions": ["issue_replacement", "switch_adapter_reference", "revoke_old_credential", "negative_test_old_credential", "simulate_scope_compromise_and_contain"],
+      "required_observations": ["credential_reference_versions", "audit_events", "old_credential_denial", "state_hash", "log_secret_scan"],
+      "pass_conditions": ["old_credential_fails", "replacement_scope_is_least_privilege", "no_secret_logged", "no_gameplay_state_rewrite"],
+      "rollback": ["invoke_RB-CREDENTIAL-01", "revoke_all_candidate_credentials_if_containment_fails", "disable_adapter"]
+    },
+    {
+      "id": "SCN-14",
+      "name": "telemetry_failure_and_redaction",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-CAP-01", "C-SEC-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["bounded_observation_buffer", "sensitive_canaries_prepared"],
+      "actions": ["drop_delay_duplicate_and_reorder_telemetry", "apply_backpressure", "scan_labels_logs_and_exports", "restore_pipeline"],
+      "required_observations": ["gap_signal", "buffer_bounds", "tick_behavior", "redaction_scan", "export_delay_and_loss"],
+      "pass_conditions": ["simulation_tick_not_blocked", "evidence_required_value_paths_fail_closed", "gaps_visible", "prohibited_labels_and_payloads_absent"],
+      "rollback": ["drain_or_discard_by_documented_policy", "restore_pipeline", "record_irrecoverable_gap"]
+    },
+    {
+      "id": "SCN-15",
+      "name": "adapter_removal_and_neutral_restore",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-IDN-01", "C-PLC-01", "C-PER-01", "C-SIM-01", "C-SOC-01", "C-ECO-01", "C-DEP-01", "C-SEC-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["neutral_baseline_hashes_captured", "candidate_has_completed_functional_cases"],
+      "actions": ["stop_new_candidate_work", "reconcile_operations_and_epochs", "disable_or_delete_adapter", "restore_neutral_configuration", "rerun_core_and_state_checks"],
+      "required_observations": ["before_after_state_hash", "core_test_result", "dependency_scan", "neutral_route_result", "provider_resource_inventory"],
+      "pass_conditions": ["neutral_path_operates", "durable_identity_and_regional_state_unchanged", "no_provider_dependency_in_core", "no_provider_process_is_authority"],
+      "rollback": ["invoke_RB-REVERT-01", "freeze_unknown_mutations_until_reconciled"]
+    },
+    {
+      "id": "SCN-16",
+      "name": "teardown_export_deletion_and_lock_in_inventory",
+      "workload_profile": "WF-FUNCTIONAL-v1",
+      "contracts": ["C-CAP-01", "C-DEP-01", "C-SEC-01", "C-OPS-01"],
+      "candidates": ["amazon_gamelift", "microsoft_playfab"],
+      "preconditions": ["SCN-15_complete_or_failure_contained"],
+      "actions": ["export_allowed_evidence", "delete_synthetic_data_and_resources", "revoke_credentials", "inventory_residuals_manual_steps_and_exit_constraints"],
+      "required_observations": ["export_manifest", "deletion_receipts", "residual_inventory", "credential_denials", "manual_effort", "unknown_exit_limits"],
+      "pass_conditions": ["all_removable_resources_removed", "residuals_and_retention_are_evidenced_or_unknown", "neutral_core_and_state_do_not_depend_on_residuals"],
+      "rollback": ["retain_sanitized_evidence_only", "escalate_undeletable_or_authoritative_residual_as_hard_failure"]
+    }
+  ],
+  "required_evidence_fields": [
+    "record_schema_version",
+    "plan_id",
+    "candidate_id",
+    "spike_task_id",
+    "run_id",
+    "run_status",
+    "claim_class",
+    "started_utc",
+    "ended_utc",
+    "driver_commit",
+    "server_artifact_fingerprint",
+    "adapter_fingerprint",
+    "configuration_hash",
+    "workload_manifest_hash",
+    "region_id",
+    "realm_ids",
+    "synthetic_fixture_seed",
+    "scenario_results",
+    "data_residency_inventory",
+    "quota_inventory",
+    "credential_inventory",
+    "raw_evidence_manifest",
+    "limitations",
+    "blockers",
+    "contract_violations",
+    "rollback_result",
+    "teardown_inventory",
+    "operator_effort",
+    "secret_scan_result"
+  ],
+  "required_scenario_result_fields": [
+    "scenario_id",
+    "status",
+    "started_utc",
+    "ended_utc",
+    "operation_ids",
+    "correlation_ids",
+    "stable_result_counts",
+    "measurement_handles",
+    "raw_evidence_handles",
+    "limitations",
+    "blockers",
+    "contract_violations",
+    "rollback_status",
+    "rollback_evidence_handles"
+  ],
+  "required_evidence_manifest_entry_fields": [
+    "path",
+    "sha256",
+    "bytes",
+    "content_type",
+    "classification",
+    "scenario_ids"
+  ],
+  "evidence_handle_rule": "every_handle_is_a_nonblank_relative_packet_path_with_one_matching_manifest_entry",
+  "runbooks": [
+    {
+      "id": "RB-OUTAGE-01",
+      "title": "provider_or_control_plane_outage",
+      "required_sections": ["trigger", "safety_and_authority_checks", "containment", "diagnosis", "actions", "recovery", "rollback", "verification", "evidence"]
+    },
+    {
+      "id": "RB-QUOTA-01",
+      "title": "quota_exhaustion",
+      "required_sections": ["trigger", "safety_and_authority_checks", "containment", "diagnosis", "actions", "recovery", "rollback", "verification", "evidence"]
+    },
+    {
+      "id": "RB-CREDENTIAL-01",
+      "title": "credential_compromise_or_rotation",
+      "required_sections": ["trigger", "safety_and_authority_checks", "containment", "diagnosis", "actions", "recovery", "rollback", "verification", "evidence"]
+    },
+    {
+      "id": "RB-REVERT-01",
+      "title": "revert_provider_specific_experiment",
+      "required_sections": ["trigger", "safety_and_authority_checks", "containment", "diagnosis", "actions", "recovery", "rollback", "verification", "evidence"]
+    }
+  ],
+  "unknown_vendor_limits": [
+    {"id": "UL-01", "name": "feature_specific_regions_and_data_locations", "status": "measure"},
+    {"id": "UL-02", "name": "resource_and_concurrent_process_quotas", "status": "measure"},
+    {"id": "UL-03", "name": "placement_lifecycle_identity_and_admin_api_rates", "status": "measure"},
+    {"id": "UL-04", "name": "burst_retry_reset_and_backpressure_behavior", "status": "measure"},
+    {"id": "UL-05", "name": "artifact_deployment_drain_shutdown_startup_update_limits", "status": "measure"},
+    {"id": "UL-06", "name": "credential_overlap_propagation_revocation_audit_and_scope", "status": "measure"},
+    {"id": "UL-07", "name": "telemetry_retention_delay_loss_cardinality_export_and_deletion", "status": "measure"},
+    {"id": "UL-08", "name": "sandbox_expiration_feature_parity_billing_and_fault_injection", "status": "measure"},
+    {"id": "UL-09", "name": "data_export_deletion_backup_restore_residual_and_account_closure", "status": "measure"}
+  ],
+  "hard_gates": [
+    "provider_neutral_authority",
+    "regional_authoritative_data",
+    "single_writer_through_failure",
+    "core_free_of_sdk_resource_and_secret_types",
+    "ambiguous_completion_reconciliation",
+    "credential_rotation_and_revocation",
+    "adapter_removal_and_neutral_restore",
+    "no_prohibited_data_leakage",
+    "no_unapproved_production_exposure_spend_or_commitment"
+  ],
+  "interpretation_rules": [
+    "missing_evidence_is_blocked_not_pass",
+    "unknown_limit_is_not_unlimited_or_zero",
+    "different_workload_or_observation_is_incomparable",
+    "hard_gate_failures_cannot_be_averaged_away",
+    "provider_dashboard_is_not_sole_evidence",
+    "sandbox_measurement_is_not_production_capacity",
+    "blocked_opponent_does_not_create_a_winner",
+    "spike_workers_do_not_recommend_a_winner",
+    "no_selection_is_valid"
+  ],
+  "unproven_scale_targets": [
+    {
+      "name": "steady_ccu",
+      "value": 10000,
+      "claim_class": "unproven_scale_target"
+    },
+    {
+      "name": "surge_ccu",
+      "value": 20000,
+      "claim_class": "unproven_scale_target"
+    }
+  ]
+}

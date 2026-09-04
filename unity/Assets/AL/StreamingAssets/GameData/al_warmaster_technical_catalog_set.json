@@ -1,0 +1,22 @@
+{
+  "gameId": "another-life",
+  "catalogSetId": "warmaster_technical_set_v1",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "minimumRuntimeCatalogVersion": 1,
+  "sourceRevision": "12576d06b27559e92203eba5b6253d1dba19a2ea",
+  "artifacts": [
+    {
+      "family": "warmaster",
+      "catalogId": "warmaster_technical_v1",
+      "relativePath": "al_warmaster_technical_catalog.json",
+      "schemaVersion": 1,
+      "contentVersion": "1.0.0",
+      "required": true,
+      "sha256": "eec602f0c589574904e181f3dd513d9d11cd9c589af64529097f58ed3077caf7",
+      "mediaType": "application/json",
+      "sourceMode": "authored",
+      "sourceRevision": "12576d06b27559e92203eba5b6253d1dba19a2ea"
+    }
+  ]
+}

@@ -52,6 +52,7 @@ namespace AL.UI.FirstUserIdentity
         private Button _confirmRealmButton;
         private Button _returnToRealmButton;
         private Button _confirmDraftButton;
+        private Button _exitAction;
 
         public event Action<FirstUserIdentityDraftSnapshot> CustomizationReady;
 
@@ -138,6 +139,12 @@ namespace AL.UI.FirstUserIdentity
             return button;
         }
 
+        public void BindExitAction(Button exitAction)
+        {
+            _exitAction = exitAction ?? throw new ArgumentNullException(nameof(exitAction));
+            ConfigureNavigation();
+        }
+
         private void Initialize(IFirstUserIdentityDraftCopyProvider copyProvider)
         {
             _copy = copyProvider ?? throw new ArgumentNullException(nameof(copyProvider));
@@ -151,6 +158,7 @@ namespace AL.UI.FirstUserIdentity
             }
 
             BuildView();
+            ConfigureNavigation();
             RefreshView();
             Focus(GetRealmChoiceButton(RealmId.Crownlands));
         }
@@ -431,6 +439,8 @@ namespace AL.UI.FirstUserIdentity
             {
                 _customizationReadySummary.text = string.Empty;
             }
+
+            ConfigureNavigation();
         }
 
         private void RefreshRealmButtons(FirstUserIdentityDraftSnapshot snapshot)
@@ -475,6 +485,120 @@ namespace AL.UI.FirstUserIdentity
             colors.pressedColor = new Color(0.06f, 0.08f, 0.12f, 1f);
             colors.disabledColor = new Color(0.05f, 0.06f, 0.08f, 0.72f);
             button.colors = colors;
+
+            Outline outline = button.GetComponent<Outline>();
+            if (outline != null)
+            {
+                outline.effectColor = selected
+                    ? new Color(0.94f, 0.72f, 0.28f, 0.92f)
+                    : new Color(0.75f, 0.81f, 0.90f, 0.42f);
+                outline.effectDistance = selected
+                    ? new Vector2(3f, -3f)
+                    : new Vector2(1f, -1f);
+            }
+        }
+
+        private void ConfigureNavigation()
+        {
+            for (int i = 0; i < RealmChoices.Length; i++)
+            {
+                Button current = _realmButtons[RealmChoices[i]];
+                Selectable previous = i > 0
+                    ? _realmButtons[RealmChoices[i - 1]]
+                    : _exitAction != null
+                        ? _exitAction
+                        : _confirmRealmButton;
+                Selectable next = i + 1 < RealmChoices.Length
+                    ? _realmButtons[RealmChoices[i + 1]]
+                    : _confirmRealmButton;
+                SetExplicitNavigation(
+                    current,
+                    _exitAction,
+                    _confirmRealmButton,
+                    previous,
+                    next);
+            }
+
+            SetExplicitNavigation(
+                _confirmRealmButton,
+                _realmButtons[RealmChoices[RealmChoices.Length - 1]],
+                _exitAction,
+                _realmButtons[RealmChoices[RealmChoices.Length - 1]],
+                _exitAction != null ? _exitAction : _realmButtons[RealmChoices[0]]);
+
+            for (int i = 0; i < ClassChoices.Length; i++)
+            {
+                Button current = _classButtons[ClassChoices[i]];
+                Selectable previous = i > 0
+                    ? _classButtons[ClassChoices[i - 1]]
+                    : _exitAction != null
+                        ? _exitAction
+                        : _returnToRealmButton;
+                Selectable next = i + 1 < ClassChoices.Length
+                    ? _classButtons[ClassChoices[i + 1]]
+                    : _confirmDraftButton;
+                SetExplicitNavigation(
+                    current,
+                    _returnToRealmButton,
+                    _confirmDraftButton,
+                    previous,
+                    next);
+            }
+
+            Selectable lastClass = _classButtons[ClassChoices[ClassChoices.Length - 1]];
+            Selectable firstClass = _classButtons[ClassChoices[0]];
+            SetExplicitNavigation(
+                _returnToRealmButton,
+                _exitAction,
+                _confirmDraftButton,
+                lastClass,
+                _exitAction != null ? _exitAction : firstClass);
+            SetExplicitNavigation(
+                _confirmDraftButton,
+                _returnToRealmButton,
+                _exitAction,
+                lastClass,
+                _exitAction != null ? _exitAction : firstClass);
+
+            if (_exitAction != null)
+            {
+                FirstUserIdentityDraftSnapshot snapshot = _flow.Snapshot;
+                if (snapshot.Step == FirstUserIdentityDraftStep.ClassFamily)
+                {
+                    SetExplicitNavigation(
+                        _exitAction,
+                        _confirmDraftButton,
+                        firstClass,
+                        _returnToRealmButton,
+                        firstClass);
+                }
+                else
+                {
+                    Button firstRealm = _realmButtons[RealmChoices[0]];
+                    SetExplicitNavigation(
+                        _exitAction,
+                        _confirmRealmButton,
+                        firstRealm,
+                        _confirmRealmButton,
+                        firstRealm);
+                }
+            }
+        }
+
+        private static void SetExplicitNavigation(
+            Selectable selectable,
+            Selectable left,
+            Selectable right,
+            Selectable up,
+            Selectable down)
+        {
+            Navigation navigation = selectable.navigation;
+            navigation.mode = Navigation.Mode.Explicit;
+            navigation.selectOnLeft = left;
+            navigation.selectOnRight = right;
+            navigation.selectOnUp = up;
+            navigation.selectOnDown = down;
+            selectable.navigation = navigation;
         }
 
         private string ResolveRealmLabel(RealmId realm)
@@ -690,6 +814,9 @@ namespace AL.UI.FirstUserIdentity
             colors.pressedColor = new Color(0.34f, 0.23f, 0.08f, 1f);
             colors.disabledColor = new Color(0.12f, 0.12f, 0.12f, 0.68f);
             button.colors = colors;
+            var outline = button.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.94f, 0.72f, 0.28f, 0.72f);
+            outline.effectDistance = new Vector2(2f, -2f);
             return button;
         }
 
@@ -704,7 +831,11 @@ namespace AL.UI.FirstUserIdentity
             colors.highlightedColor = new Color(0.17f, 0.23f, 0.32f, 1f);
             colors.selectedColor = colors.highlightedColor;
             colors.pressedColor = new Color(0.06f, 0.08f, 0.12f, 1f);
+            colors.disabledColor = new Color(0.05f, 0.06f, 0.08f, 0.72f);
             button.colors = colors;
+            var outline = button.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.55f, 0.64f, 0.74f, 0.38f);
+            outline.effectDistance = new Vector2(1f, -1f);
             return button;
         }
 

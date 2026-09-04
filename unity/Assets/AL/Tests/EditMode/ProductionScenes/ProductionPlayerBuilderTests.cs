@@ -110,20 +110,23 @@ namespace AL.Tests.EditMode.ProductionScenes
                 AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "source directory is missing");
 
                 Directory.CreateDirectory(source);
-                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..32");
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..128");
 
                 File.WriteAllText(Path.Combine(source, "catalog-00.json"), "{}");
                 Directory.CreateDirectory(duplicate);
                 AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "Duplicate GameData");
 
                 Directory.Delete(duplicate, true);
-                for (int i = 1; i < 33; i++)
+                for (int i = 1; i < 128; i++)
                 {
                     File.WriteAllText(
                         Path.Combine(source, "catalog-" + i.ToString("00", CultureInfo.InvariantCulture) + ".json"),
                         "{}");
                 }
-                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..32");
+                var boundedCatalogs = (string[])resolveCatalogs.Invoke(null, new object[] { assetsRoot });
+                Assert.That(boundedCatalogs, Has.Length.EqualTo(128));
+                File.WriteAllText(Path.Combine(source, "catalog-128.json"), "{}");
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..128");
             }
             finally
             {
@@ -146,6 +149,8 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.AreEqual(BuildTarget.StandaloneWindows64, options.target);
             Assert.AreEqual(BuildOptions.Development, options.options);
             Assert.AreEqual(ExpectedExecutable(root), options.locationPathName);
+            Assert.That(options.extraScriptingDefines, Is.Empty,
+                "The normal Player must remain structurally unflavored.");
             CollectionAssert.AreEqual(new[]
             {
                 "Assets/AL/Scenes/Boot.unity",
@@ -158,6 +163,50 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.That(options.scenes, Has.Some.EqualTo("Assets/AL/Scenes/ChampionArena.unity"));
             Assert.AreEqual("StandaloneWindows64", Prop(plan, "Target").ToString());
             Assert.AreEqual(BuildOptions.Development, (BuildOptions)Prop(plan, "Options"));
+        }
+
+        [Test]
+        public void ApprovalBuildPlanUsesDedicatedGuardedOutputSummaryAndExactDefine()
+        {
+            string root = ProjectRoot();
+            string outputDirectory = ExpectedApprovalOutputDirectory(root);
+            object plan = Static(
+                "CreateMvpApprovalPlan",
+                root,
+                outputDirectory,
+                "6000.3.22f1",
+                false,
+                false,
+                NewValidation(true, "valid"),
+                true,
+                true,
+                false,
+                false);
+
+            Assert.That(PropBool(plan, "IsValid"), Is.True, Failures(plan));
+            var options = (BuildPlayerOptions)Invoke(plan, "CreateBuildPlayerOptions");
+            Assert.That(options.locationPathName, Is.EqualTo(ExpectedApprovalExecutable(root)));
+            CollectionAssert.AreEqual(
+                new[] { "AL_MVP_APPROVAL_SLOT" },
+                options.extraScriptingDefines);
+            Assert.That(PropString(plan, "SummaryPath"), Is.EqualTo(ExpectedApprovalSummaryPath(root)));
+            CollectionAssert.AreEqual(new[]
+            {
+                "Assets/AL/Scenes/Boot.unity",
+                "Assets/AL/Scenes/RealmSelection.unity",
+                "Assets/AL/Scenes/CharacterCreation.unity",
+                "Assets/AL/Scenes/ChampionArena.unity",
+                "Assets/AL/Scenes/Kingdom.unity"
+            }, options.scenes);
+            Assert.That(
+                (bool)Static("IsGuardedMvpApprovalOutputDirectory", root, outputDirectory),
+                Is.True);
+            Assert.That(
+                (bool)Static("IsGuardedMvpApprovalOutputDirectory", root, ExpectedOutputDirectory(root)),
+                Is.False);
+            Assert.That(
+                (bool)Static("IsGuardedOutputDirectory", root, outputDirectory),
+                Is.False);
         }
 
         [Test]
@@ -600,8 +649,17 @@ namespace AL.Tests.EditMode.ProductionScenes
         private static string ExpectedExecutable(string root) =>
             Path.Combine(ExpectedOutputDirectory(root), "AnotherLifeUnity.exe");
 
+        private static string ExpectedApprovalOutputDirectory(string root) =>
+            Path.GetFullPath(Path.Combine(root, "Builds", "Validation", "Windows64MvpApproval"));
+
+        private static string ExpectedApprovalExecutable(string root) =>
+            Path.Combine(ExpectedApprovalOutputDirectory(root), "AnotherLifeUnity.exe");
+
         private static string ExpectedSummaryPath(string root) =>
             Path.GetFullPath(Path.Combine(root, "Logs", "ProductionPlayerBuildSummary.json"));
+
+        private static string ExpectedApprovalSummaryPath(string root) =>
+            Path.GetFullPath(Path.Combine(root, "Logs", "MvpApprovalPlayerBuildSummary.json"));
 
         public class ScriptedBuildEnvironmentProxy : DispatchProxy
         {

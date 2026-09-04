@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.anotherlife.data.simulation.*
+import com.example.anotherlife.ui.layout.usesLargeTextLayout
 
 @Composable
 fun DossierScreen(state: KingdomState, narrative: NarrativeState) {
@@ -87,25 +88,51 @@ fun SectionHeader(title: String, icon: ImageVector) {
 @Composable
 fun AdvisorCard(advisor: Persona) {
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = advisor.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = advisor.role, style = MaterialTheme.typography.labelSmall)
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Text(text = "Affinity: ${advisor.affinity}", style = MaterialTheme.typography.bodyMedium)
-                Text(
-                    text = advisor.strategicBias.name,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.tertiary
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val useStackedLayout = usesLargeTextLayout() || maxWidth < 320.dp
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = advisor.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(text = advisor.role, style = MaterialTheme.typography.labelSmall)
+                Spacer(Modifier.height(8.dp))
+                if (useStackedLayout) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        AdvisorAffinity(advisor)
+                        AdvisorBias(advisor)
+                    }
+                } else {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        AdvisorAffinity(advisor)
+                        AdvisorBias(advisor)
+                    }
+                }
+                LinearProgressIndicator(
+                    progress = { advisor.affinity / 100f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
-            LinearProgressIndicator(
-                progress = { advisor.affinity / 100f },
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                color = MaterialTheme.colorScheme.secondary
-            )
         }
     }
+}
+
+@Composable
+private fun AdvisorAffinity(advisor: Persona) {
+    Text(text = "Affinity: ${advisor.affinity}", style = MaterialTheme.typography.bodyMedium)
+}
+
+@Composable
+private fun AdvisorBias(advisor: Persona) {
+    Text(
+        text = advisor.strategicBias.name,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.tertiary
+    )
 }
 
 @Composable
