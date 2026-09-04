@@ -1,0 +1,276 @@
+{
+  "anatomy": {
+    "headCount": 1,
+    "legCount": 4,
+    "semanticRegionCount": 10,
+    "semanticRegions": [
+      "body",
+      "head",
+      "jaw",
+      "eye_l",
+      "eye_r",
+      "wing_arm_l",
+      "wing_arm_r",
+      "wing_membrane_l",
+      "wing_membrane_r",
+      "tail"
+    ],
+    "semanticVertexCounts": {
+      "body": 31857,
+      "eye_l": 24,
+      "eye_r": 24,
+      "head": 714,
+      "jaw": 487,
+      "tail": 13051,
+      "wing_arm_l": 4103,
+      "wing_arm_r": 4191,
+      "wing_membrane_l": 5230,
+      "wing_membrane_r": 5265
+    },
+    "tailCount": 1,
+    "wingPairCount": 1
+  },
+  "approved2DSources": [
+    {
+      "authority": "APPROVED_2D",
+      "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/55_vaeloryn_multiview_01_v001.png",
+      "sha256": "b3453b1e23b6ab911fe33fb0820c05e2f9b5d9db0e34ef89875edad83a8f8b55"
+    },
+    {
+      "authority": "APPROVED_2D",
+      "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/56_vaeloryn_multiview_02_v001.png",
+      "sha256": "ccdb03cd2e4bc2547e95497e251bbd698d52b4c19a1b179b0707993709bd897d"
+    }
+  ],
+  "authority": {
+    "finalCinematicApproval": false,
+    "gameplayAuthority": false,
+    "ownerVisualApprovalRequired": true,
+    "runtimeAuthority": false,
+    "runtimeVfxSeparate": true,
+    "status": "MOTION_REVIEW_CANDIDATE"
+  },
+  "candidateDerivation": {
+    "candidateFiles": [
+      {
+        "bytes": 18966857,
+        "path": "unity/ArtSource/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_motion_source_v002.blend",
+        "sha256": "10bf9f96380632c983b523172913de8aa31b3187b785bd0b35b23757c7681b89"
+      },
+      {
+        "bytes": 15766672,
+        "path": "unity/ArtSource/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_motion_source_v002.glb",
+        "sha256": "46d85807f79297fd3935502578466a7391f8b4a674bb2dbaa4652cea0e798b9a"
+      }
+    ],
+    "input": {
+      "meshyTaskId": "01a05b2c-92c6-7329-939f-a538fdaa859b",
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/wish_dragon_vaeloryn/wish_dragon_vaeloryn_source_v001.fbx",
+      "sha256": "80bcc74a2cf95cb2626437bba3d3ba805d6087f1498e64b1603cb256f43e68cb"
+    },
+    "operations": [
+      "local Blender removal of the 15-vertex disconnected debris component and deterministic hole cleanup",
+      "local semantic separation into ten named anatomy regions and four independent material regions",
+      "local 25-deform-bone armature, bounded two-influence skinning, and five-bone articulation review action"
+    ]
+  },
+  "cost": {
+    "incrementalUsd": 0.0,
+    "paidProviderCalls": 0,
+    "rechargeOrBillingMutation": false,
+    "tools": [
+      "Blender 5.2.0 LTS local",
+      "FFmpeg 9.0 local"
+    ]
+  },
+  "framingProofs": [
+    {
+      "aspect": "16:9",
+      "file": {
+        "bytes": 2131421,
+        "path": "unity/Docs/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_frame_16x9_v002.png",
+        "sha256": "eb95e9541cf242cd29079d761785bce0d91ac1ac5e2c3adbf27435b72eb167a4"
+      },
+      "height": 1080,
+      "width": 1920
+    },
+    {
+      "aspect": "9:16",
+      "file": {
+        "bytes": 2107363,
+        "path": "unity/Docs/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_frame_9x16_v002.png",
+        "sha256": "a54748d8bca55f447f98ca26b2e0d3a8afe53d4eeed400a8d4071727b5697145"
+      },
+      "height": 1920,
+      "width": 1080
+    }
+  ],
+  "historicalExactIdentityReference": {
+    "basename": "exec-b9b4004f-1925-44b0-9032-d8e26d429113.png",
+    "bytes": 2572091,
+    "disposition": "APPROVED_2D_SOURCE_BYTES_NOT_RECOVERED_LOCALLY",
+    "localBytesAvailable": false,
+    "sha256": "0484da2fc76779601143ddac305247c503b19dc90398c35febea2c2cec3e1c97"
+  },
+  "motionProof": {
+    "animatedBones": [
+      "neck_01",
+      "jaw",
+      "wing_l_01",
+      "wing_r_01",
+      "tail_01"
+    ],
+    "codec": "h264",
+    "contactSheet": {
+      "bytes": 155113,
+      "path": "unity/Docs/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_motion_contact_v002.png",
+      "sha256": "57c1112cc92934d8f6f75475a515b799f1f54cdde55cb6cbe67e5978cadf3eb7"
+    },
+    "durationSeconds": 7.0,
+    "file": {
+      "bytes": 246640,
+      "path": "unity/Docs/Cinematics/Shot070VaelorynSourceV002/shot070_vaeloryn_motion_review_v002.mp4",
+      "sha256": "0f7b66dc3fd6450405cec9cbf5840ba82fd1589ab5fbe73148b1381527169122"
+    },
+    "fps": 24,
+    "frameCount": 168,
+    "genuineArticulation": true,
+    "height": 540,
+    "stillImageMotionSubstitute": false,
+    "width": 960
+  },
+  "packetId": "tdf_packet_vaeloryn_wish_dragon_shot070_source_v002",
+  "rejectedSource": {
+    "basename": "wish_dragon_review_master.glb",
+    "bytes": 53457548,
+    "disposition": "REJECTED_FOR_EXACT_SOURCE_FIDELITY",
+    "inputEligible": false,
+    "negativeChecks": [
+      "duplicate_head",
+      "fused_monolithic_mesh",
+      "unskinned",
+      "single_material",
+      "identity_wing_emission_drift",
+      "lineage_gap"
+    ],
+    "sha256": "5a846774341c6e38a8f59df617cbec0b52135f5898a591db271094b3d4bb1270",
+    "triangles": 777338,
+    "usedAsInput": false
+  },
+  "rig": {
+    "armatureCount": 1,
+    "deformBoneCount": 25,
+    "maxVertexInfluences": 2,
+    "report": {
+      "bytes": 7294,
+      "path": "unity/Docs/Cinematics/Shot070VaelorynSourceV002/rig_articulation_report_v002.json",
+      "sha256": "9e3ff484482014b75e2f25c3dd7f03c0096c88dbcd35e822a51b3b739f25a8eb"
+    },
+    "requiredBones": [
+      "root",
+      "pelvis",
+      "spine_01",
+      "spine_02",
+      "neck_01",
+      "neck_02",
+      "head",
+      "jaw",
+      "tail_01",
+      "tail_02",
+      "tail_03",
+      "tail_04",
+      "wing_l_01",
+      "wing_l_02",
+      "wing_l_03",
+      "wing_r_01",
+      "wing_r_02",
+      "wing_r_03",
+      "leg_fl_01",
+      "leg_fl_02",
+      "leg_fr_01",
+      "leg_fr_02",
+      "leg_bl_01",
+      "leg_bl_02",
+      "leg_br_01",
+      "leg_br_02"
+    ],
+    "rigged": true,
+    "unweightedVertexCount": 0
+  },
+  "scale": {
+    "boundsMeters": {
+      "maximum": [
+        0.9113819599151611,
+        5.666783809661865,
+        5.703144073486328
+      ],
+      "minimum": [
+        -0.9305700063705444,
+        -5.680602073669434,
+        -5.710302352905273
+      ]
+    },
+    "maximumHeightMeters": 11.413446,
+    "purpose": "stable cinematic review scale only; no gameplay/runtime scale authority"
+  },
+  "schemaVersion": 1,
+  "shotBinding": {
+    "beatId": "CTMA-BEAT-07",
+    "durationSeconds": 7.0,
+    "fps": 24,
+    "frameInterval": [
+      1080,
+      1248
+    ],
+    "localFrameCount": 168,
+    "shotId": "Shot070"
+  },
+  "sourceAudit": {
+    "file": {
+      "bytes": 3668,
+      "path": "unity/Docs/Cinematics/Shot070VaelorynSourceV002/source_audit_v002.json",
+      "sha256": "64abd757f2a264986c54a5899eb1e8575afd19da97b133800d3ecbb5197ba204"
+    },
+    "sourceArmatures": 0,
+    "sourceMaterials": 1,
+    "sourceMeshObjects": 1,
+    "sourceNonManifoldEdges": 29,
+    "sourceTriangles": 63750
+  },
+  "sourceFidelity": {
+    "preserved": [
+      "single crowned head",
+      "four legs",
+      "one independently controlled wing pair",
+      "long articulated tail",
+      "pearl argent pale-indigo hierarchy",
+      "celestial membrane material region",
+      "crown and thorn material region"
+    ],
+    "remainingDecision": "Owner visual approval of this moving 3D candidate and final Shot070 performance remains required.",
+    "separateFromCleanMesh": [
+      "eight Gems",
+      "portal",
+      "wish-space",
+      "atmospheric magic",
+      "attack effects",
+      "audio"
+    ]
+  },
+  "sourceVersion": "tdf-cinematic-vaeloryn-2026-09-04-v002",
+  "topology": {
+    "boundaryEdgeCount": 0,
+    "independentMaterialRegionCount": 4,
+    "materialSlots": [
+      "body",
+      "celestial_membrane",
+      "crown_thorn",
+      "eyes"
+    ],
+    "meshObjectCount": 1,
+    "nonManifoldEdgeCount": 2,
+    "triangles": 63708,
+    "uvLayerCount": 1,
+    "vertices": 31857
+  }
+}
