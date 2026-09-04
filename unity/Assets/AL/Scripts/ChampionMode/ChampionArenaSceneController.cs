@@ -161,6 +161,8 @@ namespace AL.ChampionMode
         private bool _encounterClearShown;
         private bool _encounterFailed;
         private bool _innerDeathSequenceActive;
+        private string _innerDeathOperationId = string.Empty;
+        private string _innerDeathEventId = string.Empty;
         private Vector3 _innerCapitalSpawnPosition;
         private Coroutine _innerDeathRoutine;
         private bool _encounterIntroRunning;
@@ -635,6 +637,8 @@ namespace AL.ChampionMode
             _encounterClearShown = false;
             _encounterFailed = false;
             _innerDeathSequenceActive = false;
+            _innerDeathOperationId = string.Empty;
+            _innerDeathEventId = string.Empty;
             _encounterIntroRunning = false;
             _appearanceInspectionMode = false;
 
@@ -2388,6 +2392,8 @@ namespace AL.ChampionMode
                     sites));
 
             _innerDeathSequenceActive = true;
+            _innerDeathOperationId = DeathPenaltyIds.NewOperationId();
+            _innerDeathEventId = DeathPenaltyIds.NewDeathEventId();
             ShowInnerDeathPresentation(plan);
             _hudSession?.NotifyRecap(true);
 
@@ -2460,10 +2466,21 @@ namespace AL.ChampionMode
                 yield return null;
             }
 
-            bool stoodUp = InnerRealmDeathRespawnApplier.TryApply(
+            ISaveGameService saveGameService = null;
+            ServiceLocator.TryGet(out saveGameService);
+            DeathPenaltyCommitRequest penaltyRequest =
+                DeathPenaltySaveAuthority.CreateInnerRealmRequest(
+                    _innerDeathOperationId,
+                    _innerDeathEventId,
+                    _realmId);
+            DeathPenaltyCommitResult penalty;
+            bool stoodUp = DeathPenaltyProductionPath.TryCommitPenaltyThenApply(
+                saveGameService,
+                penaltyRequest,
                 plan,
                 _playerCombat,
-                _playerController);
+                _playerController,
+                out penalty);
             if (_defeatPanelObject != null)
             {
                 _defeatPanelObject.SetActive(false);
@@ -2472,6 +2489,8 @@ namespace AL.ChampionMode
 
             _innerDeathSequenceActive = false;
             _innerDeathRoutine = null;
+            _innerDeathOperationId = string.Empty;
+            _innerDeathEventId = string.Empty;
             if (stoodUp &&
                 !_appearanceInspectionMode &&
                 !_encounterIntroRunning &&
@@ -2483,9 +2502,18 @@ namespace AL.ChampionMode
 
             if (_combatFeedText != null)
             {
-                _combatFeedText.text = stoodUp
-                    ? "You stand again at the Capital."
-                    : "Fallen. Capital stand-up was unavailable.";
+                if (penalty != null &&
+                    (penalty.Status == DeathPenaltyCommitStatus.OathmarkPaymentRequired ||
+                     penalty.Status == DeathPenaltyCommitStatus.ReplayedOathmarkPaymentRequired))
+                {
+                    _combatFeedText.text = "Revival requires Oathmarks.";
+                }
+                else
+                {
+                    _combatFeedText.text = stoodUp
+                        ? "You stand again at the Capital."
+                        : "Fallen. Capital stand-up was unavailable.";
+                }
             }
 
             RefreshBossText();

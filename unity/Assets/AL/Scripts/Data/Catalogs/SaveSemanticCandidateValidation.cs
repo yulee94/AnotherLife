@@ -807,6 +807,8 @@ namespace AL.Data.Catalogs
                     "FirstWorldProgress",
                     "MapDisclosure",
                     "RealmSelection",
+                    "ChampionProgression",
+                    "DeathPenalty",
                     "WarzoneCredits",
                     "LastSavedTimestamp"
                 },
@@ -1026,6 +1028,71 @@ namespace AL.Data.Catalogs
                 "ReceiptFingerprint",
                 "ExpectedGenerationFingerprint",
                 "Revision");
+
+        private static readonly HashSet<string> ChampionProgressionFields =
+            Fields(
+                "Version",
+                "ProfileId",
+                "CharacterId",
+                "AccountId",
+                "CurrentLevel",
+                "MaximumLevel",
+                "InLevelExperienceUnits",
+                "ExperienceUnitsPerLevel",
+                "ProgressionRevision",
+                "LevelCapPolicyId",
+                "LevelCapPolicyRevision");
+
+        private static readonly HashSet<string> DeathPenaltyFields =
+            Fields(
+                "Version",
+                "Status",
+                "Outcome",
+                "ProfileId",
+                "CharacterId",
+                "AccountId",
+                "DeathEventId",
+                "CombatSessionId",
+                "EncounterAttemptId",
+                "InstanceId",
+                "DeathOrdinal",
+                "DeathStateRevision",
+                "OperationId",
+                "RequestFingerprint",
+                "DeathFingerprint",
+                "ReceiptHash",
+                "Branch",
+                "AfterProgressionRevision",
+                "LedgerVersion",
+                "LedgerRevision",
+                "ExpectedGenerationFingerprint",
+                "Revision",
+                "Receipts");
+
+        private static readonly HashSet<string> DeathPenaltyReceiptFields =
+            Fields(
+                "OperationId",
+                "RequestFingerprint",
+                "DeathFingerprint",
+                "ReceiptHash",
+                "AccountId",
+                "ProfileId",
+                "CharacterId",
+                "PolicyVersion",
+                "LevelCapPolicyId",
+                "LevelCapPolicyRevision",
+                "Branch",
+                "BeforeLevel",
+                "AfterLevel",
+                "MaximumLevel",
+                "ExperienceUnitsPerLevel",
+                "BeforeInLevelExperienceUnits",
+                "AfterInLevelExperienceUnits",
+                "BeforeProgressionRevision",
+                "AfterProgressionRevision",
+                "PlanHash",
+                "RequiresProgressionWrite",
+                "RevivalCommitted");
 
         private static readonly HashSet<string> MapDisclosureFields =
             Fields(
@@ -1414,6 +1481,8 @@ namespace AL.Data.Catalogs
             ValidateFirstWorldProgress(root, collector, state);
             ValidateMapDisclosure(root, collector, state);
             ValidateRealmSelection(root, collector, state);
+            ValidateChampionProgression(root, collector, state);
+            ValidateDeathPenalty(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
@@ -4484,6 +4553,185 @@ namespace AL.Data.Catalogs
             }
 
             return true;
+        }
+
+        private static void ValidateChampionProgression(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.ChampionProgression";
+            StrictJsonValue value;
+            if (!root.TryGet("ChampionProgression", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var progression = value as StrictJsonObject;
+            if (progression == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_CHAMPION_PROGRESSION_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                progression,
+                ChampionProgressionFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    progression,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_CHAMPION_PROGRESSION_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_CHAMPION_PROGRESSION_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+            }
+        }
+
+        private static void ValidateDeathPenalty(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.DeathPenalty";
+            StrictJsonValue value;
+            if (!root.TryGet("DeathPenalty", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var authority = value as StrictJsonObject;
+            if (authority == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_DEATH_PENALTY_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                authority,
+                DeathPenaltyFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    authority,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_DEATH_PENALTY_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_DEATH_PENALTY_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            StrictJsonValue receiptsValue;
+            if (authority.TryGet("Receipts", out receiptsValue) &&
+                !(receiptsValue is StrictJsonNull))
+            {
+                var receipts = receiptsValue as StrictJsonArray;
+                if (receipts == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_DEATH_PENALTY_RECEIPTS_INVALID",
+                        path + ".Receipts",
+                        SaveSemanticDomain.Envelope);
+                    return;
+                }
+
+                for (int i = 0; i < receipts.Items.Count; i++)
+                {
+                    var receipt = receipts.Items[i] as StrictJsonObject;
+                    if (receipt == null)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_DEATH_PENALTY_RECEIPT_INVALID",
+                            path + ".Receipts[" + i + "]",
+                            SaveSemanticDomain.Envelope);
+                        continue;
+                    }
+
+                    InspectUnexpectedProperties(
+                        receipt,
+                        DeathPenaltyReceiptFields,
+                        path + ".Receipts[" + i + "]",
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state);
+                }
+            }
         }
 
         private static void ValidateFirstWorldProgress(
