@@ -8,6 +8,7 @@ using AL.RealmSelection;
 
 [assembly: InternalsVisibleTo("AL.Nvs01.Persistence.Tests")]
 [assembly: InternalsVisibleTo("AL.EditMode.Tests")]
+[assembly: InternalsVisibleTo("AL.PlayMode.Tests")]
 
 namespace AL.Services.Local
 {
@@ -114,6 +115,15 @@ namespace AL.Services.Local
     {
         RealmSelectionResult TryCommitProfileBoundRealmSelection(
             RealmSelectionRequest request);
+    }
+
+    /// <summary>
+    /// Schema-v2 death-penalty mutation entry point. ProfileId cannot change.
+    /// </summary>
+    internal interface IProfileBoundDeathPenaltyCandidateStore
+    {
+        AL.ChampionMode.Death.DeathPenaltyCommitResult TryCommitProfileBoundDeathPenalty(
+            AL.ChampionMode.Death.DeathPenaltyCommitRequest request);
     }
 
     /// <summary>
