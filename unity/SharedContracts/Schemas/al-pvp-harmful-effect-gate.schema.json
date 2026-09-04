@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-pvp-harmful-effect-gate.schema.json",
+  "title": "Another Life PvP Harmful-Effect Gate Policy",
+  "description": "Catalog authority for same-realm harmful-target/effect eligibility. Consumes Guild membership and Alliance/war snapshots; does not mutate health or grant client/UI/network/save authority.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "version",
+    "catalogId",
+    "game",
+    "sourceRevision",
+    "machineIdentity",
+    "consumedContracts",
+    "scope",
+    "effectKinds",
+    "precedence",
+    "forcedSafeZones",
+    "hostility",
+    "presentation",
+    "authorityBoundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "catalogId": { "const": "al_pvp_harmful_effect_gate_policy" },
+    "game": { "const": "Another Life" },
+    "sourceRevision": { "$ref": "#/$defs/stableId" },
+    "machineIdentity": { "const": "PvpHarmfulEffectGate" },
+    "consumedContracts": {
+      "type": "object",
+      "required": ["guildCatalogId", "allianceCatalogId", "zonePolicy"],
+      "properties": {
+        "guildCatalogId": { "const": "al_guild_membership_policy" },
+        "allianceCatalogId": { "const": "al_alliance_war_policy" },
+        "zonePolicy": { "const": "immutable_zone_policy_snapshot" }
+      },
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "realmBinding",
+        "clientAuthority",
+        "healthMutation",
+        "hardcodedZones",
+        "runtimeTargeting",
+        "network",
+        "save"
+      ],
+      "properties": {
+        "realmBinding": { "const": "same_realm_only" },
+        "clientAuthority": { "const": false },
+        "healthMutation": { "const": false },
+        "hardcodedZones": { "const": false },
+        "runtimeTargeting": { "const": false },
+        "network": { "const": false },
+        "save": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "effectKinds": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "prefixItems": [
+        { "const": "direct_hit" },
+        { "const": "projectile" },
+        { "const": "area_of_effect" },
+        { "const": "damage_over_time_tick" },
+        { "const": "chain" },
+        { "const": "trap" },
+        { "const": "pet_summon" },
+        { "const": "reflect" },
+        { "const": "splash" },
+        { "const": "environmental" },
+        { "const": "crowd_control" }
+      ],
+      "items": false
+    },
+    "precedence": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        { "const": "invalid_stale_unknown_or_cross_realm" },
+        { "const": "forced_safe_zone" },
+        { "const": "same_guild" },
+        { "const": "same_effective_alliance" },
+        { "const": "both_toggles_on_or_opposing_active_war" }
+      ],
+      "items": false
+    },
+    "forcedSafeZones": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        { "const": "city" },
+        { "const": "beginner" },
+        { "const": "accordant" },
+        { "const": "forced_safe" }
+      ],
+      "items": false
+    },
+    "hostility": {
+      "type": "object",
+      "required": [
+        "forceHostilityWarState",
+        "warNoticeHours",
+        "warActiveHours",
+        "neverOverride"
+      ],
+      "properties": {
+        "forceHostilityWarState": { "const": "ACTIVE" },
+        "warNoticeHours": { "const": 24 },
+        "warActiveHours": { "const": 168 },
+        "neverOverride": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "prefixItems": [
+            { "const": "same_guild" },
+            { "const": "same_alliance" },
+            { "const": "city" },
+            { "const": "beginner" },
+            { "const": "accordant" },
+            { "const": "forced_safe" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "presentation": {
+      "type": "object",
+      "required": [
+        "nameplateAuthoritative",
+        "warIconAuthoritative",
+        "eligibleWarPresentation",
+        "eligibleTogglePresentation"
+      ],
+      "properties": {
+        "nameplateAuthoritative": { "const": false },
+        "warIconAuthoritative": { "const": false },
+        "eligibleWarPresentation": { "const": "war_hostile" },
+        "eligibleTogglePresentation": { "const": "hostile" }
+      },
+      "additionalProperties": false
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "required": ["plannerScope", "excludedImplementations"],
+      "properties": {
+        "plannerScope": { "const": "engine_free_snapshot_only" },
+        "excludedImplementations": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "prefixItems": [
+            { "const": "persistence" },
+            { "const": "network" },
+            { "const": "save" },
+            { "const": "health_mutation" },
+            { "const": "runtime_targeting" },
+            { "const": "ui" },
+            { "const": "client_authority" },
+            { "const": "hardcoded_zones" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 128
+    }
+  }
+}
