@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "packetId": "anotherlife-realm-creature-production-slice",
+  "qualificationId": "rcpq_elite_stonehold_oreblind_delver_v001",
+  "sourceVersion": "al-rcreature-2026-09-03-v003",
+  "authority": {
+    "source2dId": "tdf_elite_stonehold_oreblind_delver",
+    "modelId": "elite_stonehold_oreblind_delver",
+    "sourceQualificationOnly": true,
+    "runtimeAuthority": false,
+    "gameplayAuthority": false,
+    "spawnActivation": false,
+    "runtimeVfxSeparate": true
+  },
+  "source": {
+    "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_stonehold_oreblind_delver/elite_stonehold_oreblind_delver_source_v001.fbx",
+    "bytes": 13729612,
+    "sha256": "df10a1ed7b48d3ccc0c87c0fd7c163f14be25f5e71c0c3a32de624a931534b2b"
+  },
+  "approved2D": {
+    "manifestPath": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/realm_creature_2d_approval_manifest_v002.json",
+    "entryId": "tdf_elite_stonehold_oreblind_delver",
+    "source": {
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_stonehold_oreblind_delver_concept_sheet_v001.png",
+      "bytes": 2609153,
+      "sha256": "86ef99a99539d6d8fdce1dbac410e0dae4b7ab0e6735dab39f37805d624c0f23",
+      "dimensions": [1536, 1024]
+    }
+  },
+  "scale": {
+    "longitudinalAxis": "X",
+    "frontDirection": "-X",
+    "targetLengthMeters": 7.2,
+    "mappingState": "engineering_review_scale_not_gameplay_authority"
+  },
+  "protectedIdentityCues": [
+    "six_load_bearing_digging_limb_columns_in_three_distinct_pairs",
+    "eyeless_wedge_skull",
+    "broad_sensory_jaw_plates",
+    "short_counterweight_tail"
+  ],
+  "rig": {
+    "armatureObject": "RIG_oreblind_delver",
+    "skeletonProfileId": "rmc_skeleton_oreblind_six_limb_delver_v001",
+    "bindPoseId": "rmc_bind_nonhumanoid_neutral_contact_v001",
+    "rootBones": ["root", "motion_root", "body_root"],
+    "deformBones": [
+      "body_root",
+      "spine_front",
+      "spine_rear",
+      "neck_01",
+      "head",
+      "wedge_skull",
+      "tail_01",
+      "sensory_plate_front",
+      "sensory_plate_mid",
+      "sensory_plate_rear",
+      "front_upper_l",
+      "front_lower_l",
+      "front_foot_l",
+      "front_upper_r",
+      "front_lower_r",
+      "front_foot_r",
+      "middle_upper_l",
+      "middle_lower_l",
+      "middle_foot_l",
+      "middle_upper_r",
+      "middle_lower_r",
+      "middle_foot_r",
+      "rear_upper_l",
+      "rear_lower_l",
+      "rear_foot_l",
+      "rear_upper_r",
+      "rear_lower_r",
+      "rear_foot_r"
+    ],
+    "socketBones": [
+      "socket_forefoot_contact_l",
+      "socket_forefoot_contact_r",
+      "socket_middle_foot_contact_l",
+      "socket_middle_foot_contact_r",
+      "socket_rear_foot_contact_l",
+      "socket_rear_foot_contact_r",
+      "socket_attack_origin",
+      "socket_camera_focus",
+      "socket_vfx_gallery_dust",
+      "socket_vfx_plate_stress",
+      "socket_vfx_jaw_sensor",
+      "socket_vfx_claw_spark"
+    ],
+    "minimumDeformationPoses": 16,
+    "maximumInfluencesPerVertex": 4
+  },
+  "lodPolicy": {
+    "levels": [
+      { "id": "LOD0", "object": "GEO_oreblind_delver_LOD0", "maximumTriangles": 75000 },
+      { "id": "LOD1", "object": "GEO_oreblind_delver_LOD1", "maximumTriangles": 45000 },
+      { "id": "LOD2", "object": "GEO_oreblind_delver_LOD2", "maximumTriangles": 22000 }
+    ],
+    "normalPlayUsesReducedLod": true,
+    "protectedCuesRequiredEveryLevel": true
+  },
+  "materialPolicy": {
+    "materialId": "mat_oreblind_delver_pbr_v001",
+    "maximumSlots": 1,
+    "maximumTextureLongEdge": 2048,
+    "textures": [
+      {
+        "role": "base_color",
+        "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_stonehold_oreblind_delver/runtime_2k/base_color.png",
+        "bytes": 5746950,
+        "sha256": "c874fd3be3795be2c27bfdcceb5f655c1b0cfd122a5e904a1ee513ccec1812d2",
+        "dimensions": [2048, 2048]
+      },
+      {
+        "role": "normal",
+        "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_stonehold_oreblind_delver/runtime_2k/normal.png",
+        "bytes": 4513332,
+        "sha256": "6308123233c7a7db9a93d54b004ce7e93ca24f1fc240e0d46b8a630a7976aac7",
+        "dimensions": [2048, 2048]
+      },
+      {
+        "role": "metallic_smoothness",
+        "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_stonehold_oreblind_delver/runtime_2k/metallic_smoothness.png",
+        "bytes": 1336720,
+        "sha256": "cf535f27c48e2236d3a957aca5ca2146454f3d0042c1a0f215d9543119ae240e",
+        "dimensions": [2048, 2048]
+      },
+      {
+        "role": "ambient_occlusion",
+        "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_stonehold_oreblind_delver/runtime_2k/ao.png",
+        "bytes": 6988,
+        "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
+        "dimensions": [2048, 2048]
+      }
+    ],
+    "emissionBakedIntoCleanMesh": false
+  },
+  "motionPolicy": {
+    "sampleRateHz": 30,
+    "requiredKeys": ["locomotion.walk", "locomotion.run", "attack.basic", "attack.special", "skill.anticipation"],
+    "motions": [
+      { "motionKey": "idle.weight_shift", "actionName": "ANIM_oreblind_delver_idle_weight_shift_v001", "durationFrames": 61, "loop": true, "sourceIntent": "idle_breath_or_weight_shift" },
+      { "motionKey": "locomotion.walk", "actionName": "ANIM_oreblind_delver_locomotion_walk_v001", "durationFrames": 61, "loop": true, "sourceIntent": "contact_verified_primary_locomotion" },
+      { "motionKey": "locomotion.run", "actionName": "ANIM_oreblind_delver_locomotion_run_v001", "durationFrames": 31, "loop": true, "sourceIntent": "low_tunnel_sprint" },
+      { "motionKey": "attack.basic", "actionName": "ANIM_oreblind_delver_attack_basic_v001", "durationFrames": 46, "loop": false, "sourceIntent": "jaw_wall_sweep" },
+      { "motionKey": "attack.special", "actionName": "ANIM_oreblind_delver_attack_special_v001", "durationFrames": 61, "loop": false, "sourceIntent": "paired_dig_cycle" },
+      { "motionKey": "skill.anticipation", "actionName": "ANIM_oreblind_delver_skill_anticipation_v001", "durationFrames": 46, "loop": false, "sourceIntent": "vibration_freeze" },
+      { "motionKey": "reaction.hit", "actionName": "ANIM_oreblind_delver_reaction_hit_v001", "durationFrames": 31, "loop": false, "sourceIntent": "full_body_recovery_to_neutral" },
+      { "motionKey": "defeat", "actionName": "ANIM_oreblind_delver_defeat_v001", "durationFrames": 61, "loop": false, "sourceIntent": "debris_backed_emergence" }
+    ],
+    "rootMotionPolicy": "in_place_presentation_only",
+    "gameplayResultsFromAnimation": false
+  },
+  "outputs": {
+    "blend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/OreblindDelverV001/oreblind_delver_rig_lod_motion_v001.blend",
+    "fbx": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/OreblindDelverV001/oreblind_delver_rig_lod_motion_v001.fbx",
+    "dccReport": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/OreblindDelverV001/oreblind_delver_dcc_report_v001.json",
+    "qualificationManifest": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/OreblindDelverV001/oreblind_delver_qualification_manifest_v001.json",
+    "reviewDirectory": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/OreblindDelverV001/Review"
+  }
+}

@@ -75,6 +75,26 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Boss reward source catalog gate
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/boss-reward-source-catalog.txt"
+          try {
+            & python tools/game-data/test_validate_boss_reward_source.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Boss reward source catalog tests exited with code $LASTEXITCODE."
+            }
+            & python tools/game-data/validate_boss_reward_source.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Boss reward source catalog audit exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Android Unity package verifier tests
         shell: pwsh
         timeout-minutes: 5
@@ -179,7 +199,12 @@ jobs:
               "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/**",
               "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/**",
               "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/**",
-              "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_cindermaw_salamander_concept_sheet_v001.png"
+              "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_cindermaw_salamander_concept_sheet_v001.png",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_stonehold_oreblind_delver/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_stonehold_oreblind_delver/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/OreblindDelverV001/**",
+              "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/OreblindDelverV001/**",
+              "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_stonehold_oreblind_delver_concept_sheet_v001.png"
             ) -join ","
             if ($env:GITHUB_TOKEN) {
               $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x:$($env:GITHUB_TOKEN)"))

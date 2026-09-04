@@ -31,6 +31,15 @@ CINDERMAW_SLICE_DIR = (
     / "ProductionSlices"
     / "CindermawSalamanderV001"
 )
+OREBLIND_SLICE_DIR = (
+    REPO_ROOT
+    / "unity"
+    / "Docs"
+    / "Terrestrials"
+    / "RealmCreatureProductionSourceV001"
+    / "ProductionSlices"
+    / "OreblindDelverV001"
+)
 DEFAULT_PLAN = SLICE_DIR / "fault_crowned_colossus_production_slice_plan_v001.json"
 DEFAULT_SCHEMA = SLICE_DIR / "realm_creature_production_slice.schema.json"
 DEFAULT_QUALIFICATION = SLICE_DIR / "fault_crowned_colossus_qualification_manifest_v001.json"
@@ -40,6 +49,11 @@ DEFAULT_CINDERMAW_PLAN = (
 DEFAULT_CINDERMAW_SCHEMA = CINDERMAW_SLICE_DIR / "realm_creature_production_slice.schema.json"
 DEFAULT_CINDERMAW_QUALIFICATION = (
     CINDERMAW_SLICE_DIR / "cindermaw_salamander_qualification_manifest_v001.json"
+)
+DEFAULT_OREBLIND_PLAN = OREBLIND_SLICE_DIR / "oreblind_delver_production_slice_plan_v001.json"
+DEFAULT_OREBLIND_SCHEMA = OREBLIND_SLICE_DIR / "realm_creature_production_slice.schema.json"
+DEFAULT_OREBLIND_QUALIFICATION = (
+    OREBLIND_SLICE_DIR / "oreblind_delver_qualification_manifest_v001.json"
 )
 SOURCE_MANIFEST = (
     REPO_ROOT
@@ -508,6 +522,14 @@ def validate_cindermaw_slice() -> dict[str, Any]:
         plan_path=DEFAULT_CINDERMAW_PLAN,
         schema_path=DEFAULT_CINDERMAW_SCHEMA,
         qualification_path=DEFAULT_CINDERMAW_QUALIFICATION,
+    )
+
+
+def validate_oreblind_slice() -> dict[str, Any]:
+    return validate_slice(
+        plan_path=DEFAULT_OREBLIND_PLAN,
+        schema_path=DEFAULT_OREBLIND_SCHEMA,
+        qualification_path=DEFAULT_OREBLIND_QUALIFICATION,
     )
 
 
