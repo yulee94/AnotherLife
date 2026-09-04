@@ -911,11 +911,21 @@ namespace AL.Core
                 : new LocalSaveGameService();
 
             var realmService = new LocalRealmService(saveGame, gameData);
-            IResourceService resourceService = ResourceFactoryOverride != null
-                ? (IResourceService)ResourceFactoryOverride(saveGame)
-                : new LocalResourceService(saveGame);
+            KingdomProductionContributionProvider productionProvider = null;
+            IResourceService resourceService;
+            if (ResourceFactoryOverride != null)
+            {
+                resourceService = (IResourceService)ResourceFactoryOverride(saveGame);
+            }
+            else
+            {
+                productionProvider = KingdomProductionConsumer.CreateLive(saveGame);
+                resourceService = new LocalResourceService(saveGame, productionProvider);
+            }
+
             var researchService = new LocalResearchService(saveGame, resourceService);
             var buildingService = new LocalBuildingService(saveGame, resourceService, gameData);
+            KingdomProductionConsumer.BindBuildingService(productionProvider, buildingService);
             var trainingService = new LocalTrainingService(saveGame, resourceService);
 
             var battleSim = new AL.Battle.Simulator.FixedPointBattleSimulator();
