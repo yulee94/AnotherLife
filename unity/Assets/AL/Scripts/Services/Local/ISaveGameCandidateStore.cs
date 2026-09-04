@@ -5,6 +5,7 @@ using AL.Data.Runtime;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
+using AL.RealmWar.Territories.Contracts;
 
 [assembly: InternalsVisibleTo("AL.Nvs01.Persistence.Tests")]
 [assembly: InternalsVisibleTo("AL.EditMode.Tests")]
@@ -137,12 +138,34 @@ namespace AL.Services.Local
     }
 
     /// <summary>
+    /// Schema-v2 territory-capture mutation entry point. The complete typed
+    /// command result is replanned against the candidate inside the save root;
+    /// gameplay callers cannot supply an arbitrary profile mutation callback.
+    /// </summary>
+    internal interface IProfileBoundTerritoryCaptureCandidateStore
+    {
+        TerritoryCaptureApplicationResult TryCommitProfileBoundTerritoryCapture(
+            TerritoryCaptureTransactionRequest request,
+            TerritoryPhaseBPlanner planner);
+    }
+
+    /// <summary>
     /// Schema-v1 3D-first MVP loop mutation entry point. It carries no
     /// caller-provided mutation callback.
     /// </summary>
     internal interface ILegacyMvpLoopCandidateStore
     {
         SaveCandidateCommitResult TryCommitLegacyMvpLoop(MvpLoopCommitRequest request);
+    }
+
+    /// <summary>
+    /// Profile-bound first-session commands. No caller-supplied mutation callback,
+    /// building changes, or arbitrary result grants are admitted.
+    /// </summary>
+    internal interface IProfileBoundFirstSessionCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitFirstSessionIdentity(MvpLoopCommitRequest request);
+        SaveCandidateCommitResult TryCommitFirstSessionProgress(FirstWorldProgressCommitRequest request);
     }
 
     /// <summary>

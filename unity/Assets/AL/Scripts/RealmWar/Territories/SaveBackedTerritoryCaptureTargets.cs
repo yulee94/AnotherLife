@@ -13,6 +13,7 @@ namespace AL.RealmWar.Territories
         private readonly SaveGameData _save;
         private readonly ISaveGameService _saveGameService;
         private readonly TerritoryPhaseBCatalog _catalog;
+        private readonly bool _persistOnCommit;
         private readonly List<TerritoryData> _territoriesBefore;
         private readonly TerritoryCaptureLedgerData _ledgerBefore;
         private TerritoryCaptureTransactionPlan _stagedPlan;
@@ -29,6 +30,18 @@ namespace AL.RealmWar.Territories
             _saveGameService = saveGameService ??
                 throw new ArgumentNullException(nameof(saveGameService));
             _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _persistOnCommit = true;
+            _territoriesBefore = CloneTerritories(save.Territories);
+            _ledgerBefore = CloneLedger(save.TerritoryCaptureLedger);
+        }
+
+        internal SaveBackedTerritoryCandidate(
+            SaveGameData save,
+            TerritoryPhaseBCatalog catalog)
+        {
+            _save = save ?? throw new ArgumentNullException(nameof(save));
+            _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            _persistOnCommit = false;
             _territoriesBefore = CloneTerritories(save.Territories);
             _ledgerBefore = CloneLedger(save.TerritoryCaptureLedger);
         }
@@ -118,6 +131,11 @@ namespace AL.RealmWar.Territories
                 _stagedEvent == null)
             {
                 return TerritoryCommitStatus.Rejected;
+            }
+
+            if (!_persistOnCommit)
+            {
+                return TerritoryCommitStatus.Committed;
             }
 
             try

@@ -7,6 +7,7 @@ using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
 using AL.ChampionMode.Death;
+using AL.RealmWar.Territories.Contracts;
 
 namespace AL.Services.Local
 {
@@ -24,8 +25,10 @@ namespace AL.Services.Local
         IProfileBoundRealmSelectionCandidateStore,
         IProfileBoundDeathPenaltyCandidateStore,
         IProfileBoundWishgateCandidateStore,
+        IProfileBoundTerritoryCaptureCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyFirstWorldProgressCandidateStore,
+        IProfileBoundFirstSessionCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
         INvs01LegacyCandidateStore,
         IProfileWriteAuthorityProvider
@@ -148,6 +151,16 @@ namespace AL.Services.Local
                     .TryCommitProfileBoundWishgate(request, dependencies),
                 ResolveWishgate);
 
+        TerritoryCaptureApplicationResult
+            IProfileBoundTerritoryCaptureCandidateStore
+            .TryCommitProfileBoundTerritoryCapture(
+                TerritoryCaptureTransactionRequest request,
+                TerritoryPhaseBPlanner planner) =>
+            Execute(
+                () => ((IProfileBoundTerritoryCaptureCandidateStore)_inner)
+                    .TryCommitProfileBoundTerritoryCapture(request, planner),
+                ResolveTerritoryCapture);
+
         SaveCandidateCommitResult
             ILegacyMvpLoopCandidateStore.TryCommitLegacyMvpLoop(
                 MvpLoopCommitRequest request) =>
@@ -163,6 +176,20 @@ namespace AL.Services.Local
             Execute(
                 () => ((ILegacyFirstWorldProgressCandidateStore)_inner)
                     .TryCommitLegacyFirstWorldProgress(request),
+                ResolveCandidateCommit);
+
+        SaveCandidateCommitResult IProfileBoundFirstSessionCandidateStore
+            .TryCommitFirstSessionIdentity(MvpLoopCommitRequest request) =>
+            Execute(
+                () => ((IProfileBoundFirstSessionCandidateStore)_inner)
+                    .TryCommitFirstSessionIdentity(request),
+                ResolveCandidateCommit);
+
+        SaveCandidateCommitResult IProfileBoundFirstSessionCandidateStore
+            .TryCommitFirstSessionProgress(FirstWorldProgressCommitRequest request) =>
+            Execute(
+                () => ((IProfileBoundFirstSessionCandidateStore)_inner)
+                    .TryCommitFirstSessionProgress(request),
                 ResolveCandidateCommit);
 
         SaveCandidateCommitResult
@@ -459,6 +486,25 @@ namespace AL.Services.Local
             }
 
             return result.Persisted && result.MutationOccurred && SaveCommitVerified
+                ? TransactionResolution.Commit
+                : TransactionResolution.RollbackAndFreeze;
+        }
+
+        private TransactionResolution ResolveTerritoryCapture(
+            TerritoryCaptureApplicationResult result)
+        {
+            if (InnerCommitUncertain ||
+                result?.Disposition == TerritoryApplyDisposition.CommitUncertain)
+            {
+                return TransactionResolution.RollbackAndFreeze;
+            }
+
+            if (result?.Disposition != TerritoryApplyDisposition.Committed)
+            {
+                return TransactionResolution.Rollback;
+            }
+
+            return SaveCommitVerified
                 ? TransactionResolution.Commit
                 : TransactionResolution.RollbackAndFreeze;
         }
