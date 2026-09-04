@@ -29,6 +29,7 @@ namespace AL.Services.Local
         public bool productionEligible;
         public string sourceRevision;
         public string authorityLedgerId;
+        public long maxOfflineElapsedSeconds;
         public KingdomProductionContributionRecord[] contributions;
     }
 
@@ -79,6 +80,7 @@ namespace AL.Services.Local
             string sourceSha256,
             string authorityLedgerId,
             bool productionEligible,
+            long maxOfflineElapsedSeconds,
             IReadOnlyList<KingdomProductionContributionRule> contributions)
         {
             CatalogId = catalogId;
@@ -86,6 +88,7 @@ namespace AL.Services.Local
             SourceSha256 = sourceSha256;
             AuthorityLedgerId = authorityLedgerId;
             ProductionEligible = productionEligible;
+            MaxOfflineElapsedSeconds = maxOfflineElapsedSeconds;
             Contributions = contributions;
         }
 
@@ -94,6 +97,7 @@ namespace AL.Services.Local
         public string SourceSha256 { get; }
         public string AuthorityLedgerId { get; }
         public bool ProductionEligible { get; }
+        public long MaxOfflineElapsedSeconds { get; }
         public IReadOnlyList<KingdomProductionContributionRule> Contributions { get; }
     }
 
@@ -125,6 +129,7 @@ namespace AL.Services.Local
         public const string CatalogId = "kingdom_production_profile_v1";
         public const string AuthorityLedgerId = "al_six_family_production_authority_v1";
         public const int SchemaVersion = 1;
+        public const long MaximumOfflineElapsedSeconds = 2592000L;
         public const string LiveLedgerRelativePath =
             "Docs/GameDataCatalog/six-family-production-authority.v1.json";
 
@@ -258,12 +263,20 @@ namespace AL.Services.Local
                         realms));
             }
 
+            long maxOfflineElapsedSeconds = 0;
+            if (file.maxOfflineElapsedSeconds > 0 &&
+                file.maxOfflineElapsedSeconds <= MaximumOfflineElapsedSeconds)
+            {
+                maxOfflineElapsedSeconds = file.maxOfflineElapsedSeconds;
+            }
+
             var snapshot = new KingdomProductionProfileSnapshot(
                 file.catalogId,
                 file.sourceRevision,
                 actualSha256,
                 file.authorityLedgerId,
                 file.productionEligible,
+                maxOfflineElapsedSeconds,
                 Array.AsReadOnly(rules.ToArray()));
             return new KingdomProductionProfileLoadResult(
                 true,
@@ -314,6 +327,7 @@ namespace AL.Services.Local
                 ledger.sourceSetSha256,
                 ledger.ledgerId,
                 ledger.productionEligible,
+                0,
                 Array.Empty<KingdomProductionContributionRule>());
             return new KingdomProductionProfileLoadResult(
                 true,

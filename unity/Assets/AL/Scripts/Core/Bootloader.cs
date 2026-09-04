@@ -155,6 +155,7 @@ namespace AL.Core
 
                 ReconcileCompletedConstruction(postLoadMarker);
                 marker.MarkLoadSucceeded(_runtimeOwnerId);
+                OfflineKingdomProductionCatchUp.TryApplyAfterLoad(saveGameService);
             }
             catch (Exception ex)
             {
