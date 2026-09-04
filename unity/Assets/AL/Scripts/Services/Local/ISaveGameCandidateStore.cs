@@ -159,6 +159,16 @@ namespace AL.Services.Local
     }
 
     /// <summary>
+    /// Profile-bound first-session commands. No caller-supplied mutation callback,
+    /// building changes, or arbitrary result grants are admitted.
+    /// </summary>
+    internal interface IProfileBoundFirstSessionCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitFirstSessionIdentity(MvpLoopCommitRequest request);
+        SaveCandidateCommitResult TryCommitFirstSessionProgress(FirstWorldProgressCommitRequest request);
+    }
+
+    /// <summary>
     /// Schema-v1 private-kingdom teaching mutation entry point. The typed
     /// request can advance only one ordered catalog step in SaveGameData.Quests.
     /// </summary>
