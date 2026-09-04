@@ -1,0 +1,67 @@
+{
+  "modelId": "elite_umbral_cindermaw_salamander",
+  "version": "v005",
+  "auditKind": "premium_aa_source_visual",
+  "authority": {
+    "approved2D": "tdf_elite_umbral_cindermaw_salamander_concept_sheet_v001.png",
+    "conceptSheetSha256": "61a5ea43950826a19dc344c3e8f0413cd78457b33cb85c0aeff52a2e9eb872ee",
+    "immutableV004ModelSha256": "9486be45241afe61ba04b4f2fedc4d751819acfd2e0d6181a97c1e4cddb2b9d6",
+    "runtimeVfxSeparate": true
+  },
+  "reviews": {
+    "neutral_closeup": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Review/elite_umbral_cindermaw_salamander_neutral_closeup_v005.png",
+    "full_body_hero": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Review/elite_umbral_cindermaw_salamander_fullbody_hero_v005.png"
+  },
+  "categories": [
+    {
+      "id": "snout_planarity",
+      "result": "CONDITIONAL",
+      "note": "Localized vertex offsets preserved v004 topology (27690/55334) and reduced some mouth-lip volume; the snout remains a broad wedge without readable nostril pits. Max offset 5.4 mm is source-faithful but below the concept's sculpted face break."
+    },
+    {
+      "id": "facial_shading",
+      "result": "CONDITIONAL",
+      "note": "Neutral close-up no longer hides the face in red rim light. Cheek/snout still read smoother than the pebbled torso, and the inherited triangulated bake remains visible at close range."
+    },
+    {
+      "id": "wet_soot_hide",
+      "result": "CONDITIONAL",
+      "note": "Hero review is darker and more soot-black than v004's plastic blue. Close-up still shows the v003/v004 triangle-bake pattern rather than wet pebble hide."
+    },
+    {
+      "id": "obsidian_fins_scutes",
+      "result": "CONDITIONAL",
+      "note": "Fins are darker and slightly glossier than hide, with six-count silhouette preserved. They do not yet read as smoother chipped obsidian plates versus pebbled skin."
+    },
+    {
+      "id": "pale_heat_scars",
+      "result": "CONDITIONAL",
+      "note": "Fin-root and mouth-adjacent warmth is present. Pale ashen scar drawing from the approved sheet is still weak."
+    },
+    {
+      "id": "ash_paste_underside_feet",
+      "result": "PASS",
+      "note": "Forefeet and ventral surfaces read as a paler, rougher ash-paste versus dorsal soot, without turning the limbs into a second creature."
+    },
+    {
+      "id": "ember_confined_to_seams",
+      "result": "PASS",
+      "note": "Dull red tissue stays on the mouth seam and tiny fin-root hints. No baked heat, steam, distortion, or particle VFX."
+    },
+    {
+      "id": "silhouette_and_anatomy_count",
+      "result": "PASS",
+      "note": "Low-slung salamander silhouette, four splayed limbs, flattened tail, and six dorsal fins are preserved. Catalog ID unchanged."
+    },
+    {
+      "id": "runtime_readiness",
+      "result": "BLOCKED",
+      "note": "productionReady=false, rigged=false, runtimeIntegrationState=Blocked. Rig/LOD/Unity import/animation/VFX/device gates are not claimed."
+    }
+  ],
+  "overall": "CONDITIONAL",
+  "comparedToV004": "Material separation and honest neutral lighting are improved; snout planarity and triangle-bake hide remain the main source-stage gaps versus the approved concept.",
+  "productionReady": false,
+  "rigged": false,
+  "runtimeIntegrationState": "Blocked"
+}

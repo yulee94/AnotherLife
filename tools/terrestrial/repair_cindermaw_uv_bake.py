@@ -93,6 +93,10 @@ def validate_uv_bake_report(report: dict[str, Any]) -> list[str]:
         "clean_geometry_pass_uv_bake_pass_smoothing_pass_"
         "normal_detail_pass_texture_grade_pass_rigging_required"
     )
+    visual_polish_status = (
+        "clean_geometry_pass_uv_bake_pass_smoothing_pass_"
+        "normal_detail_pass_visual_polish_v005_pass_rigging_required"
+    )
     if report.get("modelId") != "elite_umbral_cindermaw_salamander":
         diagnostics.append("modelId must identify Cindermaw Salamander")
     if not report.get("sourceTaskIds"):
@@ -100,7 +104,7 @@ def validate_uv_bake_report(report: dict[str, Any]) -> list[str]:
     for field in ("inputSha256", "outputSha256"):
         if not _is_sha256(report.get(field)):
             diagnostics.append(f"{field} must be a lowercase SHA-256 digest")
-    if report.get("status") not in {legacy_status, authored_status}:
+    if report.get("status") not in {legacy_status, authored_status, visual_polish_status}:
         diagnostics.append("status must identify a fail-closed UV-bake or authored-normal stage")
     if report.get("productionReady") is not False:
         diagnostics.append("productionReady must remain false")
