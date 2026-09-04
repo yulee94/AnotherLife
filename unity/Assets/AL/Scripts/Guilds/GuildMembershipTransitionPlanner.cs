@@ -200,13 +200,13 @@ namespace AL.Guilds
                     "Guild authority cannot safely accept another Guild.");
             }
 
-            if (FindActiveMembership(snapshot, request.ActorAccountId) != null)
+            if (FindReservingMembership(snapshot, request.ActorAccountId) != null)
             {
                 return Reject(
                     GuildPlanningStatus.Conflict,
                     "AL-GUILD-ACCOUNT-ALREADY-MEMBER",
                     request.ActorAccountId,
-                    "Account already has one active Guild membership.");
+                    "Account already has one reserving Guild membership.");
             }
 
             var guild = new GuildSnapshot(
@@ -246,7 +246,7 @@ namespace AL.Guilds
             }
 
             GuildPlanningResult membershipGate = EnsureAccountCanEnter(
-                snapshot, request.ActorAccountId, request.PendingRequestId);
+                snapshot, guild, request.ActorAccountId, request.PendingRequestId);
             if (membershipGate != null)
             {
                 return membershipGate;
@@ -268,7 +268,7 @@ namespace AL.Guilds
             GuildAuthoritySnapshot snapshot,
             GuildSnapshot guild)
         {
-            GuildMemberSnapshot actor = FindActiveMember(guild, request.ActorAccountId);
+            GuildMemberSnapshot actor = FindAuthoritativeMember(guild, request.ActorAccountId);
             if (!Can(actor, value => value.CanManageInvitations))
             {
                 return Unauthorized(request.ActorAccountId);
@@ -283,7 +283,7 @@ namespace AL.Guilds
             }
 
             GuildPlanningResult membershipGate = EnsureAccountCanEnter(
-                snapshot, request.TargetAccountId, request.PendingRequestId);
+                snapshot, guild, request.TargetAccountId, request.PendingRequestId);
             if (membershipGate != null)
             {
                 return membershipGate;
@@ -392,7 +392,7 @@ namespace AL.Guilds
                 pending.AccountId,
                 StringComparison.Ordinal);
             bool isInvitationManager = Can(
-                FindActiveMember(guild, request.ActorAccountId),
+                FindAuthoritativeMember(guild, request.ActorAccountId),
                 value => value.CanManageInvitations);
             if (pending.Kind == GuildPendingRequestKind.Invitation)
             {
@@ -421,16 +421,27 @@ namespace AL.Guilds
             IReadOnlyList<GuildMemberSnapshot> members = guild.Members;
             if (accept)
             {
-                if (FindActiveMembership(snapshot, pending.AccountId) != null)
+                GuildMemberSnapshot existing = FindMember(guild, pending.AccountId);
+                if (existing != null &&
+                    StatePolicyFor(existing.State).BlocksSameGuildEntry)
+                {
+                    return Reject(
+                        GuildPlanningStatus.Conflict,
+                        "AL-GUILD-ACCOUNT-CYCLE-BLOCKED",
+                        pending.AccountId,
+                        "Account membership state blocks entry into this Guild cycle.");
+                }
+
+                if (FindReservingMembership(snapshot, pending.AccountId) != null)
                 {
                     return Reject(
                         GuildPlanningStatus.Conflict,
                         "AL-GUILD-ACCOUNT-ALREADY-MEMBER",
                         pending.AccountId,
-                        "Account already has one active Guild membership.");
+                        "Account already has one reserving Guild membership.");
                 }
 
-                if (members.Count >= MaximumMembersPerGuild)
+                if (existing == null && members.Count >= MaximumMembersPerGuild)
                 {
                     return Reject(
                         GuildPlanningStatus.Malformed,
@@ -439,13 +450,14 @@ namespace AL.Guilds
                         "Guild cannot safely accept another member.");
                 }
 
-                members = InsertMember(
-                    members,
-                    new GuildMemberSnapshot(
-                        pending.AccountId,
-                        pending.ImmutableRealmId,
-                        policy.DefaultJoinedRole,
-                        GuildMembershipState.Active));
+                var joined = new GuildMemberSnapshot(
+                    pending.AccountId,
+                    pending.ImmutableRealmId,
+                    policy.DefaultJoinedRole,
+                    GuildMembershipState.Active);
+                members = existing == null
+                    ? InsertMember(members, joined)
+                    : ReplaceMember(members, existing, joined);
             }
 
             GuildSnapshot candidateGuild = CopyGuild(
@@ -467,13 +479,16 @@ namespace AL.Guilds
             GuildAuthoritySnapshot snapshot,
             GuildSnapshot guild)
         {
-            GuildMemberSnapshot actor = FindActiveMember(guild, request.ActorAccountId);
-            if (actor == null)
+            GuildMemberSnapshot actor = FindMember(guild, request.ActorAccountId);
+            GuildMembershipState? leaveResult = actor == null
+                ? null
+                : StatePolicyFor(actor.State).LeaveResult;
+            if (actor == null || !leaveResult.HasValue)
             {
                 return Unauthorized(request.ActorAccountId);
             }
 
-            if (actor.Role == GuildRole.Master)
+            if (actor.State == GuildMembershipState.Active && actor.Role == GuildRole.Master)
             {
                 return Reject(
                     GuildPlanningStatus.Ineligible,
@@ -482,7 +497,21 @@ namespace AL.Guilds
                     "The active Master cannot leave without transfer or disband.");
             }
 
-            return RemoveMember(request, requestFingerprint, snapshot, guild, actor);
+            long candidateGuildRevision = checked(guild.Revision + 1);
+            GuildSnapshot candidateGuild = CopyGuild(
+                guild,
+                candidateGuildRevision,
+                members: ReplaceMember(
+                    guild.Members,
+                    actor,
+                    CopyMemberState(actor, leaveResult.Value)));
+            return CreatePlan(
+                request,
+                requestFingerprint,
+                snapshot,
+                ReplaceGuild(snapshot.Guilds, candidateGuild),
+                RemovePendingForAccount(snapshot.PendingRequests, actor.AccountId),
+                candidateGuildRevision);
         }
 
         private GuildPlanningResult PlanKick(
@@ -491,14 +520,17 @@ namespace AL.Guilds
             GuildAuthoritySnapshot snapshot,
             GuildSnapshot guild)
         {
-            GuildMemberSnapshot actor = FindActiveMember(guild, request.ActorAccountId);
-            GuildMemberSnapshot target = FindActiveMember(guild, request.TargetAccountId);
+            GuildMemberSnapshot actor = FindAuthoritativeMember(guild, request.ActorAccountId);
+            GuildMemberSnapshot target = FindMember(guild, request.TargetAccountId);
+            GuildMembershipState? kickResult = target == null
+                ? null
+                : StatePolicyFor(target.State).KickResult;
             if (actor == null || !Can(actor, value => value.CanManageMembers))
             {
                 return Unauthorized(request.ActorAccountId);
             }
 
-            if (target == null)
+            if (target == null || !kickResult.HasValue)
             {
                 return Reject(
                     GuildPlanningStatus.NotFound,
@@ -521,21 +553,26 @@ namespace AL.Guilds
                 return Unauthorized(request.ActorAccountId);
             }
 
-            return RemoveMember(request, requestFingerprint, snapshot, guild, target);
+            return TransitionKickedMember(
+                request, requestFingerprint, snapshot, guild, target, kickResult.Value);
         }
 
-        private GuildPlanningResult RemoveMember(
+        private GuildPlanningResult TransitionKickedMember(
             GuildTransitionRequest request,
             string requestFingerprint,
             GuildAuthoritySnapshot snapshot,
             GuildSnapshot guild,
-            GuildMemberSnapshot target)
+            GuildMemberSnapshot target,
+            GuildMembershipState kickResult)
         {
             long candidateGuildRevision = checked(guild.Revision + 1);
             GuildSnapshot candidateGuild = CopyGuild(
                 guild,
                 candidateGuildRevision,
-                members: guild.Members.Where(row => !ReferenceEquals(row, target)).ToArray());
+                members: ReplaceMember(
+                    guild.Members,
+                    target,
+                    CopyMemberState(target, kickResult)));
             return CreatePlan(
                 request,
                 requestFingerprint,
@@ -554,7 +591,7 @@ namespace AL.Guilds
             GuildRole candidateRole,
             bool promote)
         {
-            GuildMemberSnapshot actor = FindActiveMember(guild, request.ActorAccountId);
+            GuildMemberSnapshot actor = FindAuthoritativeMember(guild, request.ActorAccountId);
             Func<GuildRolePolicy, bool> permission = promote
                 ? new Func<GuildRolePolicy, bool>(value => value.CanPromote)
                 : value => value.CanDemote;
@@ -563,7 +600,7 @@ namespace AL.Guilds
                 return Unauthorized(request.ActorAccountId);
             }
 
-            GuildMemberSnapshot target = FindActiveMember(guild, request.TargetAccountId);
+            GuildMemberSnapshot target = FindAuthoritativeMember(guild, request.TargetAccountId);
             if (target == null)
             {
                 return Reject(
@@ -605,14 +642,14 @@ namespace AL.Guilds
             GuildAuthoritySnapshot snapshot,
             GuildSnapshot guild)
         {
-            GuildMemberSnapshot actor = FindActiveMember(guild, request.ActorAccountId);
+            GuildMemberSnapshot actor = FindAuthoritativeMember(guild, request.ActorAccountId);
             if (actor?.Role != GuildRole.Master ||
                 !Can(actor, value => value.CanTransferMaster))
             {
                 return Unauthorized(request.ActorAccountId);
             }
 
-            GuildMemberSnapshot target = FindActiveMember(guild, request.TargetAccountId);
+            GuildMemberSnapshot target = FindAuthoritativeMember(guild, request.TargetAccountId);
             if (target == null || target.Role == GuildRole.Master)
             {
                 return Reject(
@@ -650,7 +687,7 @@ namespace AL.Guilds
             GuildAuthoritySnapshot snapshot,
             GuildSnapshot guild)
         {
-            GuildMemberSnapshot actor = FindActiveMember(guild, request.ActorAccountId);
+            GuildMemberSnapshot actor = FindAuthoritativeMember(guild, request.ActorAccountId);
             if (actor?.Role != GuildRole.Master || !Can(actor, value => value.CanDisband))
             {
                 return Unauthorized(request.ActorAccountId);
@@ -769,6 +806,7 @@ namespace AL.Guilds
                 !candidate.IsComplete ||
                 !IsValidBinding(candidate.Binding) ||
                 candidate.RolePolicies == null ||
+                candidate.StatePolicies == null ||
                 candidate.ExcludedEffectDomains == null ||
                 !candidate.AccountFirstWithinImmutableRealm ||
                 candidate.RequiredActiveMasterCount != 1 ||
@@ -786,6 +824,16 @@ namespace AL.Guilds
                 candidate.RolePolicies.Select(row => row.Role).Distinct().Count() != 3 ||
                 !candidate.RolePolicies.Select(row => row.Role).OrderBy(row => row)
                     .SequenceEqual(new[] { GuildRole.Master, GuildRole.Officer, GuildRole.Member }) ||
+                candidate.StatePolicies.Count != 5 ||
+                candidate.StatePolicies.Any(row => row == null) ||
+                !candidate.StatePolicies.Select(row => row.State).SequenceEqual(new[]
+                {
+                    GuildMembershipState.Active,
+                    GuildMembershipState.Restricted,
+                    GuildMembershipState.PendingLeave,
+                    GuildMembershipState.Banned,
+                    GuildMembershipState.Inactive
+                }) ||
                 candidate.ExcludedEffectDomains.Count != 5 ||
                 candidate.ExcludedEffectDomains.Distinct().Count() != 5 ||
                 !candidate.ExcludedEffectDomains.OrderBy(row => row).SequenceEqual(new[]
@@ -799,9 +847,9 @@ namespace AL.Guilds
             {
                 return Reject(
                     GuildPlanningStatus.Malformed,
-                    "AL-GUILD-CATALOG-ROLES-INVALID",
+                    "AL-GUILD-CATALOG-ROWS-INVALID",
                     string.Empty,
-                    "Guild roles or excluded effect domains are incomplete.");
+                    "Guild roles, membership states, or excluded effect domains are incomplete.");
             }
 
             GuildRolePolicy master = PolicyFor(GuildRole.Master);
@@ -819,13 +867,30 @@ namespace AL.Guilds
                               !member.CanPromote && !member.CanDemote &&
                               !member.CanTransferMaster && !member.CanDisband &&
                               !member.CanFormAlliancesOrDeclareWar && !member.CanOpenRaidCalls;
-            if (!masterComplete || !officerSafe || !memberSafe)
+            bool statesSafe = StatePolicyMatches(
+                                  GuildMembershipState.Active, true, true,
+                                  GuildMembershipState.PendingLeave,
+                                  GuildMembershipState.Banned, true) &&
+                              StatePolicyMatches(
+                                  GuildMembershipState.Restricted, true, false,
+                                  GuildMembershipState.PendingLeave,
+                                  GuildMembershipState.Banned, true) &&
+                              StatePolicyMatches(
+                                  GuildMembershipState.PendingLeave, true, false,
+                                  GuildMembershipState.Inactive, null, true) &&
+                              StatePolicyMatches(
+                                  GuildMembershipState.Banned, false, false,
+                                  null, null, true) &&
+                              StatePolicyMatches(
+                                  GuildMembershipState.Inactive, false, false,
+                                  null, null, false);
+            if (!masterComplete || !officerSafe || !memberSafe || !statesSafe)
             {
                 return Reject(
                     GuildPlanningStatus.Malformed,
-                    "AL-GUILD-CATALOG-PERMISSIONS-INVALID",
+                    "AL-GUILD-CATALOG-POLICY-INVALID",
                     string.Empty,
-                    "Guild role permissions contradict the accepted authority boundary.");
+                    "Guild role or membership-state policy contradicts the accepted authority boundary.");
             }
 
             return null;
@@ -877,7 +942,7 @@ namespace AL.Guilds
             }
 
             var guildIds = new HashSet<string>(StringComparer.Ordinal);
-            var activeAccounts = new HashSet<string>(StringComparer.Ordinal);
+            var reservingAccounts = new HashSet<string>(StringComparer.Ordinal);
             foreach (GuildSnapshot guild in snapshot.Guilds)
             {
                 if (guild == null ||
@@ -897,6 +962,16 @@ namespace AL.Guilds
                 var memberIds = new HashSet<string>(StringComparer.Ordinal);
                 foreach (GuildMemberSnapshot member in guild.Members)
                 {
+                    if (member != null &&
+                        !Enum.IsDefined(typeof(GuildMembershipState), member.State))
+                    {
+                        return Reject(
+                            GuildPlanningStatus.Unsupported,
+                            "AL-GUILD-MEMBERSHIP-STATE-UNSUPPORTED",
+                            member.AccountId,
+                            "Unknown-future Guild membership state is preserved read-only.");
+                    }
+
                     if (member == null ||
                         !IsOpaqueId(member.AccountId) ||
                         !IsStableId(member.ImmutableRealmId) ||
@@ -905,10 +980,9 @@ namespace AL.Guilds
                             guild.ImmutableRealmId,
                             StringComparison.Ordinal) ||
                         !Enum.IsDefined(typeof(GuildRole), member.Role) ||
-                        !Enum.IsDefined(typeof(GuildMembershipState), member.State) ||
                         !memberIds.Add(member.AccountId) ||
-                        (member.State == GuildMembershipState.Active &&
-                         !activeAccounts.Add(member.AccountId)))
+                        (StatePolicyFor(member.State).ReservesAccount &&
+                         !reservingAccounts.Add(member.AccountId)))
                     {
                         return MalformedAuthority();
                     }
@@ -1036,16 +1110,27 @@ namespace AL.Guilds
 
         private GuildPlanningResult EnsureAccountCanEnter(
             GuildAuthoritySnapshot snapshot,
+            GuildSnapshot guild,
             string accountId,
             string pendingRequestId)
         {
-            if (FindActiveMembership(snapshot, accountId) != null)
+            if (FindReservingMembership(snapshot, accountId) != null)
             {
                 return Reject(
                     GuildPlanningStatus.Conflict,
                     "AL-GUILD-ACCOUNT-ALREADY-MEMBER",
                     accountId,
-                    "Account already has one active Guild membership.");
+                    "Account already has one reserving Guild membership.");
+            }
+
+            GuildMemberSnapshot sameGuild = FindMember(guild, accountId);
+            if (sameGuild != null && StatePolicyFor(sameGuild.State).BlocksSameGuildEntry)
+            {
+                return Reject(
+                    GuildPlanningStatus.Conflict,
+                    "AL-GUILD-ACCOUNT-CYCLE-BLOCKED",
+                    accountId,
+                    "Account membership state blocks entry into this Guild cycle.");
             }
 
             GuildPendingRequest collision = snapshot.PendingRequests.FirstOrDefault(row =>
@@ -1075,23 +1160,52 @@ namespace AL.Guilds
             return policy.RolePolicies.Single(row => row.Role == role);
         }
 
-        private static GuildMemberSnapshot FindActiveMember(
+        private GuildMembershipStatePolicy StatePolicyFor(GuildMembershipState state)
+        {
+            return policy.StatePolicies.Single(row => row.State == state);
+        }
+
+        private bool StatePolicyMatches(
+            GuildMembershipState state,
+            bool reservesAccount,
+            bool grantsRoleAuthority,
+            GuildMembershipState? leaveResult,
+            GuildMembershipState? kickResult,
+            bool blocksSameGuildEntry)
+        {
+            GuildMembershipStatePolicy candidate = StatePolicyFor(state);
+            return candidate.ReservesAccount == reservesAccount &&
+                   candidate.GrantsRoleAuthority == grantsRoleAuthority &&
+                   candidate.LeaveResult == leaveResult &&
+                   candidate.KickResult == kickResult &&
+                   candidate.BlocksSameGuildEntry == blocksSameGuildEntry;
+        }
+
+        private GuildMemberSnapshot FindAuthoritativeMember(
             GuildSnapshot guild,
             string accountId)
         {
             return guild.Members.SingleOrDefault(row =>
-                row.State == GuildMembershipState.Active &&
+                StatePolicyFor(row.State).GrantsRoleAuthority &&
                 string.Equals(row.AccountId, accountId, StringComparison.Ordinal));
         }
 
-        private static GuildMemberSnapshot FindActiveMembership(
+        private static GuildMemberSnapshot FindMember(
+            GuildSnapshot guild,
+            string accountId)
+        {
+            return guild.Members.SingleOrDefault(row =>
+                string.Equals(row.AccountId, accountId, StringComparison.Ordinal));
+        }
+
+        private GuildMemberSnapshot FindReservingMembership(
             GuildAuthoritySnapshot snapshot,
             string accountId)
         {
             return snapshot.Guilds
                 .SelectMany(row => row.Members)
                 .SingleOrDefault(row =>
-                    row.State == GuildMembershipState.Active &&
+                    StatePolicyFor(row.State).ReservesAccount &&
                     string.Equals(row.AccountId, accountId, StringComparison.Ordinal));
         }
 
@@ -1176,6 +1290,17 @@ namespace AL.Guilds
                 source.ImmutableRealmId,
                 role,
                 source.State);
+        }
+
+        private static GuildMemberSnapshot CopyMemberState(
+            GuildMemberSnapshot source,
+            GuildMembershipState state)
+        {
+            return new GuildMemberSnapshot(
+                source.AccountId,
+                source.ImmutableRealmId,
+                source.Role,
+                state);
         }
 
         private static string SnapshotSemanticHash(
