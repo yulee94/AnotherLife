@@ -194,12 +194,7 @@ namespace AL.Tests.EditMode.Narrative
             AdvanceTo(session, stage);
 
             Nvs01ProgressData legacy = service.CurrentSave.Nvs01Progress;
-            legacy.PacketVersion = Nvs01ProgressCodec.MigratablePacketVersion;
-            legacy.PacketSha256 = Nvs01ProgressCodec.MigratablePacketSha256;
-            if (legacy.LastOperation != null)
-            {
-                legacy.LastOperation.ExpectedGenerationFingerprint = string.Empty;
-            }
+            BindExactRetainedV003PacketIdentity(legacy);
             string exactLegacyProgress = JsonUtility.ToJson(legacy);
             long exactTimestamp = service.CurrentSave.LastSavedTimestamp;
             byte[] exactLegacyPrimary = new UTF8Encoding(false, true).GetBytes(
@@ -440,17 +435,13 @@ namespace AL.Tests.EditMode.Narrative
         }
 
         [Test]
-        [Ignore("Remaining #450 NVS packet-migration fault window under schema-2 Writable; successor of t_7e0e9334")]
         public void MigrationWriteFailurePreservesExactOldAndRecoveryGenerations()
         {
             LocalSaveGameService service = CreateSaveService(_saveRoot);
             service.CreateNewSave(RealmId.Crownlands);
             var session = new RuntimeSession(service, _catalog, null);
             AdvanceTo(session, "during-report");
-            service.CurrentSave.Nvs01Progress.PacketVersion =
-                Nvs01ProgressCodec.MigratablePacketVersion;
-            service.CurrentSave.Nvs01Progress.PacketSha256 =
-                Nvs01ProgressCodec.MigratablePacketSha256;
+            BindExactRetainedV003PacketIdentity(service.CurrentSave.Nvs01Progress);
 
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             string backupPath = Path.Combine(_saveRoot, "save.backup.json");
@@ -481,7 +472,6 @@ namespace AL.Tests.EditMode.Narrative
 
         [TestCase("save.tmp.json")]
         [TestCase("save.previous.json")]
-        [Ignore("Remaining #450 NVS packet-migration fault window under schema-2 Writable; successor of t_7e0e9334")]
         public void MigrationPreservesAuxiliaryGenerationAppearingAfterInventory(
             string auxiliaryFileName)
         {
@@ -489,10 +479,7 @@ namespace AL.Tests.EditMode.Narrative
             service.CreateNewSave(RealmId.Crownlands);
             var session = new RuntimeSession(service, _catalog, null);
             AdvanceTo(session, "during-report");
-            service.CurrentSave.Nvs01Progress.PacketVersion =
-                Nvs01ProgressCodec.MigratablePacketVersion;
-            service.CurrentSave.Nvs01Progress.PacketSha256 =
-                Nvs01ProgressCodec.MigratablePacketSha256;
+            BindExactRetainedV003PacketIdentity(service.CurrentSave.Nvs01Progress);
 
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             string backupPath = Path.Combine(_saveRoot, "save.backup.json");
@@ -524,17 +511,13 @@ namespace AL.Tests.EditMode.Narrative
         }
 
         [Test]
-        [Ignore("Remaining #450 NVS packet-migration fault window under schema-2 Writable; successor of t_7e0e9334")]
         public void MigrationArchivesForeignPreviousRaceAndWithholdsSuccess()
         {
             LocalSaveGameService service = CreateSaveService(_saveRoot);
             service.CreateNewSave(RealmId.Crownlands);
             var session = new RuntimeSession(service, _catalog, null);
             AdvanceTo(session, "during-report");
-            service.CurrentSave.Nvs01Progress.PacketVersion =
-                Nvs01ProgressCodec.MigratablePacketVersion;
-            service.CurrentSave.Nvs01Progress.PacketSha256 =
-                Nvs01ProgressCodec.MigratablePacketSha256;
+            BindExactRetainedV003PacketIdentity(service.CurrentSave.Nvs01Progress);
 
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             string backupPath = Path.Combine(_saveRoot, "save.backup.json");
@@ -708,7 +691,6 @@ namespace AL.Tests.EditMode.Narrative
 
         [TestCase("save.tmp.json")]
         [TestCase("save.previous.json")]
-        [Ignore("Remaining #450 NVS packet-migration fault window under schema-2 Writable; successor of t_7e0e9334")]
         public void MigrationDoesNotConsumeUnresolvedRecoveryGeneration(
             string recoveryFileName)
         {
@@ -716,10 +698,7 @@ namespace AL.Tests.EditMode.Narrative
             service.CreateNewSave(RealmId.Crownlands);
             var session = new RuntimeSession(service, _catalog, null);
             AdvanceTo(session, "offer-pending");
-            service.CurrentSave.Nvs01Progress.PacketVersion =
-                Nvs01ProgressCodec.MigratablePacketVersion;
-            service.CurrentSave.Nvs01Progress.PacketSha256 =
-                Nvs01ProgressCodec.MigratablePacketSha256;
+            BindExactRetainedV003PacketIdentity(service.CurrentSave.Nvs01Progress);
 
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             string backupPath = Path.Combine(_saveRoot, "save.backup.json");
@@ -1239,6 +1218,18 @@ namespace AL.Tests.EditMode.Narrative
             CollectionAssert.IsEmpty(progress.AcquiredArtifactIds);
             CollectionAssert.IsEmpty(progress.AppliedEffectKeys);
             Assert.AreEqual(string.Empty, progress.UnlockedChapterId);
+        }
+
+        private static void BindExactRetainedV003PacketIdentity(
+            Nvs01ProgressData progress)
+        {
+            progress.PacketVersion = Nvs01ProgressCodec.MigratablePacketVersion;
+            progress.PacketSha256 = Nvs01ProgressCodec.MigratablePacketSha256;
+            if (progress.LastOperation != null)
+            {
+                progress.LastOperation.ExpectedGenerationFingerprint =
+                    string.Empty;
+            }
         }
 
         private static void AssertMigrationRequired(
