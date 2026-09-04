@@ -192,14 +192,15 @@ jobs:
             ) -join ","
             if ($env:GITHUB_TOKEN) {
               $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x:$($env:GITHUB_TOKEN)"))
-              & git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ***" lfs pull --include=$include *>&1 |
-                Tee-Object -FilePath $transcript
+              $lfsOutput = & git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" lfs pull --include=$include *>&1
+              $lfsExit = $LASTEXITCODE
             } else {
-              & git lfs pull --include=$include *>&1 |
-                Tee-Object -FilePath $transcript
+              $lfsOutput = & git lfs pull --include=$include *>&1
+              $lfsExit = $LASTEXITCODE
             }
-            if ($LASTEXITCODE -ne 0) {
-              throw "Shot070 Vaeloryn motion-source LFS pull exited with code $LASTEXITCODE."
+            $lfsOutput | Tee-Object -FilePath $transcript
+            if ($lfsExit -ne 0) {
+              throw "Shot070 Vaeloryn motion-source LFS pull exited with code $lfsExit."
             }
             & python tools/cinematics/test_validate_shot070_vaeloryn_source.py *>&1 |
               Tee-Object -FilePath $transcript -Append
