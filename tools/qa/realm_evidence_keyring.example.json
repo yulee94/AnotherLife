@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "keys": [
+    {
+      "keyId": "anotherlife-evidence-owner-v1",
+      "secretEnv": "AL_RSQ_EVIDENCE_SIGNING_SECRET"
+    },
+    {
+      "keyId": "anotherlife-game-owner-v1",
+      "secretEnv": "AL_RSQ_OWNER_SIGNING_SECRET"
+    }
+  ]
+}

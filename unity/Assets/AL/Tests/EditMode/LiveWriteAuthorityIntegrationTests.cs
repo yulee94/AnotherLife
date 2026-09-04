@@ -313,17 +313,13 @@ namespace AL.Tests.EditMode
                     research.GetResearchState("Steel Forging");
                 ResearchState missing = research.GetResearchState("Plate Armor");
                 ResearchState allState = research.GetAllResearchStates().Single();
-                Assert.AreEqual(0, missing.Level);
                 existing.Level = 99;
                 existing.IsResearching = false;
                 allState.CompleteTimestamp = long.MaxValue;
-                missing.Level = 7;
                 float missingBonus = research.GetStatBonus(StatType.Defense);
                 research.CompleteResearch("Steel Forging");
 
-                Assert.NotNull(missing);
-                Assert.AreEqual("Plate Armor", missing.ResearchId);
-                Assert.AreEqual(7, missing.Level);
+                Assert.IsNull(missing);
                 Assert.AreEqual(0f, missingBonus);
                 Assert.AreEqual(1, saveService.CurrentSave.Researches.Count);
                 Assert.AreEqual(2, persistedResearch.Level);
