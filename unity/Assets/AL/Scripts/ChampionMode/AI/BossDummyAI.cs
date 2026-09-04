@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Skills;
 using AL.Core;
-using AL.Core.Interfaces;
 using AL.Data.Definitions;
 
 namespace AL.ChampionMode.AI
@@ -50,11 +49,9 @@ namespace AL.ChampionMode.AI
         private Vector3 _baseScale;
         private Coroutine _hitReactRoutine;
         private BossVisualFeedback _visualFeedback;
-        private string _lootEncounterId;
-        private string _lootRewardResultId;
         private RealmId _realmId = RealmId.None;
 
-        public event Action<BossLootResult> LootRolled;
+        public event Action Defeated;
 
         public float CurrentHealth => _currentHealth;
         public float MaxHealth => _maxHealth;
@@ -88,8 +85,6 @@ namespace AL.ChampionMode.AI
             }
 
             ApplyBossDefinition();
-            _lootEncounterId = Guid.NewGuid().ToString("N");
-            _lootRewardResultId = Guid.NewGuid().ToString("N");
             _currentHealth = _maxHealth;
             _currentBreak = _breakBarMax;
             _fightStartTime = Time.time;
@@ -346,21 +341,16 @@ namespace AL.ChampionMode.AI
 
         public bool ApplyCatalogStats(string id, string displayName, float maxHealth, float slamDamage)
         {
-            if (maxHealth <= 0f || slamDamage <= 0f)
+            if (string.IsNullOrWhiteSpace(id) ||
+                string.IsNullOrWhiteSpace(displayName) ||
+                !IsFinitePositive(maxHealth) ||
+                !IsFinitePositive(slamDamage))
             {
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(id))
-            {
-                _bossId = id;
-            }
-
-            if (!string.IsNullOrWhiteSpace(displayName))
-            {
-                _bossName = displayName;
-            }
-
+            _bossId = id;
+            _bossName = displayName;
             _maxHealth = maxHealth;
             _slamDamage = slamDamage;
             if (!_isDead)
@@ -458,56 +448,13 @@ namespace AL.ChampionMode.AI
             _visualFeedback?.PulseDefeated();
             SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "DEFEATED", new Color(0.85f, 1f, 0.62f), 0.38f, 1.25f);
             SkillEffectFactory.ShakeCamera(0.26f, 0.22f);
-
-            try
-            {
-                BossLootResult lootResult = ServiceLocator.Get<IBossLootService>().RollLoot(CreateLootRequest());
-                LootRolled?.Invoke(lootResult);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Boss loot application failed closed. {ex.Message}");
-                LootRolled?.Invoke(new BossLootResult
-                {
-                    ApplicationStatus = BossLootApplicationStatus.CommitUncertain,
-                    DiagnosticCode = "AL-BOSS-LOOT-SERVICE-EXCEPTION",
-                    EncounterId = _lootEncounterId,
-                    RewardResultId = _lootRewardResultId,
-                    BossId = _bossId,
-                    BossName = _bossName
-                });
-            }
-
+            Defeated?.Invoke();
             Destroy(gameObject);
         }
 
-        private BossLootRequest CreateLootRequest()
+        private static bool IsFinitePositive(float value)
         {
-            return new BossLootRequest
-            {
-                EncounterId = _lootEncounterId,
-                RewardResultId = _lootRewardResultId,
-                BossId = _bossId,
-                BossName = _bossName,
-                WarzoneCreditReward = _warzoneCreditReward,
-                RandomSeed = StableSeed(_lootRewardResultId),
-                LootTable = _possibleLoot ?? new List<EquipmentDefinition>()
-            };
-        }
-
-        private static int StableSeed(string value)
-        {
-            unchecked
-            {
-                uint hash = 2166136261;
-                foreach (char character in value ?? string.Empty)
-                {
-                    hash ^= character;
-                    hash *= 16777619;
-                }
-
-                return (int)hash;
-            }
+            return !float.IsNaN(value) && !float.IsInfinity(value) && value > 0f;
         }
 
         private void PlayHitReaction(float scaleMultiplier)
