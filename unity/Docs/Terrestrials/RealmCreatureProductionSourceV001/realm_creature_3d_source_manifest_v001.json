@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packetId": "anotherlife-realm-creature-production-source",
   "sourceVersion": "al-rcreature-2026-09-03-v003",
-  "createdAtUtc": "2026-09-03T08:52:26Z",
+  "createdAtUtc": "2026-09-04T03:40:00Z",
   "authority": {
     "finalCreativeApprover": "user",
     "approved2DSourceVersion": "anotherlife.creature-2d-approved-source.v2",
@@ -21,7 +21,7 @@
     "authoringTextureIntent": "8192x8192 native base color and 4096x4096 native normal/roughness/metallic for approved hero/elite production sources; 2048x2048 runtime maps are derivatives",
     "ownerTierTexturePackets": 3,
     "belowOwnerTierTexturePackets": 18,
-    "coverageDisposition": "Hollowbark Stalker, Reliquary Basilisk, and Cindermaw retain complete owner-tier authoring maps. Cindermaw now binds a smoothed v004 source to authored anatomy-weighted macro plate, mid-scale pebble, and fine-pore tangent normal detail. Mere-Root and Crownstep require topology-matched texture rebuilds; all other lower-tier packets remain review sources.",
+    "coverageDisposition": "Hollowbark Stalker, Reliquary Basilisk, and Cindermaw retain complete owner-tier authoring maps. Cindermaw now binds a v005 localized visual-polish source (snout offsets plus material-separated soot hide, obsidian fins, pale scars, and ash-paste underside) on the hash-bound v004 topology and authored 4K tangent normal. Mere-Root and Crownstep require topology-matched texture rebuilds; all other lower-tier packets remain review sources.",
     "runtimeVfxSeparate": true
   },
   "provenance": {
@@ -45,7 +45,8 @@
       "Approved DCC geometry repairs and structural re-audit for five blocked packets",
       "Cindermaw Meshy-7 retexture, triangulated non-overlapping UV rebuild, and tiled 8K/4K rebake",
       "Independent hash, UV, schema, and fail-closed readiness validation",
-      "Cindermaw v004 deliberate-angle smoothing and anatomy-aware authored 4K tangent-normal detail"
+      "Cindermaw v004 deliberate-angle smoothing and anatomy-aware authored 4K tangent-normal detail",
+      "Cindermaw v005 localized snout polish and material-separation pass with v004 preserved as immutable evidence"
     ],
     "licenseEvidence": "Generated through the project owner's Meshy account from AnotherLife-approved source evidence. No third-party source image is declared as an input. This is an evidence statement, not a universal legal-clearance claim.",
     "editableSourceAvailability": "FBX and image maps are retained for all selected sources; versioned Blender geometry, UV, smoothing, and normal-detail sources plus hash-bound DCC reports are retained for the remediated packets. Rigs remain undelivered."
@@ -1447,16 +1448,16 @@
     {
       "source2dId": "tdf_elite_umbral_cindermaw_salamander",
       "modelId": "elite_umbral_cindermaw_salamander",
-      "status": "clean_geometry_pass_uv_bake_pass_smoothing_pass_normal_detail_pass_texture_grade_pass_rigging_required",
+      "status": "clean_geometry_pass_uv_bake_pass_smoothing_pass_normal_detail_pass_visual_polish_v005_pass_rigging_required",
       "blocker": null,
       "selectedSource": {
-        "path": "Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v004.fbx",
-        "bytes": 6774796,
-        "sha256": "9486be45241afe61ba04b4f2fedc4d751819acfd2e0d6181a97c1e4cddb2b9d6"
+        "path": "Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v005.fbx",
+        "bytes": 6774940,
+        "sha256": "7ad41ad8ce10aeca0919008f1d99c0d9f373a37e4100b2a490cb1bc5537e3b7b"
       },
       "textures": [
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/ao.png",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/ao.png",
           "bytes": 1822184,
           "sha256": "ed950e0f356249373849fa21d4dce3554d630c4eca4f576ba2554e9e24947b57",
           "dimensions": [
@@ -1466,9 +1467,9 @@
           "mediaType": "image/png"
         },
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/base_color.png",
-          "bytes": 28810646,
-          "sha256": "a709480726abbda16b93eee728145c4e3f3274b0342f4cf37cf7f3e07818185d",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/base_color.png",
+          "bytes": 39356357,
+          "sha256": "d13223ebe782d35dd77151402c48e07866e070dca41039865704a7e4e8defab4",
           "dimensions": [
             8192,
             8192
@@ -1476,9 +1477,9 @@
           "mediaType": "image/png"
         },
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/metallic.png",
-          "bytes": 1800800,
-          "sha256": "73175a0cbc3015a213090bac6e254f5a2f7494e6825fc1934b747929d0cb7031",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/metallic.png",
+          "bytes": 2175992,
+          "sha256": "c39f5c4eb0efecb6082677918ae8a447ca0810c776a456c61de33b61239b48d5",
           "dimensions": [
             4096,
             4096
@@ -1486,7 +1487,7 @@
           "mediaType": "image/png"
         },
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/normal.png",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/normal.png",
           "bytes": 5058669,
           "sha256": "f2aebf6660f9c8d1a01223c3d1c162ac96236edb9c21c63d662189f7d0b4dba1",
           "dimensions": [
@@ -1496,9 +1497,9 @@
           "mediaType": "image/png"
         },
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/roughness.png",
-          "bytes": 5756529,
-          "sha256": "feadcd3f9fe5e8c2fb4af0c33cf348ec5af238ccfb142d59950e02966608e00b",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/roughness.png",
+          "bytes": 6052432,
+          "sha256": "f2224ab72fc8cf5bda4eec02ad40af55578b614fcd4a64e393f371813fb3aabb",
           "dimensions": [
             4096,
             4096
@@ -1507,9 +1508,9 @@
         }
       ],
       "review": {
-        "path": "Review/elite_umbral_cindermaw_salamander_threequarter_v004.png",
-        "bytes": 979003,
-        "sha256": "a9a9235fc171f9a71376a0aae1e7a2821d124339d76244a4a7a2f0a0fda3f430",
+        "path": "Review/elite_umbral_cindermaw_salamander_fullbody_hero_v005.png",
+        "bytes": 899885,
+        "sha256": "e271349c03159e5f3f10c4b96b8545b38db34d03794668b3cc03af12ef8f451b",
         "dimensions": [
           1024,
           1024

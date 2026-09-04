@@ -1,0 +1,13 @@
+{
+  "vertices": 27690,
+  "polygons": 55334,
+  "uvLayer": "UVMap_Clean",
+  "uvFacesOutsideUnit": 0,
+  "uvZeroAreaFaces": 0,
+  "uvOverlappingFaces": 0,
+  "movedSnoutVertices": 9795,
+  "unchangedNonSnoutVertices": 17895,
+  "maxOffsetMeters": 0.005394200766831006,
+  "meanSnoutInfluence": 0.12409496261237087,
+  "sharpEdgesAfter": 629
+}
