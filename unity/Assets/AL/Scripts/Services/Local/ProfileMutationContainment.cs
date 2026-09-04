@@ -84,6 +84,8 @@ namespace AL.Services.Local
         public const string ChampionCustomization = "profile.champion-customization";
         public const string MvpLoop = "profile.mvp-loop.schema1";
         public const string FirstSession = "profile.first-session.schema2";
+        public const string KingdomOneBuild = "profile.kingdom-one-build.schema2";
+        public const string KingdomTeaching = "profile.kingdom-teaching.schema2";
         public const string ChampionArena = "profile.champion-arena.indirect";
         public const string DemoInitializer = "profile.demo-initializer.indirect";
         public const string KingdomNvs01 = "profile.kingdom-nvs01.indirect";
@@ -97,7 +99,7 @@ namespace AL.Services.Local
     /// </summary>
     public static class ProfileMutationSurfaceCatalog
     {
-        private const string Version = "al-profile-mutation-surface-v3";
+        private const string Version = "al-profile-mutation-surface-v4";
         private const int MaximumRegistrationCount = 64;
 
         private static readonly ProfileMutationSurfaceDescriptor[] DescriptorArray =
@@ -130,6 +132,8 @@ namespace AL.Services.Local
             Extra(ProfileMutationSurfaceIds.Nvs01Progress, typeof(ISaveGameCandidateStore), typeof(AL.Narrative.Nvs01.Nvs01SaveGameMutationCommitter), ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation),
             Extra(ProfileMutationSurfaceIds.MvpLoop, typeof(ILegacyMvpLoopCandidateStore), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
             Extra(ProfileMutationSurfaceIds.FirstSession, typeof(IProfileBoundFirstSessionCandidateStore), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation),
+            Extra(ProfileMutationSurfaceIds.KingdomOneBuild, typeof(IProfileBoundKingdomOneBuildCandidateStore), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation),
+            Extra(ProfileMutationSurfaceIds.KingdomTeaching, typeof(IProfileBoundKingdomTeachingCandidateStore), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation),
             Extra(ProfileMutationSurfaceIds.SideQuest, typeof(ISideQuestService), typeof(SideQuestService), ProfileMutationSurfaceDisposition.Dormant),
             Extra(ProfileMutationSurfaceIds.ChampionCustomization, null, typeof(AL.ChampionMode.Customization.ChampionCustomizationController), ProfileMutationSurfaceDisposition.ContainedWriter),
             Extra(ProfileMutationSurfaceIds.ChampionArena, null, typeof(AL.ChampionMode.ChampionArenaSceneController), ProfileMutationSurfaceDisposition.IndirectCaller),
