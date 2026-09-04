@@ -5,6 +5,7 @@ using System.Linq;
 using AL.ChampionMode.Quests;
 using AL.Core;
 using AL.Data.Catalogs.WorldAtlas;
+using AL.UI.DesignSystem;
 using AL.UI.WorldMap;
 using AL.World;
 using NUnit.Framework;
@@ -23,6 +24,7 @@ namespace AL.Tests.EditMode.WorldMap
         public void SetUp()
         {
             MainQuestMapSession.ResetForTests();
+            ProgressiveMapSession.ResetForTests();
             WorldMapSession.ResetStatics();
             _snapshot = FirstSessionInnerRealmSpawn.LoadCanonicalSnapshot();
             _catalog = MainQuestMapMarkerCatalog.LoadCanonical();
@@ -32,6 +34,7 @@ namespace AL.Tests.EditMode.WorldMap
         public void TearDown()
         {
             MainQuestMapSession.ResetForTests();
+            ProgressiveMapSession.ResetForTests();
             WorldMapSession.ResetStatics();
             for (int i = 0; i < _spawned.Count; i++)
             {
@@ -211,6 +214,44 @@ namespace AL.Tests.EditMode.WorldMap
         }
 
         [Test]
+        public void ReducedEffectsKeepObjectiveStaticAndLargeTextScalesMinimapChrome()
+        {
+            InnerRealmWorldLayout layout = InnerRealmWorldLayout.FromSnapshot(_snapshot);
+            Assert.That(layout.TryGetInner("stonehold", out InnerRealmSlotLayout inner), Is.True);
+            var player = new GameObject("AccessibleMinimapPlayer");
+            player.transform.position = inner.CapitalPosition;
+            _spawned.Add(player);
+            ProgressiveMapSession.ConfigureAccessibility(
+                new MapAccessibilityProfile(
+                    new UiAccessibilitySettings(2f, true, true, true),
+                    highContrast: true));
+            MainQuestMapSession.Publish(
+                ProofOfWorthIds.OmenArenaObjectiveId,
+                RealmId.Stonehold,
+                ProofOfWorthCopy.OmenArenaObjective);
+
+            InnerRealmMinimapOverlay minimap =
+                InnerRealmMinimapOverlay.Ensure(_snapshot, player.transform);
+            _spawned.Add(minimap.gameObject);
+            GameObject objective = FindDeep(
+                minimap.transform,
+                "MinimapQuestMarker_" + inner.OutpostAPoiId);
+            Assert.That(objective, Is.Not.Null);
+            MethodInfo updatePulse = typeof(InnerRealmMinimapOverlay).GetMethod(
+                "UpdateQuestPulse",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(updatePulse, Is.Not.Null);
+
+            updatePulse.Invoke(minimap, null);
+
+            Assert.That(objective.transform.localScale, Is.EqualTo(Vector3.one));
+            Assert.That(objective.GetComponent<Image>().color.a, Is.EqualTo(1f));
+            Text title = FindDeep(minimap.transform, "MinimapTitle").GetComponent<Text>();
+            Assert.That(title.fontSize, Is.EqualTo(32));
+            Assert.That(title.GetComponent<UiScalableText>(), Is.Not.Null);
+        }
+
+        [Test]
         public void MinimapYouLabelFollowsMovingPlayerMarker()
         {
             InnerRealmWorldLayout layout = InnerRealmWorldLayout.FromSnapshot(_snapshot);
@@ -251,7 +292,7 @@ namespace AL.Tests.EditMode.WorldMap
                 ProofOfWorthIds.RestoreCovenantObjectiveId,
                 RealmId.Eldergrove,
                 ProofOfWorthCopy.C1RestoreCovenant);
-            WorldMapOverlay overlay = WorldMapOverlay.Ensure(_snapshot);
+            WorldMapOverlay overlay = EnsureStandaloneOverlay(_snapshot);
             _spawned.Add(overlay.gameObject);
             WorldMapSession.OpenMap();
 
@@ -267,6 +308,17 @@ namespace AL.Tests.EditMode.WorldMap
                 FindDeep(overlay.transform, "WorldMapQuestMarker_" + markers[0].MarkerId),
                 Is.Not.Null);
             Assert.That(Dump(overlay.transform), Does.Contain(ProofOfWorthCopy.C1RestoreCovenant));
+        }
+
+        private static WorldMapOverlay EnsureStandaloneOverlay(WorldAtlasSnapshot snapshot)
+        {
+            WorldMapOverlay overlay = WorldMapOverlay.Ensure(snapshot);
+            MethodInfo activate = typeof(WorldMapOverlay).GetMethod(
+                "SetPresentationAuthority",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(activate, Is.Not.Null);
+            activate.Invoke(overlay, new object[] { true });
+            return overlay;
         }
 
         private static GameObject FindDeep(Transform root, string name)

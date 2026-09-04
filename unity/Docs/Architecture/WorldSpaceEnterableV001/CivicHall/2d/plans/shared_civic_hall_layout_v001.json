@@ -1,0 +1,140 @@
+{
+  "schema": "anotherlife.enterable-civic-hall-layout.v1",
+  "status": "owner_approved_2d_authority_2026-09-01",
+  "purpose": "Shared world-space Level-1 civic hall interior core for Stonehold, Eldergrove, Crownlands, and Umbral exterior shells.",
+  "units": "meters",
+  "orientation": {
+    "frontEntrance": "local -Z / plan south",
+    "rearService": "plan north"
+  },
+  "envelope": {
+    "width": 9.5,
+    "depth": 8.5,
+    "height": 6.8,
+    "wallThickness": 0.3,
+    "floorToFloor": 3.2,
+    "groundClearHeight": 2.8,
+    "upperClearHeight": 2.7
+  },
+  "clearances": {
+    "publicEntranceWidth": 2.5,
+    "publicEntranceHeight": 3.0,
+    "rearServiceDoorWidth": 1.4,
+    "rearServiceDoorHeight": 2.4,
+    "interiorDoorWidth": 1.2,
+    "interiorDoorHeight": 2.4,
+    "stairWidth": 1.5,
+    "stairLandingDepth": 1.5,
+    "minimumFurnitureAisle": 1.2
+  },
+  "groundFloor": [
+    {"id": "public_hall", "x": 2.1, "z": 0.3, "width": 5.3, "depth": 5.0, "furniture": ["public_benches", "notice_board", "clear_center_aisle"]},
+    {"id": "records_room", "x": 0.3, "z": 0.3, "width": 1.8, "depth": 3.0, "furniture": ["record_shelves", "clerk_counter"]},
+    {"id": "stores", "x": 0.3, "z": 3.3, "width": 1.8, "depth": 4.9, "furniture": ["storage_racks", "locked_chest_zone"]},
+    {"id": "steward_office", "x": 7.4, "z": 0.3, "width": 1.8, "depth": 3.0, "furniture": ["steward_desk", "visitor_chairs"]},
+    {"id": "stair_and_service", "x": 7.4, "z": 3.3, "width": 1.8, "depth": 4.9, "furniture": ["u_stair", "rear_service_door"]},
+    {"id": "council_workroom", "x": 2.1, "z": 5.3, "width": 5.3, "depth": 2.9, "furniture": ["council_table", "wall_storage", "rear_window"]}
+  ],
+  "upperFloor": [
+    {"id": "open_gallery", "x": 2.1, "z": 0.3, "width": 5.3, "depth": 5.0, "void": {"x": 2.75, "z": 1.1, "width": 4.0, "depth": 3.0}, "furniture": ["gallery_rail", "two_benches"]},
+    {"id": "upper_archive", "x": 0.3, "z": 0.3, "width": 1.8, "depth": 4.9, "furniture": ["archive_shelves"]},
+    {"id": "landing_and_staff", "x": 7.4, "z": 0.3, "width": 1.8, "depth": 4.9, "furniture": ["u_stair_landing", "staff_lockers"]},
+    {"id": "council_chamber", "x": 2.1, "z": 5.3, "width": 5.3, "depth": 2.9, "furniture": ["council_table", "six_chairs", "records_credence"]},
+    {"id": "rear_archive", "x": 0.3, "z": 5.3, "width": 1.8, "depth": 2.9, "furniture": ["archive_shelves"]},
+    {"id": "upper_service", "x": 7.4, "z": 5.3, "width": 1.8, "depth": 2.9, "furniture": ["utility_cabinet"]}
+  ],
+  "doorOpenings": [
+    {"floor": "ground", "between": ["public_hall", "records_room"], "orientation": "vertical", "x": 2.1, "z": 2.0, "width": 1.2},
+    {"floor": "ground", "between": ["public_hall", "steward_office"], "orientation": "vertical", "x": 7.4, "z": 2.0, "width": 1.2},
+    {"floor": "ground", "between": ["public_hall", "stores"], "orientation": "vertical", "x": 2.1, "z": 4.3, "width": 1.2},
+    {"floor": "ground", "between": ["public_hall", "stair_and_service"], "orientation": "vertical", "x": 7.4, "z": 4.3, "width": 1.2},
+    {"floor": "ground", "between": ["public_hall", "council_workroom"], "orientation": "horizontal", "x": 4.15, "z": 5.3, "width": 1.2},
+    {"floor": "ground", "between": ["council_workroom", "stair_and_service"], "orientation": "vertical", "x": 7.4, "z": 6.7, "width": 1.2},
+    {"floor": "upper", "between": ["open_gallery", "upper_archive"], "orientation": "vertical", "x": 2.1, "z": 2.0, "width": 1.2},
+    {"floor": "upper", "between": ["open_gallery", "landing_and_staff"], "orientation": "vertical", "x": 7.4, "z": 2.0, "width": 1.2},
+    {"floor": "upper", "between": ["open_gallery", "council_chamber"], "orientation": "horizontal", "x": 4.15, "z": 5.3, "width": 1.2},
+    {"floor": "upper", "between": ["council_chamber", "rear_archive"], "orientation": "vertical", "x": 2.1, "z": 6.7, "width": 1.2},
+    {"floor": "upper", "between": ["council_chamber", "upper_service"], "orientation": "vertical", "x": 7.4, "z": 6.7, "width": 1.2}
+  ],
+  "requiredShellModules": [
+    "opaque_wall_bay",
+    "interior_opening_bay",
+    "recessed_window_bay",
+    "floor_ceiling_tile",
+    "gallery_guardrail",
+    "separate_chair",
+    "clerk_counter",
+    "secure_storage_chest"
+  ],
+  "doorPolicy": {
+    "buildingShellContainsDoorMeshes": false,
+    "openingsOnly": true,
+    "framesLeavesHingesAndInteraction": "excluded_from_this_packet",
+    "futureDoorPrefabs": "separate_deferred_asset_family"
+  },
+  "assemblyStrategy": {
+    "mode": "reusable_modular_world_assembly",
+    "gridMeters": 0.5,
+    "monolithicBuildingMesh": false,
+    "sharedGeometryAcrossApplicableStructures": true,
+    "realmIdentity": "material sets plus additive non-structural trim/root/metal overlays",
+    "runtimeAssembly": "author from reusable modules, then combine static geometry per room or exterior occlusion cell by atlas/material family; never retain one runtime renderer or collider per tile"
+  },
+  "layeredVisualPolicy": {
+    "structuralCore": "shared double-sided wall/opening panels carry shape, collision, and load path",
+    "exteriorVisualLayer": "1.5–3 m realm-specific cladding and silhouette trim; no independent colliders; combine per exterior occlusion cell",
+    "interiorVisualLayer": "0.5–1 m finish tiles for plaster, timber panel, wainscot, floor, ceiling, corner, reveal, pillar wrap, wear and grime; combine per room",
+    "glassAndShutters": "separate window-frame/glass/shutter family; glass grouped into the minimum transparent renderer set",
+    "decorativeCollision": false,
+    "runtimeTileGameObjects": false,
+    "materialPolicy": "shared opaque exterior atlas plus shared opaque interior atlas; sparse glass handled separately; variants use ID masks and trim overlays"
+  },
+  "reusableShellModules": [
+    {"id": "foundation_tile_3m", "sizeMeters": [3.0, 0.3, 3.0]},
+    {"id": "floor_tile_3m", "sizeMeters": [3.0, 0.2, 3.0]},
+    {"id": "floor_trim_0_5m", "sizeMeters": [0.5, 0.2, 3.0]},
+    {"id": "ceiling_tile_3m", "sizeMeters": [3.0, 0.2, 3.0]},
+    {"id": "wall_solid_3m", "sizeMeters": [3.0, 3.2, 0.3]},
+    {"id": "wall_window_opening_3m", "sizeMeters": [3.0, 3.2, 0.3], "openingMeters": [1.2, 1.5], "frameIncluded": false},
+    {"id": "wall_public_opening_3m", "sizeMeters": [3.0, 3.2, 0.3], "openingMeters": [2.5, 3.0], "doorIncluded": false},
+    {"id": "wall_service_opening_2m", "sizeMeters": [2.0, 3.2, 0.3], "openingMeters": [1.4, 2.4], "doorIncluded": false},
+    {"id": "wall_interior_opening_2m", "sizeMeters": [2.0, 3.2, 0.3], "openingMeters": [1.2, 2.4], "doorIncluded": false},
+    {"id": "inside_corner", "gridMeters": 0.5},
+    {"id": "outside_corner", "gridMeters": 0.5},
+    {"id": "pillar", "sizeMeters": [0.45, 3.2, 0.45]},
+    {"id": "beam_lintel_3m", "sizeMeters": [3.0, 0.35, 0.35]},
+    {"id": "window_frame_separate", "openingMeters": [1.2, 1.5]},
+    {"id": "roof_slope_3m", "spanMeters": 3.0},
+    {"id": "roof_ridge_3m", "lengthMeters": 3.0},
+    {"id": "roof_hip_valley", "gridMeters": 0.5},
+    {"id": "roof_gable_end", "gridMeters": 0.5},
+    {"id": "roof_fascia_trim_3m", "lengthMeters": 3.0},
+    {"id": "gallery_guardrail_1m", "sizeMeters": [1.0, 1.1, 0.1]}
+  ],
+  "reusableFinishTiles": [
+    {"id": "exterior_cladding_3m", "sizeMeters": [3.0, 3.2], "layer": "exterior"},
+    {"id": "exterior_cladding_1_5m", "sizeMeters": [1.5, 3.2], "layer": "exterior"},
+    {"id": "exterior_trim_strip_0_5m", "sizeMeters": [0.5, 3.2], "layer": "exterior"},
+    {"id": "interior_wall_finish_1m", "sizeMeters": [1.0, 1.0], "layer": "interior"},
+    {"id": "interior_wall_finish_2m", "sizeMeters": [2.0, 1.0], "layer": "interior"},
+    {"id": "interior_wainscot_1m", "sizeMeters": [1.0, 1.1], "layer": "interior"},
+    {"id": "interior_corner_trim_0_5m", "sizeMeters": [0.5, 3.2], "layer": "interior"},
+    {"id": "interior_floor_finish_1m", "sizeMeters": [1.0, 1.0], "layer": "interior"},
+    {"id": "interior_floor_border_0_5m", "sizeMeters": [0.5, 1.0], "layer": "interior"},
+    {"id": "interior_ceiling_finish_1m", "sizeMeters": [1.0, 1.0], "layer": "interior"},
+    {"id": "interior_ceiling_coffer_1m", "sizeMeters": [1.0, 1.0], "layer": "interior"},
+    {"id": "interior_beam_cover_3m", "lengthMeters": 3.0, "layer": "interior"},
+    {"id": "interior_pillar_wrap", "gridMeters": 0.5, "layer": "interior"},
+    {"id": "window_reveal_trim", "openingMeters": [1.2, 1.5], "layer": "interior"},
+    {"id": "wear_grime_overlay_1m", "sizeMeters": [1.0, 1.0], "layer": "interior", "collision": false}
+  ],
+  "runtimeIntent": {
+    "streaming": "seamless_small_interior",
+    "roofOcclusion": "separate_roof_group",
+    "upperFloorOcclusion": "separate_upper_shell_group",
+    "combatReadability": "central public-hall aisle remains unobstructed",
+    "doors": "real openings only; door meshes and interaction are excluded from this packet",
+    "windows": "real recesses/openings; no painted facade windows",
+    "colliders": "room-shell primitives plus stair; all door geometry and colliders deferred with the separate door family; no single solid building collider"
+  }
+}

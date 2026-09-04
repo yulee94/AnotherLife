@@ -1020,10 +1020,8 @@ namespace AL.UI.Kingdom
             snapshot.TryGetValue("Steel Forging", out var steel);
             snapshot.TryGetValue("Plate Armor", out var armor);
 
-            // The derived Attack/Defense stat-bonus lines are dropped: the only API for them
-            // (IResearchService.GetStatBonus) internally seeds research state, and the bonus formula is
-            // domain-owned (#165/#183), not the controller's to reproduce. Levels and the real frozen
-            // research timer remain visible (D7).
+            // Missing catalog rows render UNAVAILABLE. GetStatBonus is unused here
+            // because research definitions remain unpublished (#165/#183).
             _researchText.text =
                 "RESEARCH\n" +
                 FormatResearch("Steel Forging", steel) + "\n" +
@@ -1189,7 +1187,17 @@ namespace AL.UI.Kingdom
                     return Nvs01RealmContext.Unavailable();
                 }
 
-                return Nvs01RealmContextAdapter.FromCommittedIdentity(realmService.Identity);
+                RealmSelectionAuthorityState receipt = null;
+                if (ServiceLocator.TryGet<ISaveGameService>(out var saveGameService) &&
+                    saveGameService != null &&
+                    saveGameService.CurrentSave != null)
+                {
+                    receipt = saveGameService.CurrentSave.RealmSelection;
+                }
+
+                return Nvs01RealmContextAdapter.FromPersistedIdentity(
+                    realmService.Identity,
+                    receipt);
             }
             catch (Exception)
             {
@@ -1533,8 +1541,8 @@ namespace AL.UI.Kingdom
                 upgradingCount > 0 ? new Color(0.92f, 0.62f, 0.28f, 1f) : new Color(0.62f, 0.86f, 0.56f, 1f),
                 upgradingCount > 0 ? 0.88f : 0.34f);
 
-            // FORCE: troop counts are only available through the state-seeding GetTroopCount getter, so
-            // the read-only readiness chip renders a neutral unavailable value (D8) instead.
+            // FORCE: troop catalog authority is unpublished, so the read-only
+            // readiness chip renders a typed unavailable value instead of a count.
             SetReadinessChip(
                 1,
                 "FORCE",
@@ -2019,7 +2027,8 @@ namespace AL.UI.Kingdom
             bool buildingConstructionAvailable = false;
             try
             {
-                hasCommittedRealm = ServiceLocator.Get<IRealmService>().CurrentRealmId != RealmId.None;
+                IRealmService realmService = ServiceLocator.Get<IRealmService>();
+                hasCommittedRealm = realmService != null && realmService.Identity.IsCommittedValid;
                 // Full castle-grid upgrades stay capability-gated. The one Town Hall
                 // construct is unlocked by KingdomCommandPolicy itself.
                 buildingConstructionAvailable = false;
@@ -2572,7 +2581,7 @@ namespace AL.UI.Kingdom
         {
             if (state == null)
             {
-                return $"{label}: Level 0";
+                return $"{label}: UNAVAILABLE";
             }
 
             if (!state.IsResearching)

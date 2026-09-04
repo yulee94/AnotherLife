@@ -140,6 +140,33 @@ namespace AL.Narrative.Nvs01
             }
         }
 
+        public static Nvs01RealmContext FromPersistedIdentity(
+            RealmIdentitySnapshot identity,
+            AL.Data.Runtime.RealmSelectionAuthorityState receipt)
+        {
+            return FromPersistedIdentity(identity, receipt, RealmCatalogRuntime.Current);
+        }
+
+        public static Nvs01RealmContext FromPersistedIdentity(
+            RealmIdentitySnapshot identity,
+            AL.Data.Runtime.RealmSelectionAuthorityState receipt,
+            RealmCatalogSnapshot catalog)
+        {
+            if (!CommittedRealmConsumer.TryResolve(identity, receipt, catalog, out _))
+            {
+                if (identity.Status == RealmIdentityStatus.ProfileUnavailable ||
+                    identity.Status == RealmIdentityStatus.CatalogUnavailable ||
+                    identity.Status == RealmIdentityStatus.Uncommitted)
+                {
+                    return Nvs01RealmContext.Unavailable();
+                }
+
+                return Nvs01RealmContext.Invalid();
+            }
+
+            return FromCommittedIdentity(identity);
+        }
+
         private static Nvs01RealmContext Committed(string realmId) =>
             new Nvs01RealmContext(Nvs01RealmContextStatus.CommittedValid, realmId);
     }

@@ -5,6 +5,7 @@ import com.example.anotherlife.BuildConfig
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBox
@@ -30,11 +31,16 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.anotherlife.ui.layout.debugTestTag
+import com.example.anotherlife.ui.layout.usesLargeTextLayout
 import com.example.anotherlife.ui.navigation.Route
 import com.example.anotherlife.ui.simulation.AcademyScreen
 import com.example.anotherlife.ui.simulation.BattleSimulatorScreen
@@ -48,6 +54,8 @@ import com.example.anotherlife.data.simulation.DialogueNode
 import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.NarrativeState
 import com.example.anotherlife.data.contracts.AndroidSharedCatalogLoader
+import com.example.anotherlife.ui.unity.UnityBridgeSmokeRoute
+import com.example.anotherlife.ui.unity.UnityBridgeSmokeSafeReturnNotice
 
 /**
  * The core adaptive shell of "Another Life".
@@ -84,20 +92,33 @@ fun AnotherLifeShell() {
     val backStack = rememberSaveable(saver = routeBackStackSaver) {
         mutableStateListOf(Route.Kingdom)
     }
-    val routeNotice = remember { mutableStateOf<String?>(null) }
+    val routeNotice = rememberSaveable { mutableStateOf<String?>(null) }
+    val safeReturnNoticeKey = rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(debugToolsEnabled, backStack.toList()) {
         val sanitized = ShellRoutePolicy.sanitizeBackStack(backStack, debugToolsEnabled)
         if (sanitized.routes != backStack) {
             backStack.clear()
             backStack.addAll(sanitized.routes)
         }
-        routeNotice.value = sanitized.rejectedTopRoute?.message
+        routeNotice.value = ShellRoutePolicy.reduceRouteNotice(
+            currentMessage = routeNotice.value,
+            event = RouteNoticeEvent.BackStackSanitized(sanitized.rejectedTopRoute)
+        )
     }
     val currentKey = backStack.lastOrNull() ?: Route.Kingdom
     val currentRoute = ShellRoutePolicy.resolveRoute(currentKey, debugToolsEnabled).route
     val selectedNavigationRoute = ShellRoutePolicy.navigationSelection(currentRoute)
-    val useSelectedOnlyLabels = LocalDensity.current.fontScale >= 1.3f
-    val navigateBack: () -> Unit = {
+    val safeReturnNotice = UnityBridgeSmokeSafeReturnNotice.fromPersistenceKey(
+        safeReturnNoticeKey.value
+    )
+    val useLargeTextNavigation = usesLargeTextLayout()
+    val acknowledgeRouteNotice: () -> Unit = {
+        routeNotice.value = ShellRoutePolicy.reduceRouteNotice(
+            currentMessage = routeNotice.value,
+            event = RouteNoticeEvent.NavigationAcknowledged
+        )
+    }
+    val popBackStack: () -> Unit = {
         if (backStack.size > 1) {
             backStack.removeAt(backStack.lastIndex)
         } else {
@@ -105,33 +126,69 @@ fun AnotherLifeShell() {
             backStack.add(Route.Kingdom)
         }
     }
+    val acknowledgeVisibleNotices: () -> Unit = {
+        acknowledgeRouteNotice()
+        safeReturnNoticeKey.value = null
+    }
+    val navigateBack: () -> Unit = {
+        acknowledgeVisibleNotices()
+        popBackStack()
+    }
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                ShellRoutePolicy.bottomNavigationRoutes(debugToolsEnabled).forEach { route ->
-                    val isSelected = selectedNavigationRoute == route
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = {
-                            if (route == Route.Kingdom) {
-                                backStack.clear()
-                                backStack.add(Route.Kingdom)
-                            } else if (currentKey != route) {
-                                backStack.add(route)
-                            }
-                        },
-                        icon = { Icon(iconForRoute(route), contentDescription = labelForRoute(route)) },
-                        label = {
-                            Text(
-                                text = labelForRoute(route),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                softWrap = false
-                            )
-                        },
-                        alwaysShowLabel = !useSelectedOnlyLabels
+            Column {
+                if (useLargeTextNavigation) {
+                    Text(
+                        text = labelForRoute(selectedNavigationRoute),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 24.dp)
+                            .padding(horizontal = 16.dp, vertical = 2.dp)
+                            .debugTestTag("selected_navigation_label"),
+                        style = MaterialTheme.typography.labelLarge,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Clip,
+                        softWrap = false
                     )
+                }
+                NavigationBar {
+                    ShellRoutePolicy.bottomNavigationRoutes(debugToolsEnabled).forEach { route ->
+                        val isSelected = selectedNavigationRoute == route
+                        NavigationBarItem(
+                            selected = isSelected,
+                            onClick = {
+                                acknowledgeVisibleNotices()
+                                if (route == Route.Kingdom) {
+                                    backStack.clear()
+                                    backStack.add(Route.Kingdom)
+                                } else if (currentKey != route) {
+                                    backStack.add(route)
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    iconForRoute(route),
+                                    contentDescription = labelForRoute(route)
+                                )
+                            },
+                            label = if (useLargeTextNavigation) {
+                                null
+                            } else {
+                                {
+                                    Text(
+                                        text = labelForRoute(route),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        softWrap = false
+                                    )
+                                }
+                            },
+                            alwaysShowLabel = !useLargeTextNavigation,
+                            modifier = Modifier.debugTestTag("navigation_${labelForRoute(route)}")
+                        )
+                    }
                 }
             }
         }
@@ -141,7 +198,7 @@ fun AnotherLifeShell() {
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
-            routeNotice.value?.let { message ->
+            (safeReturnNotice?.message ?: routeNotice.value)?.let { message ->
                 Text(
                     text = message,
                     color = MaterialTheme.colorScheme.error,
@@ -149,6 +206,9 @@ fun AnotherLifeShell() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .semantics {
+                            liveRegion = LiveRegionMode.Polite
+                        }
                 )
             }
 
@@ -175,6 +235,7 @@ fun AnotherLifeShell() {
                         Route.Warzone -> NavEntry(resolvedRoute) {
                             WarzoneMapScreen(state = kingdomState, onAttack = { territory ->
                                 // Navigate to Battle screen for the selected territory
+                                acknowledgeRouteNotice()
                                 backStack.add(Route.Battle)
                             })
                         }
@@ -182,9 +243,25 @@ fun AnotherLifeShell() {
                             NarrativeDebugScreen(
                                 state = narrativeState,
                                 onOpenQuestPreview = {
+                                    acknowledgeVisibleNotices()
                                     if (backStack.lastOrNull() != Route.Quest) {
                                         backStack.add(Route.Quest)
                                     }
+                                },
+                                onOpenUnityBridgeSmoke = {
+                                    acknowledgeVisibleNotices()
+                                    if (backStack.lastOrNull() != Route.UnityBridgeSmoke) {
+                                        backStack.add(Route.UnityBridgeSmoke)
+                                    }
+                                }
+                            )
+                        }
+                        Route.UnityBridgeSmoke -> NavEntry(resolvedRoute) {
+                            UnityBridgeSmokeRoute(
+                                onBack = navigateBack,
+                                onSafeReturn = { notice ->
+                                    safeReturnNoticeKey.value = notice.persistenceKey
+                                    popBackStack()
                                 }
                             )
                         }
@@ -244,6 +321,7 @@ private fun labelForRoute(route: Route): String {
         Route.NarrativeDebug -> "Debug"
         Route.Battle -> "Battle"
         Route.Quest -> "Quest"
+        Route.UnityBridgeSmoke -> "Unity Smoke"
     }
 }
 
@@ -255,4 +333,5 @@ private fun iconForRoute(route: Route) = when (route) {
     Route.NarrativeDebug -> Icons.Rounded.Info
     Route.Battle -> Icons.Rounded.Star
     Route.Quest -> Icons.Rounded.Star
+    Route.UnityBridgeSmoke -> Icons.Rounded.Info
 }

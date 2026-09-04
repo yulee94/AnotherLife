@@ -3,7 +3,10 @@
     "rootNamespace": "AL",
     "references": [
         "AL.SaveAuthority",
+        "AL.SaveAuthority.RuntimeBridge",
         "AL.GameDataCatalog",
+        "AL.ChampionDeathPenalty",
+        "AL.BossRewards",
         "Unity.TextMeshPro",
         "Unity.ugui",
         "Unity.InputSystem"

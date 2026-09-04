@@ -1,7 +1,15 @@
 <resources>
 
-    <style name="Theme.AnotherLife" parent="android:style/Theme.Material.Light.NoActionBar">
+    <style name="Theme.AnotherLife.PlatformBase" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/launch_background</item>
+        <item name="android:statusBarColor">@color/launch_background</item>
+        <item name="android:navigationBarColor">@color/launch_navigation_bar</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
+
+    <style name="Theme.AnotherLife.Base" parent="Theme.AnotherLife.PlatformBase" />
+
+    <style name="Theme.AnotherLife" parent="Theme.AnotherLife.Base" />
 </resources>

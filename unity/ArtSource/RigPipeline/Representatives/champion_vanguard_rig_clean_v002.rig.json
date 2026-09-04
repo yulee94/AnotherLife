@@ -1,0 +1,2046 @@
+{
+  "approvalState": "bounded_engineering",
+  "assetId": "rmc_cleanup_champion_vanguard_v002",
+  "bindings": {
+    "bindPoseId": "rmc_bind_humanoid_a_pose_v001",
+    "budgetProfileId": "rmc_budget_champion_mobile_floor_v001",
+    "facialProfileId": "rmc_face_champion_hybrid_v001",
+    "representativeProfileId": "rmc_representative_champion_vanguard_v001",
+    "requiredMotionSetId": "rmc_set_champion_complete_v001",
+    "retargetProfileId": "rmc_retarget_humanoid_shared_v001",
+    "skeletonProfileId": "rmc_skeleton_humanoid_shared_v001"
+  },
+  "catalogAssetId": "champion_vanguard_working_v001",
+  "cleanupEvidence": {
+    "actionSignature": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "boneRenames": 22,
+    "canonicalAction": null,
+    "cleanedGeometrySignature": "e933b40c222552d0fae0f8fa5bc8226701cbd517e19fb3111816c38a7c913808",
+    "cleanedWeights": {
+      "maximumInfluencesPerVertex": 4,
+      "nonNormalizedVertices": 0,
+      "unweightedVertices": 0,
+      "vertices": 8832,
+      "verticesOverInfluenceBudget": 0,
+      "weightsBelowFloor": 0
+    },
+    "constantObjectTransformCurvesRemoved": true,
+    "deformationCleanupMaximumDriftMeters": 3e-08,
+    "deformationCleanupToleranceMeters": 0.005,
+    "geometryMaximumDriftMeters": 7e-09,
+    "geometrySignatureAfter": "e933b40c222552d0fae0f8fa5bc8226701cbd517e19fb3111816c38a7c913808",
+    "geometrySignatureBefore": "622b0b7744bf61276040611aa98912b68ccdd54235402bbc4b8096cec3f040db",
+    "removedObjects": [
+      "Camera",
+      "FORWARD_Unity+Z",
+      "Light",
+      "MountAnchor",
+      "PetAnchor",
+      "VFX_ChestAnchor",
+      "VFX_Hand_L",
+      "VFX_Hand_R",
+      "root"
+    ],
+    "sampleFrames": [
+      1
+    ],
+    "socketsAdded": 15,
+    "sourceActionCount": 0,
+    "sourceGroundOffsetMeters": 0.0,
+    "sourceWeights": {
+      "maximumInfluencesPerVertex": 9,
+      "nonNormalizedVertices": 0,
+      "unweightedVertices": 0,
+      "vertices": 8832,
+      "verticesOverInfluenceBudget": 488,
+      "weightsBelowFloor": 105
+    },
+    "topologyCleanup": {
+      "degenerateFacesRemoved": 0,
+      "duplicateFacesRemoved": 4,
+      "nonTriFacesConverted": 6735
+    }
+  },
+  "errors": [],
+  "meshes": [
+    {
+      "degenerateTriangles": 0,
+      "edges": 264,
+      "faces": 176,
+      "materialSlots": 1,
+      "maximumZ": 1.42,
+      "minimumZ": 0.9,
+      "name": "Cape",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 176,
+      "vertices": 90
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 102,
+      "faces": 68,
+      "materialSlots": 1,
+      "maximumZ": 1.419989,
+      "minimumZ": 0.900002,
+      "name": "Cape_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 68,
+      "vertices": 36
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 24,
+      "faces": 16,
+      "materialSlots": 1,
+      "maximumZ": 1.419965,
+      "minimumZ": 0.899829,
+      "name": "Cape_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 16,
+      "vertices": 10
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 180,
+      "faces": 120,
+      "materialSlots": 2,
+      "maximumZ": 1.42,
+      "minimumZ": 1.3,
+      "name": "Realm_Ornament",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 120,
+      "vertices": 64
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 69,
+      "faces": 46,
+      "materialSlots": 2,
+      "maximumZ": 1.419687,
+      "minimumZ": 1.30049,
+      "name": "Realm_Ornament_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 46,
+      "vertices": 27
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 15,
+      "faces": 9,
+      "materialSlots": 2,
+      "maximumZ": 1.423836,
+      "minimumZ": 1.310931,
+      "name": "Realm_Ornament_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 3,
+      "nonTriFaces": 0,
+      "triangles": 9,
+      "vertices": 9
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 2304,
+      "faces": 1536,
+      "materialSlots": 1,
+      "maximumZ": 1.458105,
+      "minimumZ": 0.684321,
+      "name": "SM_Arm_L",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 1536,
+      "vertices": 776
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 909,
+      "faces": 606,
+      "materialSlots": 1,
+      "maximumZ": 1.458105,
+      "minimumZ": 0.684321,
+      "name": "SM_Arm_L_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 606,
+      "vertices": 311
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 222,
+      "faces": 148,
+      "materialSlots": 1,
+      "maximumZ": 1.458105,
+      "minimumZ": 0.6872,
+      "name": "SM_Arm_L_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 148,
+      "vertices": 82
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 2304,
+      "faces": 1536,
+      "materialSlots": 1,
+      "maximumZ": 1.458105,
+      "minimumZ": 0.684321,
+      "name": "SM_Arm_R",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 1536,
+      "vertices": 776
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 909,
+      "faces": 606,
+      "materialSlots": 1,
+      "maximumZ": 1.458105,
+      "minimumZ": 0.684321,
+      "name": "SM_Arm_R_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 606,
+      "vertices": 311
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 222,
+      "faces": 148,
+      "materialSlots": 1,
+      "maximumZ": 1.458105,
+      "minimumZ": 0.6872,
+      "name": "SM_Arm_R_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 148,
+      "vertices": 82
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 288,
+      "faces": 192,
+      "materialSlots": 1,
+      "maximumZ": 1.652136,
+      "minimumZ": 1.637864,
+      "name": "SM_Eye_L",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 192,
+      "vertices": 98
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 111,
+      "faces": 74,
+      "materialSlots": 1,
+      "maximumZ": 1.65216,
+      "minimumZ": 1.637895,
+      "name": "SM_Eye_L_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 74,
+      "vertices": 39
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 27,
+      "faces": 18,
+      "materialSlots": 1,
+      "maximumZ": 1.651925,
+      "minimumZ": 1.638399,
+      "name": "SM_Eye_L_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 18,
+      "vertices": 11
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 288,
+      "faces": 192,
+      "materialSlots": 1,
+      "maximumZ": 1.652136,
+      "minimumZ": 1.637864,
+      "name": "SM_Eye_R",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 192,
+      "vertices": 98
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 111,
+      "faces": 74,
+      "materialSlots": 1,
+      "maximumZ": 1.65216,
+      "minimumZ": 1.637895,
+      "name": "SM_Eye_R_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 74,
+      "vertices": 39
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 27,
+      "faces": 18,
+      "materialSlots": 1,
+      "maximumZ": 1.651925,
+      "minimumZ": 1.638399,
+      "name": "SM_Eye_R_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 18,
+      "vertices": 11
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 1152,
+      "faces": 768,
+      "materialSlots": 1,
+      "maximumZ": 1.676198,
+      "minimumZ": 1.569963,
+      "name": "SM_Face",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 768,
+      "vertices": 392
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 453,
+      "faces": 302,
+      "materialSlots": 1,
+      "maximumZ": 1.676212,
+      "minimumZ": 1.569947,
+      "name": "SM_Face_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 302,
+      "vertices": 159
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 111,
+      "faces": 74,
+      "materialSlots": 1,
+      "maximumZ": 1.675759,
+      "minimumZ": 1.569809,
+      "name": "SM_Face_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 74,
+      "vertices": 45
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 576,
+      "faces": 384,
+      "materialSlots": 1,
+      "maximumZ": 1.781358,
+      "minimumZ": 1.638642,
+      "name": "SM_Hair",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 384,
+      "vertices": 196
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 225,
+      "faces": 150,
+      "materialSlots": 1,
+      "maximumZ": 1.781593,
+      "minimumZ": 1.638642,
+      "name": "SM_Hair_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 150,
+      "vertices": 79
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 54,
+      "faces": 36,
+      "materialSlots": 1,
+      "maximumZ": 1.776044,
+      "minimumZ": 1.643056,
+      "name": "SM_Hair_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 36,
+      "vertices": 22
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 2016,
+      "faces": 1344,
+      "materialSlots": 1,
+      "maximumZ": 1.772346,
+      "minimumZ": 1.489248,
+      "name": "SM_Head",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 1344,
+      "vertices": 682
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 795,
+      "faces": 530,
+      "materialSlots": 1,
+      "maximumZ": 1.772346,
+      "minimumZ": 1.489248,
+      "name": "SM_Head_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 530,
+      "vertices": 275
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 192,
+      "faces": 128,
+      "materialSlots": 1,
+      "maximumZ": 1.774225,
+      "minimumZ": 1.490404,
+      "name": "SM_Head_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 128,
+      "vertices": 74
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 2304,
+      "faces": 1536,
+      "materialSlots": 1,
+      "maximumZ": 0.912157,
+      "minimumZ": 0.004012,
+      "name": "SM_Leg_L",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 1536,
+      "vertices": 776
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 909,
+      "faces": 606,
+      "materialSlots": 1,
+      "maximumZ": 0.912157,
+      "minimumZ": 0.003937,
+      "name": "SM_Leg_L_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 606,
+      "vertices": 311
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 222,
+      "faces": 148,
+      "materialSlots": 1,
+      "maximumZ": 0.912157,
+      "minimumZ": 0.003425,
+      "name": "SM_Leg_L_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 148,
+      "vertices": 82
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 2304,
+      "faces": 1536,
+      "materialSlots": 1,
+      "maximumZ": 0.912157,
+      "minimumZ": 0.004012,
+      "name": "SM_Leg_R",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 1536,
+      "vertices": 776
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 909,
+      "faces": 606,
+      "materialSlots": 1,
+      "maximumZ": 0.912157,
+      "minimumZ": 0.003937,
+      "name": "SM_Leg_R_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 606,
+      "vertices": 311
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 222,
+      "faces": 148,
+      "materialSlots": 1,
+      "maximumZ": 0.912157,
+      "minimumZ": 0.003425,
+      "name": "SM_Leg_R_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 148,
+      "vertices": 82
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 864,
+      "faces": 576,
+      "materialSlots": 1,
+      "maximumZ": 1.445926,
+      "minimumZ": 0.914136,
+      "name": "SM_Torso",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 576,
+      "vertices": 294
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 339,
+      "faces": 226,
+      "materialSlots": 1,
+      "maximumZ": 1.446345,
+      "minimumZ": 0.913895,
+      "name": "SM_Torso_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 226,
+      "vertices": 119
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 81,
+      "faces": 54,
+      "materialSlots": 1,
+      "maximumZ": 1.432858,
+      "minimumZ": 0.908844,
+      "name": "SM_Torso_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 54,
+      "vertices": 33
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 78,
+      "faces": 52,
+      "materialSlots": 1,
+      "maximumZ": 1.3,
+      "minimumZ": 0.6,
+      "name": "Shield_Off",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 52,
+      "vertices": 28
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 30,
+      "faces": 20,
+      "materialSlots": 1,
+      "maximumZ": 1.306812,
+      "minimumZ": 0.6,
+      "name": "Shield_Off_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 20,
+      "vertices": 12
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 5,
+      "faces": 2,
+      "materialSlots": 1,
+      "maximumZ": 1.301372,
+      "minimumZ": 0.631302,
+      "name": "Shield_Off_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 4,
+      "nonTriFaces": 0,
+      "triangles": 2,
+      "vertices": 4
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 888,
+      "faces": 576,
+      "materialSlots": 1,
+      "maximumZ": 1.51,
+      "minimumZ": 1.37818,
+      "name": "Shoulder_L",
+      "ngons": 0,
+      "nonManifoldEdges": 48,
+      "nonTriFaces": 0,
+      "triangles": 576,
+      "vertices": 314
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 359,
+      "faces": 227,
+      "materialSlots": 1,
+      "maximumZ": 1.509935,
+      "minimumZ": 1.37818,
+      "name": "Shoulder_L_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 37,
+      "nonTriFaces": 0,
+      "triangles": 227,
+      "vertices": 134
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 92,
+      "faces": 55,
+      "materialSlots": 1,
+      "maximumZ": 1.513135,
+      "minimumZ": 1.378626,
+      "name": "Shoulder_L_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 19,
+      "nonTriFaces": 0,
+      "triangles": 55,
+      "vertices": 39
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 888,
+      "faces": 576,
+      "materialSlots": 1,
+      "maximumZ": 1.51,
+      "minimumZ": 1.37818,
+      "name": "Shoulder_R",
+      "ngons": 0,
+      "nonManifoldEdges": 48,
+      "nonTriFaces": 0,
+      "triangles": 576,
+      "vertices": 314
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 359,
+      "faces": 227,
+      "materialSlots": 1,
+      "maximumZ": 1.509935,
+      "minimumZ": 1.37818,
+      "name": "Shoulder_R_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 37,
+      "nonTriFaces": 0,
+      "triangles": 227,
+      "vertices": 134
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 92,
+      "faces": 55,
+      "materialSlots": 1,
+      "maximumZ": 1.513135,
+      "minimumZ": 1.378626,
+      "name": "Shoulder_R_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 19,
+      "nonTriFaces": 0,
+      "triangles": 55,
+      "vertices": 39
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 429,
+      "faces": 286,
+      "materialSlots": 3,
+      "maximumZ": 1.0645,
+      "minimumZ": 0.0,
+      "name": "Weapon_Main",
+      "ngons": 0,
+      "nonManifoldEdges": 0,
+      "nonTriFaces": 0,
+      "triangles": 286,
+      "vertices": 151
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 168,
+      "faces": 111,
+      "materialSlots": 3,
+      "maximumZ": 1.064426,
+      "minimumZ": 0.0,
+      "name": "Weapon_Main_LOD1",
+      "ngons": 0,
+      "nonManifoldEdges": 3,
+      "nonTriFaces": 0,
+      "triangles": 111,
+      "vertices": 64
+    },
+    {
+      "degenerateTriangles": 0,
+      "edges": 39,
+      "faces": 24,
+      "materialSlots": 3,
+      "maximumZ": 1.062751,
+      "minimumZ": 0.0,
+      "name": "Weapon_Main_LOD2",
+      "ngons": 0,
+      "nonManifoldEdges": 6,
+      "nonTriFaces": 0,
+      "triangles": 24,
+      "vertices": 21
+    }
+  ],
+  "output": {
+    "blendContentSignature": "0eb9b42d656014d42191ad0d8d90174b35276f56bda57a6977102837350d66b1",
+    "blendPath": "unity/ArtSource/RigPipeline/Representatives/champion_vanguard_rig_clean_v002.blend",
+    "blenderVersion": "5.2.0 LTS"
+  },
+  "pipelineId": "rmc_pipeline_blender_rig_cleanup_v001",
+  "preflight": {
+    "actionSignature": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "actions": 0,
+    "animatedTransforms": 39,
+    "deformingBones": 22,
+    "degenerateTriangles": 0,
+    "maximumInfluencesPerVertex": 4,
+    "minimumZ": 0.0,
+    "ngons": 0,
+    "nonManifoldEdges": 224,
+    "nonNormalizedVertices": 0,
+    "nonTriFaces": 0,
+    "unweightedVertices": 0,
+    "vertices": 8832,
+    "verticesOverInfluenceBudget": 0,
+    "warnings": [
+      "DocumentedModuleSeams: Realm_Ornament_LOD2=3 non-manifold edges",
+      "DocumentedModuleSeams: Shield_Off_LOD2=4 non-manifold edges",
+      "DocumentedModuleSeams: Shoulder_L=48 non-manifold edges",
+      "DocumentedModuleSeams: Shoulder_L_LOD1=37 non-manifold edges",
+      "DocumentedModuleSeams: Shoulder_L_LOD2=19 non-manifold edges",
+      "DocumentedModuleSeams: Shoulder_R=48 non-manifold edges",
+      "DocumentedModuleSeams: Shoulder_R_LOD1=37 non-manifold edges",
+      "DocumentedModuleSeams: Shoulder_R_LOD2=19 non-manifold edges",
+      "DocumentedModuleSeams: Weapon_Main_LOD1=3 non-manifold edges",
+      "DocumentedModuleSeams: Weapon_Main_LOD2=6 non-manifold edges"
+    ],
+    "weightsBelowFloor": 0
+  },
+  "productionEligible": false,
+  "productionGaps": [
+    "champion_facial_deformation_profile_not_authored",
+    "required_motion_set_not_in_this_pipeline",
+    "owner_creative_approval_required"
+  ],
+  "schemaVersion": 1,
+  "skeleton": {
+    "algorithm": "sha256_canonical_parent_path_bind_matrix_deform_flag_v1",
+    "records": [
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "root",
+        "parentPath": "",
+        "path": "root"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "motion_root",
+        "parentPath": "root",
+        "path": "root/motion_root"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.93
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "pelvis",
+        "parentPath": "root/motion_root",
+        "path": "root/motion_root/pelvis"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.11
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_cloth_waist",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/socket_cloth_waist"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.11
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_pelvis",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/socket_pelvis"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.11
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "spine_01",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/spine_01"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.16
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "spine_02",
+        "parentPath": "root/motion_root/pelvis/spine_01",
+        "path": "root/motion_root/pelvis/spine_01/spine_02"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.14
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "chest",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.03
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0,
+            0.08
+          ],
+          [
+            -1.0,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "clavicle_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            -1.0,
+            0.0,
+            0.0,
+            0.275
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            -0.02
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "upper_arm_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -0.0
+          ],
+          [
+            -0.0,
+            1.0,
+            0.0,
+            0.35
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "lower_arm_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            0.25
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "hand_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            -0.0,
+            0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            -0.0,
+            -1.0,
+            0.1
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_hand_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l/socket_hand_l"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            -0.0,
+            0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            -0.0,
+            -1.0,
+            0.1
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_vfx_hand_l",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l/socket_vfx_hand_l"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            -0.0,
+            0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            -0.0,
+            -1.0,
+            0.1
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_weapon_off",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_l/upper_arm_l/lower_arm_l/hand_l/socket_weapon_off"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.03
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.08
+          ],
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "clavicle_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            0.0,
+            -0.0,
+            -1.0,
+            -0.0
+          ],
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.215
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            -0.02
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "upper_arm_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.35
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "lower_arm_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            1.0,
+            -0.0,
+            0.25
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "hand_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0,
+            -1.0,
+            0.1
+          ],
+          [
+            -0.0,
+            1.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_hand_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r/socket_hand_r"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0,
+            -1.0,
+            0.1
+          ],
+          [
+            -0.0,
+            1.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_vfx_hand_r",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r/socket_vfx_hand_r"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            -0.0,
+            -1.0,
+            0.1
+          ],
+          [
+            -0.0,
+            1.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_weapon_main",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/clavicle_r/upper_arm_r/lower_arm_r/hand_r/socket_weapon_main"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.08
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "neck_01",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.08
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "head",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.24
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_camera_focus",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head/socket_camera_focus"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.24
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_hair",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head/socket_hair"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.24
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_head",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/neck_01/head/socket_head"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.08
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_back",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/socket_back"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.08
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_cape",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/socket_cape"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.08
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_chest",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/socket_chest"
+      },
+      {
+        "deform": false,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.08
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "socket_vfx_chest",
+        "parentPath": "root/motion_root/pelvis/spine_01/spine_02/chest",
+        "path": "root/motion_root/pelvis/spine_01/spine_02/chest/socket_vfx_chest"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            -0.095
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "upper_leg_l",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/upper_leg_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.46
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "lower_leg_l",
+        "parentPath": "root/motion_root/pelvis/upper_leg_l",
+        "path": "root/motion_root/pelvis/upper_leg_l/lower_leg_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            -0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.267644,
+            0.963518,
+            0.38
+          ],
+          [
+            -0.0,
+            -0.963518,
+            0.267644,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "foot_l",
+        "parentPath": "root/motion_root/pelvis/upper_leg_l/lower_leg_l",
+        "path": "root/motion_root/pelvis/upper_leg_l/lower_leg_l/foot_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            -0.0,
+            0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.994409,
+            0.105601,
+            0.186815
+          ],
+          [
+            -0.0,
+            -0.105601,
+            0.994409,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "toe_l",
+        "parentPath": "root/motion_root/pelvis/upper_leg_l/lower_leg_l/foot_l",
+        "path": "root/motion_root/pelvis/upper_leg_l/lower_leg_l/foot_l/toe_l"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.095
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "upper_leg_r",
+        "parentPath": "root/motion_root/pelvis",
+        "path": "root/motion_root/pelvis/upper_leg_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.46
+          ],
+          [
+            -0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "lower_leg_r",
+        "parentPath": "root/motion_root/pelvis/upper_leg_r",
+        "path": "root/motion_root/pelvis/upper_leg_r/lower_leg_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            -0.0,
+            -0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.267644,
+            0.963518,
+            0.38
+          ],
+          [
+            -0.0,
+            -0.963518,
+            0.267644,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "foot_r",
+        "parentPath": "root/motion_root/pelvis/upper_leg_r/lower_leg_r",
+        "path": "root/motion_root/pelvis/upper_leg_r/lower_leg_r/foot_r"
+      },
+      {
+        "deform": true,
+        "localBindMatrix": [
+          [
+            1.0,
+            -0.0,
+            0.0,
+            -0.0
+          ],
+          [
+            0.0,
+            0.994409,
+            0.105601,
+            0.186815
+          ],
+          [
+            -0.0,
+            -0.105601,
+            0.994409,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "toe_r",
+        "parentPath": "root/motion_root/pelvis/upper_leg_r/lower_leg_r/foot_r",
+        "path": "root/motion_root/pelvis/upper_leg_r/lower_leg_r/foot_r/toe_r"
+      }
+    ],
+    "signature": "9941de0420ff53f714be79db199f6b924d608c6991ed66f6443282a6a5585757"
+  },
+  "source": {
+    "localSourceRequired": true,
+    "path": "unity/ArtSource/Champions/champion_vanguard_working_v001.blend",
+    "productionRightsCleared": true,
+    "provenanceId": "rmc_provenance_champion_vanguard_v001",
+    "rightsState": "project_authored_retained_source",
+    "sha256": "10c07b25d4e7316ac664621adaf11156066b57ab9a35471df9d76ab3900bc4cb",
+    "sourceMaterialOnly": true
+  },
+  "status": "technical_candidate_valid",
+  "subjectKind": "champion"
+}

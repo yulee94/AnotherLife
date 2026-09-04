@@ -13,7 +13,8 @@ namespace AL.Services.Local
         ContainedWriter = 1,
         NarrowLegacyOperation = 2,
         Dormant = 3,
-        IndirectCaller = 4
+        IndirectCaller = 4,
+        NarrowProfileBoundOperation = 5
     }
 
     public sealed class ProfileMutationSurfaceDescriptor
@@ -63,6 +64,7 @@ namespace AL.Services.Local
         public const string ManualSave = "profile.save.manual";
         public const string LifecycleSave = "profile.save.lifecycle";
         public const string DeleteSave = "profile.save.delete";
+        public const string MvpApprovalReset = "profile.save.mvp-approval-reset";
         public const string RealmSelection = "profile.realm-selection.schema1";
         public const string Nvs01Progress = "profile.nvs01.schema1";
         public const string Resource = "profile.resource";
@@ -94,14 +96,14 @@ namespace AL.Services.Local
     /// </summary>
     public static class ProfileMutationSurfaceCatalog
     {
-        private const string Version = "al-profile-mutation-surface-v1";
+        private const string Version = "al-profile-mutation-surface-v2";
         private const int MaximumRegistrationCount = 64;
 
         private static readonly ProfileMutationSurfaceDescriptor[] DescriptorArray =
         {
             Boot("boot.game-data", typeof(IGameDataService), typeof(LocalGameDataService), ProfileMutationSurfaceDisposition.ReadOnly),
             Boot("boot.save-root", typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.ContainedWriter),
-            Boot(ProfileMutationSurfaceIds.RealmSelection, typeof(IRealmService), typeof(LocalRealmService), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
+            Boot(ProfileMutationSurfaceIds.RealmSelection, typeof(IRealmService), typeof(LocalRealmService), ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation),
             Boot(ProfileMutationSurfaceIds.Resource, typeof(IResourceService), typeof(LocalResourceService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Research, typeof(IResearchService), typeof(LocalResearchService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Building, typeof(IBuildingService), typeof(LocalBuildingService), ProfileMutationSurfaceDisposition.ContainedWriter),
@@ -123,7 +125,8 @@ namespace AL.Services.Local
             Extra(ProfileMutationSurfaceIds.ManualSave, typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Extra(ProfileMutationSurfaceIds.LifecycleSave, typeof(ISaveGameService), typeof(AL.Core.Bootloader), ProfileMutationSurfaceDisposition.IndirectCaller),
             Extra(ProfileMutationSurfaceIds.DeleteSave, typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.Dormant),
-            Extra(ProfileMutationSurfaceIds.Nvs01Progress, typeof(ISaveGameCandidateStore), typeof(AL.Narrative.Nvs01.Nvs01SaveGameMutationCommitter), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
+            Extra(ProfileMutationSurfaceIds.MvpApprovalReset, typeof(ISaveGameService), typeof(MvpApprovalSlotRuntime), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
+            Extra(ProfileMutationSurfaceIds.Nvs01Progress, typeof(ISaveGameCandidateStore), typeof(AL.Narrative.Nvs01.Nvs01SaveGameMutationCommitter), ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation),
             Extra(ProfileMutationSurfaceIds.MvpLoop, typeof(ILegacyMvpLoopCandidateStore), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
             Extra(ProfileMutationSurfaceIds.SideQuest, typeof(ISideQuestService), typeof(SideQuestService), ProfileMutationSurfaceDisposition.Dormant),
             Extra(ProfileMutationSurfaceIds.ChampionCustomization, null, typeof(AL.ChampionMode.Customization.ChampionCustomizationController), ProfileMutationSurfaceDisposition.ContainedWriter),
@@ -294,10 +297,18 @@ namespace AL.Services.Local
                 return;
             }
 
+            if (saveGameService is MvpApprovalTransactionalSaveGameService approval)
+            {
+                approval.PersistLifecycleCheckpoint();
+                return;
+            }
+
             saveGameService.Save();
         }
 
         internal static bool CanInvokeDeleteSave(ISaveGameService saveGameService) =>
-            saveGameService != null && ProductionWriteActivationEnabled;
+            saveGameService != null &&
+            (ProductionWriteActivationEnabled ||
+             MvpApprovalSlotRuntime.IsDeleteAuthorized(saveGameService));
     }
 }

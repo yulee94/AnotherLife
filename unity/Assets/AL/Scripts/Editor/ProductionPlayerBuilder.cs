@@ -26,6 +26,11 @@ namespace AL.EditorTools
         public const string ExecutableFileName = "AnotherLifeUnity.exe";
         public const string DataDirectoryName = "AnotherLifeUnity_Data";
         public const string SummaryRelativePath = "Logs/ProductionPlayerBuildSummary.json";
+        public const string MvpApprovalScriptingDefine = "AL_MVP_APPROVAL_SLOT";
+        public const string MvpApprovalOutputRelativeDirectory =
+            "Builds/Validation/Windows64MvpApproval";
+        public const string MvpApprovalSummaryRelativePath =
+            "Logs/MvpApprovalPlayerBuildSummary.json";
 
         /// <summary>Canonical Unity -executeMethod entry. An exception is intentional non-zero batch evidence.</summary>
         public static void BuildWindows64Development()
@@ -39,11 +44,37 @@ namespace AL.EditorTools
             }
         }
 
+        /// <summary>Dedicated isolated MVP approval Player entry.</summary>
+        public static void BuildWindows64MvpApproval()
+        {
+            PlayerBuildSummary summary = ExecuteMvpApproval(
+                new UnityProductionPlayerBuildEnvironment());
+            Debug.Log("[AL-MVP-APPROVAL-PLAYER-BUILD-SUMMARY] " + summary.Summarize());
+
+            if (!summary.Succeeded)
+            {
+                throw new BuildFailedException(summary.SummaryMessage);
+            }
+        }
+
         /// <summary>
         /// Testable orchestration seam. Preflight is completed before stale-output cleanup or the Unity
         /// build call, so every rejected preflight is observably non-mutating.
         /// </summary>
         internal static PlayerBuildSummary Execute(IProductionPlayerBuildEnvironment environment)
+        {
+            return ExecuteForFlavor(environment, approvalFlavor: false);
+        }
+
+        internal static PlayerBuildSummary ExecuteMvpApproval(
+            IProductionPlayerBuildEnvironment environment)
+        {
+            return ExecuteForFlavor(environment, approvalFlavor: true);
+        }
+
+        private static PlayerBuildSummary ExecuteForFlavor(
+            IProductionPlayerBuildEnvironment environment,
+            bool approvalFlavor)
         {
             if (environment == null)
             {
@@ -57,8 +88,16 @@ namespace AL.EditorTools
             try
             {
                 projectRoot = NormalizeFullPath(environment.ProjectRoot);
-                outputDirectory = NormalizeFullPath(Path.Combine(projectRoot, "Builds", "Validation", "Windows64"));
-                summaryPath = NormalizeFullPath(Path.Combine(projectRoot, "Logs", "ProductionPlayerBuildSummary.json"));
+                outputDirectory = NormalizeFullPath(Path.Combine(
+                    projectRoot,
+                    approvalFlavor
+                        ? MvpApprovalOutputRelativeDirectory
+                        : OutputRelativeDirectory));
+                summaryPath = NormalizeFullPath(Path.Combine(
+                    projectRoot,
+                    approvalFlavor
+                        ? MvpApprovalSummaryRelativePath
+                        : SummaryRelativePath));
             }
             catch (Exception exception)
             {
@@ -90,17 +129,29 @@ namespace AL.EditorTools
             bool summaryHasReparsePoint = SafeBooleanFailureClosed(
                 () => environment.HasReparsePoint(summaryPath));
 
-            PlayerBuildPlan plan = CreatePlan(
-                projectRoot,
-                outputDirectory,
-                environment.UnityVersion,
-                environment.IsCompiling,
-                environment.HasCompilationErrors,
-                validation,
-                outputIgnored,
-                summaryIgnored,
-                outputHasReparsePoint,
-                summaryHasReparsePoint);
+            PlayerBuildPlan plan = approvalFlavor
+                ? CreateMvpApprovalPlan(
+                    projectRoot,
+                    outputDirectory,
+                    environment.UnityVersion,
+                    environment.IsCompiling,
+                    environment.HasCompilationErrors,
+                    validation,
+                    outputIgnored,
+                    summaryIgnored,
+                    outputHasReparsePoint,
+                    summaryHasReparsePoint)
+                : CreatePlan(
+                    projectRoot,
+                    outputDirectory,
+                    environment.UnityVersion,
+                    environment.IsCompiling,
+                    environment.HasCompilationErrors,
+                    validation,
+                    outputIgnored,
+                    summaryIgnored,
+                    outputHasReparsePoint,
+                    summaryHasReparsePoint);
 
             if (!plan.IsValid)
             {
@@ -187,12 +238,69 @@ namespace AL.EditorTools
             bool outputHasReparsePoint,
             bool summaryHasReparsePoint)
         {
+            return CreatePlanForFlavor(
+                approvalFlavor: false,
+                projectRoot,
+                outputDirectory,
+                unityVersion,
+                isCompiling,
+                hasCompilationErrors,
+                validation,
+                outputIgnored,
+                summaryIgnored,
+                outputHasReparsePoint,
+                summaryHasReparsePoint);
+        }
+
+        internal static PlayerBuildPlan CreateMvpApprovalPlan(
+            string projectRoot,
+            string outputDirectory,
+            string unityVersion,
+            bool isCompiling,
+            bool hasCompilationErrors,
+            BuildValidationSnapshot validation,
+            bool outputIgnored,
+            bool summaryIgnored,
+            bool outputHasReparsePoint,
+            bool summaryHasReparsePoint)
+        {
+            return CreatePlanForFlavor(
+                approvalFlavor: true,
+                projectRoot,
+                outputDirectory,
+                unityVersion,
+                isCompiling,
+                hasCompilationErrors,
+                validation,
+                outputIgnored,
+                summaryIgnored,
+                outputHasReparsePoint,
+                summaryHasReparsePoint);
+        }
+
+        private static PlayerBuildPlan CreatePlanForFlavor(
+            bool approvalFlavor,
+            string projectRoot,
+            string outputDirectory,
+            string unityVersion,
+            bool isCompiling,
+            bool hasCompilationErrors,
+            BuildValidationSnapshot validation,
+            bool outputIgnored,
+            bool summaryIgnored,
+            bool outputHasReparsePoint,
+            bool summaryHasReparsePoint)
+        {
             var failures = new List<string>();
             string normalizedRoot = TryNormalize(projectRoot);
             string normalizedOutput = TryNormalize(outputDirectory);
             string summaryPath = normalizedRoot.Length == 0
                 ? string.Empty
-                : TryNormalize(Path.Combine(normalizedRoot, "Logs", "ProductionPlayerBuildSummary.json"));
+                : TryNormalize(Path.Combine(
+                    normalizedRoot,
+                    approvalFlavor
+                        ? MvpApprovalSummaryRelativePath
+                        : SummaryRelativePath));
 
             if (normalizedRoot.Length == 0)
             {
@@ -221,9 +329,14 @@ namespace AL.EditorTools
                     (validation == null ? "no report" : validation.Summary));
             }
 
-            if (!IsGuardedOutputDirectory(normalizedRoot, normalizedOutput))
+            bool guardedOutput = approvalFlavor
+                ? IsGuardedMvpApprovalOutputDirectory(normalizedRoot, normalizedOutput)
+                : IsGuardedOutputDirectory(normalizedRoot, normalizedOutput);
+            if (!guardedOutput)
             {
-                failures.Add("Player output is not the exact guarded Builds/Validation/Windows64 directory outside Assets.");
+                failures.Add(approvalFlavor
+                    ? "Player output is not the exact guarded Builds/Validation/Windows64MvpApproval directory outside Assets."
+                    : "Player output is not the exact guarded Builds/Validation/Windows64 directory outside Assets.");
             }
 
             if (!outputIgnored)
@@ -236,7 +349,10 @@ namespace AL.EditorTools
                 failures.Add("Guarded Player output contains a reparse-point/symlink boundary.");
             }
 
-            if (!IsGuardedSummaryPath(normalizedRoot, summaryPath) || !summaryIgnored)
+            bool guardedSummary = approvalFlavor
+                ? IsGuardedMvpApprovalSummaryPath(normalizedRoot, summaryPath)
+                : IsGuardedSummaryPath(normalizedRoot, summaryPath);
+            if (!guardedSummary || !summaryIgnored)
             {
                 failures.Add("Build summary path is not the exact ignored Logs path outside Assets.");
             }
@@ -271,9 +387,12 @@ namespace AL.EditorTools
                 unityVersion ?? string.Empty,
                 scenePaths,
                 failures,
-                IsGuardedSummaryPath(normalizedRoot, summaryPath) &&
+                guardedSummary &&
                 summaryIgnored &&
-                !summaryHasReparsePoint);
+                !summaryHasReparsePoint,
+                approvalFlavor
+                    ? new[] { MvpApprovalScriptingDefine }
+                    : Array.Empty<string>());
         }
 
         /// <summary>Pure BuildReport/artifact evaluation seam used by EditMode tests.</summary>
@@ -416,7 +535,23 @@ namespace AL.EditorTools
                 return false;
             }
 
-            string expected = TryNormalize(Path.Combine(root, "Builds", "Validation", "Windows64"));
+            string expected = TryNormalize(Path.Combine(root, OutputRelativeDirectory));
+            string assets = TryNormalize(Path.Combine(root, "Assets"));
+            return SamePath(candidate, expected) && !IsSameOrDescendant(candidate, assets);
+        }
+
+        internal static bool IsGuardedMvpApprovalOutputDirectory(
+            string projectRoot,
+            string candidateOutputDirectory)
+        {
+            string root = TryNormalize(projectRoot);
+            string candidate = TryNormalize(candidateOutputDirectory);
+            if (root.Length == 0 || candidate.Length == 0)
+            {
+                return false;
+            }
+
+            string expected = TryNormalize(Path.Combine(root, MvpApprovalOutputRelativeDirectory));
             string assets = TryNormalize(Path.Combine(root, "Assets"));
             return SamePath(candidate, expected) && !IsSameOrDescendant(candidate, assets);
         }
@@ -430,7 +565,23 @@ namespace AL.EditorTools
                 return false;
             }
 
-            string expected = TryNormalize(Path.Combine(root, "Logs", "ProductionPlayerBuildSummary.json"));
+            string expected = TryNormalize(Path.Combine(root, SummaryRelativePath));
+            string assets = TryNormalize(Path.Combine(root, "Assets"));
+            return SamePath(candidate, expected) && !IsSameOrDescendant(candidate, assets);
+        }
+
+        internal static bool IsGuardedMvpApprovalSummaryPath(
+            string projectRoot,
+            string candidateSummaryPath)
+        {
+            string root = TryNormalize(projectRoot);
+            string candidate = TryNormalize(candidateSummaryPath);
+            if (root.Length == 0 || candidate.Length == 0)
+            {
+                return false;
+            }
+
+            string expected = TryNormalize(Path.Combine(root, MvpApprovalSummaryRelativePath));
             string assets = TryNormalize(Path.Combine(root, "Assets"));
             return SamePath(candidate, expected) && !IsSameOrDescendant(candidate, assets);
         }
@@ -802,8 +953,10 @@ namespace AL.EditorTools
         {
             string root = ProductionPlayerBuilderPath.Normalize(ProjectRoot);
             string destination = ProductionPlayerBuilderPath.Normalize(fullPath);
-            if (!ProductionPlayerBuilder.IsGuardedSummaryPath(root, destination) ||
-                HasReparsePoint(destination))
+            bool guardedSummary =
+                ProductionPlayerBuilder.IsGuardedSummaryPath(root, destination) ||
+                ProductionPlayerBuilder.IsGuardedMvpApprovalSummaryPath(root, destination);
+            if (!guardedSummary || HasReparsePoint(destination))
             {
                 throw new IOException("Build summary destination is not the exact guarded non-reparse path.");
             }
@@ -1008,6 +1161,7 @@ namespace AL.EditorTools
     {
         private readonly ReadOnlyCollection<string> _scenePaths;
         private readonly ReadOnlyCollection<string> _failures;
+        private readonly ReadOnlyCollection<string> _extraScriptingDefines;
 
         internal PlayerBuildPlan(
             string projectRoot,
@@ -1017,7 +1171,8 @@ namespace AL.EditorTools
             string unityVersion,
             IEnumerable<string> scenePaths,
             IEnumerable<string> failures,
-            bool canWriteSummary)
+            bool canWriteSummary,
+            IEnumerable<string> extraScriptingDefines)
         {
             ProjectRoot = projectRoot ?? string.Empty;
             OutputDirectory = outputDirectory ?? string.Empty;
@@ -1026,6 +1181,8 @@ namespace AL.EditorTools
             UnityVersion = unityVersion ?? string.Empty;
             _scenePaths = Array.AsReadOnly((scenePaths ?? Array.Empty<string>()).ToArray());
             _failures = Array.AsReadOnly((failures ?? Array.Empty<string>()).ToArray());
+            _extraScriptingDefines = Array.AsReadOnly(
+                (extraScriptingDefines ?? Array.Empty<string>()).ToArray());
             CanWriteSummary = canWriteSummary;
         }
 
@@ -1038,7 +1195,8 @@ namespace AL.EditorTools
         internal IReadOnlyList<string> ScenePaths => _scenePaths;
         internal IReadOnlyList<string> Failures => _failures;
         internal BuildTarget Target => BuildTarget.StandaloneWindows64;
-        internal BuildOptions Options => BuildOptions.Development;
+        internal BuildOptions Options =>
+            BuildOptions.Development | BuildOptions.NoUniqueIdentifier;
         internal bool IsValid => _failures.Count == 0;
         internal bool CanWriteSummary { get; }
 
@@ -1049,7 +1207,8 @@ namespace AL.EditorTools
                 scenes = _scenePaths.ToArray(),
                 locationPathName = OutputPath,
                 target = Target,
-                options = Options
+                options = Options,
+                extraScriptingDefines = _extraScriptingDefines.ToArray()
             };
         }
 

@@ -32,6 +32,36 @@ namespace AL.Tests.EditMode.RealmWar
             Assert.IsTrue(host.GetComponent<ParticleSystem>() != null);
             Assert.IsTrue(host.transform.Find("Weather_GroundMist") != null);
             Assert.IsTrue(host.transform.Find("Weather_GroundMist").GetComponent<ParticleSystem>() != null);
+
+            ParticleSystem[] particleSystems = host.GetComponentsInChildren<ParticleSystem>(true);
+            Assert.That(particleSystems, Has.Length.EqualTo(4));
+            var initialMaterials = new Material[particleSystems.Length];
+            for (int i = 0; i < particleSystems.Length; i++)
+            {
+                ParticleSystemRenderer renderer = particleSystems[i]
+                    .GetComponent<ParticleSystemRenderer>();
+                Assert.That(renderer, Is.Not.Null);
+                Assert.That(renderer.enabled, Is.True);
+                Assert.That(renderer.sharedMaterial, Is.Not.Null);
+                Assert.That(renderer.sharedMaterial.shader, Is.Not.Null);
+                Assert.That(
+                    renderer.sharedMaterial.shader.name,
+                    Is.EqualTo("AnotherLife/Runtime/SoftParticle"));
+                StringAssert.DoesNotContain(
+                    "InternalErrorShader",
+                    renderer.sharedMaterial.shader.name);
+                initialMaterials[i] = renderer.sharedMaterial;
+            }
+
+            Assert.DoesNotThrow(() => weather.ConfigureForRealm(RealmId.Crownlands));
+            particleSystems = host.GetComponentsInChildren<ParticleSystem>(true);
+            for (int i = 0; i < particleSystems.Length; i++)
+            {
+                Assert.That(
+                    particleSystems[i].GetComponent<ParticleSystemRenderer>().sharedMaterial,
+                    Is.SameAs(initialMaterials[i]),
+                    "Weather reconfiguration must not allocate replacement particle materials.");
+            }
         }
 
         [Test]

@@ -1,0 +1,29 @@
+{
+  "modelId": "boss_eldergrove_mere_root_leviathan",
+  "sourceTaskIds": [
+    "01a05b45-caf4-7239-991b-3f3f940abc39",
+    "01a06522-ebd2-7564-958e-e974edb6b370"
+  ],
+  "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/Inputs/boss_eldergrove_mere_root_leviathan_meshy7_multiview_raw_v002.fbx",
+  "inputSha256": "eecf36e7faaba7e8d2dca62115df309a3b156a7db89d9fff52b08f7a10c5400a",
+  "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/boss_eldergrove_mere_root_leviathan/boss_eldergrove_mere_root_leviathan_source_v002.fbx",
+  "outputSha256": "d9aebc51f066359885444c3a1adcf061647fc1c12ae2c2fcccac68972e265356",
+  "editableBlend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/boss_eldergrove_mere_root_leviathan_geometry_v002.blend",
+  "status": "clean_geometry_pass_texture_rebuild_required",
+  "productionReady": false,
+  "rigged": false,
+  "runtimeIntegrationState": "Blocked",
+  "operations": [
+    "broadened and dorsoventrally reinforced the central shield-skull region",
+    "deepened the ventral jaw-hinge silhouette without changing appendage topology",
+    "preserved the generated seven-vane cervical silhouette and existing UV layer"
+  ],
+  "metrics": {
+    "verticesChanged": 6152,
+    "cervicalVanes": 7,
+    "shieldSkullToNeckWidthRatio": 1.1542,
+    "nonManifoldEdgesBefore": 182,
+    "nonManifoldEdgesAfter": 182
+  },
+  "diagnostics": []
+}

@@ -1,6 +1,7 @@
 using System;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.Data.Definitions;
 using AL.RealmSelection;
 using UnityEngine;
@@ -15,7 +16,10 @@ namespace AL.Services.Local
         private RealmCatalogSnapshot Catalog => _catalog ?? RealmCatalogRuntime.Current;
 
         public RealmId CurrentRealmId => Identity.IsCommittedValid ? Identity.RealmId : RealmId.None;
-        public RealmDefinition CurrentRealm => Identity.IsCommittedValid ? _gameDataService.GetRealm(Identity.RealmId) : null;
+        public RealmDefinition CurrentRealm =>
+            Identity.IsCommittedValid && _gameDataService != null
+                ? _gameDataService.GetRealm(Identity.RealmId)
+                : null;
 
         public RealmIdentitySnapshot Identity
         {
@@ -28,11 +32,9 @@ namespace AL.Services.Local
                     return Snapshot(RealmIdentityStatus.Uncommitted, RealmId.None, "AL-REALM-UNCOMMITTED");
                 if (!IsDefinedPlayable(selected))
                     return Snapshot(RealmIdentityStatus.InvalidPersistedIdentity, selected, "AL-REALM-PERSISTED-ID-INVALID");
-                RealmCatalogEntry ignored;
-                if (Catalog == null || !Catalog.TryGet(selected, out ignored))
-                    return Snapshot(RealmIdentityStatus.CatalogUnavailable, selected, "AL-REALM-DEFINITION-UNAVAILABLE");
-                if (!HasRuntimeDefinition(selected))
-                    return Snapshot(RealmIdentityStatus.CatalogUnavailable, selected, "AL-REALM-DEFINITION-UNAVAILABLE");
+                RealmAuthorityQueryResult query = RealmAuthorityQuery.Evaluate(Catalog, selected);
+                if (!query.IsFoundValid)
+                    return Snapshot(RealmIdentityStatus.CatalogUnavailable, selected, query.TechnicalCode);
                 return Snapshot(RealmIdentityStatus.CommittedValid, selected, "AL-REALM-COMMITTED-VALID");
             }
         }
@@ -59,13 +61,35 @@ namespace AL.Services.Local
                 return Result(RealmSelectionStatus.InvalidTransaction, request.RequestedRealmId, false, false, "AL-REALM-TRANSACTION-INVALID");
             if (!IsDefinedPlayable(request.RequestedRealmId))
                 return Result(RealmSelectionStatus.InvalidRealm, request.RequestedRealmId, false, false, "AL-REALM-REQUEST-INVALID");
-            RealmCatalogEntry ignored;
-            if (Catalog == null || !Catalog.TryGet(request.RequestedRealmId, out ignored))
-                return Result(RealmSelectionStatus.RealmDefinitionUnavailable, request.RequestedRealmId, false, false, "AL-REALM-DEFINITION-UNAVAILABLE");
-            if (!HasRuntimeDefinition(request.RequestedRealmId))
-                return Result(RealmSelectionStatus.RealmDefinitionUnavailable, request.RequestedRealmId, false, false, "AL-REALM-DEFINITION-UNAVAILABLE");
+            RealmAuthorityQueryResult query = RealmAuthorityQuery.Evaluate(Catalog, request.RequestedRealmId);
+            if (!query.IsFoundValid)
+                return Result(RealmSelectionStatus.RealmDefinitionUnavailable, request.RequestedRealmId, false, false, query.TechnicalCode);
             if (_saveGameService == null)
                 return Result(RealmSelectionStatus.ProfileUnavailable, request.RequestedRealmId, false, false, "AL-REALM-PROFILE-UNAVAILABLE");
+
+            if (_saveGameService is IProfileBoundRealmSelectionCandidateStore boundStore)
+            {
+                if (!(_saveGameService is IProfileWriteAuthorityProvider authorityProvider) ||
+                    !ProfileWriteAuthorityProviderGuard.IsCurrentWritable(authorityProvider))
+                {
+                    return Result(
+                        RealmSelectionStatus.ProfileUnavailable,
+                        request.RequestedRealmId,
+                        false,
+                        false,
+                        "AL-REALM-PROFILE-NOT-WRITABLE");
+                }
+
+                RealmSelectionResult boundResult =
+                    boundStore.TryCommitProfileBoundRealmSelection(request);
+                if (boundResult.Status == RealmSelectionStatus.Committed)
+                {
+                    Debug.Log($"Realm committed: {request.RequestedRealmId}");
+                    PublishPostCommitEvent(boundResult);
+                }
+
+                return boundResult;
+            }
 
             if (!(_saveGameService is ILegacyRealmSelectionCandidateStore candidateStore))
             {
@@ -82,9 +106,33 @@ namespace AL.Services.Local
             if (result.Status == RealmSelectionStatus.Committed)
             {
                 Debug.Log($"Realm committed: {request.RequestedRealmId}");
+                PublishPostCommitEvent(result);
             }
 
             return result;
+        }
+
+        private void PublishPostCommitEvent(RealmSelectionResult result)
+        {
+            if (!result.Persisted)
+            {
+                return;
+            }
+
+            var receipt = _saveGameService.CurrentSave?.RealmSelection;
+            if (receipt == null || string.IsNullOrEmpty(receipt.EventId))
+            {
+                return;
+            }
+
+            RealmSelectionEventDelivery.Publish(
+                new RealmSelectionCommittedEvent(
+                    receipt.TransactionId,
+                    RealmId.None,
+                    result.CommittedRealmId,
+                    receipt.CatalogVersion,
+                    receipt.EventId,
+                    receipt.ExpectedGenerationFingerprint));
         }
 
         private RealmIdentitySnapshot Snapshot(RealmIdentityStatus status, RealmId id, string code)
@@ -103,9 +151,5 @@ namespace AL.Services.Local
             return id != RealmId.None && Enum.IsDefined(typeof(RealmId), id);
         }
 
-        private bool HasRuntimeDefinition(RealmId id)
-        {
-            return _gameDataService != null && _gameDataService.GetRealm(id) != null;
-        }
     }
 }

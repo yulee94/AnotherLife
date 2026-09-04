@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-main-quest-line-runtime.schema.json",
+  "title": "Another Life Main Quest Line Runtime Catalog",
+  "description": "Packaged runtime projection of ANOTHERLIFE_MAIN_QUEST_LINE for editor and player builds.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "catalogId",
+    "packetId",
+    "packetVersion",
+    "sourceStatus",
+    "deliveryMechanism",
+    "relativePath",
+    "sourceManifestSha256",
+    "entryChapterId",
+    "entryQuestId",
+    "entryScene",
+    "progressEvent",
+    "progressedStateId",
+    "acceptChoiceKey",
+    "chapters",
+    "criticalPath"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "catalogId": { "const": "al_main_quest_line_runtime" },
+    "packetId": { "const": "ANOTHERLIFE_MAIN_QUEST_LINE" },
+    "packetVersion": { "const": "anotherlife-main-quest-line-2026-07-23-v001" },
+    "sourceStatus": { "const": "canonical_narrative_source_complete_runtime_wired" },
+    "deliveryMechanism": { "const": "hybrid_local_streaming_assets_gamedata" },
+    "relativePath": { "const": "GameData/al_main_quest_line_runtime.v1.json" },
+    "sourceManifestSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "entryChapterId": { "const": "CH00_FIRST_SIGNAL" },
+    "entryQuestId": { "const": "OMEN_1" },
+    "entryScene": { "const": "Kingdom" },
+    "progressEvent": { "const": "QUEST_ACCEPTED" },
+    "progressedStateId": { "const": "TALK_TO_VALERIUS" },
+    "acceptChoiceKey": { "const": "choice.omen1.accept" },
+    "criticalPath": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "chapters": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": { "$ref": "#/$defs/chapter" }
+    }
+  },
+  "$defs": {
+    "chapter": {
+      "type": "object",
+      "required": [
+        "id",
+        "order",
+        "mainQuestId",
+        "playMode",
+        "unlocksMainQuestId",
+        "runtimeBinding",
+        "entryScene",
+        "titleKey",
+        "titleText",
+        "sideQuestIds"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^CH[0-9]{2}_[A-Z0-9_]+$" },
+        "order": { "type": "integer", "minimum": 0, "maximum": 14 },
+        "mainQuestId": { "type": "string", "minLength": 1 },
+        "playMode": { "type": "string", "minLength": 1 },
+        "unlocksMainQuestId": { "type": "string" },
+        "runtimeBinding": { "enum": ["nvs01_omen_1", "proof_of_worth", "catalog_quest"] },
+        "entryScene": { "enum": ["Kingdom", "ChampionArena"] },
+        "titleKey": { "type": "string", "minLength": 1 },
+        "titleText": { "type": "string", "minLength": 1 },
+        "sideQuestIds": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "manifestVersion": 1,
+  "saveFormatId": "anotherlife.local-save",
+  "currentSchemaVersion": 2,
+  "supportedUpgradeSources": [0, 1],
+  "futureSchemaPolicy": "preserve_read_only",
+  "bothInvalidPolicy": "preserve_read_only",
+  "fixtures": [
+    {
+      "id": "pre_schema_v0_kingdom_progress",
+      "kind": "golden_upgrade",
+      "file": "pre-schema-v0.json",
+      "sha256": "900d3caf7dd946bee2e9d8e50af9d5c257cd6b23e42eec3f085b994a7dd73f44",
+      "sourceSchemaVersion": 0,
+      "expectedSchemaVersion": 2,
+      "expectedLoadStatus": "LoadedPrimary"
+    },
+    {
+      "id": "schema_v1_eldergrove_profile",
+      "kind": "golden_upgrade",
+      "file": "current-schema-v1.json",
+      "sha256": "a88c8a17d0cd5d7864e99c8b2899c96c3dba66ab5070c722fe8f91a86d98b4f1",
+      "sourceSchemaVersion": 1,
+      "expectedSchemaVersion": 2,
+      "expectedLoadStatus": "MigratedSchemaOne"
+    },
+    {
+      "id": "future_schema_v2_unknown_payload",
+      "kind": "downgrade_rejection",
+      "file": "future-schema-v2.json",
+      "sha256": "77f77820e290198b61c6571b66d6ebe05ae9f39dc31a35491efb9660e741ba55",
+      "sourceSchemaVersion": 3,
+      "expectedSchemaVersion": 3,
+      "expectedLoadStatus": "LoadedForwardSchemaReadOnly"
+    },
+    {
+      "id": "truncated_schema_v1_primary",
+      "kind": "corruption_recovery",
+      "file": "truncated-schema-v1.txt",
+      "sha256": "38c9c212dc4c581217b6051ced11557a6a4bcb4cd8f3d8a07cec4467e847ba74",
+      "sourceSchemaVersion": 1,
+      "expectedSchemaVersion": 2,
+      "expectedLoadStatus": "MigratedSchemaOne"
+    }
+  ]
+}

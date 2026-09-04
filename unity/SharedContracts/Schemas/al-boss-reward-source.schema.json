@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-boss-reward-source.schema.json",
+  "title": "Another Life Boss Reward Technical Source",
+  "description": "Immutable boss-to-reward technical catalog. Balance is separate from presentation. Mutation stays blocked.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "catalogId",
+    "gameId",
+    "catalogSetId",
+    "revision",
+    "authority",
+    "mutationActivation",
+    "approval",
+    "announcementPolicyIds",
+    "bindings",
+    "profiles",
+    "equipmentDefinitions"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "boss_reward_schema_v1" },
+    "catalogId": { "const": "al_boss_reward_source_catalog" },
+    "gameId": { "const": "another_life" },
+    "catalogSetId": { "const": "catalog_set_boss_reward_source_v001" },
+    "revision": { "const": "boss_reward_source_v001" },
+    "authority": { "const": "technical_boss_reward_source" },
+    "mutationActivation": { "const": "blocked" },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "issue",
+        "representativeBossId",
+        "sourceQualificationIssue"
+      ],
+      "properties": {
+        "mode": { "const": "autonomous_bounded_recommendation" },
+        "issue": { "const": "#168" },
+        "representativeBossId": {
+          "const": "boss_stonehold_fault_crowned_colossus"
+        },
+        "sourceQualificationIssue": { "const": "#259" }
+      }
+    },
+    "announcementPolicyIds": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        { "const": "boss_reward.item_acquired" },
+        { "const": "boss_reward.credits_committed" },
+        { "const": "boss_reward.explicit_no_reward" }
+      ],
+      "items": false
+    },
+    "bindings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": { "$ref": "#/$defs/binding" }
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": { "$ref": "#/$defs/profile" }
+    },
+    "equipmentDefinitions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": { "$ref": "#/$defs/equipment" }
+    }
+  },
+  "$defs": {
+    "technicalId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+    "contentKey": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[._][a-z0-9]+)*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bossDefinitionId",
+        "bossDefinitionContentVersion",
+        "rewardProfileId",
+        "rewardProfileContentVersion"
+      ],
+      "properties": {
+        "bossDefinitionId": { "$ref": "#/$defs/technicalId" },
+        "bossDefinitionContentVersion": { "$ref": "#/$defs/technicalId" },
+        "rewardProfileId": { "$ref": "#/$defs/technicalId" },
+        "rewardProfileContentVersion": { "$ref": "#/$defs/technicalId" }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gameId",
+        "catalogSetId",
+        "id",
+        "schemaVersion",
+        "contentVersion",
+        "warzoneCredits",
+        "isExplicitNoReward",
+        "entries",
+        "sourceRevision",
+        "rawSha256"
+      ],
+      "properties": {
+        "gameId": { "const": "another_life" },
+        "catalogSetId": { "const": "catalog_set_boss_reward_source_v001" },
+        "id": { "$ref": "#/$defs/technicalId" },
+        "schemaVersion": { "const": "boss_reward_schema_v1" },
+        "contentVersion": { "$ref": "#/$defs/technicalId" },
+        "warzoneCredits": { "type": "integer", "minimum": 0, "maximum": 250 },
+        "isExplicitNoReward": { "type": "boolean" },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/entry" }
+        },
+        "sourceRevision": { "$ref": "#/$defs/technicalId" },
+        "rawSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "equipmentDefinitionId",
+        "dropChanceMicros",
+        "quantity",
+        "acquisitionAnnouncementPolicyId"
+      ],
+      "properties": {
+        "equipmentDefinitionId": { "$ref": "#/$defs/technicalId" },
+        "dropChanceMicros": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "quantity": { "type": "integer", "minimum": 1, "maximum": 1 },
+        "acquisitionAnnouncementPolicyId": { "$ref": "#/$defs/contentKey" }
+      }
+    },
+    "equipment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "equipmentDefinitionId",
+        "schemaVersion",
+        "contentVersion",
+        "slotId",
+        "attackBonus",
+        "defenseBonus",
+        "healthBonus",
+        "stackPolicyId",
+        "acquisitionSnapshotPolicyId",
+        "presentationContentKey",
+        "sourceRevision",
+        "rawSha256"
+      ],
+      "properties": {
+        "equipmentDefinitionId": { "$ref": "#/$defs/technicalId" },
+        "schemaVersion": { "const": "boss_reward_schema_v1" },
+        "contentVersion": { "$ref": "#/$defs/technicalId" },
+        "slotId": { "$ref": "#/$defs/technicalId" },
+        "attackBonus": { "const": 0 },
+        "defenseBonus": { "const": 0 },
+        "healthBonus": { "const": 0 },
+        "stackPolicyId": { "const": "stack_quantity" },
+        "acquisitionSnapshotPolicyId": { "const": "acquisition_snapshot_v1" },
+        "presentationContentKey": { "$ref": "#/$defs/contentKey" },
+        "sourceRevision": { "$ref": "#/$defs/technicalId" },
+        "rawSha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

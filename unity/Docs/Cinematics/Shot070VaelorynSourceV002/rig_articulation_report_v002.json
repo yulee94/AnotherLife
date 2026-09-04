@@ -1,0 +1,320 @@
+{
+  "action": {
+    "animatedBones": [
+      "neck_01",
+      "jaw",
+      "wing_l_01",
+      "wing_r_01",
+      "tail_01"
+    ],
+    "fps": 24,
+    "frameEnd": 168,
+    "frameStart": 1,
+    "name": "Shot070_Vaeloryn_Articulation_v002"
+  },
+  "armature": {
+    "bones": [
+      "root",
+      "pelvis",
+      "spine_01",
+      "spine_02",
+      "neck_01",
+      "neck_02",
+      "head",
+      "jaw",
+      "tail_01",
+      "tail_02",
+      "tail_03",
+      "tail_04",
+      "wing_l_01",
+      "wing_l_02",
+      "wing_l_03",
+      "wing_r_01",
+      "wing_r_02",
+      "wing_r_03",
+      "leg_fl_01",
+      "leg_fl_02",
+      "leg_fr_01",
+      "leg_fr_02",
+      "leg_bl_01",
+      "leg_bl_02",
+      "leg_br_01",
+      "leg_br_02"
+    ],
+    "deformBoneCount": 25,
+    "maxVertexInfluences": 2,
+    "name": "Vaeloryn_Rig",
+    "unweightedVertexCount": 0
+  },
+  "authority": {
+    "finalCinematic": false,
+    "gameplay": false,
+    "ownerVisualApprovalRequired": true,
+    "runtime": false
+  },
+  "blenderVersion": "5.2.0 LTS",
+  "candidate": {
+    "armatureModifiers": [
+      "Vaeloryn_Rig"
+    ],
+    "axisSamples": {
+      "x": {
+        "maximum": 0.9113819599151611,
+        "minimum": -0.9305700063705444
+      },
+      "y": {
+        "maximum": 5.666783809661865,
+        "minimum": -5.680602073669434
+      },
+      "z": {
+        "maximum": 5.703144073486328,
+        "minimum": -5.710302352905273
+      }
+    },
+    "boundaryEdgeCount": 0,
+    "componentCount": 1,
+    "components": [
+      {
+        "centroid": [
+          -0.018062177546247445,
+          -2.1027648921694886,
+          -1.0119529643616505
+        ],
+        "maximum": [
+          0.9113819599151611,
+          5.666783809661865,
+          5.703144073486328
+        ],
+        "minimum": [
+          -0.9305700063705444,
+          -5.680602073669434,
+          -5.710302352905273
+        ],
+        "vertices": 31857
+      }
+    ],
+    "edges": 95562,
+    "largestComponentVertices": [
+      31857
+    ],
+    "materialPolygonCounts": {
+      "0": 41569,
+      "1": 21010,
+      "2": 1095,
+      "3": 32
+    },
+    "materials": [
+      "body",
+      "celestial_membrane",
+      "crown_thorn",
+      "eyes"
+    ],
+    "matrixWorld": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "name": "Vaeloryn_SkinnedBody",
+    "nonManifoldEdgeCount": 2,
+    "polygons": 63706,
+    "triangles": 63708,
+    "uvLayers": [
+      "UVMap"
+    ],
+    "vertexGroupCount": 35,
+    "vertices": 31857,
+    "worldBounds": {
+      "maximum": [
+        0.9113819599151611,
+        5.666783809661865,
+        5.703144073486328
+      ],
+      "minimum": [
+        -0.9305700063705444,
+        -5.680602073669434,
+        -5.710302352905273
+      ]
+    }
+  },
+  "materialSlots": [
+    "body",
+    "celestial_membrane",
+    "crown_thorn",
+    "eyes"
+  ],
+  "schemaVersion": 1,
+  "semanticRegionVertexCounts": {
+    "body": 31857,
+    "eye_l": 24,
+    "eye_r": 24,
+    "head": 714,
+    "jaw": 487,
+    "tail": 13051,
+    "wing_arm_l": 4103,
+    "wing_arm_r": 4191,
+    "wing_membrane_l": 5230,
+    "wing_membrane_r": 5265
+  },
+  "source": {
+    "actions": [],
+    "blenderVersion": "5.2.0 LTS",
+    "images": [
+      {
+        "filepath": "D:\\AnotherLife\\.worktrees\\t_b2e32413\\unity\\ArtSource\\Terrestrials\\RealmCreatureProductionSourceV001\\Models\\wish_dragon_vaeloryn\\model.fbm\\texture_0.png",
+        "name": "texture_0.png"
+      },
+      {
+        "filepath": "D:\\AnotherLife\\.worktrees\\t_b2e32413\\unity\\ArtSource\\Terrestrials\\RealmCreatureProductionSourceV001\\Models\\wish_dragon_vaeloryn\\model.fbm\\texture_0_metallic.png",
+        "name": "texture_0_metallic.png"
+      },
+      {
+        "filepath": "D:\\AnotherLife\\.worktrees\\t_b2e32413\\unity\\ArtSource\\Terrestrials\\RealmCreatureProductionSourceV001\\Models\\wish_dragon_vaeloryn\\model.fbm\\texture_0_normal.png",
+        "name": "texture_0_normal.png"
+      },
+      {
+        "filepath": "D:\\AnotherLife\\.worktrees\\t_b2e32413\\unity\\ArtSource\\Terrestrials\\RealmCreatureProductionSourceV001\\Models\\wish_dragon_vaeloryn\\model.fbm\\texture_0_roughness.png",
+        "name": "texture_0_roughness.png"
+      }
+    ],
+    "objects": [
+      {
+        "armatureModifiers": [],
+        "axisSamples": {
+          "x": {
+            "maximum": 0.15189699828624725,
+            "minimum": -0.15509499609470367
+          },
+          "y": {
+            "maximum": 0.9453029632568359,
+            "minimum": -0.9467669725418091
+          },
+          "z": {
+            "maximum": 0.9505240321159363,
+            "minimum": -0.9517170190811157
+          }
+        },
+        "boundaryEdgeCount": 20,
+        "componentCount": 2,
+        "components": [
+          {
+            "centroid": [
+              -0.0030479917255881632,
+              -0.3503423670370723,
+              -0.16894599706923755
+            ],
+            "maximum": [
+              0.15189699828624725,
+              0.9453029632568359,
+              0.9505240321159363
+            ],
+            "minimum": [
+              -0.15509499609470367,
+              -0.9467669725418091,
+              -0.9517170190811157
+            ],
+            "vertices": 31869
+          },
+          {
+            "centroid": [
+              0.12035666753848394,
+              -0.1399245470762253,
+              -0.29023120005925496
+            ],
+            "maximum": [
+              0.12220200151205063,
+              -0.13843001425266266,
+              -0.28648000955581665
+            ],
+            "minimum": [
+              0.11878299713134766,
+              -0.14156301319599152,
+              -0.2931250035762787
+            ],
+            "vertices": 15
+          }
+        ],
+        "edges": 63873,
+        "largestComponentVertices": [
+          31869,
+          15
+        ],
+        "materialPolygonCounts": {
+          "0": 31993
+        },
+        "materials": [
+          "Material.001"
+        ],
+        "matrixWorld": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            7.549790126404332e-08,
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            7.549790126404332e-08,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "name": "temp",
+        "nonManifoldEdgeCount": 29,
+        "polygons": 31993,
+        "triangles": 63750,
+        "uvLayers": [
+          "UVMap"
+        ],
+        "vertexGroupCount": 0,
+        "vertices": 31884,
+        "worldBounds": {
+          "maximum": [
+            0.15189699828624725,
+            0.9453029632568359,
+            0.9505240321159363
+          ],
+          "minimum": [
+            -0.15509499609470367,
+            -0.9467669725418091,
+            -0.9517170190811157
+          ]
+        }
+      }
+    ],
+    "source": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/wish_dragon_vaeloryn/wish_dragon_vaeloryn_source_v001.fbx"
+  },
+  "status": "PASS"
+}

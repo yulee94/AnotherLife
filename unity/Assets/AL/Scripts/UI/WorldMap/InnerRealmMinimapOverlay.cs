@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AL.ChampionMode.Control;
 using AL.Data.Catalogs.WorldAtlas;
+using AL.UI.DesignSystem;
 using AL.UI.RealmSelection;
 using AL.World;
 using UnityEngine;
@@ -23,9 +24,16 @@ namespace AL.UI.WorldMap
         private MainQuestMapMarkerCatalog _catalog;
         private Transform _player;
         private RectTransform _content;
+        private RectTransform _plate;
         private RectTransform _playerMarker;
         private RectTransform _playerLabel;
+        private RectTransform _questMarker;
         private InnerRealmSlotLayout _inner;
+        private HudResponsiveCompositionSet _compositions;
+        private Vector2Int _lastScreenSize;
+        private Rect _lastSafeArea;
+        private bool _lastExpanded;
+        private bool _lastCombatDense;
         private readonly List<string> _visibleMarkerIds = new List<string>();
         private IReadOnlyList<MainQuestMapMarker> _currentQuestMarkers =
             Array.Empty<MainQuestMapMarker>();
@@ -40,14 +48,13 @@ namespace AL.UI.WorldMap
             InnerRealmMinimapOverlay existing = FindObjectOfType<InnerRealmMinimapOverlay>();
             if (existing != null)
             {
-                existing.Bind(snapshot, player);
+                existing.EnsureSurfaceHealthy(snapshot, player);
                 return existing;
             }
 
             var root = new GameObject(RootName);
             InnerRealmMinimapOverlay overlay = root.AddComponent<InnerRealmMinimapOverlay>();
-            overlay.Build();
-            overlay.Bind(snapshot, player);
+            overlay.EnsureSurfaceHealthy(snapshot, player);
             return overlay;
         }
 
@@ -72,18 +79,70 @@ namespace AL.UI.WorldMap
             Refresh();
         }
 
+        internal bool IsSurfaceHealthy()
+        {
+            if (!gameObject.activeSelf || !enabled)
+            {
+                return false;
+            }
+
+            Transform canvasRoot = transform.Find("InnerRealmMinimapCanvas");
+            Transform plate = canvasRoot != null ? canvasRoot.Find("MinimapPlate") : null;
+            Transform viewport = plate != null ? plate.Find("MinimapViewport") : null;
+            Transform content = viewport != null ? viewport.Find("MinimapContent") : null;
+            Canvas canvas = canvasRoot != null ? canvasRoot.GetComponent<Canvas>() : null;
+            CanvasScaler scaler =
+                canvasRoot != null ? canvasRoot.GetComponent<CanvasScaler>() : null;
+            GraphicRaycaster raycaster =
+                canvasRoot != null ? canvasRoot.GetComponent<GraphicRaycaster>() : null;
+
+            return canvasRoot != null && canvasRoot.gameObject.activeSelf &&
+                   canvas != null && canvas.enabled &&
+                   scaler != null && scaler.enabled &&
+                   raycaster != null && raycaster.enabled &&
+                   plate != null && plate.gameObject.activeSelf &&
+                   viewport != null && viewport.gameObject.activeSelf &&
+                   content != null && content.gameObject.activeSelf &&
+                   _content == content;
+        }
+
+        internal void EnsureSurfaceHealthy(
+            WorldAtlasSnapshot snapshot,
+            Transform player = null)
+        {
+            if (!gameObject.activeSelf)
+            {
+                gameObject.SetActive(true);
+            }
+
+            if (!enabled)
+            {
+                enabled = true;
+            }
+
+            if (!IsSurfaceHealthy())
+            {
+                Build();
+            }
+
+            Bind(snapshot, player);
+        }
+
         private void OnEnable()
         {
             MainQuestMapSession.Changed += Refresh;
+            ProgressiveMapSession.Changed += Refresh;
         }
 
         private void OnDisable()
         {
             MainQuestMapSession.Changed -= Refresh;
+            ProgressiveMapSession.Changed -= Refresh;
         }
 
         private void LateUpdate()
         {
+            ApplyResponsiveLayout();
             if (_player == null)
             {
                 ChampionController champion = FindObjectOfType<ChampionController>();
@@ -94,10 +153,16 @@ namespace AL.UI.WorldMap
             }
 
             UpdatePlayerMarker();
+            UpdateQuestPulse();
         }
 
         private void Build()
         {
+            ClearVisualTree();
+            _content = null;
+            _plate = null;
+            _playerMarker = null;
+            _playerLabel = null;
             var canvasObject = new GameObject("InnerRealmMinimapCanvas");
             canvasObject.transform.SetParent(transform, false);
             var canvas = canvasObject.AddComponent<Canvas>();
@@ -106,16 +171,14 @@ namespace AL.UI.WorldMap
             var scaler = canvasObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.matchWidthOrHeight = 0.5f;
             canvasObject.AddComponent<GraphicRaycaster>();
 
             Font font = RealmSelectionIdentity.ResolvePresentationFont(18);
             Image plate = CreatePanel(canvasObject.transform, "MinimapPlate", new Color(0.025f, 0.03f, 0.04f, 0.92f));
             RectTransform plateRect = plate.rectTransform;
-            plateRect.anchorMin = Vector2.one;
-            plateRect.anchorMax = Vector2.one;
-            plateRect.pivot = Vector2.one;
-            plateRect.anchoredPosition = new Vector2(-24f, -24f);
-            plateRect.sizeDelta = new Vector2(360f, 330f);
+            _plate = plateRect;
+            ApplyResponsiveLayout(force: true);
 
             CreateText(
                 plate.transform,
@@ -129,11 +192,16 @@ namespace AL.UI.WorldMap
                 new Color(0.93f, 0.86f, 0.62f));
             Image map = CreatePanel(plate.transform, "MinimapViewport", new Color(0.055f, 0.065f, 0.075f, 1f));
             RectTransform mapRect = map.rectTransform;
-            mapRect.anchorMin = new Vector2(0.5f, 0f);
-            mapRect.anchorMax = new Vector2(0.5f, 0f);
-            mapRect.pivot = new Vector2(0.5f, 0f);
-            mapRect.anchoredPosition = new Vector2(0f, 16f);
-            mapRect.sizeDelta = new Vector2(318f, 274f);
+            mapRect.anchorMin = new Vector2(0.04f, 0.06f);
+            mapRect.anchorMax = new Vector2(0.96f, 0.82f);
+            mapRect.offsetMin = Vector2.zero;
+            mapRect.offsetMax = Vector2.zero;
+
+            Color compassColor = new Color(0.84f, 0.78f, 0.60f, 0.92f);
+            CreateCompassText(map.transform, "CompassNorth", font, "N", new Vector2(0.5f, 0.96f), compassColor);
+            CreateCompassText(map.transform, "CompassEast", font, "E", new Vector2(0.96f, 0.5f), compassColor);
+            CreateCompassText(map.transform, "CompassSouth", font, "S", new Vector2(0.5f, 0.04f), compassColor);
+            CreateCompassText(map.transform, "CompassWest", font, "W", new Vector2(0.04f, 0.5f), compassColor);
 
             var content = new GameObject("MinimapContent", typeof(RectTransform));
             content.transform.SetParent(map.transform, false);
@@ -142,6 +210,70 @@ namespace AL.UI.WorldMap
             _content.anchorMax = Vector2.one;
             _content.offsetMin = new Vector2(12f, 12f);
             _content.offsetMax = new Vector2(-12f, -12f);
+            ApplyAccessibility();
+        }
+
+        private void ApplyResponsiveLayout(bool force = false)
+        {
+            if (_plate == null)
+            {
+                return;
+            }
+            int width = Mathf.Max(1, Screen.width);
+            int height = Mathf.Max(1, Screen.height);
+            Vector2Int screenSize = new Vector2Int(width, height);
+            Rect physicalSafeArea = Screen.safeArea;
+            bool expanded = ProgressiveMapSession.MinimapExpanded;
+            bool combatDense = ProgressiveMapSession.CombatDense;
+            if (!force &&
+                screenSize == _lastScreenSize &&
+                physicalSafeArea == _lastSafeArea &&
+                expanded == _lastExpanded &&
+                combatDense == _lastCombatDense)
+            {
+                return;
+            }
+
+            _compositions ??= HudResponsiveCompositionSet.LoadDefault();
+            bool touchPrimary =
+                Application.isMobilePlatform || UnityEngine.Input.touchSupported;
+            HudCompositionDefinition composition =
+                _compositions.Resolve(width, height, touchPrimary);
+            Rect safeArea = HudLayoutProjection.ApplySafeAreaPadding(
+                physicalSafeArea,
+                composition);
+            MapSurfaceLayout layout = MapInterfaceLayout.Resolve(
+                composition,
+                safeArea,
+                combatDense);
+            Rect target = expanded ? layout.ExpandedMinimapRect : layout.MinimapRect;
+            _plate.anchorMin = new Vector2(target.xMin / width, target.yMin / height);
+            _plate.anchorMax = new Vector2(target.xMax / width, target.yMax / height);
+            _plate.pivot = new Vector2(0.5f, 0.5f);
+            _plate.offsetMin = Vector2.zero;
+            _plate.offsetMax = Vector2.zero;
+
+            _lastScreenSize = screenSize;
+            _lastSafeArea = physicalSafeArea;
+            _lastExpanded = expanded;
+            _lastCombatDense = combatDense;
+        }
+
+        private void ClearVisualTree()
+        {
+            while (transform.childCount > 0)
+            {
+                Transform child = transform.GetChild(transform.childCount - 1);
+                child.SetParent(null, false);
+                if (Application.isPlaying)
+                {
+                    Destroy(child.gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(child.gameObject);
+                }
+            }
         }
 
         private void Refresh()
@@ -156,7 +288,14 @@ namespace AL.UI.WorldMap
             _currentQuestMarkers = Array.Empty<MainQuestMapMarker>();
             _playerMarker = null;
             _playerLabel = null;
+            _questMarker = null;
             _inner = null;
+
+            if (ProgressiveMapSession.IsConfigured)
+            {
+                RefreshProgressiveMap();
+                return;
+            }
 
             MainQuestMapState state = MainQuestMapSession.Current;
             if (state == null)
@@ -209,12 +348,13 @@ namespace AL.UI.WorldMap
             if (_currentQuestMarkers.Count == 1)
             {
                 MainQuestMapMarker marker = _currentQuestMarkers[0];
-                CreateMarker(
+                Image questMarker = CreateMarker(
                     _content,
                     "MinimapQuestMarker_" + marker.MarkerId,
                     marker.MinimapUv,
                     22f,
                     new Color(1f, 0.72f, 0.18f, 0.96f));
+                _questMarker = questMarker.rectTransform;
                 CreateMarkerLabel(
                     _content,
                     "MinimapQuestMarkerLabel",
@@ -242,6 +382,59 @@ namespace AL.UI.WorldMap
                 new Color(0.48f, 0.84f, 1f, 1f));
             _playerLabel = playerLabel.rectTransform;
             UpdatePlayerMarker();
+            ApplyAccessibility();
+        }
+
+        private void RefreshProgressiveMap()
+        {
+            ProgressiveMapSnapshot snapshot = ProgressiveMapSession.Current;
+            if (snapshot == null)
+            {
+                return;
+            }
+
+            Font font = RealmSelectionIdentity.ResolvePresentationFont(12);
+            UiProductionDesignTokens tokens = UiProductionDesignTokens.LoadDefault();
+            for (int i = 0; i < snapshot.Minimap.Items.Count; i++)
+            {
+                MapDisplayItem item = snapshot.Minimap.Items[i];
+                WorldMapUv uv = item.Kind == MapDisplayItemKind.Player ||
+                                item.Kind == MapDisplayItemKind.Party
+                    ? new WorldMapUv(
+                        item.NormalizedPosition.x,
+                        item.NormalizedPosition.y)
+                    : ResolveProgressiveUv(item);
+                MapItemVisualTreatment visual = MapInterfaceAccessibility.Resolve(
+                    tokens,
+                    item.Kind,
+                    ProgressiveMapSession.Accessibility);
+                float size = item.Kind == MapDisplayItemKind.Player ? 16f : 12f;
+                CreateMarker(_content, item.Id, uv, size, visual.Color);
+                string shape = string.IsNullOrWhiteSpace(item.NonColorShape)
+                    ? item.Kind.ToString()
+                    : item.NonColorShape;
+                CreateMarkerLabel(
+                    _content,
+                    item.Id + "_label",
+                    font,
+                    "[" + shape.ToUpperInvariant() + "] " + item.Label,
+                    uv,
+                    new Vector2(0f, 17f),
+                    visual.Color);
+                _visibleMarkerIds.Add(item.Id);
+            }
+            ApplyAccessibility();
+        }
+
+        private static WorldMapUv ResolveProgressiveUv(MapDisplayItem item)
+        {
+            string identifier = string.IsNullOrEmpty(item.SourceId)
+                ? string.IsNullOrEmpty(item.FeatureId) ? item.Id : item.FeatureId
+                : item.SourceId;
+            Vector2 projected = MapInterfacePlacement.ProjectIdentifier(
+                identifier,
+                MapSurfaceKind.Minimap);
+            return new WorldMapUv(projected.x, projected.y);
         }
 
         private bool TryGetWorldPosition(string markerId, out Vector3 position)
@@ -279,11 +472,50 @@ namespace AL.UI.WorldMap
             Vector2 anchor = uv.AsVector;
             _playerMarker.anchorMin = anchor;
             _playerMarker.anchorMax = anchor;
+            _playerMarker.localRotation = Quaternion.Euler(0f, 0f, -_player.eulerAngles.y + 45f);
             if (_playerLabel != null)
             {
                 _playerLabel.anchorMin = anchor;
                 _playerLabel.anchorMax = anchor;
             }
+        }
+
+        private void UpdateQuestPulse()
+        {
+            if (_questMarker == null)
+            {
+                return;
+            }
+
+            UiAccessibilitySettings settings = ProgressiveMapSession.Accessibility.Settings;
+            Image image = _questMarker.GetComponent<Image>();
+            if (settings.ReducedMotion || settings.ReducedFlash || settings.ReducedVfx)
+            {
+                _questMarker.localScale = Vector3.one;
+                if (image != null)
+                {
+                    Color staticColor = image.color;
+                    staticColor.a = 1f;
+                    image.color = staticColor;
+                }
+                return;
+            }
+
+            float pulse = (Mathf.Sin(Time.unscaledTime * 3.6f) + 1f) * 0.5f;
+            _questMarker.localScale = Vector3.one * Mathf.Lerp(0.92f, 1.24f, pulse);
+            if (image != null)
+            {
+                Color color = image.color;
+                color.a = Mathf.Lerp(0.68f, 1f, pulse);
+                image.color = color;
+            }
+        }
+
+        private void ApplyAccessibility()
+        {
+            UiAccessibilityRuntime.ApplySettings(
+                gameObject,
+                ProgressiveMapSession.Accessibility.Settings);
         }
 
         private static Image CreateMarker(
@@ -311,14 +543,15 @@ namespace AL.UI.WorldMap
             string value,
             WorldMapUv uv,
             Vector2 offset,
-            Color color)
+            Color color,
+            float textScale = 1f)
         {
             Text text = CreateText(
                 parent,
                 name,
                 font,
                 value,
-                13,
+                Mathf.RoundToInt(13f * textScale),
                 Vector2.zero,
                 new Vector2(100f, 20f),
                 TextAnchor.MiddleCenter,
@@ -329,6 +562,32 @@ namespace AL.UI.WorldMap
             rect.anchorMax = anchor;
             rect.pivot = new Vector2(0.5f, 0.5f);
             rect.anchoredPosition = offset;
+            return text;
+        }
+
+        private static Text CreateCompassText(
+            Transform parent,
+            string name,
+            Font font,
+            string value,
+            Vector2 anchor,
+            Color color)
+        {
+            Text text = CreateText(
+                parent,
+                name,
+                font,
+                value,
+                12,
+                Vector2.zero,
+                new Vector2(20f, 20f),
+                TextAnchor.MiddleCenter,
+                color);
+            RectTransform rect = text.rectTransform;
+            rect.anchorMin = anchor;
+            rect.anchorMax = anchor;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
             return text;
         }
 

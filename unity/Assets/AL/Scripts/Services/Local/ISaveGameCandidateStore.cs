@@ -7,6 +7,8 @@ using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
 
 [assembly: InternalsVisibleTo("AL.Nvs01.Persistence.Tests")]
+[assembly: InternalsVisibleTo("AL.EditMode.Tests")]
+[assembly: InternalsVisibleTo("AL.PlayMode.Tests")]
 
 namespace AL.Services.Local
 {
@@ -97,13 +99,41 @@ namespace AL.Services.Local
     }
 
     /// <summary>
-    /// The only schema-v1 realm/bootstrap mutation entry point. It carries no
+    /// Schema-v1 realm/bootstrap mutation entry point. It carries no
     /// caller-provided mutation callback.
     /// </summary>
     internal interface ILegacyRealmSelectionCandidateStore
     {
         RealmSelectionResult TryCommitLegacyRealmSelection(
             RealmSelectionRequest request);
+    }
+
+    /// <summary>
+    /// Schema-v2 realm mutation entry point. ProfileId cannot change.
+    /// </summary>
+    internal interface IProfileBoundRealmSelectionCandidateStore
+    {
+        RealmSelectionResult TryCommitProfileBoundRealmSelection(
+            RealmSelectionRequest request);
+    }
+
+    /// <summary>
+    /// Schema-v2 death-penalty mutation entry point. ProfileId cannot change.
+    /// </summary>
+    internal interface IProfileBoundDeathPenaltyCandidateStore
+    {
+        AL.ChampionMode.Death.DeathPenaltyCommitResult TryCommitProfileBoundDeathPenalty(
+            AL.ChampionMode.Death.DeathPenaltyCommitRequest request);
+    }
+
+    /// <summary>
+    /// Schema-v2 Wishgate mutation entry point. ProfileId cannot change.
+    /// </summary>
+    internal interface IProfileBoundWishgateCandidateStore
+    {
+        AL.RealmSelection.WishgateCommitResult TryCommitProfileBoundWishgate(
+            AL.RealmSelection.WishgateCommitRequest request,
+            AL.RealmSelection.WishgateDurableDependencies dependencies);
     }
 
     /// <summary>
@@ -123,6 +153,17 @@ namespace AL.Services.Local
     {
         SaveCandidateCommitResult TryCommitLegacyKingdomTeaching(
             KingdomTeachingCommitRequest request);
+    }
+
+    /// <summary>
+    /// Schema-v1 first-world progression mutation entry point. The typed
+    /// request can advance exactly one tutorial or Proof command; arbitrary
+    /// save mutation remains unavailable to gameplay callers.
+    /// </summary>
+    internal interface ILegacyFirstWorldProgressCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitLegacyFirstWorldProgress(
+            FirstWorldProgressCommitRequest request);
     }
 
     /// <summary>

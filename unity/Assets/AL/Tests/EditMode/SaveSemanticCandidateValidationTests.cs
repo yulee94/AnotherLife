@@ -77,6 +77,27 @@ namespace AL.Tests.EditMode
             "\"PrimaryG\":0.4,\"PrimaryB\":1.0,\"HairR\":0.08," +
             "\"HairG\":0.06,\"HairB\":0.04,\"CapeEnabled\":true," +
             "\"HelmetEnabled\":false}";
+        private const string NeutralMapDisclosureJson =
+            "{\"Version\":0,\"AuthorityEpoch\":0,\"AuthorityRevision\":0," +
+            "\"CatalogVersion\":\"\",\"CatalogSha256\":\"\",\"StateDigest\":\"\"," +
+            "\"DiscoveredFeatureIds\":[],\"VisibleRouteIds\":[]," +
+            "\"VisibleObjectiveIds\":[],\"VisibleAllegianceMarkerIds\":[]}";
+        private const string EmptyTerritoryCaptureLedgerJson =
+            "{\"Version\":1,\"CatalogId\":\"territory.phase-b.baseline\"," +
+            "\"CatalogRawSha256\":\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"," +
+            "\"StateRevisionHash\":\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"," +
+            "\"ProfileSessionId\":\"profile-local-runtime\"," +
+            "\"Revisions\":[],\"Receipts\":[],\"Outbox\":[]}";
+        private const string EmptyNotificationHistoryJson =
+            "{\"Version\":1,\"Records\":[],\"Outbox\":[]}";
+        private const string EmptyOfflineProductionCatchUpJson =
+            "{\"Version\":1,\"OperationId\":\"al.offline.catchup.v1.test\"," +
+            "\"ReceiptId\":\"rcpt.test\",\"ProfileId\":\"alp_0123456789abcdef0123456789abcdef\"," +
+            "\"VerifiedGenerationFingerprint\":\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"," +
+            "\"LastVerifiedTimestamp\":100,\"CatchUpUntilTimestamp\":200,\"CappedElapsedSeconds\":100," +
+            "\"CatalogId\":\"kingdom_production_profile_v1\"," +
+            "\"CatalogSha256\":\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"," +
+            "\"SourceRevision\":\"test-source-v1\",\"Deltas\":[]}";
         private const string NeutralNvs01ProgressJson =
             "{\"Version\":0,\"PacketVersion\":\"\",\"PacketSha256\":\"\"," +
             "\"QuestId\":\"\",\"Revision\":0,\"StateId\":\"\",\"Objectives\":[]," +
@@ -124,6 +145,249 @@ namespace AL.Tests.EditMode
             byte[] firstCopy = candidate.CopyRawBytes();
             firstCopy[0] = (byte)'[';
             CollectionAssert.AreEqual(expected, candidate.CopyRawBytes());
+        }
+
+        [Test]
+        public void JsonUtilityMapDisclosurePlaceholderOnCurrentSaveIsWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"MapDisclosure\":" + NeutralMapDisclosureJson),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
+        public void MapDisclosureWithUnknownNestedFieldStaysPreservedReadOnly()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"MapDisclosure\":" + NeutralMapDisclosureJson.TrimEnd('}') + ",\"FutureField\":true}"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_UNKNOWN_NESTED_FIELD"));
+        }
+
+        [Test]
+        public void TerritoryCaptureLedgerCurrentVersionIsWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"TerritoryCaptureLedger\":" + EmptyTerritoryCaptureLedgerJson),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
+        public void TerritoryCaptureLedgerForwardVersionStaysPreservedReadOnly()
+        {
+            string forward = EmptyTerritoryCaptureLedgerJson.Replace(
+                "\"Version\":1",
+                "\"Version\":2");
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"TerritoryCaptureLedger\":" + forward),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_TERRITORY_CAPTURE_LEDGER_VERSION_FORWARD"));
+        }
+
+        [Test]
+        public void TerritoryCaptureLedgerWithInvalidShapeIsMalformed()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"TerritoryCaptureLedger\":[]"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_TERRITORY_CAPTURE_LEDGER_INVALID"));
+        }
+
+        [Test]
+        public void TerritoryCaptureLedgerWithMalformedNestedRowIsReadOnly()
+        {
+            string malformed = EmptyTerritoryCaptureLedgerJson.Replace(
+                "\"Revisions\":[]",
+                "\"Revisions\":[{\"TerritoryId\":17,\"Revision\":\"bad\"}]");
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"TerritoryCaptureLedger\":" + malformed),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+        }
+
+        [Test]
+        public void NotificationHistoryMissingOnLegacySaveIsAdmitted()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                LegacyJson(),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Not.Contain("SAVE_NOTIFICATION_HISTORY_INVALID"));
+        }
+
+        [Test]
+        public void NotificationHistoryCurrentVersionIsWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"NotificationHistory\":" + EmptyNotificationHistoryJson),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
+        public void NotificationHistoryForwardVersionStaysPreservedReadOnly()
+        {
+            string forward = EmptyNotificationHistoryJson.Replace(
+                "\"Version\":1",
+                "\"Version\":2");
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"NotificationHistory\":" + forward),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_NOTIFICATION_HISTORY_VERSION_FORWARD"));
+        }
+
+        [Test]
+        public void NotificationHistoryWithInvalidShapeIsMalformed()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"NotificationHistory\":[]"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_NOTIFICATION_HISTORY_INVALID"));
+        }
+
+        [Test]
+        public void NotificationHistorySensitiveTechnicalRecordIsMalformed()
+        {
+            string record =
+                "{\"RecordId\":\"al_notification_durable_1\"," +
+                "\"DefinitionId\":\"al_notify_save_recovered_backup\"," +
+                "\"CorrelationId\":\"save:recovered:1\"," +
+                "\"PrivacyClass\":2,\"Parameters\":[]}";
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"NotificationHistory\":{\"Version\":1,\"Records\":[" +
+                    record +
+                    "],\"Outbox\":[]}"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_NOTIFICATION_HISTORY_SENSITIVE_TECHNICAL"));
+        }
+
+        [Test]
+        public void OfflineProductionCatchUpCurrentVersionIsWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"OfflineProductionCatchUp\":" + EmptyOfflineProductionCatchUpJson),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
+        public void OfflineProductionCatchUpForwardVersionStaysPreservedReadOnly()
+        {
+            string forward = EmptyOfflineProductionCatchUpJson.Replace(
+                "\"Version\":1",
+                "\"Version\":2");
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"OfflineProductionCatchUp\":" + forward),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_OFFLINE_PRODUCTION_CATCHUP_VERSION_FORWARD"));
+        }
+
+        [Test]
+        public void OfflineProductionCatchUpInvalidShapeIsMalformed()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"OfflineProductionCatchUp\":[]"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_OFFLINE_PRODUCTION_CATCHUP_INVALID"));
         }
 
         [Test]

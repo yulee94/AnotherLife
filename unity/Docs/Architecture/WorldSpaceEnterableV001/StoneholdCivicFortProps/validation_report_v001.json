@@ -1,0 +1,93 @@
+{
+  "schema": "anotherlife.stonehold-civic-fort-props-validation.v1",
+  "status": "pass",
+  "checks": {
+    "schema": "anotherlife.stonehold-civic-fort-props-2d.v1",
+    "status": "candidate_owner_review_required",
+    "assetCount": 16,
+    "uniqueAssetIds": 16,
+    "rejectedFortR1C1Referenced": false,
+    "roomCoverageReferencedFamilies": 16,
+    "roomUseCoverageMismatches": [],
+    "placementExampleCount": 6,
+    "placementInstanceCount": 23,
+    "minimumProtectedAisleM": 1.2,
+    "protectedOpeningApproaches": 15,
+    "authorityRecordSelectors": 14,
+    "authorityMatchedOpeningApproaches": 15,
+    "images": [
+      {
+        "locator": "generation/stonehold_civic_furnishing_concept_raw_v001.png",
+        "width": 1376,
+        "height": 768,
+        "mode": "RGB"
+      },
+      {
+        "locator": "generation/stonehold_fort_furnishing_concept_raw_v001.png",
+        "width": 1376,
+        "height": 768,
+        "mode": "RGB"
+      },
+      {
+        "locator": "generation/stonehold_single_cot_concept_raw_v002.png",
+        "width": 1024,
+        "height": 1024,
+        "mode": "RGB"
+      },
+      {
+        "locator": "review/stonehold_civic_props_visual_source_v001.png",
+        "width": 2400,
+        "height": 1580,
+        "mode": "RGB"
+      },
+      {
+        "locator": "review/stonehold_fort_props_visual_source_v001.png",
+        "width": 2400,
+        "height": 1580,
+        "mode": "RGB"
+      },
+      {
+        "locator": "review/stonehold_civic_fort_props_measured_sheet_v001.png",
+        "width": 2800,
+        "height": 2240,
+        "mode": "RGB"
+      },
+      {
+        "locator": "review/stonehold_civic_fort_props_room_fit_v001.png",
+        "width": 3000,
+        "height": 2200,
+        "mode": "RGB"
+      },
+      {
+        "locator": "review/stonehold_civic_fort_props_material_runtime_v001.png",
+        "width": 2600,
+        "height": 1720,
+        "mode": "RGB"
+      },
+      {
+        "locator": "review/stonehold_civic_fort_props_review_contact_sheet_v001.png",
+        "width": 3000,
+        "height": 2200,
+        "mode": "RGB"
+      }
+    ],
+    "imageCount": 9,
+    "forbidden3dFiles": [],
+    "fitProofCount": 6
+  },
+  "failures": [],
+  "manualVisualQa": {
+    "status": "pass_after_eight_corrections",
+    "corrections": [
+      "removed rejected double-bunk bleed from the staff-locker crop",
+      "bounded all metric FRONT/TOP diagrams within their cards and added the omitted material/runtime contact-sheet panel",
+      "moved the wall notice board so the 1.2m public-hall aisle is geometrically unobstructed",
+      "removed the gate-control crop speck and marked the crate source as a three-unit presentation governed by one-unit dimensions",
+      "reduced the council table to 2.8m and notice board to 1.2m after tracing approved aperture geometry",
+      "added 15 approved opening approaches to JSON-driven room diagrams and relocated every intersecting placement",
+      "corrected all opening starts to use the approved center-coordinate convention",
+      "replaced synthetic source-ID wording with uniquely resolved parent-record selectors and direct layout validation"
+    ],
+    "authority": "manual visual QA does not convert candidate status into owner approval"
+  }
+}

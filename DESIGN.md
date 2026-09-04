@@ -1,8 +1,8 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.27
-**Last updated:** 2026-07-28
+**Version:** 1.29
+**Last updated:** 2026-08-13
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
 
@@ -50,6 +50,8 @@ This guide consolidates the active project direction in:
 - [Product Direction](unity/Docs/Product_Direction.md)
 - [Champion Mode Visual Direction](unity/Docs/ChampionMode_VisualDirection.md)
 - [Competitive Experience Benchmark](unity/Docs/AnotherLife_Competitive_Experience_Benchmark.md)
+- [Post-MVP Graphics and UI Quality Standard](unity/Docs/PostMVP_Graphics_And_UI_Quality_Standard.md)
+- [Post-MVP Graphics Benchmark Specification](unity/Docs/Benchmarks/PostMVP_Graphics_Benchmark_Spec_2026-08-25.md)
 - [Terrestrial Design Brief](unity/Docs/Terrestrials/Terrestrial_Design_Brief.md)
 - [Terrestrial Engineering Handoff](unity/Docs/Terrestrials/Terrestrial_Engineering_Handoff.md)
 - [Customization Design](unity/Assets/AL/Art/Designs/ModularChampionCustomization.md)
@@ -269,6 +271,54 @@ Use this order when composing a screen, scene, or model:
 5. **Story detail:** wear, repair, inscriptions, trophies, vegetation, and secondary ornament.
 
 If story detail weakens the primary read, remove or simplify it.
+
+### First-user journey interaction contract
+
+The first playable journey must remain understandable without prior game knowledge,
+mouse hover, or developer explanation. Apply these rules from realm selection through
+the first authored quest handoff:
+
+- Show one visually dominant primary action at a time. Choice controls may share a
+  group, but the action that advances the journey must remain distinct from choices,
+  Back, and Exit.
+- Name commands for the result the player will receive: "Continue to class," "Enter
+  the world," and "Hear Valerius's report." Avoid implementation terms such as draft,
+  verification, destination, or tutorial in action labels.
+- A selected choice must communicate selection through at least two channels, using
+  visible text plus framing or material treatment. Color alone is insufficient.
+- A control that cannot currently produce its named result must be visibly unavailable.
+  Nearby status copy must state the missing prerequisite; do not leave enabled no-op
+  buttons in the journey.
+- Guidance, headings, and completed status are not buttons. If implementation requires
+  a button-shaped compatibility surface, remove it from navigation, pointer ownership,
+  and action styling until it becomes actionable.
+- When an action completes, replace command wording with a completed or pending state.
+  Never leave a disabled command that looks broken or invites repeated input.
+- Hide task-specific controls after their task ends. Movement, combat, and dialogue
+  controls must not remain as inert visual competition for the next primary action.
+- Authored dialogue choices replace the previous choice set after selection. Declining
+  must expose an explicit way to reopen the conversation, and accepting must advance to
+  a named next action rather than an unlabelled or automatic transition.
+- When the next game scene is outside the current test boundary, end on a clear prepared
+  handoff state that names what is ready; do not imply that the encounter already ran.
+- An isolated journey checkpoint may continue an authored encounter without inventing
+  combat. It must label the checkpoint, expose success and safe retreat as distinct
+  actions, and keep all results in memory rather than claiming production progression.
+- Failure, retreat, and unavailable encounter outcomes must always lead to a visible
+  retry action. A retry replaces the resolved encounter request and must never reuse a
+  prior result or strand the player on a status-only surface.
+- Encounter success must lead visibly back to the authored quest giver, then through the
+  authored report choices to a stable realm-ready state. Show the completion result and
+  one final completion action; do not make Exit the only explanation of what happened.
+- Keyboard and controller focus must enter on the current task, move through controls in
+  their visual order, and move to the next meaningful action after completion. Hidden,
+  inactive, and presentation-only elements must not appear in the focus graph.
+- Back changes the previous choice, Exit leaves the isolated experience, and the primary
+  action advances. These meanings and their relative visual weight must remain stable on
+  every screen.
+- Keep the current task and its control instruction together. Global progress, identity
+  context, and development disclosure remain secondary and must not compete with the
+  immediate action.
 
 ### Camera-aware design
 
@@ -655,7 +705,7 @@ Never overwrite an approved source version. Create a new version and preserve th
 
 ### Current technical baseline
 
-- Unity `2022.3.62f3`.
+- Unity `6000.3.22f1` (Unity 6.3 LTS).
 - Built-in Render Pipeline at the time of this guide.
 - Target experiences include mobile and PC.
 - iOS `15.0` is the approved minimum deployment target; compatibility claims still distinguish build-level validation from an actual iOS 15 runtime or device pass.
@@ -743,12 +793,12 @@ Unity's official guidance emphasizes profiling instead of universal asset counts
 
 Official references:
 
-- [Unity 2022.3 graphics performance fundamentals](https://docs.unity3d.com/2022.3/Documentation/Manual/OptimizingGraphicsPerformance.html)
-- [Unity 2022.3 LOD Group](https://docs.unity3d.com/2022.3/Documentation/Manual/class-LODGroup.html)
-- [Unity 2022.3 mesh compression](https://docs.unity3d.com/2022.3/Documentation/Manual/mesh-compression.html)
-- [Unity 2022.3 model importing](https://docs.unity3d.com/2022.3/Documentation/Manual/ImportingModelFiles.html)
-- [Unity 2022.3 platform texture overrides](https://docs.unity3d.com/2022.3/Documentation/Manual/class-TextureImporterOverride.html)
-- [Unity 2022.3 draw-call optimization](https://docs.unity3d.com/2022.3/Documentation/Manual/optimizing-draw-calls.html)
+- [Unity 6.3 graphics performance fundamentals](https://docs.unity3d.com/6000.3/Documentation/Manual/OptimizingGraphicsPerformance.html)
+- [Unity 6.3 LOD Group](https://docs.unity3d.com/6000.3/Documentation/Manual/class-LODGroup.html)
+- [Unity 6.3 mesh compression](https://docs.unity3d.com/6000.3/Documentation/Manual/mesh-compression.html)
+- [Unity 6.3 model importing](https://docs.unity3d.com/6000.3/Documentation/Manual/ImportingModelFiles.html)
+- [Unity 6.3 platform texture overrides](https://docs.unity3d.com/6000.3/Documentation/Manual/class-TextureImporterOverride.html)
+- [Unity 6.3 draw-call optimization](https://docs.unity3d.com/6000.3/Documentation/Manual/optimizing-draw-calls.html)
 
 ## Accessibility
 

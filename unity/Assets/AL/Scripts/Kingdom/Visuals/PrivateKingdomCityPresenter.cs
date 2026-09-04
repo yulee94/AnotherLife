@@ -21,57 +21,36 @@ namespace AL.Kingdom.Visuals
         public const string TownHallRootName = "PrivateKingdom_TownHall";
         public const string ArchitectureRootName = "PrivateKingdom_Architecture";
         public const string GroundRootName = "PrivateKingdom_Ground";
-        public const int SetDressingBuildingCount = 16;
+        public const int EligibleDistrictCount = 4;
+        public const int MinimumDuplicatesPerEligibleBuilding = 2;
+        public const int MaximumDuplicatesPerEligibleBuilding = 3;
+        public const int SetDressingBuildingCount = EligibleDistrictCount * MaximumDuplicatesPerEligibleBuilding;
 
         private static readonly int ColorProperty = Shader.PropertyToID("_Color");
         private static readonly int BaseColorProperty = Shader.PropertyToID("_BaseColor");
 
-        private static readonly Vector3[] CrownlandsLayout =
+        private static readonly Vector3[] CrownlandsDistrictCenters =
         {
-            new(-4.8f, 0.05f, -1.5f), new(-4.2f, 0.05f, 2.2f),
-            new(-1.8f, 0.05f, 4.3f), new(1.8f, 0.05f, 4.3f),
-            new(4.2f, 0.05f, 2.2f), new(4.8f, 0.05f, -1.5f),
-            new(-2.7f, 0.05f, -4.0f), new(2.7f, 0.05f, -4.0f),
-            new(-6.4f, 0.05f, -3.6f), new(-6.5f, 0.05f, 0.2f),
-            new(-5.2f, 0.05f, 4.9f), new(-1.8f, 0.05f, 6.2f),
-            new(1.8f, 0.05f, 6.2f), new(5.2f, 0.05f, 4.9f),
-            new(6.5f, 0.05f, 0.2f), new(6.4f, 0.05f, -3.6f)
+            new(-4.8f, 0.05f, 0f), new(0f, 0.05f, 4.8f),
+            new(4.8f, 0.05f, 0f), new(0f, 0.05f, -4.8f)
         };
 
-        private static readonly Vector3[] StoneholdLayout =
+        private static readonly Vector3[] StoneholdDistrictCenters =
         {
-            new(-4.6f, 0.15f, -2.5f), new(-4.4f, 0.55f, 1.5f),
-            new(-2.0f, 0.95f, 4.0f), new(1.4f, 1.20f, 4.4f),
-            new(4.2f, 0.70f, 2.0f), new(4.7f, 0.25f, -2.1f),
-            new(-2.4f, 0.45f, -4.2f), new(1.9f, 0.65f, -4.4f),
-            new(-6.2f, 0.35f, -4.0f), new(-6.7f, 0.70f, 0.1f),
-            new(-5.0f, 1.00f, 5.0f), new(-0.9f, 1.35f, 6.5f),
-            new(3.3f, 1.05f, 5.6f), new(6.2f, 0.65f, 3.0f),
-            new(6.6f, 0.30f, -1.4f), new(4.7f, 0.55f, -5.2f)
+            new(-4.8f, 0.35f, 0f), new(0f, 0.85f, 4.8f),
+            new(4.8f, 0.35f, 0f), new(0f, 0.55f, -4.8f)
         };
 
-        private static readonly Vector3[] EldergroveLayout =
+        private static readonly Vector3[] EldergroveDistrictCenters =
         {
-            new(-4.9f, 0.05f, -1.0f), new(-4.4f, 0.10f, 2.6f),
-            new(-1.5f, 0.18f, 4.7f), new(2.2f, 0.12f, 4.0f),
-            new(4.7f, 0.08f, 1.5f), new(4.2f, 0.15f, -2.5f),
-            new(1.1f, 0.08f, -4.7f), new(-2.8f, 0.12f, -4.0f),
-            new(-6.6f, 0.08f, -3.4f), new(-6.5f, 0.16f, 1.0f),
-            new(-4.8f, 0.24f, 5.2f), new(-0.6f, 0.18f, 6.5f),
-            new(3.5f, 0.12f, 5.5f), new(6.4f, 0.10f, 2.2f),
-            new(6.5f, 0.16f, -2.2f), new(4.3f, 0.12f, -5.3f)
+            new(-4.8f, 0.10f, 0f), new(0f, 0.18f, 4.8f),
+            new(4.8f, 0.10f, 0f), new(0f, 0.12f, -4.8f)
         };
 
-        private static readonly Vector3[] UmbralLayout =
+        private static readonly Vector3[] UmbralDistrictCenters =
         {
-            new(-5.0f, 0.08f, 2.8f), new(-3.7f, 0.38f, -2.0f),
-            new(-1.3f, 0.62f, 4.8f), new(1.6f, 0.18f, -4.5f),
-            new(3.2f, 0.42f, 3.5f), new(4.9f, 0.78f, -0.2f),
-            new(-4.6f, 0.26f, -4.1f), new(4.0f, 0.16f, -3.7f),
-            new(-6.6f, 0.18f, 0.2f), new(-5.8f, 0.52f, 5.0f),
-            new(-2.4f, 0.82f, 6.4f), new(1.6f, 0.28f, 6.2f),
-            new(5.6f, 0.58f, 4.3f), new(6.7f, 0.34f, 0.6f),
-            new(6.0f, 0.48f, -4.8f), new(-0.8f, 0.32f, -6.5f)
+            new(-4.8f, 0.28f, 0f), new(0f, 0.52f, 4.8f),
+            new(4.8f, 0.28f, 0f), new(0f, 0.40f, -4.8f)
         };
 
         private readonly List<Material> _ownedMaterials = new();
@@ -88,6 +67,7 @@ namespace AL.Kingdom.Visuals
         public RealmId PresentedRealm { get; private set; }
         public bool TownHallConstructed { get; private set; }
         public int ArchitectureInstanceCount { get; private set; }
+        public int DuplicateCountPerEligibleBuilding { get; private set; }
         public string LastDiagnostic { get; private set; } = string.Empty;
 
         public void Refresh()
@@ -207,27 +187,47 @@ namespace AL.Kingdom.Visuals
             }
 
             Vector3[] layout = LayoutFor(realm);
+            DuplicateCountPerEligibleBuilding = confirmedTownHallLevel >= 5
+                ? MaximumDuplicatesPerEligibleBuilding
+                : MinimumDuplicatesPerEligibleBuilding;
+            KingdomBuildingSlotDefinition[] eligibleSlots = KingdomBuildingLayoutCatalog
+                .GetSlots(realm)
+                .Where(slot => !string.Equals(slot.BuildingId, "TownHall", StringComparison.Ordinal))
+                .Take(EligibleDistrictCount)
+                .ToArray();
             int[] levels = { 3, 5, 7, 4, 6, 8, 5, 4 };
-            for (int index = 0; index < layout.Length; index++)
+            for (int districtIndex = 0; districtIndex < layout.Length; districtIndex++)
             {
-                float yaw = YawFor(realm, index, layout[index]);
-                float scale = 2.35f + (index % 3) * 0.28f;
-                GameObject district = InstantiateModel(
-                    architecture,
-                    realm,
-                    "Workshop",
-                    levels[index % levels.Length],
-                    layout[index],
-                    Quaternion.Euler(0f, yaw, 0f),
-                    scale,
-                    $"PrivateKingdom_District_{index + 1:00}");
-                if (district == null)
+                Vector3 center = layout[districtIndex];
+                Vector3 radial = new Vector3(center.x, 0f, center.z).normalized;
+                Vector3 tangent = new Vector3(-radial.z, 0f, radial.x);
+                string eligibleBuildingId = districtIndex < eligibleSlots.Length
+                    ? eligibleSlots[districtIndex].BuildingId
+                    : "District" + (districtIndex + 1);
+                for (int copyIndex = 0; copyIndex < DuplicateCountPerEligibleBuilding; copyIndex++)
                 {
-                    continue;
-                }
+                    float centeredIndex = copyIndex - (DuplicateCountPerEligibleBuilding - 1) * 0.5f;
+                    Vector3 position = center + tangent * centeredIndex * 1.55f;
+                    int flatIndex = districtIndex * DuplicateCountPerEligibleBuilding + copyIndex;
+                    float yaw = YawFor(realm, flatIndex, position);
+                    float scale = 2.35f + (districtIndex % 2) * 0.24f;
+                    GameObject district = InstantiateModel(
+                        architecture,
+                        realm,
+                        "Workshop",
+                        levels[flatIndex % levels.Length],
+                        position,
+                        Quaternion.Euler(0f, yaw, 0f),
+                        scale,
+                        $"PrivateKingdom_{eligibleBuildingId}_{copyIndex + 1:00}");
+                    if (district == null)
+                    {
+                        continue;
+                    }
 
-                DisableColliders(district);
-                ArchitectureInstanceCount++;
+                    DisableColliders(district);
+                    ArchitectureInstanceCount++;
+                }
             }
         }
 
@@ -538,11 +538,11 @@ namespace AL.Kingdom.Visuals
 
         private static Vector3[] LayoutFor(RealmId realm) => realm switch
         {
-            RealmId.Stonehold => StoneholdLayout,
-            RealmId.Eldergrove => EldergroveLayout,
-            RealmId.Crownlands => CrownlandsLayout,
-            RealmId.Umbral => UmbralLayout,
-            _ => CrownlandsLayout
+            RealmId.Stonehold => StoneholdDistrictCenters,
+            RealmId.Eldergrove => EldergroveDistrictCenters,
+            RealmId.Crownlands => CrownlandsDistrictCenters,
+            RealmId.Umbral => UmbralDistrictCenters,
+            _ => CrownlandsDistrictCenters
         };
 
         private static float YawFor(RealmId realm, int index, Vector3 position)
@@ -619,6 +619,7 @@ namespace AL.Kingdom.Visuals
             }
             _ownedMaterials.Clear();
             ArchitectureInstanceCount = 0;
+            DuplicateCountPerEligibleBuilding = 0;
             if (_ownsAmbientSettings)
             {
                 RenderSettings.ambientMode = _previousAmbientMode;

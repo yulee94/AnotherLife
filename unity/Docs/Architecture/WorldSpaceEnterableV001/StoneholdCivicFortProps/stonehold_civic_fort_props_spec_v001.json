@@ -1,0 +1,1086 @@
+{
+  "schema": "anotherlife.stonehold-civic-fort-props-2d.v1",
+  "status": "candidate_owner_review_required",
+  "generatedAt": "2026-09-02T16:57:54+09:00",
+  "purpose": "First non-terrain 2D furnishing/prop handoff for the owner-approved shared civic hall and fort gatehouse.",
+  "scope": {
+    "included": [
+      "sixteen Stonehold furnishing prop families",
+      "measured dimensions and room-use mapping",
+      "material/form visual references",
+      "room-fit and clearance examples",
+      "mobile-first LOD, material, batching and collider intent",
+      "maintained, service-worn and damaged-reference-only variant policy"
+    ],
+    "excluded": [
+      "terrain, world topology, overall map and 3D map geometry",
+      "Meshy, Blender or any other 3D generation",
+      "runtime prefabs or game-data catalog mutation",
+      "door leaves, frames, hinges, door colliders or door interaction",
+      "gate actuation, gate collision, teleport, breach or ownership logic",
+      "weapons, inventory contents, loot, economy, quest, save, balance or narrative authority"
+    ],
+    "new3dJobsSubmitted": 0,
+    "worldMapTerrainTouched": false,
+    "runtimeCatalogWrite": false,
+    "downstream3dGate": "requires explicit owner approval of this 2D packet before any 3D generation"
+  },
+  "authority": [
+    "DESIGN.md",
+    "unity/Assets/AL/Art/Designs/FourRealmArchitecture.md",
+    "unity/Docs/PostMVP_Graphics_And_UI_Quality_Standard.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/CivicHall/2d/plans/shared_civic_hall_layout_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/FortGatehouse/2d/shared_fort_gatehouse_layout_v001.json",
+    "unity/Assets/AL/Art/Architecture/ConceptSheets/architecture_stonehold_modular_workshop_detail_v001.png",
+    "unity/Assets/AL/Art/Architecture/ConceptSheets/architecture_stonehold_townhall_level_progression_v001.png"
+  ],
+  "layoutAuthorities": {
+    "civic": "unity/Docs/Architecture/WorldSpaceEnterableV001/CivicHall/2d/plans/shared_civic_hall_layout_v001.json",
+    "fort": "unity/Docs/Architecture/WorldSpaceEnterableV001/FortGatehouse/2d/shared_fort_gatehouse_layout_v001.json"
+  },
+  "openingAuthorityRecords": {
+    "clearances.publicEntranceWidth": {
+      "layout": "civic",
+      "collection": "clearances",
+      "match": {
+        "publicEntranceWidth": 2.5
+      }
+    },
+    "records_to_public": {
+      "layout": "civic",
+      "collection": "doorOpenings",
+      "match": {
+        "between": ["public_hall", "records_room"]
+      }
+    },
+    "public_to_stores": {
+      "layout": "civic",
+      "collection": "doorOpenings",
+      "match": {
+        "between": ["public_hall", "stores"]
+      }
+    },
+    "public_to_steward": {
+      "layout": "civic",
+      "collection": "doorOpenings",
+      "match": {
+        "between": ["public_hall", "steward_office"]
+      }
+    },
+    "public_to_stair": {
+      "layout": "civic",
+      "collection": "doorOpenings",
+      "match": {
+        "between": ["public_hall", "stair_and_service"]
+      }
+    },
+    "public_to_council_workroom": {
+      "layout": "civic",
+      "collection": "doorOpenings",
+      "match": {
+        "between": ["public_hall", "council_workroom"]
+      }
+    },
+    "gallery_to_council_chamber": {
+      "layout": "civic",
+      "collection": "doorOpenings",
+      "match": {
+        "between": ["open_gallery", "council_chamber"]
+      }
+    },
+    "council_to_rear_archive": {
+      "layout": "civic",
+      "collection": "doorOpenings",
+      "match": {
+        "between": ["council_chamber", "rear_archive"]
+      }
+    },
+    "council_to_upper_service": {
+      "layout": "civic",
+      "collection": "doorOpenings",
+      "match": {
+        "between": ["council_chamber", "upper_service"]
+      }
+    },
+    "left_exterior_entry": {
+      "layout": "fort",
+      "collection": "apertures",
+      "match": {
+        "kind": "exterior",
+        "room": "left_guard_ready"
+      }
+    },
+    "left_guard_to_stair": {
+      "layout": "fort",
+      "collection": "apertures",
+      "match": {
+        "kind": "internal",
+        "orientation": "vertical",
+        "x": 4.0,
+        "z": 2.5
+      }
+    },
+    "left_barracks_to_landing": {
+      "layout": "fort",
+      "collection": "apertures",
+      "match": {
+        "kind": "internal",
+        "orientation": "vertical",
+        "x": 4.0,
+        "z": 5.0
+      }
+    },
+    "gallery_to_left_landing": {
+      "layout": "fort",
+      "collection": "apertures",
+      "match": {
+        "kind": "internal",
+        "orientation": "vertical",
+        "x": 6.5,
+        "z": 5.0
+      }
+    },
+    "gallery_to_right_landing": {
+      "layout": "fort",
+      "collection": "apertures",
+      "match": {
+        "kind": "internal",
+        "orientation": "vertical",
+        "x": 11.5,
+        "z": 5.0
+      }
+    }
+  },
+  "globalRules": {
+    "units": "meters",
+    "gridM": 0.5,
+    "minimumPrimaryAisleM": 1.2,
+    "stairAndLandingClearWidthM": 1.5,
+    "centralGateSlotPropCount": 0,
+    "visualStyle": "premium AA dark high-fantasy stylized realism within mystical medieval naturalism",
+    "stoneholdForm": "compressed, broad, grounded, load-bearing, repairable",
+    "stoneholdMaterials": [
+      "dark timber",
+      "basalt",
+      "soot-aged iron",
+      "heavy leather",
+      "worn wool",
+      "restrained bronze repair"
+    ],
+    "magic": "none required; identity must survive without smoke, sparks or emissive accents",
+    "paperAndSigns": "blank or authored later; generated pseudo-text is prohibited",
+    "doorPolicy": "no door geometry or behavior in this packet",
+    "gatePolicy": "central intact gate remains impassable and gameplay-owned; furnishings never create or control a physical route",
+    "openingCoordinateConvention": "approved layout x/z values are opening centers along their wall; protectedOpenings store room-local lower-left approach rectangles after subtracting half the matched authority-record width along that wall"
+  },
+  "materialAndRuntimePlan": {
+    "sharedAtlas": "one 1024x1024 opaque RGB Stonehold interior-prop atlas for timber, basalt, iron, leather, wool, bronze and blank parchment ranges",
+    "materialSlotsPerPropTarget": 1,
+    "transparency": "none",
+    "readWrite": false,
+    "mipmaps": true,
+    "smallPropTriangleCeiling": 5000,
+    "lodRatios": {
+      "lod1": "50-60% of LOD0",
+      "lod2": "20-30% of LOD0",
+      "lod3": "5-10% of LOD0 or silhouette proxy"
+    },
+    "batching": "combine non-interactive static props by room/visibility cell and atlas; keep movable or interaction-bearing candidates separate",
+    "colliders": "simple boxes or bounded compounds only; no decorative MeshColliders",
+    "qualityReductionOrder": [
+      "loose contents",
+      "small fasteners",
+      "tertiary wear",
+      "secondary braces"
+    ],
+    "protectedAtEveryTier": [
+      "function silhouette",
+      "floor footprint",
+      "interaction opening or handle when applicable",
+      "Stonehold compressed construction cue"
+    ]
+  },
+  "assetFamilies": [
+    {
+      "id": "prop_stonehold_council_table_280_v001",
+      "label": "Council Table 2.8 m",
+      "group": "civic",
+      "dimensionsM": [
+        2.8,
+        1.1,
+        0.78
+      ],
+      "source": {
+        "sheet": "civic",
+        "cell": "r1c1"
+      },
+      "roomUses": [
+        "council_workroom",
+        "council_chamber",
+        "right_holding_records"
+      ],
+      "primarySilhouette": "long heavy slab on four compressed basalt-footed timber supports",
+      "construction": "dark timber slab, soot-aged iron pressure straps, basalt feet, restrained bronze repairs",
+      "pivot": "floor_center",
+      "mobility": "static_room_furnishing",
+      "interactionAuthority": "none; behavior sockets remain open",
+      "colliderPlan": "one box collider only if gameplay later requires table obstruction",
+      "lodTrianglesTarget": [
+        2500,
+        1250,
+        550,
+        160
+      ],
+      "protectedCue": "long slab and four broad supports",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_steward_desk_160_v001",
+      "label": "Steward Desk 1.6 m",
+      "group": "civic",
+      "dimensionsM": [
+        1.6,
+        0.8,
+        0.78
+      ],
+      "source": {
+        "sheet": "civic",
+        "cell": "r1c2"
+      },
+      "roomUses": [
+        "steward_office"
+      ],
+      "primarySilhouette": "compact sloped writing top over a grounded central cabinet and side feet",
+      "construction": "dark timber, iron banding, bronze repair corners; no writing or heraldry generated into the surface",
+      "pivot": "floor_center",
+      "mobility": "static_room_furnishing",
+      "interactionAuthority": "none; optional future desk socket only",
+      "colliderPlan": "single box if required",
+      "lodTrianglesTarget": [
+        1800,
+        900,
+        380,
+        120
+      ],
+      "protectedCue": "sloped top and grounded cabinet mass",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_clerk_counter_180_v001",
+      "label": "Clerk Counter 1.8 m",
+      "group": "civic",
+      "dimensionsM": [
+        1.8,
+        0.7,
+        1.05
+      ],
+      "source": {
+        "sheet": "civic",
+        "cell": "r1c3"
+      },
+      "roomUses": [
+        "records_room"
+      ],
+      "primarySilhouette": "broad low service counter with raised rear work lip",
+      "construction": "dark timber panels, soot-aged iron riveted top rail, basalt feet",
+      "pivot": "floor_center",
+      "mobility": "static_room_furnishing",
+      "interactionAuthority": "visual service boundary only; no transaction behavior",
+      "colliderPlan": "one box collider when used as a physical queue boundary",
+      "lodTrianglesTarget": [
+        2000,
+        1000,
+        420,
+        140
+      ],
+      "protectedCue": "front panel mass and raised rear lip",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_public_bench_180_v001",
+      "label": "Public / Guard Bench 1.8 m",
+      "group": "shared",
+      "dimensionsM": [
+        1.8,
+        0.45,
+        0.48
+      ],
+      "source": {
+        "sheet": "civic",
+        "cell": "r1c4"
+      },
+      "roomUses": [
+        "public_hall",
+        "open_gallery",
+        "left_guard_ready"
+      ],
+      "primarySilhouette": "one broad timber seat carried by two blocky basalt-footed trestles",
+      "construction": "dark timber seat, soot-aged iron edge straps, basalt feet",
+      "pivot": "floor_center",
+      "mobility": "movable_or_static_by_room_authority",
+      "interactionAuthority": "none; seating behavior not authorized here",
+      "colliderPlan": "single box when retained as a separate object; omit after static room combine where safe",
+      "lodTrianglesTarget": [
+        1200,
+        600,
+        240,
+        80
+      ],
+      "protectedCue": "long seat and two compressed trestles",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_chair_055_v001",
+      "label": "Chair 0.55 m",
+      "group": "shared",
+      "dimensionsM": [
+        0.55,
+        0.55,
+        0.95
+      ],
+      "source": {
+        "sheet": "civic",
+        "cell": "r2c1"
+      },
+      "roomUses": [
+        "steward_office",
+        "council_chamber"
+      ],
+      "primarySilhouette": "straight high-backed chair with one inset heavy-leather panel",
+      "construction": "dark timber frame, heavy leather, soot-aged iron studs",
+      "pivot": "floor_center",
+      "mobility": "movable_separate_object",
+      "interactionAuthority": "none; seating behavior not authorized here",
+      "colliderPlan": "one simple box only when gameplay requires physical obstruction",
+      "lodTrianglesTarget": [
+        1000,
+        500,
+        210,
+        70
+      ],
+      "protectedCue": "straight back and inset panel",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_record_shelf_090_v001",
+      "label": "Record Shelf Bay 0.9 m",
+      "group": "shared",
+      "dimensionsM": [
+        0.9,
+        0.45,
+        2.0
+      ],
+      "source": {
+        "sheet": "civic",
+        "cell": "r2c2"
+      },
+      "roomUses": [
+        "records_room",
+        "council_workroom",
+        "council_chamber",
+        "upper_archive",
+        "rear_archive",
+        "right_inspection",
+        "right_holding_records"
+      ],
+      "primarySilhouette": "narrow tall shelving bay with thick top and lower grille-like retainers",
+      "construction": "dark timber carcass, soot-aged iron retainers; contents remain separate optional quality detail",
+      "pivot": "floor_back_center",
+      "mobility": "static_wall_furnishing",
+      "interactionAuthority": "none; record contents and reading behavior not authorized",
+      "colliderPlan": "single shallow box or room-shell inclusion",
+      "lodTrianglesTarget": [
+        1600,
+        800,
+        320,
+        100
+      ],
+      "protectedCue": "tall narrow bay and strong horizontal shelf rhythm",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_secure_chest_100_v001",
+      "label": "Secure Chest 1.0 m",
+      "group": "shared",
+      "dimensionsM": [
+        1.0,
+        0.55,
+        0.62
+      ],
+      "source": {
+        "sheet": "civic",
+        "cell": "r2c3"
+      },
+      "roomUses": [
+        "stores",
+        "left_stores",
+        "right_holding_records"
+      ],
+      "primarySilhouette": "low arched chest with three broad iron pressure bands",
+      "construction": "dark timber, soot-aged iron bands, restrained bronze side handles; no treasure glow",
+      "pivot": "floor_center",
+      "mobility": "separate_interactable_candidate",
+      "interactionAuthority": "visual candidate only; lock, inventory, loot, ownership and save behavior are open",
+      "colliderPlan": "one box collider if interaction is later approved",
+      "lodTrianglesTarget": [
+        1800,
+        900,
+        360,
+        120
+      ],
+      "protectedCue": "arched lid and three broad bands",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_notice_board_120_v001",
+      "label": "Wall Notice Board 1.2 m",
+      "group": "civic",
+      "dimensionsM": [
+        1.2,
+        0.2,
+        1.2
+      ],
+      "source": {
+        "sheet": "civic",
+        "cell": "r2c4"
+      },
+      "roomUses": [
+        "public_hall"
+      ],
+      "primarySilhouette": "compact dark inset panel inside a thick iron-cornered timber frame",
+      "construction": "dark timber frame, soot-aged iron corners, replaceable opaque notice insert; no generated pseudo-text",
+      "pivot": "wall_back_center",
+      "mobility": "static_wall_mounted",
+      "interactionAuthority": "display surface only; quest, UI and notice behavior remain open",
+      "colliderPlan": "no collider",
+      "lodTrianglesTarget": [
+        500,
+        250,
+        100,
+        40
+      ],
+      "protectedCue": "compact framed inset panel",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_single_cot_210_v001",
+      "label": "Single Barracks Cot 2.1 m",
+      "group": "fort",
+      "dimensionsM": [
+        2.1,
+        0.9,
+        0.7
+      ],
+      "source": {
+        "sheet": "single_cot",
+        "cell": "full"
+      },
+      "roomUses": [
+        "left_barracks",
+        "right_barracks"
+      ],
+      "primarySilhouette": "one low single sleeping platform on four short basalt-footed timber legs",
+      "construction": "dark timber rails, soot-aged iron corners, plain worn wool mattress and folded blanket",
+      "pivot": "floor_center",
+      "mobility": "static_room_furnishing",
+      "interactionAuthority": "none; rest or spawn behavior not authorized",
+      "colliderPlan": "one low box collider if needed",
+      "lodTrianglesTarget": [
+        1600,
+        800,
+        320,
+        100
+      ],
+      "protectedCue": "low single platform and four compressed corner feet",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_staff_locker_060_v001",
+      "label": "Staff Locker 0.6 m",
+      "group": "fort",
+      "dimensionsM": [
+        0.6,
+        0.55,
+        1.8
+      ],
+      "source": {
+        "sheet": "fort",
+        "cell": "r1c2"
+      },
+      "roomUses": [
+        "landing_and_staff",
+        "left_barracks",
+        "right_barracks"
+      ],
+      "primarySilhouette": "narrow two-door grounded cabinet on a basalt plinth",
+      "construction": "dark timber panels, soot-aged iron cross straps, small bronze repair hardware",
+      "pivot": "floor_back_center",
+      "mobility": "static_wall_furnishing",
+      "interactionAuthority": "visual storage only; inventory and ownership remain open",
+      "colliderPlan": "single shallow box",
+      "lodTrianglesTarget": [
+        1200,
+        600,
+        240,
+        80
+      ],
+      "protectedCue": "narrow twin-panel cabinet and stone plinth",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_empty_weapon_rack_160_v001",
+      "label": "Empty Armory Rack 1.6 m",
+      "group": "fort",
+      "dimensionsM": [
+        1.6,
+        0.55,
+        1.7
+      ],
+      "source": {
+        "sheet": "fort",
+        "cell": "r1c3"
+      },
+      "roomUses": [
+        "left_guard_ready",
+        "right_stair_armory"
+      ],
+      "primarySilhouette": "wide A-braced freestanding rack with two strong horizontal rails and empty retention loops",
+      "construction": "dark timber, soot-aged iron rails, heavy leather retention loops",
+      "pivot": "floor_center",
+      "mobility": "static_room_furnishing",
+      "interactionAuthority": "rack only; weapons, loadouts, pickup and armory behavior are separate assets/systems",
+      "colliderPlan": "two or three simple boxes; no MeshCollider",
+      "lodTrianglesTarget": [
+        1500,
+        750,
+        300,
+        100
+      ],
+      "protectedCue": "A-braced feet and two empty horizontal rails",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_supply_rack_120_v001",
+      "label": "Supply Rack 1.2 m",
+      "group": "fort",
+      "dimensionsM": [
+        1.2,
+        0.55,
+        1.9
+      ],
+      "source": {
+        "sheet": "fort",
+        "cell": "r1c4"
+      },
+      "roomUses": [
+        "stores",
+        "left_stores",
+        "left_stair_service"
+      ],
+      "primarySilhouette": "open four-tier rack with thick uprights and broad shelves",
+      "construction": "dark timber shelves, soot-aged iron corner straps; contents stay optional and separate",
+      "pivot": "floor_back_center",
+      "mobility": "static_wall_furnishing",
+      "interactionAuthority": "none; contents and resource behavior remain open",
+      "colliderPlan": "single shallow box or room-shell inclusion",
+      "lodTrianglesTarget": [
+        1400,
+        700,
+        280,
+        90
+      ],
+      "protectedCue": "four-tier open rhythm",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_utility_cabinet_060_v001",
+      "label": "Utility Cabinet 0.6 m",
+      "group": "fort",
+      "dimensionsM": [
+        0.6,
+        0.5,
+        1.5
+      ],
+      "source": {
+        "sheet": "fort",
+        "cell": "r2c1"
+      },
+      "roomUses": [
+        "upper_service",
+        "left_stair_service",
+        "right_stair_armory"
+      ],
+      "primarySilhouette": "short twin-panel utility cabinet on a basalt plinth",
+      "construction": "dark timber panels, broad soot-aged iron straps, simple handles",
+      "pivot": "floor_back_center",
+      "mobility": "static_wall_furnishing",
+      "interactionAuthority": "visual utility storage only",
+      "colliderPlan": "single shallow box",
+      "lodTrianglesTarget": [
+        1100,
+        550,
+        220,
+        70
+      ],
+      "protectedCue": "short twin-panel mass and stone plinth",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_supply_crate_080_v001",
+      "label": "Stackable Supply Crate 0.8 m",
+      "group": "fort",
+      "dimensionsM": [
+        0.8,
+        0.6,
+        0.6
+      ],
+      "source": {
+        "sheet": "fort",
+        "cell": "r2c2"
+      },
+      "sourcePresentation": "the source cell demonstrates three repeated stackable units; dimensionsM and this family ID govern one crate unit only",
+      "roomUses": [
+        "stores",
+        "left_stores",
+        "left_stair_service"
+      ],
+      "primarySilhouette": "low stackable box with one diagonal brace and broad iron corner plates",
+      "construction": "dark timber boards, soot-aged iron corners; no labels or pseudo-text",
+      "pivot": "floor_center",
+      "mobility": "movable_or_static_cluster_by_authority",
+      "interactionAuthority": "visual supply container only; inventory/resource behavior remains open",
+      "colliderPlan": "one box collider when separate; omit after approved static cluster combine",
+      "lodTrianglesTarget": [
+        500,
+        250,
+        100,
+        40
+      ],
+      "protectedCue": "diagonal brace and iron corners",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_inspection_counter_180_v001",
+      "label": "Inspection Counter 1.8 m",
+      "group": "fort",
+      "dimensionsM": [
+        1.8,
+        0.7,
+        1.05
+      ],
+      "source": {
+        "sheet": "fort",
+        "cell": "r2c3"
+      },
+      "roomUses": [
+        "right_inspection"
+      ],
+      "primarySilhouette": "broad inspection slab over a closed heavy-timber front",
+      "construction": "basalt or dark-stone worktop, dark timber front, soot-aged iron base rail",
+      "pivot": "floor_center",
+      "mobility": "static_room_furnishing",
+      "interactionAuthority": "visual inspection boundary only; checkpoint behavior remains open",
+      "colliderPlan": "one box collider when used as a physical boundary",
+      "lodTrianglesTarget": [
+        1700,
+        850,
+        340,
+        110
+      ],
+      "protectedCue": "broad stone-topped counter",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    },
+    {
+      "id": "prop_stonehold_gate_control_mount_240_v001",
+      "label": "Gate-Control Mount 2.4 m",
+      "group": "fort",
+      "dimensionsM": [
+        2.4,
+        0.8,
+        1.1
+      ],
+      "source": {
+        "sheet": "fort",
+        "cell": "r2c4"
+      },
+      "roomUses": [
+        "gate_control_gallery"
+      ],
+      "primarySilhouette": "low compressed basalt-and-iron mounting plinth with two visibly empty circular hardware sockets",
+      "construction": "basalt shell, soot-aged iron socket rims, restrained bronze repair straps",
+      "pivot": "floor_center",
+      "mobility": "static_separate_gameplay_interface_candidate",
+      "interactionAuthority": "mounting shell only; no lever, linkage, gate mechanism, teleport, breach, state, collider or interaction authority",
+      "colliderPlan": "one box only if later gameplay authority requires obstruction; never controls central gate collision",
+      "lodTrianglesTarget": [
+        1800,
+        900,
+        360,
+        120
+      ],
+      "protectedCue": "compressed plinth and two empty hardware sockets",
+      "materialSlotsTarget": 1,
+      "variants": [
+        "maintained_clean",
+        "service_worn",
+        "damaged_reference_only_owner_review_required"
+      ]
+    }
+  ],
+  "roomCoverage": {
+    "civicHall": {
+      "public_hall": [
+        "prop_stonehold_public_bench_180_v001",
+        "prop_stonehold_notice_board_120_v001"
+      ],
+      "records_room": [
+        "prop_stonehold_record_shelf_090_v001",
+        "prop_stonehold_clerk_counter_180_v001"
+      ],
+      "stores": [
+        "prop_stonehold_supply_rack_120_v001",
+        "prop_stonehold_secure_chest_100_v001",
+        "prop_stonehold_supply_crate_080_v001"
+      ],
+      "steward_office": [
+        "prop_stonehold_steward_desk_160_v001",
+        "prop_stonehold_chair_055_v001"
+      ],
+      "council_workroom": [
+        "prop_stonehold_council_table_280_v001",
+        "prop_stonehold_record_shelf_090_v001"
+      ],
+      "open_gallery": [
+        "prop_stonehold_public_bench_180_v001"
+      ],
+      "upper_archive": [
+        "prop_stonehold_record_shelf_090_v001"
+      ],
+      "landing_and_staff": [
+        "prop_stonehold_staff_locker_060_v001"
+      ],
+      "council_chamber": [
+        "prop_stonehold_council_table_280_v001",
+        "prop_stonehold_chair_055_v001",
+        "prop_stonehold_record_shelf_090_v001"
+      ],
+      "rear_archive": [
+        "prop_stonehold_record_shelf_090_v001"
+      ],
+      "upper_service": [
+        "prop_stonehold_utility_cabinet_060_v001"
+      ]
+    },
+    "fortGatehouse": {
+      "left_guard_ready": [
+        "prop_stonehold_public_bench_180_v001",
+        "prop_stonehold_empty_weapon_rack_160_v001"
+      ],
+      "left_stair_service": [
+        "prop_stonehold_utility_cabinet_060_v001",
+        "prop_stonehold_supply_rack_120_v001",
+        "prop_stonehold_supply_crate_080_v001"
+      ],
+      "left_stores": [
+        "prop_stonehold_supply_rack_120_v001",
+        "prop_stonehold_secure_chest_100_v001",
+        "prop_stonehold_supply_crate_080_v001"
+      ],
+      "right_stair_armory": [
+        "prop_stonehold_empty_weapon_rack_160_v001",
+        "prop_stonehold_utility_cabinet_060_v001"
+      ],
+      "right_inspection": [
+        "prop_stonehold_inspection_counter_180_v001",
+        "prop_stonehold_record_shelf_090_v001"
+      ],
+      "right_holding_records": [
+        "prop_stonehold_council_table_280_v001",
+        "prop_stonehold_record_shelf_090_v001",
+        "prop_stonehold_secure_chest_100_v001"
+      ],
+      "left_barracks": [
+        "prop_stonehold_single_cot_210_v001",
+        "prop_stonehold_staff_locker_060_v001"
+      ],
+      "gate_control_gallery": [
+        "prop_stonehold_gate_control_mount_240_v001"
+      ],
+      "right_barracks": [
+        "prop_stonehold_single_cot_210_v001",
+        "prop_stonehold_staff_locker_060_v001"
+      ],
+      "central_gate_slot": []
+    }
+  },
+  "fitProofs": [
+    {
+      "id": "civic_public_openings_and_center_aisle",
+      "formula": "two front-zone benches and one 1.2m notice board avoid six protected opening approaches while the 1.2m center aisle stays continuous",
+      "result": "pass"
+    },
+    {
+      "id": "civic_stores_wall_rack_aisle",
+      "formula": "1.8m room width - 0.55m rack depth = 1.25m clear aisle; the public-hall opening approach stays prop-free",
+      "result": "pass"
+    },
+    {
+      "id": "civic_council_three_openings",
+      "formula": "5.3m room width - 2.8m table length = 2.5m, leaving 1.25m at both side openings; six chairs flank but do not enter the centered gallery opening approach",
+      "result": "pass"
+    },
+    {
+      "id": "fort_guard_ready_two_openings",
+      "formula": "the 1.4m exterior entry and 1.2m stair-service opening connect through protected response zones; the empty rack moves to the north wall",
+      "result": "pass"
+    },
+    {
+      "id": "fort_barracks_center_aisle_and_landing_opening",
+      "formula": "3.5m room width - 0.9m cot depth - 0.9m cot depth = 1.7m center aisle; landing-side cots split around the 1.2m opening",
+      "result": "pass"
+    },
+    {
+      "id": "fort_gallery_links_and_gate_slot",
+      "formula": "both 1.2m landing approaches cross the gallery prop-free; adjacent 1.5m landing/wallwalk links remain outside the room; the central 4.0m x 10.0m gate slot below contains zero props",
+      "result": "pass"
+    }
+  ],
+  "placementExamples": [
+    {
+      "id": "civic_public_hall",
+      "authorityRoom": {"layout": "civic", "id": "public_hall"},
+      "displayTitle": "CIVIC — PUBLIC HALL",
+      "roomSizeM": [5.3, 5.0],
+      "protectedAisles": [{"x": 2.05, "z": 0.0, "w": 1.2, "d": 5.0, "label": "1.2m CENTER AISLE"}],
+      "protectedOpenings": [
+        {"x": 1.4, "z": 0.0, "w": 2.5, "d": 0.65, "edge": "south", "label": "PUBLIC 2.5m", "authorityOpeningKey": "clearances.publicEntranceWidth"},
+        {"x": 0.0, "z": 1.1, "w": 1.2, "d": 1.2, "edge": "west", "label": "RECORDS 1.2m", "authorityOpeningKey": "records_to_public"},
+        {"x": 0.0, "z": 3.4, "w": 1.2, "d": 1.2, "edge": "west", "label": "STORES 1.2m", "authorityOpeningKey": "public_to_stores"},
+        {"x": 4.1, "z": 1.1, "w": 1.2, "d": 1.2, "edge": "east", "label": "OFFICE 1.2m", "authorityOpeningKey": "public_to_steward"},
+        {"x": 4.1, "z": 3.4, "w": 1.2, "d": 1.2, "edge": "east", "label": "STAIR 1.2m", "authorityOpeningKey": "public_to_stair"},
+        {"x": 1.45, "z": 4.25, "w": 1.2, "d": 0.75, "edge": "north", "label": "COUNCIL 1.2m", "authorityOpeningKey": "public_to_council_workroom"}
+      ],
+      "placements": [
+        {"assetId": "prop_stonehold_public_bench_180_v001", "x": 0.1, "z": 0.65, "w": 1.8, "d": 0.45},
+        {"assetId": "prop_stonehold_public_bench_180_v001", "x": 3.4, "z": 0.65, "w": 1.8, "d": 0.45},
+        {"assetId": "prop_stonehold_notice_board_120_v001", "x": 0.1, "z": 0.0, "w": 1.2, "d": 0.2, "wallMounted": true}
+      ],
+      "note": "Six approved opening approaches and the center aisle stay prop-free; the compact board fits beside the public entry."
+    },
+    {
+      "id": "civic_council_chamber",
+      "authorityRoom": {"layout": "civic", "id": "council_chamber"},
+      "displayTitle": "CIVIC — COUNCIL CHAMBER",
+      "roomSizeM": [5.3, 2.9],
+      "protectedAisles": [
+        {"x": 0.0, "z": 0.0, "w": 1.25, "d": 2.9, "label": "1.25m WEST"},
+        {"x": 4.05, "z": 0.0, "w": 1.25, "d": 2.9, "label": "1.25m EAST"}
+      ],
+      "protectedOpenings": [
+        {"x": 1.45, "z": 0.0, "w": 1.2, "d": 0.8, "edge": "south", "label": "GALLERY 1.2m", "authorityOpeningKey": "gallery_to_council_chamber"},
+        {"x": 0.0, "z": 0.8, "w": 1.25, "d": 1.2, "edge": "west", "label": "ARCHIVE 1.2m", "authorityOpeningKey": "council_to_rear_archive"},
+        {"x": 4.05, "z": 0.8, "w": 1.25, "d": 1.2, "edge": "east", "label": "SERVICE 1.2m", "authorityOpeningKey": "council_to_upper_service"}
+      ],
+      "clearZones": [{"x": 1.25, "z": 0.0, "w": 1.4, "d": 0.9, "purpose": "gallery_entry_turn", "label": "GALLERY APPROACH"}],
+      "placements": [
+        {"assetId": "prop_stonehold_council_table_280_v001", "x": 1.25, "z": 0.9, "w": 2.8, "d": 1.1},
+        {"assetId": "prop_stonehold_chair_055_v001", "x": 2.75, "z": 0.25, "w": 0.55, "d": 0.55},
+        {"assetId": "prop_stonehold_chair_055_v001", "x": 3.45, "z": 0.25, "w": 0.55, "d": 0.55},
+        {"assetId": "prop_stonehold_chair_055_v001", "x": 1.3, "z": 2.1, "w": 0.55, "d": 0.55},
+        {"assetId": "prop_stonehold_chair_055_v001", "x": 2.0, "z": 2.1, "w": 0.55, "d": 0.55},
+        {"assetId": "prop_stonehold_chair_055_v001", "x": 2.7, "z": 2.1, "w": 0.55, "d": 0.55},
+        {"assetId": "prop_stonehold_chair_055_v001", "x": 3.4, "z": 2.1, "w": 0.55, "d": 0.55}
+      ],
+      "note": "The 2.8m table leaves 1.25m at both side openings; six movable chairs avoid the centered gallery approach."
+    },
+    {
+      "id": "civic_stores",
+      "authorityRoom": {"layout": "civic", "id": "stores"},
+      "displayTitle": "CIVIC — STORES",
+      "roomSizeM": [1.8, 4.9],
+      "protectedAisles": [{"x": 0.55, "z": 0.0, "w": 1.25, "d": 3.65, "label": "1.25m AISLE"}],
+      "protectedOpenings": [{"x": 0.55, "z": 0.4, "w": 1.25, "d": 1.2, "edge": "east", "label": "PUBLIC HALL 1.2m", "authorityOpeningKey": "public_to_stores"}],
+      "placements": [
+        {"assetId": "prop_stonehold_supply_rack_120_v001", "x": 0.0, "z": 0.25, "w": 0.55, "d": 1.2},
+        {"assetId": "prop_stonehold_supply_rack_120_v001", "x": 0.0, "z": 1.75, "w": 0.55, "d": 1.2},
+        {"assetId": "prop_stonehold_supply_rack_120_v001", "x": 0.0, "z": 3.25, "w": 0.55, "d": 1.2},
+        {"assetId": "prop_stonehold_secure_chest_100_v001", "x": 0.75, "z": 3.9, "w": 1.0, "d": 0.55}
+      ],
+      "note": "Wall racks leave 1.25m access; the public-hall opening stays clear and the chest occupies the dead end."
+    },
+    {
+      "id": "fort_guard_ready",
+      "authorityRoom": {"layout": "fort", "id": "left_guard_ready"},
+      "displayTitle": "FORT — GUARD READY",
+      "roomSizeM": [3.5, 4.5],
+      "protectedAisles": [
+        {"x": 1.05, "z": 0.0, "w": 1.4, "d": 1.4, "label": "ENTRY ROUTE"},
+        {"x": 1.05, "z": 1.4, "w": 2.45, "d": 1.2, "label": "STAIR TURN"},
+        {"x": 2.3, "z": 2.6, "w": 1.2, "d": 1.9, "label": "ROOM ACCESS"}
+      ],
+      "protectedOpenings": [
+        {"x": 1.05, "z": 0.0, "w": 1.4, "d": 0.7, "edge": "south", "label": "EXTERIOR 1.4m", "authorityOpeningKey": "left_exterior_entry"},
+        {"x": 2.3, "z": 1.4, "w": 1.2, "d": 1.2, "edge": "east", "label": "STAIR 1.2m", "authorityOpeningKey": "left_guard_to_stair"}
+      ],
+      "placements": [
+        {"assetId": "prop_stonehold_public_bench_180_v001", "x": 0.0, "z": 0.55, "w": 0.45, "d": 1.8},
+        {"assetId": "prop_stonehold_empty_weapon_rack_160_v001", "x": 0.1, "z": 3.95, "w": 1.6, "d": 0.55}
+      ],
+      "note": "Entry-to-stair response path stays open; the behaviorless empty rack is relocated to the north wall."
+    },
+    {
+      "id": "fort_left_barracks",
+      "authorityRoom": {"layout": "fort", "id": "left_barracks"},
+      "displayTitle": "FORT — LEFT BARRACKS",
+      "roomSizeM": [3.5, 9.0],
+      "protectedAisles": [{"x": 0.9, "z": 0.0, "w": 1.7, "d": 9.0, "label": "1.7m CENTER AISLE"}],
+      "protectedOpenings": [{"x": 0.9, "z": 3.9, "w": 2.6, "d": 1.2, "edge": "east", "label": "LANDING 1.2m", "authorityOpeningKey": "left_barracks_to_landing"}],
+      "placements": [
+        {"assetId": "prop_stonehold_single_cot_210_v001", "x": 0.0, "z": 0.35, "w": 0.9, "d": 2.1},
+        {"assetId": "prop_stonehold_single_cot_210_v001", "x": 0.0, "z": 3.1, "w": 0.9, "d": 2.1},
+        {"assetId": "prop_stonehold_single_cot_210_v001", "x": 2.6, "z": 0.35, "w": 0.9, "d": 2.1},
+        {"assetId": "prop_stonehold_single_cot_210_v001", "x": 2.6, "z": 6.05, "w": 0.9, "d": 2.1},
+        {"assetId": "prop_stonehold_staff_locker_060_v001", "x": 0.05, "z": 8.45, "w": 0.6, "d": 0.55},
+        {"assetId": "prop_stonehold_staff_locker_060_v001", "x": 2.85, "z": 8.45, "w": 0.6, "d": 0.55}
+      ],
+      "note": "Landing-side cots split around the 1.2m opening; mirror for the right barracks and keep its west opening clear."
+    },
+    {
+      "id": "fort_gate_control_gallery",
+      "authorityRoom": {"layout": "fort", "id": "gate_control_gallery"},
+      "displayTitle": "FORT — GATE CONTROL GALLERY",
+      "roomSizeM": [5.0, 6.0],
+      "protectedAisles": [
+        {"x": 1.9, "z": 0.0, "w": 1.2, "d": 5.2, "label": "1.2m ACCESS"},
+        {"x": 0.0, "z": 2.4, "w": 5.0, "d": 1.2, "label": "LANDING CROSS-ROUTE"}
+      ],
+      "protectedOpenings": [
+        {"x": 0.0, "z": 2.4, "w": 1.2, "d": 1.2, "edge": "west", "label": "LEFT LANDING", "authorityOpeningKey": "gallery_to_left_landing"},
+        {"x": 3.8, "z": 2.4, "w": 1.2, "d": 1.2, "edge": "east", "label": "RIGHT LANDING", "authorityOpeningKey": "gallery_to_right_landing"}
+      ],
+      "clearZones": [{"x": 0.5, "z": 0.6, "w": 4.0, "d": 1.6, "purpose": "observation", "label": "OBSERVATION CLEAR"}],
+      "placements": [
+        {"assetId": "prop_stonehold_gate_control_mount_240_v001", "x": 1.3, "z": 5.2, "w": 2.4, "d": 0.8}
+      ],
+      "note": "Both landing links stay clear; adjacent 1.5m stair/wallwalk routes remain external; the mount has no mechanism."
+    }
+  ],
+  "visualSources": [
+    {
+      "taskId": "01a0611b-c7cb-7351-ac34-0de5aa8e1423",
+      "provider": "Meshy text-to-image / nano-banana-pro",
+      "prompt": "Original AnotherLife Stonehold civic furnishing concept sheet, exactly eight isolated objects in a clean 4x2 grid: council table, steward desk, clerk counter, public bench, single chair, record shelf, secure chest, wall notice board. Adult premium AA dark-fantasy stylized realism; heavy dark timber, basalt feet, soot-aged iron straps, restrained bronze repairs, subtle amber only at functional accents. Believable medieval joinery, broad readable silhouettes, neutral studio lighting, full objects uncropped. No room scene, people, doors, text, letters, runes, watermark, toy style, glow edges.",
+      "disposition": "accepted_as_form_material_reference_all_eight_cells",
+      "localLocator": "generation/stonehold_civic_furnishing_concept_raw_v001.png"
+    },
+    {
+      "taskId": "01a0611c-0844-7512-9238-063ac7b2c0c0",
+      "provider": "Meshy text-to-image / nano-banana-pro",
+      "prompt": "AnotherLife Stonehold fort furnishing sheet, exactly eight isolated objects in a clean 4x2 grid: soldier bunk, locker, empty weapon rack, supply rack, utility cabinet, stackable crate, inspection counter, nonfunctional gate-control mounting plinth with empty sockets. Premium AA dark-fantasy realism; compressed rugged forms, dark timber, basalt bases, soot-aged iron, leather, restrained bronze repairs. Neutral studio, full uncropped objects. No gate mechanism, people, doors, text, runes, watermark, spikes, toy style, or glow.",
+      "disposition": "accepted_as_form_material_reference_for_seven_cells; r1c1 rejected_double_bunk",
+      "localLocator": "generation/stonehold_fort_furnishing_concept_raw_v001.png"
+    },
+    {
+      "taskId": "01a0611e-8ffb-71a2-822d-cde3d7ef207c",
+      "provider": "Meshy text-to-image / nano-banana-pro",
+      "disposition": "rejected_double_bunk_not_used",
+      "localLocator": "generation/stonehold_single_bunk_concept_raw_v001.png"
+    },
+    {
+      "taskId": "01a06120-aa06-70e0-8910-491a69b56cf3",
+      "provider": "Meshy text-to-image / gpt-image-2",
+      "prompt": "Exactly one low single-person medieval military cot with one mattress and one sleeping platform only. Four short legs, no tall posts, no upper frame, no canopy, no second level. Full cot in three-quarter view. AnotherLife Stonehold style: rugged dark timber, four small basalt feet, soot-aged iron corner straps, plain worn wool mattress and folded blanket; premium AA dark-fantasy realism, neutral gray studio. No person, weapons, doors, text, symbols, watermark, spikes, magic, glow, or toy styling.",
+      "disposition": "accepted_as_single_cot_form_material_reference",
+      "localLocator": "generation/stonehold_single_cot_concept_raw_v002.png"
+    }
+  ],
+  "sourceLimitations": [
+    "Generated images have no dimensional, topology, UV, collider, LOD, interaction or gameplay authority.",
+    "The deterministic dimensions and policies in this JSON control the handoff.",
+    "No AI-generated marks or blank panels authorize text, heraldry, quests, inventory or interaction.",
+    "Owner APPROVE, REVISE or REJECT is required before any downstream 3D generation."
+  ],
+  "openDecisions": [
+    "Owner selection or revision of the 16-family form/material direction.",
+    "Whether maintained, service-worn and damaged-reference variants are approved per family.",
+    "Exact authored notice, record, banner and emblem content; generated pseudo-text remains prohibited.",
+    "Which props receive future interaction sockets or remain static room-combined decoration.",
+    "Final per-prop topology and atlas packing after 2D approval."
+  ]
+}

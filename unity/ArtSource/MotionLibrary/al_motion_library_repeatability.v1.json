@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "libraryId": "rmc_motion_library_representative_v001",
+  "status": "passed",
+  "repeatabilityMode": "semantic_action_skeleton_event_cleanup_v1",
+  "semanticSignatureRunOne": "38d48245efed413df809f19c0b8489d3c60b51bbb0904a59c165c823b12806f6",
+  "semanticSignatureRunTwo": "38d48245efed413df809f19c0b8489d3c60b51bbb0904a59c165c823b12806f6",
+  "catalogSha256": "1e96c23dcecc4b9fa59d4eac855ae4d674592f92aeefe5213c28921defab86b6",
+  "artifacts": {
+    "rmc_motion_asset_champion_vanguard_v001": {
+      "blendSha256": "1118214baf0e50c7f7c2b5acf321a7cddbcd99a9b913be8f865f5eaa3ed602d7",
+      "fbxSha256": "71dbd2fc1a7143d602541fafc7a855ff018477df6dade7e94c3c14dd30a11e6f",
+      "sidecarSha256": "fcd11df03ec823bc43535bb949189fee1e78acc03ec443a8f5504f2f45053c14"
+    },
+    "rmc_motion_asset_npc_covenant_sentinel_v001": {
+      "blendSha256": "78cc2a79c70d53eb6f66ea097e38840200cf5fc1ca3fbb3ee7bb349d23ca5186",
+      "fbxSha256": "1c27e174ec76ffa38631d5ac1b3cdeeda66e25c873a83d0d8f8d4a877590c90f",
+      "sidecarSha256": "46b82bcf72d0dbfde37c8bf73994840fb02bcf475b75bfab476fcea42e8cd1ee"
+    },
+    "rmc_motion_asset_slagwhistle_v001": {
+      "blendSha256": "ab082c1774cbf5e705a7ea4bb027a435f60b7d278a927cf6ff75d926a34c2b4c",
+      "fbxSha256": "89995413f73d88194ff77d488aaca7879da17042227a81912586a7b4f814d4aa",
+      "sidecarSha256": "86e1910b9ae381ae9429275d434f750a044d048051b9559fe8d2b66b74f3a5a3"
+    }
+  },
+  "binaryDeterminismNote": "Blend and animated FBX bytes are retained from run one; acceptance is semantic because Blender container metadata may vary while skeleton, curves, events, cleanup metrics, and bindings remain identical."
+}

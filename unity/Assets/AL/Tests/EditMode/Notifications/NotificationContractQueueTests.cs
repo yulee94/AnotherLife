@@ -1445,19 +1445,12 @@ namespace AL.Tests.EditMode.Notifications
             Assert.True(File.Exists(inventoryPath));
             string inventory = File.ReadAllText(inventoryPath).Replace('\\', '/');
 
-            string[] messageCallers = FindCallers(scriptsRoot, ".ShowMessage(");
-            CollectionAssert.AreEqual(
-                new[]
-                {
-                    "Kingdom/Narrative/WorldStateService.cs",
-                    "Services/Local/LocalBossLootService.cs"
-                },
-                messageCallers);
+            CollectionAssert.IsEmpty(FindCallers(scriptsRoot, ".ShowMessage("));
             CollectionAssert.IsEmpty(FindCallers(scriptsRoot, ".ShowError("));
             CollectionAssert.IsEmpty(FindCallers(scriptsRoot, ".ShowResourceGain("));
 
             Assert.AreEqual(
-                1,
+                0,
                 CountOccurrences(
                     File.ReadAllText(Path.Combine(
                         scriptsRoot,
@@ -1466,7 +1459,7 @@ namespace AL.Tests.EditMode.Notifications
                         "WorldStateService.cs")),
                     ".ShowMessage("));
             Assert.AreEqual(
-                3,
+                0,
                 CountOccurrences(
                     File.ReadAllText(Path.Combine(
                         scriptsRoot,
@@ -1474,10 +1467,7 @@ namespace AL.Tests.EditMode.Notifications
                         "Local",
                         "LocalBossLootService.cs")),
                     ".ShowMessage("));
-            foreach (string caller in messageCallers)
-            {
-                StringAssert.Contains(caller, inventory);
-            }
+            StringAssert.Contains("BossLootCatalogNotificationPublisher", inventory);
 
             StringAssert.Contains("ShowError", inventory);
             StringAssert.Contains("zero production callers", inventory);

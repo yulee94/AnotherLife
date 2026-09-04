@@ -9,12 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.anotherlife.data.simulation.Building
 import com.example.anotherlife.data.simulation.KingdomState
-import com.example.anotherlife.data.simulation.ResourceType
+import com.example.anotherlife.ui.layout.usesLargeTextLayout
 
 @Composable
 fun KingdomDashboard(state: KingdomState) {
@@ -59,14 +58,34 @@ fun ResourceBar(state: KingdomState) {
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Row(
+        BoxWithConstraints(
             modifier = Modifier
                 .padding(12.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                .fillMaxWidth()
         ) {
-            state.resources.forEach { (type, amount) ->
-                ResourceInfo(type = type.name, amount = amount)
+            val entries = state.resources.toList()
+            val columnCount = if (usesLargeTextLayout() || maxWidth < 360.dp) {
+                2
+            } else {
+                entries.size.coerceAtLeast(1)
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                entries.chunked(columnCount).forEach { rowEntries ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        rowEntries.forEach { (type, amount) ->
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                ResourceInfo(type = type.name, amount = amount)
+                            }
+                        }
+                        repeat(columnCount - rowEntries.size) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
             }
         }
     }
@@ -85,23 +104,55 @@ fun BuildingItem(building: Building, onUpgrade: () -> Unit) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
+        BoxWithConstraints(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
         ) {
-            Column {
-                Text(text = building.name, style = MaterialTheme.typography.titleMedium)
-                Text(text = "Level ${building.level}", style = MaterialTheme.typography.bodySmall)
-            }
+            val useStackedLayout = usesLargeTextLayout() || maxWidth < 320.dp
 
-            Button(onClick = onUpgrade) {
-                Icon(Icons.Default.KeyboardArrowUp, contentDescription = null)
-                Spacer(Modifier.width(4.dp))
-                Text("Upgrade")
+            if (useStackedLayout) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    BuildingDetails(building)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    UpgradeButton(
+                        onUpgrade = onUpgrade,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    BuildingDetails(building)
+                    UpgradeButton(onUpgrade = onUpgrade)
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun BuildingDetails(building: Building) {
+    Column {
+        Text(text = building.name, style = MaterialTheme.typography.titleMedium)
+        Text(text = "Level ${building.level}", style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun UpgradeButton(
+    onUpgrade: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onUpgrade,
+        modifier = modifier.heightIn(min = 48.dp)
+    ) {
+        Icon(Icons.Default.KeyboardArrowUp, contentDescription = null)
+        Spacer(Modifier.width(4.dp))
+        Text("Upgrade")
     }
 }

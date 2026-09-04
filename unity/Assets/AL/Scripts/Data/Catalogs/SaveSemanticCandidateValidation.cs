@@ -27,7 +27,8 @@ namespace AL.Data.Catalogs
         CompatibleNormalized = 4,
         Valid = 5,
         ForwardSchemaReadOnly = 6,
-        OversizePreservedReadOnly = 7
+        OversizePreservedReadOnly = 7,
+        MigrationRequired = 8
     }
 
     [Flags]
@@ -503,7 +504,8 @@ namespace AL.Data.Catalogs
             bool writable,
             byte[] rawBytes,
             int originalRawByteCount,
-            IReadOnlyList<SaveSemanticDiagnostic> diagnostics)
+            IReadOnlyList<SaveSemanticDiagnostic> diagnostics,
+            string profileId = "")
         {
             SourceGeneration = sourceGeneration;
             Outcome = outcome;
@@ -518,6 +520,7 @@ namespace AL.Data.Catalogs
             this.rawBytes = Copy(rawBytes);
             OriginalRawByteCount = originalRawByteCount < 0 ? 0 : originalRawByteCount;
             Diagnostics = diagnostics ?? Array.AsReadOnly(new SaveSemanticDiagnostic[0]);
+            ProfileId = profileId ?? string.Empty;
         }
 
         public SaveCandidateSourceGeneration SourceGeneration { get; }
@@ -533,6 +536,7 @@ namespace AL.Data.Catalogs
         public int OriginalRawByteCount { get; }
         public bool HasRetainedRawBytes => rawBytes != null;
         public IReadOnlyList<SaveSemanticDiagnostic> Diagnostics { get; }
+        public string ProfileId { get; }
 
         /// <summary>
         /// Returns a new copy on every call. Accepted-size inputs are retained exactly;
@@ -565,6 +569,8 @@ namespace AL.Data.Catalogs
                         return 7;
                     case SaveSemanticCandidateOutcome.OversizePreservedReadOnly:
                         return 0;
+                    case SaveSemanticCandidateOutcome.MigrationRequired:
+                        return 5;
                     default:
                         return 0;
                 }
@@ -670,6 +676,17 @@ namespace AL.Data.Catalogs
                 return new SaveSemanticCandidateSelection(
                     primary,
                     "SAVE_SELECT_REPAIRABLE_PRIMARY");
+            }
+
+            // A clean schema-1 identity candidate must reach the atomic schema-2
+            // installer instead of being ranked below a current-schema backup.
+            if (primary != null &&
+                primary.Outcome == SaveSemanticCandidateOutcome.MigrationRequired &&
+                primary.HasRetainedRawBytes)
+            {
+                return new SaveSemanticCandidateSelection(
+                    primary,
+                    "SAVE_SELECT_SCHEMA_ONE_MIGRATION_REQUIRED");
             }
 
             // A supported primary is authoritative even when a backup has a nominally
@@ -781,14 +798,25 @@ namespace AL.Data.Catalogs
                     "Territories",
                     "RealmGems",
                     "Wishgate",
+                    "WishgateTransaction",
                     "CurrentChapterId",
                     "Warmaster",
                     "ChampionCustomization",
                     "OwnedEquipment",
                     "AppliedBossLootRewards",
                     "Nvs01Progress",
+                    "FirstWorldProgress",
+                    "MapDisclosure",
+                    "RealmSelection",
+                    "ChampionProgression",
+                    "DeathPenalty",
+                    "WorldState",
+                    "NotificationHistory",
+                    "GuildCitySeason",
                     "WarzoneCredits",
-                    "LastSavedTimestamp"
+                    "LastSavedTimestamp",
+                    "TerritoryCaptureLedger",
+                    "OfflineProductionCatchUp"
                 },
                 StringComparer.Ordinal);
 
@@ -873,6 +901,51 @@ namespace AL.Data.Catalogs
 
         private static readonly HashSet<string> WishgateFields =
             Fields("IsEarned", "EarnReason", "LastRewardId", "LastRewardChosenTimestamp");
+
+        private static readonly HashSet<string> WishgateTransactionFields =
+            Fields(
+                "Version",
+                "Status",
+                "Revision",
+                "Phase",
+                "EntitlementId",
+                "EarnReasonId",
+                "RewardId",
+                "RewardApplicationId",
+                "EarnedUtcSeconds",
+                "SelectedUtcSeconds",
+                "AppliedUtcSeconds",
+                "CommittedUtcSeconds",
+                "EntitlementRevision",
+                "EntitlementIsSupported",
+                "IsComplete",
+                "LastOperationId",
+                "LastEventId",
+                "LastRequestFingerprint",
+                "ReceiptHash",
+                "PostCommitNotificationCorrelationId",
+                "AppliedRewardApplicationId",
+                "Records");
+
+        private static readonly HashSet<string> WishgateTransitionRecordFields =
+            Fields(
+                "OperationId",
+                "EventId",
+                "CorrelationId",
+                "Operation",
+                "RequestFingerprint",
+                "EntitlementId",
+                "EarnReasonId",
+                "RewardId",
+                "RewardApplicationId",
+                "ResultingPhase",
+                "ResultingSnapshotRevision",
+                "ResultingEntitlementRevision",
+                "PlannedUtcSeconds",
+                "ResultingStateHash",
+                "PlanHash",
+                "PostCommitNotificationCorrelationId",
+                "IsSupported");
 
         private static readonly HashSet<string> WarmasterFields =
             Fields(
@@ -963,10 +1036,189 @@ namespace AL.Data.Catalogs
                 "ConsequenceIntentIds",
                 "AcquiredArtifactIds",
                 "AppliedEffectKeys",
+                "AppliedOperationIds",
+                "ApplicationReceipts",
                 "UnlockedChapterId");
+
+        private static readonly HashSet<string> Nvs01ApplicationReceiptFields =
+            Fields(
+                "ContractVersion",
+                "Kind",
+                "OperationId",
+                "ProfileId",
+                "ExpectedGenerationFingerprint",
+                "CausalOperationId",
+                "CausalPayloadFingerprint",
+                "PredecessorReceiptFingerprint",
+                "PredecessorExpectedGenerationFingerprint",
+                "RealmId",
+                "CorrelationId",
+                "ExpectedQuestRevision",
+                "CandidateQuestRevision",
+                "EffectKeys",
+                "TargetChapterId",
+                "TechnicalCurrencyId",
+                "PreviousGoldBalance",
+                "ResultingGoldBalance",
+                "PreviousValeriusAffinity",
+                "ResultingValeriusAffinity",
+                "PreviousChapterId",
+                "ResultingChapterId",
+                "PlanFingerprint");
 
         private static readonly HashSet<string> Nvs01ObjectiveFields =
             Fields("ObjectiveId", "Status");
+
+        private static readonly HashSet<string> FirstWorldProgressFields =
+            Fields(
+                "Version",
+                "Revision",
+                "TutorialStep",
+                "TeachingBeat",
+                "MovementConfirmationCount",
+                "BasicAttackConfirmationCount",
+                "CompletionEventCount",
+                "OmenOfferCount",
+                "BlockTaught",
+                "HandoffCommitted",
+                "ProofPhase",
+                "ProofQuestId",
+                "ProofQuestStateId",
+                "ProofObjectiveId",
+                "ProofDialogueId",
+                "ProofLastEventId",
+                "ProofChapterVariantId",
+                "ProofOmenAccepted",
+                "ProofAutoAccept",
+                "LastOperationId");
+
+        private static readonly HashSet<string> RealmSelectionFields =
+            Fields(
+                "Version",
+                "Committed",
+                "SelectedRealm",
+                "ProfileId",
+                "TransactionId",
+                "CorrelationId",
+                "OperationId",
+                "EventId",
+                "CatalogVersion",
+                "Provenance",
+                "ReceiptFingerprint",
+                "ExpectedGenerationFingerprint",
+                "Revision");
+
+        private static readonly HashSet<string> ChampionProgressionFields =
+            Fields(
+                "Version",
+                "ProfileId",
+                "CharacterId",
+                "AccountId",
+                "CurrentLevel",
+                "MaximumLevel",
+                "InLevelExperienceUnits",
+                "ExperienceUnitsPerLevel",
+                "ProgressionRevision",
+                "LevelCapPolicyId",
+                "LevelCapPolicyRevision");
+
+        private static readonly HashSet<string> DeathPenaltyFields =
+            Fields(
+                "Version",
+                "Status",
+                "Outcome",
+                "ProfileId",
+                "CharacterId",
+                "AccountId",
+                "DeathEventId",
+                "CombatSessionId",
+                "EncounterAttemptId",
+                "InstanceId",
+                "DeathOrdinal",
+                "DeathStateRevision",
+                "OperationId",
+                "RequestFingerprint",
+                "DeathFingerprint",
+                "ReceiptHash",
+                "Branch",
+                "AfterProgressionRevision",
+                "LedgerVersion",
+                "LedgerRevision",
+                "ExpectedGenerationFingerprint",
+                "Revision",
+                "Receipts");
+
+        private static readonly HashSet<string> DeathPenaltyReceiptFields =
+            Fields(
+                "OperationId",
+                "RequestFingerprint",
+                "DeathFingerprint",
+                "ReceiptHash",
+                "AccountId",
+                "ProfileId",
+                "CharacterId",
+                "PolicyVersion",
+                "LevelCapPolicyId",
+                "LevelCapPolicyRevision",
+                "Branch",
+                "BeforeLevel",
+                "AfterLevel",
+                "MaximumLevel",
+                "ExperienceUnitsPerLevel",
+                "BeforeInLevelExperienceUnits",
+                "AfterInLevelExperienceUnits",
+                "BeforeProgressionRevision",
+                "AfterProgressionRevision",
+                "PlanHash",
+                "RequiresProgressionWrite",
+                "RevivalCommitted");
+
+        private static readonly HashSet<string> MapDisclosureFields =
+            Fields(
+                "Version",
+                "AuthorityEpoch",
+                "AuthorityRevision",
+                "CatalogVersion",
+                "CatalogSha256",
+                "StateDigest",
+                "DiscoveredFeatureIds",
+                "VisibleRouteIds",
+                "VisibleObjectiveIds",
+                "VisibleAllegianceMarkerIds");
+
+        private static readonly HashSet<string> WorldStateFields =
+            Fields(
+                "Version",
+                "SnapshotRevision",
+                "EffectRevision",
+                "LastTrustedUtcSeconds",
+                "PolicyRevision",
+                "CatalogRevision",
+                "HasActiveInstance",
+                "ActiveInstance",
+                "CompletedHistory",
+                "OperationReceipts");
+
+        private static readonly HashSet<string> WorldStateInstanceFields =
+            Fields(
+                "InstanceId",
+                "DefinitionId",
+                "DefinitionSchemaVersion",
+                "DefinitionContentVersion",
+                "DefinitionSourceRevision",
+                "CorrelationId",
+                "OperationId",
+                "SourceSystemId",
+                "ExclusiveGroup",
+                "State",
+                "ScheduledAtUtcSeconds",
+                "StartedAtUtcSeconds",
+                "ExpectedEndAtUtcSeconds",
+                "CompletedAtUtcSeconds",
+                "CompletionReason",
+                "Revision",
+                "CommittedEffectRevision",
+                "ResolvedEffects");
 
         private static readonly HashSet<string> Nvs01EncounterFields =
             Fields(
@@ -995,6 +1247,112 @@ namespace AL.Data.Catalogs
                 "EventId",
                 "CorrelationId",
                 "ExpectedGenerationFingerprint");
+
+        private static readonly HashSet<string> TerritoryCaptureLedgerFields =
+            Fields(
+                "Version",
+                "CatalogId",
+                "CatalogRawSha256",
+                "StateRevisionHash",
+                "ProfileSessionId",
+                "Revisions",
+                "Receipts",
+                "Outbox");
+
+        private static readonly HashSet<string> NotificationHistoryFields =
+            Fields("Version", "Records", "Outbox");
+
+        private static readonly HashSet<string> NotificationHistoryRecordFields =
+            Fields(
+                "RecordId",
+                "NotificationSchemaVersion",
+                "DefinitionId",
+                "DefinitionVersion",
+                "SourceSystemId",
+                "CorrelationId",
+                "OccurredAtUtcTicks",
+                "Parameters",
+                "State",
+                "AcknowledgedAtUtcTicks",
+                "DismissedAtUtcTicks",
+                "ExpiresAtUtcTicks",
+                "LastDeliveryAttemptUtcTicks",
+                "DeliveryAttemptCount",
+                "SupersededByRecordId",
+                "DurabilityPolicy",
+                "PrivacyClass",
+                "RequiresAcknowledgement");
+
+        private static readonly HashSet<string> NotificationHistoryParameterFields =
+            Fields("Name", "Kind", "TextValue");
+
+        private static readonly HashSet<string> OfflineProductionCatchUpFields =
+            Fields(
+                "Version",
+                "OperationId",
+                "ReceiptId",
+                "ProfileId",
+                "VerifiedGenerationFingerprint",
+                "LastVerifiedTimestamp",
+                "CatchUpUntilTimestamp",
+                "CappedElapsedSeconds",
+                "CatalogId",
+                "CatalogSha256",
+                "SourceRevision",
+                "Deltas");
+
+        private static readonly HashSet<string> OfflineProductionDeltaFields =
+            Fields("ResourceType", "Amount");
+
+        private static readonly HashSet<string> TerritoryRevisionFields =
+            Fields("TerritoryId", "Revision");
+
+        private static readonly HashSet<string> TerritoryReceiptFields =
+            Fields(
+                "ReceiptId",
+                "OperationId",
+                "SemanticHash",
+                "Durability",
+                "ResultId",
+                "EventId",
+                "TerritoryId",
+                "PreviousOwner",
+                "NewOwner",
+                "PreviousRevision",
+                "NewRevision",
+                "WarzoneCreditsDelta",
+                "QuestProgressDelta",
+                "CatalogId",
+                "CatalogSchemaVersion",
+                "CatalogContentVersion",
+                "CatalogSourceRevision",
+                "CatalogRawSha256",
+                "StateRevisionHash",
+                "ProfileSessionId",
+                "AuthorizationId",
+                "AuthorizationSourceResultId",
+                "AuthorizationSourceResultHash");
+
+        private static readonly HashSet<string> TerritoryOutboxFields =
+            Fields(
+                "EventId",
+                "CaptureOperationId",
+                "TerritoryId",
+                "PreviousOwner",
+                "NewOwner",
+                "PreviousRevision",
+                "NewRevision",
+                "CatalogId",
+                "CatalogSchemaVersion",
+                "CatalogContentVersion",
+                "CatalogSourceRevision",
+                "CatalogRawSha256",
+                "StateRevisionHash",
+                "ProfileSessionId",
+                "AuthorizationId",
+                "AuthorizationSourceResultId",
+                "AuthorizationSourceResultHash",
+                "ReceiptId");
 
         public static SaveSemanticCandidate Validate(
             byte[] rawBytes,
@@ -1245,7 +1603,8 @@ namespace AL.Data.Catalogs
                     return CreateInvalid(sourceGeneration, rawBytes, originalByteCount, collector);
                 }
 
-                if (schemaVersion < policy.CurrentSaveSchemaVersion)
+                if (schemaVersion < policy.CurrentSaveSchemaVersion &&
+                    !(schemaVersion == 1 && policy.CurrentSaveSchemaVersion == 2))
                 {
                     state.HasMalformedData = true;
                     state.DisabledDomains |= SaveSemanticDomain.All;
@@ -1328,6 +1687,7 @@ namespace AL.Data.Catalogs
             ValidateTerritoryRows(root, policy.Authority, collector, state);
             ValidateRealmGemRows(root, policy.Authority, collector, state);
             ValidateWishgate(root, policy.Authority, collector, state);
+            ValidateWishgateTransaction(root, collector, state);
             ValidateWarmaster(root, isLegacySchema, policy.Authority, collector, state);
             ValidateChampionCustomization(
                 root,
@@ -1337,11 +1697,37 @@ namespace AL.Data.Catalogs
                 state);
             ValidateEquipmentRows(root, policy.Authority, collector, state);
             ValidateAppliedBossLootRewardRows(root, policy.Authority, collector, state);
-            ValidateNvs01Progress(root, policy.Nvs01Rule, collector, state);
+            ValidateNvs01Progress(root, policy.Nvs01Rule, schemaVersion, collector, state);
+            ValidateFirstWorldProgress(root, collector, state);
+            ValidateMapDisclosure(root, collector, state);
+            ValidateTerritoryCaptureLedger(root, collector, state);
+            ValidateOfflineProductionCatchUp(root, collector, state);
+            ValidateRealmSelection(root, collector, state);
+            ValidateChampionProgression(root, collector, state);
+            ValidateDeathPenalty(root, collector, state);
+            ValidateWorldState(root, collector, state);
+            ValidateNotificationHistory(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
-            if (state.HasMalformedData)
+            bool requiresProfileIdentityMigration =
+                schemaVersion == 1 &&
+                policy.CurrentSaveSchemaVersion == 2 &&
+                !state.HasMalformedData &&
+                !state.HasPreservedUnknown &&
+                !state.NeedsDataChange &&
+                !state.NeedsNormalization;
+            if (requiresProfileIdentityMigration)
+            {
+                collector.Add(
+                    "SAVE_PROFILE_ID_MIGRATION_REQUIRED",
+                    "$.ProfileId",
+                    SaveSemanticDomain.Metadata,
+                    SaveSemanticDiagnosticSeverity.Information);
+                outcome = SaveSemanticCandidateOutcome.MigrationRequired;
+                writable = false;
+            }
+            else if (state.HasMalformedData)
             {
                 outcome = SaveSemanticCandidateOutcome.DegradedMalformed;
                 writable = false;
@@ -1380,7 +1766,17 @@ namespace AL.Data.Catalogs
                 writable,
                 rawBytes,
                 originalByteCount,
-                collector);
+                collector,
+                ReadProfileId(root));
+        }
+
+        private static string ReadProfileId(StrictJsonObject root)
+        {
+            StrictJsonValue value;
+            var profileId = root != null && root.TryGet("ProfileId", out value)
+                ? value as StrictJsonString
+                : null;
+            return profileId == null ? string.Empty : profileId.Value;
         }
 
         private static void InspectUnknownTopLevelFields(
@@ -1404,6 +1800,531 @@ namespace AL.Data.Catalogs
                     AppendPropertyPath("$", property.Name),
                     SaveSemanticDomain.Envelope,
                     SaveSemanticDiagnosticSeverity.Warning);
+            }
+        }
+
+        private static void ValidateMapDisclosure(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.MapDisclosure";
+            StrictJsonValue value;
+            if (!root.TryGet("MapDisclosure", out value) || value is StrictJsonNull)
+            {
+                // Optional schema-v1 extension. Missing legacy state is admitted.
+                return;
+            }
+
+            var disclosure = value as StrictJsonObject;
+            if (disclosure == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_MAP_DISCLOSURE_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                disclosure,
+                MapDisclosureFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    disclosure,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_MAP_DISCLOSURE_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_MAP_DISCLOSURE_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+            }
+        }
+
+        private static void ValidateTerritoryCaptureLedger(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.TerritoryCaptureLedger";
+            StrictJsonValue value;
+            if (!root.TryGet("TerritoryCaptureLedger", out value) ||
+                value is StrictJsonNull)
+            {
+                // Optional schema-v1 extension. Missing legacy saves admit
+                // empty receipts/outbox and revision 0.
+                return;
+            }
+
+            var ledger = value as StrictJsonObject;
+            if (ledger == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_TERRITORY_CAPTURE_LEDGER_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                ledger,
+                TerritoryCaptureLedgerFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    ledger,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_TERRITORY_CAPTURE_LEDGER_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_TERRITORY_CAPTURE_LEDGER_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            ValidateTerritoryLedgerRows(
+                ledger,
+                "Revisions",
+                TerritoryRevisionFields,
+                new[] { "TerritoryId" },
+                Array.Empty<string>(),
+                new[] { "Revision" },
+                collector,
+                state);
+            ValidateTerritoryLedgerRows(
+                ledger,
+                "Receipts",
+                TerritoryReceiptFields,
+                new[]
+                {
+                    "ReceiptId",
+                    "OperationId",
+                    "SemanticHash",
+                    "ResultId",
+                    "EventId",
+                    "TerritoryId",
+                    "CatalogId",
+                    "CatalogSourceRevision",
+                    "CatalogRawSha256",
+                    "StateRevisionHash",
+                    "ProfileSessionId",
+                    "AuthorizationId",
+                    "AuthorizationSourceResultId",
+                    "AuthorizationSourceResultHash"
+                },
+                new[]
+                {
+                    "Durability",
+                    "PreviousOwner",
+                    "NewOwner",
+                    "WarzoneCreditsDelta",
+                    "QuestProgressDelta",
+                    "CatalogSchemaVersion",
+                    "CatalogContentVersion"
+                },
+                new[] { "PreviousRevision", "NewRevision" },
+                collector,
+                state);
+            ValidateTerritoryLedgerRows(
+                ledger,
+                "Outbox",
+                TerritoryOutboxFields,
+                new[]
+                {
+                    "EventId",
+                    "CaptureOperationId",
+                    "TerritoryId",
+                    "CatalogId",
+                    "CatalogSourceRevision",
+                    "CatalogRawSha256",
+                    "StateRevisionHash",
+                    "ProfileSessionId",
+                    "AuthorizationId",
+                    "AuthorizationSourceResultId",
+                    "AuthorizationSourceResultHash",
+                    "ReceiptId"
+                },
+                new[]
+                {
+                    "PreviousOwner",
+                    "NewOwner",
+                    "CatalogSchemaVersion",
+                    "CatalogContentVersion"
+                },
+                new[] { "PreviousRevision", "NewRevision" },
+                collector,
+                state);
+        }
+
+        private static void ValidateOfflineProductionCatchUp(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.OfflineProductionCatchUp";
+            StrictJsonValue value;
+            if (!root.TryGet("OfflineProductionCatchUp", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var catchUp = value as StrictJsonObject;
+            if (catchUp == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_OFFLINE_PRODUCTION_CATCHUP_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                catchUp,
+                OfflineProductionCatchUpFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    catchUp,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_OFFLINE_PRODUCTION_CATCHUP_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version == 0)
+            {
+                // JsonUtility emits a default empty object for a null
+                // optional field. Admit it as absent.
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_OFFLINE_PRODUCTION_CATCHUP_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            string ignored;
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "OperationId",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "ReceiptId",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "ProfileId",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "VerifiedGenerationFingerprint",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "CatalogId",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "CatalogSha256",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+            TryReadRequiredOpaqueString(
+                catchUp,
+                "SourceRevision",
+                path,
+                SaveSemanticDomain.Envelope,
+                false,
+                collector,
+                state,
+                out ignored);
+
+            long ignoredInt64;
+            TryReadRequiredInt64(
+                catchUp,
+                "LastVerifiedTimestamp",
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state,
+                out ignoredInt64);
+            TryReadRequiredInt64(
+                catchUp,
+                "CatchUpUntilTimestamp",
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state,
+                out ignoredInt64);
+            TryReadRequiredInt64(
+                catchUp,
+                "CappedElapsedSeconds",
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state,
+                out ignoredInt64);
+
+            StrictJsonValue deltasValue;
+            var deltas = catchUp.TryGet("Deltas", out deltasValue)
+                ? deltasValue as StrictJsonArray
+                : null;
+            if (deltas == null)
+            {
+                return;
+            }
+
+            for (var index = 0; index < deltas.Items.Count; index++)
+            {
+                string deltaPath = path + ".Deltas[" +
+                    index.ToString(CultureInfo.InvariantCulture) + "]";
+                var row = deltas.Items[index] as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_OFFLINE_PRODUCTION_CATCHUP_DELTA_INVALID",
+                        deltaPath,
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    OfflineProductionDeltaFields,
+                    deltaPath,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state);
+                int resourceType;
+                TryReadRequiredInt32(
+                    row,
+                    "ResourceType",
+                    deltaPath,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out resourceType);
+                TryReadRequiredInt64(
+                    row,
+                    "Amount",
+                    deltaPath,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out ignoredInt64);
+            }
+        }
+
+        private static void ValidateTerritoryLedgerRows(
+            StrictJsonObject ledger,
+            string collectionName,
+            HashSet<string> knownFields,
+            IReadOnlyList<string> requiredStringFields,
+            IReadOnlyList<string> requiredInt32Fields,
+            IReadOnlyList<string> requiredInt64Fields,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            StrictJsonValue value;
+            var rows = ledger.TryGet(collectionName, out value)
+                ? value as StrictJsonArray
+                : null;
+            if (rows == null)
+            {
+                return;
+            }
+
+            for (var index = 0; index < rows.Items.Count; index++)
+            {
+                string path = "$.TerritoryCaptureLedger." + collectionName +
+                    "[" + index.ToString(CultureInfo.InvariantCulture) + "]";
+                StrictJsonValue item = rows.Items[index];
+                var row = item as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_TERRITORY_CAPTURE_LEDGER_ROW_INVALID",
+                        path,
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    knownFields,
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state);
+
+                for (var fieldIndex = 0;
+                    fieldIndex < requiredStringFields.Count;
+                    fieldIndex++)
+                {
+                    string ignored;
+                    TryReadRequiredOpaqueString(
+                        row,
+                        requiredStringFields[fieldIndex],
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        false,
+                        collector,
+                        state,
+                        out ignored);
+                }
+
+                for (var fieldIndex = 0;
+                    fieldIndex < requiredInt32Fields.Count;
+                    fieldIndex++)
+                {
+                    int ignored;
+                    TryReadRequiredInt32(
+                        row,
+                        requiredInt32Fields[fieldIndex],
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state,
+                        out ignored);
+                }
+
+                for (var fieldIndex = 0;
+                    fieldIndex < requiredInt64Fields.Count;
+                    fieldIndex++)
+                {
+                    long ignored;
+                    TryReadRequiredInt64(
+                        row,
+                        requiredInt64Fields[fieldIndex],
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state,
+                        out ignored);
+                }
             }
         }
 
@@ -1464,6 +2385,39 @@ namespace AL.Data.Catalogs
             }
 
             return anyNonZero;
+        }
+
+        private static bool IsAllowedNvs01ExpectedGenerationFingerprint(
+            int schemaVersion,
+            string value)
+        {
+            if (value == null)
+            {
+                return false;
+            }
+
+            if (value.Length == 0)
+            {
+                return true;
+            }
+
+            if (schemaVersion < IdentityAwareSaveSchemaVersion ||
+                value.Length != 64)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (!(character >= '0' && character <= '9' ||
+                      character >= 'a' && character <= 'f'))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static void ValidateTopLevelShape(
@@ -2979,6 +3933,116 @@ namespace AL.Data.Catalogs
             }
         }
 
+        private static void ValidateWishgateTransaction(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.WishgateTransaction";
+            StrictJsonValue value;
+            if (!root.TryGet("WishgateTransaction", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var authority = value as StrictJsonObject;
+            if (authority == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WISHGATE_TRANSACTION_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                authority,
+                WishgateTransactionFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    authority,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WISHGATE_TRANSACTION_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_WISHGATE_TRANSACTION_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            StrictJsonValue recordsValue;
+            if (authority.TryGet("Records", out recordsValue) &&
+                !(recordsValue is StrictJsonNull))
+            {
+                var records = recordsValue as StrictJsonArray;
+                if (records == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_WISHGATE_TRANSACTION_RECORDS_INVALID",
+                        path + ".Records",
+                        SaveSemanticDomain.Envelope);
+                    return;
+                }
+
+                for (int i = 0; i < records.Items.Count; i++)
+                {
+                    var record = records.Items[i] as StrictJsonObject;
+                    if (record == null)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_WISHGATE_TRANSACTION_RECORD_INVALID",
+                            path + ".Records[" + i + "]",
+                            SaveSemanticDomain.Envelope);
+                        continue;
+                    }
+
+                    InspectUnexpectedProperties(
+                        record,
+                        WishgateTransitionRecordFields,
+                        path + ".Records[" + i + "]",
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state);
+                }
+            }
+        }
+
         private static void ValidateWarmaster(
             StrictJsonObject root,
             bool isLegacySchema,
@@ -3653,6 +4717,7 @@ namespace AL.Data.Catalogs
         private static void ValidateNvs01Progress(
             StrictJsonObject root,
             SaveSemanticNvs01Rule rule,
+            int schemaVersion,
             DiagnosticCollector collector,
             ValidationState state)
         {
@@ -3934,8 +4999,24 @@ namespace AL.Data.Catalogs
                 16,
                 collector,
                 state);
+            StrictJsonValue ignoredLedger;
+            if (progress.TryGet("AppliedOperationIds", out ignoredLedger))
+            {
+                ValidateNvs01StringArray(
+                    progress,
+                    "AppliedOperationIds",
+                    2,
+                    collector,
+                    state);
+            }
+
+            if (progress.TryGet("ApplicationReceipts", out ignoredLedger))
+            {
+                ValidateNvs01ApplicationReceipts(progress, collector, state);
+            }
+
             ValidateNvs01Encounter(progress, collector, state);
-            ValidateNvs01Operation(progress, collector, state);
+            ValidateNvs01Operation(progress, schemaVersion, collector, state);
 
             if (version == 0 && !IsNeutralNvs01Progress(progress))
             {
@@ -3946,6 +5027,1169 @@ namespace AL.Data.Catalogs
                     path,
                     SaveSemanticDomain.Narrative);
             }
+        }
+
+        private static void ValidateNotificationHistory(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.NotificationHistory";
+            StrictJsonValue value;
+            if (!root.TryGet("NotificationHistory", out value) || value is StrictJsonNull)
+            {
+                // Optional schema-v2 extension. Missing legacy state is admitted.
+                return;
+            }
+
+            var history = value as StrictJsonObject;
+            if (history == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                history,
+                NotificationHistoryFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    history,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            if (version == 0)
+            {
+                return;
+            }
+
+            ValidateNotificationHistoryRows(history, "Records", collector, state);
+            ValidateNotificationHistoryRows(history, "Outbox", collector, state);
+        }
+
+        private static void ValidateNotificationHistoryRows(
+            StrictJsonObject history,
+            string collectionName,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            StrictJsonValue value;
+            if (!history.TryGet(collectionName, out value) || value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var rows = value as StrictJsonArray;
+            string collectionPath = "$.NotificationHistory." + collectionName;
+            if (rows == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_ARRAY_INVALID",
+                    collectionPath,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            for (int index = 0; index < rows.Items.Count; index++)
+            {
+                string path = collectionPath +
+                    "[" + index.ToString(CultureInfo.InvariantCulture) + "]";
+                var row = rows.Items[index] as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NOTIFICATION_HISTORY_RECORD_INVALID",
+                        path,
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    NotificationHistoryRecordFields,
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state);
+
+                string ignored;
+                TryReadRequiredOpaqueString(
+                    row,
+                    "RecordId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state,
+                    out ignored);
+                TryReadRequiredOpaqueString(
+                    row,
+                    "DefinitionId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state,
+                    out ignored);
+                TryReadRequiredOpaqueString(
+                    row,
+                    "CorrelationId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state,
+                    out ignored);
+
+                int privacyClass;
+                if (TryReadRequiredInt32(
+                        row,
+                        "PrivacyClass",
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state,
+                        out privacyClass) &&
+                    privacyClass == 2)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NOTIFICATION_HISTORY_SENSITIVE_TECHNICAL",
+                        path + ".PrivacyClass",
+                        SaveSemanticDomain.Envelope);
+                }
+
+                StrictJsonValue parametersValue;
+                if (!row.TryGet("Parameters", out parametersValue) ||
+                    parametersValue is StrictJsonNull)
+                {
+                    continue;
+                }
+
+                var parameters = parametersValue as StrictJsonArray;
+                if (parameters == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NOTIFICATION_HISTORY_PARAMETERS_INVALID",
+                        path + ".Parameters",
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                for (int parameterIndex = 0;
+                     parameterIndex < parameters.Items.Count;
+                     parameterIndex++)
+                {
+                    string parameterPath = path +
+                        ".Parameters[" +
+                        parameterIndex.ToString(CultureInfo.InvariantCulture) +
+                        "]";
+                    var parameter = parameters.Items[parameterIndex] as StrictJsonObject;
+                    if (parameter == null)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_NOTIFICATION_HISTORY_PARAMETER_INVALID",
+                            parameterPath,
+                            SaveSemanticDomain.Envelope);
+                        continue;
+                    }
+
+                    InspectUnexpectedProperties(
+                        parameter,
+                        NotificationHistoryParameterFields,
+                        parameterPath,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state);
+                }
+            }
+        }
+
+        private static void ValidateWorldState(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.WorldState";
+            StrictJsonValue value;
+            if (!root.TryGet("WorldState", out value) || value is StrictJsonNull)
+            {
+                // Optional schema-v2 extension. Missing legacy state is admitted.
+                return;
+            }
+
+            var worldState = value as StrictJsonObject;
+            if (worldState == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                worldState,
+                WorldStateFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    worldState,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            if (version == 0)
+            {
+                return;
+            }
+
+            ValidateWorldStateInstanceObject(
+                worldState,
+                "ActiveInstance",
+                path,
+                collector,
+                state);
+            ValidateWorldStateObjectArray(
+                worldState,
+                "CompletedHistory",
+                path,
+                collector,
+                state);
+            ValidateWorldStateObjectArray(
+                worldState,
+                "OperationReceipts",
+                path,
+                collector,
+                state);
+        }
+
+        private static void ValidateWorldStateInstanceObject(
+            StrictJsonObject parent,
+            string fieldName,
+            string parentPath,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            StrictJsonValue value;
+            if (!parent.TryGet(fieldName, out value) || value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var instance = value as StrictJsonObject;
+            string path = parentPath + "." + fieldName;
+            if (instance == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_INSTANCE_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                instance,
+                WorldStateInstanceFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+        }
+
+        private static void ValidateWorldStateObjectArray(
+            StrictJsonObject parent,
+            string fieldName,
+            string parentPath,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            StrictJsonValue value;
+            if (!parent.TryGet(fieldName, out value) || value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var array = value as StrictJsonArray;
+            string path = parentPath + "." + fieldName;
+            if (array == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WORLD_STATE_ARRAY_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+            }
+        }
+
+        private static void ValidateRealmSelection(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.RealmSelection";
+            StrictJsonValue value;
+            if (!root.TryGet("RealmSelection", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var authority = value as StrictJsonObject;
+            if (authority == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                authority,
+                RealmSelectionFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    authority,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            bool committed;
+            if (!TryReadRequiredBoolean(
+                    authority,
+                    "Committed",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out committed))
+            {
+                return;
+            }
+
+            int selectedRealm;
+            if (!TryReadRequiredInt32(
+                    authority,
+                    "SelectedRealm",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out selectedRealm))
+            {
+                return;
+            }
+
+            string profileId;
+            string transactionId;
+            string correlationId;
+            string operationId;
+            string eventId;
+            string catalogVersion;
+            string provenance;
+            string receiptFingerprint;
+            string expectedGeneration;
+            long revision;
+            if (!TryReadRequiredString(
+                    authority,
+                    "ProfileId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out profileId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "TransactionId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out transactionId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "CorrelationId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out correlationId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "OperationId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out operationId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "EventId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out eventId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "CatalogVersion",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out catalogVersion) ||
+                !TryReadRequiredString(
+                    authority,
+                    "Provenance",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out provenance) ||
+                !TryReadRequiredString(
+                    authority,
+                    "ReceiptFingerprint",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out receiptFingerprint) ||
+                !TryReadRequiredString(
+                    authority,
+                    "ExpectedGenerationFingerprint",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out expectedGeneration) ||
+                !TryReadRequiredInt64(
+                    authority,
+                    "Revision",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out revision))
+            {
+                return;
+            }
+
+            if (!committed)
+            {
+                if ((version == 0 || version == 1) &&
+                    selectedRealm == 0 &&
+                    revision == 0 &&
+                    string.IsNullOrEmpty(profileId) &&
+                    string.IsNullOrEmpty(transactionId) &&
+                    string.IsNullOrEmpty(correlationId) &&
+                    string.IsNullOrEmpty(operationId) &&
+                    string.IsNullOrEmpty(eventId) &&
+                    string.IsNullOrEmpty(catalogVersion) &&
+                    string.IsNullOrEmpty(provenance) &&
+                    string.IsNullOrEmpty(receiptFingerprint) &&
+                    string.IsNullOrEmpty(expectedGeneration))
+                {
+                    return;
+                }
+
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_UNCOMMITTED_SLOT",
+                    path + ".Committed",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version != 1)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_VERSION_INVALID",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (selectedRealm < 1 || selectedRealm > 4)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_REALM_INVALID",
+                    path + ".SelectedRealm",
+                    SaveSemanticDomain.Envelope);
+            }
+
+            int envelopeRealm;
+            StrictJsonValue envelopeRealmValue;
+            if (root.TryGet("SelectedRealm", out envelopeRealmValue) &&
+                TryReadInt32(envelopeRealmValue, out envelopeRealm) &&
+                envelopeRealm != selectedRealm)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_REALM_MISMATCH",
+                    path + ".SelectedRealm",
+                    SaveSemanticDomain.Envelope);
+            }
+
+            if (!IsCanonicalProfileIdValue(profileId))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_PROFILE_ID_INVALID",
+                    path + ".ProfileId",
+                    SaveSemanticDomain.Envelope);
+            }
+
+            if (!IsBoundedRealmIdentity(transactionId) ||
+                !IsBoundedRealmIdentity(correlationId) ||
+                !IsBoundedRealmIdentity(operationId) ||
+                !IsBoundedRealmIdentity(receiptFingerprint) ||
+                (!string.IsNullOrEmpty(eventId) && !IsBoundedRealmIdentity(eventId)))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_IDENTITY_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+            }
+
+            if (!string.Equals(provenance, "initial", StringComparison.Ordinal) &&
+                !string.Equals(provenance, "legacy-migration", StringComparison.Ordinal))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_PROVENANCE_INVALID",
+                    path + ".Provenance",
+                    SaveSemanticDomain.Envelope);
+            }
+
+            if (revision != 1)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_REVISION_INVALID",
+                    path + ".Revision",
+                    SaveSemanticDomain.Envelope);
+            }
+        }
+
+        private static bool IsBoundedRealmIdentity(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) ||
+                value.Length < 8 ||
+                value.Length > 64)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < value.Length; i++)
+            {
+                char c = value[i];
+                if (!((c >= 'A' && c <= 'Z') ||
+                      (c >= 'a' && c <= 'z') ||
+                      (c >= '0' && c <= '9') ||
+                      c == '_' ||
+                      c == '-' ||
+                      c == '.'))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static void ValidateChampionProgression(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.ChampionProgression";
+            StrictJsonValue value;
+            if (!root.TryGet("ChampionProgression", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var progression = value as StrictJsonObject;
+            if (progression == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_CHAMPION_PROGRESSION_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                progression,
+                ChampionProgressionFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    progression,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_CHAMPION_PROGRESSION_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_CHAMPION_PROGRESSION_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+            }
+        }
+
+        private static void ValidateDeathPenalty(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.DeathPenalty";
+            StrictJsonValue value;
+            if (!root.TryGet("DeathPenalty", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var authority = value as StrictJsonObject;
+            if (authority == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_DEATH_PENALTY_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                authority,
+                DeathPenaltyFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    authority,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_DEATH_PENALTY_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_DEATH_PENALTY_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            StrictJsonValue receiptsValue;
+            if (authority.TryGet("Receipts", out receiptsValue) &&
+                !(receiptsValue is StrictJsonNull))
+            {
+                var receipts = receiptsValue as StrictJsonArray;
+                if (receipts == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_DEATH_PENALTY_RECEIPTS_INVALID",
+                        path + ".Receipts",
+                        SaveSemanticDomain.Envelope);
+                    return;
+                }
+
+                for (int i = 0; i < receipts.Items.Count; i++)
+                {
+                    var receipt = receipts.Items[i] as StrictJsonObject;
+                    if (receipt == null)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_DEATH_PENALTY_RECEIPT_INVALID",
+                            path + ".Receipts[" + i + "]",
+                            SaveSemanticDomain.Envelope);
+                        continue;
+                    }
+
+                    InspectUnexpectedProperties(
+                        receipt,
+                        DeathPenaltyReceiptFields,
+                        path + ".Receipts[" + i + "]",
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state);
+                }
+            }
+        }
+
+        private static void ValidateFirstWorldProgress(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.FirstWorldProgress";
+            StrictJsonValue value;
+            if (!root.TryGet("FirstWorldProgress", out value) ||
+                value is StrictJsonNull)
+            {
+                // Optional schema-v1 extension. Runtime reconciliation maps an
+                // omitted legacy value from already committed lordship evidence.
+                return;
+            }
+
+            var progress = value as StrictJsonObject;
+            if (progress == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_PROGRESS_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                progress,
+                FirstWorldProgressFields,
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    progress,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Narrative,
+                    rawOnly: true);
+                return;
+            }
+
+            long revision;
+            bool hasRevision = TryReadRequiredInt64(
+                progress,
+                "Revision",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out revision);
+            if (hasRevision &&
+                (revision < 0 || version == 1 && revision == 0))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_REVISION_INVALID",
+                    path + ".Revision",
+                    SaveSemanticDomain.Narrative);
+            }
+
+            ValidateFirstWorldInteger(
+                progress,
+                "TutorialStep",
+                version == 0 ? 0 : 1,
+                version == 0 ? 0 : 3,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "TeachingBeat",
+                version == 0 ? 0 : 1,
+                version == 0 ? 0 : 5,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "MovementConfirmationCount",
+                0,
+                version == 0 ? 0 : 1,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "BasicAttackConfirmationCount",
+                0,
+                version == 0 ? 0 : 1,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "CompletionEventCount",
+                0,
+                version == 0 ? 0 : 1,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "OmenOfferCount",
+                0,
+                version == 0 ? 0 : 1,
+                collector,
+                state);
+            ValidateFirstWorldInteger(
+                progress,
+                "ProofPhase",
+                0,
+                version == 0 ? 0 : 10,
+                collector,
+                state);
+
+            bool blockTaught;
+            bool hasBlockTaught = TryReadRequiredBoolean(
+                progress,
+                "BlockTaught",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out blockTaught);
+            bool handoffCommitted;
+            bool hasHandoff = TryReadRequiredBoolean(
+                progress,
+                "HandoffCommitted",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out handoffCommitted);
+            bool omenAccepted;
+            bool hasOmenAccepted = TryReadRequiredBoolean(
+                progress,
+                "ProofOmenAccepted",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out omenAccepted);
+            bool autoAccept;
+            bool hasAutoAccept = TryReadRequiredBoolean(
+                progress,
+                "ProofAutoAccept",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out autoAccept);
+
+            bool neutralStrings = true;
+            foreach (string field in new[]
+                     {
+                         "ProofQuestId",
+                         "ProofQuestStateId",
+                         "ProofObjectiveId",
+                         "ProofDialogueId",
+                         "ProofLastEventId",
+                         "ProofChapterVariantId"
+                     })
+            {
+                string text;
+                bool valid = TryReadRequiredString(
+                    progress,
+                    field,
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    allowBlank: true,
+                    collector,
+                    state,
+                    out text);
+                neutralStrings &= valid && text.Length == 0;
+            }
+
+            string operationId;
+            bool hasOperationId = TryReadRequiredString(
+                progress,
+                "LastOperationId",
+                path,
+                SaveSemanticDomain.Narrative,
+                allowBlank: true,
+                collector,
+                state,
+                out operationId);
+            if (hasOperationId &&
+                (version == 0 && operationId.Length != 0 ||
+                 version == 1 &&
+                 (string.IsNullOrWhiteSpace(operationId) ||
+                  operationId.Length > 96)))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_OPERATION_ID_INVALID",
+                    path + ".LastOperationId",
+                    SaveSemanticDomain.Narrative);
+            }
+
+            if (version == 0 &&
+                (hasBlockTaught && blockTaught ||
+                 hasHandoff && handoffCommitted ||
+                 hasOmenAccepted && omenAccepted ||
+                 hasAutoAccept && autoAccept ||
+                 !neutralStrings))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_FIRST_WORLD_NEUTRAL_STATE_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+            }
+        }
+
+        private static void ValidateFirstWorldInteger(
+            StrictJsonObject progress,
+            string fieldName,
+            int minimum,
+            int maximum,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            int value;
+            if (!TryReadRequiredInt32(
+                    progress,
+                    fieldName,
+                    "$.FirstWorldProgress",
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out value) ||
+                value >= minimum && value <= maximum)
+            {
+                return;
+            }
+
+            MarkMalformed(
+                state,
+                collector,
+                "SAVE_FIRST_WORLD_VALUE_INVALID",
+                "$.FirstWorldProgress." + fieldName,
+                SaveSemanticDomain.Narrative);
         }
 
         private static bool IsNeutralNvs01Progress(StrictJsonObject progress)
@@ -4006,6 +6250,25 @@ namespace AL.Data.Catalogs
                     ? value as StrictJsonArray
                     : null;
                 if (rows == null || rows.Items.Count != 0)
+                {
+                    return false;
+                }
+            }
+
+            foreach (string field in new[]
+                     {
+                         "AppliedOperationIds",
+                         "ApplicationReceipts"
+                     })
+            {
+                StrictJsonValue optional;
+                if (!progress.TryGet(field, out optional))
+                {
+                    continue;
+                }
+
+                var optionalRows = optional as StrictJsonArray;
+                if (optionalRows == null || optionalRows.Items.Count != 0)
                 {
                     return false;
                 }
@@ -4196,6 +6459,84 @@ namespace AL.Data.Catalogs
             }
         }
 
+        private static void ValidateNvs01ApplicationReceipts(
+            StrictJsonObject progress,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.Nvs01Progress.ApplicationReceipts";
+            StrictJsonValue value;
+            var rows = progress.TryGet("ApplicationReceipts", out value)
+                ? value as StrictJsonArray
+                : null;
+            if (rows == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_APPLICATION_RECEIPTS_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            if (rows.Items.Count > 2)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_APPLICATION_RECEIPT_LIMIT",
+                    path,
+                    SaveSemanticDomain.Narrative);
+            }
+
+            var count = Math.Min(rows.Items.Count, 2);
+            for (var index = 0; index < count; index++)
+            {
+                string rowPath = path + "[" +
+                                 index.ToString(CultureInfo.InvariantCulture) + "]";
+                var row = rows.Items[index] as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_APPLICATION_RECEIPT_INVALID",
+                        rowPath,
+                        SaveSemanticDomain.Narrative);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    Nvs01ApplicationReceiptFields,
+                    rowPath,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state);
+                string currency;
+                if (TryReadRequiredString(
+                        row,
+                        "TechnicalCurrencyId",
+                        rowPath,
+                        SaveSemanticDomain.Narrative,
+                        allowBlank: true,
+                        collector,
+                        state,
+                        out currency) &&
+                    currency.Length != 0 &&
+                    !string.Equals(currency, "oathmark", StringComparison.Ordinal))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_APPLICATION_RECEIPT_CURRENCY_INVALID",
+                        rowPath + ".TechnicalCurrencyId",
+                        SaveSemanticDomain.Narrative);
+                }
+            }
+        }
+
         private static void ValidateNvs01StringArray(
             StrictJsonObject progress,
             string field,
@@ -4309,6 +6650,7 @@ namespace AL.Data.Catalogs
 
         private static void ValidateNvs01Operation(
             StrictJsonObject progress,
+            int schemaVersion,
             DiagnosticCollector collector,
             ValidationState state)
         {
@@ -4364,12 +6706,16 @@ namespace AL.Data.Catalogs
                 var expectedFingerprint =
                     expectedFingerprintValue as StrictJsonString;
                 if (expectedFingerprint == null ||
-                    expectedFingerprint.Value.Length != 0)
+                    !IsAllowedNvs01ExpectedGenerationFingerprint(
+                        schemaVersion,
+                        expectedFingerprint.Value))
                 {
                     MarkMalformed(
                         state,
                         collector,
-                        "SAVE_SCHEMA_V1_NVS01_EXPECTED_GENERATION_INVALID",
+                        schemaVersion >= IdentityAwareSaveSchemaVersion
+                            ? "SAVE_SCHEMA_V2_NVS01_EXPECTED_GENERATION_INVALID"
+                            : "SAVE_SCHEMA_V1_NVS01_EXPECTED_GENERATION_INVALID",
                         path + ".ExpectedGenerationFingerprint",
                         SaveSemanticDomain.Narrative);
                 }
@@ -5369,7 +7715,8 @@ namespace AL.Data.Catalogs
             bool writable,
             byte[] rawBytes,
             int originalByteCount,
-            DiagnosticCollector collector)
+            DiagnosticCollector collector,
+            string profileId = "")
         {
             return new SaveSemanticCandidate(
                 sourceGeneration,
@@ -5384,7 +7731,8 @@ namespace AL.Data.Catalogs
                 writable,
                 rawBytes,
                 originalByteCount,
-                collector.Freeze());
+                collector.Freeze(),
+                profileId);
         }
 
         private static string AppendPropertyPath(string path, string name)

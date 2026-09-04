@@ -186,6 +186,121 @@ class UnityBridgeContractTest {
     }
 
     @Test
+    fun readyAcknowledgementParsesOnlyExactCurrentRequestShape() {
+        val ready = accepted(
+            UnityBridgeContract.parseReady(
+                readyJson(requestId = REQUEST_ONE)
+            )
+        )
+
+        assertEquals(UNITY_BRIDGE_CONTRACT_VERSION, ready.contractVersion)
+        assertEquals(REQUEST_ONE, ready.requestId)
+        assertEquals(ROUTE, ready.routeId)
+        assertRejected(
+            UnityBridgeContract.parseReady(
+                readyJson(REQUEST_ONE).dropLast(1) + ",\"unknown\":true}"
+            ),
+            UnityBridgeProtocolErrorCode.UnexpectedField
+        )
+        assertRejected(
+            UnityBridgeContract.parseReady(
+                """{"contractVersion":2,"requestId":"request-0001","requestId":"request-0002","routeId":"bridge.smoke"}"""
+            ),
+            UnityBridgeProtocolErrorCode.DuplicateField,
+            "requestId"
+        )
+    }
+
+    @Test
+    fun readyAcknowledgementIsGenerationFencedAndDeliveredOnce() {
+        val requestIds = ArrayDeque(listOf(REQUEST_ONE, REQUEST_TWO))
+        val session = UnityBridgeSession { requestIds.removeFirst() }
+        val first = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        val second = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+
+        assertReadyRejected(
+            session.consumeReady(readyJson(first.request.requestId)),
+            UnityBridgeProtocolErrorCode.RequestMismatch
+        )
+        assertEquals(
+            second.request.requestId,
+            readyDelivered(session.consumeReady(readyJson(second.request.requestId))).requestId
+        )
+        assertReadyRejected(
+            session.consumeReady(readyJson(second.request.requestId)),
+            UnityBridgeProtocolErrorCode.DuplicateReady
+        )
+    }
+
+    @Test
+    fun readyAcknowledgementAfterTerminalOutcomePerformsNoWork() {
+        val session = UnityBridgeSession { REQUEST_ONE }
+        val start = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        delivered(session.consumeOutcome(outcomeJson(start.request.requestId)))
+
+        assertReadyRejected(
+            session.consumeReady(readyJson(start.request.requestId)),
+            UnityBridgeProtocolErrorCode.ReadyAfterOutcome
+        )
+    }
+
+    @Test
+    fun readinessTimeoutExpiresOnlyTheCurrentPendingRequestOnce() {
+        val requestIds = ArrayDeque(listOf(REQUEST_ONE, REQUEST_TWO))
+        val session = UnityBridgeSession { requestIds.removeFirst() }
+        val first = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        val second = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+
+        assertReadyTimeoutRejected(
+            session.expireReady(first.request.requestId, first.request.routeId),
+            UnityBridgeProtocolErrorCode.RequestMismatch
+        )
+        assertEquals(
+            second.request,
+            readyTimeoutExpired(
+                session.expireReady(second.request.requestId, second.request.routeId)
+            )
+        )
+        assertReadyTimeoutRejected(
+            session.expireReady(second.request.requestId, second.request.routeId),
+            UnityBridgeProtocolErrorCode.ReadyAfterTimeout
+        )
+    }
+
+    @Test
+    fun readinessTimeoutCannotOverrideReadyOrTerminalOutcome() {
+        val requestIds = ArrayDeque(listOf(REQUEST_ONE, REQUEST_TWO))
+        val session = UnityBridgeSession { requestIds.removeFirst() }
+        val readyStart = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        readyDelivered(session.consumeReady(readyJson(readyStart.request.requestId)))
+
+        assertReadyTimeoutRejected(
+            session.expireReady(readyStart.request.requestId, readyStart.request.routeId),
+            UnityBridgeProtocolErrorCode.DuplicateReady
+        )
+
+        val outcomeStart = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        delivered(session.consumeOutcome(outcomeJson(outcomeStart.request.requestId)))
+
+        assertReadyTimeoutRejected(
+            session.expireReady(outcomeStart.request.requestId, outcomeStart.request.routeId),
+            UnityBridgeProtocolErrorCode.ReadyAfterOutcome
+        )
+    }
+
+    @Test
+    fun readyAcknowledgementAfterTimeoutIsInert() {
+        val session = UnityBridgeSession { REQUEST_ONE }
+        val start = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        readyTimeoutExpired(session.expireReady(start.request.requestId, start.request.routeId))
+
+        assertReadyRejected(
+            session.consumeReady(readyJson(start.request.requestId)),
+            UnityBridgeProtocolErrorCode.ReadyAfterTimeout
+        )
+    }
+
+    @Test
     fun malformedOutcomeDoesNotConsumeLaterValidOutcome() {
         val session = UnityBridgeSession { REQUEST_ONE }
         val start = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
@@ -199,6 +314,26 @@ class UnityBridgeContractTest {
         )
 
         assertEquals(start.request.requestId, delivered.requestId)
+    }
+
+    @Test
+    fun cancelledOutcomeCompletesOneCorrelatedSessionWithoutAResultIdentity() {
+        val session = UnityBridgeSession { REQUEST_ONE }
+        val start = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        val cancelled = outcomeJson(
+            requestId = start.request.requestId,
+            status = "cancelled"
+        )
+
+        val outcome = delivered(session.consumeOutcome(cancelled))
+
+        assertEquals(UnityRouteOutcomeStatus.Cancelled, outcome.status)
+        assertEquals(start.request.requestId, outcome.requestId)
+        assertNull(outcome.resultId)
+        assertDeliveryRejected(
+            session.consumeOutcome(cancelled),
+            UnityBridgeProtocolErrorCode.DuplicateOutcome
+        )
     }
 
     @Test
@@ -284,12 +419,12 @@ class UnityBridgeContractTest {
         val activeToken = registry.register { activeHostPayload = it }
 
         registry.clear(oldToken)
-        registry.report("active")
+        registry.reportOutcome("active")
         assertNull(oldHostPayload)
         assertEquals("active", activeHostPayload)
 
         registry.clear(activeToken)
-        registry.report("late")
+        registry.reportOutcome("late")
         assertEquals("active", activeHostPayload)
     }
 
@@ -328,6 +463,37 @@ class UnityBridgeContractTest {
         }
     }
 
+    @Test
+    fun jvmReadyCallbackUsesItsOwnCorrelatedBoundary() {
+        val session = UnityBridgeSession { REQUEST_ONE }
+        val start = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        var readyDelivery: UnityBridgeSessionReadyDelivery? = null
+        var outcomePayload: String? = null
+        val token = UnityBridgeCallbacks.register(
+            outcomeCallback = { outcomePayload = it },
+            readyCallback = { readyDelivery = session.consumeReady(it) }
+        )
+
+        try {
+            val boundary = UnityBridgeCallbacks::class.java.getMethod(
+                "reportReady",
+                String::class.java
+            )
+            val invocation = runCatching {
+                boundary.invoke(null, readyJson(start.request.requestId))
+            }
+
+            assertNull(invocation.exceptionOrNull())
+            assertNull(outcomePayload)
+            assertEquals(
+                start.request.requestId,
+                readyDelivered(readyDelivery!!).requestId
+            )
+        } finally {
+            UnityBridgeCallbacks.clear(token)
+        }
+    }
+
     private fun validRequest(): UnityRouteRequest {
         return accepted(
             UnityBridgeContract.createRequest(
@@ -354,6 +520,17 @@ class UnityBridgeContractTest {
             diagnosticCode?.let { put("diagnosticCode", it) }
             resultId?.let { put("resultId", it) }
             payload?.let { put("payload", it) }
+        }.toString()
+    }
+
+    private fun readyJson(
+        requestId: String,
+        routeId: String = ROUTE
+    ): String {
+        return buildJsonObject {
+            put("contractVersion", UNITY_BRIDGE_CONTRACT_VERSION)
+            put("requestId", requestId)
+            put("routeId", routeId)
         }.toString()
     }
 
@@ -396,6 +573,42 @@ class UnityBridgeContractTest {
         assertEquals(
             expected,
             (delivery as UnityBridgeSessionDelivery.Rejected).error.code
+        )
+    }
+
+    private fun readyDelivered(
+        delivery: UnityBridgeSessionReadyDelivery
+    ): UnityRouteReady {
+        assertTrue(delivery is UnityBridgeSessionReadyDelivery.Delivered)
+        return (delivery as UnityBridgeSessionReadyDelivery.Delivered).ready
+    }
+
+    private fun assertReadyRejected(
+        delivery: UnityBridgeSessionReadyDelivery,
+        expected: UnityBridgeProtocolErrorCode
+    ) {
+        assertTrue(delivery is UnityBridgeSessionReadyDelivery.Rejected)
+        assertEquals(
+            expected,
+            (delivery as UnityBridgeSessionReadyDelivery.Rejected).error.code
+        )
+    }
+
+    private fun readyTimeoutExpired(
+        timeout: UnityBridgeSessionReadyTimeout
+    ): UnityRouteRequest {
+        assertTrue(timeout is UnityBridgeSessionReadyTimeout.Expired)
+        return (timeout as UnityBridgeSessionReadyTimeout.Expired).request
+    }
+
+    private fun assertReadyTimeoutRejected(
+        timeout: UnityBridgeSessionReadyTimeout,
+        expected: UnityBridgeProtocolErrorCode
+    ) {
+        assertTrue(timeout is UnityBridgeSessionReadyTimeout.Rejected)
+        assertEquals(
+            expected,
+            (timeout as UnityBridgeSessionReadyTimeout.Rejected).error.code
         )
     }
 

@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "MeshyEnvironmentKitExecutionEvidence",
+  "recordId": "meshy_execution_slagfall_environment_2026-08-31_v001",
+  "recordedBy": "default",
+  "recordedAtUtc": "2026-08-31T07:36:46Z",
+  "sourceVersion": "tdf-eco-slagfall-2026-07-30-v002",
+  "subject": "Stonehold Slagfall Quarry eight-family environment kit",
+  "state": "OWNER_APPROVED_ALL_EIGHT_PRODUCTION_CANDIDATES",
+  "authorizationHistory": {
+    "prospectivePolicy": "After an approved 2D handoff, the initial 3D generation and one corrective 3D retry per asset may run automatically; any further retry requires owner approval.",
+    "policyRecordedAtUtc": "2026-08-31",
+    "historicalQualification": "The original eight image-to-3D tasks and first four corrective tasks were executed before a newly cited explicit authorization record was written. The owner subsequently set the prospective policy and approved all eight final Unity candidates. This visual approval does not rewrite the authorization state that existed at launch.",
+    "additionalGenerationAfterApproval": false
+  },
+  "ownerApproval": {
+    "decision": "Approve all",
+    "approvalRecordedAtUtc": "2026-08-31T07:36:46Z",
+    "reviewSurface": "Unity Editor",
+    "approvedFamilies": [
+      "irregular_fracture_raft",
+      "broken_fracture_raft",
+      "undercut_extraction_ledge",
+      "talus_apron",
+      "collapsed_gallery_mouth",
+      "diagonal_fault_slab",
+      "braided_runoff_pool",
+      "iron_soil_wedge"
+    ],
+    "scope": "Family identity, silhouette, material read, and profiling-scale Unity presentation as production candidates.",
+    "notApprovedByThisDecision": [
+      "final terrain or prop dimensions",
+      "navigation or route topology",
+      "gallery entry gameplay",
+      "final world placement or spawn density",
+      "combat, rewards, saves, audio, or release balance"
+    ]
+  },
+  "originalImageTo3dTasks": [
+    {"family": "irregular_fracture_raft", "providerTaskId": "01a05659-6e95-70f1-b2cd-809348a64e34", "aiModel": "meshy-t2", "selected": true},
+    {"family": "broken_fracture_raft", "providerTaskId": "01a05659-76ea-7487-8e8d-1f2839af4677", "aiModel": "meshy-t2", "selected": false},
+    {"family": "undercut_extraction_ledge", "providerTaskId": "01a05659-7b01-7535-95a3-1f0043f59520", "aiModel": "meshy-t2", "selected": false},
+    {"family": "talus_apron", "providerTaskId": "01a05659-82b0-72d7-aa53-06e327e73409", "aiModel": "meshy-t2", "selected": false},
+    {"family": "collapsed_gallery_mouth", "providerTaskId": "01a05659-8a66-7478-9889-bf418359d6b1", "aiModel": "meshy-t2", "selected": true},
+    {"family": "diagonal_fault_slab", "providerTaskId": "01a05659-92ec-73c9-aa93-3c2f02d9f7c7", "aiModel": "meshy-t2", "selected": false},
+    {"family": "braided_runoff_pool", "providerTaskId": "01a05659-9e03-7683-b2fb-f3513a10b2c4", "aiModel": "meshy-t2", "selected": false},
+    {"family": "iron_soil_wedge", "providerTaskId": "01a05659-a56c-73e0-8506-9a11d220eae5", "aiModel": "meshy-t2", "selected": false}
+  ],
+  "correctiveTasks": [
+    {"family": "undercut_extraction_ledge", "providerTaskId": "01a0566b-7f96-7627-b8e6-d2bf268bfc08", "operation": "image_to_3d", "aiModel": "meshy-7", "selected": true},
+    {"family": "diagonal_fault_slab", "providerTaskId": "01a0566b-886d-7502-8706-f1e74eb91b89", "operation": "image_to_3d", "aiModel": "meshy-7", "selected": true},
+    {"family": "braided_runoff_pool", "providerTaskId": "01a0566b-905f-7101-9563-8ebb8ee014fc", "operation": "image_to_3d", "aiModel": "meshy-7", "selected": true},
+    {"family": "iron_soil_wedge", "providerTaskId": "01a0566b-987e-700a-af09-13a2879fa919", "operation": "image_to_3d", "aiModel": "meshy-7", "selected": true},
+    {"family": "broken_fracture_raft", "providerTaskId": "01a05681-ede9-7256-a87a-1107f9f7ec8b", "operation": "image_to_image", "aiModel": "gpt-image-2", "selected": true},
+    {"family": "talus_apron", "providerTaskId": "01a05681-f939-762a-9f21-3046036d85bd", "operation": "image_to_image", "aiModel": "gpt-image-2", "selected": true},
+    {"family": "broken_fracture_raft", "providerTaskId": "01a05683-89de-7278-8e3c-f3a29dd9b83e", "operation": "image_to_3d", "aiModel": "meshy-7", "selected": true},
+    {"family": "talus_apron", "providerTaskId": "01a05683-93a9-76e4-bb42-56b9350015db", "operation": "image_to_3d", "aiModel": "meshy-7", "selected": true}
+  ],
+  "selectedSources": [
+    {
+      "family": "irregular_fracture_raft",
+      "image": {"locator": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/GenerationInputs/MeshyEnvironment/Generated2D/01_irregular_fracture_raft_meshy2d_v002.png", "sha256": "03f50d970f17d07c56d8d248bd1b712757229d5753b8303be94df06a7edbab39", "byteLength": 1514489},
+      "rawFbx": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/01_irregular_fracture_raft_meshy_t2_v001.fbx", "sha256": "564a622f057b44a67782e0020320377c7db8113a7036ad95e9051944a07c0299", "byteLength": 16445580}
+    },
+    {
+      "family": "broken_fracture_raft",
+      "image": {"locator": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/GenerationInputs/MeshyEnvironment/Generated2D/02_broken_fracture_raft_meshy2d_v003.png", "sha256": "c638a084867d76c4feeea82c6fe307fccc2bff62c5f08ad474781fed08225113", "byteLength": 1196701},
+      "rawFbx": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/02_broken_fracture_raft_meshy7_v002.fbx", "sha256": "d00e0b6007b072ef7e055c252223daf02dc5298661760ed012b429c320c5d0a5", "byteLength": 15264236}
+    },
+    {
+      "family": "undercut_extraction_ledge",
+      "image": {"locator": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/GenerationInputs/MeshyEnvironment/Generated2D/03_undercut_extraction_ledge_meshy2d_v002.png", "sha256": "91912bd6c01e3b4fbdb13af46a3c9673f5aa70a2417dc6692b9415ec45e48b29", "byteLength": 1415241},
+      "rawFbx": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/03_undercut_extraction_ledge_meshy7_v002.fbx", "sha256": "8d2e54a390bb8afc068acac90146d32d6315431b84a65f4604c4d2c0d9a287e8", "byteLength": 14124636}
+    },
+    {
+      "family": "talus_apron",
+      "image": {"locator": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/GenerationInputs/MeshyEnvironment/Generated2D/04_talus_apron_meshy2d_v002.png", "sha256": "e552ef57980d8f1a5453a40e4e43f8cdd3263e896b0b9a42a127e05d20b362fc", "byteLength": 1336232},
+      "rawFbx": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/04_talus_apron_meshy7_v002.fbx", "sha256": "5114464538c12d43f6178a8050df794ab790c529b81187f89427c8f007e3c374", "byteLength": 16796156}
+    },
+    {
+      "family": "collapsed_gallery_mouth",
+      "image": {"locator": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/GenerationInputs/MeshyEnvironment/Generated2D/05_collapsed_gallery_mouth_meshy2d_v002.png", "sha256": "1322c7f999f42cef2aa834070f82c7245ea358c84817b17a78964f45e84c35a3", "byteLength": 1531753},
+      "rawFbx": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Raw/05_collapsed_gallery_mouth_meshy_t2_v001.fbx", "sha256": "c2dba88638ff047255405b8d21a30f9e915b3c01dc766078c3ec0637e5cc8d3e", "byteLength": 16972780}
+    },
+    {
+      "family": "diagonal_fault_slab",
+      "image": {"locator": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/GenerationInputs/MeshyEnvironment/Generated2D/06_diagonal_fault_slab_meshy2d_v002.png", "sha256": "3f9e12e7dc8953a22f8e74aa0af8b6ad2be47edbbd944fcc389604279246960a", "byteLength": 1465914},
+      "rawFbx": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/06_diagonal_fault_slab_meshy7_v002.fbx", "sha256": "41476fa63099363717f9a8292ce48cc70f6b3a3a785ba37e07b5e78c053e5090", "byteLength": 14680508}
+    },
+    {
+      "family": "braided_runoff_pool",
+      "image": {"locator": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/GenerationInputs/MeshyEnvironment/Generated2D/07_braided_runoff_pool_meshy2d_v002.png", "sha256": "f01641719ea80e64ea642523e7331c19d1ea24b914d6c3bd8d31501fc67b441c", "byteLength": 1560700},
+      "rawFbx": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/07_braided_runoff_pool_meshy7_v002.fbx", "sha256": "a917ed09676dbec7a0c640823729ceb06ffe55891a7c627fcd82ca752479c409", "byteLength": 15820700}
+    },
+    {
+      "family": "iron_soil_wedge",
+      "image": {"locator": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/GenerationInputs/MeshyEnvironment/Generated2D/08_iron_soil_wedge_meshy2d_v002.png", "sha256": "76401766197de5deb4df23b3fea122c581bc6aa69b563815aa82091ef060e5f9", "byteLength": 1518569},
+      "rawFbx": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/Replacement/08_iron_soil_wedge_meshy7_v002.fbx", "sha256": "cb54651db55815162191a7e8a5b328695ea333ef048105b08d7bdea102cadc2f", "byteLength": 13320396}
+    }
+  ],
+  "selectedTextureInputs": {
+    "familyCount": 8,
+    "textureInputCount": 32,
+    "manifest": {
+      "locator": "unity/Docs/AI/Meshy/meshy_texture_inputs_slagfall_environment_2026-08-31_v001.json",
+      "sha256": "19e6f3d5eb59e80eacf2a6ae598774c3503a38d55a10fe33df190a50caa20c7d",
+      "byteLength": 12775
+    }
+  },
+  "processedOutputs": {
+    "cleanupScript": "tools/slagfall_environment_meshy_cleanup.py",
+    "masterBlend": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/tdf_envkit_stonehold_slagfall_meshy_cleanup_v001.blend", "sha256": "c03104d878f77f47713438584797e5b60a307c92e14bc0300221c209405a8e3d", "byteLength": 125071028},
+    "cleanupReport": {"locator": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/slagfall_environment_meshy_cleanup_v001.json", "sha256": "c3dae87c268279a8a3bf7545a34c8664625e82c6352f84ef7702e02764fdb307", "byteLength": 16243},
+    "unityModels": [
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_irregular_fracture_raft_v001.fbx", "sha256": "8b43948339ae62a18abeb9af91cdf1feaf5a6b8341356db560e8f41a05a60dc6", "byteLength": 661612},
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_broken_fracture_raft_v001.fbx", "sha256": "ef0096bf027d6959c0fa077dba664f869da2c6251965e65635af391696875548", "byteLength": 764924},
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_undercut_extraction_ledge_v001.fbx", "sha256": "fbc6d32d4415f85ae1fe50e8824f77f3323030e5ec5bf3963dcd2dc605bbbe5a", "byteLength": 1024108},
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_talus_apron_v001.fbx", "sha256": "505e0f0e7bd5ee28e603be120e1b8804138f6d34be47bf4559c7f54d4eb46e75", "byteLength": 1016684},
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_collapsed_gallery_mouth_v001.fbx", "sha256": "23c8f30f50ccb1338e7480909bb553650c17cefbe193d75aa019599393883760", "byteLength": 971772},
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_diagonal_fault_slab_v001.fbx", "sha256": "1d9487064b4e18c6d2f3e87fe8b92eccc1056b682665b5a550530d6997499a46", "byteLength": 748236},
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_braided_runoff_pool_v001.fbx", "sha256": "b7eeeb0beced771fe186b35232f5228d9cd4b9afa895313af621ed419e89f018", "byteLength": 714876},
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Models/tdf_prop_stonehold_slagfall_iron_soil_wedge_v001.fbx", "sha256": "2d580b12bd71e0a5a7723fe591bef4fb18d7ab74459a0ddaf5c60c7642af2ceb", "byteLength": 709308}
+    ],
+    "sharedAtlases": [
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Textures/tdf_atlas_stonehold_slagfall_environment_basecolor_v001.png", "sha256": "5613e73b522760862924f8adf441b283a6f29df7141a40174b44337a205a0380", "byteLength": 3545779},
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Textures/tdf_atlas_stonehold_slagfall_environment_normal_v001.png", "sha256": "effd49b1a6134b3be9a2f4bc9dd76c8a2440bd1ea8d5b457d4783e87e2712397", "byteLength": 4644986},
+      {"locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Textures/tdf_atlas_stonehold_slagfall_environment_metallic_smoothness_v001.png", "sha256": "9792015566d454e07c854d2fc49df9f52b969e8c74a8abe64cc52daf2a882c44", "byteLength": 1620770}
+    ],
+    "unityReviewScene": "unity/Assets/AL/Scenes/Review/Terrestrials/SlagfallEnvironmentKitReview.unity",
+    "unityReviewImage": {"locator": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/VisualReview/Unity/slagfall_environment_kit_unity_lineup_v003.png", "sha256": "4f5a554df85e1104f01c971eb3cf5c9a1f83e95ac86459e61bfe49a72130038e", "byteLength": 1242339}
+  },
+  "validation": {
+    "blenderVersion": "5.2.0 LTS",
+    "unityVersion": "6000.3.22f1",
+    "focusedEditModeTestClass": "AL.Tests.EditMode.Terrestrials.SlagfallEnvironmentKitProductionTests",
+    "focusedEditModeResult": {"total": 9, "passed": 9, "failed": 0, "skipped": 0, "jobId": "8710f0e67a2e4f3f89c494737e3468df"},
+    "axisRegression": "Blender Z-up to Unity Y-up transform is baked into exported meshes; ImportedMeshesUseUnityYAsHeight passed after the fix.",
+    "runtimeContract": "Eight prefabs; four LODs each; shared Standard PBR atlases; compressed GPU-only model import; lowest LOD static colliders; review scene excluded from build settings; no documentation dependencies."
+  },
+  "credits": {
+    "initialRecordedBalance": 4173,
+    "afterOriginalRecordedBalance": 3779,
+    "afterFirstFourCorrectiveTasksBalance": 3654,
+    "finalRecordedBalance": 3570,
+    "totalObservedDelta": 603,
+    "unresolvedHistoricalDelta": 94,
+    "reconciledAtTaskLevel": false,
+    "note": "Observed balance phases are retained without inventing per-task charges. The previously identified 94-credit discrepancy remains unresolved."
+  },
+  "conclusion": "All eight final Slagfall environment families were reviewed in the corrected Unity scene and approved by the owner. The selected variants are frozen as production candidates. No further Meshy generation is authorized or justified for this kit; remaining work is world-placement, scale, navigation, and gameplay integration under separate approval gates."
+}

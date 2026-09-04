@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AL.Core.Interfaces.Notifications;
 using AL.Services.Local;
+using AL.UI.Notifications;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -407,6 +408,72 @@ namespace AL.Tests.EditMode.Notifications
         }
 
         [Test]
+        public void PresentationContentUsesValidatedCatalogCopyAndResolvedParameterText()
+        {
+            var authority = new FakeLocalizationAuthority(
+                true,
+                "notification.operation.ready");
+            var resolver = new NotificationContentCatalogResolver(
+                ReadCatalogBytes(),
+                authority);
+            var clock = new FakeClock();
+            var service = new LocalNotificationService(
+                resolver,
+                resolver,
+                clock,
+                new UnavailableNotificationActionRegistry(),
+                new FakeDiagnosticSink());
+
+            NotificationEnqueueResult enqueue = service.Enqueue(new NotificationRequest(
+                "al_notify_operation_unavailable",
+                "al_source_nvs",
+                "notification:adapter:presentation",
+                clock.UtcNow,
+                new[]
+                {
+                    new NotificationParameter(
+                        "operation_name",
+                        NotificationParameterValue.FromLocalizationReference(
+                            "notification.operation.ready"))
+                },
+                null,
+                null,
+                null));
+            NotificationQueueRecordSnapshot record = service.GetSnapshot().Records.Single();
+
+            NotificationPresentationContentResolution result = resolver.ResolveContent(record);
+
+            Assert.AreEqual(NotificationEnqueueStatus.AcceptedPending, enqueue.Status);
+            Assert.AreEqual(NotificationPresentationContentStatus.Resolved, result.Status);
+            Assert.AreEqual("Action Unavailable", result.Content.Title);
+            Assert.AreEqual(
+                "Crafting is not ready in this build. No progress was changed.",
+                result.Content.Body);
+            Assert.AreEqual(
+                "Action Unavailable. Crafting is not ready in this build. No progress was changed.",
+                result.Content.AccessibilityAnnouncement);
+            Assert.AreEqual(string.Empty, result.Content.AcknowledgementLabel);
+        }
+
+        [Test]
+        public void PresentationContentRejectsUnknownParameterLocalizationReference()
+        {
+            var resolver = NewValidResolver();
+            NotificationDefinition definition = resolver
+                .Resolve("al_notify_operation_unavailable")
+                .Definition;
+            NotificationQueueRecordSnapshot record = NewPresentationRecord(
+                definition,
+                "notification.operation.unknown");
+
+            NotificationPresentationContentResolution result = resolver.ResolveContent(record);
+
+            Assert.AreEqual(NotificationPresentationContentStatus.MissingContentKey, result.Status);
+            Assert.IsNull(result.Content);
+            Assert.AreEqual("AL-NTF-CONTENT-MISSING", result.DiagnosticCode);
+        }
+
+        [Test]
         public void DefaultProductionServiceRemainsFailClosedAndUnregistered()
         {
             var service = new LocalNotificationService();
@@ -617,7 +684,46 @@ namespace AL.Tests.EditMode.Notifications
             }
         }
 
-        private sealed class FakeLocalizationAuthority : INotificationLocalizationReferenceAuthority
+        private static NotificationQueueRecordSnapshot NewPresentationRecord(
+            NotificationDefinition definition,
+            string localizationReference)
+        {
+            var request = new NotificationRequest(
+                definition.DefinitionId,
+                "al_source_nvs",
+                "notification:adapter:direct",
+                DateTime.UtcNow,
+                new[]
+                {
+                    new NotificationParameter(
+                        "operation_name",
+                        NotificationParameterValue.FromLocalizationReference(
+                            localizationReference))
+                },
+                null,
+                null,
+                null);
+            var receipt = new NotificationDeliveryReceipt(
+                "al_notification_session_00000000000000000001",
+                NotificationDeliveryState.PendingPresenter,
+                null,
+                null,
+                null,
+                null,
+                0,
+                null);
+            return new NotificationQueueRecordSnapshot(
+                receipt.NotificationInstanceId,
+                1,
+                definition,
+                request,
+                definition.DefaultChannel,
+                receipt);
+        }
+
+        private sealed class FakeLocalizationAuthority :
+            INotificationLocalizationReferenceAuthority,
+            INotificationPresentationLocalizationResolver
         {
             private readonly HashSet<string> references;
 
@@ -634,6 +740,22 @@ namespace AL.Tests.EditMode.Notifications
             public bool Contains(string localizationReference)
             {
                 return references.Contains(localizationReference);
+            }
+
+            public bool TryResolve(string localizationReference, out string text)
+            {
+                if (references.Contains(localizationReference) &&
+                    string.Equals(
+                        localizationReference,
+                        "notification.operation.ready",
+                        StringComparison.Ordinal))
+                {
+                    text = "Crafting";
+                    return true;
+                }
+
+                text = null;
+                return false;
             }
         }
 

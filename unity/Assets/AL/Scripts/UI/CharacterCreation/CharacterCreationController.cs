@@ -28,7 +28,10 @@ namespace AL.UI.CharacterCreation
         private readonly List<ChampionDefinition> _champions = new List<ChampionDefinition>();
         private CharacterCreationDraft _draft;
         private CharacterCreationProductionScreen _screen;
+        private GameObject _previewPresentationRoot;
         private ChampionCustomizationController _preview;
+        private CharacterCreationPreviewMotion _previewMotion;
+        private Camera _previewCamera;
         private bool _committing;
         private bool _alreadyConfirmed;
 
@@ -96,7 +99,13 @@ namespace AL.UI.CharacterCreation
         {
             ISaveGameService save = ServiceLocator.Get<ISaveGameService>();
             SaveGameData current = save?.CurrentSave;
-            RealmId realm = current != null ? current.SelectedRealm : RealmId.None;
+            RealmId realm = RealmId.None;
+            if (ServiceLocator.TryGet(out IRealmService realmService) &&
+                realmService != null &&
+                realmService.Identity.IsCommittedValid)
+            {
+                realm = realmService.Identity.RealmId;
+            }
             if (!CharacterCreationDraft.TryCreate(realm, out _draft, out string error))
             {
                 Font font = PresentationChrome.ResolveFont();
@@ -121,24 +130,24 @@ namespace AL.UI.CharacterCreation
 
         private void BuildPreview()
         {
-            if (FindObjectOfType<Light>() == null)
-            {
-                var lightObject = new GameObject("CreatorKeyLight");
-                var light = lightObject.AddComponent<Light>();
-                light.type = LightType.Directional;
-                light.intensity = 1.15f;
-                light.color = new Color(1f, 0.96f, 0.90f);
-                lightObject.transform.rotation = Quaternion.Euler(28f, 140f, 0f);
-            }
+            ReleasePreviewPresentation();
+            _previewPresentationRoot =
+                new GameObject("CharacterCreationPreviewPresentation");
+            _previewPresentationRoot.transform.SetParent(transform, false);
+            Light keyLight = CharacterCreationPreviewPresentation.EnsureOwnedLights(
+                _previewPresentationRoot.transform);
 
             var previewObject = new GameObject("CreatorPreview");
+            previewObject.transform.SetParent(_previewPresentationRoot.transform, false);
             previewObject.transform.position = new Vector3(0.85f, 0f, 3.4f);
             previewObject.transform.rotation = Quaternion.Euler(0f, 168f, 0f);
             _preview = previewObject.AddComponent<ChampionCustomizationController>();
             _preview.ApplyPresentation(_draft.Customization);
 
             var cameraObject = new GameObject("CreatorPreviewCamera");
+            cameraObject.transform.SetParent(_previewPresentationRoot.transform, false);
             var camera = cameraObject.AddComponent<Camera>();
+            _previewCamera = camera;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = PresentationChrome.StoneVoid;
             camera.fieldOfView = 28f;
@@ -148,6 +157,35 @@ namespace AL.UI.CharacterCreation
             camera.rect = new Rect(0.46f, 0.04f, 0.52f, 0.92f);
             cameraObject.transform.position = new Vector3(0.85f, 1.05f, 1.05f);
             cameraObject.transform.LookAt(new Vector3(0.85f, 0.72f, 3.4f));
+            _previewMotion = cameraObject.AddComponent<CharacterCreationPreviewMotion>();
+            _previewMotion.Configure(previewObject.transform, keyLight, camera);
+        }
+
+        private void OnDestroy()
+        {
+            ReleasePreviewPresentation();
+        }
+
+        private void ReleasePreviewPresentation()
+        {
+            GameObject ownedRoot = _previewPresentationRoot;
+            _previewPresentationRoot = null;
+            _preview = null;
+            _previewMotion = null;
+            _previewCamera = null;
+            if (ownedRoot == null)
+            {
+                return;
+            }
+
+            if (Application.isPlaying)
+            {
+                Destroy(ownedRoot);
+            }
+            else
+            {
+                DestroyImmediate(ownedRoot);
+            }
         }
 
         private void BuildUi()
@@ -159,9 +197,10 @@ namespace AL.UI.CharacterCreation
                 SelectClass,
                 () => MutateLook(_draft.CycleBodyBase),
                 () => MutateLook(_draft.CycleArmorTint),
-                () => MutateLook(_draft.CycleBodyTint),
+                value => MutateLook(() => _draft.SetSkinToneIndex(value)),
                 () => MutateLook(_draft.CycleHairStyle),
-                () => MutateLook(_draft.CycleHairColor),
+                value => MutateLook(() => _draft.SetHairColorIndex(value)),
+                value => MutateLook(() => _draft.SetEyeColorIndex(value)),
                 () => MutateLook(_draft.CycleBodyPreset),
                 () => MutateLook(_draft.ToggleHelmet),
                 () => MutateLook(_draft.ToggleCape),
@@ -220,6 +259,14 @@ namespace AL.UI.CharacterCreation
             {
                 PresentValidation("Champion preview unavailable. Your choices are preserved.");
             }
+
+            if (_preview != null &&
+                !CharacterCreationPreviewPresentation.TryFrame(
+                    _previewCamera,
+                    _preview.transform))
+            {
+                PresentValidation("Champion preview unavailable. Your choices are preserved.");
+            }
         }
 
         private void RefreshSelection()
@@ -229,6 +276,8 @@ namespace AL.UI.CharacterCreation
             {
                 _screen.Look.text = CharacterCreationProductionLayout.FormatLookSummary(_draft.Customization);
             }
+
+            CharacterCreationProductionLayout.PaintColorControls(_screen, _draft.Customization);
 
             if (_screen?.Confirm != null)
             {

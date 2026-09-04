@@ -3,9 +3,12 @@
     "rootNamespace": "AL.Tests.EditMode",
     "references": [
         "AL.Runtime",
+        "AL.Editor",
         "AL.SaveAuthority",
+        "AL.SaveAuthority.RuntimeBridge",
         "AL.GameDataCatalog",
         "AL.NotificationCatalogAdapter",
+        "AL.BossRewards",
         "Unity.InputSystem"
     ],
     "includePlatforms": [

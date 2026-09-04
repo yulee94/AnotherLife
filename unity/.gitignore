@@ -19,6 +19,8 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 *.log
+__pycache__/
+*.pyc
 
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be committed to version control.
 *.blend1
@@ -105,3 +107,7 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Fresh Blender-to-Unity round-trip copies (rebuilt by MotionRoundTripAcceptanceBuilder)
+/[Aa]ssets/AL/Generated/
+/[Aa]ssets/AL/Generated.meta

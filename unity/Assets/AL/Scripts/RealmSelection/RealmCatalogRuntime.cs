@@ -20,7 +20,8 @@ namespace AL.RealmSelection
             string peopleName,
             string markName,
             string silhouetteLanguage,
-            string materialLanguage)
+            string materialLanguage,
+            IList<string> realmGemIds)
         {
             Id = id;
             RuntimeId = runtimeId;
@@ -29,6 +30,10 @@ namespace AL.RealmSelection
             MarkName = markName ?? string.Empty;
             SilhouetteLanguage = silhouetteLanguage ?? string.Empty;
             MaterialLanguage = materialLanguage ?? string.Empty;
+            var gemIds = realmGemIds == null
+                ? Array.Empty<string>()
+                : new List<string>(realmGemIds).ToArray();
+            RealmGemIds = Array.AsReadOnly(gemIds);
         }
         public string Id { get; }
         public RealmId RuntimeId { get; }
@@ -37,12 +42,22 @@ namespace AL.RealmSelection
         public string MarkName { get; }
         public string SilhouetteLanguage { get; }
         public string MaterialLanguage { get; }
+        public IReadOnlyList<string> RealmGemIds { get; }
     }
 
     public sealed class RealmCatalogSnapshot
     {
         private readonly Dictionary<RealmId, RealmCatalogEntry> _entries;
+        private readonly Dictionary<string, string> _localization;
         internal RealmCatalogSnapshot(string version, IList<RealmCatalogEntry> entries)
+            : this(version, entries, null)
+        {
+        }
+
+        internal RealmCatalogSnapshot(
+            string version,
+            IList<RealmCatalogEntry> entries,
+            IDictionary<string, string> localization)
         {
             Version = version;
             var copy = new RealmCatalogEntry[entries.Count];
@@ -50,10 +65,31 @@ namespace AL.RealmSelection
             Realms = Array.AsReadOnly(copy);
             _entries = new Dictionary<RealmId, RealmCatalogEntry>(entries.Count);
             for (int i = 0; i < entries.Count; i++) _entries.Add(entries[i].RuntimeId, entries[i]);
+            _localization = new Dictionary<string, string>(StringComparer.Ordinal);
+            if (localization != null)
+            {
+                foreach (KeyValuePair<string, string> pair in localization)
+                {
+                    if (!string.IsNullOrEmpty(pair.Key) && pair.Value != null)
+                    {
+                        _localization[pair.Key] = pair.Value;
+                    }
+                }
+            }
         }
         public string Version { get; }
         public IReadOnlyList<RealmCatalogEntry> Realms { get; }
         public bool TryGet(RealmId id, out RealmCatalogEntry entry) => _entries.TryGetValue(id, out entry);
+        public bool TryGetLocalization(string key, out string text)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                text = string.Empty;
+                return false;
+            }
+
+            return _localization.TryGetValue(key, out text);
+        }
     }
 
     public sealed class RealmCatalogLoadResult
@@ -221,7 +257,8 @@ namespace AL.RealmSelection
                     peopleName,
                     markName,
                     silhouetteLanguage,
-                    materialLanguage));
+                    materialLanguage,
+                    realmGemIds));
             }
 
             for (int i = 0; i < realmOrder.Length; i++)
@@ -229,7 +266,24 @@ namespace AL.RealmSelection
             if (new HashSet<string>(realmOrder, StringComparer.Ordinal).Count != 4)
                 return Reject("AL-REALM-CATALOG-ORDER-MISMATCH");
             entries.Sort((left, right) => Array.IndexOf(realmOrder, left.Id).CompareTo(Array.IndexOf(realmOrder, right.Id)));
-            return new RealmCatalogLoadResult(new RealmCatalogSnapshot(SupportedVersion, entries), "AL-REALM-CATALOG-READY");
+            var localization = new Dictionary<string, string>(StringComparer.Ordinal);
+            var drafts = WireFamilyCatalogLoader.RecordsOfKind(family, "localization_draft");
+            for (int i = 0; i < drafts.Count; i++)
+            {
+                string key;
+                string text;
+                if (WireFamilyCatalogLoader.TryGetString(drafts[i], "key", out key) &&
+                    WireFamilyCatalogLoader.TryGetString(drafts[i], "text", out text) &&
+                    !string.IsNullOrEmpty(key) &&
+                    text != null)
+                {
+                    localization[key] = text;
+                }
+            }
+
+            return new RealmCatalogLoadResult(
+                new RealmCatalogSnapshot(SupportedVersion, entries, localization),
+                "AL-REALM-CATALOG-READY");
         }
 
         private static bool HasExact(GameDataCatalogRecord record, string field, string expected)

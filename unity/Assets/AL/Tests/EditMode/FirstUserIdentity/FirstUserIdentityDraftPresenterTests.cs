@@ -55,9 +55,9 @@ namespace AL.Tests.EditMode.FirstUserIdentity
             Assert.That(_presenter.ConfirmRealmButton.interactable, Is.True);
 
             string[] visible = VisibleText();
-            Assert.That(visible, Does.Contain("Selected — Eldergrove realm"));
+            Assert.That(visible, Does.Contain("Selected: Eldergrove realm"));
             Assert.That(visible, Does.Contain(
-                "Realm preview: Eldergrove realm\nDerived people: Elven heritage"));
+                "Realm: Eldergrove realm\nPeople: Elven heritage"));
         }
 
         [Test]
@@ -79,6 +79,10 @@ namespace AL.Tests.EditMode.FirstUserIdentity
             Assert.That(_presenter.CurrentDraft.ClassFamily, Is.Null);
             Assert.That(_presenter.GetComponentsInChildren<Button>().Length, Is.EqualTo(6),
                 "The active class step exposes four choices, back, and gated confirmation.");
+            Assert.That(_presenter.ReturnToRealmButton.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Change realm"));
+            Assert.That(_presenter.ConfirmDraftButton.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Continue to appearance"));
 
             _presenter.GetClassFamilyChoiceButton(ClassFamily.Ranger).onClick.Invoke();
             Assert.That(_presenter.ConfirmDraftButton.interactable, Is.True);
@@ -93,7 +97,7 @@ namespace AL.Tests.EditMode.FirstUserIdentity
             Assert.That(_presenter.GetComponentsInChildren<Button>().Length, Is.Zero,
                 "The slice stops at the customization boundary without another action.");
             Assert.That(VisibleText(), Does.Contain(
-                "Draft ready: Stonehold realm • Dwarven heritage • Ranger path. " +
+                "Origin ready: Stonehold realm • Dwarven heritage • Ranger path. " +
                 "Nothing has been saved."));
 
             _presenter.ConfirmDraftButton.onClick.Invoke();
@@ -116,6 +120,66 @@ namespace AL.Tests.EditMode.FirstUserIdentity
             Assert.That(_presenter.CurrentDraft.Race, Is.EqualTo(FirstUserRace.Humans));
             Assert.That(_presenter.CurrentDraft.ClassFamily, Is.Null);
             Assert.That(_presenter.ConfirmDraftButton.interactable, Is.False);
+        }
+
+        [Test]
+        public void EveryIdentityActionUsesExplicitVisualOrderNavigation()
+        {
+            Button firstRealm = _presenter.GetRealmChoiceButton(RealmId.Crownlands);
+            Button secondRealm = _presenter.GetRealmChoiceButton(RealmId.Stonehold);
+            Button lastRealm = _presenter.GetRealmChoiceButton(RealmId.Umbral);
+
+            Assert.That(firstRealm.navigation.mode, Is.EqualTo(Navigation.Mode.Explicit));
+            Assert.That(firstRealm.navigation.selectOnUp,
+                Is.EqualTo(_presenter.ConfirmRealmButton));
+            Assert.That(firstRealm.navigation.selectOnDown, Is.EqualTo(secondRealm));
+            Assert.That(_presenter.ConfirmRealmButton.navigation.selectOnUp,
+                Is.EqualTo(lastRealm));
+            Assert.That(_presenter.ConfirmRealmButton.navigation.selectOnDown,
+                Is.EqualTo(firstRealm));
+
+            _presenter.GetRealmChoiceButton(RealmId.Crownlands).onClick.Invoke();
+            _presenter.ConfirmRealmButton.onClick.Invoke();
+            Button firstClass = _presenter.GetClassFamilyChoiceButton(ClassFamily.Warrior);
+            Button lastClass = _presenter.GetClassFamilyChoiceButton(ClassFamily.Assassin);
+            Assert.That(firstClass.navigation.mode, Is.EqualTo(Navigation.Mode.Explicit));
+            Assert.That(firstClass.navigation.selectOnLeft,
+                Is.EqualTo(_presenter.ReturnToRealmButton));
+            Assert.That(firstClass.navigation.selectOnRight,
+                Is.EqualTo(_presenter.ConfirmDraftButton));
+            Assert.That(_presenter.ReturnToRealmButton.navigation.selectOnRight,
+                Is.EqualTo(_presenter.ConfirmDraftButton));
+            Assert.That(_presenter.ConfirmDraftButton.navigation.selectOnLeft,
+                Is.EqualTo(_presenter.ReturnToRealmButton));
+            Assert.That(_presenter.ConfirmDraftButton.navigation.selectOnUp,
+                Is.EqualTo(lastClass));
+        }
+
+        [Test]
+        public void BoundExitIsReachableFromEveryOriginStep()
+        {
+            var exitObject = new GameObject(
+                "IdentityExit",
+                typeof(RectTransform),
+                typeof(UnityEngine.UI.Image),
+                typeof(Button));
+            exitObject.transform.SetParent(_host.transform, false);
+            Button exit = exitObject.GetComponent<Button>();
+            _presenter.BindExitAction(exit);
+
+            Button firstRealm = _presenter.GetRealmChoiceButton(RealmId.Crownlands);
+            Assert.That(firstRealm.navigation.selectOnUp, Is.EqualTo(exit));
+            Assert.That(firstRealm.navigation.selectOnLeft, Is.EqualTo(exit));
+            Assert.That(exit.navigation.mode, Is.EqualTo(Navigation.Mode.Explicit));
+            Assert.That(exit.navigation.selectOnDown, Is.EqualTo(firstRealm));
+
+            firstRealm.onClick.Invoke();
+            _presenter.ConfirmRealmButton.onClick.Invoke();
+            Button firstClass = _presenter.GetClassFamilyChoiceButton(ClassFamily.Warrior);
+            Assert.That(firstClass.navigation.selectOnUp, Is.EqualTo(exit));
+            Assert.That(_presenter.ReturnToRealmButton.navigation.selectOnLeft, Is.EqualTo(exit));
+            Assert.That(_presenter.ConfirmDraftButton.navigation.selectOnRight, Is.EqualTo(exit));
+            Assert.That(exit.navigation.selectOnDown, Is.EqualTo(firstClass));
         }
 
         [Test]

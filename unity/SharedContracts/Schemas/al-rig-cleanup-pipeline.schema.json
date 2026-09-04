@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.game/schemas/al-rig-cleanup-pipeline.schema.json",
+  "title": "AnotherLife Blender Rig Cleanup Pipeline Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "pipelineId", "contentVersion", "minimumBlenderVersion", "standardPath", "provenancePath", "coordinateSystem", "determinismPolicy", "exportPreset", "assets"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "pipelineId": {"const": "rmc_pipeline_blender_rig_cleanup_v001"},
+    "contentVersion": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "minimumBlenderVersion": {"type": "array", "prefixItems": [{"type": "integer", "minimum": 0}, {"type": "integer", "minimum": 0}, {"type": "integer", "minimum": 0}], "items": false},
+    "standardPath": {"$ref": "#/$defs/repoPath"},
+    "provenancePath": {"$ref": "#/$defs/repoPath"},
+    "coordinateSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unitSystem", "unitScale", "sourceUp", "sourceForward", "fbxForward", "fbxUp", "transformTolerance", "groundToleranceMeters"],
+      "properties": {
+        "unitSystem": {"const": "METRIC"},
+        "unitScale": {"const": 1.0},
+        "sourceUp": {"const": "+Z"},
+        "sourceForward": {"const": "-Y"},
+        "fbxForward": {"const": "-Z"},
+        "fbxUp": {"const": "+Y"},
+        "transformTolerance": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.0001},
+        "groundToleranceMeters": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.002}
+      }
+    },
+    "determinismPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blend", "staticFbx", "animatedFbx", "animationFloatTolerance"],
+      "properties": {
+        "blend": {"const": "semantic_content_signature_v1"},
+        "staticFbx": {"const": "byte_exact_sha256_v1"},
+        "animatedFbx": {"const": "semantic_roundtrip_receipt_v1"},
+        "animationFloatTolerance": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.00001}
+      }
+    },
+    "exportPreset": {"$ref": "#/$defs/exportPreset"},
+    "assets": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/asset"}}
+  },
+  "$defs": {
+    "repoPath": {"type": "string", "pattern": "^(?![A-Za-z]:)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+    "rmcId": {"type": "string", "pattern": "^rmc_[a-z0-9]+(?:_[a-z0-9]+)*_v[0-9]{3}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "boneName": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"},
+    "exportPreset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "format", "axisForward", "axisUp", "globalScale", "applyUnitScale", "applyScaleOptions", "useSpaceTransform", "bakeSpaceTransform", "addLeafBones", "primaryBoneAxis", "secondaryBoneAxis", "armatureNodeType", "useArmatureDeformOnly", "meshSmoothing", "useMeshModifiers", "useTriangulateFaces", "includeAnimations", "bakeAnimation", "bakeAnimationStep", "bakeAnimationSimplifyFactor", "pathMode", "embedTextures", "metadataSidecarRequired"],
+      "properties": {
+        "id": {"const": "rmc_export_fbx_unity_rig_v001"},
+        "format": {"const": "FBX_BINARY"},
+        "axisForward": {"const": "-Z"},
+        "axisUp": {"const": "Y"},
+        "globalScale": {"const": 1.0},
+        "applyUnitScale": {"const": true},
+        "applyScaleOptions": {"const": "FBX_SCALE_UNITS"},
+        "useSpaceTransform": {"const": true},
+        "bakeSpaceTransform": {"const": false},
+        "addLeafBones": {"const": false},
+        "primaryBoneAxis": {"enum": ["X", "Y", "Z", "-X", "-Y", "-Z"]},
+        "secondaryBoneAxis": {"enum": ["X", "Y", "Z", "-X", "-Y", "-Z"]},
+        "armatureNodeType": {"const": "NULL"},
+        "useArmatureDeformOnly": {"const": false},
+        "meshSmoothing": {"enum": ["OFF", "FACE", "EDGE"]},
+        "useMeshModifiers": {"const": true},
+        "useTriangulateFaces": {"const": true},
+        "includeAnimations": {"type": "boolean"},
+        "bakeAnimation": {"type": "boolean"},
+        "bakeAnimationStep": {"type": "number", "exclusiveMinimum": 0},
+        "bakeAnimationSimplifyFactor": {"type": "number", "minimum": 0},
+        "pathMode": {"const": "STRIP"},
+        "embedTextures": {"const": false},
+        "metadataSidecarRequired": {"const": true}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "path", "sha256", "provenanceId"],
+      "properties": {
+        "type": {"enum": ["blend", "fbx"]},
+        "path": {"$ref": "#/$defs/repoPath"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "provenanceId": {"$ref": "#/$defs/rmcId"}
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blendPath", "sidecarPath", "fbxPath", "fbxReceiptPath"],
+      "properties": {
+        "blendPath": {"allOf": [{"$ref": "#/$defs/repoPath"}, {"pattern": "\\.blend$"}]},
+        "sidecarPath": {"allOf": [{"$ref": "#/$defs/repoPath"}, {"pattern": "\\.rig\\.json$"}]},
+        "fbxPath": {"allOf": [{"$ref": "#/$defs/repoPath"}, {"pattern": "\\.fbx$"}]},
+        "fbxReceiptPath": {"allOf": [{"$ref": "#/$defs/repoPath"}, {"pattern": "\\.fbx\\.receipt\\.json$"}]}
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "subjectKind", "catalogAssetId", "representativeProfileId", "source", "output", "approvalState", "armatureObject", "outputArmatureObject", "meshObjects", "removeObjects", "boneRenameMap", "hierarchyOverrides", "bodyRootBone", "requiredBones", "sockets", "skeletonProfileId", "bindPoseId", "retargetProfileId", "facialProfileId", "budgetProfileId", "requiredMotionSetId", "deformationCleanupToleranceMeters", "minimumSourceActions", "preserveActions", "productionGaps"],
+      "properties": {
+        "id": {"$ref": "#/$defs/rmcId"},
+        "subjectKind": {"enum": ["champion", "npc", "beast", "monster"]},
+        "catalogAssetId": {"type": "string", "minLength": 1},
+        "representativeProfileId": {"$ref": "#/$defs/rmcId"},
+        "source": {"$ref": "#/$defs/source"},
+        "output": {"$ref": "#/$defs/output"},
+        "approvalState": {"const": "bounded_engineering"},
+        "armatureObject": {"type": "string", "minLength": 1},
+        "outputArmatureObject": {"type": "string", "pattern": "^RIG_[A-Za-z0-9_]+$"},
+        "meshObjects": {"oneOf": [{"const": "all_meshes"}, {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}]},
+        "meshRenameMap": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+        "removeObjects": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "boneRenameMap": {"type": "object", "minProperties": 1, "additionalProperties": {"$ref": "#/$defs/boneName"}},
+        "hierarchyOverrides": {"type": "object", "additionalProperties": {"$ref": "#/$defs/boneName"}},
+        "bodyRootBone": {"enum": ["pelvis", "body_root"]},
+        "requiredBones": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"$ref": "#/$defs/boneName"}},
+        "sockets": {"type": "object", "minProperties": 1, "propertyNames": {"pattern": "^socket_[a-z0-9]+(?:_[a-z0-9]+)*$"}, "additionalProperties": {"$ref": "#/$defs/boneName"}},
+        "skeletonProfileId": {"$ref": "#/$defs/rmcId"},
+        "bindPoseId": {"$ref": "#/$defs/rmcId"},
+        "retargetProfileId": {"$ref": "#/$defs/rmcId"},
+        "facialProfileId": {"$ref": "#/$defs/rmcId"},
+        "budgetProfileId": {"$ref": "#/$defs/rmcId"},
+        "requiredMotionSetId": {"$ref": "#/$defs/rmcId"},
+        "deformationCleanupToleranceMeters": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.035},
+        "minimumSourceActions": {"type": "integer", "minimum": 0, "maximum": 16},
+        "preserveActions": {"type": "boolean"},
+        "productionGaps": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/boneName"}}
+      }
+    }
+  }
+}

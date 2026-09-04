@@ -1,0 +1,844 @@
+{
+  "schema": "anotherlife.stonehold-enterable-structure-packet-validation.v1",
+  "status": "passed",
+  "packetSetId": "stonehold_enterable_structure_packets_v001",
+  "counts": {
+    "taxonomyFamilies": 40,
+    "enterablePackets": 27,
+    "sharedModuleFamilies": 11,
+    "interiorModuleFamilies": 21,
+    "propDecorFamilies": 65,
+    "artifactRecords": 97
+  },
+  "checks": {
+    "taxonomyCoverage40of40": true,
+    "enterablePackets27of27": true,
+    "sharedModuleFamilies11of11": true,
+    "wallExceptionExplicit": true,
+    "accordantExcluded": true,
+    "gateRulesReferenceOnly": true,
+    "no3dAuthorization": true,
+    "approvedFurnishingPrecedentBound": true,
+    "allPacketsComplete": true,
+    "packetSpecificBlueprints27of27": true,
+    "interiorModules21of21": true,
+    "propFamilies65Accounted": true,
+    "artifactsHashAndDimensions": true,
+    "fullResolutionVisualQa54of54": true,
+    "no3dFiles": true,
+    "reviewArtifactsPresent": true
+  },
+  "packetErrors": [],
+  "fullResolutionVisualQa": [
+    {
+      "locator": "packets/city_capital_kit/city_capital_kit_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 874,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/city_capital_kit/city_capital_kit_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1872
+      ],
+      "sampledColorCount": 1548,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/settlement_village_kit/settlement_village_kit_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 854,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/settlement_village_kit/settlement_village_kit_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1391,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/dwelling/dwelling_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 764,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/dwelling/dwelling_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1503,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/ruin_structure/ruin_structure_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 754,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/ruin_structure/ruin_structure_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1528,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/well_fountain_cistern/well_fountain_cistern_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 772,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/well_fountain_cistern/well_fountain_cistern_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        24,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1532,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/academy/academy_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 761,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/academy/academy_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1558,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/barracks/barracks_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 744,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/barracks/barracks_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1500,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/embassy/embassy_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 755,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/embassy/embassy_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1515,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/farm/farm_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 778,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/farm/farm_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1497,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/forge/forge_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 808,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/forge/forge_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1699,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/gold_mine/gold_mine_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 825,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/gold_mine/gold_mine_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1872
+      ],
+      "sampledColorCount": 1674,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/lumber_mill/lumber_mill_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 759,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/lumber_mill/lumber_mill_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1547,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/market/market_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 804,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/market/market_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1331,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/quarry/quarry_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 770,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/quarry/quarry_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1872
+      ],
+      "sampledColorCount": 1620,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/stable/stable_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 753,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/stable/stable_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1523,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/storehouse/storehouse_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 766,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/storehouse/storehouse_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1434,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/town_hall/town_hall_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 757,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/town_hall/town_hall_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1770,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/watchtower/watchtower_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 752,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/watchtower/watchtower_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1503,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/workshop/workshop_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 805,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/workshop/workshop_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1501,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/castle_enterable/castle_enterable_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 871,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/castle_enterable/castle_enterable_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1897
+      ],
+      "sampledColorCount": 1741,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/fortress_enterable/fortress_enterable_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 843,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/fortress_enterable/fortress_enterable_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1872
+      ],
+      "sampledColorCount": 1823,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/guardpost_watch/guardpost_watch_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 737,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/guardpost_watch/guardpost_watch_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1570,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/inn_tavern/inn_tavern_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 779,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/inn_tavern/inn_tavern_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1623,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/mill_wind_water/mill_wind_water_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 835,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/mill_wind_water/mill_wind_water_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1566,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/religious_cultural_structure/religious_cultural_structure_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 800,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/religious_cultural_structure/religious_cultural_structure_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1843
+      ],
+      "sampledColorCount": 1585,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/shop_service/shop_service_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 770,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/shop_service/shop_service_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1517,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/warehouse_barn/warehouse_barn_exterior_handoff_v001.png",
+      "pixelDimensions": [
+        2400,
+        1500
+      ],
+      "nonBackgroundBounds": [
+        55,
+        61,
+        2346,
+        1416
+      ],
+      "sampledColorCount": 768,
+      "status": "passed"
+    },
+    {
+      "locator": "packets/warehouse_barn/warehouse_barn_interior_handoff_v001.png",
+      "pixelDimensions": [
+        3000,
+        1900
+      ],
+      "nonBackgroundBounds": [
+        55,
+        54,
+        2946,
+        1836
+      ],
+      "sampledColorCount": 1403,
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,478 @@
+{
+  "schemaVersion": 1,
+  "ledgerId": "al_six_family_production_authority_v1",
+  "auditedRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+  "sourceSetVersion": "2026-09-04-v1",
+  "sourceSetSha256": "10cf4e2dea9320521572316f0ebba6b11831665408ec325445bd26ecbe8c7597",
+  "familyOrder": [
+    "realms",
+    "buildings",
+    "research",
+    "troops",
+    "champions",
+    "skills"
+  ],
+  "productionEligible": false,
+  "families": [
+    {
+      "family": "realms",
+      "disposition": "source_complete",
+      "sources": [
+        {
+          "role": "technical_source",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v003.json",
+          "version": "phase-c-v003",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439",
+          "provenance": "accepted_technical_source"
+        },
+        {
+          "role": "realm_decision",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C3H_Realm_V002_Technical_Source.md",
+          "version": "phase-c3h-v002",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "91f1ed0e0fbc839447408ccc35d36aa11ba4b3884c41bea8ba39f820b38ca70f",
+          "provenance": "accepted_decision"
+        },
+        {
+          "role": "six_family_runtime_evidence",
+          "path": "unity/Assets/AL/StreamingAssets/GameData/realms.json",
+          "version": "1.0.0",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "ada1f32c33c913b7962334bef6f7868876176747f9719eb666676f7fff5756df",
+          "provenance": "runtime_wire_evidence"
+        },
+        {
+          "role": "specialized_runtime_evidence",
+          "path": "unity/Assets/AL/StreamingAssets/GameData/al_realm_catalog.json",
+          "version": "0.1.0",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "33321936662b98f9c18edf4122ad163053d1aff3017b06556cad694420e9e8d8",
+          "provenance": "specialized_runtime_evidence"
+        }
+      ],
+      "resolvedBlockerIds": [],
+      "historicalResolvedIds": [
+        "realms.rare_resource_catalog",
+        "realms.capability_profiles",
+        "realms.asset_refs"
+      ],
+      "blockers": []
+    },
+    {
+      "family": "buildings",
+      "disposition": "blocked_required",
+      "sources": [
+        {
+          "role": "technical_source",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v003.json",
+          "version": "phase-c-v003",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439",
+          "provenance": "accepted_technical_source"
+        },
+        {
+          "role": "building_decision",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C4A_Building_Authority_Convergence.md",
+          "version": "phase-c4a-v1",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "b94895911e46cfd03dfb08b15e3c4ccf860a028ffe62d922c95e564fd2e5e039",
+          "provenance": "accepted_decision"
+        },
+        {
+          "role": "six_family_runtime_evidence",
+          "path": "unity/Assets/AL/StreamingAssets/GameData/buildings.json",
+          "version": "1.0.0",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "9dfaa81320584316b9866a99851eaebf1c1cb2884b188c9cade9addd0e0be493",
+          "provenance": "runtime_wire_evidence"
+        },
+        {
+          "role": "building_art_evidence",
+          "path": "unity/Assets/AL/StreamingAssets/GameData/al_building_catalog.json",
+          "version": "0.1.0",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "345165973c397c9c115118dd72e7d7777a3cb22a4c9bb1c61067f44df828b263",
+          "provenance": "specialized_runtime_evidence"
+        }
+      ],
+      "resolvedBlockerIds": [],
+      "historicalResolvedIds": [
+        "buildings.max_level_review",
+        "buildings.cost_profiles",
+        "buildings.duration_profiles"
+      ],
+      "blockers": [
+        {
+          "id": "buildings.production_profiles",
+          "type": "behavior",
+          "status": "open",
+          "evidenceStatus": "partial_runtime_only",
+          "reason": "buildings.json names resource_output but supplies no versioned output records, rates, caps, resource bindings, or failure policy for all 15 buildings.",
+          "recommendation": "Keep the reviewed 15-building identity and progression tuple; author one bounded contribution-profile packet before production generation."
+        },
+        {
+          "id": "buildings.asset_refs",
+          "type": "asset",
+          "status": "open",
+          "evidenceStatus": "partial",
+          "reason": "al_building_catalog.json pins only Town Hall and Workshop models across four realms; the remaining 13 identities have no model bindings and buildings.json references unpinned placeholder PNG paths.",
+          "recommendation": "Retain the eight hash-pinned model tuples as evidence and require complete per-building or explicitly realm-dimensional asset mappings."
+        }
+      ]
+    },
+    {
+      "family": "research",
+      "disposition": "blocked_required",
+      "sources": [
+        {
+          "role": "technical_source",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v003.json",
+          "version": "phase-c-v003",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439",
+          "provenance": "accepted_technical_source"
+        },
+        {
+          "role": "research_decision",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C5A_Research_Authority_Convergence.md",
+          "version": "phase-c5a-v1",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "9af4fdef60aeb8a0de4bed492928c2e44730c034bb2402265ce2abdb83bad814",
+          "provenance": "accepted_decision"
+        }
+      ],
+      "resolvedBlockerIds": [],
+      "historicalResolvedIds": [],
+      "blockers": [
+        {
+          "id": "research.max_levels",
+          "type": "balance",
+          "status": "open",
+          "evidenceStatus": "missing",
+          "reason": "No accepted per-research maximum-level source exists for the eight identities.",
+          "recommendation": "Choose bounded per-identity maxima before deriving any level-domain tables."
+        },
+        {
+          "id": "research.cost_profiles",
+          "type": "balance",
+          "status": "open",
+          "evidenceStatus": "partial_migration_only",
+          "reason": "target level times 200 Gold is migration evidence without an approved level domain or production balance disposition.",
+          "recommendation": "Preserve the observed formula as the bounded default candidate, then encode it only with approved maxima."
+        },
+        {
+          "id": "research.duration_profiles",
+          "type": "balance",
+          "status": "open",
+          "evidenceStatus": "partial_migration_only",
+          "reason": "target level times 15 seconds is migration evidence without an approved level domain or production balance disposition.",
+          "recommendation": "Preserve the observed formula as the bounded default candidate, then encode it only with approved maxima."
+        },
+        {
+          "id": "research.effects",
+          "type": "behavior",
+          "status": "open",
+          "evidenceStatus": "partial_conflicting",
+          "reason": "Only steel_forging and plate_armor have observed five-percent effects; the other six effects and stacking semantics are absent.",
+          "recommendation": "Keep the two observed relations as migration candidates and require typed effects for all eight identities."
+        },
+        {
+          "id": "research.prerequisites",
+          "type": "behavior",
+          "status": "open",
+          "evidenceStatus": "partial_migration_only",
+          "reason": "No-prerequisite behavior is observed but lacks a complete accepted eight-record production mapping.",
+          "recommendation": "Use an explicit no-prerequisite profile only after it is mapped to every approved research record."
+        }
+      ]
+    },
+    {
+      "family": "troops",
+      "disposition": "blocked_required",
+      "sources": [
+        {
+          "role": "technical_source",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v003.json",
+          "version": "phase-c-v003",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439",
+          "provenance": "accepted_technical_source"
+        },
+        {
+          "role": "troop_decision",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C6A_Troop_Authority_Convergence.md",
+          "version": "phase-c6a-v1",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "6ea89f53ec7a9dfaa7a33580245cc93744b39b8de7a74332db28223564dc94cd",
+          "provenance": "accepted_decision"
+        }
+      ],
+      "resolvedBlockerIds": [],
+      "historicalResolvedIds": [],
+      "blockers": [
+        {
+          "id": "troops.records",
+          "type": "identity",
+          "status": "open",
+          "evidenceStatus": "missing",
+          "reason": "Four legacy enum anchors exist, but no accepted stable roster, aliases, authored order, or production records exist.",
+          "recommendation": "Define the smallest four-record roster only from an explicit identity packet; do not derive names from enums."
+        },
+        {
+          "id": "troops.localization",
+          "type": "localization",
+          "status": "open",
+          "evidenceStatus": "missing",
+          "reason": "No authored troop name, description, or localization references exist.",
+          "recommendation": "Author stable name and description references for every accepted troop identity."
+        },
+        {
+          "id": "troops.base_stats",
+          "type": "balance",
+          "status": "open",
+          "evidenceStatus": "missing",
+          "reason": "Aggregate simulator formulas do not define per-record base attack, defense, scaling, or matchup semantics.",
+          "recommendation": "Add bounded typed stat profiles after the roster is fixed."
+        },
+        {
+          "id": "troops.training_profiles",
+          "type": "behavior",
+          "status": "open",
+          "evidenceStatus": "partial_runtime_only",
+          "reason": "Observed 10 Food per unit and immediate completion omit duration, limits, capacity, queueing, eligibility, failure, and recovery authority.",
+          "recommendation": "Encode a bounded queue and capacity policy rather than promoting the immediate-completion prototype."
+        },
+        {
+          "id": "troops.asset_refs",
+          "type": "asset",
+          "status": "open",
+          "evidenceStatus": "missing",
+          "reason": "No committed per-troop icon, portrait, model, prefab, or hash-pinned production mapping exists.",
+          "recommendation": "Bind each accepted troop record to reviewed, hash-pinned production assets."
+        }
+      ]
+    },
+    {
+      "family": "champions",
+      "disposition": "blocked_required",
+      "sources": [
+        {
+          "role": "technical_source",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v003.json",
+          "version": "phase-c-v003",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439",
+          "provenance": "accepted_technical_source"
+        },
+        {
+          "role": "champion_decision",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C7A_Champion_Authority_Convergence.md",
+          "version": "phase-c7a-v1",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "43fadaa833512506d15d5c6e76cd32dbb10f8830796a2a265e0fa546c8026e59",
+          "provenance": "accepted_decision"
+        },
+        {
+          "role": "six_family_runtime_evidence",
+          "path": "unity/Assets/AL/StreamingAssets/GameData/champions.json",
+          "version": "1.0.0",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "0d52606dcbb60214e16f508423ce71134403f8eaf6e6ded634541a5572d64a7b",
+          "provenance": "runtime_wire_evidence"
+        },
+        {
+          "role": "vertical_slice_runtime_evidence",
+          "path": "unity/Assets/AL/StreamingAssets/GameData/champion_runtime.json",
+          "version": "1.0.0",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "0becc454cfdca1ea83d568f1fd3ff7153e366c7743a4b555b649e3a2978d2b82",
+          "provenance": "runtime_wire_evidence"
+        },
+        {
+          "role": "champion_identity_evidence",
+          "path": "unity/Assets/AL/StreamingAssets/GameData/al_champion_catalog.json",
+          "version": "0.1.0",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "92866e805421900a6e7bc01153725bd547d498d36b2021fd969dacfb4e7e67fa",
+          "provenance": "specialized_runtime_evidence"
+        }
+      ],
+      "resolvedBlockerIds": [],
+      "historicalResolvedIds": [],
+      "blockers": [
+        {
+          "id": "champions.records",
+          "type": "identity",
+          "status": "open",
+          "evidenceStatus": "conflicting_runtime_only",
+          "reason": "champions.json defines four mixed-subclass records while al_champion_catalog.json defines four Vanguard identities; neither source records an accepted roster decision or alias relationship.",
+          "recommendation": "Reconcile the two four-record identity sets in one explicit roster packet before reuse."
+        },
+        {
+          "id": "champions.localization",
+          "type": "localization",
+          "status": "open",
+          "evidenceStatus": "partial_runtime_only",
+          "reason": "champion_runtime.json contains display strings, but no accepted description or localization packet binds them to the candidate records.",
+          "recommendation": "Preserve the observed names as candidates and add stable authored name and description references."
+        },
+        {
+          "id": "champions.realm_class_assignments",
+          "type": "identity",
+          "status": "open",
+          "evidenceStatus": "conflicting_runtime_only",
+          "reason": "The runtime slice assigns four different subclasses while the specialized identity catalog labels all four records Vanguard; no accepted taxonomy migration resolves the conflict.",
+          "recommendation": "Prefer the approved class topology, then publish one exact realm/class/subclass mapping."
+        },
+        {
+          "id": "champions.asset_refs",
+          "type": "asset",
+          "status": "open",
+          "evidenceStatus": "partial_unpinned",
+          "reason": "champions.json points portraits and models at concept sheets without per-reference hashes and reuses Vanguard sheets for non-Vanguard records; al_champion_catalog.json intentionally has no art references.",
+          "recommendation": "Require record-correct portrait/model mappings with exact asset hashes and import provenance."
+        },
+        {
+          "id": "champions.base_skill_refs",
+          "type": "behavior",
+          "status": "open",
+          "evidenceStatus": "conflicting_runtime_only",
+          "reason": "The eight champion skill IDs do not match the four reviewed WIRE loadout identities, and no approved loadout or unlock mapping connects them.",
+          "recommendation": "Resolve the skills identity set first, then bind ordered base loadouts per Champion."
+        },
+        {
+          "id": "champions.stat_profiles",
+          "type": "balance",
+          "status": "open",
+          "evidenceStatus": "partial_runtime_only",
+          "reason": "champion_runtime.json relocates vertical-slice values but does not provide an accepted production stat profile, progression domain, or conflict disposition.",
+          "recommendation": "Use relocated values only as migration candidates and encode complete bounded stat profiles after approval."
+        }
+      ]
+    },
+    {
+      "family": "skills",
+      "disposition": "blocked_required",
+      "sources": [
+        {
+          "role": "technical_source",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v003.json",
+          "version": "phase-c-v003",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439",
+          "provenance": "accepted_technical_source"
+        },
+        {
+          "role": "skill_decision",
+          "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C8A_Skill_Authority_Convergence.md",
+          "version": "phase-c8a-v1",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "4278804bb0cccf94a800338b5fff77a1b173584d7e390b67379bddd02de82b4b",
+          "provenance": "accepted_decision"
+        },
+        {
+          "role": "six_family_runtime_evidence",
+          "path": "unity/Assets/AL/StreamingAssets/GameData/skills.json",
+          "version": "1.0.0",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "1df8a9a3f9cd4a2b46149a4b241c1dc3944ca02d88500d317fe1ec04baf0ba5e",
+          "provenance": "runtime_wire_evidence"
+        },
+        {
+          "role": "wire_skill_runtime_evidence",
+          "path": "unity/Assets/AL/StreamingAssets/GameData/skill_weather.v1.json",
+          "version": "1.0.0",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "36da70221569fbabcbf522d12bf1c821bd5b82bc4aff2aa1a93b84f2e50d7e14",
+          "provenance": "runtime_wire_evidence"
+        },
+        {
+          "role": "wire_schema_validator",
+          "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataWireFamilySchemas.cs",
+          "version": "schema-v1",
+          "sourceRevision": "382a98f9a2f3ce6f8ee2283107cd593063243e2b",
+          "rawSha256": "905b1dfa36de3094db3c648e9f830a593c4e6990d2519890875605b196a663e5",
+          "provenance": "schema_validator_evidence"
+        }
+      ],
+      "resolvedBlockerIds": [],
+      "historicalResolvedIds": [],
+      "blockers": [
+        {
+          "id": "skills.slot_policy",
+          "type": "identity",
+          "status": "open",
+          "evidenceStatus": "conflicting_runtime_only",
+          "reason": "The reviewed four-slot WIRE identities conflict with the eight skills.json Champion skills, and no production ownership, availability, unlock, or compatibility policy resolves the sets.",
+          "recommendation": "Retain the four validated WIRE slots as the default candidate and explicitly reconcile Champion skill identities before production."
+        },
+        {
+          "id": "skills.behavior_profiles",
+          "type": "behavior",
+          "status": "open",
+          "evidenceStatus": "partial_runtime_only",
+          "reason": "skill_weather.v1.json and runtime code implement four WIRE behaviors, but the eight skills.json records use different IDs and placeholder behavior profile references without a complete production relation.",
+          "recommendation": "Promote behavior only through one cross-validated identity/profile set covering every production skill."
+        },
+        {
+          "id": "skills.presentation_profiles",
+          "type": "behavior",
+          "status": "open",
+          "evidenceStatus": "partial_runtime_only",
+          "reason": "The WIRE catalog validates motion, effect modules, and protected cues, but skills.json references different identities and placeholder presentation profiles.",
+          "recommendation": "Reuse the protected-cue and motion-module contract after exact production skill mappings exist."
+        },
+        {
+          "id": "skills.target_authority",
+          "type": "behavior",
+          "status": "open",
+          "evidenceStatus": "partial_runtime_only",
+          "reason": "Current target types and runtime scene scans do not define stable participant identity, eligibility, ordering, missing-target, or deterministic selection rules for all skills.",
+          "recommendation": "Add typed target profiles backed by the participant registry before production publication."
+        },
+        {
+          "id": "skills.audio_asset_refs",
+          "type": "asset",
+          "status": "open",
+          "evidenceStatus": "missing",
+          "reason": "No per-skill hash-pinned audio source exists; skills.json points audio_asset_ref at Champion concept images.",
+          "recommendation": "Provide licensed, import-pinned per-skill audio references with an explicit accessibility fallback policy."
+        },
+        {
+          "id": "skills.vfx_asset_refs",
+          "type": "asset",
+          "status": "open",
+          "evidenceStatus": "partial_runtime_only",
+          "reason": "WIRE effect module IDs drive procedural runtime effects, while skills.json points vfx_asset_ref at Champion concept images; neither is a complete hash-pinned per-skill production mapping.",
+          "recommendation": "Map each accepted skill to validated pooled VFX modules and exact asset provenance."
+        },
+        {
+          "id": "skills.balance_acceptance",
+          "type": "balance",
+          "status": "open",
+          "evidenceStatus": "partial_runtime_only",
+          "reason": "The four WIRE rows have tested current values, but the conflicting eight-skill set and incomplete target/behavior mapping prevent complete-set balance acceptance.",
+          "recommendation": "Use current WIRE values as the bounded recommendation only after identity, behavior, and target authority converge."
+        }
+      ]
+    }
+  ],
+  "approval": {
+    "state": "pending",
+    "reviewedSourceSetSha256": null,
+    "blocker": {
+      "id": "approval.user_creative_balance",
+      "type": "approval",
+      "status": "open",
+      "evidenceStatus": "not_requestable",
+      "reason": "Delegated recommendation authority does not identify or approve a complete blocker-free immutable source set; 25 family decisions remain open.",
+      "recommendation": "Request final generation approval only after every family blocker resolves against this ledger contract."
+    }
+  },
+  "generationGate": {
+    "status": "blocked",
+    "outputPaths": [],
+    "activationTargets": []
+  }
+}

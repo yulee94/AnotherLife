@@ -313,17 +313,13 @@ namespace AL.Tests.EditMode
                     research.GetResearchState("Steel Forging");
                 ResearchState missing = research.GetResearchState("Plate Armor");
                 ResearchState allState = research.GetAllResearchStates().Single();
-                Assert.AreEqual(0, missing.Level);
                 existing.Level = 99;
                 existing.IsResearching = false;
                 allState.CompleteTimestamp = long.MaxValue;
-                missing.Level = 7;
                 float missingBonus = research.GetStatBonus(StatType.Defense);
                 research.CompleteResearch("Steel Forging");
 
-                Assert.NotNull(missing);
-                Assert.AreEqual("Plate Armor", missing.ResearchId);
-                Assert.AreEqual(7, missing.Level);
+                Assert.IsNull(missing);
                 Assert.AreEqual(0f, missingBonus);
                 Assert.AreEqual(1, saveService.CurrentSave.Researches.Count);
                 Assert.AreEqual(2, persistedResearch.Level);
@@ -545,14 +541,14 @@ namespace AL.Tests.EditMode
                     SaveOperationStatus.SavedPrimary,
                     saveService.LastSaveStatus);
                 Assert.NotNull(saveService.CurrentSave);
-                Assert.AreEqual(1, saveService.CurrentSave.SaveSchemaVersion);
+                Assert.AreEqual(2, saveService.CurrentSave.SaveSchemaVersion);
                 Assert.AreEqual(
                     1,
                     saveService.CurrentSave.ProfileInitializationVersion);
                 ProfileWriteAuthoritySnapshot authority =
                     saveService.GetCurrentAuthority();
                 Assert.AreEqual(
-                    ProfileWriteAuthorityStatus.MigrationRequired,
+                    ProfileWriteAuthorityStatus.Writable,
                     authority.Status);
                 Assert.AreEqual(
                     ProfileAuthoritySourceGeneration.Primary,
@@ -579,7 +575,7 @@ namespace AL.Tests.EditMode
                         out CountingFileOperationsProxy fileOperations);
                 saveService.CreateNewSave(RealmId.Crownlands);
                 Assert.AreEqual(
-                    ProfileWriteAuthorityStatus.MigrationRequired,
+                    ProfileWriteAuthorityStatus.Writable,
                     saveService.GetCurrentAuthority().Status);
 
                 var resources = new LocalResourceService(saveService);
@@ -636,7 +632,7 @@ namespace AL.Tests.EditMode
                 new object[] { root });
             service.CreateNewSave(RealmId.Crownlands);
             Assert.AreEqual(
-                ProfileWriteAuthorityStatus.MigrationRequired,
+                ProfileWriteAuthorityStatus.Writable,
                 service.GetCurrentAuthority().Status);
             return service;
         }
@@ -648,6 +644,8 @@ namespace AL.Tests.EditMode
             switch (scenario)
             {
                 case "Legacy":
+                    service.CurrentSave.SaveSchemaVersion = 1;
+                    service.CurrentSave.ProfileId = string.Empty;
                     return;
                 case "ForwardSchema":
                     service.CurrentSave.SaveSchemaVersion = 3;
@@ -716,10 +714,15 @@ namespace AL.Tests.EditMode
 
                 case "ForwardSchema":
                     CreateLegacySave(root);
-                    RewritePrimary(
-                        root,
-                        "\"SaveSchemaVersion\"\\s*:\\s*1",
-                        "\"SaveSchemaVersion\":2");
+                    {
+                        string primaryPath = Path.Combine(root, "save.json");
+                        string json = Encoding.UTF8.GetString(File.ReadAllBytes(primaryPath));
+                        Assert.That(json, Does.Contain("\"SaveSchemaVersion\": 2"));
+                        File.WriteAllBytes(
+                            primaryPath,
+                            Encoding.UTF8.GetBytes(
+                                json.Replace("\"SaveSchemaVersion\": 2", "\"SaveSchemaVersion\": 3")));
+                    }
                     var forward = CreatePathSaveService(root);
                     forward.Load();
                     return forward;

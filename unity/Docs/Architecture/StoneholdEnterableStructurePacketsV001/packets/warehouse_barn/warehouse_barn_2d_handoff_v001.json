@@ -1,0 +1,2706 @@
+{
+  "schema": "anotherlife.stonehold-enterable-structure-2d-handoff.v1",
+  "packetSetId": "stonehold_enterable_structure_packets_v001",
+  "packetId": "stonehold_warehouse_barn_2d_handoff_v001",
+  "taxonomyId": "waf_architecture_warehouse_barn",
+  "slug": "warehouse_barn",
+  "title": "Stonehold Warehouse and Barn Shell",
+  "category": "service",
+  "status": "pending_owner_review",
+  "envelopeMeters": {
+    "width": 20,
+    "depth": 14,
+    "height": 9.0
+  },
+  "massingRecommendation": "Clear-span enterable shell divided into loading, bulk storage, secure storage and staff-service cells.",
+  "roofRecommendation": "Long low iron-ribbed gable with modular loading hoods.",
+  "materialRecommendation": "Stepped basalt base; dark iron ribs; soot-aged dark timber; sparse bronze repairs; localized forge-amber practical light only.",
+  "levels": [
+    {
+      "id": "ground",
+      "elevationMeters": 0,
+      "clearHeightMeters": 4.0,
+      "rooms": [
+        "loading_hall",
+        "bulk_store_a",
+        "bulk_store_b",
+        "secure_store",
+        "staff_service",
+        "rear_yard_threshold"
+      ]
+    },
+    {
+      "id": "mezzanine",
+      "elevationMeters": 4.3,
+      "clearHeightMeters": 2.7,
+      "rooms": [
+        "light_goods_store",
+        "records",
+        "guard_walk",
+        "goods_landing"
+      ]
+    }
+  ],
+  "streamingPolicy": "Seamless small interior.",
+  "accessibilityRoute": "Step-free loading loop; dock ramp; goods lift to mezzanine; 4 m clear cross-aisle.",
+  "clearancesMeters": {
+    "publicEntrance": [
+      2.5,
+      3.0
+    ],
+    "interiorDoor": [
+      1.2,
+      2.4
+    ],
+    "minimumFurnitureAisle": 1.2,
+    "primaryCirculationWidth": 1.5,
+    "combatClearDiameter": 4.0,
+    "cameraBackoff": 2.5,
+    "stairWidth": 1.5,
+    "landingDepth": 1.5,
+    "rampMaximumSlope": "1:12"
+  },
+  "interiorModuleIds": [
+    "waf_interior_shell_wall_floor_ceiling",
+    "waf_interior_door_window_threshold",
+    "waf_interior_entry_vestibule",
+    "waf_interior_corridor_junction",
+    "waf_interior_stair_landing",
+    "waf_interior_cutaway_occlusion_set",
+    "waf_interior_storage_pantry_cellar",
+    "waf_interior_utility_service_room",
+    "waf_interior_library_archive"
+  ],
+  "propPacks": [
+    "common",
+    "storage",
+    "military",
+    "utility",
+    "archive"
+  ],
+  "socketSets": [
+    "lighting",
+    "interaction",
+    "quest",
+    "audio",
+    "vfx_anchor_runtime_separate",
+    "portal_streaming"
+  ],
+  "variants": {
+    "clean": {
+      "required": true,
+      "sharedGeometryPreferred": true
+    },
+    "used": {
+      "required": true,
+      "sharedGeometryPreferred": true
+    },
+    "damaged": {
+      "required": true,
+      "sharedGeometryPreferred": true
+    }
+  },
+  "familySpecificGate": "Approve clear-span warehouse as base; barn and shed are modular reductions.",
+  "units": "meters",
+  "views": [
+    "front_elevation",
+    "side_elevation",
+    "rear_elevation",
+    "roof_plan",
+    "material_study",
+    "every_floor_plan",
+    "longitudinal_section",
+    "cross_section"
+  ],
+  "architecturalDesign": {
+    "packetSlug": "warehouse_barn",
+    "layoutArchetype": "clear-span loading hall with secure rear cells",
+    "planSignature": "warehouse_barn|clear_span|guard_mezzanine|south|(0.86, 0.65)",
+    "exteriorMasses": [
+      {
+        "id": "main_shell",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 19.4,
+        "depth": 13.4,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "mezzanine"
+        ],
+        "exteriorRole": "main shell"
+      }
+    ],
+    "roofVolumes": [
+      {
+        "id": "roof_main_shell",
+        "massId": "main_shell",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 19.4,
+        "depth": 13.4,
+        "profile": "Long low iron-ribbed gable with modular loading hoods."
+      }
+    ],
+    "exteriorOpeningRegister": [
+      {
+        "id": "warehouse_barn_main_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "south",
+        "x": 4.25,
+        "z": 0.3,
+        "separateObject": true,
+        "planOpeningId": "warehouse_barn_main_entry"
+      },
+      {
+        "id": "warehouse_barn_service_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "north",
+        "x": 15.75,
+        "z": 13.7,
+        "separateObject": true,
+        "planOpeningId": "warehouse_barn_service_entry"
+      },
+      {
+        "id": "window_ground_loading_hall",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 4.25,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_loading_hall"
+      },
+      {
+        "id": "window_ground_bulk_store_a",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 0.0,
+        "z": 9.178,
+        "separateObject": true,
+        "planOpeningId": "window_ground_bulk_store_a"
+      },
+      {
+        "id": "window_ground_bulk_store_b",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 4.25,
+        "z": 14,
+        "separateObject": true,
+        "planOpeningId": "window_ground_bulk_store_b"
+      },
+      {
+        "id": "window_ground_secure_store",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 20,
+        "z": 2.245,
+        "separateObject": true,
+        "planOpeningId": "window_ground_secure_store"
+      },
+      {
+        "id": "window_ground_rear_yard_threshold",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 15.75,
+        "z": 14,
+        "separateObject": true,
+        "planOpeningId": "window_ground_rear_yard_threshold"
+      },
+      {
+        "id": "window_ground_vertical_core_hall",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 20,
+        "z": 7.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_vertical_core_hall"
+      },
+      {
+        "id": "window_ground_cut_west",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 0.0,
+        "z": 7.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_west"
+      },
+      {
+        "id": "window_ground_cut_south",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 16.65,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_south"
+      },
+      {
+        "id": "window_ground_cut_north",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "north",
+        "x": 16.65,
+        "z": 14,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_north"
+      },
+      {
+        "id": "window_mezzanine_light_goods_store",
+        "kind": "window",
+        "levelId": "mezzanine",
+        "side": "south",
+        "x": 3.116,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_mezzanine_light_goods_store"
+      },
+      {
+        "id": "window_mezzanine_records",
+        "kind": "window",
+        "levelId": "mezzanine",
+        "side": "south",
+        "x": 8.748,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_mezzanine_records"
+      },
+      {
+        "id": "window_mezzanine_guard_walk",
+        "kind": "window",
+        "levelId": "mezzanine",
+        "side": "south",
+        "x": 13.682,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_mezzanine_guard_walk"
+      },
+      {
+        "id": "window_mezzanine_goods_landing",
+        "kind": "window",
+        "levelId": "mezzanine",
+        "side": "east",
+        "x": 20,
+        "z": 7.0,
+        "separateObject": true,
+        "planOpeningId": "window_mezzanine_goods_landing"
+      },
+      {
+        "id": "window_mezzanine_cut_west",
+        "kind": "window",
+        "levelId": "mezzanine",
+        "side": "west",
+        "x": 0.0,
+        "z": 7.0,
+        "separateObject": true,
+        "planOpeningId": "window_mezzanine_cut_west"
+      }
+    ],
+    "criticalFeatures": [],
+    "voids": [],
+    "siteContext": {
+      "orientation": "front/local south; rear/local north",
+      "entryApproachSide": "south",
+      "courtyardsAndYards": [],
+      "perimeterWall": null
+    },
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable."
+  },
+  "floorPlans": [
+    {
+      "id": "ground",
+      "elevationMeters": 0,
+      "clearHeightMeters": 4.0,
+      "rooms": [
+        {
+          "id": "loading_hall",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 7.9,
+          "depth": 7.37,
+          "kind": "room",
+          "purpose": "loading hall"
+        },
+        {
+          "id": "bulk_store_a",
+          "x": 0.3,
+          "z": 7.67,
+          "width": 7.9,
+          "depth": 3.015,
+          "kind": "room",
+          "purpose": "bulk store a"
+        },
+        {
+          "id": "bulk_store_b",
+          "x": 0.3,
+          "z": 10.685,
+          "width": 7.9,
+          "depth": 3.015,
+          "kind": "room",
+          "purpose": "bulk store b"
+        },
+        {
+          "id": "secure_store",
+          "x": 11.8,
+          "z": 0.3,
+          "width": 7.9,
+          "depth": 3.89,
+          "kind": "room",
+          "purpose": "secure store"
+        },
+        {
+          "id": "staff_service",
+          "x": 11.8,
+          "z": 4.19,
+          "width": 4.0,
+          "depth": 3.89,
+          "kind": "room",
+          "purpose": "staff service"
+        },
+        {
+          "id": "rear_yard_threshold",
+          "x": 11.8,
+          "z": 8.081,
+          "width": 7.9,
+          "depth": 5.619,
+          "kind": "room",
+          "purpose": "rear yard threshold"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 15.8,
+          "z": 6.0,
+          "width": 3.78,
+          "depth": 2.0,
+          "kind": "room",
+          "purpose": "vertical core hall"
+        }
+      ],
+      "blueprintId": "warehouse_barn:ground:clear_span",
+      "layoutPattern": "clear_span",
+      "levelMassFootprints": [
+        {
+          "id": "main_shell",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 19.4,
+          "depth": 13.4,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 10.0,
+        "z": 0.3,
+        "width": 1.5,
+        "depth": 13.4,
+        "kind": "accessible_route_envelope"
+      },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              4.25,
+              0.3
+            ],
+            [
+              4.25,
+              3.985
+            ],
+            [
+              4.25,
+              7.0
+            ],
+            [
+              17.69,
+              7.0
+            ]
+          ]
+        },
+        {
+          "id": "service_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              15.75,
+              13.7
+            ],
+            [
+              15.75,
+              10.89
+            ],
+            [
+              15.75,
+              7.0
+            ],
+            [
+              17.69,
+              7.0
+            ]
+          ]
+        }
+      ],
+      "adjacency": [
+        [
+          "outside",
+          "loading_hall"
+        ],
+        [
+          "outside",
+          "rear_yard_threshold"
+        ],
+        [
+          "loading_hall",
+          "primary_circulation"
+        ],
+        [
+          "bulk_store_a",
+          "primary_circulation"
+        ],
+        [
+          "bulk_store_b",
+          "primary_circulation"
+        ],
+        [
+          "secure_store",
+          "primary_circulation"
+        ],
+        [
+          "staff_service",
+          "primary_circulation"
+        ],
+        [
+          "rear_yard_threshold",
+          "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
+          "primary_circulation"
+        ]
+      ],
+      "doorOpenings": [
+        {
+          "id": "warehouse_barn_main_entry",
+          "from": "outside",
+          "to": "loading_hall",
+          "side": "south",
+          "x": 4.25,
+          "z": 0.3,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "loading_hall"
+          ]
+        },
+        {
+          "id": "warehouse_barn_service_entry",
+          "from": "outside",
+          "to": "rear_yard_threshold",
+          "side": "north",
+          "x": 15.75,
+          "z": 13.7,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "rear_yard_threshold"
+          ]
+        },
+        {
+          "id": "door_ground_loading_hall",
+          "separateObject": true,
+          "between": [
+            "loading_hall",
+            "primary_circulation"
+          ],
+          "to": "loading_hall",
+          "orientation": "vertical",
+          "x": 4.25,
+          "z": 7.67,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_bulk_store_a",
+          "separateObject": true,
+          "between": [
+            "bulk_store_a",
+            "primary_circulation"
+          ],
+          "to": "bulk_store_a",
+          "orientation": "horizontal",
+          "x": 4.25,
+          "z": 7.67,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_bulk_store_b",
+          "separateObject": true,
+          "between": [
+            "bulk_store_b",
+            "primary_circulation"
+          ],
+          "to": "bulk_store_b",
+          "orientation": "horizontal",
+          "x": 4.25,
+          "z": 10.685,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_secure_store",
+          "separateObject": true,
+          "between": [
+            "secure_store",
+            "primary_circulation"
+          ],
+          "to": "secure_store",
+          "orientation": "vertical",
+          "x": 15.75,
+          "z": 4.19,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_staff_service",
+          "separateObject": true,
+          "between": [
+            "staff_service",
+            "primary_circulation"
+          ],
+          "to": "staff_service",
+          "orientation": "vertical",
+          "x": 13.8,
+          "z": 8.08,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_rear_yard_threshold",
+          "separateObject": true,
+          "between": [
+            "rear_yard_threshold",
+            "primary_circulation"
+          ],
+          "to": "rear_yard_threshold",
+          "orientation": "horizontal",
+          "x": 15.75,
+          "z": 8.081,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 17.69,
+          "z": 8.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 17.69,
+          "z": 7.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_ground_cut_BB_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 16.65,
+          "z": 7.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        }
+      ],
+      "exteriorEntrances": [
+        {
+          "id": "warehouse_barn_main_entry",
+          "from": "outside",
+          "to": "loading_hall",
+          "side": "south",
+          "x": 4.25,
+          "z": 0.3,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true
+        },
+        {
+          "id": "warehouse_barn_service_entry",
+          "from": "outside",
+          "to": "rear_yard_threshold",
+          "side": "north",
+          "x": 15.75,
+          "z": 13.7,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            1.4,
+            2.4
+          ],
+          "swing": "out",
+          "stepFree": true,
+          "separateObject": true
+        }
+      ],
+      "windowOpenings": [
+        {
+          "id": "window_ground_loading_hall",
+          "separateFrameGlassShutter": true,
+          "serves": "loading_hall",
+          "side": "south",
+          "x": 4.25,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_bulk_store_a",
+          "separateFrameGlassShutter": true,
+          "serves": "bulk_store_a",
+          "side": "west",
+          "x": 0.0,
+          "z": 9.178,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_bulk_store_b",
+          "separateFrameGlassShutter": true,
+          "serves": "bulk_store_b",
+          "side": "north",
+          "x": 4.25,
+          "z": 14,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_secure_store",
+          "separateFrameGlassShutter": true,
+          "serves": "secure_store",
+          "side": "east",
+          "x": 20,
+          "z": 2.245,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_rear_yard_threshold",
+          "separateFrameGlassShutter": true,
+          "serves": "rear_yard_threshold",
+          "side": "north",
+          "x": 15.75,
+          "z": 14,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_vertical_core_hall",
+          "separateFrameGlassShutter": true,
+          "serves": "vertical_core_hall",
+          "side": "east",
+          "x": 20,
+          "z": 7.0,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "loading_hall",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.0,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_south",
+          "separateFrameGlassShutter": true,
+          "serves": "secure_store",
+          "side": "south",
+          "x": 16.65,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        },
+        {
+          "id": "window_ground_cut_north",
+          "separateFrameGlassShutter": true,
+          "serves": "rear_yard_threshold",
+          "side": "north",
+          "x": 16.65,
+          "z": 14,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        }
+      ],
+      "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
+      "verticalCoreFootprints": [
+        {
+          "coreId": "warehouse_barn_stair_core",
+          "type": "dogleg_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 15.8,
+            "z": 6.0,
+            "width": 1.7,
+            "depth": 2.0,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "vertical_core_hall"
+        },
+        {
+          "coreId": "warehouse_barn_goods_platform",
+          "type": "goods_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 17.78,
+            "z": 6.0,
+            "width": 1.8,
+            "depth": 2.0,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "vertical_core_hall"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "loading_hall",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "ground_loading_hall_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "symbol": "TABLE",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "loading_hall_protected_aisle",
+              "x": 0.3,
+              "z": 3.385,
+              "width": 7.9,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "loading_hall_door_approach",
+              "x": 3.65,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "bulk_store_a",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "ground_bulk_store_a_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 0.602,
+              "z": 7.971,
+              "width": 1.6,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "bulk_store_a_protected_aisle",
+              "x": 0.3,
+              "z": 8.578,
+              "width": 7.9,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "bulk_store_a_door_approach",
+              "x": 3.65,
+              "z": 7.67,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "bulk_store_b",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "ground_bulk_store_b_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 0.602,
+              "z": 10.987,
+              "width": 1.6,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "bulk_store_b_protected_aisle",
+              "x": 0.3,
+              "z": 11.593,
+              "width": 7.9,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "bulk_store_b_door_approach",
+              "x": 3.65,
+              "z": 10.685,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "secure_store",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "ground_secure_store_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 12.15,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "secure_store_protected_aisle",
+              "x": 11.8,
+              "z": 1.645,
+              "width": 7.9,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "secure_store_door_approach",
+              "x": 15.15,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "staff_service",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "ground_staff_service_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "symbol": "UTILITY",
+              "x": 12.15,
+              "z": 4.54,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "staff_service_protected_aisle",
+              "x": 11.8,
+              "z": 5.535,
+              "width": 4.0,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "staff_service_door_approach",
+              "x": 13.2,
+              "z": 4.19,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "rear_yard_threshold",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "ground_rear_yard_threshold_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 12.15,
+              "z": 8.431,
+              "width": 1.6,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "rear_yard_threshold_protected_aisle",
+              "x": 11.8,
+              "z": 10.29,
+              "width": 7.9,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "rear_yard_threshold_door_approach",
+              "x": 15.15,
+              "z": 8.081,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "ground_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 16.0,
+              "z": 6.2,
+              "width": 1.8,
+              "depth": 0.512,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 15.8,
+              "z": 6.4,
+              "width": 3.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 17.09,
+              "z": 6.0,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "ground_accessible_route",
+          "x": 10.0,
+          "z": 0.3,
+          "width": 1.5,
+          "depth": 13.4,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "ground_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "loading_hall",
+          "center": [
+            4.25,
+            3.985
+          ],
+          "diameter": 4.0
+        },
+        {
+          "id": "ground_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "loading_hall",
+          "center": [
+            4.25,
+            3.985
+          ],
+          "radius": 2.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_ground_loading_hall",
+          "type": "lighting",
+          "roomId": "loading_hall",
+          "x": 4.25,
+          "z": 3.985
+        },
+        {
+          "id": "interaction_ground_loading_hall",
+          "type": "interaction",
+          "roomId": "loading_hall",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_bulk_store_a",
+          "type": "lighting",
+          "roomId": "bulk_store_a",
+          "x": 4.25,
+          "z": 9.178
+        },
+        {
+          "id": "interaction_ground_bulk_store_a",
+          "type": "interaction",
+          "roomId": "bulk_store_a",
+          "x": 0.9,
+          "z": 8.27
+        },
+        {
+          "id": "light_ground_bulk_store_b",
+          "type": "lighting",
+          "roomId": "bulk_store_b",
+          "x": 4.25,
+          "z": 12.193
+        },
+        {
+          "id": "interaction_ground_bulk_store_b",
+          "type": "interaction",
+          "roomId": "bulk_store_b",
+          "x": 0.9,
+          "z": 11.285
+        },
+        {
+          "id": "light_ground_secure_store",
+          "type": "lighting",
+          "roomId": "secure_store",
+          "x": 15.75,
+          "z": 2.245
+        },
+        {
+          "id": "interaction_ground_secure_store",
+          "type": "interaction",
+          "roomId": "secure_store",
+          "x": 12.4,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_staff_service",
+          "type": "lighting",
+          "roomId": "staff_service",
+          "x": 13.8,
+          "z": 6.135
+        },
+        {
+          "id": "interaction_ground_staff_service",
+          "type": "interaction",
+          "roomId": "staff_service",
+          "x": 12.4,
+          "z": 4.79
+        },
+        {
+          "id": "light_ground_rear_yard_threshold",
+          "type": "lighting",
+          "roomId": "rear_yard_threshold",
+          "x": 15.75,
+          "z": 10.89
+        },
+        {
+          "id": "interaction_ground_rear_yard_threshold",
+          "type": "interaction",
+          "roomId": "rear_yard_threshold",
+          "x": 12.4,
+          "z": 8.681
+        },
+        {
+          "id": "light_ground_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 17.69,
+          "z": 7.0
+        },
+        {
+          "id": "interaction_ground_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 16.4,
+          "z": 6.6
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            7.0
+          ],
+          "to": [
+            19.7,
+            7.0
+          ],
+          "cutsVerticalCoreId": "warehouse_barn_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            16.65,
+            0.3
+          ],
+          "to": [
+            16.65,
+            13.7
+          ],
+          "cutsVerticalCoreId": "warehouse_barn_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
+    },
+    {
+      "id": "mezzanine",
+      "elevationMeters": 4.3,
+      "clearHeightMeters": 2.7,
+      "rooms": [
+        {
+          "id": "light_goods_store",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 5.632,
+          "depth": 6.7,
+          "kind": "room",
+          "purpose": "light goods store"
+        },
+        {
+          "id": "records",
+          "x": 5.932,
+          "z": 0.3,
+          "width": 5.632,
+          "depth": 6.7,
+          "kind": "room",
+          "purpose": "records"
+        },
+        {
+          "id": "guard_walk",
+          "x": 11.565,
+          "z": 0.3,
+          "width": 4.235,
+          "depth": 6.7,
+          "kind": "room",
+          "purpose": "guard walk"
+        },
+        {
+          "id": "goods_landing",
+          "x": 15.8,
+          "z": 6.0,
+          "width": 3.78,
+          "depth": 2.0,
+          "kind": "room",
+          "purpose": "goods landing"
+        }
+      ],
+      "blueprintId": "warehouse_barn:mezzanine:guard_mezzanine",
+      "layoutPattern": "guard_mezzanine",
+      "levelMassFootprints": [
+        {
+          "id": "main_shell",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 19.4,
+          "depth": 13.4,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 0.3,
+        "z": 7.28,
+        "width": 19.4,
+        "depth": 1.5,
+        "kind": "accessible_route_envelope"
+      },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.5,
+          "accessible": true,
+          "points": [
+            [
+              0.3,
+              7.28
+            ],
+            [
+              0.3,
+              7.0
+            ],
+            [
+              17.69,
+              7.0
+            ],
+            [
+              17.69,
+              7.28
+            ],
+            [
+              19.7,
+              7.28
+            ]
+          ]
+        }
+      ],
+      "adjacency": [
+        [
+          "light_goods_store",
+          "primary_circulation"
+        ],
+        [
+          "records",
+          "primary_circulation"
+        ],
+        [
+          "guard_walk",
+          "primary_circulation"
+        ],
+        [
+          "goods_landing",
+          "primary_circulation"
+        ]
+      ],
+      "doorOpenings": [
+        {
+          "id": "door_mezzanine_light_goods_store",
+          "separateObject": true,
+          "between": [
+            "light_goods_store",
+            "primary_circulation"
+          ],
+          "to": "light_goods_store",
+          "orientation": "vertical",
+          "x": 3.116,
+          "z": 7.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_mezzanine_records",
+          "separateObject": true,
+          "between": [
+            "records",
+            "primary_circulation"
+          ],
+          "to": "records",
+          "orientation": "vertical",
+          "x": 8.748,
+          "z": 7.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_mezzanine_guard_walk",
+          "separateObject": true,
+          "between": [
+            "guard_walk",
+            "primary_circulation"
+          ],
+          "to": "guard_walk",
+          "orientation": "vertical",
+          "x": 13.682,
+          "z": 7.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_mezzanine_goods_landing",
+          "separateObject": true,
+          "between": [
+            "goods_landing",
+            "primary_circulation"
+          ],
+          "to": "goods_landing",
+          "orientation": "vertical",
+          "x": 17.69,
+          "z": 8.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_mezzanine_cut_AA_goods_landing",
+          "separateObject": true,
+          "between": [
+            "goods_landing",
+            "primary_circulation"
+          ],
+          "to": "goods_landing",
+          "orientation": "horizontal",
+          "x": 17.69,
+          "z": 7.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_mezzanine_cut_BB_goods_landing",
+          "separateObject": true,
+          "between": [
+            "goods_landing",
+            "primary_circulation"
+          ],
+          "to": "goods_landing",
+          "orientation": "vertical",
+          "x": 16.65,
+          "z": 7.0,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        }
+      ],
+      "exteriorEntrances": [],
+      "windowOpenings": [
+        {
+          "id": "window_mezzanine_light_goods_store",
+          "separateFrameGlassShutter": true,
+          "serves": "light_goods_store",
+          "side": "south",
+          "x": 3.116,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_mezzanine_records",
+          "separateFrameGlassShutter": true,
+          "serves": "records",
+          "side": "south",
+          "x": 8.748,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_mezzanine_guard_walk",
+          "separateFrameGlassShutter": true,
+          "serves": "guard_walk",
+          "side": "south",
+          "x": 13.682,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_mezzanine_goods_landing",
+          "separateFrameGlassShutter": true,
+          "serves": "goods_landing",
+          "side": "east",
+          "x": 20,
+          "z": 7.0,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_mezzanine_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "light_goods_store",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.0,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        }
+      ],
+      "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
+      "verticalCoreFootprints": [
+        {
+          "coreId": "warehouse_barn_stair_core",
+          "type": "dogleg_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 15.8,
+            "z": 6.0,
+            "width": 1.7,
+            "depth": 2.0,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "goods_landing"
+        },
+        {
+          "coreId": "warehouse_barn_goods_platform",
+          "type": "goods_platform",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 17.78,
+            "z": 6.0,
+            "width": 1.8,
+            "depth": 2.0,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "goods_landing"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "light_goods_store",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "mezzanine_light_goods_store_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "light_goods_store_protected_aisle",
+              "x": 2.516,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 6.7,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "light_goods_store_door_approach",
+              "x": 2.516,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "records",
+          "layoutIntent": "archive shelving",
+          "footprints": [
+            {
+              "id": "mezzanine_records_shelf_bay_1",
+              "kind": "shelf_bay",
+              "label": "archive shelving",
+              "symbol": "SHELF",
+              "x": 6.282,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.45,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 2.0
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "records_protected_aisle",
+              "x": 8.148,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 6.7,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "records_door_approach",
+              "x": 8.148,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "guard_walk",
+          "layoutIntent": "weapon rack",
+          "footprints": [
+            {
+              "id": "mezzanine_guard_walk_weapon_rack_1",
+              "kind": "weapon_rack",
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 11.915,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.5,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "guard_walk_protected_aisle",
+              "x": 13.082,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 6.7,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "guard_walk_door_approach",
+              "x": 13.082,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "goods_landing",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "mezzanine_goods_landing_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "symbol": "UTILITY",
+              "x": 16.0,
+              "z": 6.2,
+              "width": 1.2,
+              "depth": 0.512,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "goods_landing_protected_aisle",
+              "x": 15.8,
+              "z": 6.4,
+              "width": 3.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "goods_landing_door_approach",
+              "x": 17.09,
+              "z": 6.0,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "mezzanine_accessible_route",
+          "x": 0.3,
+          "z": 7.28,
+          "width": 19.4,
+          "depth": 1.5,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "mezzanine_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "light_goods_store",
+          "center": [
+            3.116,
+            3.65
+          ],
+          "diameter": 4.0
+        },
+        {
+          "id": "mezzanine_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "light_goods_store",
+          "center": [
+            3.116,
+            3.65
+          ],
+          "radius": 2.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_mezzanine_light_goods_store",
+          "type": "lighting",
+          "roomId": "light_goods_store",
+          "x": 3.116,
+          "z": 3.65
+        },
+        {
+          "id": "interaction_mezzanine_light_goods_store",
+          "type": "interaction",
+          "roomId": "light_goods_store",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_mezzanine_records",
+          "type": "lighting",
+          "roomId": "records",
+          "x": 8.748,
+          "z": 3.65
+        },
+        {
+          "id": "interaction_mezzanine_records",
+          "type": "interaction",
+          "roomId": "records",
+          "x": 6.532,
+          "z": 0.9
+        },
+        {
+          "id": "light_mezzanine_guard_walk",
+          "type": "lighting",
+          "roomId": "guard_walk",
+          "x": 13.682,
+          "z": 3.65
+        },
+        {
+          "id": "interaction_mezzanine_guard_walk",
+          "type": "interaction",
+          "roomId": "guard_walk",
+          "x": 12.165,
+          "z": 0.9
+        },
+        {
+          "id": "light_mezzanine_goods_landing",
+          "type": "lighting",
+          "roomId": "goods_landing",
+          "x": 17.69,
+          "z": 7.0
+        },
+        {
+          "id": "interaction_mezzanine_goods_landing",
+          "type": "interaction",
+          "roomId": "goods_landing",
+          "x": 16.4,
+          "z": 6.6
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            7.0
+          ],
+          "to": [
+            19.7,
+            7.0
+          ],
+          "cutsVerticalCoreId": "warehouse_barn_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            16.65,
+            0.3
+          ],
+          "to": [
+            16.65,
+            13.7
+          ],
+          "cutsVerticalCoreId": "warehouse_barn_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
+    }
+  ],
+  "verticalCirculation": [
+    {
+      "id": "warehouse_barn_stair_core",
+      "type": "dogleg_stair",
+      "footprint": {
+        "id": "stair_footprint",
+        "x": 15.8,
+        "z": 6.0,
+        "width": 1.7,
+        "depth": 2.0,
+        "kind": "vertical_circulation"
+      },
+      "clearWidthMeters": 1.5,
+      "direction": "UP clockwise",
+      "connectsLevels": [
+        "ground",
+        "mezzanine"
+      ],
+      "landings": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "mezzanine",
+          "elevationMeters": 4.3,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": false,
+      "separateObjects": true
+    },
+    {
+      "id": "warehouse_barn_goods_platform",
+      "type": "goods_platform",
+      "footprint": {
+        "id": "lift_footprint",
+        "x": 17.78,
+        "z": 6.0,
+        "width": 1.8,
+        "depth": 2.0,
+        "kind": "vertical_circulation"
+      },
+      "clearWidthMeters": 1.5,
+      "direction": "vertical platform",
+      "connectsLevels": [
+        "ground",
+        "mezzanine"
+      ],
+      "landings": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "mezzanine",
+          "elevationMeters": 4.3,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": false,
+      "separateObjects": true
+    }
+  ],
+  "sections": {
+    "longitudinal": {
+      "id": "A-A",
+      "cutLineId": "A-A",
+      "axis": "x",
+      "cutCoordinateMeters": 7.0,
+      "spanMeters": 20,
+      "levels": [
+        {
+          "id": "ground",
+          "elevationMeters": 0,
+          "clearHeightMeters": 4.0
+        },
+        {
+          "id": "mezzanine",
+          "elevationMeters": 4.3,
+          "clearHeightMeters": 2.7
+        }
+      ],
+      "roomSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "loading_hall",
+          "startMeters": 0.3,
+          "endMeters": 8.200000000000001,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 4.0
+        },
+        {
+          "levelId": "ground",
+          "roomId": "staff_service",
+          "startMeters": 11.8,
+          "endMeters": 15.8,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 4.0
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "startMeters": 15.8,
+          "endMeters": 19.580000000000002,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 4.0
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "light_goods_store",
+          "startMeters": 0.3,
+          "endMeters": 5.9319999999999995,
+          "baseElevationMeters": 4.3,
+          "clearHeightMeters": 2.7
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "records",
+          "startMeters": 5.932,
+          "endMeters": 11.564,
+          "baseElevationMeters": 4.3,
+          "clearHeightMeters": 2.7
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "guard_walk",
+          "startMeters": 11.565,
+          "endMeters": 15.8,
+          "baseElevationMeters": 4.3,
+          "clearHeightMeters": 2.7
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "goods_landing",
+          "startMeters": 15.8,
+          "endMeters": 19.580000000000002,
+          "baseElevationMeters": 4.3,
+          "clearHeightMeters": 2.7
+        }
+      ],
+      "voidSlices": [],
+      "slabs": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "mezzanine",
+          "elevationMeters": 4.3,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "warehouse_barn_stair_core",
+          "type": "dogleg_stair",
+          "connectsLevels": [
+            "ground",
+            "mezzanine"
+          ],
+          "direction": "UP clockwise",
+          "startMeters": 15.8,
+          "endMeters": 17.5
+        },
+        {
+          "coreId": "warehouse_barn_goods_platform",
+          "type": "goods_platform",
+          "connectsLevels": [
+            "ground",
+            "mezzanine"
+          ],
+          "direction": "vertical platform",
+          "startMeters": 17.78,
+          "endMeters": 19.58
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_vertical_core_hall",
+          "kind": "window",
+          "side": "east",
+          "x": 20,
+          "z": 7.0,
+          "positionMeters": 20,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 17.69,
+          "z": 7.0,
+          "positionMeters": 17.69,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 16.65,
+          "z": 7.0,
+          "positionMeters": 16.65,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "window_mezzanine_goods_landing",
+          "kind": "window",
+          "side": "east",
+          "x": 20,
+          "z": 7.0,
+          "positionMeters": 20,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "window_mezzanine_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "door_mezzanine_light_goods_store",
+          "kind": "door",
+          "side": null,
+          "x": 3.116,
+          "z": 7.0,
+          "positionMeters": 3.116,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "door_mezzanine_records",
+          "kind": "door",
+          "side": null,
+          "x": 8.748,
+          "z": 7.0,
+          "positionMeters": 8.748,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "door_mezzanine_guard_walk",
+          "kind": "door",
+          "side": null,
+          "x": 13.682,
+          "z": 7.0,
+          "positionMeters": 13.682,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "door_mezzanine_cut_AA_goods_landing",
+          "kind": "door",
+          "side": null,
+          "x": 17.69,
+          "z": 7.0,
+          "positionMeters": 17.69,
+          "orthogonalMeters": 7.0
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "door_mezzanine_cut_BB_goods_landing",
+          "kind": "door",
+          "side": null,
+          "x": 16.65,
+          "z": 7.0,
+          "positionMeters": 16.65,
+          "orthogonalMeters": 7.0
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "loading_hall",
+          "kind": "table_bench",
+          "symbol": "TABLE",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "staff_service",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 12.15,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 16.0,
+          "sectionHeightMeters": 1.3
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "light_goods_store",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "records",
+          "kind": "shelf_bay",
+          "symbol": "SHELF",
+          "positionMeters": 6.282,
+          "sectionHeightMeters": 2.0
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "guard_walk",
+          "kind": "weapon_rack",
+          "symbol": "ARMS",
+          "positionMeters": 11.915,
+          "sectionHeightMeters": 1.8
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "goods_landing",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 16.0,
+          "sectionHeightMeters": 0.8
+        }
+      ],
+      "featureSlices": [],
+      "foundation": {
+        "baseElevationMeters": -0.6,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 7.0,
+        "peakElevationMeters": 9.0,
+        "structure": "Long low iron-ribbed gable with modular loading hoods.",
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
+      }
+    },
+    "cross": {
+      "id": "B-B",
+      "cutLineId": "B-B",
+      "axis": "z",
+      "cutCoordinateMeters": 16.65,
+      "spanMeters": 14,
+      "levels": [
+        {
+          "id": "ground",
+          "elevationMeters": 0,
+          "clearHeightMeters": 4.0
+        },
+        {
+          "id": "mezzanine",
+          "elevationMeters": 4.3,
+          "clearHeightMeters": 2.7
+        }
+      ],
+      "roomSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "secure_store",
+          "startMeters": 0.3,
+          "endMeters": 4.19,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 4.0
+        },
+        {
+          "levelId": "ground",
+          "roomId": "rear_yard_threshold",
+          "startMeters": 8.081,
+          "endMeters": 13.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 4.0
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "startMeters": 6.0,
+          "endMeters": 8.0,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 4.0
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "goods_landing",
+          "startMeters": 6.0,
+          "endMeters": 8.0,
+          "baseElevationMeters": 4.3,
+          "clearHeightMeters": 2.7
+        }
+      ],
+      "voidSlices": [],
+      "slabs": [
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "mezzanine",
+          "elevationMeters": 4.3,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "warehouse_barn_stair_core",
+          "type": "dogleg_stair",
+          "connectsLevels": [
+            "ground",
+            "mezzanine"
+          ],
+          "direction": "UP clockwise",
+          "startMeters": 6.0,
+          "endMeters": 8.0
+        },
+        {
+          "coreId": "warehouse_barn_goods_platform",
+          "type": "goods_platform",
+          "connectsLevels": [
+            "ground",
+            "mezzanine"
+          ],
+          "direction": "vertical platform",
+          "startMeters": 6.0,
+          "endMeters": 8.0
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_cut_south",
+          "kind": "window",
+          "side": "south",
+          "x": 16.65,
+          "z": 0.0,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 16.65
+        },
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_cut_north",
+          "kind": "window",
+          "side": "north",
+          "x": 16.65,
+          "z": 14,
+          "positionMeters": 14,
+          "orthogonalMeters": 16.65
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 16.65,
+          "z": 7.0,
+          "positionMeters": 7.0,
+          "orthogonalMeters": 16.65
+        },
+        {
+          "levelId": "mezzanine",
+          "openingId": "door_mezzanine_cut_BB_goods_landing",
+          "kind": "door",
+          "side": null,
+          "x": 16.65,
+          "z": 7.0,
+          "positionMeters": 7.0,
+          "orthogonalMeters": 16.65
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "ground",
+          "roomId": "secure_store",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "rear_yard_threshold",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 8.431,
+          "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 6.2,
+          "sectionHeightMeters": 1.3
+        },
+        {
+          "levelId": "mezzanine",
+          "roomId": "goods_landing",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 6.2,
+          "sectionHeightMeters": 0.8
+        }
+      ],
+      "featureSlices": [],
+      "foundation": {
+        "baseElevationMeters": -0.6,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 7.0,
+        "peakElevationMeters": 9.0,
+        "structure": "Long low iron-ribbed gable with modular loading hoods.",
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": []
+      }
+    }
+  },
+  "roomPurposeAndAdjacency": "Every room has a purpose-specific footprint, furnished layout, protected clearances, separate openings, and a connection to the drawn circulation geometry. Plan-marked A-A/B-B cuts bind those rooms to both architectural sections.",
+  "sharedModules": {
+    "structural": [
+      "foundation_3m",
+      "floor_3m",
+      "ceiling_3m",
+      "wall_solid_3m",
+      "wall_opening_3m",
+      "inside_corner",
+      "outside_corner",
+      "pillar",
+      "beam_lintel",
+      "roof_slope",
+      "roof_ridge",
+      "roof_hip_valley",
+      "roof_gable_end",
+      "roof_fascia"
+    ],
+    "aperturesSeparate": [
+      "door_leaf_1_2x2_4",
+      "public_door_leaf_2_5x3_0",
+      "window_frame_1_2x1_5",
+      "glass_group",
+      "shutter_pair",
+      "local_gate_4m",
+      "major_gate_8m",
+      "main_gate_face",
+      "gate_control"
+    ],
+    "traversal": [
+      "stair_1_5m",
+      "landing_1_5m",
+      "ramp_1_to_12",
+      "lift_platform",
+      "ladder_fixed",
+      "walkway_2m",
+      "walltop_route_2m",
+      "bridge_4m_bay"
+    ],
+    "technical": [
+      "streaming_portal",
+      "loading_cover",
+      "occlusion_cell",
+      "navmesh_link",
+      "unload_boundary",
+      "lighting_socket",
+      "interaction_socket",
+      "quest_socket",
+      "audio_socket",
+      "vfx_anchor"
+    ]
+  },
+  "furnishedRoomModules": [
+    "waf_interior_shell_wall_floor_ceiling",
+    "waf_interior_door_window_threshold",
+    "waf_interior_entry_vestibule",
+    "waf_interior_corridor_junction",
+    "waf_interior_stair_landing",
+    "waf_interior_cutaway_occlusion_set",
+    "waf_interior_storage_pantry_cellar",
+    "waf_interior_utility_service_room",
+    "waf_interior_library_archive"
+  ],
+  "propDecorFamilies": [
+    "waf_banner_war_objective",
+    "waf_interactable_container_loot",
+    "waf_interactable_lever_switch",
+    "waf_interactable_lift_platform",
+    "waf_interactable_quest_objective",
+    "waf_interactable_seat_use",
+    "waf_prop_clutter_books_scrolls_papers",
+    "waf_prop_clutter_personal_items",
+    "waf_prop_clutter_pottery_bottles",
+    "waf_prop_lighting_brazier_hearth_fireplace",
+    "waf_prop_lighting_candle_lamp",
+    "waf_prop_lighting_chandelier_hanging",
+    "waf_prop_lighting_lantern_sconce",
+    "waf_prop_military_armor_stand",
+    "waf_prop_military_siege_ammunition",
+    "waf_prop_military_training_dummy_target",
+    "waf_prop_military_war_map_table",
+    "waf_prop_military_weapon_rack",
+    "waf_prop_seating_bench_pew",
+    "waf_prop_seating_chair_stool",
+    "waf_prop_storage_cabinet_cupboard",
+    "waf_prop_storage_chest_coffer",
+    "waf_prop_storage_crate_barrel_sack_basket",
+    "waf_prop_storage_shelf_bookcase",
+    "waf_prop_surface_table_desk",
+    "waf_prop_textile_rug_tapestry",
+    "waf_prop_utility_bucket_tub_washbasin",
+    "waf_prop_utility_cart_wagon",
+    "waf_prop_utility_firewood_fuel",
+    "waf_prop_utility_rope_chain",
+    "waf_prop_utility_scaffold_ladder",
+    "waf_prop_utility_tools_workset",
+    "waf_sign_notice_contract_board"
+  ],
+  "propVisualAuthority": "PR #701 is owner-approved measured/form authority for its 16 civic/fort furnishing families. Other room-fit symbols are taxonomy placeholders and remain owner-review gated by prop_stonehold_interior_decor_v001.",
+  "approvedFurnishingPrecedent": {
+    "source": "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json",
+    "approvalRecord": "PR #701 <!-- anotherlife-owner-approved -->",
+    "scope": "exact measured reuse for matching civic/fort room uses; Stonehold material, wear, atlas, LOD, collider and protected-clearance precedent elsewhere"
+  },
+  "sockets": {
+    "lighting": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "interaction": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "quest": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "audio": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "vfx_anchor_runtime_separate": {
+      "required": true,
+      "separateFromCleanGeometry": true
+    },
+    "portal_streaming": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    }
+  },
+  "bindingPolicies": {
+    "gridMeters": 0.5,
+    "placementCellMeters": 2.0,
+    "structuralBayMeters": 4.0,
+    "verticalTierMeters": 1.0,
+    "doorsAndGates": "Every door leaf, frame, shutter, glass group, local gate and main gate is a separate object from shells and perimeter walls.",
+    "mainGate": "An intact main gate stays physically impassable. Future interaction teleports atomically between paired anchors; this packet implements no teleport.",
+    "hostileGateBreak": "Reference t_c8ea885d only. This packet implements no break logic and authorizes no destructible 3D geometry.",
+    "perimeterWall": "Main castle, fortress, fort and city perimeter walls stay non-enterable and impassable; only defendable walltops and designated routes are traversable.",
+    "interiorScale": "Small interiors are seamless. Large combat interiors use separate asynchronously loaded scenes behind physical portals.",
+    "runtimeVfx": "Particles, smoke, sparks, auras, volumetrics and magic remain runtime-separate from clean geometry.",
+    "staticAssembly": "Combine opaque structural and finish modules per room or exterior visibility cell and atlas; never retain one renderer or collider per source tile at runtime.",
+    "approvedFurnishingPrecedent": "PR #701 owner-approved the Stonehold Civic + Fort Furnishing Kit V001; reuse its measured envelopes, protected opening approaches, one-material/shared-atlas target and accepted single-cot correction where applicable."
+  },
+  "mobilePolicy": {
+    "lodIntent": [
+      "LOD0 authored source",
+      "LOD1 50-60% silhouette-preserving",
+      "LOD2 20-30%",
+      "HLOD 5-10% or chunk proxy"
+    ],
+    "atlasIntent": [
+      "one shared opaque Stonehold exterior atlas",
+      "one shared opaque interior atlas",
+      "minimum separate glass renderer set"
+    ],
+    "protectedCues": [
+      "compressed roofline",
+      "stepped basalt foundation",
+      "thick buttress rhythm",
+      "clipped-corner aperture"
+    ],
+    "dropFirst": [
+      "workers",
+      "secondary clutter",
+      "scaffolds",
+      "smoke",
+      "sparks",
+      "small banners"
+    ]
+  },
+  "provenance": [
+    "DESIGN.md",
+    "unity/Assets/AL/Art/Designs/FourRealmArchitecture.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/CivicHall/civic_hall_2d_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/FortGatehouse/fort_gatehouse_2d_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/stonehold_concept_packet_coverage_v001.json",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_enterable_structures_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_exterior_interior_floorplan_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_settlement_silhouettes_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/prop_stonehold_interior_decor_v001.md"
+  ],
+  "avoid": [
+    "Solid decorative shell or facade-only substitute.",
+    "Enterable main perimeter walls.",
+    "Gate, door, window glass or shutter fused into a wall/building mesh.",
+    "Unmarked inaccessible room or painted-on aperture.",
+    "Dwarf pastiche or copied BDO / Infinity Kingdom architecture.",
+    "Crownlands vertical civic silhouette or Eldergrove root grammar.",
+    "Glowing cracks, smoke or VFX used as required silhouette.",
+    "Slagfall Quarry treated as architecture visual authorization.",
+    "Invented religious, royal, heraldic or textual meaning.",
+    "One renderer, material or collider per modular tile.",
+    "Unique 4K runtime textures for common structures."
+  ],
+  "ownerReview": {
+    "required": true,
+    "allowedDecisions": [
+      "APPROVE",
+      "REVISE",
+      "REJECT"
+    ],
+    "decision": null,
+    "gates": [
+      {
+        "id": "massing",
+        "question": "Approve the recommended exterior massing?",
+        "recommendation": "Clear-span enterable shell divided into loading, bulk storage, secure storage and staff-service cells.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "roof",
+        "question": "Approve the recommended roof profile?",
+        "recommendation": "Long low iron-ribbed gable with modular loading hoods.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "materials",
+        "question": "Approve the shown Stonehold material balance?",
+        "recommendation": "Basalt dominant, iron secondary, timber interior, bronze repair sparse.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "access",
+        "question": "Approve the entry, circulation and accessibility sequence?",
+        "recommendation": "Step-free loading loop; dock ramp; goods lift to mezzanine; 4 m clear cross-aisle.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "family_specific",
+        "question": "Approve clear-span warehouse as base; barn and shed are modular reductions.",
+        "recommendation": "The option drawn and documented in this packet.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      }
+    ]
+  },
+  "productionAuthorization": {
+    "comfyuiLocal": "approved_for_2d_only",
+    "meshy": false,
+    "blender": false,
+    "runtime3d": false,
+    "new3dJobsSubmitted": 0
+  }
+}

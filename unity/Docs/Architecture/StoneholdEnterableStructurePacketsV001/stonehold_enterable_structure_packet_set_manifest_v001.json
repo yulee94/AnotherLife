@@ -1,0 +1,1230 @@
+{
+  "schema": "anotherlife.stonehold-enterable-structure-packet-set.v1",
+  "packetSetId": "stonehold_enterable_structure_packets_v001",
+  "version": "v001",
+  "status": "pending_owner_review",
+  "ownerDecisionRequired": "APPROVE_REVISE_REJECT_per_packet",
+  "enterablePacketCount": 27,
+  "sharedModuleFamilyCount": 11,
+  "new3dJobsSubmitted": 0,
+  "coverage": {
+    "enterablePackets": [
+      "waf_architecture_city_capital_kit",
+      "waf_architecture_settlement_village_kit",
+      "waf_architecture_dwelling",
+      "waf_architecture_ruin_structure",
+      "waf_architecture_well_fountain_cistern",
+      "waf_architecture_building_academy",
+      "waf_architecture_building_barracks",
+      "waf_architecture_building_embassy",
+      "waf_architecture_building_farm",
+      "waf_architecture_building_forge",
+      "waf_architecture_building_gold_mine",
+      "waf_architecture_building_lumber_mill",
+      "waf_architecture_building_market",
+      "waf_architecture_building_quarry",
+      "waf_architecture_building_stable",
+      "waf_architecture_building_storehouse",
+      "waf_architecture_building_town_hall",
+      "waf_architecture_building_watchtower",
+      "waf_architecture_building_workshop",
+      "waf_architecture_castle_enterable",
+      "waf_architecture_fortress_enterable",
+      "waf_architecture_guardpost_watch",
+      "waf_architecture_inn_tavern",
+      "waf_architecture_mill_wind_water",
+      "waf_architecture_religious_cultural_structure",
+      "waf_architecture_shop_service",
+      "waf_architecture_warehouse_barn"
+    ],
+    "sharedModuleFamilies": [
+      "waf_interactable_door_hatch",
+      "waf_interactable_gate_teleport_control",
+      "waf_traversal_gate_breakable_war",
+      "waf_traversal_gate_local_doorway",
+      "waf_traversal_gate_main_teleport",
+      "waf_traversal_ladder_climb",
+      "waf_traversal_platform_walkway",
+      "waf_traversal_ramp_slope",
+      "waf_traversal_stair_step",
+      "waf_traversal_teleport_pad_portal_anchor",
+      "waf_traversal_wall_fortification"
+    ],
+    "nonEnterableException": [
+      "waf_architecture_building_wall"
+    ],
+    "nonStoneholdExclusion": [
+      "waf_architecture_event_accordant_isle"
+    ]
+  },
+  "bindingPolicies": {
+    "gridMeters": 0.5,
+    "placementCellMeters": 2.0,
+    "structuralBayMeters": 4.0,
+    "verticalTierMeters": 1.0,
+    "doorsAndGates": "Every door leaf, frame, shutter, glass group, local gate and main gate is a separate object from shells and perimeter walls.",
+    "mainGate": "An intact main gate stays physically impassable. Future interaction teleports atomically between paired anchors; this packet implements no teleport.",
+    "hostileGateBreak": "Reference t_c8ea885d only. This packet implements no break logic and authorizes no destructible 3D geometry.",
+    "perimeterWall": "Main castle, fortress, fort and city perimeter walls stay non-enterable and impassable; only defendable walltops and designated routes are traversable.",
+    "interiorScale": "Small interiors are seamless. Large combat interiors use separate asynchronously loaded scenes behind physical portals.",
+    "runtimeVfx": "Particles, smoke, sparks, auras, volumetrics and magic remain runtime-separate from clean geometry.",
+    "staticAssembly": "Combine opaque structural and finish modules per room or exterior visibility cell and atlas; never retain one renderer or collider per source tile at runtime.",
+    "approvedFurnishingPrecedent": "PR #701 owner-approved the Stonehold Civic + Fort Furnishing Kit V001; reuse its measured envelopes, protected opening approaches, one-material/shared-atlas target and accepted single-cot correction where applicable."
+  },
+  "sharedModuleRegister": {
+    "structural": [
+      "foundation_3m",
+      "floor_3m",
+      "ceiling_3m",
+      "wall_solid_3m",
+      "wall_opening_3m",
+      "inside_corner",
+      "outside_corner",
+      "pillar",
+      "beam_lintel",
+      "roof_slope",
+      "roof_ridge",
+      "roof_hip_valley",
+      "roof_gable_end",
+      "roof_fascia"
+    ],
+    "aperturesSeparate": [
+      "door_leaf_1_2x2_4",
+      "public_door_leaf_2_5x3_0",
+      "window_frame_1_2x1_5",
+      "glass_group",
+      "shutter_pair",
+      "local_gate_4m",
+      "major_gate_8m",
+      "main_gate_face",
+      "gate_control"
+    ],
+    "traversal": [
+      "stair_1_5m",
+      "landing_1_5m",
+      "ramp_1_to_12",
+      "lift_platform",
+      "ladder_fixed",
+      "walkway_2m",
+      "walltop_route_2m",
+      "bridge_4m_bay"
+    ],
+    "technical": [
+      "streaming_portal",
+      "loading_cover",
+      "occlusion_cell",
+      "navmesh_link",
+      "unload_boundary",
+      "lighting_socket",
+      "interaction_socket",
+      "quest_socket",
+      "audio_socket",
+      "vfx_anchor"
+    ]
+  },
+  "propFamilyCoverage": {
+    "mapped": [
+      "waf_banner_civic_pennant",
+      "waf_banner_guild",
+      "waf_banner_realm_standard",
+      "waf_banner_war_objective",
+      "waf_interactable_container_loot",
+      "waf_interactable_lever_switch",
+      "waf_interactable_lift_platform",
+      "waf_interactable_quest_objective",
+      "waf_interactable_seat_use",
+      "waf_interactable_service_station",
+      "waf_prop_clutter_books_scrolls_papers",
+      "waf_prop_clutter_debris_rubble",
+      "waf_prop_clutter_food_goods",
+      "waf_prop_clutter_personal_items",
+      "waf_prop_clutter_pottery_bottles",
+      "waf_prop_clutter_textile_bedding",
+      "waf_prop_cultural_instrument_artifact",
+      "waf_prop_forge_bellows_quench",
+      "waf_prop_forge_hearth_anvil",
+      "waf_prop_forge_tool_rack",
+      "waf_prop_guild_contract_board",
+      "waf_prop_guild_meeting_contract_desk",
+      "waf_prop_guild_trophy_display",
+      "waf_prop_kitchen_cauldron_cookware",
+      "waf_prop_kitchen_dishes_utensils",
+      "waf_prop_kitchen_oven_cookfire",
+      "waf_prop_kitchen_prep_pantry",
+      "waf_prop_lighting_brazier_hearth_fireplace",
+      "waf_prop_lighting_candle_lamp",
+      "waf_prop_lighting_chandelier_hanging",
+      "waf_prop_lighting_lantern_sconce",
+      "waf_prop_market_counter_display",
+      "waf_prop_market_scale_till",
+      "waf_prop_market_stall_canopy",
+      "waf_prop_military_armor_stand",
+      "waf_prop_military_siege_ammunition",
+      "waf_prop_military_training_dummy_target",
+      "waf_prop_military_war_map_table",
+      "waf_prop_military_weapon_rack",
+      "waf_prop_religious_altar_shrine",
+      "waf_prop_religious_reliquary_offering",
+      "waf_prop_royal_ceremonial_screen",
+      "waf_prop_royal_council_lectern",
+      "waf_prop_royal_throne_dais",
+      "waf_prop_seating_bench_pew",
+      "waf_prop_seating_chair_stool",
+      "waf_prop_sleep_bed_cot_bunk",
+      "waf_prop_storage_cabinet_cupboard",
+      "waf_prop_storage_chest_coffer",
+      "waf_prop_storage_crate_barrel_sack_basket",
+      "waf_prop_storage_shelf_bookcase",
+      "waf_prop_surface_table_desk",
+      "waf_prop_textile_rug_tapestry",
+      "waf_prop_utility_bucket_tub_washbasin",
+      "waf_prop_utility_cart_wagon",
+      "waf_prop_utility_firewood_fuel",
+      "waf_prop_utility_rope_chain",
+      "waf_prop_utility_scaffold_ladder",
+      "waf_prop_utility_tools_workset",
+      "waf_sign_direction_route",
+      "waf_sign_facility_service",
+      "waf_sign_hazard_boundary",
+      "waf_sign_notice_contract_board",
+      "waf_sign_plaque_waystone"
+    ],
+    "excluded": [
+      "waf_banner_event"
+    ]
+  },
+  "interiorModuleCoverage": [
+    "waf_interior_barracks_room",
+    "waf_interior_bedroom_living",
+    "waf_interior_corridor_junction",
+    "waf_interior_courtyard_balcony",
+    "waf_interior_cutaway_occlusion_set",
+    "waf_interior_door_window_threshold",
+    "waf_interior_entry_vestibule",
+    "waf_interior_forge_workshop",
+    "waf_interior_great_council_hall",
+    "waf_interior_guild_hall",
+    "waf_interior_kitchen_dining",
+    "waf_interior_library_archive",
+    "waf_interior_market_shop",
+    "waf_interior_mine_cave_room",
+    "waf_interior_prison_dungeon",
+    "waf_interior_religious_cultural_room",
+    "waf_interior_shell_wall_floor_ceiling",
+    "waf_interior_stair_landing",
+    "waf_interior_storage_pantry_cellar",
+    "waf_interior_throne_royal_hall",
+    "waf_interior_utility_service_room"
+  ],
+  "provenance": [
+    "DESIGN.md",
+    "unity/Assets/AL/Art/Designs/FourRealmArchitecture.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/CivicHall/civic_hall_2d_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/FortGatehouse/fort_gatehouse_2d_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/stonehold_concept_packet_coverage_v001.json",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_enterable_structures_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_exterior_interior_floorplan_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_settlement_silhouettes_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/prop_stonehold_interior_decor_v001.md"
+  ],
+  "avoid": [
+    "Solid decorative shell or facade-only substitute.",
+    "Enterable main perimeter walls.",
+    "Gate, door, window glass or shutter fused into a wall/building mesh.",
+    "Unmarked inaccessible room or painted-on aperture.",
+    "Dwarf pastiche or copied BDO / Infinity Kingdom architecture.",
+    "Crownlands vertical civic silhouette or Eldergrove root grammar.",
+    "Glowing cracks, smoke or VFX used as required silhouette.",
+    "Slagfall Quarry treated as architecture visual authorization.",
+    "Invented religious, royal, heraldic or textual meaning.",
+    "One renderer, material or collider per modular tile.",
+    "Unique 4K runtime textures for common structures."
+  ],
+  "packets": [
+    {
+      "packetId": "stonehold_city_capital_kit_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_city_capital_kit",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 3,
+      "artifacts": [
+        {
+          "locator": "packets/city_capital_kit/city_capital_kit_2d_handoff_v001.json",
+          "byteLength": 107253,
+          "sha256": "7d885af220dcab9f4909e455ab0a5d4d509ee9fa8fb147170c061fc5af32b3a9"
+        },
+        {
+          "locator": "packets/city_capital_kit/city_capital_kit_exterior_handoff_v001.png",
+          "byteLength": 167561,
+          "sha256": "726da82ec8cb175b60d943467dfd12a302991281b976f7fd6ca812c55bc3bfee",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/city_capital_kit/city_capital_kit_interior_handoff_v001.png",
+          "byteLength": 302431,
+          "sha256": "706d8d79897bfed9b41b6d47056dd17fdd984d73570f29683ef2dbcf2e69a512",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_settlement_village_kit_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_settlement_village_kit",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/settlement_village_kit/settlement_village_kit_2d_handoff_v001.json",
+          "byteLength": 75278,
+          "sha256": "42c3abe20e197af1326d74593d94fa5dfae4768fe0485be10bbb1e36f270ed93"
+        },
+        {
+          "locator": "packets/settlement_village_kit/settlement_village_kit_exterior_handoff_v001.png",
+          "byteLength": 161677,
+          "sha256": "b11dba51c557ef8153f8c3ba848890fb3f54de11dd765b7c7d9b2be4f2762fd4",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/settlement_village_kit/settlement_village_kit_interior_handoff_v001.png",
+          "byteLength": 256051,
+          "sha256": "cc78abd9004faaa890fd0856c488a7644ad0aa3e390aef2f3ecdd188bc8f7500",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_dwelling_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_dwelling",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/dwelling/dwelling_2d_handoff_v001.json",
+          "byteLength": 63726,
+          "sha256": "8d881657da826b4ef8a27422bde1c2f22695b8b37f0752f767828777abd26a76"
+        },
+        {
+          "locator": "packets/dwelling/dwelling_exterior_handoff_v001.png",
+          "byteLength": 156773,
+          "sha256": "00c7b7c10cfaf798a4fc984ae7340fc8ac8ca0d673e75d41542eca3e9da2a5db",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/dwelling/dwelling_interior_handoff_v001.png",
+          "byteLength": 243442,
+          "sha256": "3a051af7b183faf786ec57865478b44150db05b29f25c2e3167a733c2bcf6ee0",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_ruin_structure_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_ruin_structure",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/ruin_structure/ruin_structure_2d_handoff_v001.json",
+          "byteLength": 62373,
+          "sha256": "f2b39d81e10195a96c85a62daf11b8957416c788c8cf1a7a6b6851b9964caef3"
+        },
+        {
+          "locator": "packets/ruin_structure/ruin_structure_exterior_handoff_v001.png",
+          "byteLength": 158008,
+          "sha256": "5ee87b811fbd21047d0cbc4cf162be1649ee3036f0f3110b64942221c1943c8a",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/ruin_structure/ruin_structure_interior_handoff_v001.png",
+          "byteLength": 249386,
+          "sha256": "e6eaa6edb9ce3527c19f4432f7415da0ec5fc9941141cb36284a54f2ffbb3488",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_well_fountain_cistern_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_well_fountain_cistern",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/well_fountain_cistern/well_fountain_cistern_2d_handoff_v001.json",
+          "byteLength": 58619,
+          "sha256": "d51626d31d6fa160ae1558ffae04314870bfa3dfa81cbddb42a37f19f0de59d8"
+        },
+        {
+          "locator": "packets/well_fountain_cistern/well_fountain_cistern_exterior_handoff_v001.png",
+          "byteLength": 160403,
+          "sha256": "d7e1fc7fcdb9ae328bec5b53a3e00d36f1f528725fbb4cf6a75d378dc903cc39",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/well_fountain_cistern/well_fountain_cistern_interior_handoff_v001.png",
+          "byteLength": 252230,
+          "sha256": "55bf6c5bd849d4fa01112d08258a4a9e0c878a58be14d5b2d5bd77a04540e7f4",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_academy_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_academy",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/academy/academy_2d_handoff_v001.json",
+          "byteLength": 76667,
+          "sha256": "2ae4c16170a286296abaa394f3badde50e3c6ff785e0de4ec8610b8499ee559f"
+        },
+        {
+          "locator": "packets/academy/academy_exterior_handoff_v001.png",
+          "byteLength": 160337,
+          "sha256": "60865b2a9021c317ef0efe32106faee65ba0bff3d0e403b0ef7824b767407c8b",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/academy/academy_interior_handoff_v001.png",
+          "byteLength": 255175,
+          "sha256": "300020e3b573e6990bfc79634b23687ddba1418a9157815663b1fa8cc25620c8",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_barracks_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_barracks",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/barracks/barracks_2d_handoff_v001.json",
+          "byteLength": 77995,
+          "sha256": "ada2a9305203cbb569a9a747b52fa7ebfb186203bb63a3592ab6e0d93acce216"
+        },
+        {
+          "locator": "packets/barracks/barracks_exterior_handoff_v001.png",
+          "byteLength": 156533,
+          "sha256": "6890c051cbc8674c64fd7bf1eec02e6434393502254a31a067af10a4597e44b0",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/barracks/barracks_interior_handoff_v001.png",
+          "byteLength": 255843,
+          "sha256": "f1b153c1d7b0c51efae40f871ead5d234988e16154b03d593dcf516515732067",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_embassy_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_embassy",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/embassy/embassy_2d_handoff_v001.json",
+          "byteLength": 70226,
+          "sha256": "ce26425556ee6f14379756bb9c015ed797c67aca4e429eef86ea34c0949c2cf0"
+        },
+        {
+          "locator": "packets/embassy/embassy_exterior_handoff_v001.png",
+          "byteLength": 159540,
+          "sha256": "2b95225df90b4e75089b099ff0d9fcac4c37d890af871579b6b985816f9e08a2",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/embassy/embassy_interior_handoff_v001.png",
+          "byteLength": 244761,
+          "sha256": "3c017746732de856d271a55b8f7994f59ae886cad8490aeb4bbbf760cc477415",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_farm_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_farm",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/farm/farm_2d_handoff_v001.json",
+          "byteLength": 74300,
+          "sha256": "22a4b7bcd7273434468ea4ac0bc03d23fc3d55ebeb82176ae1e59eb9d4fe00d0"
+        },
+        {
+          "locator": "packets/farm/farm_exterior_handoff_v001.png",
+          "byteLength": 158158,
+          "sha256": "efe252f79859a3f38025a461ef262067b969eddf2c6faaff13690964efc6afd7",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/farm/farm_interior_handoff_v001.png",
+          "byteLength": 244514,
+          "sha256": "b97f50c240c639bfa0fb945521d87221ba2ea271da07a7f677c608ec8c452790",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_forge_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_forge",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/forge/forge_2d_handoff_v001.json",
+          "byteLength": 74267,
+          "sha256": "63a6a84d3a70677c76fd85d9547ed1c2369d9fee689a4d3446202ae111a1b739"
+        },
+        {
+          "locator": "packets/forge/forge_exterior_handoff_v001.png",
+          "byteLength": 162261,
+          "sha256": "866945f28f0e9391098cdfaaebd89770af3bb470c11d08feed3c1c277f0d45ff",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/forge/forge_interior_handoff_v001.png",
+          "byteLength": 263014,
+          "sha256": "8a18a18524b04b6814777b2a3a962a8b18258adf28d43f1f3ae0ad314b073ce5",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_gold_mine_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_gold_mine",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 3,
+      "artifacts": [
+        {
+          "locator": "packets/gold_mine/gold_mine_2d_handoff_v001.json",
+          "byteLength": 93999,
+          "sha256": "9cddd29459e209a357de6e57afae5647fd2316148fb00d4d912ebd3f7ff13c70"
+        },
+        {
+          "locator": "packets/gold_mine/gold_mine_exterior_handoff_v001.png",
+          "byteLength": 166394,
+          "sha256": "df7eb449f340405f1b939a9e53107993649ca4b29d12c42a1a070b2b8592b85c",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/gold_mine/gold_mine_interior_handoff_v001.png",
+          "byteLength": 293537,
+          "sha256": "f2cf10217bfd849524ac2f8dd2814755a4c9eda50f6773c1e7fc7c9cc4ef575e",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_lumber_mill_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_lumber_mill",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/lumber_mill/lumber_mill_2d_handoff_v001.json",
+          "byteLength": 73840,
+          "sha256": "98244564f6344ea670565d1db653c6bed896dd1cae47538684baf225aaa03815"
+        },
+        {
+          "locator": "packets/lumber_mill/lumber_mill_exterior_handoff_v001.png",
+          "byteLength": 159586,
+          "sha256": "b09c53c2f906e7fa513dbc905c620b20039685cdfbc7900ea04c0860b7896afd",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/lumber_mill/lumber_mill_interior_handoff_v001.png",
+          "byteLength": 252190,
+          "sha256": "69dd81290cb5ba4831905ecb91e6d42a2c2f1dccf092d403da9b70b406b8a997",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_market_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_market",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/market/market_2d_handoff_v001.json",
+          "byteLength": 75867,
+          "sha256": "53a0a0629813b9c9ed7f31e38bd1a4256826c0881125906eb63bcfb0f82112f1"
+        },
+        {
+          "locator": "packets/market/market_exterior_handoff_v001.png",
+          "byteLength": 158707,
+          "sha256": "d4d279994aacc92fa6bae260477decc610e3c9f7040afa122a8298d8240e3d76",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/market/market_interior_handoff_v001.png",
+          "byteLength": 254586,
+          "sha256": "a23b479e42bac8deaf0f7963102fb6f9abb3ebd07029afd63475c26a51fa4ab2",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_quarry_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_quarry",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 3,
+      "artifacts": [
+        {
+          "locator": "packets/quarry/quarry_2d_handoff_v001.json",
+          "byteLength": 95450,
+          "sha256": "87816d3c233b9554ece3443b1e0be6b9957a4e7d47443e05ba1ce35be9927075"
+        },
+        {
+          "locator": "packets/quarry/quarry_exterior_handoff_v001.png",
+          "byteLength": 166955,
+          "sha256": "64749330e19abf65cbca732ba0397daace4110a71d6293bd6d4e9c7d5144eadb",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/quarry/quarry_interior_handoff_v001.png",
+          "byteLength": 296464,
+          "sha256": "57d80485f90f5fa65fa3ef3fc85a91c634fe8a5051d5015a38358bf14af418f3",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_stable_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_stable",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/stable/stable_2d_handoff_v001.json",
+          "byteLength": 72565,
+          "sha256": "11bbedb7065b2d11d0e338840dd98f5595349df5edc6f5c6afbd4442bf4c4c5b"
+        },
+        {
+          "locator": "packets/stable/stable_exterior_handoff_v001.png",
+          "byteLength": 155000,
+          "sha256": "198debdb418f205bb321f26f848bc216d5c5fe2a26b9a4f480ef9ca5a9c788e1",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/stable/stable_interior_handoff_v001.png",
+          "byteLength": 243395,
+          "sha256": "794f64d7cf58462a3133a6979fdbe081e4fb21320069e7b6bb3cd159d51d9f32",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_storehouse_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_storehouse",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/storehouse/storehouse_2d_handoff_v001.json",
+          "byteLength": 73646,
+          "sha256": "db5639431cc5a303e7e47f9b18ade2e49a78bd42b11eacc40f658418284350d8"
+        },
+        {
+          "locator": "packets/storehouse/storehouse_exterior_handoff_v001.png",
+          "byteLength": 151505,
+          "sha256": "e0dbe52f715e40c7ffd21fa3bb94dae25be872c9ff5ec229e0092244de9c1ea9",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/storehouse/storehouse_interior_handoff_v001.png",
+          "byteLength": 247865,
+          "sha256": "2671b832395da36f6e25916f7c113ab1210534d098f4b3f797d78aed6246244d",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_town_hall_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_town_hall",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/town_hall/town_hall_2d_handoff_v001.json",
+          "byteLength": 79213,
+          "sha256": "c2d7b90dbf2a982956abc60ed14a9f6b6223e418d655e822a84b3b7de930e7cc"
+        },
+        {
+          "locator": "packets/town_hall/town_hall_exterior_handoff_v001.png",
+          "byteLength": 163102,
+          "sha256": "44c54906496079ad5d5b381f8a14d93e1b0a08b24bc17c3fb5fbd40c8210ce71",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/town_hall/town_hall_interior_handoff_v001.png",
+          "byteLength": 254602,
+          "sha256": "45eda605da1086db8f25eedfda1fb6f8458310d07ee4178ba8ae6af215e0c456",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_watchtower_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_watchtower",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 3,
+      "artifacts": [
+        {
+          "locator": "packets/watchtower/watchtower_2d_handoff_v001.json",
+          "byteLength": 76072,
+          "sha256": "5a734d0cb6bf784327f2b4f97dbcd0b5b5f1e4dbcda36432aa3f488b2da16b64"
+        },
+        {
+          "locator": "packets/watchtower/watchtower_exterior_handoff_v001.png",
+          "byteLength": 157186,
+          "sha256": "8b9ea2225cfebcfbd1bad5aa3c59cfed3e6217059e6f4a06eeda63582fd0b673",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/watchtower/watchtower_interior_handoff_v001.png",
+          "byteLength": 261709,
+          "sha256": "ca714387c6c1361b4bd6fbd0edad53f1dfddb7e5d5735133ee84ade6f7f185ea",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_workshop_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_building_workshop",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/workshop/workshop_2d_handoff_v001.json",
+          "byteLength": 70816,
+          "sha256": "c6af76772ac3e604bdeea6444f6ccbf490bbe7cdd7dc7a0d736aa0dd4dbc9871"
+        },
+        {
+          "locator": "packets/workshop/workshop_exterior_handoff_v001.png",
+          "byteLength": 162549,
+          "sha256": "aceda30a4a79cc6e69d314ef8f2b918d89167791ca83831e65946acc0535f807",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/workshop/workshop_interior_handoff_v001.png",
+          "byteLength": 248569,
+          "sha256": "d2869d8edb74cf704d940ce202e0166436545aa068c8894b1b6d78d0c2126453",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_castle_enterable_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_castle_enterable",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 4,
+      "artifacts": [
+        {
+          "locator": "packets/castle_enterable/castle_enterable_2d_handoff_v001.json",
+          "byteLength": 142412,
+          "sha256": "9dd0b487e1009969b68d335ea5722d4a3c839a1a59f2596adb8bffb2fc8ca510"
+        },
+        {
+          "locator": "packets/castle_enterable/castle_enterable_exterior_handoff_v001.png",
+          "byteLength": 167679,
+          "sha256": "9ac898f711fc84c4f1145338cd03e4580d99899792f609a407f2bbfc39d365fe",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/castle_enterable/castle_enterable_interior_handoff_v001.png",
+          "byteLength": 323412,
+          "sha256": "06a9b50e1c5b3673d19aefed245c20ec8a3844b7f21869fd7d151c9077dcf64c",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_fortress_enterable_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_fortress_enterable",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 4,
+      "artifacts": [
+        {
+          "locator": "packets/fortress_enterable/fortress_enterable_2d_handoff_v001.json",
+          "byteLength": 125819,
+          "sha256": "c7f549abd28a5ac7f42ba677c12b27710d4a6901923f26a238e399e8304a468e"
+        },
+        {
+          "locator": "packets/fortress_enterable/fortress_enterable_exterior_handoff_v001.png",
+          "byteLength": 164159,
+          "sha256": "ff5e309e6f127b5cc19bf49c1fb1b1b0057ef39211ac6515f5837db71aabdc67",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/fortress_enterable/fortress_enterable_interior_handoff_v001.png",
+          "byteLength": 317601,
+          "sha256": "5acd1ce6bd49beed5877ef1da83272bc5cef90b396e0365f9dc3b53836a35eb3",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_guardpost_watch_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_guardpost_watch",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/guardpost_watch/guardpost_watch_2d_handoff_v001.json",
+          "byteLength": 69643,
+          "sha256": "cb8e37cdbd117b9da1d3998357510cd0173f7821fc2892d3e9c0b689b6a67e14"
+        },
+        {
+          "locator": "packets/guardpost_watch/guardpost_watch_exterior_handoff_v001.png",
+          "byteLength": 156370,
+          "sha256": "4759750ba066190fa9998475096f9ebc6c6a1244574d526f1cc856ed155c16ec",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/guardpost_watch/guardpost_watch_interior_handoff_v001.png",
+          "byteLength": 244082,
+          "sha256": "e09433a1c5b2bb7e9e68e0a2ae79d7ad8dcf63931562bed6e60f43554847eb93",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_inn_tavern_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_inn_tavern",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 3,
+      "artifacts": [
+        {
+          "locator": "packets/inn_tavern/inn_tavern_2d_handoff_v001.json",
+          "byteLength": 93024,
+          "sha256": "9009d54bb4fee327ae756a48e1bbfebe0080afb77008536cbd6ccf3dcf87b80b"
+        },
+        {
+          "locator": "packets/inn_tavern/inn_tavern_exterior_handoff_v001.png",
+          "byteLength": 160237,
+          "sha256": "3b9296322414452b9d835f7fae24b44ef02a21e3409d574bf896215c80f0f851",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/inn_tavern/inn_tavern_interior_handoff_v001.png",
+          "byteLength": 282520,
+          "sha256": "194ccfae05926f5077d11d805a073e4c9277fad1a1c921426955d12e10d85042",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_mill_wind_water_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_mill_wind_water",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 3,
+      "artifacts": [
+        {
+          "locator": "packets/mill_wind_water/mill_wind_water_2d_handoff_v001.json",
+          "byteLength": 96076,
+          "sha256": "da6a2969f138b79b18d1a801a2584e0347766c9c09339b9b3b203dad96d2941e"
+        },
+        {
+          "locator": "packets/mill_wind_water/mill_wind_water_exterior_handoff_v001.png",
+          "byteLength": 161791,
+          "sha256": "3b40e42326aa78ee519694aa1d3e9e15e18950d727f93dd95ef2c0e5e6a01ad2",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/mill_wind_water/mill_wind_water_interior_handoff_v001.png",
+          "byteLength": 290554,
+          "sha256": "b7cdb7c87b73f9ddfb79abb0a3b7cdfea46c7d9348a85100336d18b59a4e7351",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_religious_cultural_structure_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_religious_cultural_structure",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/religious_cultural_structure/religious_cultural_structure_2d_handoff_v001.json",
+          "byteLength": 75002,
+          "sha256": "5e25d33a0fcf1c07f370dc181893a39327c9491cea4188172a40f0a7b54a2da4"
+        },
+        {
+          "locator": "packets/religious_cultural_structure/religious_cultural_structure_exterior_handoff_v001.png",
+          "byteLength": 165266,
+          "sha256": "a3a3acb345116bc9eb8119a440021b4417b97e69b948261a424d609ca3ae0acc",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/religious_cultural_structure/religious_cultural_structure_interior_handoff_v001.png",
+          "byteLength": 251822,
+          "sha256": "d6b2596547e8efb637fdd5c322d768259aec0b1f31cf491a2ab2165982dedc76",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_shop_service_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_shop_service",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/shop_service/shop_service_2d_handoff_v001.json",
+          "byteLength": 70580,
+          "sha256": "64b6cd416d35271ca3271ba6c4f4458ead2599b925d4c578b2b28d8fdefa5cd3"
+        },
+        {
+          "locator": "packets/shop_service/shop_service_exterior_handoff_v001.png",
+          "byteLength": 156044,
+          "sha256": "79a14d0feee40905ce5b90e061cc961899a3ae3298c82f777b313637c9df1f51",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/shop_service/shop_service_interior_handoff_v001.png",
+          "byteLength": 244273,
+          "sha256": "efc2d7b07541e1aa52261154b0bcd7d78303b9ff1345645be63032ddd19975ba",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    },
+    {
+      "packetId": "stonehold_warehouse_barn_2d_handoff_v001",
+      "taxonomyId": "waf_architecture_warehouse_barn",
+      "status": "pending_owner_review",
+      "physicalLevelCount": 2,
+      "artifacts": [
+        {
+          "locator": "packets/warehouse_barn/warehouse_barn_2d_handoff_v001.json",
+          "byteLength": 73395,
+          "sha256": "356d9ffe7da8d336683fc720621a7c18d421d72e50fa27adfdf1b69b95571a64"
+        },
+        {
+          "locator": "packets/warehouse_barn/warehouse_barn_exterior_handoff_v001.png",
+          "byteLength": 158735,
+          "sha256": "01c09f81cc4376ccb074f426019782ab00cc694e4cde41c0b0e77cfcf5287ea7",
+          "pixelDimensions": [
+            2400,
+            1500
+          ]
+        },
+        {
+          "locator": "packets/warehouse_barn/warehouse_barn_interior_handoff_v001.png",
+          "byteLength": 254206,
+          "sha256": "0ba0f8f1c73c4dd1d2251ddc13603ebc9f8726ce013309eb053559654caaaa46",
+          "pixelDimensions": [
+            3000,
+            1900
+          ]
+        }
+      ]
+    }
+  ],
+  "reviewArtifacts": [
+    {
+      "locator": "review/stonehold_enterable_packets_review_index_01_v001.png",
+      "byteLength": 399272,
+      "sha256": "8cd6d5995ceb46ef392f68c80828bc9d77e9c78d257451fddd435ae7821d63cf",
+      "pixelDimensions": [
+        2400,
+        1700
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_review_index_02_v001.png",
+      "byteLength": 390156,
+      "sha256": "8b0cf689a177a9955f39b51f1029916c3954aa4e882c850335233eb83034afb0",
+      "pixelDimensions": [
+        2400,
+        1700
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_review_index_03_v001.png",
+      "byteLength": 397758,
+      "sha256": "9421128b2bc4397820678e8431a79c69f08b3f0721089efb801107ad2a784705",
+      "pixelDimensions": [
+        2400,
+        1700
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_review_index_04_v001.png",
+      "byteLength": 437245,
+      "sha256": "6b68b727810fd0242aee6536833e4ac45a4e3a1d5b74fdc4d35e7f5c9eac13bd",
+      "pixelDimensions": [
+        2400,
+        1700
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_review_index_05_v001.png",
+      "byteLength": 263708,
+      "sha256": "1b95a100b1a0475b43bcdb64df7a4f7ab32ba81fc4050a6b22b7a5ed84e2db37",
+      "pixelDimensions": [
+        2400,
+        1700
+      ]
+    },
+    {
+      "locator": "review/README.md",
+      "byteLength": 13745,
+      "sha256": "e24c23f6c4cabf060d4e18798015dc9468cfbfa7e77ff14ee5bf81ad24f2c929"
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_01_v001.png",
+      "byteLength": 917572,
+      "sha256": "984a960912149079855a55f4bdf03e687b83d682baa72cbb0b9a6749af747117",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_02_v001.png",
+      "byteLength": 892710,
+      "sha256": "a287d0f1aa4bf4547d2fd6dbf5f0431c4ca2feca891e7d3711a50d86cf4f0f6b",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_03_v001.png",
+      "byteLength": 871652,
+      "sha256": "7e7e5e4f5b5dba5af8360cc9452b4c9df76a6c2549eff0d0bf9e75dda4514cdb",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_04_v001.png",
+      "byteLength": 918698,
+      "sha256": "4c53c593c723a77051c3f4aca62639c810dc8938c8c48d89b3a8d8e65b01c7b7",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_05_v001.png",
+      "byteLength": 896601,
+      "sha256": "ae56f555a55dbce90a71a7e4c5bb26f4265cf8a0051b8a502b0bba2ab66918b0",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_06_v001.png",
+      "byteLength": 896983,
+      "sha256": "cd36696ca8e69107c38a503a2ea58d80b5df3963a80705d0e670acfea01cf88a",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_07_v001.png",
+      "byteLength": 985525,
+      "sha256": "e05786898d72028321212fea295b73e1a2e666b579453119ff52356161d62282",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_08_v001.png",
+      "byteLength": 925933,
+      "sha256": "c43702c19979c1d0cb7db20c6fc095664da3c65cdf11ce2872fb775eba7bdbc8",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "review/stonehold_enterable_packets_full_pair_qa_09_v001.png",
+      "byteLength": 883787,
+      "sha256": "4c67fca5ab11172704e41bf892a7b3e1d274067297ae9c28031e1b64ed3b2b18",
+      "pixelDimensions": [
+        1840,
+        2030
+      ]
+    },
+    {
+      "locator": "index.html",
+      "byteLength": 19571,
+      "sha256": "8d148d3ad621dbbdba46f59f31426db4880b99efe2aa1a32b55fc4a2fc616014"
+    }
+  ],
+  "productionAuthorization": {
+    "comfyuiLocal": "approved_for_2d_only_not_used_by_this_deterministic_packet",
+    "meshy": false,
+    "blender": false,
+    "runtime3d": false
+  }
+}

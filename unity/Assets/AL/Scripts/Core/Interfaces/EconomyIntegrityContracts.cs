@@ -64,6 +64,12 @@ namespace AL.Core.Interfaces
         public const string ProductionInvalidContribution = "AL-ECO-PRODUCTION-INVALID-CONTRIBUTION";
         public const string ProductionInvalidRemainder = "AL-ECO-PRODUCTION-INVALID-REMAINDER";
         public const string ProductionDependency = "AL-ECO-PRODUCTION-DEPENDENCY";
+        public const string ProductionCatalog = "AL-ECO-PRODUCTION-CATALOG";
+        public const string ProductionProfile = "AL-ECO-PRODUCTION-PROFILE";
+        public const string ProductionRealm = "AL-ECO-PRODUCTION-REALM";
+        public const string ProductionOathmark = "AL-ECO-PRODUCTION-OATHMARK";
+        public const string ProductionDrift = "AL-ECO-PRODUCTION-DRIFT";
+        public const string ProductionElapsed = "AL-ECO-PRODUCTION-ELAPSED";
         public const string EventHandler = "AL-ECO-EVENT-HANDLER";
         public const string DiagnosticsTruncated = "AL-ECO-DIAGNOSTICS-TRUNCATED";
     }
@@ -268,6 +274,22 @@ namespace AL.Core.Interfaces
     public interface IEconomyProductionContributionProvider
     {
         EconomyProductionContributionSnapshot BuildContributions(double deltaSeconds);
+    }
+
+    public interface IEconomyBuildingLevelSnapshotSource
+    {
+        bool TryCaptureBuildingLevels(
+            out IReadOnlyDictionary<string, int> buildingLevels,
+            out EconomyDiagnostic diagnostic);
+    }
+
+    public interface IEconomyTerritoryIncomeSnapshotSource
+    {
+        bool TryCaptureTerritoryIncome(
+            RealmId realmId,
+            double deltaSeconds,
+            out IReadOnlyList<EconomyProductionContribution> contributions,
+            out EconomyDiagnostic diagnostic);
     }
 
     internal static class EconomyContractCollections

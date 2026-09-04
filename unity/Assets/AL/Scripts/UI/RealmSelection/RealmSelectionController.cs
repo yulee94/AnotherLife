@@ -348,6 +348,16 @@ namespace AL.UI.RealmSelection
             var realmService = ServiceLocator.Get<IRealmService>();
             RealmSelectionResult result = realmService.TrySelectRealm(
                 new RealmSelectionRequest(System.Guid.NewGuid().ToString("N"), id));
+            RealmSelectionFeedbackPresentation feedback = RealmSelectionFeedback.FromResult(
+                result,
+                RealmCatalogRuntime.Current);
+            if (_commitOverlay != null)
+            {
+                _commitOverlay.PresentOutcome(
+                    feedback.IsSuccess ? "REALM BOUND" : "REALM LOCKED",
+                    feedback.Text);
+            }
+
             if (!result.AllowsNavigation)
             {
                 _selectionInProgress = false;

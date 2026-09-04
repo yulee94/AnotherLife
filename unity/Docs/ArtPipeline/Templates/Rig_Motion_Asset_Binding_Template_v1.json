@@ -1,0 +1,139 @@
+{
+  "templateId": "rmc_template_asset_binding_v001",
+  "templateVersion": 1,
+  "standardId": "rmc_standard_rig_motion_v001",
+  "manifestId": "rmc_manifest_required_motion_v001",
+  "usage": "Copy one variant, replace every angle-bracket token, remove the other variants, keep IDs immutable, and validate through rig_motion_standard.py before import or promotion.",
+  "variants": [
+    {
+      "variant": "humanoid_champion",
+      "binding": {
+        "bindingId": "rmc_binding_champion_<slug>_v001",
+        "representativeProfileId": "rmc_representative_champion_<slug>_v001",
+        "assetId": "<exact_catalog_asset_id>",
+        "subjectKind": "champion",
+        "source": {
+          "path": "<repo_relative_retained_source_path>",
+          "sha256": "<64_lowercase_hex>",
+          "provenanceId": "<exact_provenance_id>",
+          "rightsState": "<cleared_or_blocked>"
+        },
+        "skeletonProfileId": "rmc_skeleton_humanoid_shared_v001",
+        "skeletonSignature": "<64_lowercase_hex_from_canonical_signature_v1>",
+        "bindPoseId": "rmc_bind_humanoid_a_pose_v001",
+        "bindPoseOverrideReason": null,
+        "retargetProfileId": "rmc_retarget_humanoid_shared_v001",
+        "facialProfileId": "rmc_face_champion_hybrid_v001",
+        "layerProfileId": "rmc_layers_champion_mobile_v001",
+        "budgetProfileId": "rmc_budget_champion_mobile_floor_v001",
+        "requiredMotionSetId": "rmc_set_champion_complete_v001",
+        "clipBindings": [
+          {
+            "clipId": "rmc_clip_<skeleton_slug>_<motion_slug>_<variant>_v001",
+            "motionKey": "<exact_manifest_motion_key>",
+            "sourceTake": "<exact_source_take_name>",
+            "clipSignature": "<64_lowercase_hex_from_canonical_clip_signature_v1>",
+            "rootPolicyId": "<exact_root_policy_id>",
+            "sampleRateHz": 30,
+            "firstFrameInclusive": 0,
+            "lastFrameInclusive": 0,
+            "loop": false,
+            "events": [
+              {
+                "eventDefinitionId": "<exact_event_definition_id>",
+                "sourceFrame": 0,
+                "eventOrdinal": 0,
+                "staticPayload": {}
+              }
+            ]
+          }
+        ],
+        "exceptions": [],
+        "evidence": {
+          "blenderPreflight": "<path>",
+          "freshUnityImport": "<path>",
+          "deformationReport": "<path>",
+          "contactReport": "<path>",
+          "mobileBudgetReport": "<path>",
+          "ownerApproval": "<path_or_blocked>"
+        }
+      }
+    },
+    {
+      "variant": "humanoid_npc",
+      "binding": {
+        "bindingId": "rmc_binding_npc_<slug>_v001",
+        "representativeProfileId": "rmc_representative_npc_<slug>_v001",
+        "assetId": "<exact_catalog_asset_id>",
+        "subjectKind": "npc",
+        "source": {
+          "path": "<repo_relative_retained_source_path>",
+          "sha256": "<64_lowercase_hex>",
+          "provenanceId": "<exact_provenance_id>",
+          "rightsState": "<cleared_or_blocked>"
+        },
+        "skeletonProfileId": "rmc_skeleton_humanoid_shared_v001",
+        "skeletonSignature": "<64_lowercase_hex_from_canonical_signature_v1>",
+        "bindPoseId": "rmc_bind_humanoid_a_pose_v001",
+        "bindPoseOverrideReason": null,
+        "retargetProfileId": "rmc_retarget_humanoid_shared_v001",
+        "facialProfileId": "rmc_face_npc_bones_v001",
+        "layerProfileId": "rmc_layers_npc_mobile_v001",
+        "budgetProfileId": "rmc_budget_npc_mobile_floor_v001",
+        "requiredMotionSetId": "rmc_set_npc_complete_v001",
+        "clipBindings": [],
+        "exceptions": [],
+        "evidence": {
+          "blenderPreflight": "<path>",
+          "freshUnityImport": "<path>",
+          "deformationReport": "<path>",
+          "contactReport": "<path>",
+          "mobileBudgetReport": "<path>",
+          "ownerApproval": "<path_or_blocked>"
+        }
+      }
+    },
+    {
+      "variant": "nonhumanoid",
+      "binding": {
+        "bindingId": "rmc_binding_<beast_or_monster>_<slug>_v001",
+        "representativeProfileId": "rmc_representative_<beast_or_monster>_<slug>_v001",
+        "assetId": "<exact_catalog_asset_id>",
+        "subjectKind": "<beast_or_monster>",
+        "source": {
+          "path": "<repo_relative_retained_source_path>",
+          "sha256": "<64_lowercase_hex>",
+          "provenanceId": "<exact_provenance_id>",
+          "rightsState": "<cleared_or_blocked>"
+        },
+        "skeletonProfileId": "<exact_nonhumanoid_skeleton_profile_id>",
+        "skeletonSignature": "<64_lowercase_hex_from_canonical_signature_v1>",
+        "bindPoseId": "<exact_anatomy_bind_pose_id>",
+        "bindPoseOverrideReason": "<null_or_versioned_anatomy_exception_reason>",
+        "retargetProfileId": "<exact_generic_retarget_profile_id>",
+        "facialProfileId": "rmc_face_creature_none_v001",
+        "layerProfileId": "rmc_layers_<beast_or_monster>_mobile_v001",
+        "budgetProfileId": "<exact_mobile_budget_profile_id>",
+        "requiredMotionSetId": "<exact_required_motion_set_id>",
+        "clipBindings": [],
+        "exceptions": [
+          {
+            "exceptionId": "rmc_exception_<slug>_v001",
+            "anatomyExceptionId": "<exact_anatomy_exception_id>",
+            "sourceAuthority": "<exact_owner_or_approved_source_reference>",
+            "forbiddenMotions": [],
+            "requiredResolution": "<unambiguous_resolution>"
+          }
+        ],
+        "evidence": {
+          "blenderPreflight": "<path>",
+          "freshUnityImport": "<path>",
+          "deformationReport": "<path>",
+          "contactReport": "<path>",
+          "mobileBudgetReport": "<path>",
+          "ownerApproval": "<path_or_blocked>"
+        }
+      }
+    }
+  ]
+}

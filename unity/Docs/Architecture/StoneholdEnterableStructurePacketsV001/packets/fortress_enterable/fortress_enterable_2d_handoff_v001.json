@@ -1,0 +1,4727 @@
+{
+  "schema": "anotherlife.stonehold-enterable-structure-2d-handoff.v1",
+  "packetSetId": "stonehold_enterable_structure_packets_v001",
+  "packetId": "stonehold_fortress_enterable_2d_handoff_v001",
+  "taxonomyId": "waf_architecture_fortress_enterable",
+  "slug": "fortress_enterable",
+  "title": "Stonehold Fortress Interior Complex",
+  "category": "defensive_complex",
+  "status": "pending_owner_review",
+  "envelopeMeters": {
+    "width": 38,
+    "depth": 30,
+    "height": 15.0
+  },
+  "massingRecommendation": "Enterable command, barracks and service buildings sit inside a separate one-gate non-enterable perimeter; capture court stays open.",
+  "roofRecommendation": "Low stepped command roofs and tower weather hoods behind separate battlements.",
+  "materialRecommendation": "Stepped basalt base; dark iron ribs; soot-aged dark timber; sparse bronze repairs; localized forge-amber practical light only.",
+  "levels": [
+    {
+      "id": "undercroft",
+      "elevationMeters": -3.4,
+      "clearHeightMeters": 3.0,
+      "rooms": [
+        "supply_hold",
+        "detention",
+        "sally_service",
+        "repair_store",
+        "streaming_airlock"
+      ]
+    },
+    {
+      "id": "ground",
+      "elevationMeters": 0,
+      "clearHeightMeters": 3.5,
+      "rooms": [
+        "command_hall",
+        "muster",
+        "armory",
+        "infirmary_service",
+        "capture_court_gallery",
+        "accessible_core"
+      ]
+    },
+    {
+      "id": "upper",
+      "elevationMeters": 3.8,
+      "clearHeightMeters": 3.0,
+      "rooms": [
+        "officer_room",
+        "barracks",
+        "war_map_room",
+        "signal_gallery",
+        "wallwalk_access"
+      ]
+    },
+    {
+      "id": "tower_level",
+      "elevationMeters": 7.1,
+      "clearHeightMeters": 2.8,
+      "rooms": [
+        "tower_guard_a",
+        "tower_guard_b",
+        "siege_store",
+        "roof_route",
+        "parapet_threshold"
+      ]
+    }
+  ],
+  "streamingPolicy": "Separate streamed large-combat interior; exterior capture court and perimeter stay in world scene.",
+  "accessibilityRoute": "Step-free command/capture route; protected lift core; independent combat stair loops and two egress portals.",
+  "clearancesMeters": {
+    "publicEntrance": [
+      2.5,
+      3.0
+    ],
+    "interiorDoor": [
+      1.2,
+      2.4
+    ],
+    "minimumFurnitureAisle": 1.2,
+    "primaryCirculationWidth": 1.8,
+    "combatClearDiameter": 6.0,
+    "cameraBackoff": 3.5,
+    "stairWidth": 1.5,
+    "landingDepth": 1.5,
+    "rampMaximumSlope": "1:12"
+  },
+  "interiorModuleIds": [
+    "waf_interior_shell_wall_floor_ceiling",
+    "waf_interior_door_window_threshold",
+    "waf_interior_entry_vestibule",
+    "waf_interior_corridor_junction",
+    "waf_interior_stair_landing",
+    "waf_interior_cutaway_occlusion_set",
+    "waf_interior_storage_pantry_cellar",
+    "waf_interior_utility_service_room",
+    "waf_interior_barracks_room",
+    "waf_interior_prison_dungeon",
+    "waf_interior_great_council_hall",
+    "waf_interior_courtyard_balcony"
+  ],
+  "propPacks": [
+    "common",
+    "military",
+    "civic",
+    "storage",
+    "utility"
+  ],
+  "socketSets": [
+    "lighting",
+    "interaction",
+    "quest",
+    "audio",
+    "vfx_anchor_runtime_separate",
+    "portal_streaming"
+  ],
+  "variants": {
+    "clean": {
+      "required": true,
+      "sharedGeometryPreferred": true
+    },
+    "used": {
+      "required": true,
+      "sharedGeometryPreferred": true
+    },
+    "damaged": {
+      "required": true,
+      "sharedGeometryPreferred": true
+    }
+  },
+  "familySpecificGate": "Approve the three-building interior complex around the central capture court.",
+  "units": "meters",
+  "views": [
+    "front_elevation",
+    "side_elevation",
+    "rear_elevation",
+    "roof_plan",
+    "material_study",
+    "every_floor_plan",
+    "longitudinal_section",
+    "cross_section"
+  ],
+  "architecturalDesign": {
+    "packetSlug": "fortress_enterable",
+    "layoutArchetype": "three enterable buildings around a capture court",
+    "planSignature": "fortress_enterable|fort_undercroft|fort_courtyard|fort_upper|tower_roof|south|(0.76, 0.58)",
+    "exteriorMasses": [
+      {
+        "id": "command_mass",
+        "x": 12.92,
+        "z": 14.4,
+        "width": 12.16,
+        "depth": 11.4,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper",
+          "tower_level"
+        ],
+        "exteriorRole": "command mass"
+      },
+      {
+        "id": "barracks_mass",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 11.4,
+        "depth": 13.2,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper",
+          "tower_level"
+        ],
+        "exteriorRole": "barracks mass"
+      },
+      {
+        "id": "service_mass",
+        "x": 26.3,
+        "z": 0.3,
+        "width": 11.4,
+        "depth": 13.2,
+        "kind": "building",
+        "levels": [
+          "ground",
+          "upper",
+          "tower_level"
+        ],
+        "exteriorRole": "service mass"
+      }
+    ],
+    "roofVolumes": [
+      {
+        "id": "roof_command_mass",
+        "massId": "command_mass",
+        "x": 12.92,
+        "z": 14.4,
+        "width": 12.16,
+        "depth": 11.4,
+        "profile": "Low stepped command roofs and tower weather hoods behind separate battlements."
+      },
+      {
+        "id": "roof_barracks_mass",
+        "massId": "barracks_mass",
+        "x": 0.3,
+        "z": 0.3,
+        "width": 11.4,
+        "depth": 13.2,
+        "profile": "Low stepped command roofs and tower weather hoods behind separate battlements."
+      },
+      {
+        "id": "roof_service_mass",
+        "massId": "service_mass",
+        "x": 26.3,
+        "z": 0.3,
+        "width": 11.4,
+        "depth": 13.2,
+        "profile": "Low stepped command roofs and tower weather hoods behind separate battlements."
+      }
+    ],
+    "exteriorOpeningRegister": [
+      {
+        "id": "fortress_enterable_main_entry",
+        "kind": "door",
+        "levelId": "ground",
+        "side": "south",
+        "x": 6.0,
+        "z": 0.3,
+        "separateObject": true,
+        "planOpeningId": "fortress_enterable_main_entry"
+      },
+      {
+        "id": "window_ground_muster",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 6.0,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_muster"
+      },
+      {
+        "id": "window_ground_armory",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "south",
+        "x": 30.11,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_ground_armory"
+      },
+      {
+        "id": "window_ground_accessible_core",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 38,
+        "z": 7.55,
+        "separateObject": true,
+        "planOpeningId": "window_ground_accessible_core"
+      },
+      {
+        "id": "window_ground_cut_west",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "west",
+        "x": 0.0,
+        "z": 7.55,
+        "separateObject": true,
+        "planOpeningId": "window_ground_cut_west"
+      },
+      {
+        "id": "window_upper_barracks",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "south",
+        "x": 6.0,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_upper_barracks"
+      },
+      {
+        "id": "window_upper_wallwalk_access",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 0.0,
+        "z": 11.048,
+        "separateObject": true,
+        "planOpeningId": "window_upper_wallwalk_access"
+      },
+      {
+        "id": "window_upper_war_map_room",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "south",
+        "x": 30.11,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_upper_war_map_room"
+      },
+      {
+        "id": "window_upper_vertical_core_hall",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "east",
+        "x": 38,
+        "z": 7.55,
+        "separateObject": true,
+        "planOpeningId": "window_upper_vertical_core_hall"
+      },
+      {
+        "id": "window_upper_cut_west",
+        "kind": "window",
+        "levelId": "upper",
+        "side": "west",
+        "x": 0.0,
+        "z": 7.55,
+        "separateObject": true,
+        "planOpeningId": "window_upper_cut_west"
+      },
+      {
+        "id": "window_tower_level_tower_guard_b",
+        "kind": "window",
+        "levelId": "tower_level",
+        "side": "south",
+        "x": 6.0,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_tower_level_tower_guard_b"
+      },
+      {
+        "id": "window_tower_level_parapet_threshold",
+        "kind": "window",
+        "levelId": "tower_level",
+        "side": "west",
+        "x": 0.0,
+        "z": 10.2,
+        "separateObject": true,
+        "planOpeningId": "window_tower_level_parapet_threshold"
+      },
+      {
+        "id": "window_tower_level_siege_store",
+        "kind": "window",
+        "levelId": "tower_level",
+        "side": "south",
+        "x": 30.11,
+        "z": 0.0,
+        "separateObject": true,
+        "planOpeningId": "window_tower_level_siege_store"
+      },
+      {
+        "id": "window_tower_level_vertical_core_hall",
+        "kind": "window",
+        "levelId": "tower_level",
+        "side": "east",
+        "x": 38,
+        "z": 7.55,
+        "separateObject": true,
+        "planOpeningId": "window_tower_level_vertical_core_hall"
+      },
+      {
+        "id": "window_tower_level_cut_west",
+        "kind": "window",
+        "levelId": "tower_level",
+        "side": "west",
+        "x": 0.0,
+        "z": 7.55,
+        "separateObject": true,
+        "planOpeningId": "window_tower_level_cut_west"
+      }
+    ],
+    "criticalFeatures": [
+      {
+        "id": "capture_court",
+        "x": 12.92,
+        "z": 1.1,
+        "width": 12.16,
+        "depth": 12.9,
+        "kind": "open_courtyard",
+        "symbol": "COURT",
+        "sectionHeightMeters": 15.0,
+        "sectionVisible": true,
+        "openToSky": true
+      }
+    ],
+    "voids": [
+      {
+        "id": "capture_court",
+        "x": 12.92,
+        "z": 1.1,
+        "width": 12.16,
+        "depth": 12.9,
+        "kind": "open_to_sky"
+      },
+      {
+        "id": "capture_court",
+        "x": 12.92,
+        "z": 1.1,
+        "width": 12.16,
+        "depth": 12.9,
+        "kind": "open_to_sky"
+      },
+      {
+        "id": "capture_court",
+        "x": 12.92,
+        "z": 1.1,
+        "width": 12.16,
+        "depth": 12.9,
+        "kind": "open_to_sky"
+      },
+      {
+        "id": "capture_court",
+        "x": 12.92,
+        "z": 1.1,
+        "width": 12.16,
+        "depth": 12.9,
+        "kind": "open_to_sky"
+      }
+    ],
+    "siteContext": {
+      "orientation": "front/local south; rear/local north",
+      "entryApproachSide": "south",
+      "courtyardsAndYards": [
+        {
+          "id": "capture_court",
+          "x": 12.92,
+          "z": 1.1,
+          "width": 12.16,
+          "depth": 12.9,
+          "kind": "open_to_sky"
+        },
+        {
+          "id": "capture_court",
+          "x": 12.92,
+          "z": 1.1,
+          "width": 12.16,
+          "depth": 12.9,
+          "kind": "open_to_sky"
+        },
+        {
+          "id": "capture_court",
+          "x": 12.92,
+          "z": 1.1,
+          "width": 12.16,
+          "depth": 12.9,
+          "kind": "open_to_sky"
+        },
+        {
+          "id": "capture_court",
+          "x": 12.92,
+          "z": 1.1,
+          "width": 12.16,
+          "depth": 12.9,
+          "kind": "open_to_sky"
+        }
+      ],
+      "perimeterWall": {
+        "id": "fortress_enterable_separate_perimeter",
+        "x": 0.0,
+        "z": 0.0,
+        "width": 38,
+        "depth": 30,
+        "enterable": false,
+        "impassable": true,
+        "walltopOnly": true,
+        "gateSeparate": true
+      }
+    },
+    "continuityContract": "Every elevation opening resolves to a same-ID plan aperture on its claimed facade; every roof volume resolves to a named mass footprint; every section resolves to marked A-A/B-B plan cuts that intersect recorded apertures; every labeled room is furnished with profession-specific equipment and is reachable."
+  },
+  "floorPlans": [
+    {
+      "id": "undercroft",
+      "elevationMeters": -3.4,
+      "clearHeightMeters": 3.0,
+      "rooms": [
+        {
+          "id": "supply_hold",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 7.185,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "supply hold"
+        },
+        {
+          "id": "repair_store",
+          "x": 20.105,
+          "z": 14.4,
+          "width": 4.975,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "repair store"
+        },
+        {
+          "id": "detention",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 6.6,
+          "kind": "room",
+          "purpose": "detention"
+        },
+        {
+          "id": "streaming_airlock",
+          "x": 0.3,
+          "z": 6.9,
+          "width": 11.4,
+          "depth": 6.6,
+          "kind": "room",
+          "purpose": "streaming airlock"
+        },
+        {
+          "id": "sally_service",
+          "x": 26.3,
+          "z": 0.3,
+          "width": 7.62,
+          "depth": 13.2,
+          "kind": "room",
+          "purpose": "sally service"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 33.92,
+          "z": 6.25,
+          "width": 3.78,
+          "depth": 2.6,
+          "kind": "room",
+          "purpose": "vertical core hall"
+        }
+      ],
+      "blueprintId": "fortress_enterable:undercroft:fort_undercroft",
+      "layoutPattern": "fort_undercroft",
+      "levelMassFootprints": [
+        {
+          "id": "command_mass",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 12.16,
+          "depth": 11.4,
+          "kind": "building"
+        },
+        {
+          "id": "barracks_mass",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 13.2,
+          "kind": "building"
+        },
+        {
+          "id": "service_mass",
+          "x": 26.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 13.2,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [
+        {
+          "id": "capture_court",
+          "x": 12.92,
+          "z": 1.1,
+          "width": 12.16,
+          "depth": 12.9,
+          "kind": "open_to_sky"
+        }
+      ],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 12.92,
+        "z": 14.4,
+        "width": 6.08,
+        "depth": 5.7,
+        "kind": "accessible_route_envelope"
+      },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.8,
+          "accessible": true,
+          "points": [
+            [
+              12.92,
+              14.4
+            ],
+            [
+              12.92,
+              7.55
+            ],
+            [
+              35.81,
+              7.55
+            ],
+            [
+              35.81,
+              20.1
+            ],
+            [
+              19.0,
+              20.1
+            ]
+          ]
+        }
+      ],
+      "adjacency": [
+        [
+          "supply_hold",
+          "primary_circulation"
+        ],
+        [
+          "repair_store",
+          "primary_circulation"
+        ],
+        [
+          "detention",
+          "primary_circulation"
+        ],
+        [
+          "streaming_airlock",
+          "primary_circulation"
+        ],
+        [
+          "sally_service",
+          "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
+          "primary_circulation"
+        ]
+      ],
+      "doorOpenings": [
+        {
+          "id": "door_undercroft_supply_hold",
+          "separateObject": true,
+          "between": [
+            "supply_hold",
+            "primary_circulation"
+          ],
+          "to": "supply_hold",
+          "orientation": "vertical",
+          "x": 16.512,
+          "z": 25.8,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_undercroft_repair_store",
+          "separateObject": true,
+          "between": [
+            "repair_store",
+            "primary_circulation"
+          ],
+          "to": "repair_store",
+          "orientation": "vertical",
+          "x": 22.593,
+          "z": 25.8,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_undercroft_detention",
+          "separateObject": true,
+          "between": [
+            "detention",
+            "primary_circulation"
+          ],
+          "to": "detention",
+          "orientation": "vertical",
+          "x": 6.0,
+          "z": 6.9,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_undercroft_streaming_airlock",
+          "separateObject": true,
+          "between": [
+            "streaming_airlock",
+            "primary_circulation"
+          ],
+          "to": "streaming_airlock",
+          "orientation": "vertical",
+          "x": 6.0,
+          "z": 13.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_undercroft_sally_service",
+          "separateObject": true,
+          "between": [
+            "sally_service",
+            "primary_circulation"
+          ],
+          "to": "sally_service",
+          "orientation": "vertical",
+          "x": 30.11,
+          "z": 13.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_undercroft_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 35.81,
+          "z": 8.85,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_undercroft_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 35.81,
+          "z": 7.55,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_undercroft_cut_BB_supply_hold",
+          "separateObject": true,
+          "between": [
+            "supply_hold",
+            "primary_circulation"
+          ],
+          "to": "supply_hold",
+          "orientation": "vertical",
+          "x": 19.0,
+          "z": 20.1,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        }
+      ],
+      "exteriorEntrances": [],
+      "windowOpenings": [],
+      "windowPolicy": "No exterior windows below grade; separate ventilation and emergency shafts.",
+      "verticalCoreFootprints": [
+        {
+          "coreId": "fortress_enterable_stair_core",
+          "type": "u_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 33.92,
+            "z": 6.25,
+            "width": 1.7,
+            "depth": 2.6,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "vertical_core_hall"
+        },
+        {
+          "coreId": "fortress_enterable_combat_lift",
+          "type": "combat_lift",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 35.9,
+            "z": 6.25,
+            "width": 1.8,
+            "depth": 2.6,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "vertical_core_hall"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "supply_hold",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "undercroft_supply_hold_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 13.27,
+              "z": 14.75,
+              "width": 1.6,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "supply_hold_protected_aisle",
+              "x": 15.912,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 11.4,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "supply_hold_door_approach",
+              "x": 15.912,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "repair_store",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "undercroft_repair_store_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 20.455,
+              "z": 14.75,
+              "width": 1.6,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "repair_store_protected_aisle",
+              "x": 21.992,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 11.4,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "repair_store_door_approach",
+              "x": 21.992,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "detention",
+          "layoutIntent": "secure cot + cell partition",
+          "footprints": [
+            {
+              "id": "undercroft_detention_secure_cot_1",
+              "kind": "secure_cot",
+              "label": "secure cot",
+              "symbol": "COT",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.9,
+              "depth": 0.8,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.6
+            },
+            {
+              "id": "undercroft_detention_cell_partition_2",
+              "kind": "cell_partition",
+              "label": "cell partition",
+              "symbol": "CELL",
+              "x": 0.65,
+              "z": 4.75,
+              "width": 0.2,
+              "depth": 1.8,
+              "orientationDegrees": 180,
+              "count": 1,
+              "sectionHeightMeters": 2.2
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "detention_protected_aisle",
+              "x": 0.3,
+              "z": 3.0,
+              "width": 11.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "detention_door_approach",
+              "x": 5.4,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "streaming_airlock",
+          "layoutIntent": "physical portal cover",
+          "footprints": [
+            {
+              "id": "undercroft_streaming_airlock_portal_cover_1",
+              "kind": "portal_cover",
+              "label": "physical portal cover",
+              "symbol": "PORTAL",
+              "x": 0.65,
+              "z": 7.25,
+              "width": 1.6,
+              "depth": 1.1,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 2.2
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "streaming_airlock_protected_aisle",
+              "x": 0.3,
+              "z": 9.6,
+              "width": 11.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "streaming_airlock_door_approach",
+              "x": 5.4,
+              "z": 6.9,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "sally_service",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "undercroft_sally_service_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "symbol": "UTILITY",
+              "x": 26.65,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "sally_service_protected_aisle",
+              "x": 29.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 13.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "sally_service_door_approach",
+              "x": 29.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "undercroft_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 34.18,
+              "z": 6.51,
+              "width": 1.8,
+              "depth": 0.666,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 33.92,
+              "z": 6.95,
+              "width": 3.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 35.21,
+              "z": 6.25,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "undercroft_accessible_route",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 6.08,
+          "depth": 5.7,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "undercroft_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "sally_service",
+          "center": [
+            30.11,
+            6.9
+          ],
+          "diameter": 6.0
+        },
+        {
+          "id": "undercroft_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "sally_service",
+          "center": [
+            30.11,
+            6.9
+          ],
+          "radius": 3.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_undercroft_supply_hold",
+          "type": "lighting",
+          "roomId": "supply_hold",
+          "x": 16.512,
+          "z": 20.1
+        },
+        {
+          "id": "interaction_undercroft_supply_hold",
+          "type": "interaction",
+          "roomId": "supply_hold",
+          "x": 13.52,
+          "z": 15.0
+        },
+        {
+          "id": "light_undercroft_repair_store",
+          "type": "lighting",
+          "roomId": "repair_store",
+          "x": 22.593,
+          "z": 20.1
+        },
+        {
+          "id": "interaction_undercroft_repair_store",
+          "type": "interaction",
+          "roomId": "repair_store",
+          "x": 20.705,
+          "z": 15.0
+        },
+        {
+          "id": "light_undercroft_detention",
+          "type": "lighting",
+          "roomId": "detention",
+          "x": 6.0,
+          "z": 3.6
+        },
+        {
+          "id": "interaction_undercroft_detention",
+          "type": "interaction",
+          "roomId": "detention",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_undercroft_streaming_airlock",
+          "type": "lighting",
+          "roomId": "streaming_airlock",
+          "x": 6.0,
+          "z": 10.2
+        },
+        {
+          "id": "interaction_undercroft_streaming_airlock",
+          "type": "interaction",
+          "roomId": "streaming_airlock",
+          "x": 0.9,
+          "z": 7.5
+        },
+        {
+          "id": "light_undercroft_sally_service",
+          "type": "lighting",
+          "roomId": "sally_service",
+          "x": 30.11,
+          "z": 6.9
+        },
+        {
+          "id": "interaction_undercroft_sally_service",
+          "type": "interaction",
+          "roomId": "sally_service",
+          "x": 26.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_undercroft_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 35.81,
+          "z": 7.55
+        },
+        {
+          "id": "interaction_undercroft_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 34.52,
+          "z": 6.85
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            7.55
+          ],
+          "to": [
+            37.7,
+            7.55
+          ],
+          "cutsVerticalCoreId": "fortress_enterable_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            19.0,
+            0.3
+          ],
+          "to": [
+            19.0,
+            29.7
+          ],
+          "cutsVerticalCoreId": "fortress_enterable_stair_core"
+        }
+      ],
+      "portalBoundary": "physical_loading_cover_and_streaming_portal",
+      "sourceAuthority": "packet-specific measured blueprint"
+    },
+    {
+      "id": "ground",
+      "elevationMeters": 0,
+      "clearHeightMeters": 3.5,
+      "rooms": [
+        {
+          "id": "command_hall",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 6.08,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "command hall"
+        },
+        {
+          "id": "capture_court_gallery",
+          "x": 19.0,
+          "z": 14.4,
+          "width": 6.08,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "capture court gallery"
+        },
+        {
+          "id": "muster",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 8.297,
+          "kind": "room",
+          "purpose": "muster"
+        },
+        {
+          "id": "armory",
+          "x": 26.3,
+          "z": 0.3,
+          "width": 7.62,
+          "depth": 7.8,
+          "kind": "room",
+          "purpose": "armory"
+        },
+        {
+          "id": "infirmary_service",
+          "x": 26.3,
+          "z": 8.1,
+          "width": 7.62,
+          "depth": 5.4,
+          "kind": "room",
+          "purpose": "infirmary service"
+        },
+        {
+          "id": "accessible_core",
+          "x": 33.92,
+          "z": 6.25,
+          "width": 3.78,
+          "depth": 2.6,
+          "kind": "room",
+          "purpose": "accessible core"
+        }
+      ],
+      "blueprintId": "fortress_enterable:ground:fort_courtyard",
+      "layoutPattern": "fort_courtyard",
+      "levelMassFootprints": [
+        {
+          "id": "command_mass",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 12.16,
+          "depth": 11.4,
+          "kind": "building"
+        },
+        {
+          "id": "barracks_mass",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 13.2,
+          "kind": "building"
+        },
+        {
+          "id": "service_mass",
+          "x": 26.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 13.2,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [
+        {
+          "id": "capture_court",
+          "x": 12.92,
+          "z": 1.1,
+          "width": 12.16,
+          "depth": 12.9,
+          "kind": "open_to_sky"
+        }
+      ],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 12.92,
+        "z": 14.4,
+        "width": 6.08,
+        "depth": 5.7,
+        "kind": "accessible_route_envelope"
+      },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.8,
+          "accessible": true,
+          "points": [
+            [
+              6.0,
+              0.3
+            ],
+            [
+              6.0,
+              4.449
+            ],
+            [
+              6.0,
+              7.55
+            ],
+            [
+              35.81,
+              7.55
+            ]
+          ]
+        }
+      ],
+      "adjacency": [
+        [
+          "outside",
+          "muster"
+        ],
+        [
+          "command_hall",
+          "primary_circulation"
+        ],
+        [
+          "capture_court_gallery",
+          "primary_circulation"
+        ],
+        [
+          "muster",
+          "primary_circulation"
+        ],
+        [
+          "armory",
+          "primary_circulation"
+        ],
+        [
+          "infirmary_service",
+          "primary_circulation"
+        ],
+        [
+          "accessible_core",
+          "primary_circulation"
+        ]
+      ],
+      "doorOpenings": [
+        {
+          "id": "fortress_enterable_main_entry",
+          "from": "outside",
+          "to": "muster",
+          "side": "south",
+          "x": 6.0,
+          "z": 0.3,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true,
+          "between": [
+            "outside",
+            "muster"
+          ]
+        },
+        {
+          "id": "door_ground_command_hall",
+          "separateObject": true,
+          "between": [
+            "command_hall",
+            "primary_circulation"
+          ],
+          "to": "command_hall",
+          "orientation": "vertical",
+          "x": 15.96,
+          "z": 25.8,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_capture_court_gallery",
+          "separateObject": true,
+          "between": [
+            "capture_court_gallery",
+            "primary_circulation"
+          ],
+          "to": "capture_court_gallery",
+          "orientation": "vertical",
+          "x": 22.04,
+          "z": 25.8,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_muster",
+          "separateObject": true,
+          "between": [
+            "muster",
+            "primary_circulation"
+          ],
+          "to": "muster",
+          "orientation": "vertical",
+          "x": 6.0,
+          "z": 8.597,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_armory",
+          "separateObject": true,
+          "between": [
+            "armory",
+            "primary_circulation"
+          ],
+          "to": "armory",
+          "orientation": "vertical",
+          "x": 30.11,
+          "z": 8.1,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_infirmary_service",
+          "separateObject": true,
+          "between": [
+            "infirmary_service",
+            "primary_circulation"
+          ],
+          "to": "infirmary_service",
+          "orientation": "vertical",
+          "x": 30.11,
+          "z": 13.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_accessible_core",
+          "separateObject": true,
+          "between": [
+            "accessible_core",
+            "primary_circulation"
+          ],
+          "to": "accessible_core",
+          "orientation": "vertical",
+          "x": 35.81,
+          "z": 8.85,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_accessible_core",
+          "separateObject": true,
+          "between": [
+            "accessible_core",
+            "primary_circulation"
+          ],
+          "to": "accessible_core",
+          "orientation": "horizontal",
+          "x": 35.81,
+          "z": 7.55,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_ground_cut_BB_command_hall",
+          "separateObject": true,
+          "between": [
+            "command_hall",
+            "primary_circulation"
+          ],
+          "to": "command_hall",
+          "orientation": "vertical",
+          "x": 18.85,
+          "z": 20.1,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        }
+      ],
+      "exteriorEntrances": [
+        {
+          "id": "fortress_enterable_main_entry",
+          "from": "outside",
+          "to": "muster",
+          "side": "south",
+          "x": 6.0,
+          "z": 0.3,
+          "orientation": "horizontal",
+          "clearOpeningMeters": [
+            2.5,
+            3.0
+          ],
+          "swing": "double_out",
+          "stepFree": true,
+          "separateObject": true
+        }
+      ],
+      "windowOpenings": [
+        {
+          "id": "window_ground_muster",
+          "separateFrameGlassShutter": true,
+          "serves": "muster",
+          "side": "south",
+          "x": 6.0,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_armory",
+          "separateFrameGlassShutter": true,
+          "serves": "armory",
+          "side": "south",
+          "x": 30.11,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_accessible_core",
+          "separateFrameGlassShutter": true,
+          "serves": "accessible_core",
+          "side": "east",
+          "x": 38,
+          "z": 7.55,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "muster",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.55,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        }
+      ],
+      "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
+      "verticalCoreFootprints": [
+        {
+          "coreId": "fortress_enterable_stair_core",
+          "type": "u_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 33.92,
+            "z": 6.25,
+            "width": 1.7,
+            "depth": 2.6,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "accessible_core"
+        },
+        {
+          "coreId": "fortress_enterable_combat_lift",
+          "type": "combat_lift",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 35.9,
+            "z": 6.25,
+            "width": 1.8,
+            "depth": 2.6,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "accessible_core"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "command_hall",
+          "layoutIntent": "council table + benches",
+          "footprints": [
+            {
+              "id": "ground_command_hall_council_table_1",
+              "kind": "council_table",
+              "label": "council table",
+              "symbol": "COUNCIL",
+              "x": 13.27,
+              "z": 14.75,
+              "width": 2.6,
+              "depth": 1.2,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.9
+            },
+            {
+              "id": "ground_command_hall_bench_row_2",
+              "kind": "bench_row",
+              "label": "benches",
+              "symbol": "BENCH",
+              "x": 13.27,
+              "z": 24.95,
+              "width": 2.2,
+              "depth": 0.5,
+              "orientationDegrees": 180,
+              "count": 1,
+              "sectionHeightMeters": 0.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "command_hall_protected_aisle",
+              "x": 15.36,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 11.4,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "command_hall_door_approach",
+              "x": 15.36,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "capture_court_gallery",
+          "layoutIntent": "court cistern lip",
+          "footprints": [
+            {
+              "id": "ground_capture_court_gallery_court_well_1",
+              "kind": "court_well",
+              "label": "court cistern lip",
+              "symbol": "WELL",
+              "x": 19.35,
+              "z": 14.75,
+              "width": 1.2,
+              "depth": 1.2,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.6
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "capture_court_gallery_protected_aisle",
+              "x": 21.44,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 11.4,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "capture_court_gallery_door_approach",
+              "x": 21.44,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "muster",
+          "layoutIntent": "weapon rack + muster bench",
+          "footprints": [
+            {
+              "id": "ground_muster_weapon_rack_1",
+              "kind": "weapon_rack",
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.8,
+              "depth": 0.5,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.8
+            },
+            {
+              "id": "ground_muster_bench_row_2",
+              "kind": "bench_row",
+              "label": "muster bench",
+              "symbol": "BENCH",
+              "x": 0.65,
+              "z": 7.797,
+              "width": 2.0,
+              "depth": 0.45,
+              "orientationDegrees": 180,
+              "count": 1,
+              "sectionHeightMeters": 0.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "muster_protected_aisle",
+              "x": 0.3,
+              "z": 3.849,
+              "width": 11.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "muster_door_approach",
+              "x": 5.4,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "armory",
+          "layoutIntent": "weapon rack + muster bench",
+          "footprints": [
+            {
+              "id": "ground_armory_weapon_rack_1",
+              "kind": "weapon_rack",
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 26.65,
+              "z": 0.65,
+              "width": 1.8,
+              "depth": 0.5,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.8
+            },
+            {
+              "id": "ground_armory_bench_row_2",
+              "kind": "bench_row",
+              "label": "muster bench",
+              "symbol": "BENCH",
+              "x": 26.65,
+              "z": 7.3,
+              "width": 2.0,
+              "depth": 0.45,
+              "orientationDegrees": 180,
+              "count": 1,
+              "sectionHeightMeters": 0.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "armory_protected_aisle",
+              "x": 29.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 7.8,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "armory_door_approach",
+              "x": 29.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "infirmary_service",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "ground_infirmary_service_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "symbol": "UTILITY",
+              "x": 26.65,
+              "z": 8.45,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "infirmary_service_protected_aisle",
+              "x": 26.3,
+              "z": 10.2,
+              "width": 7.62,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "infirmary_service_door_approach",
+              "x": 29.51,
+              "z": 8.1,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "accessible_core",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "ground_accessible_core_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 34.18,
+              "z": 6.51,
+              "width": 1.8,
+              "depth": 0.666,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "accessible_core_protected_aisle",
+              "x": 33.92,
+              "z": 6.95,
+              "width": 3.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "accessible_core_door_approach",
+              "x": 35.21,
+              "z": 6.25,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "ground_accessible_route",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 6.08,
+          "depth": 5.7,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "ground_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "muster",
+          "center": [
+            6.0,
+            4.449
+          ],
+          "diameter": 6.0
+        },
+        {
+          "id": "ground_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "muster",
+          "center": [
+            6.0,
+            4.449
+          ],
+          "radius": 3.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_ground_command_hall",
+          "type": "lighting",
+          "roomId": "command_hall",
+          "x": 15.96,
+          "z": 20.1
+        },
+        {
+          "id": "interaction_ground_command_hall",
+          "type": "interaction",
+          "roomId": "command_hall",
+          "x": 13.52,
+          "z": 15.0
+        },
+        {
+          "id": "light_ground_capture_court_gallery",
+          "type": "lighting",
+          "roomId": "capture_court_gallery",
+          "x": 22.04,
+          "z": 20.1
+        },
+        {
+          "id": "interaction_ground_capture_court_gallery",
+          "type": "interaction",
+          "roomId": "capture_court_gallery",
+          "x": 19.6,
+          "z": 15.0
+        },
+        {
+          "id": "light_ground_muster",
+          "type": "lighting",
+          "roomId": "muster",
+          "x": 6.0,
+          "z": 4.449
+        },
+        {
+          "id": "interaction_ground_muster",
+          "type": "interaction",
+          "roomId": "muster",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_armory",
+          "type": "lighting",
+          "roomId": "armory",
+          "x": 30.11,
+          "z": 4.2
+        },
+        {
+          "id": "interaction_ground_armory",
+          "type": "interaction",
+          "roomId": "armory",
+          "x": 26.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_ground_infirmary_service",
+          "type": "lighting",
+          "roomId": "infirmary_service",
+          "x": 30.11,
+          "z": 10.8
+        },
+        {
+          "id": "interaction_ground_infirmary_service",
+          "type": "interaction",
+          "roomId": "infirmary_service",
+          "x": 26.9,
+          "z": 8.7
+        },
+        {
+          "id": "light_ground_accessible_core",
+          "type": "lighting",
+          "roomId": "accessible_core",
+          "x": 35.81,
+          "z": 7.55
+        },
+        {
+          "id": "interaction_ground_accessible_core",
+          "type": "interaction",
+          "roomId": "accessible_core",
+          "x": 34.52,
+          "z": 6.85
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            7.55
+          ],
+          "to": [
+            37.7,
+            7.55
+          ],
+          "cutsVerticalCoreId": "fortress_enterable_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            19.0,
+            0.3
+          ],
+          "to": [
+            19.0,
+            29.7
+          ],
+          "cutsVerticalCoreId": "fortress_enterable_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
+    },
+    {
+      "id": "upper",
+      "elevationMeters": 3.8,
+      "clearHeightMeters": 3.0,
+      "rooms": [
+        {
+          "id": "officer_room",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 3.53,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "officer room"
+        },
+        {
+          "id": "signal_gallery",
+          "x": 16.45,
+          "z": 14.4,
+          "width": 8.63,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "signal gallery"
+        },
+        {
+          "id": "barracks",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 8.297,
+          "kind": "room",
+          "purpose": "barracks"
+        },
+        {
+          "id": "wallwalk_access",
+          "x": 0.3,
+          "z": 8.597,
+          "width": 11.4,
+          "depth": 4.903,
+          "kind": "room",
+          "purpose": "wallwalk access"
+        },
+        {
+          "id": "war_map_room",
+          "x": 26.3,
+          "z": 0.3,
+          "width": 7.62,
+          "depth": 13.2,
+          "kind": "room",
+          "purpose": "war map room"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 33.92,
+          "z": 6.25,
+          "width": 3.78,
+          "depth": 2.6,
+          "kind": "room",
+          "purpose": "vertical core hall"
+        }
+      ],
+      "blueprintId": "fortress_enterable:upper:fort_upper",
+      "layoutPattern": "fort_upper",
+      "levelMassFootprints": [
+        {
+          "id": "command_mass",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 12.16,
+          "depth": 11.4,
+          "kind": "building"
+        },
+        {
+          "id": "barracks_mass",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 13.2,
+          "kind": "building"
+        },
+        {
+          "id": "service_mass",
+          "x": 26.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 13.2,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [
+        {
+          "id": "capture_court",
+          "x": 12.92,
+          "z": 1.1,
+          "width": 12.16,
+          "depth": 12.9,
+          "kind": "open_to_sky"
+        }
+      ],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 12.92,
+        "z": 14.4,
+        "width": 6.08,
+        "depth": 5.7,
+        "kind": "accessible_route_envelope"
+      },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.8,
+          "accessible": true,
+          "points": [
+            [
+              12.92,
+              14.4
+            ],
+            [
+              12.92,
+              7.55
+            ],
+            [
+              35.81,
+              7.55
+            ],
+            [
+              35.81,
+              20.1
+            ],
+            [
+              19.0,
+              20.1
+            ]
+          ]
+        }
+      ],
+      "adjacency": [
+        [
+          "officer_room",
+          "primary_circulation"
+        ],
+        [
+          "signal_gallery",
+          "primary_circulation"
+        ],
+        [
+          "barracks",
+          "primary_circulation"
+        ],
+        [
+          "wallwalk_access",
+          "primary_circulation"
+        ],
+        [
+          "war_map_room",
+          "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
+          "primary_circulation"
+        ]
+      ],
+      "doorOpenings": [
+        {
+          "id": "door_upper_officer_room",
+          "separateObject": true,
+          "between": [
+            "officer_room",
+            "primary_circulation"
+          ],
+          "to": "officer_room",
+          "orientation": "vertical",
+          "x": 14.685,
+          "z": 25.8,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_upper_signal_gallery",
+          "separateObject": true,
+          "between": [
+            "signal_gallery",
+            "primary_circulation"
+          ],
+          "to": "signal_gallery",
+          "orientation": "vertical",
+          "x": 20.765,
+          "z": 25.8,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_upper_barracks",
+          "separateObject": true,
+          "between": [
+            "barracks",
+            "primary_circulation"
+          ],
+          "to": "barracks",
+          "orientation": "vertical",
+          "x": 6.0,
+          "z": 8.597,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_upper_wallwalk_access",
+          "separateObject": true,
+          "between": [
+            "wallwalk_access",
+            "primary_circulation"
+          ],
+          "to": "wallwalk_access",
+          "orientation": "vertical",
+          "x": 6.0,
+          "z": 13.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_upper_war_map_room",
+          "separateObject": true,
+          "between": [
+            "war_map_room",
+            "primary_circulation"
+          ],
+          "to": "war_map_room",
+          "orientation": "vertical",
+          "x": 30.11,
+          "z": 13.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_upper_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 35.81,
+          "z": 8.85,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_upper_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 35.81,
+          "z": 7.55,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_upper_cut_BB_signal_gallery",
+          "separateObject": true,
+          "between": [
+            "signal_gallery",
+            "primary_circulation"
+          ],
+          "to": "signal_gallery",
+          "orientation": "vertical",
+          "x": 19.0,
+          "z": 20.1,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        }
+      ],
+      "exteriorEntrances": [],
+      "windowOpenings": [
+        {
+          "id": "window_upper_barracks",
+          "separateFrameGlassShutter": true,
+          "serves": "barracks",
+          "side": "south",
+          "x": 6.0,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_upper_wallwalk_access",
+          "separateFrameGlassShutter": true,
+          "serves": "wallwalk_access",
+          "side": "west",
+          "x": 0.0,
+          "z": 11.048,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_upper_war_map_room",
+          "separateFrameGlassShutter": true,
+          "serves": "war_map_room",
+          "side": "south",
+          "x": 30.11,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_upper_vertical_core_hall",
+          "separateFrameGlassShutter": true,
+          "serves": "vertical_core_hall",
+          "side": "east",
+          "x": 38,
+          "z": 7.55,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_upper_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "barracks",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.55,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        }
+      ],
+      "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
+      "verticalCoreFootprints": [
+        {
+          "coreId": "fortress_enterable_stair_core",
+          "type": "u_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 33.92,
+            "z": 6.25,
+            "width": 1.7,
+            "depth": 2.6,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "vertical_core_hall"
+        },
+        {
+          "coreId": "fortress_enterable_combat_lift",
+          "type": "combat_lift",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 35.9,
+            "z": 6.25,
+            "width": 1.8,
+            "depth": 2.6,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "vertical_core_hall"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "officer_room",
+          "layoutIntent": "desk + chair",
+          "footprints": [
+            {
+              "id": "upper_officer_room_desk_1",
+              "kind": "desk",
+              "label": "desk + chair",
+              "symbol": "DESK",
+              "x": 13.27,
+              "z": 14.75,
+              "width": 1.4,
+              "depth": 0.7,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "officer_room_protected_aisle",
+              "x": 14.085,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 11.4,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "officer_room_door_approach",
+              "x": 14.085,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "signal_gallery",
+          "layoutIntent": "table / benches",
+          "footprints": [
+            {
+              "id": "upper_signal_gallery_table_bench_1",
+              "kind": "table_bench",
+              "label": "table / benches",
+              "symbol": "TABLE",
+              "x": 16.8,
+              "z": 14.75,
+              "width": 1.8,
+              "depth": 0.9,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "signal_gallery_protected_aisle",
+              "x": 20.165,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 11.4,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "signal_gallery_door_approach",
+              "x": 20.165,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "barracks",
+          "layoutIntent": "weapon rack",
+          "footprints": [
+            {
+              "id": "upper_barracks_weapon_rack_1",
+              "kind": "weapon_rack",
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.5,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "barracks_protected_aisle",
+              "x": 0.3,
+              "z": 3.849,
+              "width": 11.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "barracks_door_approach",
+              "x": 5.4,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "wallwalk_access",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "upper_wallwalk_access_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "symbol": "UTILITY",
+              "x": 0.65,
+              "z": 8.947,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "wallwalk_access_protected_aisle",
+              "x": 0.3,
+              "z": 10.448,
+              "width": 11.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "wallwalk_access_door_approach",
+              "x": 5.4,
+              "z": 8.597,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "war_map_room",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "upper_war_map_room_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "symbol": "UTILITY",
+              "x": 26.65,
+              "z": 0.65,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "war_map_room_protected_aisle",
+              "x": 29.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 13.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "war_map_room_door_approach",
+              "x": 29.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "upper_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 34.18,
+              "z": 6.51,
+              "width": 1.8,
+              "depth": 0.666,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 33.92,
+              "z": 6.95,
+              "width": 3.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 35.21,
+              "z": 6.25,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "upper_accessible_route",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 6.08,
+          "depth": 5.7,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "upper_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "war_map_room",
+          "center": [
+            30.11,
+            6.9
+          ],
+          "diameter": 6.0
+        },
+        {
+          "id": "upper_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "war_map_room",
+          "center": [
+            30.11,
+            6.9
+          ],
+          "radius": 3.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_upper_officer_room",
+          "type": "lighting",
+          "roomId": "officer_room",
+          "x": 14.685,
+          "z": 20.1
+        },
+        {
+          "id": "interaction_upper_officer_room",
+          "type": "interaction",
+          "roomId": "officer_room",
+          "x": 13.52,
+          "z": 15.0
+        },
+        {
+          "id": "light_upper_signal_gallery",
+          "type": "lighting",
+          "roomId": "signal_gallery",
+          "x": 20.765,
+          "z": 20.1
+        },
+        {
+          "id": "interaction_upper_signal_gallery",
+          "type": "interaction",
+          "roomId": "signal_gallery",
+          "x": 17.05,
+          "z": 15.0
+        },
+        {
+          "id": "light_upper_barracks",
+          "type": "lighting",
+          "roomId": "barracks",
+          "x": 6.0,
+          "z": 4.449
+        },
+        {
+          "id": "interaction_upper_barracks",
+          "type": "interaction",
+          "roomId": "barracks",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_wallwalk_access",
+          "type": "lighting",
+          "roomId": "wallwalk_access",
+          "x": 6.0,
+          "z": 11.048
+        },
+        {
+          "id": "interaction_upper_wallwalk_access",
+          "type": "interaction",
+          "roomId": "wallwalk_access",
+          "x": 0.9,
+          "z": 9.197
+        },
+        {
+          "id": "light_upper_war_map_room",
+          "type": "lighting",
+          "roomId": "war_map_room",
+          "x": 30.11,
+          "z": 6.9
+        },
+        {
+          "id": "interaction_upper_war_map_room",
+          "type": "interaction",
+          "roomId": "war_map_room",
+          "x": 26.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_upper_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 35.81,
+          "z": 7.55
+        },
+        {
+          "id": "interaction_upper_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 34.52,
+          "z": 6.85
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            7.55
+          ],
+          "to": [
+            37.7,
+            7.55
+          ],
+          "cutsVerticalCoreId": "fortress_enterable_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            19.0,
+            0.3
+          ],
+          "to": [
+            19.0,
+            29.7
+          ],
+          "cutsVerticalCoreId": "fortress_enterable_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
+    },
+    {
+      "id": "tower_level",
+      "elevationMeters": 7.1,
+      "clearHeightMeters": 2.8,
+      "rooms": [
+        {
+          "id": "tower_guard_a",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 6.08,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "tower guard a"
+        },
+        {
+          "id": "roof_route",
+          "x": 19.0,
+          "z": 14.4,
+          "width": 6.08,
+          "depth": 11.4,
+          "kind": "room",
+          "purpose": "roof route"
+        },
+        {
+          "id": "tower_guard_b",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 6.6,
+          "kind": "room",
+          "purpose": "tower guard b"
+        },
+        {
+          "id": "parapet_threshold",
+          "x": 0.3,
+          "z": 6.9,
+          "width": 11.4,
+          "depth": 6.6,
+          "kind": "room",
+          "purpose": "parapet threshold"
+        },
+        {
+          "id": "siege_store",
+          "x": 26.3,
+          "z": 0.3,
+          "width": 7.62,
+          "depth": 13.2,
+          "kind": "room",
+          "purpose": "siege store"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 33.92,
+          "z": 6.25,
+          "width": 3.78,
+          "depth": 2.6,
+          "kind": "room",
+          "purpose": "vertical core hall"
+        }
+      ],
+      "blueprintId": "fortress_enterable:tower_level:tower_roof",
+      "layoutPattern": "tower_roof",
+      "levelMassFootprints": [
+        {
+          "id": "command_mass",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 12.16,
+          "depth": 11.4,
+          "kind": "building"
+        },
+        {
+          "id": "barracks_mass",
+          "x": 0.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 13.2,
+          "kind": "building"
+        },
+        {
+          "id": "service_mass",
+          "x": 26.3,
+          "z": 0.3,
+          "width": 11.4,
+          "depth": 13.2,
+          "kind": "building"
+        }
+      ],
+      "exteriorVoidsAndCourts": [
+        {
+          "id": "capture_court",
+          "x": 12.92,
+          "z": 1.1,
+          "width": 12.16,
+          "depth": 12.9,
+          "kind": "open_to_sky"
+        }
+      ],
+      "circulation": {
+        "id": "primary_circulation",
+        "x": 12.92,
+        "z": 14.4,
+        "width": 6.08,
+        "depth": 5.7,
+        "kind": "accessible_route_envelope"
+      },
+      "circulationRoutes": [
+        {
+          "id": "primary_accessible_route",
+          "widthMeters": 1.8,
+          "accessible": true,
+          "points": [
+            [
+              12.92,
+              14.4
+            ],
+            [
+              12.92,
+              7.55
+            ],
+            [
+              35.81,
+              7.55
+            ],
+            [
+              35.81,
+              20.1
+            ],
+            [
+              19.0,
+              20.1
+            ]
+          ]
+        }
+      ],
+      "adjacency": [
+        [
+          "tower_guard_a",
+          "primary_circulation"
+        ],
+        [
+          "roof_route",
+          "primary_circulation"
+        ],
+        [
+          "tower_guard_b",
+          "primary_circulation"
+        ],
+        [
+          "parapet_threshold",
+          "primary_circulation"
+        ],
+        [
+          "siege_store",
+          "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
+          "primary_circulation"
+        ]
+      ],
+      "doorOpenings": [
+        {
+          "id": "door_tower_level_tower_guard_a",
+          "separateObject": true,
+          "between": [
+            "tower_guard_a",
+            "primary_circulation"
+          ],
+          "to": "tower_guard_a",
+          "orientation": "vertical",
+          "x": 15.96,
+          "z": 25.8,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_tower_level_roof_route",
+          "separateObject": true,
+          "between": [
+            "roof_route",
+            "primary_circulation"
+          ],
+          "to": "roof_route",
+          "orientation": "vertical",
+          "x": 22.04,
+          "z": 25.8,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_tower_level_tower_guard_b",
+          "separateObject": true,
+          "between": [
+            "tower_guard_b",
+            "primary_circulation"
+          ],
+          "to": "tower_guard_b",
+          "orientation": "vertical",
+          "x": 6.0,
+          "z": 6.9,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_tower_level_parapet_threshold",
+          "separateObject": true,
+          "between": [
+            "parapet_threshold",
+            "primary_circulation"
+          ],
+          "to": "parapet_threshold",
+          "orientation": "vertical",
+          "x": 6.0,
+          "z": 13.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_tower_level_siege_store",
+          "separateObject": true,
+          "between": [
+            "siege_store",
+            "primary_circulation"
+          ],
+          "to": "siege_store",
+          "orientation": "vertical",
+          "x": 30.11,
+          "z": 13.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_tower_level_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 35.81,
+          "z": 8.85,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_tower_level_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 35.81,
+          "z": 7.55,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_tower_level_cut_BB_tower_guard_a",
+          "separateObject": true,
+          "between": [
+            "tower_guard_a",
+            "primary_circulation"
+          ],
+          "to": "tower_guard_a",
+          "orientation": "vertical",
+          "x": 18.85,
+          "z": 20.1,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        }
+      ],
+      "exteriorEntrances": [],
+      "windowOpenings": [
+        {
+          "id": "window_tower_level_tower_guard_b",
+          "separateFrameGlassShutter": true,
+          "serves": "tower_guard_b",
+          "side": "south",
+          "x": 6.0,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_tower_level_parapet_threshold",
+          "separateFrameGlassShutter": true,
+          "serves": "parapet_threshold",
+          "side": "west",
+          "x": 0.0,
+          "z": 10.2,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_tower_level_siege_store",
+          "separateFrameGlassShutter": true,
+          "serves": "siege_store",
+          "side": "south",
+          "x": 30.11,
+          "z": 0.0,
+          "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_tower_level_vertical_core_hall",
+          "separateFrameGlassShutter": true,
+          "serves": "vertical_core_hall",
+          "side": "east",
+          "x": 38,
+          "z": 7.55,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_tower_level_cut_west",
+          "separateFrameGlassShutter": true,
+          "serves": "parapet_threshold",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.55,
+          "orientation": "vertical",
+          "openingMeters": [
+            1.2,
+            1.5
+          ],
+          "cutAligned": true
+        }
+      ],
+      "windowPolicy": "Real recessed openings use separate frame, glass and shutter objects.",
+      "verticalCoreFootprints": [
+        {
+          "coreId": "fortress_enterable_stair_core",
+          "type": "u_stair",
+          "footprint": {
+            "id": "stair_footprint",
+            "x": 33.92,
+            "z": 6.25,
+            "width": 1.7,
+            "depth": 2.6,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "UP clockwise",
+          "locatedInRoomId": "vertical_core_hall"
+        },
+        {
+          "coreId": "fortress_enterable_combat_lift",
+          "type": "combat_lift",
+          "footprint": {
+            "id": "lift_footprint",
+            "x": 35.9,
+            "z": 6.25,
+            "width": 1.8,
+            "depth": 2.6,
+            "kind": "vertical_circulation"
+          },
+          "landingDepthMeters": 1.5,
+          "direction": "vertical platform",
+          "locatedInRoomId": "vertical_core_hall"
+        }
+      ],
+      "furnishingLayouts": [
+        {
+          "roomId": "tower_guard_a",
+          "layoutIntent": "weapon rack",
+          "footprints": [
+            {
+              "id": "tower_level_tower_guard_a_weapon_rack_1",
+              "kind": "weapon_rack",
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 13.27,
+              "z": 14.75,
+              "width": 1.6,
+              "depth": 0.5,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "tower_guard_a_protected_aisle",
+              "x": 15.36,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 11.4,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "tower_guard_a_door_approach",
+              "x": 15.36,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "roof_route",
+          "layoutIntent": "task table + wall storage",
+          "footprints": [
+            {
+              "id": "tower_level_roof_route_utility_table_1",
+              "kind": "utility_table",
+              "label": "task table + wall storage",
+              "symbol": "UTILITY",
+              "x": 19.35,
+              "z": 14.75,
+              "width": 1.2,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 0.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "roof_route_protected_aisle",
+              "x": 21.44,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 11.4,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "roof_route_door_approach",
+              "x": 21.44,
+              "z": 14.4,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "tower_guard_b",
+          "layoutIntent": "weapon rack",
+          "footprints": [
+            {
+              "id": "tower_level_tower_guard_b_weapon_rack_1",
+              "kind": "weapon_rack",
+              "label": "weapon rack",
+              "symbol": "ARMS",
+              "x": 0.65,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.5,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.8
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "tower_guard_b_protected_aisle",
+              "x": 0.3,
+              "z": 3.0,
+              "width": 11.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "tower_guard_b_door_approach",
+              "x": 5.4,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "parapet_threshold",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "tower_level_parapet_threshold_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 0.65,
+              "z": 7.25,
+              "width": 1.6,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "parapet_threshold_protected_aisle",
+              "x": 0.3,
+              "z": 9.6,
+              "width": 11.4,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "parapet_threshold_door_approach",
+              "x": 5.4,
+              "z": 6.9,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "siege_store",
+          "layoutIntent": "racks / crates",
+          "footprints": [
+            {
+              "id": "tower_level_siege_store_storage_rack_1",
+              "kind": "storage_rack",
+              "label": "racks / crates",
+              "symbol": "RACK",
+              "x": 26.65,
+              "z": 0.65,
+              "width": 1.6,
+              "depth": 0.6,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.5
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "siege_store_protected_aisle",
+              "x": 29.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 13.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "siege_store_door_approach",
+              "x": 29.51,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "tower_level_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 34.18,
+              "z": 6.51,
+              "width": 1.8,
+              "depth": 0.666,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 33.92,
+              "z": 6.95,
+              "width": 3.78,
+              "depth": 1.2,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 35.21,
+              "z": 6.25,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        }
+      ],
+      "clearanceZones": [
+        {
+          "id": "tower_level_accessible_route",
+          "x": 12.92,
+          "z": 14.4,
+          "width": 6.08,
+          "depth": 5.7,
+          "kind": "primary_accessible_route"
+        },
+        {
+          "id": "tower_level_combat_clear",
+          "kind": "combat_diameter",
+          "roomId": "siege_store",
+          "center": [
+            30.11,
+            6.9
+          ],
+          "diameter": 6.0
+        },
+        {
+          "id": "tower_level_camera_backoff",
+          "kind": "camera_backoff",
+          "roomId": "siege_store",
+          "center": [
+            30.11,
+            6.9
+          ],
+          "radius": 3.5
+        }
+      ],
+      "socketPlacements": [
+        {
+          "id": "light_tower_level_tower_guard_a",
+          "type": "lighting",
+          "roomId": "tower_guard_a",
+          "x": 15.96,
+          "z": 20.1
+        },
+        {
+          "id": "interaction_tower_level_tower_guard_a",
+          "type": "interaction",
+          "roomId": "tower_guard_a",
+          "x": 13.52,
+          "z": 15.0
+        },
+        {
+          "id": "light_tower_level_roof_route",
+          "type": "lighting",
+          "roomId": "roof_route",
+          "x": 22.04,
+          "z": 20.1
+        },
+        {
+          "id": "interaction_tower_level_roof_route",
+          "type": "interaction",
+          "roomId": "roof_route",
+          "x": 19.6,
+          "z": 15.0
+        },
+        {
+          "id": "light_tower_level_tower_guard_b",
+          "type": "lighting",
+          "roomId": "tower_guard_b",
+          "x": 6.0,
+          "z": 3.6
+        },
+        {
+          "id": "interaction_tower_level_tower_guard_b",
+          "type": "interaction",
+          "roomId": "tower_guard_b",
+          "x": 0.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_tower_level_parapet_threshold",
+          "type": "lighting",
+          "roomId": "parapet_threshold",
+          "x": 6.0,
+          "z": 10.2
+        },
+        {
+          "id": "interaction_tower_level_parapet_threshold",
+          "type": "interaction",
+          "roomId": "parapet_threshold",
+          "x": 0.9,
+          "z": 7.5
+        },
+        {
+          "id": "light_tower_level_siege_store",
+          "type": "lighting",
+          "roomId": "siege_store",
+          "x": 30.11,
+          "z": 6.9
+        },
+        {
+          "id": "interaction_tower_level_siege_store",
+          "type": "interaction",
+          "roomId": "siege_store",
+          "x": 26.9,
+          "z": 0.9
+        },
+        {
+          "id": "light_tower_level_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 35.81,
+          "z": 7.55
+        },
+        {
+          "id": "interaction_tower_level_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 34.52,
+          "z": 6.85
+        }
+      ],
+      "sectionCutLines": [
+        {
+          "id": "A-A",
+          "orientation": "longitudinal",
+          "from": [
+            0.3,
+            7.55
+          ],
+          "to": [
+            37.7,
+            7.55
+          ],
+          "cutsVerticalCoreId": "fortress_enterable_stair_core"
+        },
+        {
+          "id": "B-B",
+          "orientation": "cross",
+          "from": [
+            19.0,
+            0.3
+          ],
+          "to": [
+            19.0,
+            29.7
+          ],
+          "cutsVerticalCoreId": "fortress_enterable_stair_core"
+        }
+      ],
+      "portalBoundary": "none_on_this_level",
+      "sourceAuthority": "packet-specific measured blueprint"
+    }
+  ],
+  "verticalCirculation": [
+    {
+      "id": "fortress_enterable_stair_core",
+      "type": "u_stair",
+      "footprint": {
+        "id": "stair_footprint",
+        "x": 33.92,
+        "z": 6.25,
+        "width": 1.7,
+        "depth": 2.6,
+        "kind": "vertical_circulation"
+      },
+      "clearWidthMeters": 1.5,
+      "direction": "UP clockwise",
+      "connectsLevels": [
+        "undercroft",
+        "ground",
+        "upper",
+        "tower_level"
+      ],
+      "landings": [
+        {
+          "levelId": "undercroft",
+          "elevationMeters": -3.4,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.8,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "tower_level",
+          "elevationMeters": 7.1,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": false,
+      "separateObjects": true
+    },
+    {
+      "id": "fortress_enterable_combat_lift",
+      "type": "combat_lift",
+      "footprint": {
+        "id": "lift_footprint",
+        "x": 35.9,
+        "z": 6.25,
+        "width": 1.8,
+        "depth": 2.6,
+        "kind": "vertical_circulation"
+      },
+      "clearWidthMeters": 1.5,
+      "direction": "vertical platform",
+      "connectsLevels": [
+        "undercroft",
+        "ground",
+        "upper",
+        "tower_level"
+      ],
+      "landings": [
+        {
+          "levelId": "undercroft",
+          "elevationMeters": -3.4,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.8,
+          "depthMeters": 1.5
+        },
+        {
+          "levelId": "tower_level",
+          "elevationMeters": 7.1,
+          "depthMeters": 1.5
+        }
+      ],
+      "accessible": true,
+      "separateObjects": true
+    }
+  ],
+  "sections": {
+    "longitudinal": {
+      "id": "A-A",
+      "cutLineId": "A-A",
+      "axis": "x",
+      "cutCoordinateMeters": 7.55,
+      "spanMeters": 38,
+      "levels": [
+        {
+          "id": "undercroft",
+          "elevationMeters": -3.4,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "id": "ground",
+          "elevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "id": "upper",
+          "elevationMeters": 3.8,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "id": "tower_level",
+          "elevationMeters": 7.1,
+          "clearHeightMeters": 2.8
+        }
+      ],
+      "roomSlices": [
+        {
+          "levelId": "undercroft",
+          "roomId": "streaming_airlock",
+          "startMeters": 0.3,
+          "endMeters": 11.700000000000001,
+          "baseElevationMeters": -3.4,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "sally_service",
+          "startMeters": 26.3,
+          "endMeters": 33.92,
+          "baseElevationMeters": -3.4,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "vertical_core_hall",
+          "startMeters": 33.92,
+          "endMeters": 37.7,
+          "baseElevationMeters": -3.4,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "ground",
+          "roomId": "muster",
+          "startMeters": 0.3,
+          "endMeters": 11.700000000000001,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "armory",
+          "startMeters": 26.3,
+          "endMeters": 33.92,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_core",
+          "startMeters": 33.92,
+          "endMeters": 37.7,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "levelId": "upper",
+          "roomId": "barracks",
+          "startMeters": 0.3,
+          "endMeters": 11.700000000000001,
+          "baseElevationMeters": 3.8,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "upper",
+          "roomId": "war_map_room",
+          "startMeters": 26.3,
+          "endMeters": 33.92,
+          "baseElevationMeters": 3.8,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "upper",
+          "roomId": "vertical_core_hall",
+          "startMeters": 33.92,
+          "endMeters": 37.7,
+          "baseElevationMeters": 3.8,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "parapet_threshold",
+          "startMeters": 0.3,
+          "endMeters": 11.700000000000001,
+          "baseElevationMeters": 7.1,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "siege_store",
+          "startMeters": 26.3,
+          "endMeters": 33.92,
+          "baseElevationMeters": 7.1,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "vertical_core_hall",
+          "startMeters": 33.92,
+          "endMeters": 37.7,
+          "baseElevationMeters": 7.1,
+          "clearHeightMeters": 2.8
+        }
+      ],
+      "voidSlices": [
+        {
+          "levelId": "undercroft",
+          "voidId": "capture_court",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 12.92,
+          "endMeters": 25.08,
+          "baseElevationMeters": 0.0
+        },
+        {
+          "levelId": "ground",
+          "voidId": "capture_court",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 12.92,
+          "endMeters": 25.08,
+          "baseElevationMeters": 0.0
+        },
+        {
+          "levelId": "upper",
+          "voidId": "capture_court",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 12.92,
+          "endMeters": 25.08,
+          "baseElevationMeters": 3.8
+        },
+        {
+          "levelId": "tower_level",
+          "voidId": "capture_court",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 12.92,
+          "endMeters": 25.08,
+          "baseElevationMeters": 7.1
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "undercroft",
+          "elevationMeters": -3.4,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.8,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "tower_level",
+          "elevationMeters": 7.1,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "fortress_enterable_stair_core",
+          "type": "u_stair",
+          "connectsLevels": [
+            "undercroft",
+            "ground",
+            "upper",
+            "tower_level"
+          ],
+          "direction": "UP clockwise",
+          "startMeters": 33.92,
+          "endMeters": 35.62
+        },
+        {
+          "coreId": "fortress_enterable_combat_lift",
+          "type": "combat_lift",
+          "connectsLevels": [
+            "undercroft",
+            "ground",
+            "upper",
+            "tower_level"
+          ],
+          "direction": "vertical platform",
+          "startMeters": 35.9,
+          "endMeters": 37.7
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "undercroft",
+          "openingId": "door_undercroft_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 35.81,
+          "z": 7.55,
+          "positionMeters": 35.81,
+          "orthogonalMeters": 7.55
+        },
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_accessible_core",
+          "kind": "window",
+          "side": "east",
+          "x": 38,
+          "z": 7.55,
+          "positionMeters": 38,
+          "orthogonalMeters": 7.55
+        },
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.55,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 7.55
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_accessible_core",
+          "kind": "door",
+          "side": null,
+          "x": 35.81,
+          "z": 7.55,
+          "positionMeters": 35.81,
+          "orthogonalMeters": 7.55
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_vertical_core_hall",
+          "kind": "window",
+          "side": "east",
+          "x": 38,
+          "z": 7.55,
+          "positionMeters": 38,
+          "orthogonalMeters": 7.55
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.55,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 7.55
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 35.81,
+          "z": 7.55,
+          "positionMeters": 35.81,
+          "orthogonalMeters": 7.55
+        },
+        {
+          "levelId": "tower_level",
+          "openingId": "window_tower_level_vertical_core_hall",
+          "kind": "window",
+          "side": "east",
+          "x": 38,
+          "z": 7.55,
+          "positionMeters": 38,
+          "orthogonalMeters": 7.55
+        },
+        {
+          "levelId": "tower_level",
+          "openingId": "window_tower_level_cut_west",
+          "kind": "window",
+          "side": "west",
+          "x": 0.0,
+          "z": 7.55,
+          "positionMeters": 0.0,
+          "orthogonalMeters": 7.55
+        },
+        {
+          "levelId": "tower_level",
+          "openingId": "door_tower_level_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 35.81,
+          "z": 7.55,
+          "positionMeters": 35.81,
+          "orthogonalMeters": 7.55
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "undercroft",
+          "roomId": "streaming_airlock",
+          "kind": "portal_cover",
+          "symbol": "PORTAL",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 2.2
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "sally_service",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 26.65,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "undercroft",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 34.18,
+          "sectionHeightMeters": 1.3
+        },
+        {
+          "levelId": "ground",
+          "roomId": "muster",
+          "kind": "weapon_rack",
+          "symbol": "ARMS",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "muster",
+          "kind": "bench_row",
+          "symbol": "BENCH",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 0.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "armory",
+          "kind": "weapon_rack",
+          "symbol": "ARMS",
+          "positionMeters": 26.65,
+          "sectionHeightMeters": 1.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "armory",
+          "kind": "bench_row",
+          "symbol": "BENCH",
+          "positionMeters": 26.65,
+          "sectionHeightMeters": 0.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "accessible_core",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 34.18,
+          "sectionHeightMeters": 1.3
+        },
+        {
+          "levelId": "upper",
+          "roomId": "barracks",
+          "kind": "weapon_rack",
+          "symbol": "ARMS",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.8
+        },
+        {
+          "levelId": "upper",
+          "roomId": "war_map_room",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 26.65,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "upper",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 34.18,
+          "sectionHeightMeters": 1.3
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "parapet_threshold",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 0.65,
+          "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "siege_store",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 26.65,
+          "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 34.18,
+          "sectionHeightMeters": 1.3
+        }
+      ],
+      "featureSlices": [
+        {
+          "id": "capture_court",
+          "kind": "open_courtyard",
+          "symbol": "COURT",
+          "positionMeters": 12.92,
+          "sectionHeightMeters": 15.0,
+          "openToSky": true
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -4.0,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 9.899999999999999,
+        "peakElevationMeters": 15.0,
+        "structure": "Low stepped command roofs and tower weather hoods behind separate battlements.",
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": [
+          {
+            "startMeters": 12.92,
+            "endMeters": 25.08
+          },
+          {
+            "startMeters": 12.92,
+            "endMeters": 25.08
+          },
+          {
+            "startMeters": 12.92,
+            "endMeters": 25.08
+          },
+          {
+            "startMeters": 12.92,
+            "endMeters": 25.08
+          }
+        ]
+      }
+    },
+    "cross": {
+      "id": "B-B",
+      "cutLineId": "B-B",
+      "axis": "z",
+      "cutCoordinateMeters": 19.0,
+      "spanMeters": 30,
+      "levels": [
+        {
+          "id": "undercroft",
+          "elevationMeters": -3.4,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "id": "ground",
+          "elevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "id": "upper",
+          "elevationMeters": 3.8,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "id": "tower_level",
+          "elevationMeters": 7.1,
+          "clearHeightMeters": 2.8
+        }
+      ],
+      "roomSlices": [
+        {
+          "levelId": "undercroft",
+          "roomId": "supply_hold",
+          "startMeters": 14.4,
+          "endMeters": 25.8,
+          "baseElevationMeters": -3.4,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "ground",
+          "roomId": "command_hall",
+          "startMeters": 14.4,
+          "endMeters": 25.8,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "capture_court_gallery",
+          "startMeters": 14.4,
+          "endMeters": 25.8,
+          "baseElevationMeters": 0,
+          "clearHeightMeters": 3.5
+        },
+        {
+          "levelId": "upper",
+          "roomId": "signal_gallery",
+          "startMeters": 14.4,
+          "endMeters": 25.8,
+          "baseElevationMeters": 3.8,
+          "clearHeightMeters": 3.0
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "tower_guard_a",
+          "startMeters": 14.4,
+          "endMeters": 25.8,
+          "baseElevationMeters": 7.1,
+          "clearHeightMeters": 2.8
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "roof_route",
+          "startMeters": 14.4,
+          "endMeters": 25.8,
+          "baseElevationMeters": 7.1,
+          "clearHeightMeters": 2.8
+        }
+      ],
+      "voidSlices": [
+        {
+          "levelId": "undercroft",
+          "voidId": "capture_court",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 1.1,
+          "endMeters": 14.0,
+          "baseElevationMeters": 0.0
+        },
+        {
+          "levelId": "ground",
+          "voidId": "capture_court",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 1.1,
+          "endMeters": 14.0,
+          "baseElevationMeters": 0.0
+        },
+        {
+          "levelId": "upper",
+          "voidId": "capture_court",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 1.1,
+          "endMeters": 14.0,
+          "baseElevationMeters": 3.8
+        },
+        {
+          "levelId": "tower_level",
+          "voidId": "capture_court",
+          "kind": "open_to_sky",
+          "openToSky": true,
+          "startMeters": 1.1,
+          "endMeters": 14.0,
+          "baseElevationMeters": 7.1
+        }
+      ],
+      "slabs": [
+        {
+          "levelId": "undercroft",
+          "elevationMeters": -3.4,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "ground",
+          "elevationMeters": 0,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "upper",
+          "elevationMeters": 3.8,
+          "thicknessMeters": 0.3
+        },
+        {
+          "levelId": "tower_level",
+          "elevationMeters": 7.1,
+          "thicknessMeters": 0.3
+        }
+      ],
+      "verticalCoreSlices": [
+        {
+          "coreId": "fortress_enterable_stair_core",
+          "type": "u_stair",
+          "connectsLevels": [
+            "undercroft",
+            "ground",
+            "upper",
+            "tower_level"
+          ],
+          "direction": "UP clockwise",
+          "startMeters": 6.25,
+          "endMeters": 8.85
+        },
+        {
+          "coreId": "fortress_enterable_combat_lift",
+          "type": "combat_lift",
+          "connectsLevels": [
+            "undercroft",
+            "ground",
+            "upper",
+            "tower_level"
+          ],
+          "direction": "vertical platform",
+          "startMeters": 6.25,
+          "endMeters": 8.85
+        }
+      ],
+      "apertureSlices": [
+        {
+          "levelId": "undercroft",
+          "openingId": "door_undercroft_cut_BB_supply_hold",
+          "kind": "door",
+          "side": null,
+          "x": 19.0,
+          "z": 20.1,
+          "positionMeters": 20.1,
+          "orthogonalMeters": 19.0
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_command_hall",
+          "kind": "door",
+          "side": null,
+          "x": 18.85,
+          "z": 20.1,
+          "positionMeters": 20.1,
+          "orthogonalMeters": 18.85
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_cut_BB_signal_gallery",
+          "kind": "door",
+          "side": null,
+          "x": 19.0,
+          "z": 20.1,
+          "positionMeters": 20.1,
+          "orthogonalMeters": 19.0
+        },
+        {
+          "levelId": "tower_level",
+          "openingId": "door_tower_level_cut_BB_tower_guard_a",
+          "kind": "door",
+          "side": null,
+          "x": 18.85,
+          "z": 20.1,
+          "positionMeters": 20.1,
+          "orthogonalMeters": 18.85
+        }
+      ],
+      "furnitureSlices": [
+        {
+          "levelId": "undercroft",
+          "roomId": "supply_hold",
+          "kind": "storage_rack",
+          "symbol": "RACK",
+          "positionMeters": 14.75,
+          "sectionHeightMeters": 1.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "command_hall",
+          "kind": "council_table",
+          "symbol": "COUNCIL",
+          "positionMeters": 14.75,
+          "sectionHeightMeters": 0.9
+        },
+        {
+          "levelId": "ground",
+          "roomId": "command_hall",
+          "kind": "bench_row",
+          "symbol": "BENCH",
+          "positionMeters": 24.95,
+          "sectionHeightMeters": 0.5
+        },
+        {
+          "levelId": "ground",
+          "roomId": "capture_court_gallery",
+          "kind": "court_well",
+          "symbol": "WELL",
+          "positionMeters": 14.75,
+          "sectionHeightMeters": 0.6
+        },
+        {
+          "levelId": "upper",
+          "roomId": "signal_gallery",
+          "kind": "table_bench",
+          "symbol": "TABLE",
+          "positionMeters": 14.75,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "tower_guard_a",
+          "kind": "weapon_rack",
+          "symbol": "ARMS",
+          "positionMeters": 14.75,
+          "sectionHeightMeters": 1.8
+        },
+        {
+          "levelId": "tower_level",
+          "roomId": "roof_route",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 14.75,
+          "sectionHeightMeters": 0.8
+        }
+      ],
+      "featureSlices": [
+        {
+          "id": "capture_court",
+          "kind": "open_courtyard",
+          "symbol": "COURT",
+          "positionMeters": 1.1,
+          "sectionHeightMeters": 15.0,
+          "openToSky": true
+        }
+      ],
+      "foundation": {
+        "baseElevationMeters": -4.0,
+        "thicknessMeters": 0.6,
+        "steppedBasalt": true
+      },
+      "roofProfile": {
+        "baseElevationMeters": 9.899999999999999,
+        "peakElevationMeters": 15.0,
+        "structure": "Low stepped command roofs and tower weather hoods behind separate battlements.",
+        "cutRoomsAndVoids": true,
+        "openToSkySpans": [
+          {
+            "startMeters": 1.1,
+            "endMeters": 14.0
+          },
+          {
+            "startMeters": 1.1,
+            "endMeters": 14.0
+          },
+          {
+            "startMeters": 1.1,
+            "endMeters": 14.0
+          },
+          {
+            "startMeters": 1.1,
+            "endMeters": 14.0
+          }
+        ]
+      }
+    }
+  },
+  "roomPurposeAndAdjacency": "Every room has a purpose-specific footprint, furnished layout, protected clearances, separate openings, and a connection to the drawn circulation geometry. Plan-marked A-A/B-B cuts bind those rooms to both architectural sections.",
+  "sharedModules": {
+    "structural": [
+      "foundation_3m",
+      "floor_3m",
+      "ceiling_3m",
+      "wall_solid_3m",
+      "wall_opening_3m",
+      "inside_corner",
+      "outside_corner",
+      "pillar",
+      "beam_lintel",
+      "roof_slope",
+      "roof_ridge",
+      "roof_hip_valley",
+      "roof_gable_end",
+      "roof_fascia"
+    ],
+    "aperturesSeparate": [
+      "door_leaf_1_2x2_4",
+      "public_door_leaf_2_5x3_0",
+      "window_frame_1_2x1_5",
+      "glass_group",
+      "shutter_pair",
+      "local_gate_4m",
+      "major_gate_8m",
+      "main_gate_face",
+      "gate_control"
+    ],
+    "traversal": [
+      "stair_1_5m",
+      "landing_1_5m",
+      "ramp_1_to_12",
+      "lift_platform",
+      "ladder_fixed",
+      "walkway_2m",
+      "walltop_route_2m",
+      "bridge_4m_bay"
+    ],
+    "technical": [
+      "streaming_portal",
+      "loading_cover",
+      "occlusion_cell",
+      "navmesh_link",
+      "unload_boundary",
+      "lighting_socket",
+      "interaction_socket",
+      "quest_socket",
+      "audio_socket",
+      "vfx_anchor"
+    ]
+  },
+  "furnishedRoomModules": [
+    "waf_interior_shell_wall_floor_ceiling",
+    "waf_interior_door_window_threshold",
+    "waf_interior_entry_vestibule",
+    "waf_interior_corridor_junction",
+    "waf_interior_stair_landing",
+    "waf_interior_cutaway_occlusion_set",
+    "waf_interior_storage_pantry_cellar",
+    "waf_interior_utility_service_room",
+    "waf_interior_barracks_room",
+    "waf_interior_prison_dungeon",
+    "waf_interior_great_council_hall",
+    "waf_interior_courtyard_balcony"
+  ],
+  "propDecorFamilies": [
+    "waf_banner_civic_pennant",
+    "waf_banner_realm_standard",
+    "waf_banner_war_objective",
+    "waf_interactable_container_loot",
+    "waf_interactable_lever_switch",
+    "waf_interactable_lift_platform",
+    "waf_interactable_quest_objective",
+    "waf_interactable_seat_use",
+    "waf_prop_clutter_personal_items",
+    "waf_prop_clutter_pottery_bottles",
+    "waf_prop_lighting_brazier_hearth_fireplace",
+    "waf_prop_lighting_candle_lamp",
+    "waf_prop_lighting_chandelier_hanging",
+    "waf_prop_lighting_lantern_sconce",
+    "waf_prop_military_armor_stand",
+    "waf_prop_military_siege_ammunition",
+    "waf_prop_military_training_dummy_target",
+    "waf_prop_military_war_map_table",
+    "waf_prop_military_weapon_rack",
+    "waf_prop_royal_council_lectern",
+    "waf_prop_seating_bench_pew",
+    "waf_prop_seating_chair_stool",
+    "waf_prop_storage_cabinet_cupboard",
+    "waf_prop_storage_chest_coffer",
+    "waf_prop_storage_crate_barrel_sack_basket",
+    "waf_prop_storage_shelf_bookcase",
+    "waf_prop_surface_table_desk",
+    "waf_prop_textile_rug_tapestry",
+    "waf_prop_utility_bucket_tub_washbasin",
+    "waf_prop_utility_cart_wagon",
+    "waf_prop_utility_firewood_fuel",
+    "waf_prop_utility_rope_chain",
+    "waf_prop_utility_scaffold_ladder",
+    "waf_prop_utility_tools_workset",
+    "waf_sign_direction_route",
+    "waf_sign_facility_service",
+    "waf_sign_hazard_boundary",
+    "waf_sign_notice_contract_board",
+    "waf_sign_plaque_waystone"
+  ],
+  "propVisualAuthority": "PR #701 is owner-approved measured/form authority for its 16 civic/fort furnishing families. Other room-fit symbols are taxonomy placeholders and remain owner-review gated by prop_stonehold_interior_decor_v001.",
+  "approvedFurnishingPrecedent": {
+    "source": "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json",
+    "approvalRecord": "PR #701 <!-- anotherlife-owner-approved -->",
+    "scope": "exact measured reuse for matching civic/fort room uses; Stonehold material, wear, atlas, LOD, collider and protected-clearance precedent elsewhere"
+  },
+  "sockets": {
+    "lighting": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "interaction": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "quest": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "audio": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    },
+    "vfx_anchor_runtime_separate": {
+      "required": true,
+      "separateFromCleanGeometry": true
+    },
+    "portal_streaming": {
+      "required": true,
+      "separateFromCleanGeometry": false
+    }
+  },
+  "bindingPolicies": {
+    "gridMeters": 0.5,
+    "placementCellMeters": 2.0,
+    "structuralBayMeters": 4.0,
+    "verticalTierMeters": 1.0,
+    "doorsAndGates": "Every door leaf, frame, shutter, glass group, local gate and main gate is a separate object from shells and perimeter walls.",
+    "mainGate": "An intact main gate stays physically impassable. Future interaction teleports atomically between paired anchors; this packet implements no teleport.",
+    "hostileGateBreak": "Reference t_c8ea885d only. This packet implements no break logic and authorizes no destructible 3D geometry.",
+    "perimeterWall": "Main castle, fortress, fort and city perimeter walls stay non-enterable and impassable; only defendable walltops and designated routes are traversable.",
+    "interiorScale": "Small interiors are seamless. Large combat interiors use separate asynchronously loaded scenes behind physical portals.",
+    "runtimeVfx": "Particles, smoke, sparks, auras, volumetrics and magic remain runtime-separate from clean geometry.",
+    "staticAssembly": "Combine opaque structural and finish modules per room or exterior visibility cell and atlas; never retain one renderer or collider per source tile at runtime.",
+    "approvedFurnishingPrecedent": "PR #701 owner-approved the Stonehold Civic + Fort Furnishing Kit V001; reuse its measured envelopes, protected opening approaches, one-material/shared-atlas target and accepted single-cot correction where applicable."
+  },
+  "mobilePolicy": {
+    "lodIntent": [
+      "LOD0 authored source",
+      "LOD1 50-60% silhouette-preserving",
+      "LOD2 20-30%",
+      "HLOD 5-10% or chunk proxy"
+    ],
+    "atlasIntent": [
+      "one shared opaque Stonehold exterior atlas",
+      "one shared opaque interior atlas",
+      "minimum separate glass renderer set"
+    ],
+    "protectedCues": [
+      "compressed roofline",
+      "stepped basalt foundation",
+      "thick buttress rhythm",
+      "clipped-corner aperture"
+    ],
+    "dropFirst": [
+      "workers",
+      "secondary clutter",
+      "scaffolds",
+      "smoke",
+      "sparks",
+      "small banners"
+    ]
+  },
+  "provenance": [
+    "DESIGN.md",
+    "unity/Assets/AL/Art/Designs/FourRealmArchitecture.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/CivicHall/civic_hall_2d_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/FortGatehouse/fort_gatehouse_2d_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/README.md",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_manifest_v001.json",
+    "unity/Docs/Architecture/WorldSpaceEnterableV001/StoneholdCivicFortProps/stonehold_civic_fort_props_spec_v001.json",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/stonehold_concept_packet_coverage_v001.json",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_enterable_structures_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_exterior_interior_floorplan_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/architecture_stonehold_settlement_silhouettes_v001.md",
+    "unity/Docs/AssetLibrary/StoneholdConceptPacketsV001/prop_stonehold_interior_decor_v001.md"
+  ],
+  "avoid": [
+    "Solid decorative shell or facade-only substitute.",
+    "Enterable main perimeter walls.",
+    "Gate, door, window glass or shutter fused into a wall/building mesh.",
+    "Unmarked inaccessible room or painted-on aperture.",
+    "Dwarf pastiche or copied BDO / Infinity Kingdom architecture.",
+    "Crownlands vertical civic silhouette or Eldergrove root grammar.",
+    "Glowing cracks, smoke or VFX used as required silhouette.",
+    "Slagfall Quarry treated as architecture visual authorization.",
+    "Invented religious, royal, heraldic or textual meaning.",
+    "One renderer, material or collider per modular tile.",
+    "Unique 4K runtime textures for common structures."
+  ],
+  "ownerReview": {
+    "required": true,
+    "allowedDecisions": [
+      "APPROVE",
+      "REVISE",
+      "REJECT"
+    ],
+    "decision": null,
+    "gates": [
+      {
+        "id": "massing",
+        "question": "Approve the recommended exterior massing?",
+        "recommendation": "Enterable command, barracks and service buildings sit inside a separate one-gate non-enterable perimeter; capture court stays open.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "roof",
+        "question": "Approve the recommended roof profile?",
+        "recommendation": "Low stepped command roofs and tower weather hoods behind separate battlements.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "materials",
+        "question": "Approve the shown Stonehold material balance?",
+        "recommendation": "Basalt dominant, iron secondary, timber interior, bronze repair sparse.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "access",
+        "question": "Approve the entry, circulation and accessibility sequence?",
+        "recommendation": "Step-free command/capture route; protected lift core; independent combat stair loops and two egress portals.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      },
+      {
+        "id": "family_specific",
+        "question": "Approve the three-building interior complex around the central capture court.",
+        "recommendation": "The option drawn and documented in this packet.",
+        "choices": [
+          "APPROVE",
+          "REVISE",
+          "REJECT"
+        ],
+        "decision": null
+      }
+    ]
+  },
+  "productionAuthorization": {
+    "comfyuiLocal": "approved_for_2d_only",
+    "meshy": false,
+    "blender": false,
+    "runtime3d": false,
+    "new3dJobsSubmitted": 0
+  }
+}

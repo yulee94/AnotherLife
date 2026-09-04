@@ -8,3 +8,40 @@
 /tools/game-data/generate_phase_c_realm_shadow_artifact.py text eol=lf
 /tools/game-data/migrate_byte_stable_sources.py             text eol=lf
 /tools/game-data/validate_building_champion_art_catalogs.py text eol=lf
+
+# Canonical scene manifests are byte-compared by the fail-closed validator.
+/unity/Docs/GameDataCatalog/six-family-production-authority.v1.json           text eol=lf
+/unity/Assets/AL/StreamingAssets/GameData/al_enabled_scene_manifest.v1.json   text eol=lf
+/unity/Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json text eol=lf
+/unity/Assets/AL/StreamingAssets/GameData/al_main_quest_line_runtime.v1.json  text eol=lf
+/unity/Assets/AL/StreamingAssets/GameData/al_boss_reward_source_catalog.json  text eol=lf
+/unity/Packages/packages-lock.json                                            text eol=lf
+
+# Deterministic QA policy, baseline, evidence schema, and captured reports.
+/tools/qa/**/*.json                                                           text eol=lf
+/unity/SharedContracts/integrated-qa-evidence.schema.json                     text eol=lf
+
+# Hash-bound Slagfall provenance. Recorded SHA-256 values require raw LF bytes.
+/unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshy/slagfall_environment_meshy_cleanup_v001.json text eol=lf
+/unity/Docs/AI/Meshy/meshy_texture_inputs_slagfall_environment_2026-08-31_v001.json text eol=lf
+
+# Hash-bound approved enterable-architecture packets.
+/unity/Docs/Architecture/WorldSpaceEnterableV001/**/*.json text eol=lf
+
+# Hash-bound save schema golden fixtures.
+/unity/Assets/AL/Tests/EditMode/Fixtures/SaveSchema1/** text eol=lf
+
+# Hash-bound Fault-Crowned Colossus production-slice reports.
+/unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/**/*.json text eol=lf
+
+# Hash-bound Shot070 Vaeloryn motion-source reports.
+/unity/Docs/Cinematics/Shot070VaelorynSourceV002/**/*.json text eol=lf
+/unity/Docs/Cinematics/Shot070VaelorynShotScaleV001/**/*.json text eol=lf
+
+# Hash-bound launch-cinematic packaging catalog and packet.
+/unity/Assets/AL/StreamingAssets/GameData/al_launch_cinematic_runtime.v1.json text eol=lf
+/unity/Docs/Cinematics/LaunchCinematicPacketV001/**/*.json text eol=lf
+
+# GS-04 evidence hashes raw SVG bytes; keep generated artifacts byte-stable.
+/tools/ui/validate_ui_release_readiness.py text eol=lf
+/unity/Docs/UI/Evidence/GS-04/** text eol=lf

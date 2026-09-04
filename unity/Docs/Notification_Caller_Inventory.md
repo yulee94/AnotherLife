@@ -1,43 +1,46 @@
 # Notification Caller Inventory
 
 **Tracking issue/spec:** #177, `unity/Docs/Notification_Delivery_Contract_Spec.md`
-**Inventory baseline:** `e535f8232169d73e018bbaf512f2fb2057917b83`
-**Status date:** 2026-07-29
-**Status:** Phase B typed contract and bounded session queue; production caller migration is intentionally deferred
+**Inventory baseline:** current main after durable history/outbox slice
+**Status date:** 2026-09-04
+**Status:** Durable history/outbox storage plus bounded catalog-backed publisher migration
 
 This record inventories every production call to the compatibility-only
-`ShowMessage`, `ShowError`, and `ShowResourceGain` wrappers at the Phase B
-baseline. The wrappers remain obsolete compile-compatibility seams only. New
-code must submit a typed `NotificationRequest` through `Enqueue`.
+`ShowMessage`, `ShowError`, and `ShowResourceGain` wrappers. The wrappers remain
+obsolete compile-compatibility seams only. New code must submit a typed
+`NotificationRequest` through `Enqueue`.
 
 ## Raw compatibility callers
 
-| Wrapper | Production caller | Exact call sites | Owning migration | Phase B disposition |
+| Wrapper | Production caller | Exact call sites | Owning migration | Current disposition |
 | --- | --- | ---: | --- | --- |
-| `ShowMessage` | `Kingdom/Narrative/WorldStateService.cs` | 1 | #172 | Retain unchanged. Migrate only with the world-state owning transaction and approved notification definition/content source. |
-| `ShowMessage` | `Services/Local/LocalBossLootService.cs` | 3 | #168 | Retain unchanged. Migrate only with the boss-reward owning transaction and approved notification definition/content source. |
+| `ShowMessage` | zero production callers | 0 | #177 | Migrated. `LocalBossLootService` now publishes `al_notify_reward_committed` through `BossLootCatalogNotificationPublisher`. |
 | `ShowError` | zero production callers | 0 | #177 follow-up | Remove only after the compatibility window and downstream implementation checks permit it. |
 | `ShowResourceGain` | zero production callers | 0 | #177 follow-up | Remove only after the compatibility window and downstream implementation checks permit it. |
 
 Interface declarations and the `LocalNotificationService` wrapper
 implementations are contract boundaries, not production caller sites.
 
-## Phase B rules
+## Typed catalog-backed publishers in this slice
+
+- `LocalBossLootService` → `BossLootCatalogNotificationPublisher` (`al_notify_reward_committed`, source `al_source_boss_loot`). Raw player names are not included.
+- `CatalogBackedWorldStateNotificationOutbox` maps authored start/end intents to `al_notify_world_event_started` / `al_notify_world_event_ended`. Unknown definitions including `al_notify_world_event_cancelled` fail closed.
+
+## Rules
 
 - Raw wrappers emit `AL-NTF-LEGACY-RAW`, escape technical text, and never enter
-  the typed queue or claim a `Presented` receipt.
-- Raw wrappers create no durable history.
-- No new production caller may be added to this inventory.
-- `WorldStateService` and `LocalBossLootService` remain unchanged in Phase B.
-- Typed production caller migration is deferred until the owning issue and an
-  approved definition/content source are ready.
-- The focused EditMode suite scans production source and fails if these exact
-  paths or call counts change, or if `ShowError`/`ShowResourceGain` gain a
-  production caller.
+  the typed queue, durable history, or claim a `Presented` receipt.
+- No new production caller may be added to the raw wrappers.
+- Durable enqueue requires an injected durable store; without it, definitions
+  remain `RejectedDurabilityUnavailable`.
+- Production catalog activation remains behind #183; typed requests still fail
+  closed when the default resolver is unavailable.
+- The focused EditMode suite scans production source and fails if
+  `ShowMessage`/`ShowError`/`ShowResourceGain` gain a production caller.
 
 ## Runtime and optimization impact
 
-The inventory itself has no runtime, memory, build-size, install-size, or device
-compatibility impact. The Phase B queue remains session-only and bounded to 64
-records; it adds no save data, scene object, UI asset, Android dependency, or
-player-facing content.
+Durable history is an optional schema-v2 save extension. Missing legacy saves
+admit an empty outbox/history. Retention is 100 completed records plus all
+unacknowledged required records. No Android, scene, or player-facing copy
+changes belong to this inventory.
