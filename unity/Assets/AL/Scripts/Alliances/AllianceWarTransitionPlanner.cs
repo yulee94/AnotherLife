@@ -117,7 +117,9 @@ namespace AL.Alliances
                 AlliancePlanningResult race = DetectMembershipRace(snapshot, guilds);
                 if (race != null &&
                     request.Operation != AllianceOperation.Decline &&
-                    request.Operation != AllianceOperation.DeclineWarEnd)
+                    request.Operation != AllianceOperation.DeclineWarEnd &&
+                    request.Operation != AllianceOperation.Leave &&
+                    request.Operation != AllianceOperation.Disband)
                 {
                     return race;
                 }
@@ -283,8 +285,8 @@ namespace AL.Alliances
                 return RealmConflict(request.TargetGuildId);
             }
 
-            if (FindActiveAllianceForGuild(snapshot, request.ActorGuildId) != null ||
-                FindActiveAllianceForGuild(snapshot, request.TargetGuildId) != null)
+            if (FindBlockingAllianceForGuild(snapshot, request.ActorGuildId) != null ||
+                FindBlockingAllianceForGuild(snapshot, request.TargetGuildId) != null)
             {
                 return Reject(
                     AlliancePlanningStatus.Conflict,
@@ -394,8 +396,8 @@ namespace AL.Alliances
                     return StaleGuild(pending.TargetGuildId);
                 }
 
-                if (FindActiveAllianceForGuild(snapshot, pending.ProposerGuildId) != null ||
-                    FindActiveAllianceForGuild(snapshot, pending.TargetGuildId) != null)
+                if (FindBlockingAllianceForGuild(snapshot, pending.ProposerGuildId) != null ||
+                    FindBlockingAllianceForGuild(snapshot, pending.TargetGuildId) != null)
                 {
                     return Reject(
                         AlliancePlanningStatus.Conflict,
@@ -454,7 +456,7 @@ namespace AL.Alliances
             AllianceAuthoritySnapshot snapshot,
             GuildAuthoritySnapshot guilds)
         {
-            AllianceSnapshot alliance = RequireActiveAlliance(snapshot, request.AllianceId);
+            AllianceSnapshot alliance = RequireMembershipAlliance(snapshot, request.AllianceId);
             if (alliance == null)
             {
                 return Reject(
@@ -501,20 +503,28 @@ namespace AL.Alliances
 
             IReadOnlyList<AllianceMemberGuildSnapshot> remaining = alliance.MemberGuilds
                 .Where(row => !string.Equals(row.GuildId, request.ActorGuildId, StringComparison.Ordinal))
+                .Where(row => IsActiveGuild(guilds, row.GuildId))
                 .ToArray();
-            AllianceSnapshot candidate = remaining.Count < 2
+            AllianceSnapshot candidate = remaining.Count >= 2
                 ? CopyAlliance(
-                    alliance,
-                    checked(alliance.Revision + 1),
-                    AllianceRelationState.Absent,
-                    string.Empty,
-                    Array.Empty<AllianceMemberGuildSnapshot>())
-                : CopyAlliance(
                     alliance,
                     checked(alliance.Revision + 1),
                     AllianceRelationState.Active,
                     DeriveLeadGuildId(remaining, request.ActorGuildId, alliance.LeadGuildId),
-                    remaining);
+                    remaining)
+                : remaining.Count == 1
+                    ? CopyAlliance(
+                        alliance,
+                        checked(alliance.Revision + 1),
+                        AllianceRelationState.Suspended,
+                        DeriveLeadGuildId(remaining, request.ActorGuildId, alliance.LeadGuildId),
+                        remaining)
+                    : CopyAlliance(
+                        alliance,
+                        checked(alliance.Revision + 1),
+                        AllianceRelationState.Cooldown,
+                        string.Empty,
+                        Array.Empty<AllianceMemberGuildSnapshot>());
             return CreatePlan(
                 request,
                 requestFingerprint,
@@ -531,7 +541,7 @@ namespace AL.Alliances
             AllianceAuthoritySnapshot snapshot,
             GuildAuthoritySnapshot guilds)
         {
-            AllianceSnapshot alliance = RequireActiveAlliance(snapshot, request.AllianceId);
+            AllianceSnapshot alliance = RequireMembershipAlliance(snapshot, request.AllianceId);
             if (alliance == null)
             {
                 return Reject(
@@ -557,9 +567,9 @@ namespace AL.Alliances
             AllianceSnapshot candidate = CopyAlliance(
                 alliance,
                 checked(alliance.Revision + 1),
-                AllianceRelationState.Absent,
-                string.Empty,
-                Array.Empty<AllianceMemberGuildSnapshot>());
+                AllianceRelationState.Cooldown,
+                alliance.LeadGuildId,
+                alliance.MemberGuilds);
             return CreatePlan(
                 request,
                 requestFingerprint,
@@ -817,7 +827,7 @@ namespace AL.Alliances
                     war.WarId,
                     war.AttackerAllianceId,
                     war.DefenderAllianceId,
-                    AllianceWarState.None,
+                    AllianceWarState.ReconciliationPending,
                     war.DeclaredAtUnixSeconds,
                     war.ActivatedAtUnixSeconds,
                     war.AttackerAllianceRevision,
@@ -1402,6 +1412,16 @@ namespace AL.Alliances
                 row.Relation == AllianceRelationState.Active);
         }
 
+        private static AllianceSnapshot RequireMembershipAlliance(
+            AllianceAuthoritySnapshot snapshot,
+            string allianceId)
+        {
+            return snapshot.Alliances.SingleOrDefault(row =>
+                string.Equals(row.AllianceId, allianceId, StringComparison.Ordinal) &&
+                (row.Relation == AllianceRelationState.Active ||
+                 row.Relation == AllianceRelationState.Suspended));
+        }
+
         private static AllianceSnapshot FindActiveAllianceForGuild(
             AllianceAuthoritySnapshot snapshot,
             string guildId)
@@ -1410,6 +1430,23 @@ namespace AL.Alliances
                 row.Relation == AllianceRelationState.Active &&
                 row.MemberGuilds.Any(member =>
                     string.Equals(member.GuildId, guildId, StringComparison.Ordinal)));
+        }
+
+        private static AllianceSnapshot FindBlockingAllianceForGuild(
+            AllianceAuthoritySnapshot snapshot,
+            string guildId)
+        {
+            return snapshot.Alliances.SingleOrDefault(row =>
+                (row.Relation == AllianceRelationState.Active ||
+                 row.Relation == AllianceRelationState.Suspended) &&
+                row.MemberGuilds.Any(member =>
+                    string.Equals(member.GuildId, guildId, StringComparison.Ordinal)));
+        }
+
+        private static bool IsActiveGuild(GuildAuthoritySnapshot guilds, string guildId)
+        {
+            GuildSnapshot guild = FindGuild(guilds, guildId);
+            return guild != null && guild.Status == GuildStatus.Active;
         }
 
         private static AllianceWarSnapshot FindWarBetween(
@@ -1422,9 +1459,20 @@ namespace AL.Alliances
                 return null;
             }
 
-            return snapshot.Wars.SingleOrDefault(row =>
-                WarMatches(row, leftAllianceId, rightAllianceId) &&
-                row.CommittedState != AllianceWarState.None);
+            AllianceWarSnapshot[] matches = snapshot.Wars.Where(row =>
+                    WarMatches(row, leftAllianceId, rightAllianceId) &&
+                    row.CommittedState != AllianceWarState.None)
+                .ToArray();
+            AllianceWarSnapshot[] open = matches.Where(row =>
+                    row.CommittedState == AllianceWarState.Declared ||
+                    row.CommittedState == AllianceWarState.Active)
+                .ToArray();
+            if (open.Length == 1)
+            {
+                return open[0];
+            }
+
+            return open.Length == 0 && matches.Length == 1 ? matches[0] : null;
         }
 
         private static bool WarMatches(
@@ -1543,13 +1591,15 @@ namespace AL.Alliances
             string allianceId)
         {
             return wars.Select(row =>
-                    string.Equals(row.AttackerAllianceId, allianceId, StringComparison.Ordinal) ||
-                    string.Equals(row.DefenderAllianceId, allianceId, StringComparison.Ordinal)
+                    (string.Equals(row.AttackerAllianceId, allianceId, StringComparison.Ordinal) ||
+                     string.Equals(row.DefenderAllianceId, allianceId, StringComparison.Ordinal)) &&
+                    (row.CommittedState == AllianceWarState.Declared ||
+                     row.CommittedState == AllianceWarState.Active)
                         ? new AllianceWarSnapshot(
                             row.WarId,
                             row.AttackerAllianceId,
                             row.DefenderAllianceId,
-                            AllianceWarState.None,
+                            AllianceWarState.ReconciliationPending,
                             row.DeclaredAtUnixSeconds,
                             row.ActivatedAtUnixSeconds,
                             row.AttackerAllianceRevision,
