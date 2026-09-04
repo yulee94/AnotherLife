@@ -88,6 +88,11 @@ def _is_sha256(value: object) -> bool:
 
 def validate_uv_bake_report(report: dict[str, Any]) -> list[str]:
     diagnostics: list[str] = []
+    legacy_status = "clean_geometry_pass_uv_bake_complete_normal_detail_rebuild_required"
+    authored_status = (
+        "clean_geometry_pass_uv_bake_pass_smoothing_pass_"
+        "normal_detail_pass_texture_grade_pass_rigging_required"
+    )
     if report.get("modelId") != "elite_umbral_cindermaw_salamander":
         diagnostics.append("modelId must identify Cindermaw Salamander")
     if not report.get("sourceTaskIds"):
@@ -95,8 +100,8 @@ def validate_uv_bake_report(report: dict[str, Any]) -> list[str]:
     for field in ("inputSha256", "outputSha256"):
         if not _is_sha256(report.get(field)):
             diagnostics.append(f"{field} must be a lowercase SHA-256 digest")
-    if report.get("status") != "clean_geometry_pass_uv_bake_complete_normal_detail_rebuild_required":
-        diagnostics.append("status must identify UV-bake completion while keeping normal-detail rebuilding fail-closed")
+    if report.get("status") not in {legacy_status, authored_status}:
+        diagnostics.append("status must identify a fail-closed UV-bake or authored-normal stage")
     if report.get("productionReady") is not False:
         diagnostics.append("productionReady must remain false")
     if report.get("rigged") is not False:
@@ -121,6 +126,52 @@ def validate_uv_bake_report(report: dict[str, Any]) -> list[str]:
     after = int(metrics.get("nonManifoldEdgesAfter", 0))
     if after > before:
         diagnostics.append("UV repair must not increase non-manifold edge count")
+    if report.get("status") == authored_status:
+        detail = report.get("normalDetail") or {}
+        expected_method = "object_space_procedural_height_to_clean_uv_tangent_normal_v001"
+        if detail.get("status") != "PASS":
+            diagnostics.append("authored normal-detail evidence must pass")
+        if detail.get("method") != expected_method:
+            diagnostics.append("authored normal-detail method mismatch")
+        if detail.get("authoredNormalDetail") is not True:
+            diagnostics.append("authoredNormalDetail must be true")
+        if detail.get("runtimeVfxSeparate") is not True:
+            diagnostics.append("runtime VFX must remain separate from normal detail")
+        if float(detail.get("gutterRadiusPixels", -1.0)) != 2.0:
+            diagnostics.append("normalDetail gutter radius must be exactly two pixels")
+        if detail.get("atlasBackground") != "neutral_tangent":
+            diagnostics.append("normalDetail atlas background must stay neutral tangent")
+        frame = detail.get("coordinateFrame")
+        frame_valid = False
+        if (
+            isinstance(frame, dict)
+            and frame.get("lateralAxis") == "world X"
+            and frame.get("longitudinalAxis") == "world Y"
+            and frame.get("dorsalAxis") == "world Z"
+            and isinstance(frame.get("span"), list)
+            and len(frame["span"]) == 3
+        ):
+            try:
+                spans = [float(value) for value in frame["span"]]
+            except (TypeError, ValueError):
+                spans = []
+            frame_valid = (
+                len(spans) == 3
+                and all(math.isfinite(value) and value > 0.0 for value in spans)
+                and int(max(range(3), key=lambda axis: spans[axis])) == 1
+            )
+        if not frame_valid:
+            diagnostics.append("normalDetail coordinate frame axes are invalid")
+        sharp_before = metrics.get("sharpEdgesBefore")
+        sharp_after = metrics.get("sharpEdgesAfter")
+        if not isinstance(sharp_before, int) or not isinstance(sharp_after, int) or sharp_after >= sharp_before:
+            diagnostics.append("smoothing evidence must reduce accidental sharp edges")
+        p95 = metrics.get("normalAngularP95Degrees")
+        maximum = metrics.get("normalAngularMaxDegrees")
+        if not isinstance(p95, (int, float)) or not 5.0 <= p95 <= 20.0:
+            diagnostics.append("normalAngularP95Degrees is outside the authored-detail gate")
+        if not isinstance(maximum, (int, float)) or maximum > 35.0:
+            diagnostics.append("normalAngularMaxDegrees exceeds the authored-detail gate")
 
     required = {
         "base_color": [8192, 8192],
@@ -140,6 +191,10 @@ def validate_uv_bake_report(report: dict[str, Any]) -> list[str]:
             diagnostics.append(f"{name} must be {dimensions[0]}x{dimensions[1]}")
         if not _is_sha256(entry.get("sha256")):
             diagnostics.append(f"{name} must include a lowercase SHA-256 digest")
+    if report.get("status") == authored_status:
+        normal = maps.get("normal") or {}
+        if normal.get("provenance") != "object_space_procedural_height_to_clean_uv_tangent_normal_v001":
+            diagnostics.append("normal map must bind authored normal-detail provenance")
     return diagnostics
 
 
