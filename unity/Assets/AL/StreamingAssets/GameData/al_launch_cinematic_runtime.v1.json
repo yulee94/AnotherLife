@@ -1,0 +1,47 @@
+{
+  "approvedForProduction": false,
+  "authorityStatus": "PACKAGING_BLOCKED_NO_APPROVED_MASTER",
+  "cinematicId": "launch_omen_01",
+  "finalCinematicApproval": false,
+  "gameplayAuthority": false,
+  "ownerVisualApprovalRequired": true,
+  "platforms": [
+    {
+      "byteLength": 0,
+      "codecProfile": "h264-high",
+      "container": "mp4",
+      "durationSeconds": 60.0,
+      "encodePresent": false,
+      "frameCount": 1440,
+      "framesPerSecond": 24,
+      "height": 1080,
+      "platform": "Desktop",
+      "prepareTimeoutSeconds": 8.0,
+      "sha256": "",
+      "skipEligibilityFrame": 120,
+      "streamingAssetsPath": "LaunchCinematic/Desktop/launch_omen_01.mp4",
+      "width": 1920
+    },
+    {
+      "byteLength": 0,
+      "codecProfile": "h264-main",
+      "container": "mp4",
+      "durationSeconds": 60.0,
+      "encodePresent": false,
+      "frameCount": 1440,
+      "framesPerSecond": 24,
+      "height": 720,
+      "platform": "Android",
+      "prepareTimeoutSeconds": 8.0,
+      "sha256": "",
+      "skipEligibilityFrame": 120,
+      "streamingAssetsPath": "LaunchCinematic/Android/launch_omen_01.mp4",
+      "width": 1280
+    }
+  ],
+  "probeEvidenceApproved": false,
+  "reducedMotionFallbackOnly": true,
+  "runtimeAuthority": false,
+  "schema": "al.launch.cinematic.runtime",
+  "version": 1
+}
