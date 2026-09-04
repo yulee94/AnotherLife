@@ -38,6 +38,7 @@ namespace AL.ChampionMode
         public const string OpponentMissingCode = "AL-FIRST-FIGHT-OPPONENT-MISSING";
         public const string SpecialMissingCode = "AL-FIRST-FIGHT-SPECIAL-MISSING";
         public const string AttackMissingCode = "AL-FIRST-FIGHT-ATTACK-MISSING";
+        public const string UncommittedRealmCode = "AL-FIRST-FIGHT-REALM-UNCOMMITTED";
 
         public static bool TryResolve(
             IGameDataService data,
@@ -92,6 +93,13 @@ namespace AL.ChampionMode
             if (!TryResolveSpecial(skills, out SkillLoadoutSlot special))
             {
                 diagnosticCode = SpecialMissingCode;
+                return false;
+            }
+
+            bool hasSelectedIdentity = selected != null && selected.HasIdentity;
+            if (!hasSelectedIdentity && !IsCommittedRealm(fallbackRealm))
+            {
+                diagnosticCode = UncommittedRealmCode;
                 return false;
             }
 
@@ -204,8 +212,7 @@ namespace AL.ChampionMode
                 return data.GetChampion(selected.Id);
             }
 
-            ChampionDefinition byRealm = FindFirstForRealm(data, fallbackRealm);
-            return byRealm != null ? byRealm : FindFirstValid(data);
+            return FindFirstForRealm(data, fallbackRealm);
         }
 
         private static ChampionDefinition ResolveOpponent(IGameDataService data, ChampionDefinition player)
@@ -250,17 +257,12 @@ namespace AL.ChampionMode
             return null;
         }
 
-        private static ChampionDefinition FindFirstValid(IGameDataService data)
+        private static bool IsCommittedRealm(RealmId realm)
         {
-            foreach (ChampionDefinition champion in Enumerate(data))
-            {
-                if (HasCombatStats(champion))
-                {
-                    return champion;
-                }
-            }
-
-            return null;
+            return realm == RealmId.Stonehold ||
+                   realm == RealmId.Eldergrove ||
+                   realm == RealmId.Crownlands ||
+                   realm == RealmId.Umbral;
         }
 
         private static bool TryResolveSpecial(
