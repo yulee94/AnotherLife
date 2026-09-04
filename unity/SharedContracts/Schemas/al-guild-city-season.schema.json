@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-guild-city-season.schema.json",
+  "title": "Another Life Guild City Season And Ownership Policy",
+  "description": "Catalog authority for inner-realm Guild City weekly seasons, reset-to-neutral, contest, ownership, and banner binding. Guild is the machine identity; Clan is localization-only presentation copy. Stronghold capture (#459) and public realm dungeons (#456) remain separate authorities.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "version",
+    "catalogId",
+    "game",
+    "sourceRevision",
+    "machineIdentity",
+    "playerFacingTerms",
+    "consumedContracts",
+    "seasonPolicy",
+    "realms",
+    "bannerPolicy",
+    "benefitPolicy",
+    "reservedAuthorities",
+    "statuses",
+    "contestPhases",
+    "commitStates",
+    "transitions",
+    "replayPolicy",
+    "recovery",
+    "authorityBoundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "catalogId": { "const": "al_guild_city_season_policy" },
+    "game": { "const": "Another Life" },
+    "sourceRevision": { "$ref": "#/$defs/stableId" },
+    "machineIdentity": { "const": "Guild" },
+    "playerFacingTerms": {
+      "type": "object",
+      "required": ["primary", "presentationAlias", "aliasScope"],
+      "properties": {
+        "primary": { "const": "Guild" },
+        "presentationAlias": { "const": "Clan" },
+        "aliasScope": { "const": "localization_only" }
+      },
+      "additionalProperties": false
+    },
+    "consumedContracts": {
+      "type": "object",
+      "required": ["guildCatalogId", "guildIdentity", "guildRoles", "realmCatalogId"],
+      "properties": {
+        "guildCatalogId": { "const": "al_guild_membership_policy" },
+        "guildIdentity": { "const": "external_guild_snapshot" },
+        "guildRoles": { "const": "external_guild_roles" },
+        "realmCatalogId": { "const": "al_realm_catalog" }
+      },
+      "additionalProperties": false
+    },
+    "seasonPolicy": {
+      "type": "object",
+      "required": [
+        "weekBoundary",
+        "clock",
+        "citiesPerRealm",
+        "cityIdPattern",
+        "capitalsContestable",
+        "ownersPerCityPerWeek",
+        "sameRealmParticipantsOnly",
+        "neutralizeBeforeContest"
+      ],
+      "properties": {
+        "weekBoundary": { "const": "monday_00_00_utc" },
+        "clock": { "const": "trusted_server_unix_seconds" },
+        "citiesPerRealm": { "const": 3 },
+        "cityIdPattern": { "const": "{realm_id}_guild_city_01..03" },
+        "capitalsContestable": { "const": false },
+        "ownersPerCityPerWeek": { "const": 1 },
+        "sameRealmParticipantsOnly": { "const": true },
+        "neutralizeBeforeContest": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "realms": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        { "$ref": "#/$defs/realmSlotsCrownlands" },
+        { "$ref": "#/$defs/realmSlotsStonehold" },
+        { "$ref": "#/$defs/realmSlotsEldergrove" },
+        { "$ref": "#/$defs/realmSlotsUmbral" }
+      ],
+      "items": false
+    },
+    "bannerPolicy": {
+      "type": "object",
+      "required": ["neutralPresentation", "ownedPresentation", "invalidFallback", "foreignBanner"],
+      "properties": {
+        "neutralPresentation": { "const": "realm_symbol" },
+        "ownedPresentation": { "const": "moderated_hash_bound_guild_banner" },
+        "invalidFallback": { "const": "safe_text_mark" },
+        "foreignBanner": { "const": "never" }
+      },
+      "additionalProperties": false
+    },
+    "benefitPolicy": {
+      "type": "object",
+      "required": [
+        "kind",
+        "consumer",
+        "mintOathmarksInKingdomManagement",
+        "mintOathmarksIn25d"
+      ],
+      "properties": {
+        "kind": { "const": "city_control_perk_profile_ref" },
+        "consumer": { "const": "downstream_3d_dungeon_reward_modifier" },
+        "mintOathmarksInKingdomManagement": { "const": false },
+        "mintOathmarksIn25d": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "reservedAuthorities": {
+      "type": "object",
+      "required": ["strongholdCastleCapture", "publicRealmDungeon"],
+      "properties": {
+        "strongholdCastleCapture": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "prefixItems": [{ "const": "castle_capture_stronghold" }],
+          "items": false
+        },
+        "publicRealmDungeon": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            { "const": "public_realm_dungeon_entrance" },
+            { "const": "public_realm_dungeon_cooldown" },
+            { "const": "public_realm_dungeon_quest" },
+            { "const": "public_realm_dungeon_reward" },
+            { "const": "public_realm_dungeon_coordinate" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "statuses": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "prefixItems": [
+        { "const": "NEUTRAL" },
+        { "const": "CONTESTING" },
+        { "const": "OWNED" },
+        { "const": "NEUTRALIZING" },
+        { "const": "RESETTING_PENDING" },
+        { "const": "LOCKOUT" }
+      ],
+      "items": false
+    },
+    "contestPhases": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        { "const": "IDLE" },
+        { "const": "OPEN_FOR_PARTICIPATION" },
+        { "const": "WINDOW_CLOSED" },
+        { "const": "RESOLVED" },
+        { "const": "LOCKED" }
+      ],
+      "items": false
+    },
+    "commitStates": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        { "const": "REALM_CITY_SEASON_PENDING" },
+        { "const": "REALM_CITY_SEASON_COMMITTED" },
+        { "const": "REALM_CITY_SEASON_TERMINAL" }
+      ],
+      "items": false
+    },
+    "transitions": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "prefixItems": [
+        { "const": "reset_week" },
+        { "const": "open_contest" },
+        { "const": "enter_contest" },
+        { "const": "close_window" },
+        { "const": "resolve" },
+        { "const": "commit_ownership" },
+        { "const": "cancel" },
+        { "const": "reconcile" }
+      ],
+      "items": false
+    },
+    "replayPolicy": {
+      "type": "object",
+      "required": [
+        "operationIdentity",
+        "sameFingerprint",
+        "differentFingerprint",
+        "unknownOutcome"
+      ],
+      "properties": {
+        "operationIdentity": { "const": "operation_id" },
+        "sameFingerprint": { "const": "already_committed" },
+        "differentFingerprint": { "const": "conflict" },
+        "unknownOutcome": { "const": "fail_closed_until_reconciled" }
+      },
+      "additionalProperties": false
+    },
+    "recovery": {
+      "type": "object",
+      "required": ["terminalResolution", "unknownOutcome", "tie"],
+      "properties": {
+        "terminalResolution": { "const": "xor" },
+        "unknownOutcome": { "const": "fail_closed_until_reconciled" },
+        "tie": { "const": "no_owner" }
+      },
+      "additionalProperties": false
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "required": ["plannerScope", "excludedImplementations"],
+      "properties": {
+        "plannerScope": { "const": "engine_free_snapshot_only" },
+        "excludedImplementations": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "prefixItems": [
+            { "const": "persistence" },
+            { "const": "network" },
+            { "const": "save" },
+            { "const": "combat" },
+            { "const": "ui" },
+            { "const": "economy" },
+            { "const": "runtime_map" },
+            { "const": "oathmark_mint" },
+            { "const": "stronghold_capture" },
+            { "const": "public_realm_dungeon" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 128
+    },
+    "realmSlotsCrownlands": {
+      "type": "object",
+      "required": ["realmId", "capitalId", "realmSymbolId", "cityIds"],
+      "properties": {
+        "realmId": { "const": "crownlands" },
+        "capitalId": { "const": "capital_crownspire" },
+        "realmSymbolId": { "const": "realm_symbol_crownlands" },
+        "cityIds": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            { "const": "crownlands_guild_city_01" },
+            { "const": "crownlands_guild_city_02" },
+            { "const": "crownlands_guild_city_03" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "realmSlotsStonehold": {
+      "type": "object",
+      "required": ["realmId", "capitalId", "realmSymbolId", "cityIds"],
+      "properties": {
+        "realmId": { "const": "stonehold" },
+        "capitalId": { "const": "capital_anvildeep" },
+        "realmSymbolId": { "const": "realm_symbol_stonehold" },
+        "cityIds": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            { "const": "stonehold_guild_city_01" },
+            { "const": "stonehold_guild_city_02" },
+            { "const": "stonehold_guild_city_03" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "realmSlotsEldergrove": {
+      "type": "object",
+      "required": ["realmId", "capitalId", "realmSymbolId", "cityIds"],
+      "properties": {
+        "realmId": { "const": "eldergrove" },
+        "capitalId": { "const": "capital_worldroot" },
+        "realmSymbolId": { "const": "realm_symbol_eldergrove" },
+        "cityIds": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            { "const": "eldergrove_guild_city_01" },
+            { "const": "eldergrove_guild_city_02" },
+            { "const": "eldergrove_guild_city_03" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "realmSlotsUmbral": {
+      "type": "object",
+      "required": ["realmId", "capitalId", "realmSymbolId", "cityIds"],
+      "properties": {
+        "realmId": { "const": "umbral" },
+        "capitalId": { "const": "capital_veilspire" },
+        "realmSymbolId": { "const": "realm_symbol_umbral" },
+        "cityIds": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            { "const": "umbral_guild_city_01" },
+            { "const": "umbral_guild_city_02" },
+            { "const": "umbral_guild_city_03" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "qualificationId": "rcpq_elite_stonehold_oreblind_delver_v001",
+  "modelId": "elite_stonehold_oreblind_delver",
+  "sourceVersion": "al-rcreature-2026-09-03-v003",
+  "catalogId": "elite_stonehold_oreblind_delver",
+  "productionReady": false,
+  "sourceQualification": "PASS",
+  "runtimeIntegration": "BLOCKED",
+  "deviceQualification": "BLOCKED",
+  "gameplayOrSpawnActivation": false,
+  "runtimeVfxSeparate": true,
+  "emissionBakedIntoCleanMesh": false,
+  "unityPbrImport": "BLOCKED",
+  "pcReview": "PASS",
+  "androidDeviceEvidence": "BLOCKED",
+  "vfxSockets": [
+    "socket_vfx_gallery_dust",
+    "socket_vfx_plate_stress",
+    "socket_vfx_jaw_sensor",
+    "socket_vfx_claw_spark"
+  ],
+  "blockers": [
+    "Unity PBR import stays outside unity/Assets; this slice does not create runtime prefabs, Addressables, or spawn catalogs.",
+    "No scoped Android/device capture was available in this run.",
+    "Runtime dust/spark/sensor VFX remain socket-only; no particle/volume playback assets were authored into the clean mesh or spawned.",
+    "Source packet productionReady and rigged stay false until Unity import, animation playback, VFX readability, performance, and device gates all pass."
+  ]
+}
