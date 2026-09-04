@@ -21,19 +21,43 @@ namespace AL.RealmSelection
         RealmDefinitionUnavailable = 4,
         ProfileUnavailable = 5,
         SaveFailedPreviousPreserved = 6,
-        InvalidTransaction = 7
+        InvalidTransaction = 7,
+        CommitUncertain = 8
     }
 
     public readonly struct RealmSelectionRequest
     {
         public RealmSelectionRequest(string transactionId, RealmId requestedRealmId)
+            : this(
+                transactionId,
+                requestedRealmId,
+                transactionId,
+                string.Empty,
+                string.Empty)
+        {
+        }
+
+        public RealmSelectionRequest(
+            string transactionId,
+            RealmId requestedRealmId,
+            string correlationId,
+            string expectedProfileId,
+            string expectedGenerationFingerprint)
         {
             TransactionId = transactionId ?? string.Empty;
             RequestedRealmId = requestedRealmId;
+            CorrelationId = string.IsNullOrWhiteSpace(correlationId)
+                ? TransactionId
+                : correlationId;
+            ExpectedProfileId = expectedProfileId ?? string.Empty;
+            ExpectedGenerationFingerprint = expectedGenerationFingerprint ?? string.Empty;
         }
 
         public string TransactionId { get; }
         public RealmId RequestedRealmId { get; }
+        public string CorrelationId { get; }
+        public string ExpectedProfileId { get; }
+        public string ExpectedGenerationFingerprint { get; }
     }
 
     public readonly struct RealmIdentitySnapshot
