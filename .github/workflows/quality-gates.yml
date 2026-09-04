@@ -124,6 +124,46 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Realm-creature production-slice qualification
+        shell: pwsh
+        timeout-minutes: 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $transcript = "artifacts/realm-creature-production-slice.txt"
+          try {
+            $include = @(
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/boss_stonehold_fault_crowned_colossus/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/boss_stonehold_fault_crowned_colossus/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/**",
+              "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/**",
+              "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_stonehold_fault_crowned_colossus_concept_sheet_v001.png"
+            ) -join ","
+            if ($env:GITHUB_TOKEN) {
+              $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x:$($env:GITHUB_TOKEN)"))
+              & git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" lfs pull --include=$include *>&1 |
+                Tee-Object -FilePath $transcript
+            } else {
+              & git lfs pull --include=$include *>&1 |
+                Tee-Object -FilePath $transcript
+            }
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-creature production-slice LFS pull exited with code $LASTEXITCODE."
+            }
+            & python -m pip install --disable-pip-version-check jsonschema==4.26.0 *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-creature production-slice schema dependency install exited with code $LASTEXITCODE."
+            }
+            & python tools/terrestrial/test_validate_realm_creature_production_slice.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-creature production-slice tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Quality-gate fixture proof
         shell: pwsh
         timeout-minutes: 10
@@ -169,6 +209,7 @@ jobs:
             artifacts/deterministic-qa/report.json
             artifacts/deterministic-qa/junit.xml
             artifacts/deterministic-qa/logs/
+            artifacts/realm-creature-production-slice.txt
             artifacts/quality-gate-fixtures.txt
             artifacts/golden-scene-evidence-validator.txt
           if-no-files-found: error
