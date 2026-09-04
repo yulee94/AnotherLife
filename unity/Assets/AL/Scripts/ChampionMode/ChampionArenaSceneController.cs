@@ -161,6 +161,8 @@ namespace AL.ChampionMode
         private bool _encounterClearShown;
         private bool _encounterFailed;
         private bool _innerDeathSequenceActive;
+        private string _innerDeathOperationId = string.Empty;
+        private string _innerDeathEventId = string.Empty;
         private Vector3 _innerCapitalSpawnPosition;
         private Coroutine _innerDeathRoutine;
         private bool _encounterIntroRunning;
@@ -170,7 +172,6 @@ namespace AL.ChampionMode
         private GameObject _inspectionShowcaseRoot;
         private GameObject _introStageCueRoot;
         private RuntimePlatformQualityController _qualityController;
-        private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
         private Coroutine _firstFightLoadRoutine;
         private bool _guardianCatalogFailureReported;
@@ -181,6 +182,17 @@ namespace AL.ChampionMode
         private ChampionHudSession _hudSession;
 
         public ChampionEncounterLoadPlan AuthoritativeEncounterLoadPlan { get; private set; }
+        public ChampionEncounterConsequencePlan AuthoritativeEncounterConsequencePlan
+        {
+            get;
+            private set;
+        }
+
+        public ChampionEncounterPresentationPlan AuthoritativeEncounterPresentationPlan
+        {
+            get;
+            private set;
+        }
 
         private void Start()
         {
@@ -508,6 +520,32 @@ namespace AL.ChampionMode
             {
                 _guardianTrialCleared = true;
             }
+
+            AuthoritativeEncounterConsequencePlan =
+                ChampionEncounterConsequenceGateway.ApplyBossDefeat(
+                    FirstSessionChampionStart.IsFirstSessionLanding,
+                    _realmId,
+                    AuthoritativeEncounterLoadPlan != null
+                        ? AuthoritativeEncounterLoadPlan.Receipt
+                        : null);
+            AuthoritativeEncounterPresentationPlan =
+                ChampionEncounterPresentationGateway.Present(
+                    AuthoritativeEncounterConsequencePlan);
+            RefreshBossText();
+            RefreshEncounterText();
+        }
+
+        private ChampionEncounterPresentationPlan ResolveEncounterPresentation()
+        {
+            if (AuthoritativeEncounterPresentationPlan != null)
+            {
+                return AuthoritativeEncounterPresentationPlan;
+            }
+
+            AuthoritativeEncounterPresentationPlan =
+                ChampionEncounterPresentationGateway.Present(
+                    AuthoritativeEncounterConsequencePlan);
+            return AuthoritativeEncounterPresentationPlan;
         }
 
         private void ApplyRuntimeQuality()
@@ -637,6 +675,8 @@ namespace AL.ChampionMode
             _encounterClearShown = false;
             _encounterFailed = false;
             _innerDeathSequenceActive = false;
+            _innerDeathOperationId = string.Empty;
+            _innerDeathEventId = string.Empty;
             _encounterIntroRunning = false;
             _appearanceInspectionMode = false;
 
@@ -1768,10 +1808,14 @@ namespace AL.ChampionMode
                 return;
             }
 
-            if (_encounterFailed)
+            ChampionEncounterPresentationPlan presentation = ResolveEncounterPresentation();
+            if (presentation.Status == ChampionEncounterPresentationStatus.Defeat ||
+                _encounterFailed)
             {
                 _bossText.color = new Color(1f, 0.38f, 0.28f);
-                _bossText.text = "Champion fallen\nEncounter failed";
+                _bossText.text = presentation.Status == ChampionEncounterPresentationStatus.Defeat
+                    ? "Champion fallen\nReceipt " + presentation.NvsCorrelationId
+                    : "Champion fallen\nEncounter failed";
                 if (_bossStateStrip != null)
                 {
                     _bossStateStrip.color = new Color(1f, 0.18f, 0.08f, 0.92f);
@@ -1780,21 +1824,59 @@ namespace AL.ChampionMode
                 return;
             }
 
-            if (_boss == null || _boss.IsDead)
+            if (presentation.Status == ChampionEncounterPresentationStatus.Clear ||
+                presentation.Status == ChampionEncounterPresentationStatus.Practice ||
+                presentation.Status == ChampionEncounterPresentationStatus.Unavailable ||
+                presentation.Status == ChampionEncounterPresentationStatus.Failure)
             {
-                _bossText.color = new Color(0.80f, 1f, 0.62f);
-                _bossText.text = "Boss defeated\nLoot roll complete";
+                bool receiptClear =
+                    presentation.Status == ChampionEncounterPresentationStatus.Clear;
+                _bossText.color = receiptClear
+                    ? new Color(0.80f, 1f, 0.62f)
+                    : presentation.VisiblyPractice
+                        ? new Color(0.84f, 0.88f, 0.92f)
+                        : new Color(1f, 0.58f, 0.32f);
+                _bossText.text = receiptClear
+                    ? "Boss defeated\nReceipt " + presentation.RewardResultId
+                    : presentation.VisiblyPractice
+                        ? "Practice complete\nno committed reward"
+                        : "Result unavailable\n" + presentation.DiagnosticCode;
                 if (_bossStateStrip != null)
                 {
-                    _bossStateStrip.color = new Color(0.42f, 1f, 0.48f, 0.90f);
+                    _bossStateStrip.color = receiptClear
+                        ? new Color(0.42f, 1f, 0.48f, 0.90f)
+                        : new Color(1f, 0.62f, 0.20f, 0.78f);
                 }
 
                 SetFillAmount(_bossHealthFill, 0f);
                 SetFillAmount(_bossBreakFill, 1f);
                 if (_combatFeedText != null)
                 {
-                    _combatFeedText.text = ChampionHudCopy.BossClearFeed;
+                    _combatFeedText.text = receiptClear
+                        ? ChampionHudCopy.ClearFeed
+                        : presentation.VisiblyPractice
+                            ? "Practice complete. No committed reward or progression."
+                            : presentation.DiagnosticCode;
                 }
+                return;
+            }
+
+            if (_boss == null)
+            {
+                return;
+            }
+
+            if (_boss.IsDead)
+            {
+                _bossText.color = new Color(0.84f, 0.88f, 0.92f);
+                _bossText.text = "Result pending";
+                if (_bossStateStrip != null)
+                {
+                    _bossStateStrip.color = new Color(0.24f, 0.56f, 1f, 0.78f);
+                }
+
+                SetFillAmount(_bossHealthFill, 0f);
+                SetFillAmount(_bossBreakFill, 1f);
                 return;
             }
 
@@ -2061,7 +2143,11 @@ namespace AL.ChampionMode
         private void RefreshEncounterText()
         {
             float elapsed = Mathf.Max(0f, Time.time - _encounterStartTime);
-            bool bossDefeated = _boss == null || _boss.IsDead;
+            ChampionEncounterPresentationPlan presentation = ResolveEncounterPresentation();
+            bool receiptTerminal =
+                presentation.Status == ChampionEncounterPresentationStatus.Clear ||
+                presentation.Status == ChampionEncounterPresentationStatus.Defeat ||
+                presentation.Status == ChampionEncounterPresentationStatus.Practice;
             if (_boss != null)
             {
                 _guardBreakObserved |= _boss.IsBroken;
@@ -2077,7 +2163,7 @@ namespace AL.ChampionMode
             {
                 _combatGoalsText.text =
                     $"{GoalMark(_guardBreakObserved)} Break Guard\n" +
-                    $"{GoalMark(bossDefeated)} Defeat Boss";
+                    $"{GoalMark(receiptTerminal)} Defeat Boss";
             }
 
             if (_encounterResultText == null)
@@ -2085,14 +2171,30 @@ namespace AL.ChampionMode
                 return;
             }
 
-            if (_encounterFailed)
+            if (presentation.Status == ChampionEncounterPresentationStatus.Defeat ||
+                _encounterFailed)
             {
                 _encounterResultText.color = new Color(1f, 0.34f, 0.24f);
                 _encounterResultText.text = $"FALLEN\n{FormatEncounterTime(elapsed)}";
                 return;
             }
 
-            if (!bossDefeated)
+            if (presentation.Status == ChampionEncounterPresentationStatus.Practice)
+            {
+                _encounterResultText.color = new Color(0.84f, 0.88f, 0.92f);
+                _encounterResultText.text = "PRACTICE\nno committed reward";
+                return;
+            }
+
+            if (presentation.Status == ChampionEncounterPresentationStatus.Unavailable ||
+                presentation.Status == ChampionEncounterPresentationStatus.Failure)
+            {
+                _encounterResultText.color = new Color(1f, 0.58f, 0.32f);
+                _encounterResultText.text = "UNAVAILABLE\n" + presentation.DiagnosticCode;
+                return;
+            }
+
+            if (presentation.Status != ChampionEncounterPresentationStatus.Clear)
             {
                 _encounterResultText.color = _enrageObserved ? new Color(1f, 0.58f, 0.32f) : new Color(0.84f, 0.88f, 0.92f);
                 _encounterResultText.text = _enrageObserved ? "Enrage survived\nfinish clean" : "Grade pending\nhold pressure";
@@ -2179,64 +2281,23 @@ namespace AL.ChampionMode
 
         private void RefreshClearRewardText()
         {
+            ChampionEncounterPresentationPlan presentation = ResolveEncounterPresentation();
             if (_clearCreditText != null)
             {
-                _clearCreditText.text = _lastBossLootResult == null
-                    ? "WARZONE CREDITS SYNCED"
-                    : $"WARZONE CREDITS +{_lastBossLootResult.WarzoneCreditsAwarded}";
+                _clearCreditText.text = presentation.VisiblyPractice
+                    ? "PRACTICE — NO COMMITTED REWARD"
+                    : presentation.ShowsCommittedReward
+                        ? "REWARD RECEIPT " + presentation.RewardResultId
+                        : "REWARD UNAVAILABLE";
             }
 
             if (_clearLootText != null)
             {
-                _clearLootText.text = BuildLootSummary();
+                _clearLootText.text = presentation.VisiblyPractice ||
+                                      !presentation.ShowsCommittedProgression
+                    ? "PROGRESSION NOT COMMITTED"
+                    : "NVS " + presentation.NvsCorrelationId + " / " + presentation.RealmId;
             }
-        }
-
-        private string BuildLootSummary()
-        {
-            if (_lastBossLootResult == null)
-            {
-                return "LOOT Awaiting vault sync";
-            }
-
-            if (_lastBossLootResult.Drops == null || _lastBossLootResult.Drops.Count == 0)
-            {
-                return "LOOT No equipment drop this clear";
-            }
-
-            BossLootDrop drop = _lastBossLootResult.Drops[0];
-            string displayName = string.IsNullOrWhiteSpace(drop.DisplayName) ? "Unidentified relic" : drop.DisplayName;
-            string overflow = _lastBossLootResult.Drops.Count > 1 ? $" +{_lastBossLootResult.Drops.Count - 1} more" : string.Empty;
-            string stats = BuildDropStatLine(drop);
-            return string.IsNullOrWhiteSpace(stats)
-                ? $"LOOT {displayName}{overflow}"
-                : $"LOOT {displayName}{overflow} // {stats}";
-        }
-
-        private static string BuildDropStatLine(BossLootDrop drop)
-        {
-            if (drop == null)
-            {
-                return string.Empty;
-            }
-
-            string stats = drop.Slot.ToString();
-            if (drop.AttackBonus > 0)
-            {
-                stats += $"  ATK +{drop.AttackBonus}";
-            }
-
-            if (drop.DefenseBonus > 0)
-            {
-                stats += $"  DEF +{drop.DefenseBonus}";
-            }
-
-            if (drop.HealthBonus > 0)
-            {
-                stats += $"  HP +{drop.HealthBonus}";
-            }
-
-            return stats;
         }
 
         private void PlayClearPresentation(Color gradeColor)
@@ -2390,6 +2451,8 @@ namespace AL.ChampionMode
                     sites));
 
             _innerDeathSequenceActive = true;
+            _innerDeathOperationId = DeathPenaltyIds.NewOperationId();
+            _innerDeathEventId = DeathPenaltyIds.NewDeathEventId();
             ShowInnerDeathPresentation(plan);
             _hudSession?.NotifyRecap(true);
 
@@ -2462,10 +2525,21 @@ namespace AL.ChampionMode
                 yield return null;
             }
 
-            bool stoodUp = InnerRealmDeathRespawnApplier.TryApply(
+            ISaveGameService saveGameService = null;
+            ServiceLocator.TryGet(out saveGameService);
+            DeathPenaltyCommitRequest penaltyRequest =
+                DeathPenaltySaveAuthority.CreateInnerRealmRequest(
+                    _innerDeathOperationId,
+                    _innerDeathEventId,
+                    _realmId);
+            DeathPenaltyCommitResult penalty;
+            bool stoodUp = DeathPenaltyProductionPath.TryCommitPenaltyThenApply(
+                saveGameService,
+                penaltyRequest,
                 plan,
                 _playerCombat,
-                _playerController);
+                _playerController,
+                out penalty);
             if (_defeatPanelObject != null)
             {
                 _defeatPanelObject.SetActive(false);
@@ -2474,6 +2548,8 @@ namespace AL.ChampionMode
 
             _innerDeathSequenceActive = false;
             _innerDeathRoutine = null;
+            _innerDeathOperationId = string.Empty;
+            _innerDeathEventId = string.Empty;
             if (stoodUp &&
                 !_appearanceInspectionMode &&
                 !_encounterIntroRunning &&
@@ -2485,9 +2561,18 @@ namespace AL.ChampionMode
 
             if (_combatFeedText != null)
             {
-                _combatFeedText.text = stoodUp
-                    ? "You stand again at the Capital."
-                    : "Fallen. Capital stand-up was unavailable.";
+                if (penalty != null &&
+                    (penalty.Status == DeathPenaltyCommitStatus.OathmarkPaymentRequired ||
+                     penalty.Status == DeathPenaltyCommitStatus.ReplayedOathmarkPaymentRequired))
+                {
+                    _combatFeedText.text = "Revival requires Oathmarks.";
+                }
+                else
+                {
+                    _combatFeedText.text = stoodUp
+                        ? "You stand again at the Capital."
+                        : "Fallen. Capital stand-up was unavailable.";
+                }
             }
 
             RefreshBossText();
@@ -3453,8 +3538,8 @@ namespace AL.ChampionMode
 
             var rewardPanel = CreateHudPanel(_clearPanelObject.transform, "ClearRewardPanel", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -224f), new Vector2(672f, 76f), new Color(0.020f, 0.038f, 0.042f, 0.94f));
             CreateHudPanel(rewardPanel.transform, "ClearRewardAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(672f, 4f), new Color(1f, 0.74f, 0.34f, 0.66f));
-            _clearCreditText = CreateText(rewardPanel.transform, font, "WARZONE CREDITS +500", 15, new Vector2(20f, -16f), new Vector2(250f, 24f), TextAnchor.UpperLeft, new Color(1f, 0.82f, 0.48f));
-            _clearLootText = CreateText(rewardPanel.transform, font, "LOOT Ember Crown Shard", 14, new Vector2(288f, -16f), new Vector2(354f, 42f), TextAnchor.UpperLeft, new Color(0.84f, 0.92f, 1f));
+            _clearCreditText = CreateText(rewardPanel.transform, font, "REWARD PENDING", 15, new Vector2(20f, -16f), new Vector2(250f, 24f), TextAnchor.UpperLeft, new Color(1f, 0.82f, 0.48f));
+            _clearLootText = CreateText(rewardPanel.transform, font, "PROGRESSION NOT COMMITTED", 14, new Vector2(288f, -16f), new Vector2(354f, 42f), TextAnchor.UpperLeft, new Color(0.84f, 0.92f, 1f));
 
             CreateUiImage(_clearPanelObject.transform, "ClearProgressTrack", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -312f), new Vector2(672f, 7f), new Color(0.045f, 0.060f, 0.066f, 0.92f));
             _clearProgressFill = CreateUiImage(_clearPanelObject.transform, "ClearProgressFill", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -312f), new Vector2(0f, 7f), new Color(0.62f, 1f, 0.40f, 0.94f));

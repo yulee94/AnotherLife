@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "boss_reward_schema_v1",
+  "catalogId": "al_boss_reward_source_catalog",
+  "gameId": "another_life",
+  "catalogSetId": "catalog_set_boss_reward_source_v001",
+  "revision": "boss_reward_source_v001",
+  "authority": "technical_boss_reward_source",
+  "mutationActivation": "blocked",
+  "approval": {
+    "mode": "autonomous_bounded_recommendation",
+    "issue": "#168",
+    "representativeBossId": "boss_stonehold_fault_crowned_colossus",
+    "sourceQualificationIssue": "#259"
+  },
+  "announcementPolicyIds": [
+    "boss_reward.item_acquired",
+    "boss_reward.credits_committed",
+    "boss_reward.explicit_no_reward"
+  ],
+  "bindings": [
+    {
+      "bossDefinitionId": "boss_stonehold_fault_crowned_colossus",
+      "bossDefinitionContentVersion": "v001",
+      "rewardProfileId": "reward_profile_stonehold_fault_crowned_colossus",
+      "rewardProfileContentVersion": "v001"
+    }
+  ],
+  "profiles": [
+    {
+      "gameId": "another_life",
+      "catalogSetId": "catalog_set_boss_reward_source_v001",
+      "id": "reward_profile_stonehold_fault_crowned_colossus",
+      "schemaVersion": "boss_reward_schema_v1",
+      "contentVersion": "v001",
+      "warzoneCredits": 250,
+      "isExplicitNoReward": false,
+      "entries": [
+        {
+          "equipmentDefinitionId": "equipment_stonehold_fault_crowned_colossus_core",
+          "dropChanceMicros": 1000000,
+          "quantity": 1,
+          "acquisitionAnnouncementPolicyId": "boss_reward.item_acquired"
+        }
+      ],
+      "sourceRevision": "boss_reward_source_v001",
+      "rawSha256": "14d182912ca9c8b62e7eadfb14900cfcdbe2e0708a1124baa9588ad1f1b527dc"
+    }
+  ],
+  "equipmentDefinitions": [
+    {
+      "equipmentDefinitionId": "equipment_stonehold_fault_crowned_colossus_core",
+      "schemaVersion": "boss_reward_schema_v1",
+      "contentVersion": "v001",
+      "slotId": "trinket",
+      "attackBonus": 0,
+      "defenseBonus": 0,
+      "healthBonus": 0,
+      "stackPolicyId": "stack_quantity",
+      "acquisitionSnapshotPolicyId": "acquisition_snapshot_v1",
+      "presentationContentKey": "equipment.stonehold.fault_crowned_colossus.core",
+      "sourceRevision": "boss_reward_source_v001",
+      "rawSha256": "673d466a8f9779542ff4ff2985e825cf97f88d18f83e06414e11d6c65e92fd24"
+    }
+  ]
+}
