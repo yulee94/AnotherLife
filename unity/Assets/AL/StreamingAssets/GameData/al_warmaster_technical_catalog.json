@@ -1,0 +1,110 @@
+{
+  "gameId": "another-life",
+  "catalogId": "warmaster_technical_v1",
+  "family": "warmaster",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "12576d06b27559e92203eba5b6253d1dba19a2ea",
+  "records": [
+    {
+      "id": "prototype_true_warmaster",
+      "kind": "set",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.set.true_warmaster.name",
+      "summary_ref": "warmaster.set.true_warmaster.summary",
+      "piece_ids": [
+        "warmaster_piece_01",
+        "warmaster_piece_02",
+        "warmaster_piece_03",
+        "warmaster_piece_04",
+        "warmaster_piece_05",
+        "warmaster_piece_06",
+        "warmaster_piece_07",
+        "warmaster_piece_08",
+        "warmaster_piece_09",
+        "warmaster_piece_10"
+      ]
+    },
+    {
+      "id": "warmaster_piece_01",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.oathbound_helm.name",
+      "summary_ref": "warmaster.piece.oathbound_helm.summary",
+      "piece_ids": []
+    },
+    {
+      "id": "warmaster_piece_02",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.vanguard_pauldrons.name",
+      "summary_ref": "warmaster.piece.vanguard_pauldrons.summary",
+      "piece_ids": []
+    },
+    {
+      "id": "warmaster_piece_03",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.command_breastplate.name",
+      "summary_ref": "warmaster.piece.command_breastplate.summary",
+      "piece_ids": []
+    },
+    {
+      "id": "warmaster_piece_04",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.siege_gauntlets.name",
+      "summary_ref": "warmaster.piece.siege_gauntlets.summary",
+      "piece_ids": []
+    },
+    {
+      "id": "warmaster_piece_05",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.standard_bearer_sash.name",
+      "summary_ref": "warmaster.piece.standard_bearer_sash.summary",
+      "piece_ids": []
+    },
+    {
+      "id": "warmaster_piece_06",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.war_council_belt.name",
+      "summary_ref": "warmaster.piece.war_council_belt.summary",
+      "piece_ids": []
+    },
+    {
+      "id": "warmaster_piece_07",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.marchwarden_greaves.name",
+      "summary_ref": "warmaster.piece.marchwarden_greaves.summary",
+      "piece_ids": []
+    },
+    {
+      "id": "warmaster_piece_08",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.bannercloak.name",
+      "summary_ref": "warmaster.piece.bannercloak.summary",
+      "piece_ids": []
+    },
+    {
+      "id": "warmaster_piece_09",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.conquest_medallion.name",
+      "summary_ref": "warmaster.piece.conquest_medallion.summary",
+      "piece_ids": []
+    },
+    {
+      "id": "warmaster_piece_10",
+      "kind": "piece",
+      "owner_set_id": "prototype_true_warmaster",
+      "name_ref": "warmaster.piece.final_war_plate.name",
+      "summary_ref": "warmaster.piece.final_war_plate.summary",
+      "piece_ids": []
+    }
+  ],
+  "aliases": []
+}
