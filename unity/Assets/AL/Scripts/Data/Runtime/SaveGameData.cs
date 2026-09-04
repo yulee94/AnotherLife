@@ -57,6 +57,9 @@ namespace AL.Data.Runtime
         // active world event and do not invent one until a committed start.
         public WorldStatePersistentState WorldState;
         // Optional schema-v2 extension. Missing legacy/schema-2 saves admit
+        // empty notification history/outbox until a durable record is committed.
+        public NotificationHistoryPersistentState NotificationHistory;
+        // Optional schema-v2 extension. Missing legacy/schema-2 saves admit
         // empty Guild City seasons until a trusted-clock commit persists them.
         public AL.Guilds.GuildCitySeasonPersistentState GuildCitySeason;
         public int WarzoneCredits;
@@ -702,5 +705,47 @@ namespace AL.Data.Runtime
         public string InstanceId = string.Empty;
         public long CommittedRevision;
         public WorldStateInstanceRecord ResultingInstance = new WorldStateInstanceRecord();
+    }
+
+    [Serializable]
+    public sealed class NotificationHistoryPersistentState
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public List<NotificationHistoryRecord> Records = new List<NotificationHistoryRecord>();
+        public List<NotificationHistoryRecord> Outbox = new List<NotificationHistoryRecord>();
+    }
+
+    [Serializable]
+    public sealed class NotificationHistoryRecord
+    {
+        public string RecordId = string.Empty;
+        public int NotificationSchemaVersion;
+        public string DefinitionId = string.Empty;
+        public int DefinitionVersion;
+        public string SourceSystemId = string.Empty;
+        public string CorrelationId = string.Empty;
+        public long OccurredAtUtcTicks;
+        public List<NotificationHistoryParameterRecord> Parameters =
+            new List<NotificationHistoryParameterRecord>();
+        public int State;
+        public long AcknowledgedAtUtcTicks;
+        public long DismissedAtUtcTicks;
+        public long ExpiresAtUtcTicks;
+        public long LastDeliveryAttemptUtcTicks;
+        public int DeliveryAttemptCount;
+        public string SupersededByRecordId = string.Empty;
+        public int DurabilityPolicy;
+        public int PrivacyClass;
+        public bool RequiresAcknowledgement;
+    }
+
+    [Serializable]
+    public sealed class NotificationHistoryParameterRecord
+    {
+        public string Name = string.Empty;
+        public int Kind;
+        public string TextValue = string.Empty;
     }
 }

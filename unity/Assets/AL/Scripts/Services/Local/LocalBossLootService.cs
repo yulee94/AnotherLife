@@ -512,23 +512,11 @@ namespace AL.Services.Local
 
         private void NotifyResult(BossLootRequest request, BossLootResult result)
         {
-            if (result.WarzoneCreditsAwarded > 0)
-            {
-                _notificationService.ShowMessage($"Defeated {result.BossName}. +{result.WarzoneCreditsAwarded} Warzone Credits.");
-            }
-
-            foreach (var drop in result.Drops)
-            {
-                if (drop.AnnounceWorldDrop)
-                {
-                    string playerName = string.IsNullOrWhiteSpace(request.PlayerDisplayName) ? "Anonymous player" : request.PlayerDisplayName;
-                    _notificationService.ShowMessage($"{playerName} has acquired {drop.DisplayName} from {result.BossName}.");
-                }
-                else
-                {
-                    _notificationService.ShowMessage($"Loot acquired: {drop.DisplayName}.");
-                }
-            }
+            BossLootCatalogNotificationPublisher.PublishCommitted(
+                _notificationService,
+                request,
+                result,
+                DateTime.UtcNow);
         }
     }
 }
