@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "catalogId": "al_guild_raid_muster_policy",
+  "game": "Another Life",
+  "sourceRevision": "guild_raid_muster_policy_v1",
+  "machineIdentity": "Guild",
+  "playerFacingTerms": {
+    "primary": "Guild",
+    "presentationAlias": "Clan",
+    "aliasScope": "localization_only"
+  },
+  "consumedContracts": {
+    "guildCatalogId": "al_guild_membership_policy",
+    "guildIdentity": "external_guild_snapshot",
+    "guildRoles": "external_guild_roles",
+    "allianceCatalogId": "al_alliance_war_policy",
+    "allianceRelations": "external_alliance_war_snapshot"
+  },
+  "callPolicy": {
+    "callerAuthority": "master_or_officer",
+    "windowMinutes": 30,
+    "callsPerGuildPerWeek": 1,
+    "parallelSlots": 1,
+    "minJoinCount": 2,
+    "clock": "trusted_server_unix_seconds"
+  },
+  "bossRotation": {
+    "slotCount": 4,
+    "formula": "season_epoch_plus_week_id_mod_4",
+    "slots": [
+      { "slotIndex": 0, "bossProfileId": "raid_boss_iron_colossus" },
+      { "slotIndex": 1, "bossProfileId": "raid_boss_ash_seraph" },
+      { "slotIndex": 2, "bossProfileId": "raid_boss_thorn_wraith" },
+      { "slotIndex": 3, "bossProfileId": "raid_boss_veil_regent" }
+    ]
+  },
+  "closedInstance": {
+    "topologyId": "closed_raid_topology_v1",
+    "idPrefix": "closed_raid_",
+    "transferAuthority": "command_envelope_only",
+    "reservedPublicDungeonIds": [
+      "public_realm_dungeon_entrance",
+      "public_realm_dungeon_cooldown",
+      "public_realm_dungeon_quest",
+      "public_realm_dungeon_reward",
+      "public_realm_dungeon_coordinate"
+    ]
+  },
+  "consent": {
+    "join": "explicit",
+    "decline": "explicit",
+    "silence": "no_response",
+    "warBypassesConsent": false,
+    "membershipInfersJoin": false
+  },
+  "recovery": {
+    "safeReturn": "validated_pre_raid_envelope",
+    "unknownOutcome": "no_reward_no_lockout",
+    "duplicateFingerprint": "already_committed",
+    "terminalResolution": "xor"
+  },
+  "transitions": [
+    "announce_call",
+    "join",
+    "decline",
+    "launch",
+    "transfer_in",
+    "transfer_out",
+    "reconcile",
+    "cancel",
+    "expire"
+  ],
+  "replayPolicy": {
+    "operationIdentity": "operation_id",
+    "sameFingerprint": "already_committed",
+    "differentFingerprint": "conflict",
+    "unknownOutcome": "fail_closed_until_reconciled"
+  },
+  "authorityBoundary": {
+    "plannerScope": "engine_free_snapshot_only",
+    "excludedImplementations": [
+      "persistence",
+      "network",
+      "save",
+      "combat",
+      "ui",
+      "economy",
+      "city",
+      "scene_teleport",
+      "boss_balance",
+      "public_realm_dungeon"
+    ]
+  }
+}
