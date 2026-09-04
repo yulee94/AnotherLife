@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.dev/schemas/al-boss-skill-presentation.schema.json",
+  "title": "Another Life boss and skill presentation catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gameId",
+    "catalogId",
+    "schemaVersion",
+    "contentVersion",
+    "authority",
+    "semanticSeparation",
+    "resolutionPolicy",
+    "bossProfiles",
+    "skillProfiles"
+  ],
+  "properties": {
+    "gameId": { "const": "another-life" },
+    "catalogId": { "const": "boss_skill_presentation_v1" },
+    "schemaVersion": { "const": 1 },
+    "contentVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "authority": { "$ref": "#/$defs/authority" },
+    "semanticSeparation": { "$ref": "#/$defs/semanticSeparation" },
+    "resolutionPolicy": { "$ref": "#/$defs/resolutionPolicy" },
+    "bossProfiles": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": { "$ref": "#/$defs/bossProfile" }
+    },
+    "skillProfiles": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": { "$ref": "#/$defs/skillProfile" }
+    }
+  },
+  "$defs": {
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalogOwner",
+        "finalCreativeOwner",
+        "status",
+        "ownerDecisionRef",
+        "gameplayAuthority",
+        "runtimeSpawn"
+      ],
+      "properties": {
+        "catalogOwner": { "const": "boss_skill_presentation" },
+        "finalCreativeOwner": { "const": "project_owner" },
+        "status": { "const": "presentation_only" },
+        "ownerDecisionRef": { "$ref": "#/$defs/nonBlank" },
+        "gameplayAuthority": { "const": false },
+        "runtimeSpawn": { "const": false }
+      }
+    },
+    "semanticSeparation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "itemGradeForbidden",
+        "slotIndexForbidden",
+        "threatProgressionIndependent"
+      ],
+      "properties": {
+        "itemGradeForbidden": { "const": true },
+        "slotIndexForbidden": { "const": true },
+        "threatProgressionIndependent": { "const": true }
+      }
+    },
+    "resolutionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unknownId",
+        "sourceHashMismatch",
+        "unsupportedVersion",
+        "gameplayMutation",
+        "fallbackContent"
+      ],
+      "properties": {
+        "unknownId": { "const": "explicit_failure" },
+        "sourceHashMismatch": { "const": "explicit_failure" },
+        "unsupportedVersion": { "const": "explicit_failure" },
+        "gameplayMutation": { "const": "forbidden" },
+        "fallbackContent": { "const": "explicit_unavailable" }
+      }
+    },
+    "qualityTier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "lodId",
+        "maxParticles",
+        "maxLights",
+        "maxTrails",
+        "cameraImpulse",
+        "flashAllowed"
+      ],
+      "properties": {
+        "id": { "enum": ["low", "balanced", "high"] },
+        "lodId": { "enum": ["LOD0", "LOD1", "LOD2"] },
+        "maxParticles": { "type": "integer", "minimum": 0 },
+        "maxLights": { "type": "integer", "minimum": 0 },
+        "maxTrails": { "type": "integer", "minimum": 0 },
+        "cameraImpulse": { "type": "boolean" },
+        "flashAllowed": { "const": false }
+      }
+    },
+    "distanceContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "lodId", "cosmeticScale", "telegraphProtected"],
+      "properties": {
+        "id": { "enum": ["hero", "nearby", "distant"] },
+        "lodId": { "enum": ["LOD0", "LOD1", "LOD2"] },
+        "cosmeticScale": { "type": "number", "minimum": 0, "maximum": 1 },
+        "telegraphProtected": { "const": true }
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reducedMotionVariantId", "reducedFlash", "nonColorCues"],
+      "properties": {
+        "reducedMotionVariantId": { "$ref": "#/$defs/nonBlank" },
+        "reducedFlash": { "const": true },
+        "nonColorCues": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        }
+      }
+    },
+    "pooling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxActive", "maxPooled", "resetOnRelease"],
+      "properties": {
+        "maxActive": { "type": "integer", "minimum": 1 },
+        "maxPooled": { "type": "integer", "minimum": 1 },
+        "resetOnRelease": { "const": true }
+      }
+    },
+    "phases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anticipation", "cast", "channel", "release", "recovery"],
+      "properties": {
+        "anticipation": { "$ref": "#/$defs/nonBlank" },
+        "cast": { "$ref": "#/$defs/nonBlank" },
+        "channel": { "$ref": "#/$defs/nonBlank" },
+        "release": { "$ref": "#/$defs/nonBlank" },
+        "recovery": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "effects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["telegraph", "active", "impact", "cleanup", "accessibility"],
+      "properties": {
+        "telegraph": { "$ref": "#/$defs/nonBlank" },
+        "active": { "$ref": "#/$defs/nonBlank" },
+        "impact": { "$ref": "#/$defs/nonBlank" },
+        "cleanup": { "$ref": "#/$defs/nonBlank" },
+        "accessibility": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "bossProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "realmId",
+        "sourceProfileId",
+        "modelId",
+        "qualificationId",
+        "sourceVersion",
+        "sourceSha256",
+        "prefabRef",
+        "rigId",
+        "materialId",
+        "motionKeys",
+        "protectedIdentityCues",
+        "qualityTiers",
+        "distanceContexts",
+        "accessibility",
+        "pooling",
+        "unavailableFallback"
+      ],
+      "properties": {
+        "id": { "const": "boss_presentation_stonehold_fault_crowned_colossus_v001" },
+        "kind": { "const": "boss" },
+        "realmId": { "const": "stonehold" },
+        "sourceProfileId": { "const": "tdf_boss_stonehold_fault_crowned_colossus" },
+        "modelId": { "const": "boss_stonehold_fault_crowned_colossus" },
+        "qualificationId": { "const": "rcpq_boss_stonehold_fault_crowned_colossus_v001" },
+        "sourceVersion": { "$ref": "#/$defs/nonBlank" },
+        "sourceSha256": { "$ref": "#/$defs/sha256" },
+        "prefabRef": { "$ref": "#/$defs/nonBlank" },
+        "rigId": { "$ref": "#/$defs/nonBlank" },
+        "materialId": { "$ref": "#/$defs/nonBlank" },
+        "motionKeys": {
+          "type": "array",
+          "minItems": 5,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        },
+        "protectedIdentityCues": {
+          "type": "array",
+          "minItems": 4,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        },
+        "qualityTiers": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/qualityTier" }
+        },
+        "distanceContexts": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/distanceContext" }
+        },
+        "accessibility": { "$ref": "#/$defs/accessibility" },
+        "pooling": { "$ref": "#/$defs/pooling" },
+        "unavailableFallback": { "const": "explicit_unavailable" }
+      }
+    },
+    "skillProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "skillId",
+        "vfxId",
+        "actorFamily",
+        "presentationIndependentOfPower",
+        "telegraphChannel",
+        "cosmeticChannel",
+        "phases",
+        "effects",
+        "qualityTiers",
+        "distanceContexts",
+        "accessibility",
+        "pooling",
+        "unavailableFallback"
+      ],
+      "properties": {
+        "id": { "const": "skill_presentation_boss_faultline_slam_v001" },
+        "skillId": { "const": "boss_faultline_slam" },
+        "vfxId": { "$ref": "#/$defs/nonBlank" },
+        "actorFamily": { "const": "boss" },
+        "presentationIndependentOfPower": { "const": true },
+        "telegraphChannel": { "$ref": "#/$defs/nonBlank" },
+        "cosmeticChannel": { "$ref": "#/$defs/nonBlank" },
+        "phases": { "$ref": "#/$defs/phases" },
+        "effects": { "$ref": "#/$defs/effects" },
+        "qualityTiers": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/qualityTier" }
+        },
+        "distanceContexts": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/distanceContext" }
+        },
+        "accessibility": { "$ref": "#/$defs/accessibility" },
+        "pooling": { "$ref": "#/$defs/pooling" },
+        "unavailableFallback": { "const": "explicit_unavailable" }
+      }
+    }
+  }
+}
