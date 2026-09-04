@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-oathmark-marketplace.schema.json",
+  "title": "Another Life Oathmark Marketplace Settlement Policy",
+  "description": "Catalog authority for the sole 3D Oathmark identity and pure Marketplace listing/reservation/settlement policy. No runtime, save, network, UI, repair, consumable, or earning-source activation.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "version",
+    "catalogId",
+    "game",
+    "sourceRevision",
+    "currency",
+    "listing",
+    "settlement",
+    "replayPolicy",
+    "authorityBoundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "catalogId": { "const": "al_oathmark_marketplace_policy" },
+    "game": { "const": "Another Life" },
+    "sourceRevision": { "$ref": "#/$defs/stableId" },
+    "currency": { "$ref": "#/$defs/currency" },
+    "listing": { "$ref": "#/$defs/listing" },
+    "settlement": { "$ref": "#/$defs/settlement" },
+    "replayPolicy": { "$ref": "#/$defs/replayPolicy" },
+    "authorityBoundary": { "$ref": "#/$defs/authorityBoundary" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 128
+    },
+    "currency": {
+      "type": "object",
+      "required": [
+        "technicalId",
+        "playerFacingSingular",
+        "playerFacingPlural",
+        "domain",
+        "integerUnitScale",
+        "fractionalUnits",
+        "conversion",
+        "premiumOrRealMoney",
+        "soleMainCurrency",
+        "forbiddenWallets"
+      ],
+      "properties": {
+        "technicalId": { "const": "oathmark" },
+        "playerFacingSingular": { "const": "Oathmark" },
+        "playerFacingPlural": { "const": "Oathmarks" },
+        "domain": { "const": "three_dimensional_player_main" },
+        "integerUnitScale": { "const": 1 },
+        "fractionalUnits": { "const": false },
+        "conversion": { "const": "forbidden" },
+        "premiumOrRealMoney": { "const": "forbidden" },
+        "soleMainCurrency": { "const": true },
+        "forbiddenWallets": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "prefixItems": [
+            { "const": "legacy_gold" },
+            { "const": "kingdom_resource" },
+            { "const": "guild_treasury" },
+            { "const": "realm_resource" },
+            { "const": "warzone_credits" },
+            { "const": "premium" },
+            { "const": "real_money" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "listing": {
+      "type": "object",
+      "required": [
+        "minimumPrice",
+        "maximumPrice",
+        "durationHours",
+        "cancellation",
+        "directPersonalTrade",
+        "lifecycle"
+      ],
+      "properties": {
+        "minimumPrice": { "const": 10 },
+        "maximumPrice": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 9223372036854775807
+        },
+        "durationHours": { "const": 72 },
+        "cancellation": { "const": "seller_only_before_reservation" },
+        "directPersonalTrade": { "const": "disabled" },
+        "lifecycle": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "prefixItems": [
+            { "const": "draft" },
+            { "const": "listed_escrowed" },
+            { "const": "reserved" },
+            { "const": "sold" },
+            { "const": "cancelled" },
+            { "const": "expired" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "settlement": {
+      "type": "object",
+      "required": ["buyerDebit", "tax", "sellerCredit"],
+      "properties": {
+        "buyerDebit": { "const": "listed_price" },
+        "tax": {
+          "type": "object",
+          "required": ["method", "divisor", "destination", "creditedWallets"],
+          "properties": {
+            "method": { "const": "floor_listed_price_divided_by_ten" },
+            "divisor": { "const": 10 },
+            "destination": { "const": "destroyed" },
+            "creditedWallets": {
+              "type": "array",
+              "maxItems": 0,
+              "items": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "sellerCredit": { "const": "listed_price_minus_tax" }
+      },
+      "additionalProperties": false
+    },
+    "replayPolicy": {
+      "type": "object",
+      "required": [
+        "operationIdentity",
+        "correlationIdentities",
+        "sameFingerprint",
+        "differentFingerprint",
+        "unknownOutcome"
+      ],
+      "properties": {
+        "operationIdentity": { "const": "operation_id" },
+        "correlationIdentities": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            { "const": "account_id" },
+            { "const": "item_id" },
+            { "const": "listing_id" },
+            { "const": "operation_id" }
+          ],
+          "items": false
+        },
+        "sameFingerprint": { "const": "already_committed" },
+        "differentFingerprint": { "const": "conflict" },
+        "unknownOutcome": { "const": "fail_closed_until_reconciled" }
+      },
+      "additionalProperties": false
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "required": ["plannerScope", "excludedImplementations"],
+      "properties": {
+        "plannerScope": { "const": "engine_free_snapshot_only" },
+        "excludedImplementations": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "prefixItems": [
+            { "const": "network" },
+            { "const": "save" },
+            { "const": "ui" },
+            { "const": "repair" },
+            { "const": "consumable" },
+            { "const": "earning_source" },
+            { "const": "persistence" }
+          ],
+          "items": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

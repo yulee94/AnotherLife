@@ -46,6 +46,7 @@ GAMEDATA_DIR = (
 REAL_CATALOGS = {
     "al-alliance-war": "al_alliance_war_policy.json",
     "al-guild-membership": "al_guild_membership_policy.json",
+    "al-oathmark-marketplace": "al_oathmark_marketplace_policy.json",
     "al-map-disclosure": "al_map_disclosure_catalog.json",
     "al-realm": "al_realm_catalog.json",
     "al-realm-gem-wishgate-content": "al_realm_gem_wishgate_content_catalog.json",
