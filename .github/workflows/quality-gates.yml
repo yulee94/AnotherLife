@@ -106,7 +106,7 @@ jobs:
           }
       - name: Realm-slice evidence harness contract
         shell: pwsh
-        timeout-minutes: 5
+        timeout-minutes: 15
         run: |
           $transcript = "artifacts/realm-slice-evidence-contract.txt"
           try {
@@ -119,6 +119,35 @@ jobs:
               Tee-Object -FilePath $transcript -Append
             if ($LASTEXITCODE -ne 0) {
               throw "Realm-slice evidence contract tests exited with code $LASTEXITCODE."
+            }
+            & python tools/qa/test_realm_evidence_registry.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm evidence registry contract tests exited with code $LASTEXITCODE."
+            }
+            $registryPath = "unity/Docs/RealmSliceEvidenceRegistry/registry.v1.json"
+            & python tools/qa/realm_evidence_registry.py verify --registry $registryPath *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Canonical realm evidence registry verification exited with code $LASTEXITCODE."
+            }
+            if ("${{ github.event_name }}" -eq "pull_request") {
+              $baseSha = "${{ github.event.pull_request.base.sha }}"
+              & git cat-file -e "${baseSha}:$registryPath" 2>$null
+              if ($LASTEXITCODE -eq 0) {
+                $baseRegistry = Join-Path $env:RUNNER_TEMP "realm-registry-base.json"
+                & git show "${baseSha}:$registryPath" | Set-Content -LiteralPath $baseRegistry
+                if ($LASTEXITCODE -ne 0) {
+                  throw "Could not materialize the trusted base realm evidence registry."
+                }
+                & python tools/qa/realm_evidence_registry.py verify-append-only `
+                  --base $baseRegistry `
+                  --registry $registryPath *>&1 |
+                  Tee-Object -FilePath $transcript -Append
+                if ($LASTEXITCODE -ne 0) {
+                  throw "Realm evidence registry append-only check exited with code $LASTEXITCODE."
+                }
+              }
             }
           } catch {
             $_ | Out-String | Add-Content -LiteralPath $transcript
