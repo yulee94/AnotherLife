@@ -1481,7 +1481,6 @@ namespace AL.Tests.EditMode
             string[] expectedCreditCallers =
             {
                 "Kingdom/Quests/LocalQuestService.cs",
-                "RealmWar/Warzone/WarzoneService.cs",
                 "Utilities/DemoInitializer.cs"
             };
             CollectionAssert.AreEqual(expectedCreditCallers, creditCallers);

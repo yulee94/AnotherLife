@@ -2,7 +2,7 @@
 
 **Tracking issue:** #163
 **Inventory baseline:** `cc9f28cc2f81aeaa70125adfa4e2d34a3a7b4aa3`
-**Status:** Phase 1 compatibility boundary; building construction migrated to its typed owning transaction
+**Status:** Phase 1 compatibility boundary; building construction and territory capture migrated to typed owning transactions
 
 This record inventories every production call to the legacy `AddResource`, `ConsumeResource`, `AddCredits`, and `SpendCredits` wrappers at the #163 Phase 1 baseline. The wrappers remain only so each owning domain can migrate to a typed no-save mutation inside its own validated transaction.
 
@@ -21,7 +21,6 @@ This record inventories every production call to the legacy `AddResource`, `Cons
 | --- | --- | --- | --- |
 | `unity/Assets/AL/Scripts/ChampionMode/AI/BossDummyAI.cs` | `AddCredits` | #168 / #180 | Remove the exception fallback grant; only an authoritative encounter reward transaction may apply credits. |
 | `unity/Assets/AL/Scripts/Kingdom/Quests/LocalQuestService.cs` | `AddCredits` | #152 / #133 | Use the typed no-save primitive inside the quest/report transaction; avoid a nested save. |
-| `unity/Assets/AL/Scripts/RealmWar/Warzone/WarzoneService.cs` | `AddCredits` | #166 | Use the typed no-save primitive only after a validated, duplicate-safe ownership transition. |
 | `unity/Assets/AL/Scripts/Services/Local/LocalBossLootService.cs` | `AddCredits` | #168 | Apply credits with equipment and the reward ledger in one recoverable boundary. |
 | `unity/Assets/AL/Scripts/Services/Local/LocalWarmasterService.cs` | `SpendCredits` | #171 | Stage typed spend and piece-state mutation, then persist once or recover visibly. |
 | `unity/Assets/AL/Scripts/Utilities/DemoInitializer.cs` | `AddCredits` | #178 / #150 | Keep test/demo-only and excluded from the ShellFoundation production profile. |
@@ -38,6 +37,12 @@ This record inventories every production call to the legacy `AddResource`, `Cons
   exact next-level definition, consumes through `IResourceIntegrityService`,
   commits wallet and order state once, and rolls both back on a known save
   failure.
+- Territory capture is no longer a legacy credit-wrapper caller. The typed path
+  applies a catalog-backed exact-once ownership/credit/quest/receipt/outbox
+  transaction behind the existing write-authority gate and rolls back on known
+  save failure. The legacy void capture wrapper is fail-closed and non-mutating;
+  production capture remains unavailable until a caller supplies a validated
+  typed command/battle authorization result.
 
 ## Production snapshot blocker
 

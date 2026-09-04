@@ -46,6 +46,181 @@ namespace AL.Data.Runtime
         public MapDisclosurePersistentState MapDisclosure;
         public int WarzoneCredits;
         public long LastSavedTimestamp;
+        // Optional schema-v1 extension. Missing legacy saves admit empty
+        // receipts/outbox and derive ownership revisions as 0 from Territories.
+        public TerritoryCaptureLedgerData TerritoryCaptureLedger;
+    }
+
+    [Serializable]
+    public sealed class TerritoryCaptureLedgerData
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public string CatalogId = string.Empty;
+        public string CatalogRawSha256 = string.Empty;
+        public string StateRevisionHash = string.Empty;
+        public string ProfileSessionId = string.Empty;
+        public List<TerritoryOwnershipRevisionData> Revisions =
+            new List<TerritoryOwnershipRevisionData>();
+        public List<TerritoryCaptureReceiptRecord> Receipts =
+            new List<TerritoryCaptureReceiptRecord>();
+        public List<TerritoryCaptureOutboxRecord> Outbox =
+            new List<TerritoryCaptureOutboxRecord>();
+    }
+
+    [Serializable]
+    public sealed class TerritoryOwnershipRevisionData
+    {
+        public string TerritoryId = string.Empty;
+        public long Revision;
+    }
+
+    [Serializable]
+    public sealed class TerritoryCaptureReceiptRecord
+    {
+        public string ReceiptId = string.Empty;
+        public string OperationId = string.Empty;
+        public string SemanticHash = string.Empty;
+        public int Durability;
+        public string ResultId = string.Empty;
+        public string EventId = string.Empty;
+        public string TerritoryId = string.Empty;
+        public RealmId PreviousOwner;
+        public RealmId NewOwner;
+        public long PreviousRevision;
+        public long NewRevision;
+        public int WarzoneCreditsDelta;
+        public int QuestProgressDelta;
+        public string CatalogId = string.Empty;
+        public int CatalogSchemaVersion;
+        public int CatalogContentVersion;
+        public string CatalogSourceRevision = string.Empty;
+        public string CatalogRawSha256 = string.Empty;
+        public string StateRevisionHash = string.Empty;
+        public string ProfileSessionId = string.Empty;
+        public string AuthorizationId = string.Empty;
+        public string AuthorizationSourceResultId = string.Empty;
+        public string AuthorizationSourceResultHash = string.Empty;
+
+        public static TerritoryCaptureReceiptRecord FromReceipt(
+            AL.RealmWar.Territories.Contracts.TerritoryCaptureReceipt receipt)
+        {
+            if (receipt == null)
+            {
+                return null;
+            }
+
+            return new TerritoryCaptureReceiptRecord
+            {
+                ReceiptId = receipt.ReceiptId,
+                OperationId = receipt.OperationId,
+                SemanticHash = receipt.SemanticHash,
+                Durability = (int)receipt.Durability,
+                ResultId = receipt.ResultId,
+                EventId = receipt.EventId,
+                TerritoryId = receipt.TerritoryId,
+                PreviousOwner = receipt.PreviousOwner,
+                NewOwner = receipt.NewOwner,
+                PreviousRevision = receipt.PreviousRevision,
+                NewRevision = receipt.NewRevision,
+                WarzoneCreditsDelta = receipt.WarzoneCreditsDelta,
+                QuestProgressDelta = receipt.QuestProgressDelta,
+                CatalogId = receipt.CatalogId,
+                CatalogSchemaVersion = receipt.CatalogSchemaVersion,
+                CatalogContentVersion = receipt.CatalogContentVersion,
+                CatalogSourceRevision = receipt.CatalogSourceRevision,
+                CatalogRawSha256 = receipt.CatalogRawSha256,
+                StateRevisionHash = receipt.StateRevisionHash,
+                ProfileSessionId = receipt.ProfileSessionId,
+                AuthorizationId = receipt.AuthorizationId,
+                AuthorizationSourceResultId = receipt.AuthorizationSourceResultId,
+                AuthorizationSourceResultHash = receipt.AuthorizationSourceResultHash
+            };
+        }
+
+        public AL.RealmWar.Territories.Contracts.TerritoryCaptureReceipt ToReceipt()
+        {
+            return new AL.RealmWar.Territories.Contracts.TerritoryCaptureReceipt(
+                ReceiptId,
+                OperationId,
+                SemanticHash,
+                (AL.RealmWar.Territories.Contracts.TerritoryOperationDurability)Durability,
+                ResultId,
+                EventId,
+                TerritoryId,
+                PreviousOwner,
+                NewOwner,
+                PreviousRevision,
+                NewRevision,
+                WarzoneCreditsDelta,
+                QuestProgressDelta,
+                new AL.RealmWar.Territories.Contracts.TerritoryCatalogIdentity(
+                    CatalogId,
+                    CatalogSchemaVersion,
+                    CatalogContentVersion,
+                    CatalogSourceRevision,
+                    CatalogRawSha256),
+                StateRevisionHash,
+                ProfileSessionId,
+                AuthorizationId,
+                AuthorizationSourceResultId,
+                AuthorizationSourceResultHash);
+        }
+    }
+
+    [Serializable]
+    public sealed class TerritoryCaptureOutboxRecord
+    {
+        public string EventId = string.Empty;
+        public string CaptureOperationId = string.Empty;
+        public string TerritoryId = string.Empty;
+        public RealmId PreviousOwner;
+        public RealmId NewOwner;
+        public long PreviousRevision;
+        public long NewRevision;
+        public string CatalogId = string.Empty;
+        public int CatalogSchemaVersion;
+        public int CatalogContentVersion;
+        public string CatalogSourceRevision = string.Empty;
+        public string CatalogRawSha256 = string.Empty;
+        public string StateRevisionHash = string.Empty;
+        public string ProfileSessionId = string.Empty;
+        public string AuthorizationId = string.Empty;
+        public string AuthorizationSourceResultId = string.Empty;
+        public string AuthorizationSourceResultHash = string.Empty;
+        public string ReceiptId = string.Empty;
+
+        public static TerritoryCaptureOutboxRecord FromEvent(
+            AL.RealmWar.Territories.Contracts.TerritoryCaptureCommittedEvent committedEvent)
+        {
+            if (committedEvent == null)
+            {
+                return null;
+            }
+
+            return new TerritoryCaptureOutboxRecord
+            {
+                EventId = committedEvent.EventId,
+                CaptureOperationId = committedEvent.CaptureOperationId,
+                TerritoryId = committedEvent.TerritoryId,
+                PreviousOwner = committedEvent.PreviousOwner,
+                NewOwner = committedEvent.NewOwner,
+                PreviousRevision = committedEvent.PreviousRevision,
+                NewRevision = committedEvent.NewRevision,
+                CatalogId = committedEvent.CatalogId,
+                CatalogSchemaVersion = committedEvent.CatalogSchemaVersion,
+                CatalogContentVersion = committedEvent.CatalogContentVersion,
+                CatalogSourceRevision = committedEvent.CatalogSourceRevision,
+                CatalogRawSha256 = committedEvent.CatalogRawSha256,
+                StateRevisionHash = committedEvent.StateRevisionHash,
+                ProfileSessionId = committedEvent.ProfileSessionId,
+                AuthorizationId = committedEvent.AuthorizationId,
+                AuthorizationSourceResultId = committedEvent.AuthorizationSourceResultId,
+                AuthorizationSourceResultHash = committedEvent.AuthorizationSourceResultHash,
+                ReceiptId = committedEvent.ReceiptId
+            };
+        }
     }
 
     [Serializable]
