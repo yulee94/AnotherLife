@@ -217,8 +217,9 @@ jobs:
               "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/56_vaeloryn_multiview_02_v001.png"
             ) -join ","
             if ($env:GITHUB_TOKEN) {
-              $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x:$($env:GITHUB_TOKEN)"))
-              $lfsOutput = & git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" lfs pull --include=$include *>&1
+              $basicAuth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x:$($env:GITHUB_TOKEN)"))
+              $header = "AUTHORIZATION: basic $basicAuth"
+              $lfsOutput = & git -c "http.https://github.com/.extraheader=$header" lfs pull --include=$include *>&1
               $lfsExit = $LASTEXITCODE
             } else {
               $lfsOutput = & git lfs pull --include=$include *>&1
@@ -232,6 +233,26 @@ jobs:
               Tee-Object -FilePath $transcript -Append
             if ($LASTEXITCODE -ne 0) {
               throw "Shot070 Vaeloryn motion-source tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Boss and skill presentation catalog
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/boss-skill-presentation.txt"
+          try {
+            & python -m pip install --disable-pip-version-check jsonschema==4.26.0 *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Boss/skill presentation schema dependency install exited with code $LASTEXITCODE."
+            }
+            & python tools/presentation/test_validate_boss_skill_presentation.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Boss/skill presentation tests exited with code $LASTEXITCODE."
             }
           } catch {
             $_ | Out-String | Add-Content -LiteralPath $transcript
@@ -285,6 +306,7 @@ jobs:
             artifacts/deterministic-qa/logs/
             artifacts/realm-creature-production-slice.txt
             artifacts/shot070-vaeloryn-source.txt
+            artifacts/boss-skill-presentation.txt
             artifacts/quality-gate-fixtures.txt
             artifacts/golden-scene-evidence-validator.txt
           if-no-files-found: error
