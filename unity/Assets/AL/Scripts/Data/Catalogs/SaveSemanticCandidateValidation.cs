@@ -806,6 +806,7 @@ namespace AL.Data.Catalogs
                     "Nvs01Progress",
                     "FirstWorldProgress",
                     "MapDisclosure",
+                    "RealmSelection",
                     "WarzoneCredits",
                     "LastSavedTimestamp"
                 },
@@ -1009,6 +1010,22 @@ namespace AL.Data.Catalogs
                 "ProofOmenAccepted",
                 "ProofAutoAccept",
                 "LastOperationId");
+
+        private static readonly HashSet<string> RealmSelectionFields =
+            Fields(
+                "Version",
+                "Committed",
+                "SelectedRealm",
+                "ProfileId",
+                "TransactionId",
+                "CorrelationId",
+                "OperationId",
+                "EventId",
+                "CatalogVersion",
+                "Provenance",
+                "ReceiptFingerprint",
+                "ExpectedGenerationFingerprint",
+                "Revision");
 
         private static readonly HashSet<string> MapDisclosureFields =
             Fields(
@@ -1396,6 +1413,7 @@ namespace AL.Data.Catalogs
             ValidateNvs01Progress(root, policy.Nvs01Rule, schemaVersion, collector, state);
             ValidateFirstWorldProgress(root, collector, state);
             ValidateMapDisclosure(root, collector, state);
+            ValidateRealmSelection(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
@@ -4134,6 +4152,338 @@ namespace AL.Data.Catalogs
                     path,
                     SaveSemanticDomain.Narrative);
             }
+        }
+
+        private static void ValidateRealmSelection(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.RealmSelection";
+            StrictJsonValue value;
+            if (!root.TryGet("RealmSelection", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var authority = value as StrictJsonObject;
+            if (authority == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                authority,
+                RealmSelectionFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    authority,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            bool committed;
+            if (!TryReadRequiredBoolean(
+                    authority,
+                    "Committed",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out committed))
+            {
+                return;
+            }
+
+            int selectedRealm;
+            if (!TryReadRequiredInt32(
+                    authority,
+                    "SelectedRealm",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out selectedRealm))
+            {
+                return;
+            }
+
+            string profileId;
+            string transactionId;
+            string correlationId;
+            string operationId;
+            string eventId;
+            string catalogVersion;
+            string provenance;
+            string receiptFingerprint;
+            string expectedGeneration;
+            long revision;
+            if (!TryReadRequiredString(
+                    authority,
+                    "ProfileId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out profileId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "TransactionId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out transactionId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "CorrelationId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out correlationId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "OperationId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out operationId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "EventId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out eventId) ||
+                !TryReadRequiredString(
+                    authority,
+                    "CatalogVersion",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out catalogVersion) ||
+                !TryReadRequiredString(
+                    authority,
+                    "Provenance",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out provenance) ||
+                !TryReadRequiredString(
+                    authority,
+                    "ReceiptFingerprint",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out receiptFingerprint) ||
+                !TryReadRequiredString(
+                    authority,
+                    "ExpectedGenerationFingerprint",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    true,
+                    collector,
+                    state,
+                    out expectedGeneration) ||
+                !TryReadRequiredInt64(
+                    authority,
+                    "Revision",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out revision))
+            {
+                return;
+            }
+
+            if (!committed)
+            {
+                if ((version == 0 || version == 1) &&
+                    selectedRealm == 0 &&
+                    revision == 0 &&
+                    string.IsNullOrEmpty(profileId) &&
+                    string.IsNullOrEmpty(transactionId) &&
+                    string.IsNullOrEmpty(correlationId) &&
+                    string.IsNullOrEmpty(operationId) &&
+                    string.IsNullOrEmpty(eventId) &&
+                    string.IsNullOrEmpty(catalogVersion) &&
+                    string.IsNullOrEmpty(provenance) &&
+                    string.IsNullOrEmpty(receiptFingerprint) &&
+                    string.IsNullOrEmpty(expectedGeneration))
+                {
+                    return;
+                }
+
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_UNCOMMITTED_SLOT",
+                    path + ".Committed",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version != 1)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_VERSION_INVALID",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (selectedRealm < 1 || selectedRealm > 4)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_REALM_INVALID",
+                    path + ".SelectedRealm",
+                    SaveSemanticDomain.Envelope);
+            }
+
+            int envelopeRealm;
+            StrictJsonValue envelopeRealmValue;
+            if (root.TryGet("SelectedRealm", out envelopeRealmValue) &&
+                TryReadInt32(envelopeRealmValue, out envelopeRealm) &&
+                envelopeRealm != selectedRealm)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_REALM_MISMATCH",
+                    path + ".SelectedRealm",
+                    SaveSemanticDomain.Envelope);
+            }
+
+            if (!IsCanonicalProfileIdValue(profileId))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_PROFILE_ID_INVALID",
+                    path + ".ProfileId",
+                    SaveSemanticDomain.Envelope);
+            }
+
+            if (!IsBoundedRealmIdentity(transactionId) ||
+                !IsBoundedRealmIdentity(correlationId) ||
+                !IsBoundedRealmIdentity(operationId) ||
+                !IsBoundedRealmIdentity(receiptFingerprint) ||
+                (!string.IsNullOrEmpty(eventId) && !IsBoundedRealmIdentity(eventId)))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_IDENTITY_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+            }
+
+            if (!string.Equals(provenance, "initial", StringComparison.Ordinal) &&
+                !string.Equals(provenance, "legacy-migration", StringComparison.Ordinal))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_PROVENANCE_INVALID",
+                    path + ".Provenance",
+                    SaveSemanticDomain.Envelope);
+            }
+
+            if (revision != 1)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_REALM_SELECTION_REVISION_INVALID",
+                    path + ".Revision",
+                    SaveSemanticDomain.Envelope);
+            }
+        }
+
+        private static bool IsBoundedRealmIdentity(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) ||
+                value.Length < 8 ||
+                value.Length > 64)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < value.Length; i++)
+            {
+                char c = value[i];
+                if (!((c >= 'A' && c <= 'Z') ||
+                      (c >= 'a' && c <= 'z') ||
+                      (c >= '0' && c <= '9') ||
+                      c == '_' ||
+                      c == '-' ||
+                      c == '.'))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static void ValidateFirstWorldProgress(
