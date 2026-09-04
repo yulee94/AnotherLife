@@ -463,10 +463,22 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 Is.Not.Null);
             GameObject clearPanel = GameObject.Find("EncounterClearPanel");
             Assert.That(clearPanel, Is.Not.Null);
+            string[] recapText = clearPanel.GetComponentsInChildren<Text>()
+                .Select(text => text.text).ToArray();
+            Assert.That(recapText, Does.Contain("PRACTICE COMPLETE"));
+            Assert.That(recapText, Does.Contain("PRACTICE — NO COMMITTED REWARD"));
+            Assert.That(recapText, Does.Contain("PROGRESSION NOT COMMITTED"));
+            Assert.That(recapText.Any(text => text.StartsWith("ENCOUNTER CLEAR") ||
+                                              text.StartsWith("REWARD RECEIPT ")), Is.False);
+            Assert.That(arena.AuthoritativeEncounterPresentationPlan.VisiblyPractice, Is.True);
+            Assert.That(arena.AuthoritativeEncounterPresentationPlan.ShowsCommittedReward, Is.False);
+            Assert.That(arena.AuthoritativeEncounterPresentationPlan.ShowsCommittedProgression, Is.False);
             Button continueResult = clearPanel.GetComponentsInChildren<Button>(true)
                 .Single(button => button.name == "Continue");
             continueResult.onClick.Invoke();
-            yield return null;
+            yield return new WaitForSeconds(0.3f);
+            Assert.That(clearPanel.activeSelf, Is.False,
+                "Refreshing the HUD after Continue must not reopen the practice recap.");
             Assert.That(player.BlocksGameplayEntry, Is.False,
                 "Continuing from the first-session result must release the recap owner before accepting the mark.");
             Assert.That(
@@ -481,7 +493,7 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(
                 ImplementsInterface(
                     isolatedSave,
-                    "AL.Services.Local.ILegacyMvpLoopCandidateStore"),
+                    "AL.Services.Local.IProfileBoundFirstSessionCandidateStore"),
                 Is.True);
             Assert.That(isolatedSave.LastSaveStatus, Is.EqualTo(SaveOperationStatus.SavedPrimary));
             Assert.That(ProfileMutationContainment.ProductionWriteActivationEnabled, Is.False,
@@ -489,8 +501,8 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(
                 ProfileWriteAuthorityProviderGuard.IsCurrentWritable(
                     (IProfileWriteAuthorityProvider)isolatedSave),
-                Is.False,
-                "Only the reviewed typed first-user candidate seams may write during this trial.");
+                Is.True,
+                "The isolated schema-2 profile must retain current Writable authority while the general mutation latch stays closed.");
 
             ISaveGameService reloaded = CreateIsolatedLocalSaveService(_isolatedSaveRoot);
             reloaded.Load();
