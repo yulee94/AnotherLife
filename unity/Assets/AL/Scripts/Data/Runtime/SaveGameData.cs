@@ -329,7 +329,38 @@ namespace AL.Data.Runtime
         public List<string> ConsequenceIntentIds = new List<string>();
         public List<string> AcquiredArtifactIds = new List<string>();
         public List<string> AppliedEffectKeys = new List<string>();
+        public List<string> AppliedOperationIds = new List<string>();
+        public List<Nvs01ConsequenceApplicationReceiptData> ApplicationReceipts =
+            new List<Nvs01ConsequenceApplicationReceiptData>();
         public string UnlockedChapterId = string.Empty;
+    }
+
+    [Serializable]
+    public class Nvs01ConsequenceApplicationReceiptData
+    {
+        public int ContractVersion;
+        public int Kind;
+        public string OperationId = string.Empty;
+        public string ProfileId = string.Empty;
+        public string ExpectedGenerationFingerprint = string.Empty;
+        public string CausalOperationId = string.Empty;
+        public string CausalPayloadFingerprint = string.Empty;
+        public string PredecessorReceiptFingerprint = string.Empty;
+        public string PredecessorExpectedGenerationFingerprint = string.Empty;
+        public string RealmId = string.Empty;
+        public string CorrelationId = string.Empty;
+        public long ExpectedQuestRevision;
+        public long CandidateQuestRevision;
+        public List<string> EffectKeys = new List<string>();
+        public string TargetChapterId = string.Empty;
+        public string TechnicalCurrencyId = string.Empty;
+        public long PreviousGoldBalance;
+        public long ResultingGoldBalance;
+        public float PreviousValeriusAffinity;
+        public float ResultingValeriusAffinity;
+        public string PreviousChapterId = string.Empty;
+        public string ResultingChapterId = string.Empty;
+        public string PlanFingerprint = string.Empty;
     }
 
     [Serializable]

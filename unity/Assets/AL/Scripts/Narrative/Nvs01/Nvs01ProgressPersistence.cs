@@ -48,6 +48,9 @@ namespace AL.Narrative.Nvs01
                 ConsequenceIntentIds = snapshot.ConsequenceIntentIds.ToList(),
                 AcquiredArtifactIds = new List<string>(),
                 AppliedEffectKeys = new List<string>(),
+                AppliedOperationIds = new List<string>(),
+                ApplicationReceipts =
+                    new List<Nvs01ConsequenceApplicationReceiptData>(),
                 UnlockedChapterId = string.Empty
             };
 
@@ -329,11 +332,25 @@ namespace AL.Narrative.Nvs01
                 return false;
             }
 
-            if (data.AcquiredArtifactIds.Count != 0 ||
-                data.AppliedEffectKeys.Count != 0 ||
-                !string.IsNullOrEmpty(data.UnlockedChapterId))
+            data.AppliedOperationIds = data.AppliedOperationIds ??
+                new List<string>();
+            data.ApplicationReceipts = data.ApplicationReceipts ??
+                new List<Nvs01ConsequenceApplicationReceiptData>();
+            if (data.AcquiredArtifactIds.Count >
+                    Nvs01RuntimeContract.MaximumConsequenceIntentCount ||
+                data.AppliedEffectKeys.Count >
+                    Nvs01RuntimeContract.MaximumConsequenceIntentCount ||
+                data.AppliedOperationIds.Count >
+                    Nvs01ConsequenceContract.MaximumAppliedOperationCount ||
+                data.ApplicationReceipts.Count >
+                    Nvs01ConsequenceContract.MaximumApplicationReceiptCount)
             {
-                error = "unsupported consequence state";
+                error = "collection bound or nullability failure";
+                return false;
+            }
+
+            if (!TryAcceptConsequenceLedger(data, out error))
+            {
                 return false;
             }
 
@@ -436,8 +453,10 @@ namespace AL.Narrative.Nvs01
                 HasLastOperation = source.HasLastOperation,
                 LastOperation = Clone(source.LastOperation),
                 ConsequenceIntentIds = new List<string>(source.ConsequenceIntentIds),
-                AcquiredArtifactIds = new List<string>(source.AcquiredArtifactIds),
-                AppliedEffectKeys = new List<string>(source.AppliedEffectKeys),
+                AcquiredArtifactIds = CloneStrings(source.AcquiredArtifactIds),
+                AppliedEffectKeys = CloneStrings(source.AppliedEffectKeys),
+                AppliedOperationIds = CloneStrings(source.AppliedOperationIds),
+                ApplicationReceipts = CloneReceipts(source.ApplicationReceipts),
                 UnlockedChapterId = source.UnlockedChapterId
             };
         }
@@ -625,6 +644,10 @@ namespace AL.Narrative.Nvs01
             data.AcquiredArtifactIds.Count == 0 &&
             data.AppliedEffectKeys != null &&
             data.AppliedEffectKeys.Count == 0 &&
+            data.AppliedOperationIds != null &&
+            data.AppliedOperationIds.Count == 0 &&
+            data.ApplicationReceipts != null &&
+            data.ApplicationReceipts.Count == 0 &&
             string.IsNullOrEmpty(data.UnlockedChapterId);
 
         private static bool IsNeutral(Nvs01EncounterRequestData data) =>
@@ -654,6 +677,243 @@ namespace AL.Narrative.Nvs01
             string.IsNullOrEmpty(data.EventId) &&
             string.IsNullOrEmpty(data.CorrelationId) &&
             string.IsNullOrEmpty(data.ExpectedGenerationFingerprint);
+
+        internal static void CopyConsequenceLedger(
+            Nvs01ProgressData destination,
+            Nvs01ProgressData source)
+        {
+            if (destination == null || source == null) return;
+            destination.AcquiredArtifactIds = CloneStrings(source.AcquiredArtifactIds);
+            destination.AppliedEffectKeys = CloneStrings(source.AppliedEffectKeys);
+            destination.AppliedOperationIds = CloneStrings(source.AppliedOperationIds);
+            destination.ApplicationReceipts = CloneReceipts(source.ApplicationReceipts);
+            destination.UnlockedChapterId = source.UnlockedChapterId ?? string.Empty;
+        }
+
+        internal static Nvs01ConsequenceApplicationReceiptData EncodeReceipt(
+            Nvs01ConsequenceApplicationReceipt receipt)
+        {
+            if (receipt == null) return null;
+            return new Nvs01ConsequenceApplicationReceiptData
+            {
+                ContractVersion = receipt.ContractVersion,
+                Kind = (int)receipt.Kind,
+                OperationId = receipt.OperationId,
+                ProfileId = receipt.ProfileId,
+                ExpectedGenerationFingerprint =
+                    receipt.ExpectedGenerationFingerprint,
+                CausalOperationId = receipt.CausalOperationId,
+                CausalPayloadFingerprint = receipt.CausalPayloadFingerprint,
+                PredecessorReceiptFingerprint =
+                    receipt.PredecessorReceiptFingerprint,
+                PredecessorExpectedGenerationFingerprint =
+                    receipt.PredecessorExpectedGenerationFingerprint,
+                RealmId = receipt.RealmId,
+                CorrelationId = receipt.CorrelationId,
+                ExpectedQuestRevision = receipt.ExpectedQuestRevision,
+                CandidateQuestRevision = receipt.CandidateQuestRevision,
+                EffectKeys = new List<string>(receipt.EffectKeys),
+                TargetChapterId = receipt.TargetChapterId,
+                TechnicalCurrencyId = receipt.TechnicalCurrencyId,
+                PreviousGoldBalance = receipt.PreviousGoldBalance,
+                ResultingGoldBalance = receipt.ResultingGoldBalance,
+                PreviousValeriusAffinity = receipt.PreviousValeriusAffinity,
+                ResultingValeriusAffinity = receipt.ResultingValeriusAffinity,
+                PreviousChapterId = receipt.PreviousChapterId,
+                ResultingChapterId = receipt.ResultingChapterId,
+                PlanFingerprint = receipt.PlanFingerprint
+            };
+        }
+
+        internal static bool HasExactConsequenceLedger(Nvs01ProgressData data) =>
+            TryAcceptConsequenceLedger(data, out _);
+
+        internal static Nvs01ConsequenceApplicationReceipt DecodeReceipt(
+            Nvs01ConsequenceApplicationReceiptData data)
+        {
+            if (data == null) return null;
+            return new Nvs01ConsequenceApplicationReceipt(
+                data.ContractVersion,
+                (Nvs01ConsequencePlanKind)data.Kind,
+                data.OperationId,
+                data.ProfileId,
+                data.ExpectedGenerationFingerprint,
+                data.CausalOperationId,
+                data.CausalPayloadFingerprint,
+                data.PredecessorReceiptFingerprint,
+                data.PredecessorExpectedGenerationFingerprint,
+                data.RealmId,
+                data.CorrelationId,
+                data.ExpectedQuestRevision,
+                data.CandidateQuestRevision,
+                data.EffectKeys,
+                data.TargetChapterId,
+                data.PreviousGoldBalance,
+                data.ResultingGoldBalance,
+                data.PreviousValeriusAffinity,
+                data.ResultingValeriusAffinity,
+                data.PreviousChapterId,
+                data.ResultingChapterId,
+                data.PlanFingerprint,
+                data.TechnicalCurrencyId);
+        }
+
+        private static bool TryAcceptConsequenceLedger(
+            Nvs01ProgressData data,
+            out string error)
+        {
+            error = string.Empty;
+            IList<string> artifacts = data.AcquiredArtifactIds ?? new List<string>();
+            IList<string> effects = data.AppliedEffectKeys ?? new List<string>();
+            IList<string> operations = data.AppliedOperationIds ?? new List<string>();
+            IList<Nvs01ConsequenceApplicationReceiptData> receipts =
+                data.ApplicationReceipts ??
+                new List<Nvs01ConsequenceApplicationReceiptData>();
+            bool chapterEmpty = string.IsNullOrEmpty(data.UnlockedChapterId);
+            if (artifacts.Count == 0 &&
+                effects.Count == 0 &&
+                operations.Count == 0 &&
+                receipts.Count == 0 &&
+                chapterEmpty)
+            {
+                return true;
+            }
+
+            if (receipts.Count == 0 ||
+                receipts.Count > Nvs01ConsequenceContract.MaximumApplicationReceiptCount ||
+                operations.Count != receipts.Count ||
+                artifacts.Count > Nvs01ConsequenceContract.MaximumArtifactCount ||
+                effects.Count > Nvs01ConsequenceContract.MaximumAppliedEffectCount)
+            {
+                error = "unsupported consequence state";
+                return false;
+            }
+
+            var expectedEffects = new List<string>();
+            var expectedOperations = new List<string>();
+            bool sawArena = false;
+            bool sawReport = false;
+            for (int index = 0; index < receipts.Count; index++)
+            {
+                Nvs01ConsequenceApplicationReceipt receipt =
+                    DecodeReceipt(receipts[index]);
+                if (receipt == null ||
+                    !receipt.HasCanonicalFingerprint() ||
+                    !Nvs01ConsequenceContract.IsAuthoritativeOathmarkCurrency(
+                        receipt.TechnicalCurrencyId))
+                {
+                    error = "unsupported consequence state";
+                    return false;
+                }
+
+                expectedOperations.Add(receipt.OperationId);
+                for (int effect = 0; effect < receipt.EffectKeys.Count; effect++)
+                {
+                    expectedEffects.Add(receipt.EffectKeys[effect]);
+                }
+
+                if (receipt.Kind == Nvs01ConsequencePlanKind.ArenaSuccess)
+                {
+                    sawArena = true;
+                }
+                else if (receipt.Kind == Nvs01ConsequencePlanKind.ReportCompletion)
+                {
+                    sawReport = true;
+                }
+            }
+
+            if (!SameOrdinal(artifacts, sawArena
+                    ? new[] { Nvs01ConsequenceContract.TearArtifactId }
+                    : Array.Empty<string>()) ||
+                !SameOrdinal(effects, expectedEffects) ||
+                !SameOrdinal(operations, expectedOperations) ||
+                (sawReport && chapterEmpty) ||
+                (!sawReport && !chapterEmpty))
+            {
+                error = "unsupported consequence state";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool SameOrdinal(
+            IList<string> actual,
+            IList<string> expected)
+        {
+            if (actual == null || expected == null || actual.Count != expected.Count)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < actual.Count; index++)
+            {
+                if (!string.Equals(
+                        actual[index],
+                        expected[index],
+                        StringComparison.Ordinal))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static List<string> CloneStrings(IList<string> source)
+        {
+            return source == null
+                ? new List<string>()
+                : new List<string>(source);
+        }
+
+        private static List<Nvs01ConsequenceApplicationReceiptData> CloneReceipts(
+            IList<Nvs01ConsequenceApplicationReceiptData> source)
+        {
+            var copy = new List<Nvs01ConsequenceApplicationReceiptData>();
+            if (source == null) return copy;
+            for (int index = 0; index < source.Count; index++)
+            {
+                Nvs01ConsequenceApplicationReceiptData row = source[index];
+                if (row == null)
+                {
+                    copy.Add(null);
+                    continue;
+                }
+
+                copy.Add(new Nvs01ConsequenceApplicationReceiptData
+                {
+                    ContractVersion = row.ContractVersion,
+                    Kind = row.Kind,
+                    OperationId = row.OperationId,
+                    ProfileId = row.ProfileId,
+                    ExpectedGenerationFingerprint =
+                        row.ExpectedGenerationFingerprint,
+                    CausalOperationId = row.CausalOperationId,
+                    CausalPayloadFingerprint = row.CausalPayloadFingerprint,
+                    PredecessorReceiptFingerprint =
+                        row.PredecessorReceiptFingerprint,
+                    PredecessorExpectedGenerationFingerprint =
+                        row.PredecessorExpectedGenerationFingerprint,
+                    RealmId = row.RealmId,
+                    CorrelationId = row.CorrelationId,
+                    ExpectedQuestRevision = row.ExpectedQuestRevision,
+                    CandidateQuestRevision = row.CandidateQuestRevision,
+                    EffectKeys = CloneStrings(row.EffectKeys),
+                    TargetChapterId = row.TargetChapterId,
+                    TechnicalCurrencyId = row.TechnicalCurrencyId,
+                    PreviousGoldBalance = row.PreviousGoldBalance,
+                    ResultingGoldBalance = row.ResultingGoldBalance,
+                    PreviousValeriusAffinity = row.PreviousValeriusAffinity,
+                    ResultingValeriusAffinity = row.ResultingValeriusAffinity,
+                    PreviousChapterId = row.PreviousChapterId,
+                    ResultingChapterId = row.ResultingChapterId,
+                    PlanFingerprint = row.PlanFingerprint
+                });
+            }
+
+            return copy;
+        }
 
         private static Nvs01RuntimeDiagnostic Diagnostic(
             string code,
@@ -953,8 +1213,11 @@ namespace AL.Narrative.Nvs01
                     "SAVE-CONFLICT");
             }
 
-            candidateSave.Nvs01Progress =
-                Nvs01ProgressCodec.Encode(plan.Candidate);
+            Nvs01ProgressData encoded = Nvs01ProgressCodec.Encode(plan.Candidate);
+            Nvs01ProgressCodec.CopyConsequenceLedger(
+                encoded,
+                candidateSave.Nvs01Progress);
+            candidateSave.Nvs01Progress = encoded;
             if (!string.Equals(
                     candidateSave.ProfileId ?? string.Empty,
                     requiredProfileId,
