@@ -56,6 +56,9 @@ namespace AL.Data.Runtime
         // Optional schema-v2 extension. Missing legacy/schema-2 saves have no
         // active world event and do not invent one until a committed start.
         public WorldStatePersistentState WorldState;
+        // Optional schema-v2 extension. Missing legacy/schema-2 saves admit
+        // empty Guild City seasons until a trusted-clock commit persists them.
+        public AL.Guilds.GuildCitySeasonPersistentState GuildCitySeason;
         public int WarzoneCredits;
         public long LastSavedTimestamp;
         // Optional schema-v1 extension. Missing legacy saves admit empty
