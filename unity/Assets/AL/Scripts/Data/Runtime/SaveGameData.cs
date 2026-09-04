@@ -64,6 +64,37 @@ namespace AL.Data.Runtime
         // Optional schema-v1 extension. Missing legacy saves admit empty
         // receipts/outbox and derive ownership revisions as 0 from Territories.
         public TerritoryCaptureLedgerData TerritoryCaptureLedger;
+        // Optional schema-v2 extension. Missing legacy schema-2 saves admit
+        // no catch-up receipt; OfflineProgressApplied stays false until a
+        // verified catch-up commit installs this marker.
+        public OfflineProductionCatchUpState OfflineProductionCatchUp;
+    }
+
+    [Serializable]
+    public sealed class OfflineProductionCatchUpState
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public string OperationId = string.Empty;
+        public string ReceiptId = string.Empty;
+        public string ProfileId = string.Empty;
+        public string VerifiedGenerationFingerprint = string.Empty;
+        public long LastVerifiedTimestamp;
+        public long CatchUpUntilTimestamp;
+        public long CappedElapsedSeconds;
+        public string CatalogId = string.Empty;
+        public string CatalogSha256 = string.Empty;
+        public string SourceRevision = string.Empty;
+        public List<OfflineProductionDeltaRecord> Deltas =
+            new List<OfflineProductionDeltaRecord>();
+    }
+
+    [Serializable]
+    public sealed class OfflineProductionDeltaRecord
+    {
+        public ResourceType ResourceType;
+        public long Amount;
     }
 
     [Serializable]

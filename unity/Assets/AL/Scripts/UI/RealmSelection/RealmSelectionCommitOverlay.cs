@@ -1,5 +1,6 @@
 using System;
 using AL.Core;
+using AL.RealmSelection;
 using AL.UI.Presentation;
 using UnityEngine;
 using UnityEngine.UI;
@@ -73,7 +74,25 @@ namespace AL.UI.RealmSelection
 
             if (_lockWarning != null)
             {
-                _lockWarning.text = RealmSelectionIdentity.LockWarningFallback;
+                string warning;
+                RealmSelectionFeedback.TryResolveLockWarning(RealmCatalogRuntime.Current, out warning);
+                _lockWarning.text = warning;
+            }
+
+            gameObject.SetActive(true);
+            transform.SetAsLastSibling();
+        }
+
+        public void PresentOutcome(string title, string body)
+        {
+            if (_title != null && !string.IsNullOrEmpty(title))
+            {
+                _title.text = title;
+            }
+
+            if (_lockWarning != null)
+            {
+                _lockWarning.text = body ?? string.Empty;
             }
 
             gameObject.SetActive(true);
