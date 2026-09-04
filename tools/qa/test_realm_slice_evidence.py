@@ -253,7 +253,7 @@ class RealmSliceIdentityTests(unittest.TestCase):
 
     def test_mode_namespace_controls_the_non_overlapping_output_path(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             path = self.module.row_directory(root, self.envelope)
             expected = (
                 root / self.envelope["candidateId"] / "Stonehold" / "3d" / "ko-KR"
