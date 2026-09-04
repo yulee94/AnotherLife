@@ -61,8 +61,12 @@ namespace AL.Tests.EditMode
                 object currentSave = GetProperty(service, "CurrentSave");
                 Assert.NotNull(currentSave);
                 Assert.AreEqual(CurrentSaveFormatId, GetField(currentSave, "SaveFormatId"));
-                Assert.AreEqual(1, GetField(currentSave, "SaveSchemaVersion"));
-                Assert.AreEqual(1, GetField(currentSave, "ProfileInitializationVersion"));
+                Assert.AreEqual(
+                    SaveGameData.CurrentSaveSchemaVersion,
+                    GetField(currentSave, "SaveSchemaVersion"));
+                Assert.AreEqual(
+                    SaveGameData.CurrentProfileInitializationVersion,
+                    GetField(currentSave, "ProfileInitializationVersion"));
                 Assert.AreEqual("Crownlands", GetField(currentSave, "SelectedRealm").ToString());
                 Assert.AreEqual(4300, GetField(currentSave, "WarzoneCredits"));
 

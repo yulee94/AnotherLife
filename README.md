@@ -29,6 +29,18 @@ C:\Users\MY\Documents\AnotherLife
 
 Android Studio, Unity Hub, GitHub, Fable, Gemini, and other tools are tools only. They are not repository agents, owners, approval gates, or workstreams.
 
+### Unity asset prerequisites
+
+Unity textures and other large assets are stored in Git LFS. Before opening Unity or running asset tests, use `git lfs pull` to download the tracked content. A checkout made with LFS downloads disabled contains text pointers instead of usable images; Unity then reports missing textures even though the paths exist.
+
+For a bounded architecture and app-icon test run, download just those asset families:
+
+```sh
+git lfs pull --include='unity/Assets/AL/Art/Architecture/**,unity/Assets/AL/Art/Generated/Architecture/**,unity/Assets/AL/Art/Branding/AndroidAdaptive/**,unity/Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png' --exclude=''
+```
+
+This restores existing versioned content; it does not generate or replace approved art. Other asset suites may need additional LFS paths. Keep platform-specific validation explicit: Windows registry/save-handle tests require Windows, and rendering checks need a graphics-capable Unity run.
+
 ## Ownership model
 
 The final user decision is recorded in `unity/Docs/Ownership_Decision_Record.md`: **this Codex agent owns all project workload and responsibility for Another Life.**

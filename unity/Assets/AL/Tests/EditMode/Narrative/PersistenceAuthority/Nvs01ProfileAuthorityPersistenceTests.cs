@@ -92,11 +92,18 @@ namespace AL.Tests.EditMode.Narrative
                 durableReceipt.EventId,
                 durableReceipt.PayloadFingerprint,
                 "Result identity and payload identity must remain distinct.");
-            string serializedCandidate = JsonUtility.ToJson(store.Durable);
+            string serializedCandidate =
+                JsonUtility.ToJson(store.Durable.Nvs01Progress);
             StringAssert.DoesNotContain(
-                "AuthorityEpoch",
+                "\"AuthorityEpoch\"",
                 serializedCandidate,
-                "AuthorityEpoch is process-local and must never enter save bytes.");
+                "NVS01 process-local authority epochs must never enter NVS01 progress save bytes.");
+            string entireSave = JsonUtility.ToJson(store.Durable);
+            foreach (string processEpoch in new[] { EpochA, EpochB, EpochC })
+            {
+                StringAssert.DoesNotContain(processEpoch, entireSave,
+                    "Process-local save authority tokens must not leak into any persisted domain.");
+            }
 
             string committedFingerprint =
                 store.Authority.VerifiedGenerationFingerprint;

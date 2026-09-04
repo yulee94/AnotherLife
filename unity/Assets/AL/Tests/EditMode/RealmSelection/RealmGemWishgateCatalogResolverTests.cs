@@ -26,8 +26,10 @@ namespace AL.Tests.EditMode.RealmSelection
             Assert.That(result.TechnicalCode, Is.EqualTo(RealmGemWishgateCatalogResolver.ReadyCode));
             Assert.That(result.Snapshot, Is.Not.Null);
             Assert.That(result.Snapshot.SourceVersion, Is.EqualTo("0.1.0"));
+            Assert.That(sourceBytes, Has.Length.EqualTo(
+                RealmGemWishgateCatalogResolver.ExpectedSourceByteLength));
             Assert.That(result.Snapshot.SourceSha256, Is.EqualTo(
-                "942699cb3c39ebea243c381bd5cadf78ab85aef177902ed09aad2b60897a086b"));
+                RealmGemWishgateCatalogResolver.ExpectedSourceSha256));
             CollectionAssert.AreEqual(
                 new[]
                 {

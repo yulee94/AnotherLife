@@ -112,8 +112,15 @@ namespace AL.Tests.EditMode.AndroidBridge
                 "bridge.route_mismatch",
                 "bridge.duplicate_outcome",
                 "bridge.session_closed",
-                "bridge.send_unavailable"
+                "bridge.send_unavailable",
+                "bridge.duplicate_ready",
+                "bridge.ready_after_outcome"
             };
+            Assert.That(
+                diagnosticValues,
+                Has.Length.EqualTo(
+                    Enum.GetValues(
+                        typeof(UnityBridgeProtocolErrorCode)).Length));
             foreach (UnityBridgeProtocolErrorCode code in
                      Enum.GetValues(typeof(UnityBridgeProtocolErrorCode)))
             {

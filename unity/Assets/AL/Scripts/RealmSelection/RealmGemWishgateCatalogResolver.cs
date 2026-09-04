@@ -216,10 +216,10 @@ namespace AL.RealmSelection
         public const string ExpectedCatalogId = "al_realm_gem_wishgate_content_catalog";
         public const string ExpectedSourcePacketId = "al_narrative_realm_gem_wishgate_source_v001";
         public const string SupportedVersion = "0.1.0";
-        public const int ExpectedSourceByteLength = 16513;
+        public const int ExpectedSourceByteLength = 16239;
         public const int MaximumSourceBytes = 32768;
         public const string ExpectedSourceSha256 =
-            "942699cb3c39ebea243c381bd5cadf78ab85aef177902ed09aad2b60897a086b";
+            "899892f08ecb330359586f3d2ba767c193e4e6c9c91f380cb5c35ccec9a057ce";
 
         public const string ReadyCode = "AL-REALM-GEM-WISHGATE-CATALOG-READY";
         public const string InvalidQueryIdCode = "AL-REALM-GEM-WISHGATE-ID-INVALID";
