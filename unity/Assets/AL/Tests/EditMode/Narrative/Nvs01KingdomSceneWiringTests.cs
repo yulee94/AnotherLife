@@ -29,6 +29,7 @@ namespace AL.Tests.EditMode.Narrative
         public void SetUp()
         {
             ServicesDictionary().Clear();
+            EnsureCatalogPublished();
             ServiceLocator.Register<IRealmService>(new CommittedRealmService(RealmId.Crownlands));
             _saveRoot = Path.Combine(
                 Path.GetTempPath(),
@@ -37,6 +38,11 @@ namespace AL.Tests.EditMode.Narrative
             Directory.CreateDirectory(_saveRoot);
             var saveService = CreateSaveService(_saveRoot);
             saveService.CreateNewSave(RealmId.Crownlands);
+            SaveGameData save = saveService.CurrentSave;
+            Assert.NotNull(save);
+            save.RealmSelection = CommittedReceipt(RealmId.Crownlands, save.ProfileId);
+            WriteCanonicalSave(save);
+            saveService.Load();
             ServiceLocator.Register<ISaveGameService>(saveService);
         }
 
@@ -55,6 +61,7 @@ namespace AL.Tests.EditMode.Narrative
             }
 
             ServicesDictionary().Clear();
+            RestoreCatalog();
             if (!string.IsNullOrEmpty(_saveRoot) && Directory.Exists(_saveRoot))
             {
                 Directory.Delete(_saveRoot, true);
@@ -434,7 +441,7 @@ namespace AL.Tests.EditMode.Narrative
             Assert.That(source, Does.Not.Contain("Nvs01KingdomPresenter.CreateInMemory"));
             Assert.That(source, Does.Not.Contain("SceneManager"));
             Assert.That(source, Does.Contain("Nvs01CatalogLoader.Shared"));
-            Assert.That(source, Does.Contain("Nvs01RealmContextAdapter.FromCommittedIdentity"));
+            Assert.That(source, Does.Contain("Nvs01RealmContextAdapter.FromPersistedIdentity"));
         }
 
         private KingdomSceneController CreateController(bool profileReady)
@@ -460,6 +467,61 @@ namespace AL.Tests.EditMode.Narrative
             {
                 UnityEngine.Object.DestroyImmediate(canvas);
             }
+        }
+
+        private void EnsureCatalogPublished()
+        {
+            string path = Path.Combine(
+                Application.dataPath,
+                "AL",
+                "StreamingAssets",
+                "GameData",
+                "realm_specialized.v1.json");
+            RealmCatalogLoadResult parsed = RealmCatalogRuntime.Parse(File.ReadAllText(path));
+            Assert.That(parsed.IsSuccess, Is.True, parsed.TechnicalCode);
+            SetRuntimeCatalog(parsed.Snapshot);
+        }
+
+        private static void RestoreCatalog()
+        {
+            SetRuntimeCatalog(null);
+        }
+
+        private static void SetRuntimeCatalog(RealmCatalogSnapshot snapshot)
+        {
+            typeof(RealmCatalogRuntime)
+                .GetProperty("Current")
+                .GetSetMethod(true)
+                .Invoke(null, new object[] { snapshot });
+        }
+
+        private static RealmSelectionAuthorityState CommittedReceipt(RealmId realm, string profileId)
+        {
+            string transactionId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            var authority = new RealmSelectionAuthorityState
+            {
+                Version = RealmSelectionAuthority.CurrentVersion,
+                Committed = true,
+                SelectedRealm = (int)realm,
+                ProfileId = profileId ?? string.Empty,
+                TransactionId = transactionId,
+                CorrelationId = transactionId,
+                OperationId = RealmSelectionAuthority.OperationId,
+                EventId = RealmSelectionAuthority.EventId(transactionId),
+                CatalogVersion = RealmCatalogRuntime.SupportedVersion,
+                Provenance = RealmSelectionAuthority.InitialProvenance,
+                Revision = 1
+            };
+            authority.ReceiptFingerprint = RealmSelectionAuthority.ComputeReceiptFingerprint(
+                authority.ProfileId,
+                realm,
+                authority.TransactionId,
+                authority.CorrelationId,
+                authority.OperationId,
+                authority.EventId,
+                authority.Provenance,
+                authority.Revision);
+            return authority;
         }
 
         private static LocalSaveGameService CreateSaveService(string root)
