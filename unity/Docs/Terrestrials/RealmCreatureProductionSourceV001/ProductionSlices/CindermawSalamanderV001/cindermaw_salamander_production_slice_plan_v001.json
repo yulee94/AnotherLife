@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "packetId": "anotherlife-realm-creature-production-slice",
+  "qualificationId": "rcpq_elite_umbral_cindermaw_salamander_v001",
+  "sourceVersion": "al-rcreature-2026-09-03-v003",
+  "authority": {
+    "source2dId": "tdf_elite_umbral_cindermaw_salamander",
+    "modelId": "elite_umbral_cindermaw_salamander",
+    "sourceQualificationOnly": true,
+    "runtimeAuthority": false,
+    "gameplayAuthority": false,
+    "spawnActivation": false,
+    "runtimeVfxSeparate": true
+  },
+  "source": {
+    "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v005.fbx",
+    "bytes": 6774940,
+    "sha256": "7ad41ad8ce10aeca0919008f1d99c0d9f373a37e4100b2a490cb1bc5537e3b7b"
+  },
+  "approved2D": {
+    "manifestPath": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/realm_creature_2d_approval_manifest_v002.json",
+    "entryId": "tdf_elite_umbral_cindermaw_salamander",
+    "source": {
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_cindermaw_salamander_concept_sheet_v001.png",
+      "bytes": 2804083,
+      "sha256": "61a5ea43950826a19dc344c3e8f0413cd78457b33cb85c0aeff52a2e9eb872ee",
+      "dimensions": [1536, 1024]
+    }
+  },
+  "scale": {
+    "longitudinalAxis": "X",
+    "frontDirection": "-X",
+    "targetLengthMeters": 7.56,
+    "mappingState": "engineering_review_scale_not_gameplay_authority"
+  },
+  "protectedIdentityCues": [
+    "four_outward_splayed_load_bearing_limbs",
+    "enormous_wedge_mouth_and_tiny_lateral_eyes",
+    "one_dorsoventrally_flattened_tail",
+    "dorsal_heat_fins_rooted_neck_to_tail"
+  ],
+  "rig": {
+    "armatureObject": "RIG_cindermaw_salamander",
+    "skeletonProfileId": "rmc_skeleton_cindermaw_quadruped_heat_fin_v001",
+    "bindPoseId": "rmc_bind_nonhumanoid_neutral_contact_v001",
+    "rootBones": ["root", "motion_root", "body_root"],
+    "deformBones": [
+      "body_root",
+      "spine_front",
+      "spine_rear",
+      "neck_01",
+      "head",
+      "jaw",
+      "tail_01",
+      "tail_02",
+      "heat_fin_01",
+      "heat_fin_02",
+      "heat_fin_03",
+      "heat_fin_04",
+      "heat_fin_05",
+      "heat_fin_06",
+      "front_upper_l",
+      "front_lower_l",
+      "front_foot_l",
+      "front_upper_r",
+      "front_lower_r",
+      "front_foot_r",
+      "rear_upper_l",
+      "rear_lower_l",
+      "rear_foot_l",
+      "rear_upper_r",
+      "rear_lower_r",
+      "rear_foot_r"
+    ],
+    "socketBones": [
+      "socket_forefoot_contact_l",
+      "socket_forefoot_contact_r",
+      "socket_rear_foot_contact_l",
+      "socket_rear_foot_contact_r",
+      "socket_attack_origin",
+      "socket_camera_focus",
+      "socket_vfx_mouth_ember",
+      "socket_vfx_fin_heat",
+      "socket_vfx_contact_steam",
+      "socket_vfx_throat_heat"
+    ],
+    "minimumDeformationPoses": 16,
+    "maximumInfluencesPerVertex": 4
+  },
+  "lodPolicy": {
+    "levels": [
+      { "id": "LOD0", "object": "GEO_cindermaw_salamander_LOD0", "maximumTriangles": 75000 },
+      { "id": "LOD1", "object": "GEO_cindermaw_salamander_LOD1", "maximumTriangles": 45000 },
+      { "id": "LOD2", "object": "GEO_cindermaw_salamander_LOD2", "maximumTriangles": 22000 }
+    ],
+    "normalPlayUsesReducedLod": true,
+    "protectedCuesRequiredEveryLevel": true
+  },
+  "materialPolicy": {
+    "materialId": "mat_cindermaw_salamander_pbr_v001",
+    "maximumSlots": 1,
+    "maximumTextureLongEdge": 2048,
+    "textures": [
+      {
+        "role": "base_color",
+        "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/runtime_2k_v005/base_color.png",
+        "bytes": 4910283,
+        "sha256": "2fc21a4293e0cf28948f7b6ddf395d895c80ba41fceb8c7183e1e974be5fb621",
+        "dimensions": [2048, 2048]
+      },
+      {
+        "role": "normal",
+        "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/runtime_2k_v005/normal.png",
+        "bytes": 3336756,
+        "sha256": "09a9897190fd8c5a17b9e0c29ef0c86ee522c62fb6cdb40ad4ea2fd17f3eef57",
+        "dimensions": [2048, 2048]
+      },
+      {
+        "role": "metallic_smoothness",
+        "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/runtime_2k_v005/metallic_smoothness.png",
+        "bytes": 3754082,
+        "sha256": "33d5c4648e0f00ad2d1b5094387eae92fdafbe9dc98eb0f330dd4221d5b51c4e",
+        "dimensions": [2048, 2048]
+      },
+      {
+        "role": "ambient_occlusion",
+        "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/runtime_2k_v005/ao.png",
+        "bytes": 271102,
+        "sha256": "40d09e26f9248babbc20106ab1674c21409c45023738bbc42a61c83085036c9f",
+        "dimensions": [2048, 2048]
+      }
+    ],
+    "emissionBakedIntoCleanMesh": false
+  },
+  "motionPolicy": {
+    "sampleRateHz": 30,
+    "requiredKeys": ["locomotion.walk", "locomotion.run", "attack.basic", "attack.special", "skill.anticipation"],
+    "motions": [
+      { "motionKey": "idle.weight_shift", "actionName": "ANIM_cindermaw_salamander_idle_weight_shift_v001", "durationFrames": 61, "loop": true, "sourceIntent": "idle_breath_or_weight_shift" },
+      { "motionKey": "locomotion.walk", "actionName": "ANIM_cindermaw_salamander_locomotion_walk_v001", "durationFrames": 61, "loop": true, "sourceIntent": "belly_drag_lateral_limb_push" },
+      { "motionKey": "locomotion.run", "actionName": "ANIM_cindermaw_salamander_locomotion_run_v001", "durationFrames": 31, "loop": true, "sourceIntent": "full_body_charge_recovery" },
+      { "motionKey": "attack.basic", "actionName": "ANIM_cindermaw_salamander_attack_basic_v001", "durationFrames": 46, "loop": false, "sourceIntent": "sudden_jaw_surge" },
+      { "motionKey": "attack.special", "actionName": "ANIM_cindermaw_salamander_attack_special_v001", "durationFrames": 61, "loop": false, "sourceIntent": "flattened_tail_slap" },
+      { "motionKey": "skill.anticipation", "actionName": "ANIM_cindermaw_salamander_skill_anticipation_v001", "durationFrames": 46, "loop": false, "sourceIntent": "heat_seeking_pause_throat_expansion" },
+      { "motionKey": "reaction.hit", "actionName": "ANIM_cindermaw_salamander_reaction_hit_v001", "durationFrames": 31, "loop": false, "sourceIntent": "full_body_recovery_to_neutral" },
+      { "motionKey": "defeat", "actionName": "ANIM_cindermaw_salamander_defeat_v001", "durationFrames": 61, "loop": false, "sourceIntent": "full_body_recovery_to_neutral" }
+    ],
+    "rootMotionPolicy": "in_place_presentation_only",
+    "gameplayResultsFromAnimation": false
+  },
+  "outputs": {
+    "blend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/cindermaw_salamander_rig_lod_motion_v001.blend",
+    "fbx": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/cindermaw_salamander_rig_lod_motion_v001.fbx",
+    "dccReport": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/cindermaw_salamander_dcc_report_v001.json",
+    "qualificationManifest": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/cindermaw_salamander_qualification_manifest_v001.json",
+    "reviewDirectory": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/Review"
+  }
+}

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.Encounter;
 using AL.ChampionMode.Presentation;
 using AL.ChampionMode.UI;
 using AL.Core;
@@ -18,7 +19,7 @@ namespace AL.ChampionMode.Skills
     }
 
     [RequireComponent(typeof(ChampionCombat))]
-    public class SkillCaster : MonoBehaviour
+    public class SkillCaster : MonoBehaviour, IChampionEncounterRuntimeHost
     {
         private const int SlotCount = SkillLoadoutCatalog.RequiredSlotCount;
         private const float DeniedFeedbackCooldown = 0.55f;
@@ -26,6 +27,7 @@ namespace AL.ChampionMode.Skills
         private readonly float[] _nextReadyTimes = new float[SlotCount];
 
         private SkillLoadoutSnapshot _loadout;
+        private ChampionEncounterLoadReceipt _productionEncounterLoad;
         private ChampionCombat _combat;
         private ChampionController _controller;
         private ChampionCrowdControl _crowdControl;
@@ -45,6 +47,7 @@ namespace AL.ChampionMode.Skills
         public bool IsLoadoutReady =>
             _loadoutState == SkillLoadoutState.Ready && _loadout != null;
         public SkillLoadoutSnapshot LoadoutSnapshot => IsLoadoutReady ? _loadout : null;
+        public ChampionEncounterLoadReceipt ProductionEncounterLoad => _productionEncounterLoad;
         public bool IsCasting => _castRoutine != null;
         public int ActiveSlot => _activeSlot;
         public string ActiveSkillName =>
@@ -111,6 +114,22 @@ namespace AL.ChampionMode.Skills
         {
             snapshot = LoadoutSnapshot;
             return snapshot != null;
+        }
+
+        public bool TryBind(ChampionEncounterLoadReceipt receipt)
+        {
+            return TryApplyEncounterLoad(receipt);
+        }
+
+        public bool TryApplyEncounterLoad(ChampionEncounterLoadReceipt receipt)
+        {
+            if (_isDestroyed || !ChampionEncounterRuntimeGateway.ValidReceipt(receipt))
+            {
+                return false;
+            }
+
+            _productionEncounterLoad = receipt;
+            return true;
         }
 
         public bool RetryLoadoutLoad()

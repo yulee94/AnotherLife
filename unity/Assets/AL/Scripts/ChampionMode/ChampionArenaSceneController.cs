@@ -201,6 +201,9 @@ namespace AL.ChampionMode
             ApplyRuntimeQuality();
             ApplyFirstSessionPresentationBudgets();
             BuildArena();
+            ChampionEncounterRuntimeGateway.Apply(
+                AuthoritativeEncounterLoadPlan,
+                _playerSkillCaster);
             BuildHud();
             if (FirstSessionChampionStart.ShouldRunProofOfWorth)
             {
@@ -499,10 +502,9 @@ namespace AL.ChampionMode
             // in the ShellFoundation profile (D10) until #150/#180.
         }
 
-        private void HandleBossLootRolled(BossLootResult result)
+        private void HandleBossDefeated()
         {
-            _lastBossLootResult = result;
-            if (_guardianTrialStarted && _boss != null && _boss.IsDead)
+            if (_guardianTrialStarted)
             {
                 _guardianTrialCleared = true;
             }
@@ -626,7 +628,7 @@ namespace AL.ChampionMode
 
             _boss = boss.AddComponent<BossDummyAI>();
             _boss.ConfigureRealmContext(_realmId);
-            _boss.LootRolled += HandleBossLootRolled;
+            _boss.Defeated += HandleBossDefeated;
             _bossTransform = boss.transform;
             CreateIntroCinematicCues(player.transform, boss.transform, realmAccent);
             _encounterStartTime = Time.time;
@@ -1526,7 +1528,7 @@ namespace AL.ChampionMode
 
             if (_boss != null)
             {
-                _boss.LootRolled -= HandleBossLootRolled;
+                _boss.Defeated -= HandleBossDefeated;
             }
 
             if (_playerCombat != null)
