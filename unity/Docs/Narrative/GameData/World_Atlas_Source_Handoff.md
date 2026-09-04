@@ -1,28 +1,27 @@
 # World Atlas Source Handoff
 
-**Packet ID:** `al_narrative_world_atlas_source_v002`
-**Catalog version:** `0.2.0`
+**Packet ID:** `al_narrative_world_atlas_source_v003`
+**Catalog version:** `0.3.0`
 **Primary delivery mode:** Codex narrative/content
 **Runtime content catalog:** `unity/Assets/AL/StreamingAssets/GameData/al_world_atlas_narrative_catalog.json`
-**Topology contract:** `al_world_atlas_topology_query_contract_v001`
+**Topology contracts:** `al_world_atlas_topology_query_contract_v001`, `al_world_atlas_protected_zone_query_contract_v001`
 **Related issue:** #181
 
 ## Source intent
 
-This packet exposes the user's approved abstract four-realm world topology as
-versioned narrative source without deciding where any realm sits. It gives the
-later #181 technical validator stable node, bridge, endpoint, wall, transition,
-and boundary references while preserving the original world-atlas narrative
-meaning.
+This packet extends the approved abstract four-realm world topology with stable
+city, beginner, and town protected-subzone and policy identities without
+deciding where any realm sits. It gives #478/#480 immutable contract inputs
+while preserving the original world-atlas narrative meaning.
 
 The packet remains deliberately nonmutating. Every bridge, transition,
 boundary, scene, and objective capability is `requested`; none grants runtime
 scene loading, travel, PvP, territory, Realm Gem, reward, save, collision,
 pathfinding, geometry, or presentation authority.
 
-## Preserved v001 narrative source
+## Preserved v002 atlas source
 
-The following v001 collections and their order are unchanged:
+The following v002 collections and their order are unchanged:
 
 - 11 zones;
 - 5 requested objectives;
@@ -34,9 +33,10 @@ The following v001 collections and their order are unchanged:
 - all player-facing copy, quest associations, visibility rules, and blocked
   runtime claims that existed in v001.
 
-The pre-v002 `sourceAuthorities` object is unchanged except for one additive
-`topologyContract` provenance record. No established zone, objective,
-localization, realm, gate, quest, or Wishgate ID was renamed or aliased.
+No established topology, boundary, zone, objective, localization, realm, gate,
+quest, or Wishgate ID was renamed, reordered, or aliased. Source v003 adds only
+the protected-zone contract provenance and bounded protected policy/subzone
+collections.
 
 ## Approved abstract topology
 
@@ -95,6 +95,22 @@ Walls and transitions are logical source references. This packet does not
 define their dimensions, architecture, materials, collision, destruction,
 repair, traversal time, grace periods, spawn behavior, or visual treatment.
 
+## Protected city, beginner, and town authority
+
+The packet adds exactly three immutable policy IDs:
+
+- `zone_policy_city_safe_v001`;
+- `zone_policy_beginner_safe_v001`;
+- `zone_policy_town_safe_v001`.
+
+Each canonical realm has exactly one technical subzone for each kind, using
+`zone_protected_<realm>_<kind>`, for 12 records total. Every record references
+its existing `zone_inner_<realm>` parent and matching policy ID. Policies are
+forced non-PvP, block war override, require harmful-effect revalidation, remain
+contract-only, and grant no mutation authority. Subzone scene and boundary
+hooks remain requested; no placement, geometry, presence, movement, or PvP
+enforcement is activated.
+
 ## Unresolved user placement gate
 
 The placement record remains exactly:
@@ -120,11 +136,18 @@ the Windows working-tree byte representation.
 
 - catalog path: `unity/Assets/AL/StreamingAssets/GameData/al_world_atlas_narrative_catalog.json`
 - catalog ID: `al_world_atlas_narrative_catalog`
-- catalog version: `0.2.0`
-- source packet ID: `al_narrative_world_atlas_source_v002`
-- exact Git blob: `d71e7792603f095c49dccd7f4f6ff762aa043c2a`
-- exact canonical UTF-8 length: 29,895 bytes
-- exact SHA-256: `d3db74638b55128a46581e31d0c9d0ef9861b743b0b33d1ddf7a5571c9cfd711`
+- catalog version: `0.3.0`
+- source packet ID: `al_narrative_world_atlas_source_v003`
+- exact Git blob: `09c1f6a2be64d9cca7a7e23510b4acd8d0d206f6`
+- exact canonical UTF-8 length: 34,835 bytes
+- exact SHA-256: `9034e8fb8e4c6b611c7b9285e456338e719edd9a5a4ff76a5fd05a196d3c9c8a`
+
+The preserved v002 source remains historical lineage:
+
+- packet: `al_narrative_world_atlas_source_v002`
+- Git blob: `d71e7792603f095c49dccd7f4f6ff762aa043c2a`
+- canonical UTF-8 length: 29,895 bytes
+- SHA-256: `d3db74638b55128a46581e31d0c9d0ef9861b743b0b33d1ddf7a5571c9cfd711`
 
 The preserved v001 source introduced by PR #333 remains historical lineage:
 
@@ -148,6 +171,8 @@ current-main v001 source, the current realm catalog, and the v002 candidate:
   ownership, and reference closure;
 - exact unresolved placement state with no realm assignment or compass value;
 - exact four transition zones, eight walls, and four ordered boundary chains;
+- exact three protected-zone policies and 12 realm/kind subzones;
+- duplicate, reversed, unknown, activated, and mutable protected/boundary claims rejected;
 - exact realm-catalog `innerRealmId`, `mainGateId`, and `outerWarzoneId`
   references;
 - requested/nonmutating status for zones, objectives, bridges, transitions,
@@ -161,35 +186,29 @@ requirements for publication on the eventual exact post-integration base. Unity
 Editor, Player, PlayMode, Android device, visual, and runtime-performance checks
 were not performed for this local source handoff and are not claimed.
 
-The canonical catalog grows from 13,213 to 29,895 bytes, an exact raw
-StreamingAssets payload increase of 16,682 bytes before platform packaging or
-compression. There is no new code, dependency, asset, eager load, cache,
-polling, per-frame work, or runtime allocation path. Exact Player build and
-installed-size deltas remain unmeasured and platform-dependent; a later
-packaging phase must report them rather than treating this source amendment as
-zero-impact.
+The canonical catalog grows from v002's 29,895 to 34,835 bytes, an exact raw
+StreamingAssets payload increase of 4,940 bytes before platform packaging or
+compression. The strict loader and read-only query model gain protected-zone
+records and indices, but no dependency, asset, eager-load hook, polling, or
+per-frame path is added. Exact Player build, steady-state memory, and installed-
+size deltas remain unmeasured and platform-dependent; a later packaging phase
+must report them rather than treating this contract amendment as zero-impact.
 
-## Windows byte-stability follow-up
+## Windows byte stability
 
-PR #429 protects the repository's then-current raw-byte-pinned paths, but this
-atlas source is not yet listed in `unity/.gitattributes` or the byte-migration
-target set. A Windows checkout with `core.autocrlf=true` can therefore retain a
-CRLF working copy even though Git stores the canonical LF blob above.
-
-Before any runtime adapter, schema, validator, or packaged consumer treats this
-v002 SHA-256 as raw-file authority, Codex engineering must land a separate
-workflow-focused change that pins this exact path to LF and updates the safe
-byte-migration/check target to this v002 identity. That follow-up must not be
-folded into this narrative PR or treated as runtime activation.
+The existing `unity/.gitattributes` LF rule remains authoritative. The safe
+byte-migration/check target is versioned with the v003 length and SHA-256 above;
+unreviewed drift, BOM, lone CR, and mutated CRLF variants continue to fail
+closed.
 
 ## Handoff and acceptance status
 
 Narrative source status: ready for A1 source-mode review after current-main
 refresh and repository gates.
 
-This packet completes only #181 Phase B source authoring. It does not complete
-the separate byte-stability follow-up, specialized schema/validator, immutable
-query foundation, realm placement, runtime artifact, production registration,
+This packet completes only the protected-subzone catalog/schema/query slice. It
+does not complete realm placement, scene/traversal/boundary enforcement,
+integrated map acceptance, runtime combat/PvP authority, production registration,
 legacy fallback removal, scenes, world geometry, terrestrial design, visual
 fidelity, integrated playtest, milestone, or release.
 

@@ -250,6 +250,11 @@ namespace AL.ChampionMode.Customization
             return segments.Length >= 2 && segments.All(IsTechnicalId);
         }
 
+        public static bool IsCapabilityId(string value)
+        {
+            return IsTechnicalId(value) || IsContentKey(value);
+        }
+
         public static bool IsOperationId(string value)
         {
             if (string.IsNullOrEmpty(value) ||
@@ -359,7 +364,7 @@ namespace AL.ChampionMode.Customization
                 Error(diagnostics, "AL-CUS-OPTION-CONTENT", path + ".contentKey", item.Id);
             }
 
-            if (!IsTechnicalId(item.RequiredCapabilityId))
+            if (!IsCapabilityId(item.RequiredCapabilityId))
             {
                 Error(diagnostics, "AL-CUS-OPTION-CAPABILITY",
                     path + ".requiredCapabilityId", item.Id);
@@ -610,7 +615,7 @@ namespace AL.ChampionMode.Customization
                 IReadOnlyList<string> capabilities = item.RequiredCapabilityIds ??
                                                      Array.Empty<string>();
                 if (capabilities.Count > CustomizationTechnicalLimits.MaximumCapabilities ||
-                    capabilities.Any(value => !IsTechnicalId(value)) ||
+                    capabilities.Any(value => !IsCapabilityId(value)) ||
                     capabilities.Distinct(StringComparer.Ordinal).Count() != capabilities.Count)
                 {
                     Error(diagnostics, "AL-CUS-PRESET-CAPABILITY", path + ".capabilities", item.Id);
