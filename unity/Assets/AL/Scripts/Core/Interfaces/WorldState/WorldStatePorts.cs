@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using AL.Data.Runtime;
+
 namespace AL.Core.Interfaces.WorldState
 {
     public interface IWorldStateClock
@@ -33,5 +36,26 @@ namespace AL.Core.Interfaces.WorldState
         WorldEffectApplyResult Apply(
             WorldEffectPlan plan,
             IWorldStateMutationTarget target);
+    }
+
+    public interface IWorldStateCandidatePersistence
+    {
+        int AttemptCount { get; }
+
+        WorldStatePersistenceResult PersistAndVerify(WorldStatePersistentState candidate);
+
+        WorldStatePersistentState LoadPublished();
+    }
+
+    public interface IWorldStateCommitEventSink
+    {
+        IReadOnlyList<WorldStateTransitionEvent> Published { get; }
+
+        IReadOnlyList<WorldStateDiagnostic> Publish(WorldStateTransitionEvent change);
+    }
+
+    public interface IWorldStateNotificationOutbox
+    {
+        bool TryEnqueue(WorldStateNotificationIntent intent, out string diagnostic);
     }
 }
