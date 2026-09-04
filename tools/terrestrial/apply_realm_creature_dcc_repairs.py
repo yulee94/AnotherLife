@@ -80,14 +80,16 @@ def apply_packet_revision(manifest: dict[str, Any], created_at_utc: str) -> None
     manifest["createdAtUtc"] = created_at_utc
     manifest["qualityBar"]["coverageDisposition"] = (
         "Hollowbark Stalker, Reliquary Basilisk, and Cindermaw retain complete owner-tier authoring "
-        "maps. Cindermaw now binds a smoothed v004 source to authored anatomy-weighted macro plate, "
-        "mid-scale pebble, and fine-pore tangent normal detail. Mere-Root and Crownstep "
+        "maps. Cindermaw now binds a v005 localized visual-polish source (snout offsets plus "
+        "material-separated soot hide, obsidian fins, pale scars, and ash-paste underside) on the "
+        "hash-bound v004 topology and authored 4K tangent normal. Mere-Root and Crownstep "
         "require topology-matched texture rebuilds; all other lower-tier packets remain review sources."
     )
     additions = [
         "Approved DCC geometry repairs and structural re-audit for five blocked packets",
         "Cindermaw Meshy-7 retexture, triangulated non-overlapping UV rebuild, and tiled 8K/4K rebake",
         "Cindermaw v004 deliberate-angle smoothing and anatomy-aware authored 4K tangent-normal detail",
+        "Cindermaw v005 localized snout polish and material-separation pass with v004 preserved as immutable evidence",
         "Independent hash, UV, schema, and fail-closed readiness validation",
     ]
     existing = manifest["provenance"].get("editingSteps", [])
@@ -361,64 +363,65 @@ def validate_repair_evidence(
     )
 
     if model_id == "elite_umbral_cindermaw_salamander":
-        diagnostics.extend(validate_uv_bake_report(report))
-        if repair.get("normalProvenance") != "neutral_tangent":
-            source_uv_path = _reported_nested_repo_file(
-                report,
-                field="sourceUvEvidence",
-                repo_root=repo_root,
-                diagnostics=diagnostics,
-            )
-            smoothing_path = _reported_nested_repo_file(
-                report,
-                field="smoothingEvidence",
-                repo_root=repo_root,
-                diagnostics=diagnostics,
-            )
-            if source_uv_path is not None:
-                try:
-                    source_uv_report = json.loads(source_uv_path.read_text(encoding="utf-8"))
-                except (OSError, UnicodeError, json.JSONDecodeError):
-                    diagnostics.append("sourceUvEvidence is not valid JSON")
-                else:
-                    diagnostics.extend(
-                        validate_source_uv_evidence(
-                            source_uv_report,
-                            expected_model_path=expected_output,
-                            expected_model_sha256=str(selected_source.get("sha256", "")),
+        if not repair.get("visualPolish"):
+            diagnostics.extend(validate_uv_bake_report(report))
+            if repair.get("normalProvenance") != "neutral_tangent":
+                source_uv_path = _reported_nested_repo_file(
+                    report,
+                    field="sourceUvEvidence",
+                    repo_root=repo_root,
+                    diagnostics=diagnostics,
+                )
+                smoothing_path = _reported_nested_repo_file(
+                    report,
+                    field="smoothingEvidence",
+                    repo_root=repo_root,
+                    diagnostics=diagnostics,
+                )
+                if source_uv_path is not None:
+                    try:
+                        source_uv_report = json.loads(source_uv_path.read_text(encoding="utf-8"))
+                    except (OSError, UnicodeError, json.JSONDecodeError):
+                        diagnostics.append("sourceUvEvidence is not valid JSON")
+                    else:
+                        diagnostics.extend(
+                            validate_source_uv_evidence(
+                                source_uv_report,
+                                expected_model_path=expected_output,
+                                expected_model_sha256=str(selected_source.get("sha256", "")),
+                            )
                         )
-                    )
-            if smoothing_path is not None:
-                try:
-                    smoothing_report = json.loads(smoothing_path.read_text(encoding="utf-8"))
-                except (OSError, UnicodeError, json.JSONDecodeError):
-                    diagnostics.append("smoothingEvidence is not valid JSON")
-                else:
-                    expected_input_path = portable_report_path(
-                        repo_root / repair["input"], repo_root
-                    )
-                    expected_input_file = repo_root / repair["input"]
-                    diagnostics.extend(
-                        validate_smoothing_evidence(
-                            smoothing_report,
-                            expected_input_path=expected_input_path,
-                            expected_input_sha256=(
-                                _sha256(expected_input_file)
-                                if expected_input_file.is_file()
-                                else ""
-                            ),
-                            expected_output_path=expected_output,
-                            expected_output_sha256=str(selected_source.get("sha256", "")),
-                            expected_blend_path=portable_report_path(
-                                repo_root / repair["blend"], repo_root
-                            ),
-                            expected_blend_sha256=(
-                                _sha256(repo_root / repair["blend"])
-                                if (repo_root / repair["blend"]).is_file()
-                                else ""
-                            ),
+                if smoothing_path is not None:
+                    try:
+                        smoothing_report = json.loads(smoothing_path.read_text(encoding="utf-8"))
+                    except (OSError, UnicodeError, json.JSONDecodeError):
+                        diagnostics.append("smoothingEvidence is not valid JSON")
+                    else:
+                        expected_input_path = portable_report_path(
+                            repo_root / repair["input"], repo_root
                         )
-                    )
+                        expected_input_file = repo_root / repair["input"]
+                        diagnostics.extend(
+                            validate_smoothing_evidence(
+                                smoothing_report,
+                                expected_input_path=expected_input_path,
+                                expected_input_sha256=(
+                                    _sha256(expected_input_file)
+                                    if expected_input_file.is_file()
+                                    else ""
+                                ),
+                                expected_output_path=expected_output,
+                                expected_output_sha256=str(selected_source.get("sha256", "")),
+                                expected_blend_path=portable_report_path(
+                                    repo_root / repair["blend"], repo_root
+                                ),
+                                expected_blend_sha256=(
+                                    _sha256(repo_root / repair["blend"])
+                                    if (repo_root / repair["blend"]).is_file()
+                                    else ""
+                                ),
+                            )
+                        )
         expected_maps: dict[str, dict[str, Any]] = {}
         for record in textures or []:
             expected_maps[portable_report_path(packet_root / record["path"], repo_root)] = record
@@ -470,24 +473,25 @@ REPAIRS: dict[str, dict[str, Any]] = {
         "report": "DCCReports/elite_crownlands_crownstep_geometry_v002.json",
     },
     "elite_umbral_cindermaw_salamander": {
-        "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v003.fbx",
-        "model": "Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v004.fbx",
-        "blend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/elite_umbral_cindermaw_salamander_normal_smoothing_v004.blend",
+        "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v004.fbx",
+        "model": "Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v005.fbx",
+        "blend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/elite_umbral_cindermaw_salamander_visual_polish_v005.blend",
         "textures": [
-            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/ao.png",
-            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/base_color.png",
-            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/metallic.png",
-            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/normal.png",
-            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/roughness.png",
+            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/ao.png",
+            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/base_color.png",
+            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/metallic.png",
+            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/normal.png",
+            "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_visualpolish_v005/roughness.png",
         ],
-        "review": "Review/elite_umbral_cindermaw_salamander_threequarter_v004.png",
-        "status": "clean_geometry_pass_uv_bake_pass_smoothing_pass_normal_detail_pass_texture_grade_pass_rigging_required",
+        "review": "Review/elite_umbral_cindermaw_salamander_fullbody_hero_v005.png",
+        "status": "clean_geometry_pass_uv_bake_pass_smoothing_pass_normal_detail_pass_visual_polish_v005_pass_rigging_required",
+        "visualPolish": True,
         "tasks": [
             "01a05f90-dc1f-723e-9e7a-4e3feb8f3dbc",
             "01a05fa3-16b8-70f5-a0bd-cca9f316e455",
             "01a06569-2956-73a2-a51e-bade35802fba",
         ],
-        "report": "DCCReports/elite_umbral_cindermaw_salamander_normal_detail_v004.json",
+        "report": "DCCReports/elite_umbral_cindermaw_salamander_visual_polish_v005.json",
         "normalProvenance": "object_space_procedural_height_to_clean_uv_tangent_normal_v001",
     },
 }
