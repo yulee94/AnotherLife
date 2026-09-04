@@ -147,8 +147,8 @@
         "kind": "door",
         "levelId": "ground",
         "side": "south",
-        "x": 4.0,
-        "z": 0.0,
+        "x": 1.302,
+        "z": 0.3,
         "separateObject": true,
         "planOpeningId": "dwelling_main_entry"
       },
@@ -157,8 +157,8 @@
         "kind": "door",
         "levelId": "ground",
         "side": "north",
-        "x": 6.24,
-        "z": 7,
+        "x": 5.115,
+        "z": 6.7,
         "separateObject": true,
         "planOpeningId": "dwelling_service_entry"
       },
@@ -187,7 +187,7 @@
         "kind": "window",
         "levelId": "ground",
         "side": "south",
-        "x": 6.698,
+        "x": 6.905,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_kitchen"
@@ -207,10 +207,20 @@
         "kind": "window",
         "levelId": "ground",
         "side": "north",
-        "x": 5.85,
+        "x": 5.115,
         "z": 7,
         "separateObject": true,
         "planOpeningId": "window_ground_wash_service"
+      },
+      {
+        "id": "window_ground_vertical_core_hall",
+        "kind": "window",
+        "levelId": "ground",
+        "side": "east",
+        "x": 8,
+        "z": 3.5,
+        "separateObject": true,
+        "planOpeningId": "window_ground_vertical_core_hall"
       },
       {
         "id": "window_ground_cut_west",
@@ -218,39 +228,9 @@
         "levelId": "ground",
         "side": "west",
         "x": 0.0,
-        "z": 2.7,
+        "z": 3.5,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_west"
-      },
-      {
-        "id": "window_ground_cut_east",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "east",
-        "x": 8,
-        "z": 2.7,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_east"
-      },
-      {
-        "id": "window_ground_cut_south",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "south",
-        "x": 4.876,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_south"
-      },
-      {
-        "id": "window_ground_cut_north",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "north",
-        "x": 4.876,
-        "z": 7,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_north"
       },
       {
         "id": "window_upper_family_bedroom",
@@ -266,9 +246,9 @@
         "id": "window_upper_secondary_bedroom",
         "kind": "window",
         "levelId": "upper",
-        "side": "east",
-        "x": 8,
-        "z": 2.11,
+        "side": "south",
+        "x": 5.115,
+        "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_upper_secondary_bedroom"
       },
@@ -278,7 +258,7 @@
         "levelId": "upper",
         "side": "east",
         "x": 8,
-        "z": 5.31,
+        "z": 3.5,
         "separateObject": true,
         "planOpeningId": "window_upper_landing_storage"
       },
@@ -288,42 +268,13 @@
         "levelId": "upper",
         "side": "west",
         "x": 0.0,
-        "z": 2.7,
+        "z": 3.5,
         "separateObject": true,
         "planOpeningId": "window_upper_cut_west"
-      },
-      {
-        "id": "window_upper_cut_east",
-        "kind": "window",
-        "levelId": "upper",
-        "side": "east",
-        "x": 8,
-        "z": 2.7,
-        "separateObject": true,
-        "planOpeningId": "window_upper_cut_east"
-      },
-      {
-        "id": "window_upper_cut_south",
-        "kind": "window",
-        "levelId": "upper",
-        "side": "south",
-        "x": 4.876,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_upper_cut_south"
-      },
-      {
-        "id": "window_upper_cut_north",
-        "kind": "window",
-        "levelId": "upper",
-        "side": "north",
-        "x": 4.876,
-        "z": 7,
-        "separateObject": true,
-        "planOpeningId": "window_upper_cut_north"
       }
     ],
     "criticalFeatures": [],
+    "voids": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
@@ -358,10 +309,10 @@
         },
         {
           "id": "kitchen",
-          "x": 5.696,
+          "x": 6.23,
           "z": 0.3,
-          "width": 2.004,
-          "depth": 3.62,
+          "width": 1.35,
+          "depth": 2.2,
           "kind": "room",
           "purpose": "kitchen"
         },
@@ -378,10 +329,19 @@
           "id": "wash_service",
           "x": 4.0,
           "z": 3.92,
-          "width": 3.7,
+          "width": 2.23,
           "depth": 2.78,
           "kind": "room",
           "purpose": "wash service"
+        },
+        {
+          "id": "vertical_core_hall",
+          "x": 6.23,
+          "z": 2.5,
+          "width": 1.35,
+          "depth": 2.0,
+          "kind": "room",
+          "purpose": "vertical core hall"
         }
       ],
       "blueprintId": "dwelling:ground:domestic_front_back",
@@ -412,16 +372,20 @@
           "accessible": true,
           "points": [
             [
-              4.0,
-              0.0
-            ],
-            [
-              4.0,
+              1.302,
               0.3
             ],
             [
-              4.0,
-              6.7
+              1.302,
+              2.11
+            ],
+            [
+              1.302,
+              3.5
+            ],
+            [
+              6.905,
+              3.5
             ]
           ]
         },
@@ -431,12 +395,20 @@
           "accessible": true,
           "points": [
             [
-              6.24,
-              7
+              5.115,
+              6.7
             ],
             [
-              4.0,
-              6.7
+              5.115,
+              5.31
+            ],
+            [
+              5.115,
+              3.5
+            ],
+            [
+              6.905,
+              3.5
             ]
           ]
         }
@@ -469,6 +441,10 @@
         [
           "wash_service",
           "primary_circulation"
+        ],
+        [
+          "vertical_core_hall",
+          "primary_circulation"
         ]
       ],
       "doorOpenings": [
@@ -477,8 +453,8 @@
           "from": "outside",
           "to": "entry",
           "side": "south",
-          "x": 4.0,
-          "z": 0.0,
+          "x": 1.302,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -497,8 +473,8 @@
           "from": "outside",
           "to": "wash_service",
           "side": "north",
-          "x": 6.24,
-          "z": 7,
+          "x": 5.115,
+          "z": 6.7,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             1.4,
@@ -555,8 +531,8 @@
           ],
           "to": "kitchen",
           "orientation": "vertical",
-          "x": 6.698,
-          "z": 3.92,
+          "x": 6.905,
+          "z": 2.5,
           "clearOpeningMeters": [
             1.2,
             2.4
@@ -589,13 +565,48 @@
           ],
           "to": "wash_service",
           "orientation": "horizontal",
-          "x": 5.85,
+          "x": 5.115,
           "z": 3.92,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_ground_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "vertical",
+          "x": 6.905,
+          "z": 4.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_vertical_core_hall",
+          "separateObject": true,
+          "between": [
+            "vertical_core_hall",
+            "primary_circulation"
+          ],
+          "to": "vertical_core_hall",
+          "orientation": "horizontal",
+          "x": 6.905,
+          "z": 3.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [
@@ -604,8 +615,8 @@
           "from": "outside",
           "to": "entry",
           "side": "south",
-          "x": 4.0,
-          "z": 0.0,
+          "x": 1.302,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -620,8 +631,8 @@
           "from": "outside",
           "to": "wash_service",
           "side": "north",
-          "x": 6.24,
-          "z": 7,
+          "x": 5.115,
+          "z": 6.7,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             1.4,
@@ -664,7 +675,7 @@
           "separateFrameGlassShutter": true,
           "serves": "kitchen",
           "side": "south",
-          "x": 6.698,
+          "x": 6.905,
           "z": 0.0,
           "orientation": "horizontal",
           "openingMeters": [
@@ -690,9 +701,22 @@
           "separateFrameGlassShutter": true,
           "serves": "wash_service",
           "side": "north",
-          "x": 5.85,
+          "x": 5.115,
           "z": 7,
           "orientation": "horizontal",
+          "openingMeters": [
+            1.2,
+            1.5
+          ]
+        },
+        {
+          "id": "window_ground_vertical_core_hall",
+          "separateFrameGlassShutter": true,
+          "serves": "vertical_core_hall",
+          "side": "east",
+          "x": 8,
+          "z": 3.5,
+          "orientation": "vertical",
           "openingMeters": [
             1.2,
             1.5
@@ -704,50 +728,8 @@
           "serves": "entry",
           "side": "west",
           "x": 0.0,
-          "z": 2.7,
+          "z": 3.5,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "kitchen",
-          "side": "east",
-          "x": 8,
-          "z": 2.7,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "living_hearth",
-          "side": "south",
-          "x": 4.876,
-          "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "wash_service",
-          "side": "north",
-          "x": 4.876,
-          "z": 7,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -762,15 +744,15 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 4.176,
-            "z": 1.6,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 6.23,
+            "z": 2.5,
+            "width": 1.35,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "UP clockwise",
-          "locatedInRoomId": "living_hearth"
+          "locatedInRoomId": "vertical_core_hall"
         }
       ],
       "furnishingLayouts": [
@@ -795,10 +777,10 @@
           "protectedClearances": [
             {
               "id": "entry_protected_aisle",
-              "x": 0.3,
-              "z": 1.51,
-              "width": 2.004,
-              "depth": 1.2,
+              "x": 0.702,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 3.62,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -827,15 +809,28 @@
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 1.3
+            },
+            {
+              "id": "ground_living_hearth_table_bench_2",
+              "kind": "table_bench",
+              "label": "family table",
+              "symbol": "TABLE",
+              "x": 2.643,
+              "z": 2.681,
+              "width": 1.6,
+              "depth": 0.9,
+              "orientationDegrees": 180,
+              "count": 1,
+              "sectionHeightMeters": 0.8
             }
           ],
           "protectedClearances": [
             {
               "id": "living_hearth_protected_aisle",
-              "x": 2.304,
-              "z": 1.51,
-              "width": 3.392,
-              "depth": 1.2,
+              "x": 3.4,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 3.62,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -857,10 +852,10 @@
               "kind": "prep_table",
               "label": "kitchen prep",
               "symbol": "PREP",
-              "x": 5.896,
-              "z": 0.5,
-              "width": 1.154,
-              "depth": 0.7,
+              "x": 6.365,
+              "z": 0.435,
+              "width": 0.778,
+              "depth": 0.618,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.9
@@ -869,15 +864,15 @@
           "protectedClearances": [
             {
               "id": "kitchen_protected_aisle",
-              "x": 5.696,
-              "z": 1.51,
-              "width": 2.004,
-              "depth": 1.2,
+              "x": 6.305,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 2.2,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "kitchen_door_approach",
-              "x": 6.098,
+              "x": 6.305,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -931,9 +926,9 @@
               "kind": "wash_trough",
               "label": "wash trough",
               "symbol": "WASH",
-              "x": 4.278,
-              "z": 4.198,
-              "width": 1.4,
+              "x": 4.223,
+              "z": 4.143,
+              "width": 1.284,
               "depth": 0.55,
               "orientationDegrees": 0,
               "count": 1,
@@ -943,16 +938,53 @@
           "protectedClearances": [
             {
               "id": "wash_service_protected_aisle",
-              "x": 4.0,
-              "z": 4.71,
-              "width": 3.7,
-              "depth": 1.2,
+              "x": 4.515,
+              "z": 3.92,
+              "width": 1.2,
+              "depth": 2.78,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "wash_service_door_approach",
-              "x": 5.25,
+              "x": 4.515,
               "z": 3.92,
+              "width": 1.2,
+              "depth": 1.2,
+              "kind": "door_swing_clearance"
+            }
+          ]
+        },
+        {
+          "roomId": "vertical_core_hall",
+          "layoutIntent": "guarded machine",
+          "footprints": [
+            {
+              "id": "ground_vertical_core_hall_machine_bed_1",
+              "kind": "machine_bed",
+              "label": "guarded machine",
+              "symbol": "MACHINE",
+              "x": 6.365,
+              "z": 2.635,
+              "width": 0.778,
+              "depth": 0.554,
+              "orientationDegrees": 0,
+              "count": 1,
+              "sectionHeightMeters": 1.3
+            }
+          ],
+          "protectedClearances": [
+            {
+              "id": "vertical_core_hall_protected_aisle",
+              "x": 6.305,
+              "z": 2.5,
+              "width": 1.2,
+              "depth": 2.0,
+              "kind": "minimum_1_2m_aisle"
+            },
+            {
+              "id": "vertical_core_hall_door_approach",
+              "x": 6.305,
+              "z": 2.5,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1023,14 +1055,14 @@
           "id": "light_ground_kitchen",
           "type": "lighting",
           "roomId": "kitchen",
-          "x": 6.698,
-          "z": 2.11
+          "x": 6.905,
+          "z": 1.4
         },
         {
           "id": "interaction_ground_kitchen",
           "type": "interaction",
           "roomId": "kitchen",
-          "x": 6.296,
+          "x": 6.68,
           "z": 0.9
         },
         {
@@ -1051,7 +1083,7 @@
           "id": "light_ground_wash_service",
           "type": "lighting",
           "roomId": "wash_service",
-          "x": 5.85,
+          "x": 5.115,
           "z": 5.31
         },
         {
@@ -1060,6 +1092,20 @@
           "roomId": "wash_service",
           "x": 4.6,
           "z": 4.52
+        },
+        {
+          "id": "light_ground_vertical_core_hall",
+          "type": "lighting",
+          "roomId": "vertical_core_hall",
+          "x": 6.905,
+          "z": 3.5
+        },
+        {
+          "id": "interaction_ground_vertical_core_hall",
+          "type": "interaction",
+          "roomId": "vertical_core_hall",
+          "x": 6.68,
+          "z": 3.1
         }
       ],
       "sectionCutLines": [
@@ -1068,11 +1114,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            2.7
+            3.5
           ],
           "to": [
             7.7,
-            2.7
+            3.5
           ],
           "cutsVerticalCoreId": "dwelling_stair_core"
         },
@@ -1080,11 +1126,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            4.876,
+            6.905,
             0.3
           ],
           "to": [
-            4.876,
+            6.905,
             6.7
           ],
           "cutsVerticalCoreId": "dwelling_stair_core"
@@ -1111,17 +1157,17 @@
           "id": "secondary_bedroom",
           "x": 4.0,
           "z": 0.3,
-          "width": 3.7,
+          "width": 2.23,
           "depth": 3.62,
           "kind": "room",
           "purpose": "secondary bedroom"
         },
         {
           "id": "landing_storage",
-          "x": 0.3,
-          "z": 3.92,
-          "width": 7.4,
-          "depth": 2.78,
+          "x": 6.23,
+          "z": 2.5,
+          "width": 1.35,
+          "depth": 2.0,
           "kind": "room",
           "purpose": "landing storage"
         }
@@ -1156,6 +1202,18 @@
             [
               4.0,
               0.3
+            ],
+            [
+              4.0,
+              3.5
+            ],
+            [
+              6.905,
+              3.5
+            ],
+            [
+              6.905,
+              6.7
             ],
             [
               4.0,
@@ -1205,7 +1263,7 @@
           ],
           "to": "secondary_bedroom",
           "orientation": "vertical",
-          "x": 5.85,
+          "x": 5.115,
           "z": 3.92,
           "clearOpeningMeters": [
             1.2,
@@ -1221,14 +1279,32 @@
             "primary_circulation"
           ],
           "to": "landing_storage",
-          "orientation": "horizontal",
-          "x": 4.0,
-          "z": 3.92,
+          "orientation": "vertical",
+          "x": 6.905,
+          "z": 4.5,
           "clearOpeningMeters": [
             1.2,
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_upper_cut_AA_landing_storage",
+          "separateObject": true,
+          "between": [
+            "landing_storage",
+            "primary_circulation"
+          ],
+          "to": "landing_storage",
+          "orientation": "horizontal",
+          "x": 6.905,
+          "z": 3.5,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [],
@@ -1250,10 +1326,10 @@
           "id": "window_upper_secondary_bedroom",
           "separateFrameGlassShutter": true,
           "serves": "secondary_bedroom",
-          "side": "east",
-          "x": 8,
-          "z": 2.11,
-          "orientation": "vertical",
+          "side": "south",
+          "x": 5.115,
+          "z": 0.0,
+          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1265,7 +1341,7 @@
           "serves": "landing_storage",
           "side": "east",
           "x": 8,
-          "z": 5.31,
+          "z": 3.5,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1278,50 +1354,8 @@
           "serves": "family_bedroom",
           "side": "west",
           "x": 0.0,
-          "z": 2.7,
+          "z": 3.5,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_upper_cut_east",
-          "separateFrameGlassShutter": true,
-          "serves": "secondary_bedroom",
-          "side": "east",
-          "x": 8,
-          "z": 2.7,
-          "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_upper_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "secondary_bedroom",
-          "side": "south",
-          "x": 4.876,
-          "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_upper_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "landing_storage",
-          "side": "north",
-          "x": 4.876,
-          "z": 7,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1336,10 +1370,10 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 5.54,
-            "z": 4.04,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 6.23,
+            "z": 2.5,
+            "width": 1.35,
+            "depth": 2.0,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1394,10 +1428,10 @@
               "kind": "bed_or_cot",
               "label": "bed",
               "symbol": "BED",
-              "x": 4.35,
-              "z": 0.65,
-              "width": 2.0,
-              "depth": 0.934,
+              "x": 4.223,
+              "z": 0.523,
+              "width": 1.284,
+              "depth": 1.0,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.7
@@ -1406,15 +1440,15 @@
           "protectedClearances": [
             {
               "id": "secondary_bedroom_protected_aisle",
-              "x": 4.0,
-              "z": 1.51,
-              "width": 3.7,
-              "depth": 1.2,
+              "x": 4.515,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 3.62,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "secondary_bedroom_door_approach",
-              "x": 5.25,
+              "x": 4.515,
               "z": 0.3,
               "width": 1.2,
               "depth": 1.2,
@@ -1431,10 +1465,10 @@
               "kind": "utility_table",
               "label": "task table + wall storage",
               "symbol": "UTILITY",
-              "x": 0.578,
-              "z": 4.198,
-              "width": 1.2,
-              "depth": 0.6,
+              "x": 6.365,
+              "z": 2.635,
+              "width": 0.778,
+              "depth": 0.554,
               "orientationDegrees": 0,
               "count": 1,
               "sectionHeightMeters": 0.8
@@ -1443,16 +1477,16 @@
           "protectedClearances": [
             {
               "id": "landing_storage_protected_aisle",
-              "x": 0.3,
-              "z": 4.71,
-              "width": 7.4,
-              "depth": 1.2,
+              "x": 6.305,
+              "z": 2.5,
+              "width": 1.2,
+              "depth": 2.0,
               "kind": "minimum_1_2m_aisle"
             },
             {
               "id": "landing_storage_door_approach",
-              "x": 3.4,
-              "z": 3.92,
+              "x": 6.305,
+              "z": 2.5,
               "width": 1.2,
               "depth": 1.2,
               "kind": "door_swing_clearance"
@@ -1472,20 +1506,20 @@
         {
           "id": "upper_combat_clear",
           "kind": "combat_diameter",
-          "roomId": "landing_storage",
+          "roomId": "family_bedroom",
           "center": [
-            4.0,
-            5.31
+            2.15,
+            2.11
           ],
-          "diameter": 2.78
+          "diameter": 3.62
         },
         {
           "id": "upper_camera_backoff",
           "kind": "camera_backoff",
-          "roomId": "landing_storage",
+          "roomId": "family_bedroom",
           "center": [
-            4.0,
-            5.31
+            2.15,
+            2.11
           ],
           "radius": 2.5
         }
@@ -1509,7 +1543,7 @@
           "id": "light_upper_secondary_bedroom",
           "type": "lighting",
           "roomId": "secondary_bedroom",
-          "x": 5.85,
+          "x": 5.115,
           "z": 2.11
         },
         {
@@ -1523,15 +1557,15 @@
           "id": "light_upper_landing_storage",
           "type": "lighting",
           "roomId": "landing_storage",
-          "x": 4.0,
-          "z": 5.31
+          "x": 6.905,
+          "z": 3.5
         },
         {
           "id": "interaction_upper_landing_storage",
           "type": "interaction",
           "roomId": "landing_storage",
-          "x": 0.9,
-          "z": 4.52
+          "x": 6.68,
+          "z": 3.1
         }
       ],
       "sectionCutLines": [
@@ -1540,11 +1574,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            2.7
+            3.5
           ],
           "to": [
             7.7,
-            2.7
+            3.5
           ],
           "cutsVerticalCoreId": "dwelling_stair_core"
         },
@@ -1552,11 +1586,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            4.876,
+            6.905,
             0.3
           ],
           "to": [
-            4.876,
+            6.905,
             6.7
           ],
           "cutsVerticalCoreId": "dwelling_stair_core"
@@ -1572,10 +1606,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 4.176,
-        "z": 1.6,
-        "width": 1.4,
-        "depth": 2.2,
+        "x": 6.23,
+        "z": 2.5,
+        "width": 1.35,
+        "depth": 2.0,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -1605,7 +1639,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 2.7,
+      "cutCoordinateMeters": 3.5,
       "spanMeters": 8,
       "levels": [
         {
@@ -1638,9 +1672,9 @@
         },
         {
           "levelId": "ground",
-          "roomId": "kitchen",
-          "startMeters": 5.696,
-          "endMeters": 7.699999999999999,
+          "roomId": "vertical_core_hall",
+          "startMeters": 6.23,
+          "endMeters": 7.58,
           "baseElevationMeters": 0,
           "clearHeightMeters": 2.8
         },
@@ -1656,7 +1690,15 @@
           "levelId": "upper",
           "roomId": "secondary_bedroom",
           "startMeters": 4.0,
-          "endMeters": 7.7,
+          "endMeters": 6.23,
+          "baseElevationMeters": 3.2,
+          "clearHeightMeters": 2.6
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing_storage",
+          "startMeters": 6.23,
+          "endMeters": 7.58,
           "baseElevationMeters": 3.2,
           "clearHeightMeters": 2.6
         }
@@ -1683,30 +1725,90 @@
             "upper"
           ],
           "direction": "UP clockwise",
-          "startMeters": 4.176,
-          "endMeters": 5.576
+          "startMeters": 6.23,
+          "endMeters": 7.58
         }
       ],
       "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "window_ground_vertical_core_hall",
+          "kind": "window",
+          "side": "east",
+          "x": 8,
+          "z": 3.5,
+          "positionMeters": 8,
+          "orthogonalMeters": 3.5
+        },
         {
           "levelId": "ground",
           "openingId": "window_ground_cut_west",
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 2.7,
+          "z": 3.5,
           "positionMeters": 0.0,
-          "orthogonalMeters": 2.7
+          "orthogonalMeters": 3.5
         },
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_east",
+          "openingId": "door_ground_entry",
+          "kind": "door",
+          "side": null,
+          "x": 1.302,
+          "z": 3.92,
+          "positionMeters": 1.302,
+          "orthogonalMeters": 3.92
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_living_hearth",
+          "kind": "door",
+          "side": null,
+          "x": 4.0,
+          "z": 3.92,
+          "positionMeters": 4.0,
+          "orthogonalMeters": 3.92
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_pantry",
+          "kind": "door",
+          "side": null,
+          "x": 2.15,
+          "z": 3.92,
+          "positionMeters": 2.15,
+          "orthogonalMeters": 3.92
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_wash_service",
+          "kind": "door",
+          "side": null,
+          "x": 5.115,
+          "z": 3.92,
+          "positionMeters": 5.115,
+          "orthogonalMeters": 3.92
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 6.905,
+          "z": 3.5,
+          "positionMeters": 6.905,
+          "orthogonalMeters": 3.5
+        },
+        {
+          "levelId": "upper",
+          "openingId": "window_upper_landing_storage",
           "kind": "window",
           "side": "east",
           "x": 8,
-          "z": 2.7,
+          "z": 3.5,
           "positionMeters": 8,
-          "orthogonalMeters": 2.7
+          "orthogonalMeters": 3.5
         },
         {
           "levelId": "upper",
@@ -1714,19 +1816,39 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 2.7,
+          "z": 3.5,
           "positionMeters": 0.0,
-          "orthogonalMeters": 2.7
+          "orthogonalMeters": 3.5
         },
         {
           "levelId": "upper",
-          "openingId": "window_upper_cut_east",
-          "kind": "window",
-          "side": "east",
-          "x": 8,
-          "z": 2.7,
-          "positionMeters": 8,
-          "orthogonalMeters": 2.7
+          "openingId": "door_upper_family_bedroom",
+          "kind": "door",
+          "side": null,
+          "x": 2.15,
+          "z": 3.92,
+          "positionMeters": 2.15,
+          "orthogonalMeters": 3.92
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_secondary_bedroom",
+          "kind": "door",
+          "side": null,
+          "x": 5.115,
+          "z": 3.92,
+          "positionMeters": 5.115,
+          "orthogonalMeters": 3.92
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_cut_AA_landing_storage",
+          "kind": "door",
+          "side": null,
+          "x": 6.905,
+          "z": 3.5,
+          "positionMeters": 6.905,
+          "orthogonalMeters": 3.5
         }
       ],
       "furnitureSlices": [
@@ -1748,11 +1870,19 @@
         },
         {
           "levelId": "ground",
-          "roomId": "kitchen",
-          "kind": "prep_table",
-          "symbol": "PREP",
-          "positionMeters": 5.896,
-          "sectionHeightMeters": 0.9
+          "roomId": "living_hearth",
+          "kind": "table_bench",
+          "symbol": "TABLE",
+          "positionMeters": 2.643,
+          "sectionHeightMeters": 0.8
+        },
+        {
+          "levelId": "ground",
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 6.365,
+          "sectionHeightMeters": 1.3
         },
         {
           "levelId": "upper",
@@ -1767,8 +1897,16 @@
           "roomId": "secondary_bedroom",
           "kind": "bed_or_cot",
           "symbol": "BED",
-          "positionMeters": 4.35,
+          "positionMeters": 4.223,
           "sectionHeightMeters": 0.7
+        },
+        {
+          "levelId": "upper",
+          "roomId": "landing_storage",
+          "kind": "utility_table",
+          "symbol": "UTILITY",
+          "positionMeters": 6.365,
+          "sectionHeightMeters": 0.8
         }
       ],
       "featureSlices": [],
@@ -1789,7 +1927,7 @@
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 4.876,
+      "cutCoordinateMeters": 6.905,
       "spanMeters": 7,
       "levels": [
         {
@@ -1806,33 +1944,25 @@
       "roomSlices": [
         {
           "levelId": "ground",
-          "roomId": "living_hearth",
+          "roomId": "kitchen",
           "startMeters": 0.3,
-          "endMeters": 3.92,
+          "endMeters": 2.5,
           "baseElevationMeters": 0,
           "clearHeightMeters": 2.8
         },
         {
           "levelId": "ground",
-          "roomId": "wash_service",
-          "startMeters": 3.92,
-          "endMeters": 6.699999999999999,
+          "roomId": "vertical_core_hall",
+          "startMeters": 2.5,
+          "endMeters": 4.5,
           "baseElevationMeters": 0,
           "clearHeightMeters": 2.8
         },
         {
           "levelId": "upper",
-          "roomId": "secondary_bedroom",
-          "startMeters": 0.3,
-          "endMeters": 3.92,
-          "baseElevationMeters": 3.2,
-          "clearHeightMeters": 2.6
-        },
-        {
-          "levelId": "upper",
           "roomId": "landing_storage",
-          "startMeters": 3.92,
-          "endMeters": 6.699999999999999,
+          "startMeters": 2.5,
+          "endMeters": 4.5,
           "baseElevationMeters": 3.2,
           "clearHeightMeters": 2.6
         }
@@ -1859,83 +1989,95 @@
             "upper"
           ],
           "direction": "UP clockwise",
-          "startMeters": 1.6,
-          "endMeters": 3.8
+          "startMeters": 2.5,
+          "endMeters": 4.5
         }
       ],
       "apertureSlices": [
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_south",
+          "openingId": "window_ground_kitchen",
           "kind": "window",
           "side": "south",
-          "x": 4.876,
+          "x": 6.905,
           "z": 0.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 4.876
+          "orthogonalMeters": 6.905
         },
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 4.876,
-          "z": 7,
-          "positionMeters": 7,
-          "orthogonalMeters": 4.876
+          "openingId": "door_ground_kitchen",
+          "kind": "door",
+          "side": null,
+          "x": 6.905,
+          "z": 2.5,
+          "positionMeters": 2.5,
+          "orthogonalMeters": 6.905
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 6.905,
+          "z": 4.5,
+          "positionMeters": 4.5,
+          "orthogonalMeters": 6.905
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_vertical_core_hall",
+          "kind": "door",
+          "side": null,
+          "x": 6.905,
+          "z": 3.5,
+          "positionMeters": 3.5,
+          "orthogonalMeters": 6.905
         },
         {
           "levelId": "upper",
-          "openingId": "window_upper_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 4.876,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 4.876
+          "openingId": "door_upper_landing_storage",
+          "kind": "door",
+          "side": null,
+          "x": 6.905,
+          "z": 4.5,
+          "positionMeters": 4.5,
+          "orthogonalMeters": 6.905
         },
         {
           "levelId": "upper",
-          "openingId": "window_upper_cut_north",
-          "kind": "window",
-          "side": "north",
-          "x": 4.876,
-          "z": 7,
-          "positionMeters": 7,
-          "orthogonalMeters": 4.876
+          "openingId": "door_upper_cut_AA_landing_storage",
+          "kind": "door",
+          "side": null,
+          "x": 6.905,
+          "z": 3.5,
+          "positionMeters": 3.5,
+          "orthogonalMeters": 6.905
         }
       ],
       "furnitureSlices": [
         {
           "levelId": "ground",
-          "roomId": "living_hearth",
-          "kind": "hearth",
-          "symbol": "HEARTH",
-          "positionMeters": 0.639,
-          "sectionHeightMeters": 1.3
+          "roomId": "kitchen",
+          "kind": "prep_table",
+          "symbol": "PREP",
+          "positionMeters": 0.435,
+          "sectionHeightMeters": 0.9
         },
         {
           "levelId": "ground",
-          "roomId": "wash_service",
-          "kind": "wash_trough",
-          "symbol": "WASH",
-          "positionMeters": 4.198,
-          "sectionHeightMeters": 0.8
-        },
-        {
-          "levelId": "upper",
-          "roomId": "secondary_bedroom",
-          "kind": "bed_or_cot",
-          "symbol": "BED",
-          "positionMeters": 0.65,
-          "sectionHeightMeters": 0.7
+          "roomId": "vertical_core_hall",
+          "kind": "machine_bed",
+          "symbol": "MACHINE",
+          "positionMeters": 2.635,
+          "sectionHeightMeters": 1.3
         },
         {
           "levelId": "upper",
           "roomId": "landing_storage",
           "kind": "utility_table",
           "symbol": "UTILITY",
-          "positionMeters": 4.198,
+          "positionMeters": 2.635,
           "sectionHeightMeters": 0.8
         }
       ],

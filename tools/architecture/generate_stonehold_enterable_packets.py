@@ -22,6 +22,7 @@ try:
         LAYOUT_PROFILES,
         build_packet_geometry,
         contains_rect,
+        geometry_invariants,
     )
 except ModuleNotFoundError:  # Direct `python tools/architecture/...py` execution.
     from stonehold_packet_geometry import (  # type: ignore
@@ -30,6 +31,7 @@ except ModuleNotFoundError:  # Direct `python tools/architecture/...py` executio
         LAYOUT_PROFILES,
         build_packet_geometry,
         contains_rect,
+        geometry_invariants,
     )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -327,14 +329,19 @@ def draw_elevation(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], vi
         draw.line((hx - 45, masses[0][1], hx, y0 + 55, hx + 45, masses[0][1]), fill=IRON, width=12, joint="curve")
         draw.line((hx - 40, masses[0][1], hx + 40, masses[0][1]), fill=ACCENT, width=3)
     elif slug == "mill_wind_water":
-        masses = [mass(0.48, 0.58, 0.42, 0.11)]
-        wheel_x = masses[0][2] + 22
+        masses = [mass(0.62, 0.48, 0.42, 0.11)]
+        wheel_x = masses[0][0] - 40
         wheel_y = base_y - 70
         draw.ellipse((wheel_x - 52, wheel_y - 52, wheel_x + 52, wheel_y + 52), outline=ACCENT, width=6)
         for angle in range(0, 180, 30):
             dx = int(math.cos(math.radians(angle)) * 48)
             dy = int(math.sin(math.radians(angle)) * 48)
             draw.line((wheel_x - dx, wheel_y - dy, wheel_x + dx, wheel_y + dy), fill=LINE, width=2)
+        draw.rectangle((wheel_x - 18, base_y - 20, masses[0][0], base_y - 8), fill=IRON, outline=ACCENT)
+    elif slug == "forge":
+        masses = [mass(0.38, 0.46, 0.44, 0.08), mass(0.72, 0.28, 0.32, 0.10)]
+        chimney_x = masses[0][2] - 40
+        draw.rectangle((chimney_x, masses[0][1] - 55, chimney_x + 28, masses[0][1] + 10), fill=STONE, outline=ACCENT, width=2)
     elif slug == "ruin_structure":
         masses = [mass(0.50, 0.62, 0.39, 0.09)]
         draw.polygon([(masses[0][0] + 120, masses[0][1] - 45), (masses[0][0] + 170, masses[0][1] + 25), (masses[0][0] + 220, masses[0][1] - 5)], fill=BG)
@@ -346,7 +353,7 @@ def draw_elevation(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], vi
     body_l = min(item[0] for item in masses)
     body_r = max(item[2] for item in masses)
     body_t = min(item[1] for item in masses)
-    if slug in {"forge", "workshop", "dwelling", "inn_tavern"}:
+    if slug in {"workshop", "dwelling", "inn_tavern"}:
         chimney_x = body_r - 55
         draw.rectangle((chimney_x, body_t - 55, chimney_x + 28, body_t + 10), fill=STONE, outline=ACCENT, width=2)
     if slug == "market":
@@ -517,7 +524,12 @@ def draw_floor_plan(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int], l
         core_box = scaled_rect(core["footprint"])
         color = ROUTE if "stair" in core["type"] or "ramp" in core["type"] else PORTAL
         draw.rectangle(core_box, outline=color, width=4)
-        draw.line((core_box[0] + 5, core_box[3] - 5, core_box[2] - 5, core_box[1] + 5), fill=color, width=3)
+        mid_x = (core_box[0] + core_box[2]) / 2
+        mid_y = (core_box[1] + core_box[3]) / 2
+        if "stair" in core["type"] or "ramp" in core["type"]:
+            draw.line((core_box[0] + 4, core_box[3] - 4, mid_x, core_box[3] - 4, mid_x, core_box[1] + 4, core_box[2] - 4, core_box[1] + 4), fill=color, width=3)
+        else:
+            draw.rectangle((core_box[0] + 6, core_box[1] + 6, core_box[2] - 6, core_box[3] - 6), outline=color, width=2)
         draw.text(((core_box[0] + core_box[2]) / 2, core_box[1] + 5), "UP " + core["type"].replace("_", " "), font=FONTS["tiny"], fill=color, anchor="ma")
 
     for zone in layout["clearanceZones"]:
@@ -717,6 +729,7 @@ def packet_shape_errors(packet: dict[str, Any]) -> list[str]:
                     core_contained = core_contained and room is not None and contains_rect(room, core_item.get("footprint", {}))
             if not core_contained:
                 errors.append("every vertical core must be contained by its recorded room")
+            errors.extend(geometry_invariants(packet))
             kinds = {item["kind"] for level in floor_plans for layout in level.get("furnishingLayouts", []) for item in layout.get("footprints", [])}
             feature_kinds = {item["kind"] for item in design.get("criticalFeatures", [])}
             if packet.get("slug") == "forge" and not {"furnace", "anvil", "quench_trough", "hood_flue"} <= kinds | feature_kinds:
