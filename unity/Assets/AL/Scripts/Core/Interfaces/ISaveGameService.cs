@@ -15,7 +15,8 @@ namespace AL.Core.Interfaces
         LoadedPrimaryWithPreservedUnknown = 7,
         LoadedPrimaryDegraded = 8,
         LoadedForwardSchemaReadOnly = 9,
-        RecoveryRequired = 10
+        RecoveryRequired = 10,
+        MigratedSchemaOne = 11
     }
 
     public enum SaveOperationStatus

@@ -13,7 +13,8 @@ namespace AL.Services.Local
         ContainedWriter = 1,
         NarrowLegacyOperation = 2,
         Dormant = 3,
-        IndirectCaller = 4
+        IndirectCaller = 4,
+        NarrowProfileBoundOperation = 5
     }
 
     public sealed class ProfileMutationSurfaceDescriptor
@@ -95,14 +96,14 @@ namespace AL.Services.Local
     /// </summary>
     public static class ProfileMutationSurfaceCatalog
     {
-        private const string Version = "al-profile-mutation-surface-v1";
+        private const string Version = "al-profile-mutation-surface-v2";
         private const int MaximumRegistrationCount = 64;
 
         private static readonly ProfileMutationSurfaceDescriptor[] DescriptorArray =
         {
             Boot("boot.game-data", typeof(IGameDataService), typeof(LocalGameDataService), ProfileMutationSurfaceDisposition.ReadOnly),
             Boot("boot.save-root", typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.ContainedWriter),
-            Boot(ProfileMutationSurfaceIds.RealmSelection, typeof(IRealmService), typeof(LocalRealmService), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
+            Boot(ProfileMutationSurfaceIds.RealmSelection, typeof(IRealmService), typeof(LocalRealmService), ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation),
             Boot(ProfileMutationSurfaceIds.Resource, typeof(IResourceService), typeof(LocalResourceService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Research, typeof(IResearchService), typeof(LocalResearchService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Building, typeof(IBuildingService), typeof(LocalBuildingService), ProfileMutationSurfaceDisposition.ContainedWriter),
@@ -125,7 +126,7 @@ namespace AL.Services.Local
             Extra(ProfileMutationSurfaceIds.LifecycleSave, typeof(ISaveGameService), typeof(AL.Core.Bootloader), ProfileMutationSurfaceDisposition.IndirectCaller),
             Extra(ProfileMutationSurfaceIds.DeleteSave, typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.Dormant),
             Extra(ProfileMutationSurfaceIds.MvpApprovalReset, typeof(ISaveGameService), typeof(MvpApprovalSlotRuntime), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
-            Extra(ProfileMutationSurfaceIds.Nvs01Progress, typeof(ISaveGameCandidateStore), typeof(AL.Narrative.Nvs01.Nvs01SaveGameMutationCommitter), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
+            Extra(ProfileMutationSurfaceIds.Nvs01Progress, typeof(ISaveGameCandidateStore), typeof(AL.Narrative.Nvs01.Nvs01SaveGameMutationCommitter), ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation),
             Extra(ProfileMutationSurfaceIds.MvpLoop, typeof(ILegacyMvpLoopCandidateStore), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
             Extra(ProfileMutationSurfaceIds.SideQuest, typeof(ISideQuestService), typeof(SideQuestService), ProfileMutationSurfaceDisposition.Dormant),
             Extra(ProfileMutationSurfaceIds.ChampionCustomization, null, typeof(AL.ChampionMode.Customization.ChampionCustomizationController), ProfileMutationSurfaceDisposition.ContainedWriter),
