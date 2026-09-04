@@ -1,0 +1,152 @@
+{
+  "modelId": "elite_umbral_cindermaw_salamander",
+  "sourceTaskIds": [
+    "01a05f90-dc1f-723e-9e7a-4e3feb8f3dbc",
+    "01a05fa3-16b8-70f5-a0bd-cca9f316e455",
+    "01a06569-2956-73a2-a51e-bade35802fba"
+  ],
+  "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v003.fbx",
+  "inputSha256": "adc05ab231729a2189f1d956f90384aa051932ba34bc2c5929cd897b06a25fd5",
+  "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v004.fbx",
+  "outputSha256": "9486be45241afe61ba04b4f2fedc4d751819acfd2e0d6181a97c1e4cddb2b9d6",
+  "editableBlend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/elite_umbral_cindermaw_salamander_normal_smoothing_v004.blend",
+  "editableBlendSha256": "dfd22edc0ed0ab3e9c050e815e206202db25f1f7a1f42b2447211e43452a3783",
+  "status": "clean_geometry_pass_uv_bake_pass_smoothing_pass_normal_detail_pass_texture_grade_pass_rigging_required",
+  "productionReady": false,
+  "rigged": false,
+  "runtimeIntegrationState": "Blocked",
+  "operations": [
+    "recomputed deliberate 60-degree smoothing before tangent extraction",
+    "authored anatomy-weighted macro plates, mid pebbles, and fine pores in object space",
+    "rasterized the continuous field into the clean UV tangent basis at 4096 square",
+    "preserved the approved charcoal/obsidian color packet and separate runtime VFX boundary"
+  ],
+  "metrics": {
+    "uvLayer": "UVMap_Clean",
+    "uvFacesOutsideUnit": 0,
+    "uvZeroAreaFaces": 0,
+    "uvOverlappingFaces": 0,
+    "sharpEdgesBefore": 53054,
+    "sharpEdgesAfter": 631,
+    "normalAngularP50Degrees": 3.3000000000000003,
+    "normalAngularP95Degrees": 11.4,
+    "normalAngularMaxDegrees": 25.07196628034544,
+    "normalStrength": 0.01,
+    "polygonalProjectionBlockerResolved": true
+  },
+  "normalDetail": {
+    "status": "PASS",
+    "method": "object_space_procedural_height_to_clean_uv_tangent_normal_v001",
+    "authoredNormalDetail": true,
+    "runtimeVfxSeparate": true,
+    "orientation": "OpenGL +Y",
+    "modelPath": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v004.fbx",
+    "modelSha256": "9486be45241afe61ba04b4f2fedc4d751819acfd2e0d6181a97c1e4cddb2b9d6",
+    "objectName": "elite_umbral_cindermaw_salamander_geometry_uv_smooth_v004",
+    "outputPath": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/normal.png",
+    "outputSha256": "f2aebf6660f9c8d1a01223c3d1c162ac96236edb9c21c63d662189f7d0b4dba1",
+    "dimensions": [
+      4096,
+      4096
+    ],
+    "strength": 0.01,
+    "gutterRadiusPixels": 2.0,
+    "atlasBackground": "neutral_tangent",
+    "coordinateFrame": {
+      "lateralAxis": "world X",
+      "longitudinalAxis": "world Y",
+      "dorsalAxis": "world Z",
+      "boundsMin": [
+        -0.4188709855079651,
+        -0.9499970078468323,
+        -0.24544595181941986
+      ],
+      "boundsMax": [
+        0.4271009862422943,
+        0.9491789937019348,
+        0.24447400867938995
+      ],
+      "span": [
+        0.8459719717502594,
+        1.899176001548767,
+        0.4899199604988098
+      ]
+    },
+    "metrics": {
+      "resolution": 4096,
+      "coveredPixels": 4252968,
+      "coverageFraction": 0.2534966468811035,
+      "overlapPixelWrites": 0,
+      "angularP50Degrees": 3.3000000000000003,
+      "angularP95Degrees": 11.4,
+      "angularMaxDegrees": 25.07196628034544,
+      "unitLengthMaxError": 2.220446049250313e-16
+    }
+  },
+  "sourceUvEvidence": {
+    "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/DCCReports/elite_umbral_cindermaw_salamander_uv_validation_v004.json",
+    "sha256": "5a6c265f24262e3c51259f26b02d2854dd049ddaeaa0e25495f40c7b0b6abc10"
+  },
+  "smoothingEvidence": {
+    "path": "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/DCCReports/elite_umbral_cindermaw_salamander_smoothing_v004.json",
+    "sha256": "daf3b24f2901ced073cd3e70b8224f8cf7b870c77eae5f5dd945e63907f8142c"
+  },
+  "review": {
+    "name": "review",
+    "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Review/elite_umbral_cindermaw_salamander_threequarter_v004.png",
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "sha256": "a9a9235fc171f9a71376a0aae1e7a2821d124339d76244a4a7a2f0a0fda3f430"
+  },
+  "bakedMaps": [
+    {
+      "name": "base_color",
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/base_color.png",
+      "dimensions": [
+        8192,
+        8192
+      ],
+      "sha256": "a709480726abbda16b93eee728145c4e3f3274b0342f4cf37cf7f3e07818185d"
+    },
+    {
+      "name": "normal",
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/normal.png",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "sha256": "f2aebf6660f9c8d1a01223c3d1c162ac96236edb9c21c63d662189f7d0b4dba1",
+      "provenance": "object_space_procedural_height_to_clean_uv_tangent_normal_v001"
+    },
+    {
+      "name": "roughness",
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/roughness.png",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "sha256": "feadcd3f9fe5e8c2fb4af0c33cf348ec5af238ccfb142d59950e02966608e00b"
+    },
+    {
+      "name": "metallic",
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/metallic.png",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "sha256": "73175a0cbc3015a213090bac6e254f5a2f7494e6825fc1934b747929d0cb7031"
+    },
+    {
+      "name": "ao",
+      "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_normaldetail_v004/ao.png",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "sha256": "ed950e0f356249373849fa21d4dce3554d630c4eca4f576ba2554e9e24947b57"
+    }
+  ],
+  "diagnostics": []
+}

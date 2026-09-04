@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "fixtureVersion": "rsq-fixtures-v1",
+  "seed": 1618033988,
+  "logicalClockUtc": "2026-01-01T00:00:00Z",
+  "scenarios": [
+    {
+      "id": "RSQ-3D-ARRIVAL",
+      "version": "v1",
+      "mode": "Adventure3D",
+      "cleanProfile": true,
+      "fixedWeather": "clear-neutral",
+      "fixedPopulation": "baseline",
+      "orderedAnchors": ["slice_spawn", "capital_threshold", "capital_landmark", "civic_entry", "civic_objective", "slice_return"],
+      "randomEncounters": false,
+      "expectedMetricsByCheck": {
+        "RSQ-3D-NAV-001": {"requiredAnchors": ["slice_spawn", "capital_threshold", "capital_landmark", "civic_entry", "civic_objective", "slice_return"]}
+      }
+    },
+    {
+      "id": "RSQ-3D-COMBAT",
+      "version": "v1",
+      "mode": "Adventure3D",
+      "fixedState": ["player-build", "loadout", "target-set", "telegraph-script", "party-support", "objective-contest", "effect-source-ladder", "defeat-recovery"],
+      "expectedMetricsByCheck": {
+        "RSQ-3D-CMB-001": {"telegraphsExpected": ["solo-hostile", "party-hostile", "density-effect-ladder", "objective-contest", "defeat-recovery"]}
+      }
+    },
+    {
+      "id": "RSQ-2_5D-KINGDOM",
+      "version": "v1",
+      "mode": "Kingdom2_5D",
+      "snapshots": ["early", "middle", "mature"],
+      "fixedState": ["grid", "resources", "bounded-queue", "accepted-receipts", "neighbor-targets", "construction-failures", "camera-anchors"]
+    },
+    {
+      "id": "RSQ-2_5D-STRATEGIC-COMBAT",
+      "version": "v1",
+      "mode": "Kingdom2_5D",
+      "fixedState": ["self", "party", "hostile", "objective", "route", "allegiance", "highest-threat", "result", "unavailable-reconnect"],
+      "authorityChangingCommands": false,
+      "expectedMetricsByCheck": {
+        "RSQ-2_5D-CMB-001": {"requiredSemanticStates": ["self", "party", "hostile", "objective", "route", "allegiance", "highest-threat", "result", "unavailable-reconnect"]}
+      }
+    },
+    {
+      "id": "RSQ-CROSS-MODE",
+      "version": "v1",
+      "mode": "CrossMode",
+      "requiredPredicate": "LordshipUnlocked",
+      "orderedStates": ["Adventure3D", "Kingdom2_5D", "Adventure3D"],
+      "fixedState": ["view-switch", "rejection", "idempotent-retry", "interruption", "hud-collapse-restore", "authoritative-snapshot"],
+      "expectedMetricsByCheck": {
+        "RSQ-2_5D-NAV-001": {"expectedStates": ["Adventure3D", "Kingdom2_5D", "Adventure3D"]},
+        "RSQ-3D-INP-001": {"requiredActions": ["move", "camera", "target", "skill-1", "skill-2", "skill-3", "skill-4", "interact", "menu", "map", "cancel-back", "mode-switch-request"]},
+        "RSQ-2_5D-INP-001": {"requiredActions": ["shared-menu-entry", "shared-menu-exit", "pan", "zoom", "building-select", "dock", "placement", "rotation", "inspector", "queue", "map-view-switch", "confirm", "cancel-back", "focus-restoration"]}
+      }
+    },
+    {
+      "id": "RSQ-SAVE-CONTINUITY",
+      "version": "v1",
+      "mode": "CrossMode",
+      "fixtureIds": ["pre_schema_v0_kingdom_progress", "schema1_kingdom_progress"],
+      "requiredHashes": ["primary-before", "primary-after", "backup-before", "backup-after", "quarantine-before", "quarantine-after"]
+    },
+    {
+      "id": "RSQ-LOCALE",
+      "version": "v1",
+      "mode": "CrossMode",
+      "locales": ["en-US", "ko-KR"],
+      "requiredChecks": ["missing-key", "missing-font", "text-bounds", "caption-subtitle", "input-glyph"]
+    },
+    {
+      "id": "RSQ-NARRATIVE-Stonehold",
+      "version": "v1",
+      "mode": "CrossMode",
+      "realm": "Stonehold",
+      "requiredPredicate": "LordshipUnlocked",
+      "orderedCheckpoints": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"],
+      "expectedMetricsByCheck": {
+        "RSQ-3D-NAR-001": {"expectedCheckpointIds": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"]},
+        "RSQ-2_5D-NAR-001": {"requiredPredicateId": "LordshipUnlocked", "expectedCheckpointIds": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"]}
+      }
+    },
+    {
+      "id": "RSQ-NARRATIVE-Eldergrove",
+      "version": "v1",
+      "mode": "CrossMode",
+      "realm": "Eldergrove",
+      "requiredPredicate": "LordshipUnlocked",
+      "orderedCheckpoints": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"],
+      "expectedMetricsByCheck": {
+        "RSQ-3D-NAR-001": {"expectedCheckpointIds": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"]},
+        "RSQ-2_5D-NAR-001": {"requiredPredicateId": "LordshipUnlocked", "expectedCheckpointIds": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"]}
+      }
+    },
+    {
+      "id": "RSQ-NARRATIVE-Crownlands",
+      "version": "v1",
+      "mode": "CrossMode",
+      "realm": "Crownlands",
+      "requiredPredicate": "LordshipUnlocked",
+      "orderedCheckpoints": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"],
+      "expectedMetricsByCheck": {
+        "RSQ-3D-NAR-001": {"expectedCheckpointIds": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"]},
+        "RSQ-2_5D-NAR-001": {"requiredPredicateId": "LordshipUnlocked", "expectedCheckpointIds": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"]}
+      }
+    },
+    {
+      "id": "RSQ-NARRATIVE-Umbral",
+      "version": "v1",
+      "mode": "CrossMode",
+      "realm": "Umbral",
+      "requiredPredicate": "LordshipUnlocked",
+      "orderedCheckpoints": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"],
+      "expectedMetricsByCheck": {
+        "RSQ-3D-NAR-001": {"expectedCheckpointIds": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"]},
+        "RSQ-2_5D-NAR-001": {"requiredPredicateId": "LordshipUnlocked", "expectedCheckpointIds": ["entry", "objective", "branch-consequence", "completion", "persistence", "restart", "resume"]}
+      }
+    }
+  ]
+}

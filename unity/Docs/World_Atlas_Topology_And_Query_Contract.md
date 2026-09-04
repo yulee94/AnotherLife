@@ -531,3 +531,33 @@ None blocks this contract, the unresolved narrative source amendment, or pure va
 - [ ] Narrative fidelity and final user visual/playtest/release approval are recorded.
 
 This document completes only Phase A coordination. It creates no production or creative acceptance claim.
+
+## 19. Protected-zone query addendum
+
+**Addendum contract ID:** `al_world_atlas_protected_zone_query_contract_v001`
+
+Catalog source v003 extends, but does not rename or reorder, the v002 topology,
+boundary, zone, objective, or localization identities. It adds three immutable
+contract-only policy IDs:
+
+1. `zone_policy_city_safe_v001`
+2. `zone_policy_beginner_safe_v001`
+3. `zone_policy_town_safe_v001`
+
+Each policy is `forced_non_pvp`, applies to all player harmful effects, requires
+revalidation at effect application, blocks war override, has no mutation
+authority, and remains `contract_only`. This metadata does not enforce PvP,
+move an actor, infer presence, or define a physical boundary.
+
+Each canonical realm exposes one technical subzone ID per policy kind, ordered
+by `crownlands`, `stonehold`, `eldergrove`, `umbral`, then `city`, `beginner`,
+`town`: `zone_protected_<realm>_<kind>`. Every record references its existing
+`zone_inner_<realm>` parent and the corresponding policy ID. Names, city/town
+placement, geometry, scenes, triggers, traversal, presence authority, and
+player-facing copy remain unavailable.
+
+The specialized validator rejects missing, duplicate, reordered, cross-realm,
+unknown-parent, unknown-policy, activated-enforcement, war-override, or mutation
+claims. Immutable typed queries expose exact policy/subzone lookup and canonical
+per-realm subzone lists. Unknown and malformed IDs return typed failures; no
+query mutates movement, combat, PvP, scenes, saves, territory, or catalog state.

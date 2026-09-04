@@ -238,19 +238,21 @@ and `resolutionPolicy`.
 
 ### 3.9 `al_world_atlas_narrative_catalog.json`
 
-- **Version / packet:** `0.2.0` / `al_narrative_world_atlas_source_v002`
+- **Version / packet:** `0.3.0` / `al_narrative_world_atlas_source_v003`
 - **Owner:** `codex_narrative_content` (technical consumer issue #181; topology contract `al_world_atlas_topology_query_contract_v001`, merge commit `a97d5e5c`).
 - **Runtime consumer:** `WorldAtlasTopologyLoader.Validate(byte[])` — a strict, fully
   implemented validator (counts, cross-references, global unique IDs, boundary ordering,
   topology ring/bridge constraints). It is **not** wired to read the file at runtime; it
   awaits a byte source. Tested by `WorldAtlasTopologyTests`.
 - **Fields / types / examples:**
-  - `sourceAuthorities`: `primaryMode`, `realmCatalog`, `mainQuestPacket`, `nvsPacket` (`OMEN_1`), `topologyContract{id, path, mergeCommit}`, `technicalConsumerIssue` (181).
+  - `sourceAuthorities`: `primaryMode`, `realmCatalog`, `mainQuestPacket`, `nvsPacket` (`OMEN_1`), `topologyContract{id, path, mergeCommit}`, `protectedZoneContract{id, path, issue}`, `technicalConsumerIssue` (181).
   - `atlasPolicy`: `viewerRealmRule`, `crossRealmRule`, `unavailableRuntimeBehavior`, `queryAuthority`, `nonGoals[]`.
   - `abstractTopology`: `{topologyId, macroNarrativeZoneId, nodes[5] (ring_slot_01..04 + center_slot), adjacency[4], bridges[12], endpoints[24], placement{status: unresolved_user_gate, assignments[], compassOrientation: unresolved}}`.
   - `transitionZones[]` (4): `{id, realmId, mainGateId, zoneType, sceneReferenceStatus: requested, traversalStatus: requested, mutationAuthority}`.
   - `walls[]` (8): `{id, realmId, boundaryRole (inner_wall/outer_wall), geometryStatus: requested, mutationAuthority}`.
   - `boundaries[]` (4): `{id, realmId, innerRealmId, innerAtlasZoneId, innerWallId, transitionZoneId, mainGateId, outerWallId, outerWarzoneId, outerAtlasZoneId, orderedStages[5], hookStatus: requested, mutationAuthority}`.
+  - `protectedZonePolicies[]` (3): immutable city/beginner/town `forced_non_pvp` policies with required effect-application recheck, blocked war override, `contract_only` enforcement, and no mutation authority.
+  - `protectedSubzones[]` (12): one city, beginner, and town technical subzone per canonical realm, each referencing its existing inner atlas zone and exact policy ID; scene and boundary hooks remain requested.
   - `zones[]` (11): `{id, realmId, displayNameKey, summaryKey, zoneType, visibility, sceneReferenceStatus, relatedQuestMilestones[], pvpPolicy?}` — 4 inner + 4 warzone gates + `zone_crossroads_bridges` + `zone_accordant_isle` (forced_non_pvp) + `zone_sky_castle_marker`.
   - `objectives[]` (5): `{id, displayNameKey, summaryKey, requiredZoneTypes[]/requiredZoneIds[], hookStatus: requested, mutationAuthority}` — includes `objective_eight_gem_custody`.
   - `draftLocalization[]` (large), `engineeringHandoff` (`consumerIssue: 181`, `requiredValidation[]` pins the exact 5/4/12/24/4/8/4/11/5 counts).
