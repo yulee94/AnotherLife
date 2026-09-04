@@ -5,6 +5,7 @@ using AL.Data.Runtime;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
+using AL.RealmWar.Territories.Contracts;
 
 [assembly: InternalsVisibleTo("AL.Nvs01.Persistence.Tests")]
 [assembly: InternalsVisibleTo("AL.EditMode.Tests")]
@@ -134,6 +135,18 @@ namespace AL.Services.Local
         AL.RealmSelection.WishgateCommitResult TryCommitProfileBoundWishgate(
             AL.RealmSelection.WishgateCommitRequest request,
             AL.RealmSelection.WishgateDurableDependencies dependencies);
+    }
+
+    /// <summary>
+    /// Schema-v2 territory-capture mutation entry point. The complete typed
+    /// command result is replanned against the candidate inside the save root;
+    /// gameplay callers cannot supply an arbitrary profile mutation callback.
+    /// </summary>
+    internal interface IProfileBoundTerritoryCaptureCandidateStore
+    {
+        TerritoryCaptureApplicationResult TryCommitProfileBoundTerritoryCapture(
+            TerritoryCaptureTransactionRequest request,
+            TerritoryPhaseBPlanner planner);
     }
 
     /// <summary>

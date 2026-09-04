@@ -58,6 +58,16 @@ namespace AL.RealmWar.Territories
             TerritoryCaptureTransactionRequest request)
         {
             string territoryId = request?.CaptureRequest?.TerritoryId ?? string.Empty;
+            if (!_allowWritesWithoutGate &&
+                _saveGameService is
+                    AL.Services.Local.IProfileBoundTerritoryCaptureCandidateStore
+                        profileBoundStore)
+            {
+                return profileBoundStore.TryCommitProfileBoundTerritoryCapture(
+                    request,
+                    _planner);
+            }
+
             if (!TryGetAuthorizedSave(out SaveGameData save))
             {
                 return Reject(

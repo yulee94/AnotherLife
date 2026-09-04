@@ -7,6 +7,7 @@ using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
 using AL.ChampionMode.Death;
+using AL.RealmWar.Territories.Contracts;
 
 namespace AL.Services.Local
 {
@@ -24,6 +25,7 @@ namespace AL.Services.Local
         IProfileBoundRealmSelectionCandidateStore,
         IProfileBoundDeathPenaltyCandidateStore,
         IProfileBoundWishgateCandidateStore,
+        IProfileBoundTerritoryCaptureCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyFirstWorldProgressCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
@@ -147,6 +149,16 @@ namespace AL.Services.Local
                 () => ((IProfileBoundWishgateCandidateStore)_inner)
                     .TryCommitProfileBoundWishgate(request, dependencies),
                 ResolveWishgate);
+
+        TerritoryCaptureApplicationResult
+            IProfileBoundTerritoryCaptureCandidateStore
+            .TryCommitProfileBoundTerritoryCapture(
+                TerritoryCaptureTransactionRequest request,
+                TerritoryPhaseBPlanner planner) =>
+            Execute(
+                () => ((IProfileBoundTerritoryCaptureCandidateStore)_inner)
+                    .TryCommitProfileBoundTerritoryCapture(request, planner),
+                ResolveTerritoryCapture);
 
         SaveCandidateCommitResult
             ILegacyMvpLoopCandidateStore.TryCommitLegacyMvpLoop(
@@ -459,6 +471,25 @@ namespace AL.Services.Local
             }
 
             return result.Persisted && result.MutationOccurred && SaveCommitVerified
+                ? TransactionResolution.Commit
+                : TransactionResolution.RollbackAndFreeze;
+        }
+
+        private TransactionResolution ResolveTerritoryCapture(
+            TerritoryCaptureApplicationResult result)
+        {
+            if (InnerCommitUncertain ||
+                result?.Disposition == TerritoryApplyDisposition.CommitUncertain)
+            {
+                return TransactionResolution.RollbackAndFreeze;
+            }
+
+            if (result?.Disposition != TerritoryApplyDisposition.Committed)
+            {
+                return TransactionResolution.Rollback;
+            }
+
+            return SaveCommitVerified
                 ? TransactionResolution.Commit
                 : TransactionResolution.RollbackAndFreeze;
         }
