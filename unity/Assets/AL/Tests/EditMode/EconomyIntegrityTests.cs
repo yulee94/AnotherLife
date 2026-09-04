@@ -247,7 +247,8 @@ namespace AL.Tests.EditMode
         public void PublicEconomyConstructorsFailClosedWithoutTypedAuthorityProvider()
         {
             AssertOnlyPublicSaveConstructor(
-                "AL.Services.Local.LocalResourceService");
+                "AL.Services.Local.LocalResourceService",
+                allowsProductionProvider: true);
             AssertOnlyPublicSaveConstructor(
                 "AL.Services.Local.LocalWarzoneCreditService");
             object save = CreateValidSave();
@@ -2761,18 +2762,35 @@ namespace AL.Tests.EditMode
         }
 
         private static void AssertOnlyPublicSaveConstructor(
-            string serviceTypeName)
+            string serviceTypeName,
+            bool allowsProductionProvider = false)
         {
             Type serviceType = GetRuntimeType(serviceTypeName);
+            Type saveServiceType =
+                GetRuntimeType("AL.Core.Interfaces.ISaveGameService");
+            Type rawSaveType =
+                GetRuntimeType("AL.Data.Runtime.SaveGameData");
             ConstructorInfo[] publicConstructors = serviceType.GetConstructors(
                 BindingFlags.Instance | BindingFlags.Public);
-            Assert.AreEqual(1, publicConstructors.Length, serviceTypeName);
-            ParameterInfo[] parameters =
-                publicConstructors[0].GetParameters();
-            Assert.AreEqual(1, parameters.Length, serviceTypeName);
-            Assert.AreEqual(
-                GetRuntimeType("AL.Core.Interfaces.ISaveGameService"),
-                parameters[0].ParameterType,
+            Assert.AreEqual(allowsProductionProvider ? 2 : 1, publicConstructors.Length, serviceTypeName);
+            Assert.NotNull(serviceType.GetConstructor(new[] { saveServiceType }), serviceTypeName);
+            if (allowsProductionProvider)
+            {
+                Assert.NotNull(serviceType.GetConstructor(new[]
+                {
+                    saveServiceType,
+                    GetRuntimeType("AL.Core.Interfaces.IEconomyProductionContributionProvider")
+                }), serviceTypeName);
+            }
+            Assert.False(
+                publicConstructors.Any(
+                    constructor =>
+                    {
+                        ParameterInfo[] parameters = constructor.GetParameters();
+                        return parameters.Any(
+                            parameter =>
+                                parameter.ParameterType == rawSaveType);
+                    }),
                 serviceTypeName);
         }
 

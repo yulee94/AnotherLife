@@ -636,6 +636,8 @@ namespace AL.Tests.EditMode
                 typeof(AudioSource),
                 typeof(LaunchCinematicVideoPlayerHost));
             host = root.GetComponent<LaunchCinematicVideoPlayerHost>();
+            SetField(host, "_surface", root.GetComponent<RawImage>());
+            InvokePrivate(host, "Awake");
             return root;
         }
 

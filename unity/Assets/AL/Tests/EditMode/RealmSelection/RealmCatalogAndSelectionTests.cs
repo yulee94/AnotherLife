@@ -372,13 +372,18 @@ namespace AL.Tests.EditMode.RealmSelection
             try
             {
                 LocalSaveGameService save = CreateLocalSave(root);
+                save.Load();
+                Assert.That(save.CurrentSave, Is.Not.Null, save.LastLoadMessage);
                 var service = new LocalRealmService(save, new FakeGameDataService(_definitions), _catalog);
-                RealmSelectionResult first = service.TrySelectRealm(new RealmSelectionRequest("tx_first", RealmId.Stonehold));
+                RealmSelectionResult first = service.TrySelectRealm(
+                    new RealmSelectionRequest(Guid.NewGuid().ToString("N"), RealmId.Stonehold));
                 byte[] exactPrimary = File.ReadAllBytes(Path.Combine(root, "save.json"));
                 byte[] exactBackup = File.ReadAllBytes(Path.Combine(root, "save.backup.json"));
                 SaveGameData published = save.CurrentSave;
-                RealmSelectionResult repeated = service.TrySelectRealm(new RealmSelectionRequest("tx_same", RealmId.Stonehold));
-                RealmSelectionResult different = service.TrySelectRealm(new RealmSelectionRequest("tx_other", RealmId.Umbral));
+                RealmSelectionResult repeated = service.TrySelectRealm(
+                    new RealmSelectionRequest(Guid.NewGuid().ToString("N"), RealmId.Stonehold));
+                RealmSelectionResult different = service.TrySelectRealm(
+                    new RealmSelectionRequest(Guid.NewGuid().ToString("N"), RealmId.Umbral));
                 Assert.That(first.Status, Is.EqualTo(RealmSelectionStatus.Committed));
                 Assert.That(repeated.Status, Is.EqualTo(RealmSelectionStatus.AlreadyCommittedSameRealm));
                 Assert.That(different.Status, Is.EqualTo(RealmSelectionStatus.RejectedDifferentRealm));

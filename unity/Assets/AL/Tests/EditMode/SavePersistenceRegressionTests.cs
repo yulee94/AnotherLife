@@ -34,8 +34,8 @@ namespace AL.Tests.EditMode
 
                 object currentSave = GetProperty(service, "CurrentSave");
                 Assert.AreEqual(CurrentSaveFormatId, GetField(currentSave, "SaveFormatId"));
-                Assert.AreEqual(1, GetField(currentSave, "SaveSchemaVersion"));
-                Assert.AreEqual(1, GetField(currentSave, "ProfileInitializationVersion"));
+                Assert.AreEqual(SaveGameData.CurrentSaveSchemaVersion, GetField(currentSave, "SaveSchemaVersion"));
+                Assert.AreEqual(SaveGameData.CurrentProfileInitializationVersion, GetField(currentSave, "ProfileInitializationVersion"));
 
                 string primaryPath = Path.Combine(root, "save.json");
                 SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
@@ -49,8 +49,8 @@ namespace AL.Tests.EditMode
                 Invoke(reloadedService, "Load");
                 object reloadedSave = GetProperty(reloadedService, "CurrentSave");
                 Assert.AreEqual(CurrentSaveFormatId, GetField(reloadedSave, "SaveFormatId"));
-                Assert.AreEqual(1, GetField(reloadedSave, "SaveSchemaVersion"));
-                Assert.AreEqual(1, GetField(reloadedSave, "ProfileInitializationVersion"));
+                Assert.AreEqual(SaveGameData.CurrentSaveSchemaVersion, GetField(reloadedSave, "SaveSchemaVersion"));
+                Assert.AreEqual(SaveGameData.CurrentProfileInitializationVersion, GetField(reloadedSave, "ProfileInitializationVersion"));
             }
             finally
             {
@@ -272,9 +272,9 @@ namespace AL.Tests.EditMode
                 Assert.AreEqual(
                     CurrentSaveFormatId,
                     GetField(currentSave, "SaveFormatId"));
-                Assert.AreEqual(1, GetField(currentSave, "SaveSchemaVersion"));
+                Assert.AreEqual(SaveGameData.CurrentSaveSchemaVersion, GetField(currentSave, "SaveSchemaVersion"));
                 Assert.AreEqual(
-                    1,
+                    SaveGameData.CurrentProfileInitializationVersion,
                     GetField(currentSave, "ProfileInitializationVersion"));
                 Assert.AreEqual(
                     "Crownlands",
@@ -300,10 +300,10 @@ namespace AL.Tests.EditMode
                     CurrentSaveFormatId,
                     GetField(persistedSave, "SaveFormatId"));
                 Assert.AreEqual(
-                    1,
+                    SaveGameData.CurrentSaveSchemaVersion,
                     GetField(persistedSave, "SaveSchemaVersion"));
                 Assert.AreEqual(
-                    1,
+                    SaveGameData.CurrentProfileInitializationVersion,
                     GetField(persistedSave, "ProfileInitializationVersion"));
                 Assert.AreEqual(
                     "Crownlands",
@@ -402,9 +402,9 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(
                 CurrentSaveFormatId,
                 GetField(currentSave, "SaveFormatId"));
-            Assert.AreEqual(1, GetField(currentSave, "SaveSchemaVersion"));
+            Assert.AreEqual(SaveGameData.CurrentSaveSchemaVersion, GetField(currentSave, "SaveSchemaVersion"));
             Assert.AreEqual(
-                1,
+                SaveGameData.CurrentProfileInitializationVersion,
                 GetField(currentSave, "ProfileInitializationVersion"));
             Assert.AreEqual(
                 "None",
@@ -1074,8 +1074,8 @@ namespace AL.Tests.EditMode
                 });
             return new SaveSemanticValidationPolicy(
                 CurrentSaveFormatId,
-                1,
-                1,
+                SaveGameData.CurrentSaveSchemaVersion,
+                SaveGameData.CurrentProfileInitializationVersion,
                 authority,
                 maximumInputBytes: 1024 * 1024);
         }
