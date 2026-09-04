@@ -1,0 +1,60 @@
+{
+  "androidEvidence": {
+    "decodeOfLaunchMaster": "NOT_PERFORMED_NO_APPROVED_MASTER",
+    "packagedLaunchMp4Count": 0,
+    "presentationPath": "static-fallback"
+  },
+  "authority": {
+    "approvedForProduction": false,
+    "finalCinematicApproval": false,
+    "gameplayAuthority": false,
+    "ownerVisualApprovalRequired": true,
+    "probeEvidenceApproved": false,
+    "runtimeAuthority": false,
+    "status": "PACKAGING_BLOCKED_NO_APPROVED_MASTER"
+  },
+  "encodeContract": {
+    "android": {
+      "codecProfile": "h264-main",
+      "height": 720,
+      "maximumBytes": 42000000,
+      "width": 1280
+    },
+    "desktop": {
+      "codecProfile": "h264-high",
+      "height": 1080,
+      "maximumBytes": 95000000,
+      "width": 1920
+    },
+    "durationSeconds": 60.0,
+    "fps": 24,
+    "frameCount": 1440
+  },
+  "encodes": {
+    "android": null,
+    "desktop": null
+  },
+  "forbiddenSources": {
+    "rejectedMeshyGlbSha256": "5a846774341c6e38a8f59df617cbec0b52135f5898a591db271094b3d4bb1270",
+    "shot070ReviewMp4Sha256": "0f7b66dc3fd6450405cec9cbf5840ba82fd1589ab5fbe73148b1381527169122",
+    "stillImageMotionSubstitute": false
+  },
+  "packetId": "tdf_packet_launch_cinematic_packaging_v001",
+  "reducedMotionFallback": {
+    "bootPresentation": "static-fallback",
+    "controllerBinding": "LaunchCinematicPlaybackCoordinator",
+    "required": true
+  },
+  "runtimeCatalog": {
+    "bytes": 1316,
+    "path": "unity/Assets/AL/StreamingAssets/GameData/al_launch_cinematic_runtime.v1.json",
+    "sha256": "77b58ecb6252c03416bd5e61c8939c44364dd5e961422f9039138b6366c9feb3"
+  },
+  "schemaVersion": 1,
+  "sourceVersion": "tdf-launch-cinematic-packaging-2026-09-04-v001",
+  "windowsEvidence": {
+    "decodeOfLaunchMaster": "NOT_PERFORMED_NO_APPROVED_MASTER",
+    "packagedLaunchMp4Count": 0,
+    "presentationPath": "static-fallback"
+  }
+}
