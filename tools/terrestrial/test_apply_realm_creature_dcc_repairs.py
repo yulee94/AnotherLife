@@ -69,7 +69,8 @@ class ApplyRealmCreatureDccRepairsTests(unittest.TestCase):
         self.assertIn("smoothing evidence customNormalsRemoved must be true", smoothing_diagnostics)
 
     def test_rejects_unbound_authored_normal_nested_evidence(self):
-        repair = REPAIRS["elite_umbral_cindermaw_salamander"]
+        repair = dict(REPAIRS["elite_umbral_cindermaw_salamander"])
+        repair["visualPolish"] = False
         with tempfile.TemporaryDirectory() as temporary:
             repo_root = Path(temporary)
             packet_root = repo_root / "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001"
@@ -286,7 +287,8 @@ class ApplyRealmCreatureDccRepairsTests(unittest.TestCase):
         self.assertIn("report productionReady must remain false", diagnostics)
 
     def test_rejects_cindermaw_bad_uv_metrics_and_map_checksum(self):
-        repair = REPAIRS["elite_umbral_cindermaw_salamander"]
+        repair = dict(REPAIRS["elite_umbral_cindermaw_salamander"])
+        repair["visualPolish"] = False
         report = {
             "modelId": "elite_umbral_cindermaw_salamander",
             "sourceTaskIds": repair["tasks"],
@@ -367,18 +369,20 @@ class ApplyRealmCreatureDccRepairsTests(unittest.TestCase):
     def test_sunmane_repair_uses_recorded_v002_audit_report(self):
         self.assertTrue(REPAIRS["elite_eldergrove_sunmane_thornstag"]["report"].endswith("_v002.json"))
 
-    def test_cindermaw_repair_promotes_smoothed_authored_normal_v004(self):
+    def test_cindermaw_repair_promotes_visual_polish_v005(self):
         repair = REPAIRS["elite_umbral_cindermaw_salamander"]
-        self.assertTrue(repair["input"].endswith("_source_v003.fbx"))
-        self.assertTrue(repair["model"].endswith("_source_v004.fbx"))
-        self.assertTrue(repair["blend"].endswith("_normal_smoothing_v004.blend"))
-        self.assertTrue(repair["report"].endswith("_normal_detail_v004.json"))
-        self.assertTrue(repair["review"].endswith("_threequarter_v004.png"))
-        self.assertTrue(all("normaldetail_v004" in path for path in repair["textures"]))
+        self.assertTrue(repair["input"].endswith("_source_v004.fbx"))
+        self.assertTrue(repair["model"].endswith("_source_v005.fbx"))
+        self.assertTrue(repair["blend"].endswith("_visual_polish_v005.blend"))
+        self.assertTrue(repair["report"].endswith("_visual_polish_v005.json"))
+        self.assertTrue(repair["review"].endswith("_fullbody_hero_v005.png"))
+        self.assertTrue(all("visualpolish_v005" in path for path in repair["textures"]))
+        self.assertTrue(repair["visualPolish"])
         self.assertEqual(
             "object_space_procedural_height_to_clean_uv_tangent_normal_v001",
             repair["normalProvenance"],
         )
+        self.assertIn("visual_polish_v005_pass", repair["status"])
         self.assertNotIn("normal_detail_rebuild_required", repair["status"])
 
     def test_updates_selected_source_and_clears_only_structural_blocker(self):
