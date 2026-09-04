@@ -2017,7 +2017,8 @@ namespace AL.UI.Kingdom
             bool buildingConstructionAvailable = false;
             try
             {
-                hasCommittedRealm = ServiceLocator.Get<IRealmService>().CurrentRealmId != RealmId.None;
+                IRealmService realmService = ServiceLocator.Get<IRealmService>();
+                hasCommittedRealm = realmService != null && realmService.Identity.IsCommittedValid;
                 // Full castle-grid upgrades stay capability-gated. The one Town Hall
                 // construct is unlocked by KingdomCommandPolicy itself.
                 buildingConstructionAvailable = false;

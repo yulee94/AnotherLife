@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
+using AL.RealmSelection;
 using UnityEngine;
 
 namespace AL.Services.Local
@@ -25,6 +26,15 @@ namespace AL.Services.Local
 
         public void TriggerStateChange(string eventId, WorldStateEffect effect, float durationHours)
         {
+            if (!CommittedRealmConsumer.TryResolveFromSave(
+                    _saveGameService.CurrentSave,
+                    RealmCatalogRuntime.Current,
+                    out _))
+            {
+                Debug.LogWarning("AL-WORLD-REALM-AUTHORITY-UNAVAILABLE");
+                return;
+            }
+
             ActiveEventId = eventId;
             CurrentEffect = effect;
 

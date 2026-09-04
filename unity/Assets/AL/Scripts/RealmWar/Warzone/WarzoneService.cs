@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.RealmSelection;
 using AL.RealmWar.Territories;
 using AL.RealmWar.Territories.Contracts;
 using UnityEngine;
@@ -19,6 +20,7 @@ namespace AL.RealmWar.Warzone
             _writeAuthorityGate;
         private readonly TerritoryCaptureTransactionService _captureTransactions;
         private readonly bool _allowWritesWithoutGate;
+        private readonly RealmCatalogSnapshot _catalog;
 
         public event Action<string, RealmId> OnTerritoryCaptured;
 
@@ -27,19 +29,22 @@ namespace AL.RealmWar.Warzone
                 saveGameService,
                 AL.Services.Local.EconomyWriteAuthorityGate.FromSaveService(
                     saveGameService),
-                false)
+                false,
+                null)
         {
         }
 
         private WarzoneService(
             ISaveGameService saveGameService,
             AL.Services.Local.EconomyWriteAuthorityGate writeAuthorityGate,
-            bool allowWritesWithoutGate)
+            bool allowWritesWithoutGate,
+            RealmCatalogSnapshot catalog)
         {
             _saveGameService = saveGameService ??
                 throw new ArgumentNullException(nameof(saveGameService));
             _writeAuthorityGate = writeAuthorityGate;
             _allowWritesWithoutGate = allowWritesWithoutGate;
+            _catalog = catalog;
             _captureTransactions = allowWritesWithoutGate
                 ? TerritoryCaptureTransactionService.CreateForTests(saveGameService)
                 : new TerritoryCaptureTransactionService(saveGameService);
@@ -47,7 +52,14 @@ namespace AL.RealmWar.Warzone
 
         internal static WarzoneService CreateForTests(ISaveGameService saveGameService)
         {
-            return new WarzoneService(saveGameService, null, true);
+            return new WarzoneService(saveGameService, null, true, null);
+        }
+
+        internal static WarzoneService CreateForTests(
+            ISaveGameService saveGameService,
+            RealmCatalogSnapshot catalog)
+        {
+            return new WarzoneService(saveGameService, null, true, catalog);
         }
 
         private List<TerritoryData> Territories =>
@@ -108,7 +120,16 @@ namespace AL.RealmWar.Warzone
 
         public long CalculatePassiveIncome(ResourceType type)
         {
-            var selectedRealm = _saveGameService.CurrentSave?.SelectedRealm ?? RealmId.None;
+            CommittedRealmAuthority authority;
+            if (!CommittedRealmConsumer.TryResolveFromSave(
+                    _saveGameService.CurrentSave,
+                    _catalog ?? RealmCatalogRuntime.Current,
+                    out authority))
+            {
+                return 0;
+            }
+
+            var selectedRealm = authority.RealmId;
             List<TerritoryData> territories = Territories;
             if (territories == null)
             {
