@@ -50,10 +50,17 @@ namespace AL.Services.Local
         public event Action<ResourceType, long> OnResourceChanged;
 
         public LocalResourceService(ISaveGameService saveGameService)
+            : this(saveGameService, null)
+        {
+        }
+
+        public LocalResourceService(
+            ISaveGameService saveGameService,
+            IEconomyProductionContributionProvider productionProvider)
             : this(
                 saveGameService,
                 EconomyWriteAuthorityGate.FromSaveService(saveGameService),
-                null)
+                productionProvider)
         {
         }
 
