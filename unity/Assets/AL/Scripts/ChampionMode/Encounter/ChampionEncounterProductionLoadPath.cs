@@ -6,7 +6,8 @@ namespace AL.ChampionMode.Encounter
     /// <summary>
     /// Production Champion encounter start/load entry. Binds the live #183
     /// Champion/skill source set, requires a committed valid realm, and applies
-    /// no save, reward, or combat-result mutation.
+    /// no save, reward, or combat-result mutation. C3 consumes the resulting
+    /// snapshot as the sole production load authority for runtime start.
     /// </summary>
     public static class ChampionEncounterProductionLoadPath
     {
