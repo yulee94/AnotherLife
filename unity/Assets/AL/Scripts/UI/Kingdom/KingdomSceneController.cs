@@ -1187,7 +1187,17 @@ namespace AL.UI.Kingdom
                     return Nvs01RealmContext.Unavailable();
                 }
 
-                return Nvs01RealmContextAdapter.FromCommittedIdentity(realmService.Identity);
+                RealmSelectionAuthorityState receipt = null;
+                if (ServiceLocator.TryGet<ISaveGameService>(out var saveGameService) &&
+                    saveGameService != null &&
+                    saveGameService.CurrentSave != null)
+                {
+                    receipt = saveGameService.CurrentSave.RealmSelection;
+                }
+
+                return Nvs01RealmContextAdapter.FromPersistedIdentity(
+                    realmService.Identity,
+                    receipt);
             }
             catch (Exception)
             {
@@ -2017,7 +2027,8 @@ namespace AL.UI.Kingdom
             bool buildingConstructionAvailable = false;
             try
             {
-                hasCommittedRealm = ServiceLocator.Get<IRealmService>().CurrentRealmId != RealmId.None;
+                IRealmService realmService = ServiceLocator.Get<IRealmService>();
+                hasCommittedRealm = realmService != null && realmService.Identity.IsCommittedValid;
                 // Full castle-grid upgrades stay capability-gated. The one Town Hall
                 // construct is unlocked by KingdomCommandPolicy itself.
                 buildingConstructionAvailable = false;

@@ -99,7 +99,13 @@ namespace AL.UI.CharacterCreation
         {
             ISaveGameService save = ServiceLocator.Get<ISaveGameService>();
             SaveGameData current = save?.CurrentSave;
-            RealmId realm = current != null ? current.SelectedRealm : RealmId.None;
+            RealmId realm = RealmId.None;
+            if (ServiceLocator.TryGet(out IRealmService realmService) &&
+                realmService != null &&
+                realmService.Identity.IsCommittedValid)
+            {
+                realm = realmService.Identity.RealmId;
+            }
             if (!CharacterCreationDraft.TryCreate(realm, out _draft, out string error))
             {
                 Font font = PresentationChrome.ResolveFont();
