@@ -104,6 +104,26 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Realm-slice evidence harness contract
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/realm-slice-evidence-contract.txt"
+          try {
+            & python -m pip install --disable-pip-version-check jsonschema==4.26.0 *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-slice schema dependency install exited with code $LASTEXITCODE."
+            }
+            & python tools/qa/test_realm_slice_evidence.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Realm-slice evidence contract tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Quality-gate fixture proof
         shell: pwsh
         timeout-minutes: 10
