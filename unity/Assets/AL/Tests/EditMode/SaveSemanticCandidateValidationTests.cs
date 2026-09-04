@@ -88,6 +88,8 @@ namespace AL.Tests.EditMode
             "\"StateRevisionHash\":\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"," +
             "\"ProfileSessionId\":\"profile-local-runtime\"," +
             "\"Revisions\":[],\"Receipts\":[],\"Outbox\":[]}";
+        private const string EmptyNotificationHistoryJson =
+            "{\"Version\":1,\"Records\":[],\"Outbox\":[]}";
         private const string EmptyOfflineProductionCatchUpJson =
             "{\"Version\":1,\"OperationId\":\"al.offline.catchup.v1.test\"," +
             "\"ReceiptId\":\"rcpt.test\",\"ProfileId\":\"alp_0123456789abcdef0123456789abcdef\"," +
@@ -244,6 +246,95 @@ namespace AL.Tests.EditMode
                 SaveSemanticCandidateOutcome.DegradedMalformed,
                 candidate.Outcome);
             Assert.False(candidate.IsWritable);
+        }
+
+        [Test]
+        public void NotificationHistoryMissingOnLegacySaveIsAdmitted()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                LegacyJson(),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Not.Contain("SAVE_NOTIFICATION_HISTORY_INVALID"));
+        }
+
+        [Test]
+        public void NotificationHistoryCurrentVersionIsWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"NotificationHistory\":" + EmptyNotificationHistoryJson),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
+        public void NotificationHistoryForwardVersionStaysPreservedReadOnly()
+        {
+            string forward = EmptyNotificationHistoryJson.Replace(
+                "\"Version\":1",
+                "\"Version\":2");
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"NotificationHistory\":" + forward),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_NOTIFICATION_HISTORY_VERSION_FORWARD"));
+        }
+
+        [Test]
+        public void NotificationHistoryWithInvalidShapeIsMalformed()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"NotificationHistory\":[]"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_NOTIFICATION_HISTORY_INVALID"));
+        }
+
+        [Test]
+        public void NotificationHistorySensitiveTechnicalRecordIsMalformed()
+        {
+            string record =
+                "{\"RecordId\":\"al_notification_durable_1\"," +
+                "\"DefinitionId\":\"al_notify_save_recovered_backup\"," +
+                "\"CorrelationId\":\"save:recovered:1\"," +
+                "\"PrivacyClass\":2,\"Parameters\":[]}";
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"NotificationHistory\":{\"Version\":1,\"Records\":[" +
+                    record +
+                    "],\"Outbox\":[]}"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_NOTIFICATION_HISTORY_SENSITIVE_TECHNICAL"));
         }
 
         [Test]
