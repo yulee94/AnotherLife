@@ -287,7 +287,9 @@ namespace AL.ChampionMode.Control
 
         public bool ApplyCatalogStats(float maxHealth, float maxMana, float attackPower)
         {
-            if (maxHealth <= 0f || maxMana < 0f || attackPower <= 0f)
+            if (!IsFinitePositive(maxHealth) ||
+                !IsFiniteNonNegative(maxMana) ||
+                !IsFinitePositive(attackPower))
             {
                 return false;
             }
@@ -301,6 +303,16 @@ namespace AL.ChampionMode.Control
             OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
             OnManaChanged?.Invoke(_currentMana, _maxMana);
             return true;
+        }
+
+        private static bool IsFinitePositive(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value) && value > 0f;
+        }
+
+        private static bool IsFiniteNonNegative(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value) && value >= 0f;
         }
     }
 }
