@@ -389,8 +389,18 @@ namespace AL.Guilds
             GuildRaidNetworkCommandEnvelope envelope,
             GuildAuthoritySnapshot membership,
             AllianceAuthoritySnapshot alliance,
+            GuildRaidMusterPersistentState persisted)
+        {
+            return ApplyInternal(envelope, membership, alliance, persisted, null, true);
+        }
+
+        private GuildRaidMusterRuntimeResult ApplyInternal(
+            GuildRaidNetworkCommandEnvelope envelope,
+            GuildAuthoritySnapshot membership,
+            AllianceAuthoritySnapshot alliance,
             GuildRaidMusterPersistentState persisted,
-            IRaidInstanceEnvelopeLoader loader = null)
+            IRaidInstanceEnvelopeLoader loader,
+            bool deferTransferLoad)
         {
             GuildRaidMusterPersistentState current = persisted ?? GuildRaidMusterSaveCodec.Empty();
             if (!TryValidateEnvelope(envelope, out long trustedClock, out string envelopeCode))
@@ -425,6 +435,44 @@ namespace AL.Guilds
             }
 
             RaidPlanningResult planning = planner.Plan(envelope.Command, raids, membership, alliance);
+            if (planning != null &&
+                planning.Status == GuildPlanningStatus.AlreadyCommitted &&
+                (envelope.Command.Operation == RaidOperation.TransferIn ||
+                 envelope.Command.Operation == RaidOperation.TransferOut))
+            {
+                RaidInstanceCommandEnvelope replayCommand = BuildTransferCommand(envelope.Command, raids);
+                if (!deferTransferLoad && loader == null)
+                {
+                    return Result(
+                        GuildPlanningStatus.Unavailable,
+                        current,
+                        planning,
+                        replayCommand,
+                        InstanceLoaderUnavailableCode,
+                        false);
+                }
+
+                if (!deferTransferLoad &&
+                    !loader.TryLoad(replayCommand, out string replayLoadCode))
+                {
+                    return Result(
+                        GuildPlanningStatus.Unavailable,
+                        current,
+                        planning,
+                        replayCommand,
+                        string.IsNullOrEmpty(replayLoadCode) ? InstanceLoaderUnavailableCode : replayLoadCode,
+                        false);
+                }
+
+                return Result(
+                    GuildPlanningStatus.AlreadyCommitted,
+                    current,
+                    planning,
+                    replayCommand,
+                    string.Empty,
+                    false);
+            }
+
             if (planning == null || !planning.IsPrepared)
             {
                 string diagnostic = planning == null || planning.Diagnostics.Count == 0
@@ -444,7 +492,7 @@ namespace AL.Guilds
                 planning.Plan.CandidateSnapshot);
             if (transferCommand != null)
             {
-                if (loader == null)
+                if (!deferTransferLoad && loader == null)
                 {
                     return Result(
                         GuildPlanningStatus.Unavailable,
@@ -455,7 +503,8 @@ namespace AL.Guilds
                         false);
                 }
 
-                if (!loader.TryLoad(transferCommand, out string loadCode))
+                if (!deferTransferLoad &&
+                    !loader.TryLoad(transferCommand, out string loadCode))
                 {
                     return Result(
                         GuildPlanningStatus.Unavailable,
@@ -480,8 +529,7 @@ namespace AL.Guilds
             GuildRaidNetworkCommandEnvelope envelope,
             GuildAuthoritySnapshot membership,
             AllianceAuthoritySnapshot alliance,
-            SaveGameData save,
-            IRaidInstanceEnvelopeLoader loader = null)
+            SaveGameData save)
         {
             if (save == null)
             {
@@ -494,12 +542,13 @@ namespace AL.Guilds
                     false);
             }
 
-            GuildRaidMusterRuntimeResult result = Apply(
+            GuildRaidMusterRuntimeResult result = ApplyInternal(
                 envelope,
                 membership,
                 alliance,
                 save.GuildRaidMuster,
-                loader);
+                null,
+                true);
             if (result.Mutated)
             {
                 save.GuildRaidMuster = result.Persisted;
@@ -527,15 +576,55 @@ namespace AL.Guilds
             }
 
             GuildRaidMusterPersistentState previous = saveGameService.CurrentSave.GuildRaidMuster;
-            GuildRaidMusterRuntimeResult prepared = Apply(
+            GuildRaidMusterRuntimeResult prepared = ApplyInternal(
                 envelope,
                 membership,
                 alliance,
                 previous,
-                loader);
+                loader,
+                true);
             if (!prepared.Mutated)
             {
+                if (prepared.Status == GuildPlanningStatus.AlreadyCommitted &&
+                    prepared.TransferCommand != null)
+                {
+                    if (loader == null)
+                    {
+                        return Result(
+                            GuildPlanningStatus.Unavailable,
+                            prepared.Persisted,
+                            prepared.Planning,
+                            prepared.TransferCommand,
+                            InstanceLoaderUnavailableCode,
+                            false);
+                    }
+
+                    if (loader.TryLoad(prepared.TransferCommand, out string replayLoadCode))
+                    {
+                        return prepared;
+                    }
+
+                    return Result(
+                        GuildPlanningStatus.Unavailable,
+                        prepared.Persisted,
+                        prepared.Planning,
+                        prepared.TransferCommand,
+                        string.IsNullOrEmpty(replayLoadCode) ? InstanceLoaderUnavailableCode : replayLoadCode,
+                        false);
+                }
+
                 return prepared;
+            }
+
+            if (prepared.TransferCommand != null && loader == null)
+            {
+                return Result(
+                    GuildPlanningStatus.Unavailable,
+                    previous ?? GuildRaidMusterSaveCodec.Empty(),
+                    prepared.Planning,
+                    prepared.TransferCommand,
+                    InstanceLoaderUnavailableCode,
+                    false);
             }
 
             saveGameService.CurrentSave.GuildRaidMuster = prepared.Persisted;
@@ -565,6 +654,18 @@ namespace AL.Guilds
                     prepared.TransferCommand,
                     SaveCommitFailedCode,
                     false);
+            }
+
+            if (prepared.TransferCommand != null &&
+                !loader.TryLoad(prepared.TransferCommand, out string loadCode))
+            {
+                return Result(
+                    GuildPlanningStatus.Unavailable,
+                    prepared.Persisted,
+                    prepared.Planning,
+                    prepared.TransferCommand,
+                    string.IsNullOrEmpty(loadCode) ? InstanceLoaderUnavailableCode : loadCode,
+                    true);
             }
 
             return prepared;
@@ -617,7 +718,8 @@ namespace AL.Guilds
                 .Where(value => value != null &&
                                 string.Equals(value.GuildId, guildId, StringComparison.Ordinal) &&
                                 !IsTerminal(value.State))
-                .OrderByDescending(value => value.WindowStartUnixSeconds)
+                .OrderByDescending(value => PresentationPriority(value, actorAccountId))
+                .ThenByDescending(value => value.WindowStartUnixSeconds)
                 .FirstOrDefault();
             bool officer = actor.Role == GuildRole.Master || actor.Role == GuildRole.Officer;
             RaidParticipantSnapshot participant = call?.Participants?.FirstOrDefault(value =>
@@ -738,6 +840,31 @@ namespace AL.Guilds
                 enabled,
                 callId,
                 enabled ? string.Empty : "planner_revalidation_required");
+        }
+
+        private static int PresentationPriority(RaidCallSnapshot call, string actorAccountId)
+        {
+            RaidParticipantSnapshot participant = call?.Participants?.FirstOrDefault(value =>
+                value != null && string.Equals(value.AccountId, actorAccountId, StringComparison.Ordinal));
+            if (participant?.Transfer == RaidTransferState.InInstance)
+            {
+                return 3;
+            }
+
+            if (participant != null &&
+                participant.Response == RaidParticipantResponse.Join &&
+                participant.Transfer == RaidTransferState.NotTransferred &&
+                (call.State == RaidCallState.Ready ||
+                 call.State == RaidCallState.Countdown ||
+                 call.State == RaidCallState.Active))
+            {
+                return 2;
+            }
+
+            return participant?.Response == RaidParticipantResponse.NoResponse &&
+                   call.State == RaidCallState.Accepting
+                ? 1
+                : 0;
         }
 
         private static bool IsTerminal(RaidCallState state)
