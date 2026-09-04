@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "catalogId": "al_oathmark_marketplace_policy",
+  "game": "Another Life",
+  "sourceRevision": "oathmark_marketplace_policy_v1",
+  "currency": {
+    "technicalId": "oathmark",
+    "playerFacingSingular": "Oathmark",
+    "playerFacingPlural": "Oathmarks",
+    "domain": "three_dimensional_player_main",
+    "integerUnitScale": 1,
+    "fractionalUnits": true,
+    "conversion": "forbidden",
+    "premiumOrRealMoney": "forbidden",
+    "soleMainCurrency": true,
+    "forbiddenWallets": ["legacy_gold", "kingdom_resource", "guild_treasury", "realm_resource", "warzone_credits", "premium", "real_money"]
+  },
+  "listing": {
+    "minimumPrice": 10,
+    "maximumPrice": 9223372036854775807,
+    "durationHours": 72,
+    "cancellation": "seller_only_before_reservation",
+    "directPersonalTrade": "disabled",
+    "lifecycle": ["draft", "listed_escrowed", "reserved", "sold", "cancelled", "expired"]
+  },
+  "settlement": {
+    "buyerDebit": "listed_price",
+    "tax": { "method": "floor_listed_price_divided_by_ten", "divisor": 10, "destination": "destroyed", "creditedWallets": [] },
+    "sellerCredit": "listed_price_minus_tax"
+  },
+  "replayPolicy": {
+    "operationIdentity": "operation_id",
+    "correlationIdentities": ["account_id", "item_id", "listing_id", "operation_id"],
+    "sameFingerprint": "already_committed",
+    "differentFingerprint": "conflict",
+    "unknownOutcome": "fail_closed_until_reconciled"
+  },
+  "authorityBoundary": {
+    "plannerScope": "engine_free_snapshot_only",
+    "excludedImplementations": ["network", "save", "ui", "repair", "consumable", "earning_source", "persistence"]
+  }
+}
