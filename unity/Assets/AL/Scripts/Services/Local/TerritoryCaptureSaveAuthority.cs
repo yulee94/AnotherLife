@@ -40,6 +40,17 @@ namespace AL.Services.Local
                     "Territory capture requires a complete typed transaction request.");
             }
 
+            TerritoryCaptureAuthorization authorization =
+                request.CaptureRequest.Authorization;
+            if (authorization == null ||
+                authorization.Source != TerritoryCaptureAuthorizationSource.CommandResult)
+            {
+                return RejectTerritoryCapture(
+                    territoryId,
+                    "AuthorizationSourceUnavailable",
+                    "Profile-bound territory capture requires a typed command authorization result.");
+            }
+
             ProfileWriteAuthoritySnapshot before = GetCurrentAuthority();
             if (before.Status != ProfileWriteAuthorityStatus.Writable ||
                 _currentSave == null)
@@ -62,7 +73,8 @@ namespace AL.Services.Local
 
             TerritoryCaptureTransactionPlan initialPlan =
                 PlanTerritoryCapture(_currentSave, request, planner);
-            if (initialPlan.Status != TerritoryCaptureStatus.Planned)
+            if (initialPlan.Status != TerritoryCaptureStatus.Planned &&
+                initialPlan.Status != TerritoryCaptureStatus.AlreadyCommittedReplay)
             {
                 return planner.ApplyCapture(initialPlan, null, null, null);
             }
@@ -128,6 +140,19 @@ namespace AL.Services.Local
                     "The profile-bound territory commit returned no result.");
             }
 
+            if ((bound.CommitResult.Outcome == SaveCandidateCommitOutcome.Committed ||
+                 bound.CommitResult.Outcome == SaveCandidateCommitOutcome.Duplicate) &&
+                !HasCommittedTerritoryCaptureAuthorityReceipt(bound))
+            {
+                return WithCommitDisposition(
+                    candidateResult,
+                    initialPlan,
+                    TerritoryApplyDisposition.CommitUncertain,
+                    ToUncertain(candidateResult?.Receipt),
+                    "CaptureAuthorityReceiptUncertain",
+                    "The profile-bound authority receipt did not prove a durable territory commit.");
+            }
+
             switch (bound.CommitResult.Outcome)
             {
                 case SaveCandidateCommitOutcome.Committed:
@@ -169,12 +194,54 @@ namespace AL.Services.Local
                         "ProfileReadOnly",
                         bound.CommitResult.Message);
 
+                case SaveCandidateCommitOutcome.Rejected:
+                    return ResolveRejectedTerritoryCaptureCommit(
+                        territoryId,
+                        candidateResult,
+                        initialPlan,
+                        bound.CommitResult.Message);
+
                 default:
-                    return candidateResult ?? RejectTerritoryCapture(
+                    return WithCommitDisposition(
+                        candidateResult,
+                        initialPlan,
+                        TerritoryApplyDisposition.Rejected,
+                        null,
+                        "CaptureCommitOutcomeUnsupported",
+                        string.IsNullOrWhiteSpace(bound.CommitResult.Message)
+                            ? "The territory commit returned an unsupported durable outcome."
+                            : bound.CommitResult.Message);
+            }
+        }
+
+        private static TerritoryCaptureApplicationResult
+            ResolveRejectedTerritoryCaptureCommit(
+                string territoryId,
+                TerritoryCaptureApplicationResult candidateResult,
+                TerritoryCaptureTransactionPlan initialPlan,
+                string message)
+        {
+            return candidateResult == null && initialPlan == null
+                ? RejectTerritoryCapture(
                         territoryId,
                         "CaptureCommitRejected",
-                        bound.CommitResult.Message);
-            }
+                        message)
+                : WithCommitDisposition(
+                    candidateResult,
+                    initialPlan,
+                    TerritoryApplyDisposition.Rejected,
+                    null,
+                    "CaptureCommitRejected",
+                    string.IsNullOrWhiteSpace(message)
+                        ? "The durable territory commit was rejected."
+                        : message);
+        }
+
+        private static bool HasCommittedTerritoryCaptureAuthorityReceipt(
+            ProfileBoundSaveCandidateCommitResult bound)
+        {
+            return bound?.AuthorityReceipt != null &&
+                   bound.AuthorityReceipt.Status == ProfileMutationReceiptStatus.Committed;
         }
 
         private static TerritoryCaptureTransactionPlan PlanTerritoryCapture(

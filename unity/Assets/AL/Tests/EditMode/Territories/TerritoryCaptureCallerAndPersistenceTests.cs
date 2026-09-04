@@ -89,6 +89,171 @@ namespace AL.Tests.EditMode.Territories
         }
 
         [Test]
+        public void ReplayRechecksDurableAuthorityBeforeReportingCommittedHistory()
+        {
+            string root = CreateRoot();
+            try
+            {
+                LocalSaveGameService save = CreateWritable(root);
+                TerritoryCaptureTransactionRequest request = Request(
+                    TerritoryCaptureTransactionService.CreateForTests(save),
+                    save.CurrentSave,
+                    "capture-T5-replay-authority");
+                var warzone = new WarzoneService(save);
+                Assert.AreEqual(
+                    TerritoryApplyDisposition.Committed,
+                    warzone.ApplyCaptureTransaction(request).Disposition);
+                File.AppendAllText(Path.Combine(root, "save.json"), " ");
+
+                TerritoryCaptureApplicationResult replay =
+                    ApplyIgnoringFailureLogs(warzone, request);
+
+                Assert.AreEqual(TerritoryApplyDisposition.RolledBack, replay.Disposition);
+                Assert.That(
+                    replay.Diagnostics.Select(item => item.Code),
+                    Does.Contain("CaptureRolledBack"));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void ProductionCaptureRejectsNonCommandAuthorizationBeforeMutation()
+        {
+            string root = CreateRoot();
+            try
+            {
+                LocalSaveGameService save = CreateWritable(root);
+                TerritoryCaptureTransactionRequest accepted = Request(
+                    TerritoryCaptureTransactionService.CreateForTests(save),
+                    save.CurrentSave,
+                    "capture-T5-fake-authorization");
+                TerritoryCaptureTransactionRequest rejectedRequest =
+                    WithAuthorizationSource(
+                        accepted,
+                        TerritoryCaptureAuthorizationSource.FakeTestOutcome);
+                var warzone = new WarzoneService(save);
+                int publications = 0;
+                warzone.OnTerritoryCaptured += (_, __) => publications++;
+
+                TerritoryCaptureApplicationResult result =
+                    warzone.ApplyCaptureTransaction(rejectedRequest);
+
+                Assert.AreEqual(TerritoryApplyDisposition.Rejected, result.Disposition);
+                Assert.AreEqual(0, publications);
+                Assert.AreEqual(RealmId.None, Owner(save.CurrentSave, "T5"));
+                Assert.AreEqual(0, save.CurrentSave.WarzoneCredits);
+                Assert.That(
+                    result.Diagnostics.Select(item => item.Code),
+                    Does.Contain("AuthorizationSourceUnavailable"));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void ProfileBoundStoreRejectsNonCommandAuthorizationDirectly()
+        {
+            string root = CreateRoot();
+            try
+            {
+                LocalSaveGameService save = CreateWritable(root);
+                var planner = TerritoryPhaseBPlanner.CreateCurrentBaseline();
+                TerritoryCaptureTransactionRequest accepted = Request(
+                    TerritoryCaptureTransactionService.CreateForTests(save),
+                    save.CurrentSave,
+                    "capture-T5-direct-fake-authorization");
+
+                TerritoryCaptureApplicationResult result =
+                    ((IProfileBoundTerritoryCaptureCandidateStore)save)
+                    .TryCommitProfileBoundTerritoryCapture(
+                        WithAuthorizationSource(
+                            accepted,
+                            TerritoryCaptureAuthorizationSource.FakeTestOutcome),
+                        planner);
+
+                Assert.AreEqual(TerritoryApplyDisposition.Rejected, result.Disposition);
+                Assert.AreEqual(RealmId.None, Owner(save.CurrentSave, "T5"));
+                Assert.AreEqual(0, save.CurrentSave.WarzoneCredits);
+                Assert.That(
+                    result.Diagnostics.Select(item => item.Code),
+                    Does.Contain("AuthorizationSourceUnavailable"));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void RejectedCandidateCommitCannotReturnStagedCommittedResult()
+        {
+            MethodInfo resolve = typeof(LocalSaveGameService).GetMethod(
+                "ResolveRejectedTerritoryCaptureCommit",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(
+                resolve,
+                "Rejected durable outcomes need an explicit fail-closed mapping seam.");
+            var staged = new TerritoryCaptureApplicationResult(
+                TerritoryApplyDisposition.Committed,
+                null,
+                null,
+                null,
+                Array.Empty<TerritoryDiagnostic>());
+
+            var result = (TerritoryCaptureApplicationResult)resolve.Invoke(
+                null,
+                new object[] { "T5", staged, null, "store rejected" });
+
+            Assert.AreEqual(TerritoryApplyDisposition.Rejected, result.Disposition);
+            Assert.Null(result.Event);
+            Assert.That(
+                result.Diagnostics.Select(item => item.Code),
+                Does.Contain("CaptureCommitRejected"));
+        }
+
+        [Test]
+        public void UncertainProfileReceiptCannotAuthorizeCommittedOrReplayResult()
+        {
+            MethodInfo verify = typeof(LocalSaveGameService).GetMethod(
+                "HasCommittedTerritoryCaptureAuthorityReceipt",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(
+                verify,
+                "Territory publication must check the profile-bound authority receipt.");
+            ConstructorInfo receiptConstructor = typeof(ProfileMutationReceipt)
+                .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
+                .Single();
+            var uncertainReceipt = (ProfileMutationReceipt)receiptConstructor.Invoke(
+                new object[]
+                {
+                    ProfileMutationReceiptStatus.CommitUncertain,
+                    (ulong)1,
+                    "profile",
+                    "expected-generation",
+                    string.Empty,
+                    string.Empty,
+                    TerritoryCaptureSaveAuthority.OperationId,
+                    "result",
+                    string.Empty,
+                    true,
+                    new[] { "AL-TEST-UNCERTAIN" }
+                });
+            var bound = new ProfileBoundSaveCandidateCommitResult(
+                new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Duplicate,
+                    null,
+                    "uncertain authority"),
+                uncertainReceipt);
+
+            Assert.False((bool)verify.Invoke(null, new object[] { bound }));
+        }
+
+        [Test]
         public void CallerForwardsOnlyExternallySuppliedAcceptedAuthorization()
         {
             string root = CreateRoot();
@@ -158,6 +323,84 @@ namespace AL.Tests.EditMode.Territories
                     typeof(MvpApprovalTransactionalSaveGameService)),
                 Is.True,
                 "Approval/device acceptance must retain the same profile-bound capture boundary as local saves.");
+        }
+
+        [Test]
+        [Platform("Win")]
+        [Parallelizable(ParallelScope.None)]
+        public void ApprovalSaveWrapperCommitsAndVerifiesReplayThroughDurableAuthority()
+        {
+            string root = CreateRoot();
+            string normalRoot = Path.Combine(root, "normal-approval-capture");
+            Directory.CreateDirectory(normalRoot);
+            string previousRegistryOverride =
+                MvpApprovalVirtualStore.RegistrySubKeyPathOverrideForTests;
+            string registryPath =
+                @"Software\AnotherLife\Tests\MvpApprovalVfsV1\" +
+                Guid.NewGuid().ToString("N");
+            MvpApprovalVirtualStore store = null;
+            try
+            {
+                MvpApprovalVirtualStore.RegistrySubKeyPathOverrideForTests = registryPath;
+                Assert.True(
+                    MvpApprovalSlotPlan.TryCreate(
+                        normalRoot,
+                        out MvpApprovalSlotPlan plan,
+                        out string planFailure),
+                    planFailure);
+                Assert.True(
+                    MvpApprovalVirtualStore.TryPrepare(
+                        plan,
+                        out store,
+                        out string storeFailure),
+                    storeFailure);
+                var files = new MvpApprovalSaveFileOperations(plan.SaveRoot, store);
+                var inner = new LocalSaveGameService(plan.SaveRoot, files);
+                var service = new MvpApprovalTransactionalSaveGameService(store, inner);
+                service.Load();
+                RealmSelectionResult realm =
+                    ((IProfileBoundRealmSelectionCandidateStore)service)
+                    .TryCommitProfileBoundRealmSelection(
+                        new RealmSelectionRequest(
+                            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                            RealmId.Crownlands));
+                Assert.AreEqual(RealmSelectionStatus.Committed, realm.Status);
+                Assert.AreEqual(
+                    MvpApprovalStartNewDisposition.Succeeded,
+                    service.ExecuteReset(candidate =>
+                    {
+                        SeedTerritories(candidate);
+                        return MvpApprovalStartNewDisposition.Succeeded;
+                    }));
+                var builder = TerritoryCaptureTransactionService.CreateForTests(service);
+                TerritoryCaptureTransactionRequest request = Request(
+                    builder,
+                    service.CurrentSave,
+                    "capture-T5-approval-wrapper");
+                int commitsBefore = store.CommitCountForTests;
+
+                TerritoryCaptureApplicationResult committed =
+                    ((IProfileBoundTerritoryCaptureCandidateStore)service)
+                    .TryCommitProfileBoundTerritoryCapture(request, builder.Planner);
+                TerritoryCaptureApplicationResult replay =
+                    ((IProfileBoundTerritoryCaptureCandidateStore)service)
+                    .TryCommitProfileBoundTerritoryCapture(request, builder.Planner);
+
+                Assert.AreEqual(TerritoryApplyDisposition.Committed, committed.Disposition);
+                Assert.AreEqual(TerritoryApplyDisposition.Replayed, replay.Disposition);
+                Assert.AreEqual(commitsBefore + 1, store.CommitCountForTests);
+                Assert.AreEqual(100, service.CurrentSave.WarzoneCredits);
+                Assert.False(service.PersistenceFrozen);
+            }
+            finally
+            {
+                store?.DeletePersistentDataForTests();
+                store?.Revoke();
+                WindowsRegistryValueStore.DeleteTestSubKeyAndFlush(registryPath);
+                MvpApprovalVirtualStore.RegistrySubKeyPathOverrideForTests =
+                    previousRegistryOverride;
+                DeleteRoot(root);
+            }
         }
 
         [TestCase(TerritoryApplyDisposition.Committed, "Territory secured")]
@@ -369,6 +612,38 @@ namespace AL.Tests.EditMode.Territories
                 1);
         }
 
+        private static TerritoryCaptureTransactionRequest WithAuthorizationSource(
+            TerritoryCaptureTransactionRequest request,
+            TerritoryCaptureAuthorizationSource source)
+        {
+            TerritoryCaptureRequest capture = request.CaptureRequest;
+            TerritoryCaptureAuthorization authorization = capture.Authorization;
+            return new TerritoryCaptureTransactionRequest(
+                new TerritoryCaptureRequest(
+                    capture.OperationId,
+                    capture.TerritoryId,
+                    capture.CommittedProfileRealm,
+                    capture.ExpectedCapturerRealm,
+                    capture.ExpectedPreviousOwner,
+                    capture.ExpectedRevision,
+                    new TerritoryCaptureAuthorization(
+                        authorization.AuthorizationId,
+                        source,
+                        authorization.ProfileSessionId,
+                        authorization.TerritoryId,
+                        authorization.CapturerRealm,
+                        authorization.ExpectedPreviousOwner,
+                        authorization.ExpectedRevision,
+                        authorization.SourceResultId,
+                        authorization.SourceResultHash,
+                        authorization.ExpiresAtUtcTicks,
+                        authorization.UsePolicy)),
+                request.ExpectedCatalogIdentity,
+                request.ExpectedStateRevisionHash,
+                request.ProfileSessionId,
+                request.AuthorizationEvaluationUtcTicks);
+        }
+
         private static LocalSaveGameService CreateWritable(string root)
         {
             return CreateWritable(root, new SystemSaveFileOperations());
@@ -424,7 +699,6 @@ namespace AL.Tests.EditMode.Territories
             Assert.NotNull(bound);
             Assert.True(bound.CommitResult.IsCommitted, bound.CommitResult.Message);
         }
-
 
         private static List<TerritoryData> BaselineTerritories() =>
             new List<TerritoryData>

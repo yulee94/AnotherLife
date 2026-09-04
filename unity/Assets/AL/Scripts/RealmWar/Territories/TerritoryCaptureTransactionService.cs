@@ -58,6 +58,25 @@ namespace AL.RealmWar.Territories
             TerritoryCaptureTransactionRequest request)
         {
             string territoryId = request?.CaptureRequest?.TerritoryId ?? string.Empty;
+            if (request?.CaptureRequest == null)
+            {
+                return Reject(
+                    territoryId,
+                    "MissingCaptureRequest",
+                    "Territory capture requires a typed authorization result.");
+            }
+
+            TerritoryCaptureAuthorization authorization =
+                request.CaptureRequest.Authorization;
+            if (authorization == null ||
+                authorization.Source != TerritoryCaptureAuthorizationSource.CommandResult)
+            {
+                return Reject(
+                    territoryId,
+                    "AuthorizationSourceUnavailable",
+                    "Production territory capture requires a typed command authorization result.");
+            }
+
             if (!_allowWritesWithoutGate &&
                 _saveGameService is
                     AL.Services.Local.IProfileBoundTerritoryCaptureCandidateStore
@@ -82,25 +101,6 @@ namespace AL.RealmWar.Territories
                     territoryId,
                     "NoCurrentSave",
                     "Territory capture requires a current save.");
-            }
-
-            if (request?.CaptureRequest == null)
-            {
-                return Reject(
-                    territoryId,
-                    "MissingCaptureRequest",
-                    "Territory capture requires a typed authorization result.");
-            }
-
-            TerritoryCaptureAuthorization authorization =
-                request.CaptureRequest.Authorization;
-            if (authorization == null ||
-                authorization.Source != TerritoryCaptureAuthorizationSource.CommandResult)
-            {
-                return Reject(
-                    territoryId,
-                    "AuthorizationSourceUnavailable",
-                    "Production territory capture requires a typed command authorization result.");
             }
 
             IReadOnlyList<TerritoryStateRecord> states = ReadStates(save, _planner.Catalog);
