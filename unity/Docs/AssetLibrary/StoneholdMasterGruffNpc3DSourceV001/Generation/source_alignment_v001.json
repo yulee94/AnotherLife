@@ -1,0 +1,52 @@
+{
+  "packetId": "stonehold_master_gruff_npc_3d_source_v001",
+  "rosterId": "rct_stonehold_npc_service_v001",
+  "displayName": "Master Gruff — Stonehold Service Worker",
+  "parentPacket": "four_realm_representative_npc_2d_source_v001",
+  "parentMergeSha": "ce25ef090d588f75f3e02f08798d8fec8dda30cd",
+  "parentPr": 731,
+  "verdict": "PASS",
+  "pose": "a-pose",
+  "heightMeters": 1.43,
+  "notes": [
+    "Four orthographic views are isolated full-body A-pose on black, no extra figures, no text, no VFX, no modern wrenches.",
+    "Front and back show empty gloved hands and separately visible boots; belt tools are period tongs, hammer, calipers, and a pouch.",
+    "Left and right are true opposite profiles, not flipped duplicates; far limbs are occluded as expected in profile.",
+    "Concept three-quarter is identity-only (held tongs and hammer) and is excluded from Meshy reconstruction.",
+    "Handoff sheet is excluded from Meshy because it is a multi-panel composition.",
+    "Cross-view tool placement and shoulder plating differ slightly and must be reconciled in DCC, not projected as fused geometry.",
+    "2D packet downstream3DReady remains false; this task is the authorized non-automatic image-to-3D conversion after alignment."
+  ],
+  "selectedMeshyInputs": [
+    {
+      "view": "front",
+      "path": "unity/Docs/AssetLibrary/FourRealmRepresentativeNpc2DSourceV001/Views/rct_stonehold_npc_service_v001_view_front_v001.png",
+      "sha256": "c3a2ca8c753c16312b3d9b62086a9e7e41946f009f4a7f0609d19252e463e755"
+    },
+    {
+      "view": "right",
+      "path": "unity/Docs/AssetLibrary/FourRealmRepresentativeNpc2DSourceV001/Views/rct_stonehold_npc_service_v001_view_right_v001.png",
+      "sha256": "7c2662767ec702cd5d96188173d8d267c1fac3cf01804637cf7a06d91d9c9e7e"
+    },
+    {
+      "view": "back",
+      "path": "unity/Docs/AssetLibrary/FourRealmRepresentativeNpc2DSourceV001/Views/rct_stonehold_npc_service_v001_view_back_v001.png",
+      "sha256": "e3625ac11dc1e0cb83d8c25594bb9645283b9fff9f5781e112077e21329bff3f"
+    },
+    {
+      "view": "left",
+      "path": "unity/Docs/AssetLibrary/FourRealmRepresentativeNpc2DSourceV001/Views/rct_stonehold_npc_service_v001_view_left_v001.png",
+      "sha256": "5a5d2764bdc800cc7921a5091eb5481430bee887b6b5283ae0ad04aec77828a8"
+    }
+  ],
+  "excludedFromMeshy": [
+    {
+      "path": "unity/Docs/AssetLibrary/FourRealmRepresentativeNpc2DSourceV001/Concepts/rct_stonehold_npc_service_v001_concept_threequarter_v001.png",
+      "reason": "identity concept with held tools; would bake props into hands"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/FourRealmRepresentativeNpc2DSourceV001/HandoffSheets/rct_stonehold_npc_service_v001_model_handoff_v001.png",
+      "reason": "multi-panel sheet would sculpt as a relief"
+    }
+  ]
+}
