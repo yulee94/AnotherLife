@@ -174,7 +174,12 @@ jobs:
               "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/boss_stonehold_fault_crowned_colossus/**",
               "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/**",
               "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/FaultCrownedColossusV001/**",
-              "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_stonehold_fault_crowned_colossus_concept_sheet_v001.png"
+              "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_stonehold_fault_crowned_colossus_concept_sheet_v001.png",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Textures/elite_umbral_cindermaw_salamander/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/**",
+              "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ProductionSlices/CindermawSalamanderV001/**",
+              "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_cindermaw_salamander_concept_sheet_v001.png"
             ) -join ","
             if ($env:GITHUB_TOKEN) {
               $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x:$($env:GITHUB_TOKEN)"))

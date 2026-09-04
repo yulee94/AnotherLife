@@ -810,7 +810,8 @@ namespace AL.Data.Catalogs
                     "ChampionProgression",
                     "DeathPenalty",
                     "WarzoneCredits",
-                    "LastSavedTimestamp"
+                    "LastSavedTimestamp",
+                    "TerritoryCaptureLedger"
                 },
                 StringComparer.Ordinal);
 
@@ -1134,6 +1135,67 @@ namespace AL.Data.Catalogs
                 "EventId",
                 "CorrelationId",
                 "ExpectedGenerationFingerprint");
+
+        private static readonly HashSet<string> TerritoryCaptureLedgerFields =
+            Fields(
+                "Version",
+                "CatalogId",
+                "CatalogRawSha256",
+                "StateRevisionHash",
+                "ProfileSessionId",
+                "Revisions",
+                "Receipts",
+                "Outbox");
+
+        private static readonly HashSet<string> TerritoryRevisionFields =
+            Fields("TerritoryId", "Revision");
+
+        private static readonly HashSet<string> TerritoryReceiptFields =
+            Fields(
+                "ReceiptId",
+                "OperationId",
+                "SemanticHash",
+                "Durability",
+                "ResultId",
+                "EventId",
+                "TerritoryId",
+                "PreviousOwner",
+                "NewOwner",
+                "PreviousRevision",
+                "NewRevision",
+                "WarzoneCreditsDelta",
+                "QuestProgressDelta",
+                "CatalogId",
+                "CatalogSchemaVersion",
+                "CatalogContentVersion",
+                "CatalogSourceRevision",
+                "CatalogRawSha256",
+                "StateRevisionHash",
+                "ProfileSessionId",
+                "AuthorizationId",
+                "AuthorizationSourceResultId",
+                "AuthorizationSourceResultHash");
+
+        private static readonly HashSet<string> TerritoryOutboxFields =
+            Fields(
+                "EventId",
+                "CaptureOperationId",
+                "TerritoryId",
+                "PreviousOwner",
+                "NewOwner",
+                "PreviousRevision",
+                "NewRevision",
+                "CatalogId",
+                "CatalogSchemaVersion",
+                "CatalogContentVersion",
+                "CatalogSourceRevision",
+                "CatalogRawSha256",
+                "StateRevisionHash",
+                "ProfileSessionId",
+                "AuthorizationId",
+                "AuthorizationSourceResultId",
+                "AuthorizationSourceResultHash",
+                "ReceiptId");
 
         public static SaveSemanticCandidate Validate(
             byte[] rawBytes,
@@ -1480,6 +1542,7 @@ namespace AL.Data.Catalogs
             ValidateNvs01Progress(root, policy.Nvs01Rule, schemaVersion, collector, state);
             ValidateFirstWorldProgress(root, collector, state);
             ValidateMapDisclosure(root, collector, state);
+            ValidateTerritoryCaptureLedger(root, collector, state);
             ValidateRealmSelection(root, collector, state);
             ValidateChampionProgression(root, collector, state);
             ValidateDeathPenalty(root, collector, state);
@@ -1645,6 +1708,243 @@ namespace AL.Data.Catalogs
                     path + ".Version",
                     SaveSemanticDomain.Envelope,
                     rawOnly: true);
+            }
+        }
+
+        private static void ValidateTerritoryCaptureLedger(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.TerritoryCaptureLedger";
+            StrictJsonValue value;
+            if (!root.TryGet("TerritoryCaptureLedger", out value) ||
+                value is StrictJsonNull)
+            {
+                // Optional schema-v1 extension. Missing legacy saves admit
+                // empty receipts/outbox and revision 0.
+                return;
+            }
+
+            var ledger = value as StrictJsonObject;
+            if (ledger == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_TERRITORY_CAPTURE_LEDGER_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                ledger,
+                TerritoryCaptureLedgerFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    ledger,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_TERRITORY_CAPTURE_LEDGER_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_TERRITORY_CAPTURE_LEDGER_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            ValidateTerritoryLedgerRows(
+                ledger,
+                "Revisions",
+                TerritoryRevisionFields,
+                new[] { "TerritoryId" },
+                Array.Empty<string>(),
+                new[] { "Revision" },
+                collector,
+                state);
+            ValidateTerritoryLedgerRows(
+                ledger,
+                "Receipts",
+                TerritoryReceiptFields,
+                new[]
+                {
+                    "ReceiptId",
+                    "OperationId",
+                    "SemanticHash",
+                    "ResultId",
+                    "EventId",
+                    "TerritoryId",
+                    "CatalogId",
+                    "CatalogSourceRevision",
+                    "CatalogRawSha256",
+                    "StateRevisionHash",
+                    "ProfileSessionId",
+                    "AuthorizationId",
+                    "AuthorizationSourceResultId",
+                    "AuthorizationSourceResultHash"
+                },
+                new[]
+                {
+                    "Durability",
+                    "PreviousOwner",
+                    "NewOwner",
+                    "WarzoneCreditsDelta",
+                    "QuestProgressDelta",
+                    "CatalogSchemaVersion",
+                    "CatalogContentVersion"
+                },
+                new[] { "PreviousRevision", "NewRevision" },
+                collector,
+                state);
+            ValidateTerritoryLedgerRows(
+                ledger,
+                "Outbox",
+                TerritoryOutboxFields,
+                new[]
+                {
+                    "EventId",
+                    "CaptureOperationId",
+                    "TerritoryId",
+                    "CatalogId",
+                    "CatalogSourceRevision",
+                    "CatalogRawSha256",
+                    "StateRevisionHash",
+                    "ProfileSessionId",
+                    "AuthorizationId",
+                    "AuthorizationSourceResultId",
+                    "AuthorizationSourceResultHash",
+                    "ReceiptId"
+                },
+                new[]
+                {
+                    "PreviousOwner",
+                    "NewOwner",
+                    "CatalogSchemaVersion",
+                    "CatalogContentVersion"
+                },
+                new[] { "PreviousRevision", "NewRevision" },
+                collector,
+                state);
+        }
+
+        private static void ValidateTerritoryLedgerRows(
+            StrictJsonObject ledger,
+            string collectionName,
+            HashSet<string> knownFields,
+            IReadOnlyList<string> requiredStringFields,
+            IReadOnlyList<string> requiredInt32Fields,
+            IReadOnlyList<string> requiredInt64Fields,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            StrictJsonValue value;
+            var rows = ledger.TryGet(collectionName, out value)
+                ? value as StrictJsonArray
+                : null;
+            if (rows == null)
+            {
+                return;
+            }
+
+            for (var index = 0; index < rows.Items.Count; index++)
+            {
+                string path = "$.TerritoryCaptureLedger." + collectionName +
+                    "[" + index.ToString(CultureInfo.InvariantCulture) + "]";
+                StrictJsonValue item = rows.Items[index];
+                var row = item as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_TERRITORY_CAPTURE_LEDGER_ROW_INVALID",
+                        path,
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    knownFields,
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state);
+
+                for (var fieldIndex = 0;
+                    fieldIndex < requiredStringFields.Count;
+                    fieldIndex++)
+                {
+                    string ignored;
+                    TryReadRequiredOpaqueString(
+                        row,
+                        requiredStringFields[fieldIndex],
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        false,
+                        collector,
+                        state,
+                        out ignored);
+                }
+
+                for (var fieldIndex = 0;
+                    fieldIndex < requiredInt32Fields.Count;
+                    fieldIndex++)
+                {
+                    int ignored;
+                    TryReadRequiredInt32(
+                        row,
+                        requiredInt32Fields[fieldIndex],
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state,
+                        out ignored);
+                }
+
+                for (var fieldIndex = 0;
+                    fieldIndex < requiredInt64Fields.Count;
+                    fieldIndex++)
+                {
+                    long ignored;
+                    TryReadRequiredInt64(
+                        row,
+                        requiredInt64Fields[fieldIndex],
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state,
+                        out ignored);
+                }
             }
         }
 

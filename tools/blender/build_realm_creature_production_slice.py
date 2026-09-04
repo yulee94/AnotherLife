@@ -107,15 +107,20 @@ def select_only(objects: list[bpy.types.Object], active: bpy.types.Object) -> No
     bpy.context.view_layer.objects.active = active
 
 
-def join_source_meshes(meshes: list[bpy.types.Object]) -> bpy.types.Object:
+def mesh_data_name(object_name: str) -> str:
+    return object_name.replace("GEO_", "MESH_", 1) if object_name.startswith("GEO_") else f"MESH_{object_name}"
+
+
+def join_source_meshes(meshes: list[bpy.types.Object], plan: dict[str, Any]) -> bpy.types.Object:
     select_only(meshes, meshes[0])
     if len(meshes) > 1:
         bpy.ops.object.join()
     mesh = bpy.context.view_layer.objects.active
     if mesh is None or mesh.type != "MESH":
         raise BuildError("SourceJoinFailed")
-    mesh.name = "GEO_fault_crowned_colossus_LOD0"
-    mesh.data.name = "MESH_fault_crowned_colossus_LOD0"
+    lod0_name = plan["lodPolicy"]["levels"][0]["object"]
+    mesh.name = lod0_name
+    mesh.data.name = mesh_data_name(lod0_name)
     return mesh
 
 
@@ -249,9 +254,9 @@ def add_edit_bone(
         bone.parent = armature.data.edit_bones[parent]
 
 
-def build_armature(plan: dict[str, Any], dimensions: Vector) -> bpy.types.Object:
+def build_six_limb_armature(plan: dict[str, Any], dimensions: Vector) -> bpy.types.Object:
     length, width, height = dimensions
-    armature_data = bpy.data.armatures.new("ARM_fault_crowned_colossus")
+    armature_data = bpy.data.armatures.new("ARM_" + plan["rig"]["armatureObject"].removeprefix("RIG_"))
     armature = bpy.data.objects.new(plan["rig"]["armatureObject"], armature_data)
     bpy.context.scene.collection.objects.link(armature)
     select_only([armature], armature)
@@ -299,6 +304,73 @@ def build_armature(plan: dict[str, Any], dimensions: Vector) -> bpy.types.Object
     return armature
 
 
+def build_quadruped_heat_fin_armature(plan: dict[str, Any], dimensions: Vector) -> bpy.types.Object:
+    length, width, height = dimensions
+    armature_data = bpy.data.armatures.new("ARM_" + plan["rig"]["armatureObject"].removeprefix("RIG_"))
+    armature = bpy.data.objects.new(plan["rig"]["armatureObject"], armature_data)
+    bpy.context.scene.collection.objects.link(armature)
+    select_only([armature], armature)
+    bpy.ops.object.mode_set(mode="EDIT")
+    body_z = height * 0.38
+    add_edit_bone(armature, "root", (0, 0, 0), (0, 0, max(0.12, height * 0.06)), None, False)
+    add_edit_bone(armature, "motion_root", (0, 0, 0), (0, 0, max(0.16, height * 0.08)), "root", False)
+    add_edit_bone(armature, "body_root", (0, 0, body_z), (-length * 0.05, 0, body_z), "motion_root", True)
+    add_edit_bone(armature, "spine_front", (0, 0, body_z), (-length * 0.22, 0, body_z * 1.02), "body_root", True)
+    add_edit_bone(armature, "neck_01", (-length * 0.22, 0, body_z * 1.02), (-length * 0.32, 0, body_z * 0.92), "spine_front", True)
+    add_edit_bone(armature, "head", (-length * 0.32, 0, body_z * 0.92), (-length * 0.42, 0, body_z * 0.7), "neck_01", True)
+    add_edit_bone(armature, "jaw", (-length * 0.42, 0, body_z * 0.7), (-length * 0.5, 0, body_z * 0.52), "head", True)
+    add_edit_bone(armature, "spine_rear", (0, 0, body_z), (length * 0.22, 0, body_z * 0.96), "body_root", True)
+    add_edit_bone(armature, "tail_01", (length * 0.22, 0, body_z * 0.96), (length * 0.36, 0, body_z * 0.7), "spine_rear", True)
+    add_edit_bone(armature, "tail_02", (length * 0.36, 0, body_z * 0.7), (length * 0.48, 0, body_z * 0.42), "tail_01", True)
+    fin_xs = (-length * 0.18, -length * 0.1, -length * 0.02, length * 0.06, length * 0.14, length * 0.22)
+    for index, x in enumerate(fin_xs, start=1):
+        parent = "spine_front" if x < 0 else ("spine_rear" if x > 0 else "body_root")
+        add_edit_bone(
+            armature,
+            f"heat_fin_{index:02d}",
+            (x, 0, height * 0.52),
+            (x, 0, height * 0.78),
+            parent,
+            True,
+        )
+    x_positions = {"front": -length * 0.2, "rear": length * 0.18}
+    for pair, x in x_positions.items():
+        parent = "spine_front" if pair == "front" else "spine_rear"
+        for side, sign in (("l", 1.0), ("r", -1.0)):
+            y = sign * width * 0.34
+            upper = f"{pair}_upper_{side}"
+            lower = f"{pair}_lower_{side}"
+            foot = f"{pair}_foot_{side}"
+            add_edit_bone(armature, upper, (x, y * 0.55, body_z), (x, y, height * 0.22), parent, True)
+            add_edit_bone(armature, lower, (x, y, height * 0.22), (x - length * 0.02, y * 1.08, height * 0.08), upper, True)
+            add_edit_bone(armature, foot, (x - length * 0.02, y * 1.08, height * 0.08), (x - length * 0.06, y * 1.08, 0.004), lower, True)
+            socket_prefix = "forefoot" if pair == "front" else "rear_foot"
+            add_edit_bone(
+                armature,
+                f"socket_{socket_prefix}_contact_{side}",
+                (x - length * 0.06, y * 1.08, 0.004),
+                (x - length * 0.06, y * 1.08, max(0.04, height * 0.02)),
+                foot,
+                False,
+            )
+    add_edit_bone(armature, "socket_attack_origin", (-length * 0.5, 0, body_z * 0.52), (-length * 0.54, 0, body_z * 0.52), "jaw", False)
+    add_edit_bone(armature, "socket_camera_focus", (-length * 0.08, 0, height * 0.62), (-length * 0.08, 0, height * 0.72), "body_root", False)
+    add_edit_bone(armature, "socket_vfx_mouth_ember", (-length * 0.48, 0, body_z * 0.58), (-length * 0.48, 0, body_z * 0.68), "jaw", False)
+    add_edit_bone(armature, "socket_vfx_fin_heat", (0, 0, height * 0.78), (0, 0, height * 0.9), "heat_fin_03", False)
+    add_edit_bone(armature, "socket_vfx_contact_steam", (0, 0, 0.01), (0, 0, max(0.05, height * 0.04)), "body_root", False)
+    add_edit_bone(armature, "socket_vfx_throat_heat", (-length * 0.28, 0, body_z * 0.7), (-length * 0.28, 0, body_z * 0.82), "neck_01", False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    armature.show_in_front = True
+    return armature
+
+
+def build_armature(plan: dict[str, Any], dimensions: Vector) -> bpy.types.Object:
+    profile = str(plan["rig"]["skeletonProfileId"])
+    if "quadruped_heat_fin" in profile:
+        return build_quadruped_heat_fin_armature(plan, dimensions)
+    return build_six_limb_armature(plan, dimensions)
+
+
 def point_segment_distance(point: Vector, head: Vector, tail: Vector) -> float:
     segment = tail - head
     length_squared = segment.length_squared
@@ -308,8 +380,23 @@ def point_segment_distance(point: Vector, head: Vector, tail: Vector) -> float:
     return (point - (head + factor * segment)).length
 
 
-def candidate_bones(point: Vector, dimensions: Vector) -> list[str]:
+def candidate_bones(point: Vector, dimensions: Vector, profile: str = "") -> list[str]:
     length, width, height = dimensions
+    if "quadruped_heat_fin" in profile:
+        if point.z < height * 0.48 and abs(point.y) > width * 0.08:
+            pair = "front" if point.x < 0 else "rear"
+            side = "l" if point.y >= 0 else "r"
+            return [f"{pair}_upper_{side}", f"{pair}_lower_{side}", f"{pair}_foot_{side}", "body_root"]
+        if point.x < -length * 0.34:
+            return ["jaw", "head", "neck_01", "spine_front"]
+        if point.x < -length * 0.16:
+            return ["head", "neck_01", "spine_front", "body_root"]
+        if point.x > length * 0.28:
+            return ["tail_02", "tail_01", "spine_rear", "body_root"]
+        if point.z > height * 0.5:
+            index = min(6, max(1, int((point.x / max(length, 1e-6) + 0.5) * 6) + 1))
+            return [f"heat_fin_{index:02d}", "spine_front" if point.x < 0 else "spine_rear", "body_root"]
+        return ["body_root", "spine_front" if point.x < 0 else "spine_rear"]
     if point.z < height * 0.58 and abs(point.y) > width * 0.08:
         pair = min(
             (("front", -length * 0.24), ("middle", 0.0), ("rear", length * 0.25)),
@@ -332,7 +419,7 @@ def candidate_bones(point: Vector, dimensions: Vector) -> list[str]:
     return ["body_root", "spine_front" if point.x < 0 else "spine_rear"]
 
 
-def skin_mesh(mesh: bpy.types.Object, armature: bpy.types.Object, dimensions: Vector) -> dict[str, int]:
+def skin_mesh(mesh: bpy.types.Object, armature: bpy.types.Object, dimensions: Vector, profile: str = "") -> dict[str, int]:
     deform_bones = {bone.name: bone for bone in armature.data.bones if bone.use_deform}
     for group in list(mesh.vertex_groups):
         mesh.vertex_groups.remove(group)
@@ -341,7 +428,7 @@ def skin_mesh(mesh: bpy.types.Object, armature: bpy.types.Object, dimensions: Ve
     unweighted = 0
     for vertex in mesh.data.vertices:
         point = vertex.co
-        candidates = [name for name in candidate_bones(point, dimensions) if name in deform_bones]
+        candidates = [name for name in candidate_bones(point, dimensions, profile) if name in deform_bones]
         weighted = []
         for name in candidates:
             bone = deform_bones[name]
@@ -406,7 +493,7 @@ def build_lods(
         clone = lod0.copy()
         clone.data = lod0.data.copy()
         clone.name = plan_rows[lod_id]["object"]
-        clone.data.name = f"MESH_fault_crowned_colossus_{lod_id}"
+        clone.data.name = mesh_data_name(plan_rows[lod_id]["object"])
         bpy.context.scene.collection.objects.link(clone)
         maximum = plan_rows[lod_id]["maximumTriangles"]
         ratio = min(ratios[lod_id], maximum * 0.96 / source_triangles)
@@ -448,53 +535,75 @@ def rotate(armature: bpy.types.Object, name: str, x: float = 0, y: float = 0, z:
     bone.rotation_mode = "QUATERNION"
 
 
+def try_rotate(armature: bpy.types.Object, name: str, x: float = 0, y: float = 0, z: float = 0) -> None:
+    if name in armature.pose.bones:
+        rotate(armature, name, x=x, y=y, z=z)
+
+
 def apply_motion_pose(armature: bpy.types.Object, key: str, normalized: float) -> None:
     reset_pose(armature)
     cycle = math.sin(normalized * math.tau)
     envelope = math.sin(normalized * math.pi)
+    limb_pairs = tuple(
+        pair
+        for pair in ("front", "middle", "rear")
+        if f"{pair}_upper_l" in armature.pose.bones
+    )
     if key == "idle.weight_shift":
-        rotate(armature, "body_root", z=0.025 * cycle)
-        rotate(armature, "head", y=0.035 * cycle)
+        try_rotate(armature, "body_root", z=0.025 * cycle)
+        try_rotate(armature, "head", y=0.035 * cycle)
+        try_rotate(armature, "jaw", y=0.02 * cycle)
+        for index in range(1, 7):
+            try_rotate(armature, f"heat_fin_{index:02d}", x=0.03 * cycle)
     elif key in {"locomotion.walk", "locomotion.run"}:
         amplitude = 0.16 if key.endswith("walk") else 0.25
-        for index, pair in enumerate(("front", "middle", "rear")):
-            pair_cycle = math.sin(normalized * math.tau + index * math.tau / 3.0)
+        for index, pair in enumerate(limb_pairs):
+            pair_cycle = math.sin(normalized * math.tau + index * math.tau / max(1, len(limb_pairs)))
             for side, sign in (("l", 1.0), ("r", -1.0)):
                 phase = pair_cycle * sign
-                rotate(armature, f"{pair}_upper_{side}", y=amplitude * phase)
-                rotate(armature, f"{pair}_lower_{side}", y=-amplitude * 0.55 * phase)
-        rotate(armature, "body_root", z=0.018 * cycle)
-        rotate(armature, "head", y=-0.035 * cycle)
+                try_rotate(armature, f"{pair}_upper_{side}", y=amplitude * phase)
+                try_rotate(armature, f"{pair}_lower_{side}", y=-amplitude * 0.55 * phase)
+        try_rotate(armature, "body_root", z=0.018 * cycle)
+        try_rotate(armature, "head", y=-0.035 * cycle)
+        try_rotate(armature, "tail_01", z=0.06 * cycle)
+        try_rotate(armature, "tail_02", z=0.08 * cycle)
     elif key == "attack.basic":
-        rotate(armature, "body_root", y=-0.09 * envelope)
-        rotate(armature, "spine_front", y=-0.16 * envelope)
-        rotate(armature, "neck_01", y=0.18 * envelope)
-        rotate(armature, "head", y=0.24 * envelope)
-        rotate(armature, "horn_plow", y=0.18 * envelope)
+        try_rotate(armature, "body_root", y=-0.09 * envelope)
+        try_rotate(armature, "spine_front", y=-0.16 * envelope)
+        try_rotate(armature, "neck_01", y=0.18 * envelope)
+        try_rotate(armature, "head", y=0.24 * envelope)
+        try_rotate(armature, "horn_plow", y=0.18 * envelope)
+        try_rotate(armature, "jaw", y=0.32 * envelope)
     elif key == "attack.special":
-        rotate(armature, "body_root", z=0.12 * envelope)
-        rotate(armature, "spine_front", z=0.15 * envelope)
-        rotate(armature, "head", z=-0.12 * envelope)
-        rotate(armature, "front_upper_l", x=-0.08 * envelope, y=0.08 * envelope)
-        rotate(armature, "front_upper_r", x=0.08 * envelope, y=-0.08 * envelope)
+        try_rotate(armature, "body_root", z=0.12 * envelope)
+        try_rotate(armature, "spine_front", z=0.15 * envelope)
+        try_rotate(armature, "head", z=-0.12 * envelope)
+        try_rotate(armature, "front_upper_l", x=-0.08 * envelope, y=0.08 * envelope)
+        try_rotate(armature, "front_upper_r", x=0.08 * envelope, y=-0.08 * envelope)
+        try_rotate(armature, "tail_01", z=-0.28 * envelope)
+        try_rotate(armature, "tail_02", z=-0.34 * envelope)
     elif key == "skill.anticipation":
-        rotate(armature, "body_root", y=0.07 * envelope)
-        rotate(armature, "spine_front", y=0.11 * envelope)
-        rotate(armature, "head", y=-0.13 * envelope)
-        for pair in ("front", "middle", "rear"):
-            rotate(armature, f"{pair}_upper_l", y=-0.055 * envelope)
-            rotate(armature, f"{pair}_upper_r", y=-0.055 * envelope)
+        try_rotate(armature, "body_root", y=0.07 * envelope)
+        try_rotate(armature, "spine_front", y=0.11 * envelope)
+        try_rotate(armature, "head", y=-0.13 * envelope)
+        try_rotate(armature, "jaw", y=-0.08 * envelope)
+        for pair in limb_pairs:
+            try_rotate(armature, f"{pair}_upper_l", y=-0.055 * envelope)
+            try_rotate(armature, f"{pair}_upper_r", y=-0.055 * envelope)
+        for index in range(1, 7):
+            try_rotate(armature, f"heat_fin_{index:02d}", x=0.08 * envelope)
     elif key == "reaction.hit":
-        rotate(armature, "body_root", z=-0.10 * envelope)
-        rotate(armature, "head", z=0.12 * envelope)
+        try_rotate(armature, "body_root", z=-0.10 * envelope)
+        try_rotate(armature, "head", z=0.12 * envelope)
     elif key == "defeat":
         progress = normalized * normalized * (3.0 - 2.0 * normalized)
-        rotate(armature, "body_root", x=0.22 * progress, z=0.10 * progress)
-        rotate(armature, "spine_front", x=0.16 * progress)
-        rotate(armature, "head", y=0.22 * progress)
-        for pair in ("front", "middle", "rear"):
-            rotate(armature, f"{pair}_upper_l", y=-0.16 * progress)
-            rotate(armature, f"{pair}_upper_r", y=-0.16 * progress)
+        try_rotate(armature, "body_root", x=0.22 * progress, z=0.10 * progress)
+        try_rotate(armature, "spine_front", x=0.16 * progress)
+        try_rotate(armature, "head", y=0.22 * progress)
+        try_rotate(armature, "jaw", y=0.12 * progress)
+        for pair in limb_pairs:
+            try_rotate(armature, f"{pair}_upper_l", y=-0.16 * progress)
+            try_rotate(armature, f"{pair}_upper_r", y=-0.16 * progress)
 
 
 def action_endpoint_errors(
@@ -793,12 +902,14 @@ def render_reviews(
     scene = bpy.context.scene
     actions = {action.name: action for action in bpy.data.actions}
     outputs: list[Path] = []
+    lod0_name = plan["lodPolicy"]["levels"][0]["object"]
+    review_slug = lod0_name[4:-5] if lod0_name.startswith("GEO_") and lod0_name.endswith("_LOD0") else lod0_name
     for lod_id, obj in zip(("LOD0", "LOD1", "LOD2"), lods):
         armature.animation_data.action = None
         reset_pose(armature)
         for candidate in lods:
             candidate.hide_render = candidate is not obj
-        path = output_dir / f"fault_crowned_colossus_{lod_id.lower()}_bind_v001.png"
+        path = output_dir / f"{review_slug}_{lod_id.lower()}_bind_v001.png"
         scene.render.filepath = str(path)
         bpy.ops.render.render(write_still=True)
         outputs.append(path)
@@ -810,7 +921,7 @@ def render_reviews(
         lods[1].hide_render = True
         lods[2].hide_render = True
         slug = motion_key.replace(".", "_")
-        path = output_dir / f"fault_crowned_colossus_{slug}_v001.png"
+        path = output_dir / f"{review_slug}_{slug}_v001.png"
         scene.render.filepath = str(path)
         bpy.ops.render.render(write_still=True)
         outputs.append(path)
@@ -853,7 +964,7 @@ def build_scene(repo_root: Path, plan: dict[str, Any]) -> dict[str, Any]:
                 "materialSlots": len(obj.data.materials),
             }
         )
-    lod0 = join_source_meshes(imported)
+    lod0 = join_source_meshes(imported, plan)
     normalization = normalize_source(lod0, float(plan["scale"]["targetLengthMeters"]))
     minimum, maximum = world_bounds(lod0)
     dimensions = maximum - minimum
@@ -861,7 +972,7 @@ def build_scene(repo_root: Path, plan: dict[str, Any]) -> dict[str, Any]:
         raise BuildError("SourceHasNoUvLayer")
     material = configure_material(repo_root, plan, lod0)
     armature = build_armature(plan, dimensions)
-    skinning = skin_mesh(lod0, armature, dimensions)
+    skinning = skin_mesh(lod0, armature, dimensions, plan["rig"]["skeletonProfileId"])
     lods = build_lods(lod0, armature, plan)
     weights = mesh_weight_stats(lods)
     weights["maximumInfluencesPerVertex"] = max(weights["maximumInfluencesPerVertex"], skinning["maximumInfluencesPerVertex"])
