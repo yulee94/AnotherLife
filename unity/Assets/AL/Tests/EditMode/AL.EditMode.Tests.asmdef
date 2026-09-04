@@ -8,6 +8,7 @@
         "AL.SaveAuthority.RuntimeBridge",
         "AL.GameDataCatalog",
         "AL.NotificationCatalogAdapter",
+        "AL.BossRewards",
         "Unity.InputSystem"
     ],
     "includePlatforms": [
