@@ -41,6 +41,7 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 | `al_rig_motion_standard.json` | `al-rig-motion-standard.schema.json` | — |
 | `al_required_motion_manifest.json` | `al-required-motion-manifest.schema.json` | — |
 | `al_model_motion_skill_vfx_harness.v1.json` | `al-model-motion-skill-vfx-harness.schema.json` | — |
+| `al_boss_skill_presentation_catalog.v1.json` | `al-boss-skill-presentation.schema.json` | — |
 
 `al-world-asset-inventory.schema.json` defines the held post-MVP world-asset logical
 family, production identity, binding, provenance, standards, budget-measurement, and

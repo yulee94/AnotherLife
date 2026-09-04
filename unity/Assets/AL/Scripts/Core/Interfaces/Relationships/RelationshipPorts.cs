@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace AL.Core.Interfaces.Relationships
 {
     public interface IRelationshipIdentityResolver
@@ -44,5 +46,26 @@ namespace AL.Core.Interfaces.Relationships
         bool TryFindCorrelation(string correlationId, out string operationId);
 
         bool TryRecord(RelationshipPreparedPlan plan, out string conflictCorrelationId);
+    }
+
+    public interface IRelationshipCandidatePersistence
+    {
+        int AttemptCount { get; }
+
+        RelationshipPersistenceResult PersistAndVerify(RelationshipRawState candidate);
+
+        RelationshipRawState LoadPublished();
+    }
+
+    public interface IRelationshipCommitEventSink
+    {
+        IReadOnlyList<RelationshipCommittedChange> Published { get; }
+
+        IReadOnlyList<RelationshipDiagnostic> Publish(RelationshipCommittedChange change);
+    }
+
+    public interface IRelationshipNotificationOutbox
+    {
+        bool TryEnqueue(RelationshipCommittedChange committed, out string diagnostic);
     }
 }
