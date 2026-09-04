@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "catalogId": "al_guild_progression_policy",
+  "game": "Another Life",
+  "sourceRevision": "guild_progression_policy_v1",
+  "machineIdentity": "Guild",
+  "playerFacingTerms": {
+    "primary": "Guild",
+    "presentationAlias": "Clan",
+    "aliasScope": "localization_only"
+  },
+  "consumedContracts": {
+    "guildCatalogId": "al_guild_membership_policy",
+    "guildIdentity": "external_guild_snapshot",
+    "guildRoles": "external_guild_roles"
+  },
+  "progression": {
+    "levelCapSelected": false,
+    "researchTreeSelected": false,
+    "costsSelected": false,
+    "numericPerkTuningProductionEligible": true,
+    "authority": "guild_master_only",
+    "levels": [
+      {
+        "levelId": "guild_level_structural_1",
+        "ordinal": 1,
+        "productionEligible": false
+      }
+    ]
+  },
+  "research": [
+    {
+      "researchId": "guild_research_structural_1",
+      "requiredLevelId": "guild_level_structural_1",
+      "requiredResearchIds": [],
+      "productionEligible": false
+    }
+  ],
+  "perks": [
+    {
+      "sourceId": "guild_progression",
+      "profileId": "guild_member_character_stats",
+      "ruleId": "guild_research_structural_1_rule",
+      "requiredLevelId": "guild_level_structural_1",
+      "requiredResearchId": "guild_research_structural_1",
+      "scope": "member_character_stats",
+      "cap": {
+        "kind": "unselected",
+        "productionEligible": false
+      },
+      "stacking": {
+        "group": "guild_research_structural",
+        "order": 0,
+        "rule": "explicit_visible_only"
+      },
+      "sourceVersion": "1.0.0",
+      "sourceHash": "3f6c9a1b2d4e5f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8",
+      "statBreakdownToken": "guild.research.structural_1",
+      "hiddenGlobalMultiplier": false,
+      "productionEligible": false,
+      "appliesCombatMutation": false
+    }
+  ],
+  "hiddenGlobalMultipliers": "forbidden",
+  "transitions": [
+    "advance_level",
+    "complete_research"
+  ],
+  "replayPolicy": {
+    "operationIdentity": "operation_id",
+    "sameFingerprint": "already_committed",
+    "differentFingerprint": "conflict",
+    "unknownOutcome": "fail_closed_until_reconciled"
+  },
+  "authorityBoundary": {
+    "plannerScope": "engine_free_snapshot_only",
+    "numericPerkTuning": "production_ineligible",
+    "excludedImplementations": [
+      "persistence",
+      "network",
+      "save",
+      "combat",
+      "ui",
+      "economy",
+      "city",
+      "raid",
+      "oathmark_mint",
+      "alliance"
+    ]
+  }
+}
