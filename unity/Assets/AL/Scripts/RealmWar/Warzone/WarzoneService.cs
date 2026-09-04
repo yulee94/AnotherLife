@@ -1,9 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.RealmWar.Territories;
+using AL.RealmWar.Territories.Contracts;
 using UnityEngine;
 using System;
+
+[assembly: InternalsVisibleTo("AL.EditMode.Tests")]
 
 namespace AL.RealmWar.Warzone
 {
@@ -12,24 +17,37 @@ namespace AL.RealmWar.Warzone
         private readonly ISaveGameService _saveGameService;
         private readonly AL.Services.Local.EconomyWriteAuthorityGate
             _writeAuthorityGate;
+        private readonly TerritoryCaptureTransactionService _captureTransactions;
+        private readonly bool _allowWritesWithoutGate;
+
         public event Action<string, RealmId> OnTerritoryCaptured;
 
         public WarzoneService(ISaveGameService saveGameService)
             : this(
                 saveGameService,
                 AL.Services.Local.EconomyWriteAuthorityGate.FromSaveService(
-                    saveGameService))
+                    saveGameService),
+                false)
         {
         }
 
         private WarzoneService(
             ISaveGameService saveGameService,
-            AL.Services.Local.EconomyWriteAuthorityGate writeAuthorityGate)
+            AL.Services.Local.EconomyWriteAuthorityGate writeAuthorityGate,
+            bool allowWritesWithoutGate)
         {
             _saveGameService = saveGameService ??
                 throw new ArgumentNullException(nameof(saveGameService));
-            _writeAuthorityGate = writeAuthorityGate ??
-                throw new ArgumentNullException(nameof(writeAuthorityGate));
+            _writeAuthorityGate = writeAuthorityGate;
+            _allowWritesWithoutGate = allowWritesWithoutGate;
+            _captureTransactions = allowWritesWithoutGate
+                ? TerritoryCaptureTransactionService.CreateForTests(saveGameService)
+                : new TerritoryCaptureTransactionService(saveGameService);
+        }
+
+        internal static WarzoneService CreateForTests(ISaveGameService saveGameService)
+        {
+            return new WarzoneService(saveGameService, null, true);
         }
 
         private List<TerritoryData> Territories =>
@@ -48,37 +66,44 @@ namespace AL.RealmWar.Warzone
 
         public void CaptureTerritory(string territoryId, RealmId capturer)
         {
-            if (!_writeAuthorityGate.TryGetWritableSave(out var writableSave))
+            Debug.LogWarning(
+                "[AL-WARZONE-CAPTURE-AUTHORIZATION-REQUIRED] Legacy capture is unavailable until a typed producer supplies an authorization result.");
+        }
+
+        public TerritoryCaptureApplicationResult ApplyCaptureTransaction(
+            TerritoryCaptureTransactionRequest request)
+        {
+            string territoryId = request?.CaptureRequest?.TerritoryId ?? string.Empty;
+            if (!TryGetAuthorizedSave(out _))
             {
                 Debug.LogWarning(
                     "[AL-WARZONE-PROFILE-READ-ONLY] Territory capture rejected before any profile mutation.");
-                return;
+                return new TerritoryCaptureApplicationResult(
+                    TerritoryApplyDisposition.Rejected,
+                    null,
+                    null,
+                    null,
+                    new[]
+                    {
+                        new TerritoryDiagnostic(
+                            TerritoryDiagnosticSeverity.Error,
+                            "ProfileReadOnly",
+                            territoryId ?? string.Empty,
+                            "Territory capture rejected before any profile mutation.")
+                    });
             }
 
-            if (!EnsureTerritories(writableSave) ||
-                !_writeAuthorityGate.IsWritableFor(writableSave))
+            TerritoryCaptureApplicationResult result =
+                _captureTransactions.ApplyCapture(request);
+            if (result != null &&
+                result.Disposition == TerritoryApplyDisposition.Committed &&
+                result.Event != null)
             {
-                return;
+                OnTerritoryCaptured?.Invoke(result.Event.TerritoryId, result.Event.NewOwner);
+                Debug.Log($"Territory {result.Event.TerritoryId} captured by {result.Event.NewOwner}");
             }
 
-            var territory = writableSave.Territories?
-                .FirstOrDefault(t => t?.Id == territoryId);
-            if (territory != null)
-            {
-                territory.OwnerRealm = capturer;
-                OnTerritoryCaptured?.Invoke(territoryId, capturer);
-                Debug.Log($"Territory {territory.Name} captured by {capturer}");
-                try
-                {
-                    ServiceLocator.Get<IQuestService>().UpdateProgress(QuestType.CaptureTerritory, 1);
-                    ServiceLocator.Get<IWarzoneCreditService>().AddCredits(100);
-                }
-                catch (Exception)
-                {
-                    // Quest and credit services are optional in isolated tests.
-                }
-                _saveGameService.Save();
-            }
+            return result;
         }
 
         public long CalculatePassiveIncome(ResourceType type)
@@ -105,31 +130,15 @@ namespace AL.RealmWar.Warzone
             return total;
         }
 
-        private bool EnsureTerritories(AL.Data.Runtime.SaveGameData save)
+        private bool TryGetAuthorizedSave(out AL.Data.Runtime.SaveGameData save)
         {
-            if (save == null)
+            if (_allowWritesWithoutGate)
             {
-                return false;
+                save = _saveGameService.CurrentSave;
+                return save != null;
             }
 
-            if (save.Territories != null && save.Territories.Count > 0)
-            {
-                return true;
-            }
-
-            if (!_writeAuthorityGate.IsWritableFor(save))
-            {
-                return false;
-            }
-
-            save.Territories ??= new List<TerritoryData>();
-
-            save.Territories.Add(new TerritoryData { Id = "T1", Name = "Iron Peaks", OwnerRealm = RealmId.Stonehold, BonusType = ResourceType.Stone, BonusAmount = 50, IsFortress = true });
-            save.Territories.Add(new TerritoryData { Id = "T2", Name = "Silver Woods", OwnerRealm = RealmId.Eldergrove, BonusType = ResourceType.Wood, BonusAmount = 40, IsFortress = false });
-            save.Territories.Add(new TerritoryData { Id = "T3", Name = "Golden Plains", OwnerRealm = RealmId.Crownlands, BonusType = ResourceType.Gold, BonusAmount = 20, IsFortress = false });
-            save.Territories.Add(new TerritoryData { Id = "T4", Name = "Shadow Vale", OwnerRealm = RealmId.Umbral, BonusType = ResourceType.Food, BonusAmount = 60, IsFortress = true });
-            save.Territories.Add(new TerritoryData { Id = "T5", Name = "Neutral Borderlands", OwnerRealm = RealmId.None, BonusType = ResourceType.Gold, BonusAmount = 10, IsFortress = false });
-            return true;
+            return _writeAuthorityGate.TryGetWritableSave(out save);
         }
 
         private static TerritoryData CloneTerritory(TerritoryData territory) =>
