@@ -14,6 +14,8 @@
     "playerFacingTerms",
     "membershipScope",
     "roles",
+    "membershipStates",
+    "membershipStatePolicy",
     "transitions",
     "pendingRequestPolicy",
     "replayPolicy",
@@ -51,7 +53,7 @@
         "subject": { "const": "account" },
         "realmBinding": { "const": "immutable_account_realm" },
         "sameRealmCharactersShareMembership": { "const": true },
-        "crossGuildUniqueness": { "const": "one_active_membership_per_account" },
+        "crossGuildUniqueness": { "const": "one_reserving_membership_per_account" },
         "requiredActiveMasterCount": { "const": 1 },
         "joinedRole": { "const": "Member" }
       },
@@ -67,6 +69,29 @@
         { "$ref": "#/$defs/memberRole" }
       ],
       "items": false
+    },
+    "membershipStates": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        { "$ref": "#/$defs/activeState" },
+        { "$ref": "#/$defs/restrictedState" },
+        { "$ref": "#/$defs/pendingLeaveState" },
+        { "$ref": "#/$defs/bannedState" },
+        { "$ref": "#/$defs/inactiveState" }
+      ],
+      "items": false
+    },
+    "membershipStatePolicy": {
+      "type": "object",
+      "required": ["revisionFence", "unknownState", "bannedScope"],
+      "properties": {
+        "revisionFence": { "const": "exact_authority_and_guild_revisions" },
+        "unknownState": { "const": "preserve_read_only" },
+        "bannedScope": { "const": "same_guild_cycle" }
+      },
+      "additionalProperties": false
     },
     "transitions": {
       "type": "array",
@@ -240,6 +265,109 @@
             "canDisband": { "const": false },
             "canFormAlliancesOrDeclareWar": { "const": false },
             "canOpenRaidCalls": { "const": false }
+          }
+        }
+      ]
+    },
+    "membershipStateBase": {
+      "type": "object",
+      "required": [
+        "state",
+        "reservesAccount",
+        "grantsRoleAuthority",
+        "leaveResult",
+        "kickResult",
+        "blocksSameGuildEntry"
+      ],
+      "properties": {
+        "state": {
+          "enum": ["Active", "Restricted", "PendingLeave", "Banned", "Inactive"]
+        },
+        "reservesAccount": { "type": "boolean" },
+        "grantsRoleAuthority": { "type": "boolean" },
+        "leaveResult": {
+          "type": ["string", "null"],
+          "enum": ["PendingLeave", "Inactive", null]
+        },
+        "kickResult": {
+          "type": ["string", "null"],
+          "enum": ["Banned", null]
+        },
+        "blocksSameGuildEntry": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "activeState": {
+      "allOf": [
+        { "$ref": "#/$defs/membershipStateBase" },
+        {
+          "properties": {
+            "state": { "const": "Active" },
+            "reservesAccount": { "const": true },
+            "grantsRoleAuthority": { "const": true },
+            "leaveResult": { "const": "PendingLeave" },
+            "kickResult": { "const": "Banned" },
+            "blocksSameGuildEntry": { "const": true }
+          }
+        }
+      ]
+    },
+    "restrictedState": {
+      "allOf": [
+        { "$ref": "#/$defs/membershipStateBase" },
+        {
+          "properties": {
+            "state": { "const": "Restricted" },
+            "reservesAccount": { "const": true },
+            "grantsRoleAuthority": { "const": false },
+            "leaveResult": { "const": "PendingLeave" },
+            "kickResult": { "const": "Banned" },
+            "blocksSameGuildEntry": { "const": true }
+          }
+        }
+      ]
+    },
+    "pendingLeaveState": {
+      "allOf": [
+        { "$ref": "#/$defs/membershipStateBase" },
+        {
+          "properties": {
+            "state": { "const": "PendingLeave" },
+            "reservesAccount": { "const": true },
+            "grantsRoleAuthority": { "const": false },
+            "leaveResult": { "const": "Inactive" },
+            "kickResult": { "const": null },
+            "blocksSameGuildEntry": { "const": true }
+          }
+        }
+      ]
+    },
+    "bannedState": {
+      "allOf": [
+        { "$ref": "#/$defs/membershipStateBase" },
+        {
+          "properties": {
+            "state": { "const": "Banned" },
+            "reservesAccount": { "const": false },
+            "grantsRoleAuthority": { "const": false },
+            "leaveResult": { "const": null },
+            "kickResult": { "const": null },
+            "blocksSameGuildEntry": { "const": true }
+          }
+        }
+      ]
+    },
+    "inactiveState": {
+      "allOf": [
+        { "$ref": "#/$defs/membershipStateBase" },
+        {
+          "properties": {
+            "state": { "const": "Inactive" },
+            "reservesAccount": { "const": false },
+            "grantsRoleAuthority": { "const": false },
+            "leaveResult": { "const": null },
+            "kickResult": { "const": null },
+            "blocksSameGuildEntry": { "const": false }
           }
         }
       ]
