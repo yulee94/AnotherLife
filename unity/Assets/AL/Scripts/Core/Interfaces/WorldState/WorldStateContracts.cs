@@ -173,6 +173,23 @@ namespace AL.Core.Interfaces.WorldState
         Committed = 1
     }
 
+    public enum WorldStateStandaloneCommitStatus
+    {
+        AppliedCommitted = 0,
+        AlreadyCommitted = 1,
+        NoChange = 2,
+        RejectedValidation = 3,
+        RejectedStale = 4,
+        PersistenceFailedPreviousPreserved = 5,
+        NotificationFailedAfterCommit = 6
+    }
+
+    public enum WorldStatePersistenceStatus
+    {
+        Verified = 0,
+        Failed = 1
+    }
+
     public sealed class WorldStateDiagnostic
     {
         public WorldStateDiagnostic(
@@ -921,6 +938,55 @@ namespace AL.Core.Interfaces.WorldState
         public WorldStatePlanningStatus Status { get; }
         public WorldStateTransitionPlan Plan { get; }
         public WorldStateOperationReceipt ExistingReceipt { get; }
+        public IReadOnlyList<WorldStateDiagnostic> Diagnostics { get; }
+    }
+
+    public sealed class WorldStatePersistenceResult
+    {
+        public WorldStatePersistenceResult(
+            WorldStatePersistenceStatus status,
+            AL.Data.Runtime.WorldStatePersistentState persisted,
+            string diagnostic)
+        {
+            Status = status;
+            Persisted = persisted;
+            Diagnostic = diagnostic ?? string.Empty;
+        }
+
+        public WorldStatePersistenceStatus Status { get; }
+        public AL.Data.Runtime.WorldStatePersistentState Persisted { get; }
+        public string Diagnostic { get; }
+        public bool IsVerified => Status == WorldStatePersistenceStatus.Verified;
+    }
+
+    public sealed class WorldStateStandaloneCommitResult
+    {
+        public WorldStateStandaloneCommitResult(
+            WorldStateStandaloneCommitStatus status,
+            WorldStateTransitionPlan plan,
+            WorldStateSnapshot snapshotBefore,
+            WorldStateSnapshot snapshotAfter,
+            WorldStateTransitionEvent committedEvent,
+            int persistAttemptCount,
+            IEnumerable<WorldStateDiagnostic> diagnostics)
+        {
+            Status = status;
+            Plan = plan;
+            SnapshotBefore = snapshotBefore;
+            SnapshotAfter = snapshotAfter;
+            CommittedEvent = committedEvent;
+            PersistAttemptCount = persistAttemptCount;
+            Diagnostics = WorldStateCollections.Freeze(
+                diagnostics,
+                WorldStateTechnicalLimits.MaximumDiagnostics);
+        }
+
+        public WorldStateStandaloneCommitStatus Status { get; }
+        public WorldStateTransitionPlan Plan { get; }
+        public WorldStateSnapshot SnapshotBefore { get; }
+        public WorldStateSnapshot SnapshotAfter { get; }
+        public WorldStateTransitionEvent CommittedEvent { get; }
+        public int PersistAttemptCount { get; }
         public IReadOnlyList<WorldStateDiagnostic> Diagnostics { get; }
     }
 
