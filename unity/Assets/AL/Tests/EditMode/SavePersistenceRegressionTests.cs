@@ -623,7 +623,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void CandidatePreflightFreezesWhenCanonicalPrimaryCannotBeVerified()
+        public void ProfileBoundRealmRejectsMissingCanonicalPrimaryWithoutMutation()
         {
             string root = Path.Combine(
                 Path.GetTempPath(),
@@ -640,36 +640,32 @@ namespace AL.Tests.EditMode
                     "CreateNewSave",
                     Enum.Parse(realmType, "Crownlands"));
                 object publishedBefore = GetProperty(service, "CurrentSave");
+                string backupBefore = File.ReadAllText(
+                    Path.Combine(root, "save.backup.json"));
                 File.Delete(Path.Combine(root, "save.json"));
 
-                LogAssert.Expect(
-                    LogType.Error,
-                    new System.Text.RegularExpressions.Regex(
-                        "^AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT:"));
                 object result = InvokeRealmSelectionCandidate(
                     service,
                     "tx_duplicate_missing_primary",
                     "Crownlands");
 
                 Assert.AreEqual(
-                    "SaveFailedPreviousPreserved",
+                    "ProfileUnavailable",
                     GetProperty(result, "Status").ToString());
+                Assert.AreEqual(
+                    "AL-REALM-PROFILE-NOT-WRITABLE",
+                    GetProperty(result, "TechnicalCode"));
                 Assert.AreSame(
                     publishedBefore,
                     GetProperty(service, "CurrentSave"));
                 Assert.AreEqual(
-                    "SaveFailedPreviousPreserved",
+                    "SavedPrimary",
                     GetProperty(service, "LastSaveStatus").ToString());
-                Assert.That(
-                    (string)GetProperty(service, "LastSaveMessage"),
-                    Does.StartWith(
-                        "AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT:"));
-                CollectionAssert.Contains(
-                    GetDiagnosticCodes(
-                        GetProperty(service, "LastSaveDisposition")),
-                    "AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT");
-                Assert.NotNull(
-                    GetProperty(service, "ReadOnlyCandidateSnapshot"));
+                Assert.Null(GetProperty(service, "ReadOnlyCandidateSnapshot"));
+                Assert.False(File.Exists(Path.Combine(root, "save.json")));
+                Assert.AreEqual(
+                    backupBefore,
+                    File.ReadAllText(Path.Combine(root, "save.backup.json")));
             }
             finally
             {
@@ -681,7 +677,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void DuplicateCandidateKeepsPublishedReferenceAfterExactVerification()
+        public void ProfileBoundRealmInstallsReceiptThenKeepsReplayReference()
         {
             string root = Path.Combine(
                 Path.GetTempPath(),
@@ -699,16 +695,29 @@ namespace AL.Tests.EditMode
                     Enum.Parse(realmType, "Crownlands"));
                 object publishedBefore = GetProperty(service, "CurrentSave");
 
-                object result = InvokeRealmSelectionCandidate(
+                object migration = InvokeRealmSelectionCandidate(
                     service,
                     "tx_duplicate_verified",
                     "Crownlands");
 
                 Assert.AreEqual(
                     "AlreadyCommittedSameRealm",
-                    GetProperty(result, "Status").ToString());
-                Assert.AreSame(
+                    GetProperty(migration, "Status").ToString());
+                Assert.AreNotSame(
                     publishedBefore,
+                    GetProperty(service, "CurrentSave"));
+                object receiptBound = GetProperty(service, "CurrentSave");
+
+                object replay = InvokeRealmSelectionCandidate(
+                    service,
+                    "tx_duplicate_verified_replay",
+                    "Crownlands");
+
+                Assert.AreEqual(
+                    "AlreadyCommittedSameRealm",
+                    GetProperty(replay, "Status").ToString());
+                Assert.AreSame(
+                    receiptBound,
                     GetProperty(service, "CurrentSave"));
             }
             finally
@@ -823,10 +832,10 @@ namespace AL.Tests.EditMode
             Assert.Null(replayDiagnostic);
             Assert.True(Nvs01ProgressCodec.Equivalent(durable, replayed));
             Assert.AreEqual(
-                5,
+                10,
                 fileSystem.GetBoundedReadCount(backupPath) -
                 backupReadsBefore,
-                "Exact recovered replay must traverse two recovery-witness inventories, the pinned authority baseline, and two duplicate-authority inventories.");
+                "Exact recovered profile-bound replay must traverse the profile authority frames, two recovery-witness inventories, the pinned authority baseline, and two duplicate-authority inventories.");
             Assert.AreSame(
                 publishedBefore,
                 GetProperty(recovered, "CurrentSave"));
@@ -4168,7 +4177,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void MissingBackupBlocksTypedCandidateWithoutImplicitRepair()
+        public void MissingBackupMakesProfileBoundCandidateReadOnlyWithoutImplicitRepair()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             var fileSystem = new ScriptedSaveFileOperations();
@@ -4191,21 +4200,20 @@ namespace AL.Tests.EditMode
                 InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.False(disposition.IsCommitted);
+            Assert.NotNull(disposition.Diagnostic);
             Assert.AreEqual(
-                "SaveFailedPreviousPreserved",
+                Nvs01CatalogContract.DiagnosticCodePrefix + "SAVE-READ-ONLY",
+                disposition.Diagnostic.Code);
+            Assert.AreEqual(
+                "SavedPrimary",
                 GetProperty(service, "LastSaveStatus").ToString());
-            Assert.That(
-                (string)GetProperty(service, "LastSaveMessage"),
-                Does.StartWith(
-                    "AL-SAVE-TYPED-BACKUP-GENERATION-CONFLICT:"));
             Assert.AreSame(
                 publishedBefore,
                 GetProperty(service, "CurrentSave"));
             Assert.AreEqual(
                 publishedJsonBefore,
                 JsonUtility.ToJson(publishedBefore));
-            Assert.NotNull(
-                GetProperty(service, "ReadOnlyCandidateSnapshot"));
+            Assert.Null(GetProperty(service, "ReadOnlyCandidateSnapshot"));
             Assert.AreEqual(priorPrimary, fileSystem.ReadAllText(primaryPath));
             Assert.False(fileSystem.FileExists(backupPath));
             Assert.False(fileSystem.FileExists(tempPath));
@@ -4220,11 +4228,11 @@ namespace AL.Tests.EditMode
         }
 
         [TestCase("nvs", "primary", "different", 4)]
-        [TestCase("nvs", "backup", "missing", 2)]
-        [TestCase("nvs", "backup", "different", 3)]
-        [TestCase("realm", "primary", "different", 2)]
-        [TestCase("realm", "backup", "missing", 2)]
-        [TestCase("realm", "backup", "different", 3)]
+        [TestCase("nvs", "backup", "missing", 4)]
+        [TestCase("nvs", "backup", "different", 4)]
+        [TestCase("realm", "primary", "different", 4)]
+        [TestCase("realm", "backup", "missing", 4)]
+        [TestCase("realm", "backup", "different", 4)]
         public void TypedLegacyCandidatePinsExactPrimaryAndBackupAcrossPreparation(
             string route,
             string target,
@@ -4298,7 +4306,7 @@ namespace AL.Tests.EditMode
                     Guid.NewGuid().ToString("N"),
                     "Crownlands");
                 Assert.AreEqual(
-                    "SaveFailedPreviousPreserved",
+                    "CommitUncertain",
                     GetProperty(result, "Status").ToString());
             }
             else
@@ -5357,10 +5365,18 @@ namespace AL.Tests.EditMode
                 requestType,
                 transactionId,
                 Enum.Parse(realmType, realmName));
+            object currentSave = GetProperty(service, "CurrentSave");
+            bool profileBound = currentSave != null &&
+                (int)GetField(currentSave, "SaveSchemaVersion") ==
+                    SaveGameData.CurrentSaveSchemaVersion;
             Type storeType = GetRuntimeType(
-                "AL.Services.Local.ILegacyRealmSelectionCandidateStore");
+                profileBound
+                    ? "AL.Services.Local.IProfileBoundRealmSelectionCandidateStore"
+                    : "AL.Services.Local.ILegacyRealmSelectionCandidateStore");
             MethodInfo commit = storeType.GetMethod(
-                "TryCommitLegacyRealmSelection");
+                profileBound
+                    ? "TryCommitProfileBoundRealmSelection"
+                    : "TryCommitLegacyRealmSelection");
             Assert.NotNull(commit);
             return commit.Invoke(service, new[] { request });
         }
@@ -5439,7 +5455,7 @@ namespace AL.Tests.EditMode
                 fileSystem.ReadAllText(backupPath),
                 validDifferentBackup);
             int hostileBackupRead =
-                fileSystem.GetBoundedReadCount(backupPath) + 2;
+                fileSystem.GetBoundedReadCount(backupPath) + 4;
             bool hostileObserverRan = false;
             fileSystem.BoundedReadObserver = (path, count) =>
             {
@@ -5466,7 +5482,7 @@ namespace AL.Tests.EditMode
                     Guid.NewGuid().ToString("N"),
                     "Crownlands");
                 Assert.AreEqual(
-                    "SaveFailedPreviousPreserved",
+                    "CommitUncertain",
                     GetProperty(result, "Status").ToString());
             }
             else

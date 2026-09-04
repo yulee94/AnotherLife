@@ -2333,6 +2333,9 @@ namespace AL.Services.Local
                         true,
                         diskChanged,
                         SaveCandidateSourceGeneration.Backup);
+                    ObservePrimaryAuthority(recoveredSave);
+                    ActivatePublishedWritableAuthority(
+                        ProfileAuthoritySourceGeneration.Primary);
                     SetLoadStatus(
                         SaveLoadStatus.RecoveredFromBackup,
                         recoveryMessage,
@@ -2425,6 +2428,9 @@ namespace AL.Services.Local
                         true,
                         true,
                         diskChanged);
+                    ObservePrimaryAuthority(recoveredSave);
+                    ActivatePublishedWritableAuthority(
+                        ProfileAuthoritySourceGeneration.Primary);
                     SetLoadStatus(
                         SaveLoadStatus.RecoveredFromBackup,
                         recoveryMessage,
