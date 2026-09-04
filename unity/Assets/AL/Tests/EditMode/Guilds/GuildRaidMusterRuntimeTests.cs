@@ -168,21 +168,55 @@ namespace AL.Tests.EditMode.Guilds
         }
 
         [Test]
+        public void SaveFailureDoesNotLoadRaidInstanceBeforeCommit()
+        {
+            GuildRaidMusterRuntime runtime = Runtime();
+            var save = new RecordingSaveGameService(SaveOperationStatus.SaveFailedPreviousPreserved);
+            save.CurrentSave.GuildRaidMuster = GuildRaidMusterSaveCodec.Write(
+                SnapshotWithActiveParticipant(),
+                ClockStart);
+            var loader = new RecordingLoader(true);
+            GuildRaidMusterTransitionRequest request = Request(
+                RaidOperation.TransferOut,
+                "operation_transfer_out_save_failure",
+                AccountMemberA,
+                save.CurrentSave.GuildRaidMuster.Revision,
+                ClockStart + 100,
+                AccountMemberA,
+                EnvelopeIn,
+                EnvelopeReturn);
+
+            GuildRaidMusterRuntimeResult result = runtime.ApplyToSaveService(
+                Envelope(request),
+                Membership(),
+                EmptyAlliance(),
+                save,
+                loader);
+
+            Assert.That(result.Status, Is.EqualTo(GuildPlanningStatus.Unavailable));
+            Assert.That(result.DiagnosticCode, Is.EqualTo(GuildRaidMusterRuntime.SaveCommitFailedCode));
+            Assert.That(save.SaveCalls, Is.EqualTo(1));
+            Assert.That(loader.LastCommand, Is.Null);
+        }
+
+        [Test]
         public void TransferUsesOnlyExplicitInstanceEnvelopeAndPersistsAfterLoaderAcceptance()
         {
             GuildRaidMusterRuntime runtime = Runtime();
             GuildRaidMusterPersistentState countdown = BuildCountdown(runtime);
             var loader = new RecordingLoader(true);
+            var save = new RecordingSaveGameService(SaveOperationStatus.SavedPrimary);
+            save.CurrentSave.GuildRaidMuster = countdown;
             GuildRaidMusterTransitionRequest request = TransferIn(
                 "operation_transfer_in_runtime",
                 countdown.Revision,
                 ClockStart + 90);
 
-            GuildRaidMusterRuntimeResult result = runtime.Apply(
+            GuildRaidMusterRuntimeResult result = runtime.ApplyToSaveService(
                 Envelope(request),
                 Membership(),
                 EmptyAlliance(),
-                countdown,
+                save,
                 loader);
 
             Assert.That(result.Status, Is.EqualTo(GuildPlanningStatus.Prepared));
@@ -200,26 +234,133 @@ namespace AL.Tests.EditMode.Guilds
         }
 
         [Test]
-        public void TransferLoaderFailureDoesNotPersistPlannerCandidate()
+        public void TransferLoaderFailureCanRetryFromDurableAuthority()
         {
             GuildRaidMusterRuntime runtime = Runtime();
             GuildRaidMusterPersistentState countdown = BuildCountdown(runtime);
+            var save = new RecordingSaveGameService(SaveOperationStatus.SavedPrimary);
+            save.CurrentSave.GuildRaidMuster = countdown;
             var loader = new RecordingLoader(false, "AL-RAID-INSTANCE-LOAD-FAILED");
+            GuildRaidNetworkCommandEnvelope command = Envelope(
+                TransferIn("operation_transfer_load_fail", countdown.Revision, ClockStart + 90));
 
-            GuildRaidMusterRuntimeResult result = runtime.Apply(
-                Envelope(TransferIn("operation_transfer_load_fail", countdown.Revision, ClockStart + 90)),
+            GuildRaidMusterRuntimeResult result = runtime.ApplyToSaveService(
+                command,
                 Membership(),
                 EmptyAlliance(),
-                countdown,
+                save,
                 loader);
 
             Assert.That(result.Status, Is.EqualTo(GuildPlanningStatus.Unavailable));
             Assert.That(result.DiagnosticCode, Is.EqualTo("AL-RAID-INSTANCE-LOAD-FAILED"));
-            Assert.That(result.Mutated, Is.False);
-            Assert.That(result.Persisted, Is.SameAs(countdown));
+            Assert.That(result.Mutated, Is.True);
+            Assert.That(save.SaveCalls, Is.EqualTo(1));
             Assert.That(result.Persisted.Calls.Single().Participants
                 .Single(value => value.AccountId == AccountMemberA).Transfer,
-                Is.EqualTo((int)RaidTransferState.NotTransferred));
+                Is.EqualTo((int)RaidTransferState.InInstance));
+
+            var retryLoader = new RecordingLoader(true);
+            GuildRaidMusterRuntimeResult retry = runtime.ApplyToSaveService(
+                command,
+                Membership(),
+                EmptyAlliance(),
+                save,
+                retryLoader);
+            Assert.That(retry.Status, Is.EqualTo(GuildPlanningStatus.AlreadyCommitted));
+            Assert.That(retry.Mutated, Is.False);
+            Assert.That(save.SaveCalls, Is.EqualTo(1));
+            Assert.That(retryLoader.LastCommand.CommandId, Is.EqualTo("operation_transfer_load_fail"));
+        }
+
+        [Test]
+        public void TransferReplayWithRetainedReceiptAndMissingCallReturnsConflictWithoutSideEffects()
+        {
+            GuildRaidMusterRuntime runtime = Runtime();
+            var save = new RecordingSaveGameService(SaveOperationStatus.SavedPrimary);
+            save.CurrentSave.GuildRaidMuster = BuildCountdown(runtime);
+            GuildRaidNetworkCommandEnvelope transferIn = Envelope(
+                TransferIn(
+                    "operation_transfer_receipt_without_call",
+                    save.CurrentSave.GuildRaidMuster.Revision,
+                    ClockStart + 90));
+            Assert.That(runtime.ApplyToSaveService(
+                transferIn,
+                Membership(),
+                EmptyAlliance(),
+                save,
+                new RecordingLoader(true)).Status,
+                Is.EqualTo(GuildPlanningStatus.Prepared));
+
+            GuildRaidMusterPersistentState retained = save.CurrentSave.GuildRaidMuster;
+            retained.Calls.Clear();
+            Assert.That(GuildRaidMusterSaveCodec.TryRead(retained, out _, out _), Is.True,
+                "Retained receipts without calls remain valid save data.");
+            int saveCalls = save.SaveCalls;
+            var replayLoader = new RecordingLoader(true);
+
+            GuildRaidMusterRuntimeResult replay = runtime.ApplyToSaveService(
+                transferIn,
+                Membership(),
+                EmptyAlliance(),
+                save,
+                replayLoader);
+
+            Assert.That(replay.Status, Is.EqualTo(GuildPlanningStatus.Conflict));
+            Assert.That(replay.DiagnosticCode, Is.EqualTo(GuildRaidMusterRuntime.TransferReplayStaleCode));
+            Assert.That(replay.TransferCommand, Is.Null);
+            Assert.That(replay.Mutated, Is.False);
+            Assert.That(save.CurrentSave.GuildRaidMuster, Is.SameAs(retained));
+            Assert.That(save.SaveCalls, Is.EqualTo(saveCalls));
+            Assert.That(replayLoader.LastCommand, Is.Null);
+        }
+
+        [Test]
+        public void StaleTransferInReplayCannotReloadAfterParticipantReturned()
+        {
+            GuildRaidMusterRuntime runtime = Runtime();
+            var save = new RecordingSaveGameService(SaveOperationStatus.SavedPrimary);
+            save.CurrentSave.GuildRaidMuster = BuildCountdown(runtime);
+            GuildRaidNetworkCommandEnvelope transferIn = Envelope(
+                TransferIn(
+                    "operation_transfer_in_then_return",
+                    save.CurrentSave.GuildRaidMuster.Revision,
+                    ClockStart + 90));
+            Assert.That(runtime.ApplyToSaveService(
+                transferIn,
+                Membership(),
+                EmptyAlliance(),
+                save,
+                new RecordingLoader(true)).Status,
+                Is.EqualTo(GuildPlanningStatus.Prepared));
+
+            GuildRaidMusterTransitionRequest transferOut = Request(
+                RaidOperation.TransferOut,
+                "operation_return_before_stale_replay",
+                AccountMemberA,
+                save.CurrentSave.GuildRaidMuster.Revision,
+                ClockStart + 90,
+                AccountMemberA,
+                EnvelopeIn,
+                EnvelopeReturn);
+            Assert.That(runtime.ApplyToSaveService(
+                Envelope(transferOut),
+                Membership(),
+                EmptyAlliance(),
+                save,
+                new RecordingLoader(true)).Status,
+                Is.EqualTo(GuildPlanningStatus.Prepared));
+
+            var staleLoader = new RecordingLoader(true);
+            GuildRaidMusterRuntimeResult stale = runtime.ApplyToSaveService(
+                transferIn,
+                Membership(),
+                EmptyAlliance(),
+                save,
+                staleLoader);
+
+            Assert.That(stale.Status, Is.EqualTo(GuildPlanningStatus.Conflict));
+            Assert.That(stale.DiagnosticCode, Is.EqualTo("AL-RAID-TRANSFER-REPLAY-STALE"));
+            Assert.That(staleLoader.LastCommand, Is.Null);
         }
 
         [Test]
@@ -291,8 +432,7 @@ namespace AL.Tests.EditMode.Guilds
                 Envelope(TransferIn("operation_transfer_ui", countdown.Revision, ClockStart + 90)),
                 Membership(),
                 EmptyAlliance(),
-                countdown,
-                new RecordingLoader(true)).Persisted;
+                countdown).Persisted;
             GuildRaidMusterUiPresentation returnUi = runtime.Present(
                 active,
                 Membership(),
@@ -300,6 +440,57 @@ namespace AL.Tests.EditMode.Guilds
                 GuildAlpha,
                 ClockStart + 100);
             Assert.That(returnUi.Actions.Single(value => value.Operation == RaidOperation.TransferOut).Enabled, Is.True);
+        }
+
+        [Test]
+        public void UiKeepsInInstanceCallVisibleWhenNewerCallExists()
+        {
+            GuildRaidMusterRuntime runtime = Runtime();
+            RaidAuthoritySnapshot active = SnapshotWithActiveParticipant();
+            var newer = new RaidCallSnapshot(
+                "call_bravo_002",
+                GuildAlpha,
+                AccountMaster,
+                RaidCallState.Accepting,
+                WeekId + 1,
+                SeasonEpoch,
+                BossVeil,
+                "closed_instance_bravo_002",
+                ClosedTopology,
+                ClockStart + 60,
+                ClockStart + 600,
+                new[]
+                {
+                    new RaidParticipantSnapshot(
+                        AccountMemberB,
+                        RaidParticipantResponse.NoResponse,
+                        RaidTransferState.NotTransferred,
+                        string.Empty,
+                        string.Empty,
+                        false,
+                        false)
+                },
+                new RaidInstanceSnapshot(RaidInstanceState.NotLaunched, string.Empty, ClosedTopology),
+                RaidOutcomeKind.None,
+                false,
+                false);
+            var snapshot = new RaidAuthoritySnapshot(
+                GuildAuthorityStatus.Available,
+                active.Revision,
+                Binding(),
+                new[] { active.Calls[0], newer },
+                Array.Empty<RaidOperationReceipt>(),
+                true);
+
+            GuildRaidMusterUiPresentation ui = runtime.Present(
+                GuildRaidMusterSaveCodec.Write(snapshot, ClockStart + 100),
+                Membership(),
+                AccountMemberA,
+                GuildAlpha,
+                ClockStart + 100);
+
+            Assert.That(ui.CallId, Is.EqualTo(CallAlpha));
+            Assert.That(ui.Actions.Single(value => value.Operation == RaidOperation.TransferOut).Enabled, Is.True);
         }
 
         [Test]
@@ -349,8 +540,7 @@ namespace AL.Tests.EditMode.Guilds
                 Envelope(Announce("operation_malformed_save", 1, ClockStart)),
                 Membership(),
                 EmptyAlliance(),
-                malformed,
-                new RecordingLoader(true));
+                malformed);
             Assert.That(result.Status, Is.EqualTo(GuildPlanningStatus.Unavailable));
             Assert.That(result.DiagnosticCode, Is.EqualTo(GuildRaidMusterRuntime.SaveMalformedCode));
             Assert.That(result.Mutated, Is.False);
