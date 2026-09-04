@@ -288,5 +288,101 @@ class CindermawRuntimeBenchmarkSliceTests(unittest.TestCase):
         self.assertIn("RequiredBonesMissing", report["issues"])
 
 
+class OreblindDelverSliceTests(unittest.TestCase):
+    def test_committed_oreblind_slice_passes_source_qualification(self) -> None:
+        report = VALIDATOR.validate_oreblind_slice()
+
+        self.assertEqual("PASS", report["overall"])
+        self.assertEqual("elite_stonehold_oreblind_delver", report["modelId"])
+        self.assertEqual("PASS", report["sourceQualification"])
+        self.assertEqual("BLOCKED", report["runtimeIntegration"])
+        self.assertEqual("BLOCKED", report["deviceQualification"])
+        self.assertFalse(report["gameplayOrSpawnActivation"])
+
+    def test_oreblind_source_manifest_stays_not_production_ready(self) -> None:
+        manifest = VALIDATOR.load_json(VALIDATOR.SOURCE_MANIFEST)
+        model = next(
+            row
+            for row in manifest["models"]
+            if row["modelId"] == "elite_stonehold_oreblind_delver"
+        )
+
+        self.assertFalse(model["productionReady"])
+        self.assertEqual("Blocked", model["runtimeIntegrationState"])
+        self.assertEqual(
+            "df10a1ed7b48d3ccc0c87c0fd7c163f14be25f5e71c0c3a32de624a931534b2b",
+            model["selectedSource"]["sha256"],
+        )
+        self.assertTrue(
+            str(model["selectedSource"]["path"]).endswith(
+                "elite_stonehold_oreblind_delver_source_v001.fbx"
+            )
+        )
+
+    def test_oreblind_runtime_asset_output_path_fails_closed(self) -> None:
+        plan = VALIDATOR.load_json(VALIDATOR.DEFAULT_OREBLIND_PLAN)
+        plan["outputs"]["fbx"] = "unity/Assets/AL/Creatures/oreblind_delver.fbx"
+        with tempfile.TemporaryDirectory() as directory:
+            plan_path = Path(directory) / "unsafe-oreblind-plan.json"
+            plan_path.write_text(json.dumps(plan), encoding="utf-8")
+            report = VALIDATOR.validate_slice(
+                plan_path=plan_path,
+                schema_path=VALIDATOR.DEFAULT_OREBLIND_SCHEMA,
+                qualification_path=VALIDATOR.DEFAULT_OREBLIND_QUALIFICATION,
+            )
+
+        self.assertEqual("FAIL", report["overall"])
+        self.assertIn("RuntimePathForbidden:outputs.fbx", report["issues"])
+
+    def test_absent_oreblind_qualification_manifest_fails_closed(self) -> None:
+        report = VALIDATOR.validate_slice(
+            plan_path=VALIDATOR.DEFAULT_OREBLIND_PLAN,
+            schema_path=VALIDATOR.DEFAULT_OREBLIND_SCHEMA,
+            qualification_path=VALIDATOR.OREBLIND_SLICE_DIR
+            / "missing-qualification.json",
+        )
+
+        self.assertEqual("FAIL", report["overall"])
+        self.assertTrue(
+            any(
+                issue.startswith("InvalidQualification")
+                for issue in report["issues"]
+            )
+        )
+
+    def test_oreblind_missing_middle_limb_fails_closed(self) -> None:
+        qualification = VALIDATOR.load_json(VALIDATOR.DEFAULT_OREBLIND_QUALIFICATION)
+        qualification["rig"]["boneNames"] = [
+            name
+            for name in qualification["rig"]["boneNames"]
+            if name != "middle_upper_l"
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            qualification_path = Path(directory) / "missing-middle-limb.json"
+            qualification_path.write_text(
+                json.dumps(qualification),
+                encoding="utf-8",
+            )
+            report = VALIDATOR.validate_slice(
+                plan_path=VALIDATOR.DEFAULT_OREBLIND_PLAN,
+                schema_path=VALIDATOR.DEFAULT_OREBLIND_SCHEMA,
+                qualification_path=qualification_path,
+            )
+
+        self.assertEqual("FAIL", report["overall"])
+        self.assertIn("RequiredBonesMissing", report["issues"])
+
+    def test_oreblind_vfx_sockets_stay_off_the_clean_mesh(self) -> None:
+        qualification = VALIDATOR.load_json(VALIDATOR.DEFAULT_OREBLIND_QUALIFICATION)
+        bones = set(qualification["rig"]["boneNames"])
+
+        self.assertIn("socket_vfx_gallery_dust", bones)
+        self.assertIn("socket_vfx_jaw_sensor", bones)
+        self.assertIn("socket_vfx_claw_spark", bones)
+        self.assertTrue(qualification["material"]["runtimeVfxSeparate"])
+        self.assertFalse(qualification["material"]["emissionBakedIntoCleanMesh"])
+        self.assertFalse(qualification["gameplayOrSpawnActivation"])
+
+
 if __name__ == "__main__":
     unittest.main()
