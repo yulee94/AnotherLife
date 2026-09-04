@@ -3,6 +3,7 @@ using AL.ChampionMode.Quests;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using AL.UI.Kingdom;
+using AL.Core.SaveAuthority;
 
 namespace AL.Services.Local
 {
@@ -24,9 +25,10 @@ namespace AL.Services.Local
     }
 
     /// <summary>
-    /// Typed schema-v1 write boundary for the post-lordship private-kingdom
-    /// teaching quest. The catalog chooses the current stable step and event;
-    /// the save root accepts only a one-step ordered transition.
+    /// Typed write boundary for the post-lordship private-kingdom teaching quest.
+    /// Schema-v2 uses the profile-bound save root; schema-v1 retains its legacy
+    /// typed boundary. The catalog chooses the current stable step and event,
+    /// and either save root accepts only a one-step ordered transition.
     /// </summary>
     public static class KingdomTeachingSaveAuthority
     {
@@ -35,9 +37,7 @@ namespace AL.Services.Local
             KingdomTeachingCatalog catalog,
             string observedCompletionEvent)
         {
-            if (saveGameService?.CurrentSave == null ||
-                catalog == null ||
-                !(saveGameService is ILegacyKingdomTeachingCandidateStore store))
+            if (saveGameService?.CurrentSave == null || catalog == null)
             {
                 return Rejected("AL-KINGDOM-TEACHING-PROFILE-READ-ONLY");
             }
@@ -57,16 +57,33 @@ namespace AL.Services.Local
                 return Rejected("AL-KINGDOM-TEACHING-ORDER-CONFLICT");
             }
 
-            SaveCandidateCommitResult commit = store.TryCommitLegacyKingdomTeaching(
-                new KingdomTeachingCommitRequest(
-                    Guid.NewGuid().ToString("N"),
-                    save.SelectedRealm,
-                    catalog.QuestId,
-                    state.CurrentStep.Id,
-                    state.CurrentStep.CompletionEvent,
-                    state.ProgressValue,
-                    state.ProgressValue + 1,
-                    catalog.Steps.Count));
+            var request = new KingdomTeachingCommitRequest(
+                Guid.NewGuid().ToString("N"),
+                save.SelectedRealm,
+                catalog.QuestId,
+                state.CurrentStep.Id,
+                state.CurrentStep.CompletionEvent,
+                state.ProgressValue,
+                state.ProgressValue + 1,
+                catalog.Steps.Count);
+            SaveCandidateCommitResult commit;
+            if (save.SaveSchemaVersion ==
+                    SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion &&
+                saveGameService is IProfileBoundKingdomTeachingCandidateStore bound)
+            {
+                commit = bound.TryCommitProfileBoundKingdomTeaching(request);
+            }
+            else if (save.SaveSchemaVersion ==
+                         SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
+                     saveGameService is ILegacyKingdomTeachingCandidateStore legacy)
+            {
+                commit = legacy.TryCommitLegacyKingdomTeaching(request);
+            }
+            else
+            {
+                return Rejected("AL-KINGDOM-TEACHING-PROFILE-READ-ONLY");
+            }
+
             if (commit == null)
             {
                 return Rejected("AL-KINGDOM-TEACHING-PROFILE-READ-ONLY");

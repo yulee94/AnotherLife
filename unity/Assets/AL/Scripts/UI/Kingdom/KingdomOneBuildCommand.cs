@@ -4,6 +4,7 @@ using AL.Data.Definitions;
 using AL.Data.Runtime;
 using AL.Services.Local;
 using AL.UI.FirstUserIdentity;
+using AL.Core.SaveAuthority;
 
 namespace AL.UI.Kingdom
 {
@@ -36,8 +37,9 @@ namespace AL.UI.Kingdom
     /// <summary>
     /// The one production Kingdom construct after the greybox duel. Uses catalog
     /// building <c>town_hall</c> (runtime/save id <c>TownHall</c>) and persists
-    /// through <see cref="ISaveGameService"/> via the existing MVP-loop adapter.
-    /// Does not invent buildings, costs, or a parallel greybox save file.
+    /// through <see cref="ISaveGameService"/> via a narrow profile-bound command.
+    /// Legacy schema-v1 saves retain their existing MVP-loop adapter. The command
+    /// does not invent buildings, costs, or a parallel greybox save file.
     /// </summary>
     public static class KingdomOneBuildCommand
     {
@@ -73,7 +75,10 @@ namespace AL.UI.Kingdom
             }
 
             MvpLoopSnapshot snapshot = MvpLoopSaveCodec.Read(saveGameService.CurrentSave);
-            if (IsOneBuild(snapshot.LastBuildId) && snapshot.LastBuildLevel >= CompletedLevel)
+            int saveSchemaVersion = saveGameService.CurrentSave.SaveSchemaVersion;
+            if (saveSchemaVersion == SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
+                IsOneBuild(snapshot.LastBuildId) &&
+                snapshot.LastBuildLevel == CompletedLevel)
             {
                 return new KingdomOneBuildResult(
                     true,
@@ -88,6 +93,15 @@ namespace AL.UI.Kingdom
                     ".");
             }
 
+            if (saveSchemaVersion == SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
+                IsOneBuild(snapshot.LastBuildId) &&
+                snapshot.LastBuildLevel != CompletedLevel)
+            {
+                return Fail(
+                    "TOWN HALL ORDER NOT COMMITTED: existing TownHall level conflicts " +
+                    "with the approved level-1 construct.");
+            }
+
             if (!snapshot.ClassFamily.HasValue ||
                 !FirstUserIdentityDerivation.IsSupportedRealm(snapshot.Realm) ||
                 !FirstUserIdentityDerivation.IsSupportedClassFamily(snapshot.ClassFamily.Value))
@@ -95,33 +109,63 @@ namespace AL.UI.Kingdom
                 return Fail("TOWN HALL UNAVAILABLE: champion identity is required.");
             }
 
-            MvpLoopCommitResult commit = MvpLoopSaveAuthority.TryCommit(
-                saveGameService,
-                new MvpLoopCommitRequest(
-                    Guid.NewGuid().ToString("N"),
-                    snapshot.Realm,
-                    snapshot.ClassFamily.Value,
-                    snapshot.IdentityConfirmed,
-                    snapshot.LastResultId,
-                    BuildingId,
-                    CompletedLevel));
-            if (commit == null || !commit.Accepted)
+            bool accepted;
+            bool persisted;
+            string commitMessage;
+            if (saveSchemaVersion ==
+                    SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion &&
+                saveGameService is IProfileBoundKingdomOneBuildCandidateStore bound)
+            {
+                SaveCandidateCommitResult commit =
+                    bound.TryCommitProfileBoundKingdomOneBuild(
+                        new KingdomOneBuildCommitRequest(
+                            Guid.NewGuid().ToString("N"),
+                            snapshot.Realm));
+                accepted = commit != null &&
+                    (commit.Outcome == SaveCandidateCommitOutcome.Committed ||
+                     commit.Outcome == SaveCandidateCommitOutcome.Duplicate);
+                persisted = commit?.Outcome == SaveCandidateCommitOutcome.Committed;
+                commitMessage = commit?.Message ?? string.Empty;
+            }
+            else if (saveSchemaVersion ==
+                         SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion)
+            {
+                MvpLoopCommitResult commit = MvpLoopSaveAuthority.TryCommit(
+                    saveGameService,
+                    new MvpLoopCommitRequest(
+                        Guid.NewGuid().ToString("N"),
+                        snapshot.Realm,
+                        snapshot.ClassFamily.Value,
+                        snapshot.IdentityConfirmed,
+                        snapshot.LastResultId,
+                        BuildingId,
+                        CompletedLevel));
+                accepted = commit != null && commit.Accepted;
+                persisted = commit != null && commit.Persisted;
+                commitMessage = commit?.Message ?? string.Empty;
+            }
+            else
+            {
+                return Fail("TOWN HALL UNAVAILABLE: no writable kingdom profile.");
+            }
+
+            if (!accepted)
             {
                 return Fail(
                     "TOWN HALL ORDER NOT COMMITTED: " +
-                    (commit == null || string.IsNullOrWhiteSpace(commit.Message)
+                    (string.IsNullOrWhiteSpace(commitMessage)
                         ? "profile authority rejected the construct."
-                        : commit.Message));
+                        : commitMessage));
             }
 
             int level = MvpLoopSaveCodec.Read(saveGameService.CurrentSave).LastBuildLevel;
             return new KingdomOneBuildResult(
                 true,
-                commit.Persisted,
+                persisted,
                 BuildingId,
                 CatalogBuildingId,
                 level,
-                commit.Persisted
+                persisted
                     ? "TOWN HALL CONSTRUCTED: catalog " +
                       CatalogBuildingId +
                       " is now Lv " +

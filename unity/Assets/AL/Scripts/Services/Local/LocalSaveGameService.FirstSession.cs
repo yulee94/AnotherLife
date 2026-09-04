@@ -8,7 +8,10 @@ using AL.UI.CharacterCreation;
 
 namespace AL.Services.Local
 {
-    public sealed partial class LocalSaveGameService : IProfileBoundFirstSessionCandidateStore
+    public sealed partial class LocalSaveGameService :
+        IProfileBoundFirstSessionCandidateStore,
+        IProfileBoundKingdomOneBuildCandidateStore,
+        IProfileBoundKingdomTeachingCandidateStore
     {
         SaveCandidateCommitResult IProfileBoundFirstSessionCandidateStore
             .TryCommitFirstSessionProgress(FirstWorldProgressCommitRequest request)
