@@ -91,11 +91,10 @@ namespace AL.Services.Local
     }
 
     /// <summary>
-    /// Dormant schema-v1 to schema-v2 profile-identity migration executor. It is
-    /// deliberately not wired into <c>LocalSaveGameService</c>: production saves
-    /// remain schema-v1 and continue to report <c>MigrationRequired</c> through
-    /// the write-authority provider until the separately reviewed current-mutator
-    /// cutover train activates publication.
+    /// Production schema-v1 to schema-v2 profile-identity migration executor.
+    /// LocalSaveGameService installs the witnessed ledger before publishing
+    /// consumer-visible Writable. Forward, degraded, uncertain, malformed, and
+    /// correlation-conflict evidence remain non-writable.
     ///
     /// This executor mints one canonical ProfileId (crypto-random, with bounded
     /// collision retry through <see cref="ProfileIdentityMigrationPlanner"/>),

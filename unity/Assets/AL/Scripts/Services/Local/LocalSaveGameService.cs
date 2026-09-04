@@ -218,17 +218,19 @@ namespace AL.Services.Local
             (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
     }
 
-    public sealed class LocalSaveGameService :
+    public sealed partial class LocalSaveGameService :
         ISaveGameService,
         ISaveLoadDispositionProvider,
         ISaveOperationDispositionProvider,
         ISaveGameCandidateStore,
         ILegacyRealmSelectionCandidateStore,
+        IProfileBoundRealmSelectionCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
         ILegacyFirstWorldProgressCandidateStore,
         INvs01LegacyCandidateStore,
-        IProfileWriteAuthorityProvider
+        IProfileWriteAuthorityProvider,
+        IProfileBoundSaveGameCandidateStore
     {
         private const string SaveFileName = "save.json";
         private const string BackupFileName = "save.backup.json";
@@ -544,6 +546,15 @@ namespace AL.Services.Local
                         source);
                 }
 
+                if (TryGetPublishedWritableAuthority(
+                        source,
+                        saveSchemaVersion,
+                        profileInitializationVersion,
+                        out ProfileWriteAuthoritySnapshot writable))
+                {
+                    return writable;
+                }
+
                 if (saveSchemaVersion ==
                         SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
                     profileInitializationVersion ==
@@ -724,6 +735,7 @@ namespace AL.Services.Local
         private void ResetObservedAuthority()
         {
             ResetObservedNonWritableAuthorityCache();
+            ResetPublishedWritableAuthority();
             _hasObservedAuthoritySource = false;
             _observedAuthoritySource =
                 ProfileAuthoritySourceGeneration.None;
@@ -2044,6 +2056,52 @@ namespace AL.Services.Local
             SaveCandidateInventoryEntry backup = Find(inventory, SaveCandidateSourceGeneration.Backup);
             SaveCandidateInventoryEntry previous = Find(inventory, SaveCandidateSourceGeneration.Previous);
 
+            if (HasProfileIdentityWitnessEvidence() &&
+                TryResumeWitnessedSchemaTwoLedger(
+                    inventory,
+                    primary,
+                    backup,
+                    out SaveGameData resumedSave,
+                    out string resumeMessage))
+            {
+                _currentSave = resumedSave;
+                _readOnlyCandidate = null;
+                _profileWritable = true;
+                ObservePrimaryAuthority(resumedSave);
+                PublishDisposition(
+                    inventory,
+                    primary.SemanticCandidate,
+                    "SAVE_SELECT_SCHEMA_TWO_WITNESSED_RESUME",
+                    true,
+                    true,
+                    false);
+                ActivatePublishedWritableAuthority(
+                    ProfileAuthoritySourceGeneration.Primary);
+                SetLoadStatus(
+                    SaveLoadStatus.MigratedSchemaOne,
+                    resumeMessage,
+                    false);
+                return;
+            }
+
+            if (HasConflictingSchemaOneAndTwoGenerations(inventory) &&
+                !HasMatchingProfileIdentityWitness(primary, backup))
+            {
+                _currentSave = null;
+                PublishDisposition(
+                    inventory,
+                    null,
+                    "SAVE_SELECT_SCHEMA_CORRELATION_CONFLICT",
+                    false,
+                    false,
+                    false);
+                SetLoadStatus(
+                    SaveLoadStatus.RecoveryRequired,
+                    "AL-SAVE-SCHEMA-CORRELATION-CONFLICT: Mixed schema-1 and schema-2 generations were preserved without a matching identity witness; no profile was replaced.",
+                    false);
+                return;
+            }
+
             if (!TryVerifyNvs01MigrationBackupArchivesTwice(
                     out string migrationArchiveDiagnostic))
             {
@@ -2179,6 +2237,12 @@ namespace AL.Services.Local
                 SaveSemanticCandidateOutcome.RepairableWithDataChange)
             {
                 ActivateExactNvs01V003Migration(inventory, selected);
+                return;
+            }
+
+            if (selected.Outcome == SaveSemanticCandidateOutcome.MigrationRequired)
+            {
+                TryInstallSchemaTwoProfileIdentity(inventory, selected);
                 return;
             }
 
@@ -2675,7 +2739,8 @@ namespace AL.Services.Local
                 HasSaveEvidence(LegacyPreviousPath) ||
                 HasSaveEvidence(TempPath) ||
                 HasSaveEvidence(StageFiveRecoveryMarkerPath) ||
-                HasNvs01MigrationBackupArchiveEvidence())
+                HasNvs01MigrationBackupArchiveEvidence() ||
+                HasProfileIdentityWitnessEvidence())
             {
                 return true;
             }
@@ -2689,11 +2754,18 @@ namespace AL.Services.Local
 
         public void CreateNewSave(RealmId realmId)
         {
+            var request = new RealmSelectionRequest(
+                Guid.NewGuid().ToString("N"),
+                realmId);
+            if (HasExactSchemaTwoProfile(_currentSave))
+            {
+                ((IProfileBoundRealmSelectionCandidateStore)this)
+                    .TryCommitProfileBoundRealmSelection(request);
+                return;
+            }
+
             ((ILegacyRealmSelectionCandidateStore)this)
-                .TryCommitLegacyRealmSelection(
-                    new RealmSelectionRequest(
-                        Guid.NewGuid().ToString("N"),
-                        realmId));
+                .TryCommitLegacyRealmSelection(request);
         }
 
         public void DeleteSave()
@@ -2839,6 +2911,11 @@ namespace AL.Services.Local
             candidate.SaveSchemaVersion = SaveGameData.CurrentSaveSchemaVersion;
             candidate.ProfileInitializationVersion =
                 SaveGameData.CurrentProfileInitializationVersion;
+            if (string.IsNullOrEmpty(candidate.ProfileId))
+            {
+                candidate.ProfileId = new CryptographicProfileIdentityCandidateSource()
+                    .GetCandidate(1);
+            }
             ApplyApprovedNeutralNormalization(candidate, selected);
 
             SaveOperationStatus status = PersistCandidate(
@@ -6160,7 +6237,8 @@ namespace AL.Services.Local
             if (HasSaveEvidence(SavePath) ||
                 HasSaveEvidence(BackupPath) ||
                 HasSaveEvidence(PreviousPath) ||
-                HasSaveEvidence(LegacyPreviousPath))
+                HasSaveEvidence(LegacyPreviousPath) ||
+                HasProfileIdentityWitnessEvidence())
             {
                 return false;
             }
@@ -6973,6 +7051,11 @@ namespace AL.Services.Local
             save.SaveFormatId = SaveGameData.CurrentSaveFormatId;
             save.SaveSchemaVersion = SaveGameData.CurrentSaveSchemaVersion;
             save.ProfileInitializationVersion = SaveGameData.CurrentProfileInitializationVersion;
+            if (string.IsNullOrEmpty(save.ProfileId))
+            {
+                save.ProfileId = new CryptographicProfileIdentityCandidateSource()
+                    .GetCandidate(1);
+            }
             return save;
         }
 

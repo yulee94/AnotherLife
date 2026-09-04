@@ -50,6 +50,24 @@ namespace AL.Tests.EditMode
 
             Assert.AreEqual(SaveSemanticCandidateOutcome.Valid, candidate.Outcome);
             Assert.IsTrue(candidate.IsWritable);
+            Assert.AreEqual(ProfileA, candidate.ProfileId);
+        }
+
+        [Test]
+        public void SchemaOneValidatorRequiresMigrationUnderSchemaTwoPolicy()
+        {
+            SaveGameData save = CreateRealSchemaOneSave(out byte[] _);
+
+            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+                Serialize(save),
+                SaveCandidateSourceGeneration.Primary,
+                SchemaTwoPolicy());
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.MigrationRequired,
+                candidate.Outcome);
+            Assert.IsFalse(candidate.IsWritable);
+            Assert.AreEqual(string.Empty, candidate.ProfileId);
         }
 
         [TestCase("")]
@@ -361,29 +379,16 @@ namespace AL.Tests.EditMode
 
         private static SaveGameData CreateRealSchemaOneSave(out byte[] bytes)
         {
-            string root = Path.Combine(
-                Path.GetTempPath(),
-                "AnotherLife-MigrationTests",
-                Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(root);
-
-            try
-            {
-                object service = CreateSaveService(root);
-                Invoke(service, "CreateNewSave", RealmId.Eldergrove);
-
-                string primaryPath = Path.Combine(root, "save.json");
-                bytes = File.ReadAllBytes(primaryPath);
-                return JsonUtility.FromJson<SaveGameData>(
-                    Encoding.UTF8.GetString(bytes));
-            }
-            finally
-            {
-                if (Directory.Exists(root))
-                {
-                    Directory.Delete(root, true);
-                }
-            }
+            bytes = File.ReadAllBytes(
+                Path.Combine(
+                    Application.dataPath,
+                    "AL",
+                    "Tests",
+                    "EditMode",
+                    "Fixtures",
+                    "SaveSchema1",
+                    "current-schema-v1.json"));
+            return JsonUtility.FromJson<SaveGameData>(Encoding.UTF8.GetString(bytes));
         }
 
         private static byte[] Serialize(SaveGameData save) =>
@@ -391,24 +396,29 @@ namespace AL.Tests.EditMode
 
         private static SaveSemanticValidationPolicy SchemaOnePolicy()
         {
+            SaveSemanticValidationPolicy production = ProductionPolicy();
+            return new SaveSemanticValidationPolicy(
+                production.CurrentSaveFormatId,
+                SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion,
+                production.CurrentProfileInitializationVersion,
+                production.Authority,
+                production.MaximumInputBytes,
+                production.MaximumDiagnostics,
+                production.Nvs01Rule);
+        }
+
+        private static SaveSemanticValidationPolicy SchemaTwoPolicy()
+        {
+            return ProductionPolicy();
+        }
+
+        private static SaveSemanticValidationPolicy ProductionPolicy()
+        {
             MethodInfo method = typeof(LocalSaveGameService).GetMethod(
                 "CreateSemanticPolicy",
                 BindingFlags.Static | BindingFlags.NonPublic);
             Assert.NotNull(method, "Expected the production semantic policy factory.");
             return (SaveSemanticValidationPolicy)method.Invoke(null, null);
-        }
-
-        private static SaveSemanticValidationPolicy SchemaTwoPolicy()
-        {
-            SaveSemanticValidationPolicy one = SchemaOnePolicy();
-            return new SaveSemanticValidationPolicy(
-                one.CurrentSaveFormatId,
-                SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion,
-                one.CurrentProfileInitializationVersion,
-                one.Authority,
-                one.MaximumInputBytes,
-                one.MaximumDiagnostics,
-                one.Nvs01Rule);
         }
 
         private static object CreateSaveService(string root)

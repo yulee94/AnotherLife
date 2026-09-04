@@ -113,7 +113,7 @@ class DeterministicQaTests(unittest.TestCase):
         self.assertRegex(provenance["content"]["worldCatalogSha256"], r"^[0-9a-f]{64}$")
         self.assertRegex(provenance["content"]["narrativeCatalogSha256"], r"^[0-9a-f]{64}$")
         self.assertEqual(provenance["save"]["formatId"], "anotherlife.local-save")
-        self.assertEqual(provenance["save"]["schemaVersion"], 1)
+        self.assertEqual(provenance["save"]["schemaVersion"], 2)
         self.assertRegex(provenance["save"]["fixtureManifestSha256"], r"^[0-9a-f]{64}$")
 
     def test_repeated_attempts_normalize_logs_and_detect_nondeterminism(self):
@@ -239,7 +239,7 @@ class DeterministicQaTests(unittest.TestCase):
         )
         self.assertEqual(green["manualComparison"]["reasonCode"], "automated_manual_equivalent")
         self.assertEqual(green["provenance"]["unity"]["version"], "6000.3.22f1")
-        self.assertEqual(green["provenance"]["save"]["schemaVersion"], 1)
+        self.assertEqual(green["provenance"]["save"]["schemaVersion"], 2)
         self.assertTrue(
             (REPO_ROOT / "tools/qa/evidence/representative-green/junit.xml").is_file()
         )
