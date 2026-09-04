@@ -464,7 +464,8 @@ namespace AL.Services.Local
             IProfileBoundRealmSelectionCandidateStore
             .TryCommitProfileBoundRealmSelection(RealmSelectionRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.TransactionId))
+            if (!RealmSelectionAuthority.IsBoundedIdentity(request.TransactionId) ||
+                !RealmSelectionAuthority.IsBoundedIdentity(request.CorrelationId))
             {
                 return LegacyRealmResult(
                     RealmSelectionStatus.InvalidTransaction,
@@ -474,7 +475,7 @@ namespace AL.Services.Local
                     "AL-REALM-TRANSACTION-INVALID");
             }
 
-            if (!Enum.IsDefined(typeof(RealmId), request.RequestedRealmId))
+            if (!RealmSelectionAuthority.IsDefinedPlayable(request.RequestedRealmId))
             {
                 return LegacyRealmResult(
                     RealmSelectionStatus.InvalidRealm,
@@ -494,34 +495,141 @@ namespace AL.Services.Local
                     "AL-REALM-PROFILE-NOT-SCHEMA-TWO");
             }
 
-            RealmId currentRealm = _currentSave.SelectedRealm;
-            if (currentRealm == request.RequestedRealmId)
+            ProfileWriteAuthoritySnapshot before = GetCurrentAuthority();
+            if (before == null ||
+                before.Status != ProfileWriteAuthorityStatus.Writable)
+            {
+                return MapNonWritableRealmAuthority(request.RequestedRealmId, before);
+            }
+
+            if (!string.IsNullOrEmpty(request.ExpectedProfileId) &&
+                !string.Equals(
+                    request.ExpectedProfileId,
+                    before.ProfileId,
+                    StringComparison.Ordinal))
             {
                 return LegacyRealmResult(
-                    RealmSelectionStatus.Committed,
+                    RealmSelectionStatus.ProfileUnavailable,
                     request.RequestedRealmId,
                     false,
                     false,
-                    "AL-REALM-DUPLICATE");
+                    "AL-REALM-PROFILE-MISMATCH");
             }
 
-            if (currentRealm != RealmId.None &&
-                currentRealm != request.RequestedRealmId)
+            if (!string.IsNullOrEmpty(request.ExpectedGenerationFingerprint) &&
+                !string.Equals(
+                    request.ExpectedGenerationFingerprint,
+                    before.VerifiedGenerationFingerprint,
+                    StringComparison.Ordinal))
             {
                 return LegacyRealmResult(
                     RealmSelectionStatus.InvalidTransaction,
                     request.RequestedRealmId,
                     false,
                     false,
-                    "AL-REALM-REPLACEMENT-REJECTED");
+                    "AL-REALM-STALE-BASE");
             }
 
-            ProfileWriteAuthoritySnapshot before = GetCurrentAuthority();
+            RealmId publishedRealm = _currentSave.SelectedRealm;
+            RealmSelectionAuthorityState publishedAuthority = _currentSave.RealmSelection;
+            if (TryRejectIncoherentPublishedRealm(
+                    publishedRealm,
+                    publishedAuthority,
+                    request.RequestedRealmId,
+                    out RealmSelectionResult incoherent))
+            {
+                return incoherent;
+            }
+
+            if (IsCommittedAuthority(publishedAuthority))
+            {
+                if (!string.Equals(
+                        publishedAuthority.CorrelationId,
+                        request.CorrelationId,
+                        StringComparison.Ordinal) &&
+                    publishedRealm != request.RequestedRealmId)
+                {
+                    return LegacyRealmResult(
+                        RealmSelectionStatus.RejectedDifferentRealm,
+                        request.RequestedRealmId,
+                        false,
+                        false,
+                        "AL-REALM-DIFFERENT-REALM-REJECTED");
+                }
+
+                if (string.Equals(
+                        publishedAuthority.CorrelationId,
+                        request.CorrelationId,
+                        StringComparison.Ordinal) &&
+                    (!string.Equals(
+                         publishedAuthority.TransactionId,
+                         request.TransactionId,
+                         StringComparison.Ordinal) ||
+                     publishedRealm != request.RequestedRealmId))
+                {
+                    return LegacyRealmResult(
+                        RealmSelectionStatus.InvalidTransaction,
+                        request.RequestedRealmId,
+                        false,
+                        false,
+                        "AL-REALM-CORRELATION-CONFLICT");
+                }
+
+                if (publishedRealm == request.RequestedRealmId)
+                {
+                    return LegacyRealmResult(
+                        RealmSelectionStatus.AlreadyCommittedSameRealm,
+                        request.RequestedRealmId,
+                        false,
+                        false,
+                        "AL-REALM-ALREADY-COMMITTED");
+                }
+
+                return LegacyRealmResult(
+                    RealmSelectionStatus.RejectedDifferentRealm,
+                    request.RequestedRealmId,
+                    false,
+                    false,
+                    "AL-REALM-DIFFERENT-REALM-REJECTED");
+            }
+
+            if (RealmSelectionAuthority.IsDefinedPlayable(publishedRealm) &&
+                publishedRealm != request.RequestedRealmId)
+            {
+                return LegacyRealmResult(
+                    RealmSelectionStatus.RejectedDifferentRealm,
+                    request.RequestedRealmId,
+                    false,
+                    false,
+                    "AL-REALM-DIFFERENT-REALM-REJECTED");
+            }
+
+            bool legacyMigration =
+                RealmSelectionAuthority.IsDefinedPlayable(publishedRealm) &&
+                publishedRealm == request.RequestedRealmId;
+            string transactionId = legacyMigration
+                ? RealmSelectionAuthority.MigrationTransactionId(
+                    before.ProfileId,
+                    publishedRealm)
+                : request.TransactionId;
+            string correlationId = legacyMigration
+                ? transactionId
+                : request.CorrelationId;
+            string eventId = legacyMigration
+                ? string.Empty
+                : RealmSelectionAuthority.EventId(transactionId);
+            string provenance = legacyMigration
+                ? RealmSelectionAuthority.LegacyMigrationProvenance
+                : RealmSelectionAuthority.InitialProvenance;
+            RealmId committedRealm = legacyMigration
+                ? publishedRealm
+                : request.RequestedRealmId;
+
             ProfileBoundSaveCandidateCommitResult bound =
                 ((IProfileBoundSaveGameCandidateStore)this).TryCommitCandidate(
                     ProfileAuthorityExpectation.From(before),
                     ProfileBoundRealmOperationId,
-                    request.TransactionId,
+                    transactionId,
                     candidate =>
                     {
                         if (!string.Equals(
@@ -533,27 +641,215 @@ namespace AL.Services.Local
                                 "AL-SAVE-PROFILE-ID-MUTATION-REJECTED");
                         }
 
-                        candidate.SelectedRealm = request.RequestedRealmId;
+                        if (legacyMigration &&
+                            candidate.SelectedRealm != publishedRealm)
+                        {
+                            return SaveCandidateMutationPreparation.Rejected(
+                                "AL-REALM-AUTHORITY-CONFLICT");
+                        }
+
+                        if (!legacyMigration)
+                        {
+                            candidate.SelectedRealm = committedRealm;
+                        }
+
+                        var authority = new RealmSelectionAuthorityState
+                        {
+                            Version = RealmSelectionAuthority.CurrentVersion,
+                            Committed = true,
+                            SelectedRealm = (int)committedRealm,
+                            ProfileId = before.ProfileId,
+                            TransactionId = transactionId,
+                            CorrelationId = correlationId,
+                            OperationId = ProfileBoundRealmOperationId,
+                            EventId = eventId,
+                            CatalogVersion = RealmCatalogRuntime.SupportedVersion,
+                            Provenance = provenance,
+                            ExpectedGenerationFingerprint =
+                                before.VerifiedGenerationFingerprint,
+                            Revision = 1
+                        };
+                        authority.ReceiptFingerprint =
+                            RealmSelectionAuthority.ComputeReceiptFingerprint(
+                                authority.ProfileId,
+                                committedRealm,
+                                authority.TransactionId,
+                                authority.CorrelationId,
+                                authority.OperationId,
+                                authority.EventId,
+                                authority.Provenance,
+                                authority.Revision);
+                        candidate.RealmSelection = authority;
                         return SaveCandidateMutationPreparation.Prepared();
                     });
 
+            return MapBoundRealmCommit(
+                request.RequestedRealmId,
+                bound,
+                legacyMigration);
+        }
+
+        private RealmSelectionResult MapBoundRealmCommit(
+            RealmId requested,
+            ProfileBoundSaveCandidateCommitResult bound,
+            bool legacyMigration)
+        {
             SaveCandidateCommitResult commit = bound?.CommitResult;
-            if (commit != null && commit.IsCommitted)
+            if (commit == null)
             {
                 return LegacyRealmResult(
-                    RealmSelectionStatus.Committed,
-                    request.RequestedRealmId,
-                    true,
-                    true,
-                    "AL-REALM-COMMITTED");
+                    RealmSelectionStatus.SaveFailedPreviousPreserved,
+                    requested,
+                    false,
+                    false,
+                    "AL-REALM-SAVE-FAILED");
+            }
+
+            switch (commit.Outcome)
+            {
+                case SaveCandidateCommitOutcome.Committed:
+                    return LegacyRealmResult(
+                        legacyMigration
+                            ? RealmSelectionStatus.AlreadyCommittedSameRealm
+                            : RealmSelectionStatus.Committed,
+                        requested,
+                        true,
+                        true,
+                        legacyMigration
+                            ? "AL-REALM-LEGACY-MIGRATED"
+                            : "AL-REALM-COMMITTED");
+                case SaveCandidateCommitOutcome.Duplicate:
+                    return LegacyRealmResult(
+                        RealmSelectionStatus.AlreadyCommittedSameRealm,
+                        requested,
+                        false,
+                        false,
+                        "AL-REALM-ALREADY-COMMITTED");
+                case SaveCandidateCommitOutcome.CommitUncertain:
+                    return LegacyRealmResult(
+                        RealmSelectionStatus.CommitUncertain,
+                        requested,
+                        false,
+                        false,
+                        string.IsNullOrWhiteSpace(commit.Message)
+                            ? "AL-REALM-COMMIT-UNCERTAIN"
+                            : commit.Message);
+                case SaveCandidateCommitOutcome.PreviousPreserved:
+                    return LegacyRealmResult(
+                        RealmSelectionStatus.SaveFailedPreviousPreserved,
+                        requested,
+                        false,
+                        false,
+                        string.IsNullOrWhiteSpace(commit.Message)
+                            ? "AL-REALM-SAVE-FAILED"
+                            : commit.Message);
+                default:
+                    return LegacyRealmResult(
+                        RealmSelectionStatus.ProfileUnavailable,
+                        requested,
+                        false,
+                        false,
+                        string.IsNullOrWhiteSpace(commit.Message)
+                            ? "AL-REALM-PROFILE-READ-ONLY"
+                            : commit.Message);
+            }
+        }
+
+        private RealmSelectionResult MapNonWritableRealmAuthority(
+            RealmId requested,
+            ProfileWriteAuthoritySnapshot authority)
+        {
+            if (authority != null &&
+                authority.Status == ProfileWriteAuthorityStatus.CommitUncertain)
+            {
+                return LegacyRealmResult(
+                    RealmSelectionStatus.CommitUncertain,
+                    requested,
+                    false,
+                    false,
+                    "AL-REALM-COMMIT-UNCERTAIN");
+            }
+
+            if (authority != null &&
+                authority.Status == ProfileWriteAuthorityStatus.ForwardSchemaReadOnly)
+            {
+                return LegacyRealmResult(
+                    RealmSelectionStatus.ProfileUnavailable,
+                    requested,
+                    false,
+                    false,
+                    "AL-REALM-PROFILE-READ-ONLY");
             }
 
             return LegacyRealmResult(
-                RealmSelectionStatus.SaveFailedPreviousPreserved,
-                request.RequestedRealmId,
+                RealmSelectionStatus.ProfileUnavailable,
+                requested,
                 false,
                 false,
-                commit?.Message ?? "AL-REALM-SAVE-FAILED");
+                "AL-REALM-PROFILE-NOT-WRITABLE");
+        }
+
+        private static bool IsCommittedAuthority(RealmSelectionAuthorityState authority)
+        {
+            return authority != null &&
+                   authority.Committed &&
+                   authority.Version == RealmSelectionAuthority.CurrentVersion &&
+                   RealmSelectionAuthority.IsBoundedIdentity(authority.TransactionId) &&
+                   RealmSelectionAuthority.IsBoundedIdentity(authority.CorrelationId) &&
+                   RealmSelectionAuthority.IsBoundedIdentity(authority.ReceiptFingerprint);
+        }
+
+        private bool TryRejectIncoherentPublishedRealm(
+            RealmId publishedRealm,
+            RealmSelectionAuthorityState publishedAuthority,
+            RealmId requested,
+            out RealmSelectionResult result)
+        {
+            result = default;
+            if (!Enum.IsDefined(typeof(RealmId), publishedRealm))
+            {
+                result = LegacyRealmResult(
+                    RealmSelectionStatus.ProfileUnavailable,
+                    requested,
+                    false,
+                    false,
+                    "AL-REALM-PERSISTED-ID-INVALID");
+                return true;
+            }
+
+            if (!IsCommittedAuthority(publishedAuthority))
+            {
+                return false;
+            }
+
+            var boundRealm = (RealmId)publishedAuthority.SelectedRealm;
+            if (boundRealm != publishedRealm ||
+                !RealmSelectionAuthority.IsDefinedPlayable(boundRealm) ||
+                !string.Equals(
+                    publishedAuthority.ProfileId,
+                    _currentSave.ProfileId,
+                    StringComparison.Ordinal) ||
+                publishedAuthority.ReceiptFingerprint !=
+                    RealmSelectionAuthority.ComputeReceiptFingerprint(
+                        publishedAuthority.ProfileId,
+                        boundRealm,
+                        publishedAuthority.TransactionId,
+                        publishedAuthority.CorrelationId,
+                        publishedAuthority.OperationId,
+                        publishedAuthority.EventId,
+                        publishedAuthority.Provenance,
+                        publishedAuthority.Revision))
+            {
+                result = LegacyRealmResult(
+                    RealmSelectionStatus.ProfileUnavailable,
+                    requested,
+                    false,
+                    false,
+                    "AL-REALM-RECEIPT-RECONCILE-FAILED");
+                return true;
+            }
+
+            return false;
         }
 
         ProfileBoundSaveCandidateCommitResult

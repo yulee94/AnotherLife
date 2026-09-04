@@ -1820,7 +1820,40 @@ namespace AL.Services.Local
 
             SaveFileReadResult backup = ReadCanonicalPath(BackupPath);
             if (backup.Disposition != SaveFileReadDisposition.Read ||
-                !TryDeserializeValidSaveBytes(
+                backup.Bytes == null)
+            {
+                message =
+                    "AL-SAVE-TYPED-BACKUP-GENERATION-CONFLICT: A valid exact backup generation is required before typed legacy candidate preparation.";
+                return false;
+            }
+
+            if (publishedSave.SaveSchemaVersion ==
+                SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion)
+            {
+                SaveSemanticCandidate backupSemantic =
+                    ValidateSemanticCandidate(
+                        backup.Bytes,
+                        SaveCandidateSourceGeneration.Backup);
+                if (backupSemantic == null ||
+                    backupSemantic.Outcome == SaveSemanticCandidateOutcome.Invalid ||
+                    backupSemantic.Outcome ==
+                        SaveSemanticCandidateOutcome.DegradedMalformed ||
+                    backupSemantic.Outcome ==
+                        SaveSemanticCandidateOutcome.ForwardSchemaReadOnly ||
+                    backupSemantic.Outcome ==
+                        SaveSemanticCandidateOutcome.OversizePreservedReadOnly)
+                {
+                    message =
+                        "AL-SAVE-TYPED-BACKUP-GENERATION-CONFLICT: A valid exact backup generation is required before typed legacy candidate preparation.";
+                    return false;
+                }
+
+                baseline = new SaveAuthorityBaseline(primary, backup);
+                message = string.Empty;
+                return true;
+            }
+
+            if (!TryDeserializeValidSaveBytes(
                     backup.Bytes,
                     out _,
                     out _,
