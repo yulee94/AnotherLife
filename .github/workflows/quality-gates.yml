@@ -175,6 +175,41 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Shot070 Vaeloryn motion-source qualification
+        shell: pwsh
+        timeout-minutes: 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $transcript = "artifacts/shot070-vaeloryn-source.txt"
+          try {
+            $include = @(
+              "unity/ArtSource/Cinematics/Shot070VaelorynSourceV002/**",
+              "unity/Docs/Cinematics/Shot070VaelorynSourceV002/**",
+              "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/wish_dragon_vaeloryn/**",
+              "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/55_vaeloryn_multiview_01_v001.png",
+              "unity/Docs/Terrestrials/RealmCreatureProductionSourceV001/ConceptSheets/56_vaeloryn_multiview_02_v001.png"
+            ) -join ","
+            if ($env:GITHUB_TOKEN) {
+              $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x:$($env:GITHUB_TOKEN)"))
+              & git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ***" lfs pull --include=$include *>&1 |
+                Tee-Object -FilePath $transcript
+            } else {
+              & git lfs pull --include=$include *>&1 |
+                Tee-Object -FilePath $transcript
+            }
+            if ($LASTEXITCODE -ne 0) {
+              throw "Shot070 Vaeloryn motion-source LFS pull exited with code $LASTEXITCODE."
+            }
+            & python tools/cinematics/test_validate_shot070_vaeloryn_source.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Shot070 Vaeloryn motion-source tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Quality-gate fixture proof
         shell: pwsh
         timeout-minutes: 10
@@ -221,6 +256,7 @@ jobs:
             artifacts/deterministic-qa/junit.xml
             artifacts/deterministic-qa/logs/
             artifacts/realm-creature-production-slice.txt
+            artifacts/shot070-vaeloryn-source.txt
             artifacts/quality-gate-fixtures.txt
             artifacts/golden-scene-evidence-validator.txt
           if-no-files-found: error
