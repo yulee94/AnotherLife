@@ -20,6 +20,7 @@ EXPECTED_DEFECTS do not fail the run (they are the known data defects the
 downstream data-generation task must correct).
 """
 
+import copy
 import json
 import pathlib
 import sys
@@ -33,8 +34,9 @@ GAMEDATA_DIR = (
     ROOT.parent / "Assets" / "AL" / "StreamingAssets" / "GameData"
 )
 
-# schema-name -> real catalog file (for the ten content catalogs)
+# schema-name -> registered real catalog file
 REAL_CATALOGS = {
+    "al-item-power-ladders": "al_item_power_ladders_catalog.json",
     "al-realm": "al_realm_catalog.json",
     "al-realm-gem-wishgate-content": "al_realm_gem_wishgate_content_catalog.json",
     "al-notification-content": "al_notification_content_catalog.json",
@@ -63,6 +65,57 @@ EXPECTED_DEFECTS = {
 def load_json(path):
     with open(path, "r", encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def expect_item_power_ladder_rejected(validator, canonical, name, mutate):
+    sabotaged = copy.deepcopy(canonical)
+    mutate(sabotaged)
+    if not list(validator.iter_errors(sabotaged)):
+        raise AssertionError(f"sabotage unexpectedly passed: {name}")
+    print(f"PASS reject {name}")
+
+
+def swap_adjacent(document, key, index):
+    items = document[key]
+    items[index], items[index + 1] = items[index + 1], items[index]
+
+
+def validate_item_power_ladders():
+    schema = load_json(SCHEMAS_DIR / "al-item-power-ladders.schema.json")
+    catalog = load_json(GAMEDATA_DIR / "al_item_power_ladders_catalog.json")
+    Draft202012Validator.check_schema(schema)
+    validator = Draft202012Validator(schema)
+
+    errors = list(validator.iter_errors(catalog))
+    if errors:
+        first = errors[0]
+        path = ".".join(str(part) for part in first.absolute_path) or "<root>"
+        raise AssertionError(f"canonical catalog failed at {path}: {first.message}")
+    print("PASS canonical item power ladders")
+
+    cases = [
+        ("inverted PvP ranks", lambda value: swap_adjacent(value, "pvpGearLadder", 0)),
+        ("outer dungeon outranks dragon", lambda value: swap_adjacent(value, "pvpGearLadder", 1)),
+        ("inner dungeon outranks outer dungeon", lambda value: swap_adjacent(value, "pvpGearLadder", 2)),
+        ("PvP gear is not awakened", lambda value: value["pvpGearLadder"][1].update(awakening="standard")),
+        ("inverted PvE ranks", lambda value: swap_adjacent(value, "pveGearLadder", 0)),
+        ("Warmaster loses PvP", lambda value: value["pvpGearLadder"][0].update(rank=2)),
+        ("Warmaster loses PvE", lambda value: value["pveGearLadder"][0].update(rank=2)),
+        ("inverted embed gem ranks", lambda value: swap_adjacent(value, "embedGemLadder", 0)),
+        ("inverted accessory ranks", lambda value: swap_adjacent(value, "accessoryLadder", 0)),
+        ("quest accessory trades", lambda value: value["accessoryLadder"][3].update(tradable=True)),
+        ("special heart slots as gear", lambda value: value["specialHearts"][0].update(regularGearSlotEligible=True)),
+        ("Wish Dragon heart accepts seven gems", lambda value: value["specialHearts"][0]["acquisition"].update(realmUniqueGemCount=7)),
+        ("Wish Dragon heart waives arena victory", lambda value: value["specialHearts"][0]["acquisition"].update(requirementsMode="any")),
+        ("world-boss heart drop is not extremely low", lambda value: value["specialHearts"][1]["acquisition"].update(dropFrequency="low")),
+        ("world-boss contributor loot is unequal", lambda value: value["specialHearts"][1]["acquisition"].update(contributorLootPercentagePolicy="weighted")),
+        ("dragon gem band lowered", lambda value: value["embedGemLadder"][0].update(minimumPercent=90)),
+        ("crafted gem becomes a range", lambda value: value["embedGemLadder"][2].update(maximumPercent=76)),
+    ]
+    for name, mutate in cases:
+        expect_item_power_ladder_rejected(validator, catalog, name, mutate)
+
+    print(f"ALL ITEM POWER LADDER CHECKS PASSED ({len(cases)} sabotage cases)")
 
 
 def first_error_message(errors):
@@ -140,6 +193,12 @@ def main():
         reports["invalid"].append((fixture_path.name, ok, first_error_message(errors) if errors else ""))
         if not ok:
             failures.append(f"INVALID fixture {fixture_path.name} unexpectedly PASSED (should be rejected)")
+
+    # 4. Semantic sabotage cases that invert owner-locked item ladders or permissions.
+    try:
+        validate_item_power_ladders()
+    except Exception as exc:
+        failures.append(f"item power ladder sabotage validation failed: {exc}")
 
     # ---- Report ----
     print("== Schema compilation ==")
