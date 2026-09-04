@@ -37,8 +37,11 @@ namespace AL.Guilds
 
     public enum GuildMembershipState
     {
-        Active,
-        Inactive
+        Active = 0,
+        Inactive = 1,
+        Restricted = 2,
+        PendingLeave = 3,
+        Banned = 4
     }
 
     public enum GuildPendingRequestKind
@@ -146,6 +149,32 @@ namespace AL.Guilds
         public bool CanOpenRaidCalls { get; }
     }
 
+    public sealed class GuildMembershipStatePolicy
+    {
+        public GuildMembershipStatePolicy(
+            GuildMembershipState state,
+            bool reservesAccount,
+            bool grantsRoleAuthority,
+            GuildMembershipState? leaveResult,
+            GuildMembershipState? kickResult,
+            bool blocksSameGuildEntry)
+        {
+            State = state;
+            ReservesAccount = reservesAccount;
+            GrantsRoleAuthority = grantsRoleAuthority;
+            LeaveResult = leaveResult;
+            KickResult = kickResult;
+            BlocksSameGuildEntry = blocksSameGuildEntry;
+        }
+
+        public GuildMembershipState State { get; }
+        public bool ReservesAccount { get; }
+        public bool GrantsRoleAuthority { get; }
+        public GuildMembershipState? LeaveResult { get; }
+        public GuildMembershipState? KickResult { get; }
+        public bool BlocksSameGuildEntry { get; }
+    }
+
     public sealed class GuildMembershipPolicySnapshot
     {
         public GuildMembershipPolicySnapshot(
@@ -157,12 +186,38 @@ namespace AL.Guilds
             GuildRole defaultJoinedRole,
             IEnumerable<GuildEffectDomain> excludedEffectDomains,
             bool isComplete)
+            : this(
+                status,
+                binding,
+                rolePolicies,
+                null,
+                accountFirstWithinImmutableRealm,
+                requiredActiveMasterCount,
+                defaultJoinedRole,
+                excludedEffectDomains,
+                isComplete)
+        {
+        }
+
+        public GuildMembershipPolicySnapshot(
+            GuildCatalogStatus status,
+            GuildCatalogBinding binding,
+            IEnumerable<GuildRolePolicy> rolePolicies,
+            IEnumerable<GuildMembershipStatePolicy> statePolicies,
+            bool accountFirstWithinImmutableRealm,
+            int requiredActiveMasterCount,
+            GuildRole defaultJoinedRole,
+            IEnumerable<GuildEffectDomain> excludedEffectDomains,
+            bool isComplete)
         {
             Status = status;
             Binding = binding;
             RolePolicies = rolePolicies == null
                 ? null
                 : Array.AsReadOnly(rolePolicies.ToArray());
+            StatePolicies = statePolicies == null
+                ? null
+                : Array.AsReadOnly(statePolicies.ToArray());
             AccountFirstWithinImmutableRealm = accountFirstWithinImmutableRealm;
             RequiredActiveMasterCount = requiredActiveMasterCount;
             DefaultJoinedRole = defaultJoinedRole;
@@ -175,6 +230,7 @@ namespace AL.Guilds
         public GuildCatalogStatus Status { get; }
         public GuildCatalogBinding Binding { get; }
         public IReadOnlyList<GuildRolePolicy> RolePolicies { get; }
+        public IReadOnlyList<GuildMembershipStatePolicy> StatePolicies { get; }
         public bool AccountFirstWithinImmutableRealm { get; }
         public int RequiredActiveMasterCount { get; }
         public GuildRole DefaultJoinedRole { get; }

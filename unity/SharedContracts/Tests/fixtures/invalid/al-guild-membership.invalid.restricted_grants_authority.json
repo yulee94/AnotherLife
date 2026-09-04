@@ -14,7 +14,7 @@
   ],
   "membershipStates": [
     { "state": "Active", "reservesAccount": true, "grantsRoleAuthority": true, "leaveResult": "PendingLeave", "kickResult": "Banned", "blocksSameGuildEntry": true },
-    { "state": "Restricted", "reservesAccount": true, "grantsRoleAuthority": false, "leaveResult": "PendingLeave", "kickResult": "Banned", "blocksSameGuildEntry": true },
+    { "state": "Restricted", "reservesAccount": true, "grantsRoleAuthority": true, "leaveResult": "PendingLeave", "kickResult": "Banned", "blocksSameGuildEntry": true },
     { "state": "PendingLeave", "reservesAccount": true, "grantsRoleAuthority": false, "leaveResult": "Inactive", "kickResult": null, "blocksSameGuildEntry": true },
     { "state": "Banned", "reservesAccount": false, "grantsRoleAuthority": false, "leaveResult": null, "kickResult": null, "blocksSameGuildEntry": true },
     { "state": "Inactive", "reservesAccount": false, "grantsRoleAuthority": false, "leaveResult": null, "kickResult": null, "blocksSameGuildEntry": false }
@@ -23,6 +23,6 @@
   "transitions": ["create", "join", "invite", "accept", "decline", "leave", "kick", "promote", "demote", "master_transfer", "disband"],
   "pendingRequestPolicy": { "joinApplicationResolution": "master_or_officer", "invitationResolution": "invited_account_or_manager_cancel", "membershipChangeFence": "accept_exact_guild_revision", "terminalResolution": "accept_xor_decline" },
   "replayPolicy": { "operationIdentity": "operation_id", "sameFingerprint": "already_committed", "differentFingerprint": "conflict", "unknownOutcome": "fail_closed_until_reconciled" },
-  "excludedEffectDomains": ["combat", "economy", "perk", "city"],
+  "excludedEffectDomains": ["combat", "economy", "perk", "city", "raid"],
   "authorityBoundary": { "plannerScope": "engine_free_snapshot_only", "excludedImplementations": ["persistence", "network", "save", "combat", "economy", "perk", "city", "raid"] }
 }
