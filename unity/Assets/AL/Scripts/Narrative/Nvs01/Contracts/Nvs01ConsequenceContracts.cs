@@ -170,6 +170,16 @@ namespace AL.Narrative.Nvs01
         internal const string Overflow = "AL-NVS01-C4-OVERFLOW";
         internal const string ChapterIncompatible =
             "AL-NVS01-C4-CHAPTER-INCOMPATIBLE";
+        internal const string ReplayFingerprintMismatch =
+            "AL-NVS01-C4-REPLAY-FINGERPRINT-MISMATCH";
+        internal const string MixedAuthority =
+            "AL-NVS01-C4-MIXED-AUTHORITY";
+        internal const string PersistFailed =
+            "AL-NVS01-C4-PERSIST-FAILED";
+        internal const string NotifyFailed =
+            "AL-NVS01-C4-NOTIFY-FAILED";
+        internal const string EffectsCommittedNotificationId =
+            "Nvs01EffectsCommitted";
     }
 
     internal enum Nvs01ConsequencePlanningStatus
