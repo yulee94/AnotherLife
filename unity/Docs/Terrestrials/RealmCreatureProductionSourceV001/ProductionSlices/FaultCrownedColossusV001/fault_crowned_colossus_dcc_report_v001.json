@@ -1,0 +1,439 @@
+{
+  "authorityBoundary": {
+    "deviceQualification": "BLOCKED",
+    "gameplayOrSpawnActivation": false,
+    "runtimeIntegration": "BLOCKED",
+    "runtimeVfxSeparate": true
+  },
+  "blenderVersion": "5.2.0 LTS",
+  "builder": {
+    "path": "tools/blender/build_realm_creature_production_slice.py",
+    "sha256": "21035d9a20f0021afa64b8d03341e6689163c514a2446df5ed6ccd1c9918b701"
+  },
+  "deformation": {
+    "degenerateTriangles": 0,
+    "inversionMethod": "triangle_vertex_order_identity_plus_positive_area_v1",
+    "invertedTriangles": 0,
+    "maximumBoundsExpansionRatio": 1.320487,
+    "nonFiniteVertices": 0,
+    "poseCount": 24,
+    "poses": [
+      {
+        "actionName": "ANIM_fault_crowned_colossus_idle_weight_shift_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_idle_weight_shift_v001",
+        "frame": 30,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_idle_weight_shift_v001",
+        "frame": 61,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_locomotion_walk_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_locomotion_walk_v001",
+        "frame": 30,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_locomotion_walk_v001",
+        "frame": 61,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_locomotion_run_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_locomotion_run_v001",
+        "frame": 15,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_locomotion_run_v001",
+        "frame": 31,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_attack_basic_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_attack_basic_v001",
+        "frame": 23,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_attack_basic_v001",
+        "frame": 46,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_attack_special_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_attack_special_v001",
+        "frame": 30,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_attack_special_v001",
+        "frame": 61,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_skill_anticipation_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_skill_anticipation_v001",
+        "frame": 23,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_skill_anticipation_v001",
+        "frame": 46,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_reaction_hit_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_reaction_hit_v001",
+        "frame": 15,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_reaction_hit_v001",
+        "frame": 31,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_defeat_v001",
+        "frame": 1,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_defeat_v001",
+        "frame": 30,
+        "issues": 0
+      },
+      {
+        "actionName": "ANIM_fault_crowned_colossus_defeat_v001",
+        "frame": 61,
+        "issues": 0
+      }
+    ]
+  },
+  "lods": [
+    {
+      "id": "LOD0",
+      "materialSlots": 1,
+      "object": "GEO_fault_crowned_colossus_LOD0",
+      "protectedIdentityCues": [
+        "six_load_bearing_limb_columns_in_three_distinct_pairs",
+        "low_shielded_chest_and_compact_protected_eyes",
+        "single_broad_plow_horn_with_fractured_crown",
+        "mineralized_dorsal_lamellae_rooted_to_body_anatomy"
+      ],
+      "triangles": 61793,
+      "uvLayers": 1,
+      "vertices": 30938
+    },
+    {
+      "id": "LOD1",
+      "materialSlots": 1,
+      "object": "GEO_fault_crowned_colossus_LOD1",
+      "protectedIdentityCues": [
+        "six_load_bearing_limb_columns_in_three_distinct_pairs",
+        "low_shielded_chest_and_compact_protected_eyes",
+        "single_broad_plow_horn_with_fractured_crown",
+        "mineralized_dorsal_lamellae_rooted_to_body_anatomy"
+      ],
+      "triangles": 35839,
+      "uvLayers": 1,
+      "vertices": 17950
+    },
+    {
+      "id": "LOD2",
+      "materialSlots": 1,
+      "object": "GEO_fault_crowned_colossus_LOD2",
+      "protectedIdentityCues": [
+        "six_load_bearing_limb_columns_in_three_distinct_pairs",
+        "low_shielded_chest_and_compact_protected_eyes",
+        "single_broad_plow_horn_with_fractured_crown",
+        "mineralized_dorsal_lamellae_rooted_to_body_anatomy"
+      ],
+      "triangles": 17301,
+      "uvLayers": 1,
+      "vertices": 8678
+    }
+  ],
+  "logicalBuildSignature": "736f82c13a0c39df2ad9df49378fd4e08f7be6bbc5a4ebe72e78a6df0eaaaf3d",
+  "material": {
+    "emissionBakedIntoCleanMesh": false,
+    "id": "mat_fault_crowned_colossus_pbr_v001",
+    "maximumTextureLongEdge": 2048,
+    "runtimeVfxSeparate": true,
+    "slotCount": 1,
+    "textureRoles": [
+      "ambient_occlusion",
+      "base_color",
+      "metallic_smoothness",
+      "normal"
+    ]
+  },
+  "motions": [
+    {
+      "actionName": "ANIM_fault_crowned_colossus_idle_weight_shift_v001",
+      "finiteTransforms": true,
+      "frameCount": 61,
+      "loop": true,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "idle.weight_shift",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_fault_crowned_colossus_locomotion_walk_v001",
+      "finiteTransforms": true,
+      "frameCount": 61,
+      "loop": true,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "locomotion.walk",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_fault_crowned_colossus_locomotion_run_v001",
+      "finiteTransforms": true,
+      "frameCount": 31,
+      "loop": true,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "locomotion.run",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_fault_crowned_colossus_attack_basic_v001",
+      "finiteTransforms": true,
+      "frameCount": 46,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "attack.basic",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_fault_crowned_colossus_attack_special_v001",
+      "finiteTransforms": true,
+      "frameCount": 61,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "attack.special",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_fault_crowned_colossus_skill_anticipation_v001",
+      "finiteTransforms": true,
+      "frameCount": 46,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "skill.anticipation",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_fault_crowned_colossus_reaction_hit_v001",
+      "finiteTransforms": true,
+      "frameCount": 31,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 0.0,
+      "motionKey": "reaction.hit",
+      "sampleRateHz": 30
+    },
+    {
+      "actionName": "ANIM_fault_crowned_colossus_defeat_v001",
+      "finiteTransforms": true,
+      "frameCount": 61,
+      "loop": false,
+      "loopPositionErrorMeters": 0.0,
+      "loopRotationErrorDegrees": 13.841348,
+      "motionKey": "defeat",
+      "sampleRateHz": 30
+    }
+  ],
+  "normalization": {
+    "boundsMaximum": [
+      6.25,
+      2.90602,
+      4.79035
+    ],
+    "boundsMinimum": [
+      -6.25,
+      -2.90602,
+      0.0
+    ],
+    "canonicalFront": "-X",
+    "detectedSourceFrontBeforeCanonicalization": "-X",
+    "dimensionsMeters": [
+      12.5,
+      5.81204,
+      4.79035
+    ],
+    "targetLengthMeters": 12.5
+  },
+  "qualificationId": "rcpq_boss_stonehold_fault_crowned_colossus_v001",
+  "repeatBuildLogicalSignature": "736f82c13a0c39df2ad9df49378fd4e08f7be6bbc5a4ebe72e78a6df0eaaaf3d",
+  "rig": {
+    "armatureObject": "RIG_fault_crowned_colossus",
+    "boneNames": [
+      "body_root",
+      "dorsal_front",
+      "dorsal_mid",
+      "dorsal_rear",
+      "front_foot_l",
+      "front_foot_r",
+      "front_lower_l",
+      "front_lower_r",
+      "front_upper_l",
+      "front_upper_r",
+      "head",
+      "horn_plow",
+      "middle_foot_l",
+      "middle_foot_r",
+      "middle_lower_l",
+      "middle_lower_r",
+      "middle_upper_l",
+      "middle_upper_r",
+      "motion_root",
+      "neck_01",
+      "rear_foot_l",
+      "rear_foot_r",
+      "rear_lower_l",
+      "rear_lower_r",
+      "rear_upper_l",
+      "rear_upper_r",
+      "root",
+      "socket_attack_origin",
+      "socket_camera_focus",
+      "socket_forefoot_contact_l",
+      "socket_forefoot_contact_r",
+      "socket_middle_foot_contact_l",
+      "socket_middle_foot_contact_r",
+      "socket_rear_foot_contact_l",
+      "socket_rear_foot_contact_r",
+      "socket_vfx_dorsal_stress",
+      "socket_vfx_thorax_dust",
+      "spine_front",
+      "spine_rear",
+      "tail_01"
+    ],
+    "hierarchy": {
+      "body_root": "motion_root",
+      "dorsal_front": "spine_front",
+      "dorsal_mid": "body_root",
+      "dorsal_rear": "spine_rear",
+      "front_foot_l": "front_lower_l",
+      "front_foot_r": "front_lower_r",
+      "front_lower_l": "front_upper_l",
+      "front_lower_r": "front_upper_r",
+      "front_upper_l": "spine_front",
+      "front_upper_r": "spine_front",
+      "head": "neck_01",
+      "horn_plow": "head",
+      "middle_foot_l": "middle_lower_l",
+      "middle_foot_r": "middle_lower_r",
+      "middle_lower_l": "middle_upper_l",
+      "middle_lower_r": "middle_upper_r",
+      "middle_upper_l": "body_root",
+      "middle_upper_r": "body_root",
+      "motion_root": "root",
+      "neck_01": "spine_front",
+      "rear_foot_l": "rear_lower_l",
+      "rear_foot_r": "rear_lower_r",
+      "rear_lower_l": "rear_upper_l",
+      "rear_lower_r": "rear_upper_r",
+      "rear_upper_l": "spine_rear",
+      "rear_upper_r": "spine_rear",
+      "root": null,
+      "socket_attack_origin": "horn_plow",
+      "socket_camera_focus": "body_root",
+      "socket_forefoot_contact_l": "front_foot_l",
+      "socket_forefoot_contact_r": "front_foot_r",
+      "socket_middle_foot_contact_l": "middle_foot_l",
+      "socket_middle_foot_contact_r": "middle_foot_r",
+      "socket_rear_foot_contact_l": "rear_foot_l",
+      "socket_rear_foot_contact_r": "rear_foot_r",
+      "socket_vfx_dorsal_stress": "dorsal_mid",
+      "socket_vfx_thorax_dust": "body_root",
+      "spine_front": "body_root",
+      "spine_rear": "body_root",
+      "tail_01": "spine_rear"
+    },
+    "hierarchySignature": "cae9da4582a8aefdbe6d71c8c785997856898ef4db7a629a85f119e2f6082091",
+    "maximumInfluencesPerVertex": 4,
+    "parentlessBones": [
+      "root"
+    ],
+    "skeletonSignature": "3aadce82a07f815f445c829ef3942a4f469bccc9556bb7802cafb6cb877c1ff3",
+    "unweightedVertices": 0
+  },
+  "roundTrip": {
+    "actionsMatched": true,
+    "fbxImportPassed": true,
+    "importedActionNames": [
+      "RIG_fault_crowned_colossus|ANIM_fault_crowned_colossus_attack_basic_v001",
+      "RIG_fault_crowned_colossus|ANIM_fault_crowned_colossus_attack_special_v001",
+      "RIG_fault_crowned_colossus|ANIM_fault_crowned_colossus_defeat_v001",
+      "RIG_fault_crowned_colossus|ANIM_fault_crowned_colossus_idle_weight_shift_v001",
+      "RIG_fault_crowned_colossus|ANIM_fault_crowned_colossus_locomotion_run_v001",
+      "RIG_fault_crowned_colossus|ANIM_fault_crowned_colossus_locomotion_walk_v001",
+      "RIG_fault_crowned_colossus|ANIM_fault_crowned_colossus_reaction_hit_v001",
+      "RIG_fault_crowned_colossus|ANIM_fault_crowned_colossus_skill_anticipation_v001"
+    ],
+    "importedMaterialNames": [
+      "mat_fault_crowned_colossus_pbr_v001"
+    ],
+    "importedTriangles": {
+      "GEO_fault_crowned_colossus_LOD0": 61793,
+      "GEO_fault_crowned_colossus_LOD1": 35839,
+      "GEO_fault_crowned_colossus_LOD2": 17301
+    },
+    "lodTrianglesMatched": true,
+    "materialsMatched": true,
+    "skeletonSignatureMatched": true
+  },
+  "schemaVersion": 1,
+  "source": {
+    "inventory": [
+      {
+        "materialSlots": 1,
+        "name": "temp",
+        "triangles": 61793,
+        "uvLayers": 1,
+        "vertices": 30938
+      }
+    ],
+    "path": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/boss_stonehold_fault_crowned_colossus/boss_stonehold_fault_crowned_colossus_source_v001.fbx",
+    "sha256": "c06b9fc23316f6d40ff747e1bdf12b4a055633530d6dd036909a3bc2f83d70f6"
+  },
+  "status": "PASS"
+}
