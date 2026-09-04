@@ -17,6 +17,9 @@ namespace AL.Core.Interfaces
     {
         ResearchState GetResearchState(string researchId);
         IEnumerable<ResearchState> GetAllResearchStates();
+        ResearchTroopCatalogQueryResult QueryResearch(string researchId);
+        ResearchTroopMutationResult TryStartResearch(string researchId);
+        ResearchTroopMutationResult TryCompleteResearch(string researchId);
         void StartResearch(string researchId);
         void CompleteResearch(string researchId);
         float GetStatBonus(StatType statType);
