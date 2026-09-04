@@ -10,6 +10,8 @@ using AL.Kingdom;
 using AL.Kingdom.Visuals;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
+using AL.RealmWar.Territories;
+using AL.RealmWar.Territories.Contracts;
 using AL.Services.Local;
 using System.Linq;
 using UnityEngine;
@@ -102,6 +104,21 @@ namespace AL.UI.Kingdom
             CityLayoutEngine.OnBuildingSelected -= HandleBuildingSelected;
             KingdomVisualizer.OnTerritorySelected -= HandleTerritorySelected;
             KingdomTeachingInteraction.InteractionRequested -= HandleKingdomTeachingInteraction;
+        }
+
+        public TerritoryCaptureApplicationResult ApplyAcceptedTerritoryCapture(
+            TerritoryCaptureAcceptedCommandResult acceptedResult)
+        {
+            ServiceLocator.TryGet(out ITerritoryService territoryService);
+            ServiceLocator.TryGet(out ISaveGameService saveGameService);
+            TerritoryCaptureApplicationResult result =
+                TerritoryCaptureCaller.ApplyAcceptedResult(
+                    territoryService,
+                    saveGameService,
+                    acceptedResult);
+            SetMessage(TerritoryCapturePresentation.Describe(result));
+            Refresh();
+            return result;
         }
 
         private void Start()

@@ -264,6 +264,31 @@ jobs:
             if ($LASTEXITCODE -ne 0) {
               throw "Shot070 Vaeloryn motion-source tests exited with code $LASTEXITCODE."
             }
+            & python tools/cinematics/test_validate_shot070_vaeloryn_shot_scale.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Shot070 Vaeloryn shot-scale tests exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Launch cinematic packaging gate
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/launch-cinematic-packaging.txt"
+          try {
+            & python tools/cinematics/test_validate_launch_cinematic_packet.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Launch cinematic packaging tests exited with code $LASTEXITCODE."
+            }
+            & python tools/cinematics/validate_launch_cinematic_packet.py *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "Launch cinematic packaging validator exited with code $LASTEXITCODE."
+            }
           } catch {
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
@@ -336,6 +361,7 @@ jobs:
             artifacts/deterministic-qa/logs/
             artifacts/realm-creature-production-slice.txt
             artifacts/shot070-vaeloryn-source.txt
+            artifacts/launch-cinematic-packaging.txt
             artifacts/boss-skill-presentation.txt
             artifacts/quality-gate-fixtures.txt
             artifacts/golden-scene-evidence-validator.txt

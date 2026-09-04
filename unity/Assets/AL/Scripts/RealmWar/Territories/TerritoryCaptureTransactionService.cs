@@ -58,22 +58,6 @@ namespace AL.RealmWar.Territories
             TerritoryCaptureTransactionRequest request)
         {
             string territoryId = request?.CaptureRequest?.TerritoryId ?? string.Empty;
-            if (!TryGetAuthorizedSave(out SaveGameData save))
-            {
-                return Reject(
-                    territoryId,
-                    "ProfileReadOnly",
-                    "Territory capture rejected before any profile mutation.");
-            }
-
-            if (save == null)
-            {
-                return Reject(
-                    territoryId,
-                    "NoCurrentSave",
-                    "Territory capture requires a current save.");
-            }
-
             if (request?.CaptureRequest == null)
             {
                 return Reject(
@@ -91,6 +75,32 @@ namespace AL.RealmWar.Territories
                     territoryId,
                     "AuthorizationSourceUnavailable",
                     "Production territory capture requires a typed command authorization result.");
+            }
+
+            if (!_allowWritesWithoutGate &&
+                _saveGameService is
+                    AL.Services.Local.IProfileBoundTerritoryCaptureCandidateStore
+                        profileBoundStore)
+            {
+                return profileBoundStore.TryCommitProfileBoundTerritoryCapture(
+                    request,
+                    _planner);
+            }
+
+            if (!TryGetAuthorizedSave(out SaveGameData save))
+            {
+                return Reject(
+                    territoryId,
+                    "ProfileReadOnly",
+                    "Territory capture rejected before any profile mutation.");
+            }
+
+            if (save == null)
+            {
+                return Reject(
+                    territoryId,
+                    "NoCurrentSave",
+                    "Territory capture requires a current save.");
             }
 
             IReadOnlyList<TerritoryStateRecord> states = ReadStates(save, _planner.Catalog);

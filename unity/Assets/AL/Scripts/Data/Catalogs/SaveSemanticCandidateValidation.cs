@@ -798,6 +798,7 @@ namespace AL.Data.Catalogs
                     "Territories",
                     "RealmGems",
                     "Wishgate",
+                    "WishgateTransaction",
                     "CurrentChapterId",
                     "Warmaster",
                     "ChampionCustomization",
@@ -810,6 +811,9 @@ namespace AL.Data.Catalogs
                     "ChampionProgression",
                     "DeathPenalty",
                     "WorldState",
+                    "NotificationHistory",
+                    "GuildCitySeason",
+                    "GuildRaidMuster",
                     "WarzoneCredits",
                     "LastSavedTimestamp",
                     "TerritoryCaptureLedger",
@@ -898,6 +902,51 @@ namespace AL.Data.Catalogs
 
         private static readonly HashSet<string> WishgateFields =
             Fields("IsEarned", "EarnReason", "LastRewardId", "LastRewardChosenTimestamp");
+
+        private static readonly HashSet<string> WishgateTransactionFields =
+            Fields(
+                "Version",
+                "Status",
+                "Revision",
+                "Phase",
+                "EntitlementId",
+                "EarnReasonId",
+                "RewardId",
+                "RewardApplicationId",
+                "EarnedUtcSeconds",
+                "SelectedUtcSeconds",
+                "AppliedUtcSeconds",
+                "CommittedUtcSeconds",
+                "EntitlementRevision",
+                "EntitlementIsSupported",
+                "IsComplete",
+                "LastOperationId",
+                "LastEventId",
+                "LastRequestFingerprint",
+                "ReceiptHash",
+                "PostCommitNotificationCorrelationId",
+                "AppliedRewardApplicationId",
+                "Records");
+
+        private static readonly HashSet<string> WishgateTransitionRecordFields =
+            Fields(
+                "OperationId",
+                "EventId",
+                "CorrelationId",
+                "Operation",
+                "RequestFingerprint",
+                "EntitlementId",
+                "EarnReasonId",
+                "RewardId",
+                "RewardApplicationId",
+                "ResultingPhase",
+                "ResultingSnapshotRevision",
+                "ResultingEntitlementRevision",
+                "PlannedUtcSeconds",
+                "ResultingStateHash",
+                "PlanHash",
+                "PostCommitNotificationCorrelationId",
+                "IsSupported");
 
         private static readonly HashSet<string> WarmasterFields =
             Fields(
@@ -988,7 +1037,35 @@ namespace AL.Data.Catalogs
                 "ConsequenceIntentIds",
                 "AcquiredArtifactIds",
                 "AppliedEffectKeys",
+                "AppliedOperationIds",
+                "ApplicationReceipts",
                 "UnlockedChapterId");
+
+        private static readonly HashSet<string> Nvs01ApplicationReceiptFields =
+            Fields(
+                "ContractVersion",
+                "Kind",
+                "OperationId",
+                "ProfileId",
+                "ExpectedGenerationFingerprint",
+                "CausalOperationId",
+                "CausalPayloadFingerprint",
+                "PredecessorReceiptFingerprint",
+                "PredecessorExpectedGenerationFingerprint",
+                "RealmId",
+                "CorrelationId",
+                "ExpectedQuestRevision",
+                "CandidateQuestRevision",
+                "EffectKeys",
+                "TargetChapterId",
+                "TechnicalCurrencyId",
+                "PreviousGoldBalance",
+                "ResultingGoldBalance",
+                "PreviousValeriusAffinity",
+                "ResultingValeriusAffinity",
+                "PreviousChapterId",
+                "ResultingChapterId",
+                "PlanFingerprint");
 
         private static readonly HashSet<string> Nvs01ObjectiveFields =
             Fields("ObjectiveId", "Status");
@@ -1182,6 +1259,33 @@ namespace AL.Data.Catalogs
                 "Revisions",
                 "Receipts",
                 "Outbox");
+
+        private static readonly HashSet<string> NotificationHistoryFields =
+            Fields("Version", "Records", "Outbox");
+
+        private static readonly HashSet<string> NotificationHistoryRecordFields =
+            Fields(
+                "RecordId",
+                "NotificationSchemaVersion",
+                "DefinitionId",
+                "DefinitionVersion",
+                "SourceSystemId",
+                "CorrelationId",
+                "OccurredAtUtcTicks",
+                "Parameters",
+                "State",
+                "AcknowledgedAtUtcTicks",
+                "DismissedAtUtcTicks",
+                "ExpiresAtUtcTicks",
+                "LastDeliveryAttemptUtcTicks",
+                "DeliveryAttemptCount",
+                "SupersededByRecordId",
+                "DurabilityPolicy",
+                "PrivacyClass",
+                "RequiresAcknowledgement");
+
+        private static readonly HashSet<string> NotificationHistoryParameterFields =
+            Fields("Name", "Kind", "TextValue");
 
         private static readonly HashSet<string> OfflineProductionCatchUpFields =
             Fields(
@@ -1584,6 +1688,7 @@ namespace AL.Data.Catalogs
             ValidateTerritoryRows(root, policy.Authority, collector, state);
             ValidateRealmGemRows(root, policy.Authority, collector, state);
             ValidateWishgate(root, policy.Authority, collector, state);
+            ValidateWishgateTransaction(root, collector, state);
             ValidateWarmaster(root, isLegacySchema, policy.Authority, collector, state);
             ValidateChampionCustomization(
                 root,
@@ -1602,6 +1707,7 @@ namespace AL.Data.Catalogs
             ValidateChampionProgression(root, collector, state);
             ValidateDeathPenalty(root, collector, state);
             ValidateWorldState(root, collector, state);
+            ValidateNotificationHistory(root, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
@@ -3828,6 +3934,116 @@ namespace AL.Data.Catalogs
             }
         }
 
+        private static void ValidateWishgateTransaction(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.WishgateTransaction";
+            StrictJsonValue value;
+            if (!root.TryGet("WishgateTransaction", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var authority = value as StrictJsonObject;
+            if (authority == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WISHGATE_TRANSACTION_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                authority,
+                WishgateTransactionFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    authority,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WISHGATE_TRANSACTION_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_WISHGATE_TRANSACTION_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            StrictJsonValue recordsValue;
+            if (authority.TryGet("Records", out recordsValue) &&
+                !(recordsValue is StrictJsonNull))
+            {
+                var records = recordsValue as StrictJsonArray;
+                if (records == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_WISHGATE_TRANSACTION_RECORDS_INVALID",
+                        path + ".Records",
+                        SaveSemanticDomain.Envelope);
+                    return;
+                }
+
+                for (int i = 0; i < records.Items.Count; i++)
+                {
+                    var record = records.Items[i] as StrictJsonObject;
+                    if (record == null)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_WISHGATE_TRANSACTION_RECORD_INVALID",
+                            path + ".Records[" + i + "]",
+                            SaveSemanticDomain.Envelope);
+                        continue;
+                    }
+
+                    InspectUnexpectedProperties(
+                        record,
+                        WishgateTransitionRecordFields,
+                        path + ".Records[" + i + "]",
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state);
+                }
+            }
+        }
+
         private static void ValidateWarmaster(
             StrictJsonObject root,
             bool isLegacySchema,
@@ -4784,6 +5000,22 @@ namespace AL.Data.Catalogs
                 16,
                 collector,
                 state);
+            StrictJsonValue ignoredLedger;
+            if (progress.TryGet("AppliedOperationIds", out ignoredLedger))
+            {
+                ValidateNvs01StringArray(
+                    progress,
+                    "AppliedOperationIds",
+                    2,
+                    collector,
+                    state);
+            }
+
+            if (progress.TryGet("ApplicationReceipts", out ignoredLedger))
+            {
+                ValidateNvs01ApplicationReceipts(progress, collector, state);
+            }
+
             ValidateNvs01Encounter(progress, collector, state);
             ValidateNvs01Operation(progress, schemaVersion, collector, state);
 
@@ -4795,6 +5027,231 @@ namespace AL.Data.Catalogs
                     "SAVE_NVS01_NEUTRAL_STATE_INVALID",
                     path,
                     SaveSemanticDomain.Narrative);
+            }
+        }
+
+        private static void ValidateNotificationHistory(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.NotificationHistory";
+            StrictJsonValue value;
+            if (!root.TryGet("NotificationHistory", out value) || value is StrictJsonNull)
+            {
+                // Optional schema-v2 extension. Missing legacy state is admitted.
+                return;
+            }
+
+            var history = value as StrictJsonObject;
+            if (history == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                history,
+                NotificationHistoryFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    history,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            if (version == 0)
+            {
+                return;
+            }
+
+            ValidateNotificationHistoryRows(history, "Records", collector, state);
+            ValidateNotificationHistoryRows(history, "Outbox", collector, state);
+        }
+
+        private static void ValidateNotificationHistoryRows(
+            StrictJsonObject history,
+            string collectionName,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            StrictJsonValue value;
+            if (!history.TryGet(collectionName, out value) || value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var rows = value as StrictJsonArray;
+            string collectionPath = "$.NotificationHistory." + collectionName;
+            if (rows == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NOTIFICATION_HISTORY_ARRAY_INVALID",
+                    collectionPath,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            for (int index = 0; index < rows.Items.Count; index++)
+            {
+                string path = collectionPath +
+                    "[" + index.ToString(CultureInfo.InvariantCulture) + "]";
+                var row = rows.Items[index] as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NOTIFICATION_HISTORY_RECORD_INVALID",
+                        path,
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    NotificationHistoryRecordFields,
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state);
+
+                string ignored;
+                TryReadRequiredOpaqueString(
+                    row,
+                    "RecordId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state,
+                    out ignored);
+                TryReadRequiredOpaqueString(
+                    row,
+                    "DefinitionId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state,
+                    out ignored);
+                TryReadRequiredOpaqueString(
+                    row,
+                    "CorrelationId",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state,
+                    out ignored);
+
+                int privacyClass;
+                if (TryReadRequiredInt32(
+                        row,
+                        "PrivacyClass",
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state,
+                        out privacyClass) &&
+                    privacyClass == 2)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NOTIFICATION_HISTORY_SENSITIVE_TECHNICAL",
+                        path + ".PrivacyClass",
+                        SaveSemanticDomain.Envelope);
+                }
+
+                StrictJsonValue parametersValue;
+                if (!row.TryGet("Parameters", out parametersValue) ||
+                    parametersValue is StrictJsonNull)
+                {
+                    continue;
+                }
+
+                var parameters = parametersValue as StrictJsonArray;
+                if (parameters == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NOTIFICATION_HISTORY_PARAMETERS_INVALID",
+                        path + ".Parameters",
+                        SaveSemanticDomain.Envelope);
+                    continue;
+                }
+
+                for (int parameterIndex = 0;
+                     parameterIndex < parameters.Items.Count;
+                     parameterIndex++)
+                {
+                    string parameterPath = path +
+                        ".Parameters[" +
+                        parameterIndex.ToString(CultureInfo.InvariantCulture) +
+                        "]";
+                    var parameter = parameters.Items[parameterIndex] as StrictJsonObject;
+                    if (parameter == null)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_NOTIFICATION_HISTORY_PARAMETER_INVALID",
+                            parameterPath,
+                            SaveSemanticDomain.Envelope);
+                        continue;
+                    }
+
+                    InspectUnexpectedProperties(
+                        parameter,
+                        NotificationHistoryParameterFields,
+                        parameterPath,
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state);
+                }
             }
         }
 
@@ -5799,6 +6256,25 @@ namespace AL.Data.Catalogs
                 }
             }
 
+            foreach (string field in new[]
+                     {
+                         "AppliedOperationIds",
+                         "ApplicationReceipts"
+                     })
+            {
+                StrictJsonValue optional;
+                if (!progress.TryGet(field, out optional))
+                {
+                    continue;
+                }
+
+                var optionalRows = optional as StrictJsonArray;
+                if (optionalRows == null || optionalRows.Items.Count != 0)
+                {
+                    return false;
+                }
+            }
+
             StrictJsonValue encounterValue;
             var encounter = progress.TryGet("CurrentEncounter", out encounterValue)
                 ? encounterValue as StrictJsonObject
@@ -5979,6 +6455,84 @@ namespace AL.Data.Catalogs
                         collector,
                         "SAVE_NVS01_OBJECTIVE_STATUS_INVALID",
                         rowPath + ".Status",
+                        SaveSemanticDomain.Narrative);
+                }
+            }
+        }
+
+        private static void ValidateNvs01ApplicationReceipts(
+            StrictJsonObject progress,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.Nvs01Progress.ApplicationReceipts";
+            StrictJsonValue value;
+            var rows = progress.TryGet("ApplicationReceipts", out value)
+                ? value as StrictJsonArray
+                : null;
+            if (rows == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_APPLICATION_RECEIPTS_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            if (rows.Items.Count > 2)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_APPLICATION_RECEIPT_LIMIT",
+                    path,
+                    SaveSemanticDomain.Narrative);
+            }
+
+            var count = Math.Min(rows.Items.Count, 2);
+            for (var index = 0; index < count; index++)
+            {
+                string rowPath = path + "[" +
+                                 index.ToString(CultureInfo.InvariantCulture) + "]";
+                var row = rows.Items[index] as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_APPLICATION_RECEIPT_INVALID",
+                        rowPath,
+                        SaveSemanticDomain.Narrative);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    Nvs01ApplicationReceiptFields,
+                    rowPath,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state);
+                string currency;
+                if (TryReadRequiredString(
+                        row,
+                        "TechnicalCurrencyId",
+                        rowPath,
+                        SaveSemanticDomain.Narrative,
+                        allowBlank: true,
+                        collector,
+                        state,
+                        out currency) &&
+                    currency.Length != 0 &&
+                    !string.Equals(currency, "oathmark", StringComparison.Ordinal))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_APPLICATION_RECEIPT_CURRENCY_INVALID",
+                        rowPath + ".TechnicalCurrencyId",
                         SaveSemanticDomain.Narrative);
                 }
             }

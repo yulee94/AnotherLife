@@ -154,7 +154,7 @@
         "levelId": "ground",
         "side": "south",
         "x": 4.75,
-        "z": 0.0,
+        "z": 0.3,
         "separateObject": true,
         "planOpeningId": "town_hall_main_entry"
       },
@@ -163,8 +163,8 @@
         "kind": "door",
         "levelId": "ground",
         "side": "north",
-        "x": 7.41,
-        "z": 8.5,
+        "x": 8.3,
+        "z": 8.2,
         "separateObject": true,
         "planOpeningId": "town_hall_service_entry"
       },
@@ -234,7 +234,7 @@
         "levelId": "ground",
         "side": "west",
         "x": 0.0,
-        "z": 5.1,
+        "z": 4.25,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_west"
       },
@@ -244,7 +244,7 @@
         "levelId": "ground",
         "side": "east",
         "x": 9.5,
-        "z": 5.1,
+        "z": 4.25,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_east"
       },
@@ -253,20 +253,10 @@
         "kind": "window",
         "levelId": "ground",
         "side": "south",
-        "x": 8.22,
+        "x": 8.3,
         "z": 0.0,
         "separateObject": true,
         "planOpeningId": "window_ground_cut_south"
-      },
-      {
-        "id": "window_ground_cut_north",
-        "kind": "window",
-        "levelId": "ground",
-        "side": "north",
-        "x": 8.22,
-        "z": 8.5,
-        "separateObject": true,
-        "planOpeningId": "window_ground_cut_north"
       },
       {
         "id": "window_upper_open_gallery",
@@ -334,7 +324,7 @@
         "levelId": "upper",
         "side": "west",
         "x": 0.0,
-        "z": 5.1,
+        "z": 4.25,
         "separateObject": true,
         "planOpeningId": "window_upper_cut_west"
       },
@@ -344,32 +334,23 @@
         "levelId": "upper",
         "side": "east",
         "x": 9.5,
-        "z": 5.1,
+        "z": 4.25,
         "separateObject": true,
         "planOpeningId": "window_upper_cut_east"
-      },
-      {
-        "id": "window_upper_cut_south",
-        "kind": "window",
-        "levelId": "upper",
-        "side": "south",
-        "x": 8.22,
-        "z": 0.0,
-        "separateObject": true,
-        "planOpeningId": "window_upper_cut_south"
       },
       {
         "id": "window_upper_cut_north",
         "kind": "window",
         "levelId": "upper",
         "side": "north",
-        "x": 8.22,
+        "x": 8.3,
         "z": 8.5,
         "separateObject": true,
         "planOpeningId": "window_upper_cut_north"
       }
     ],
     "criticalFeatures": [],
+    "voids": [],
     "siteContext": {
       "orientation": "front/local south; rear/local north",
       "entryApproachSide": "south",
@@ -477,15 +458,19 @@
           "points": [
             [
               4.75,
-              0.0
+              0.3
             ],
             [
               4.75,
-              0.0
+              2.8
             ],
             [
               4.75,
-              7.9
+              5.125
+            ],
+            [
+              8.3,
+              5.125
             ]
           ]
         },
@@ -495,12 +480,16 @@
           "accessible": true,
           "points": [
             [
-              7.41,
-              8.5
+              8.3,
+              8.2
             ],
             [
-              4.75,
-              7.9
+              8.3,
+              5.75
+            ],
+            [
+              8.3,
+              5.125
             ]
           ]
         }
@@ -546,7 +535,7 @@
           "to": "public_hall",
           "side": "south",
           "x": 4.75,
-          "z": 0.0,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -565,8 +554,8 @@
           "from": "outside",
           "to": "stair_and_service",
           "side": "north",
-          "x": 7.41,
-          "z": 8.5,
+          "x": 8.3,
+          "z": 8.2,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             1.4,
@@ -681,6 +670,42 @@
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_ground_cut_AA_stair_and_service",
+          "separateObject": true,
+          "between": [
+            "stair_and_service",
+            "primary_circulation"
+          ],
+          "to": "stair_and_service",
+          "orientation": "horizontal",
+          "x": 8.3,
+          "z": 4.25,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_ground_cut_BB_stair_and_service",
+          "separateObject": true,
+          "between": [
+            "stair_and_service",
+            "primary_circulation"
+          ],
+          "to": "stair_and_service",
+          "orientation": "vertical",
+          "x": 8.3,
+          "z": 5.75,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [
@@ -690,7 +715,7 @@
           "to": "public_hall",
           "side": "south",
           "x": 4.75,
-          "z": 0.0,
+          "z": 0.3,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             2.5,
@@ -705,8 +730,8 @@
           "from": "outside",
           "to": "stair_and_service",
           "side": "north",
-          "x": 7.41,
-          "z": 8.5,
+          "x": 8.3,
+          "z": 8.2,
           "orientation": "horizontal",
           "clearOpeningMeters": [
             1.4,
@@ -802,7 +827,7 @@
           "serves": "stores",
           "side": "west",
           "x": 0.0,
-          "z": 5.1,
+          "z": 4.25,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -816,7 +841,7 @@
           "serves": "stair_and_service",
           "side": "east",
           "x": 9.5,
-          "z": 5.1,
+          "z": 4.25,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -829,22 +854,8 @@
           "separateFrameGlassShutter": true,
           "serves": "steward_office",
           "side": "south",
-          "x": 8.22,
+          "x": 8.3,
           "z": 0.0,
-          "orientation": "horizontal",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_ground_cut_north",
-          "separateFrameGlassShutter": true,
-          "serves": "stair_and_service",
-          "side": "north",
-          "x": 8.22,
-          "z": 8.5,
           "orientation": "horizontal",
           "openingMeters": [
             1.2,
@@ -860,10 +871,10 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 7.52,
-            "z": 4.0,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 7.4,
+            "z": 3.4,
+            "width": 1.8,
+            "depth": 1.7,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -875,10 +886,10 @@
           "type": "public_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 7.52,
-            "z": 4.0,
-            "width": 1.56,
-            "depth": 1.6,
+            "x": 7.4,
+            "z": 5.35,
+            "width": 1.8,
+            "depth": 1.5,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -958,10 +969,10 @@
           "protectedClearances": [
             {
               "id": "records_room_protected_aisle",
-              "x": 0.3,
-              "z": 1.2,
-              "width": 1.8,
-              "depth": 1.2,
+              "x": 0.6,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 3.0,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -995,10 +1006,10 @@
           "protectedClearances": [
             {
               "id": "stores_protected_aisle",
-              "x": 0.3,
-              "z": 5.15,
-              "width": 1.8,
-              "depth": 1.2,
+              "x": 0.6,
+              "z": 3.3,
+              "width": 1.2,
+              "depth": 4.9,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1032,10 +1043,10 @@
           "protectedClearances": [
             {
               "id": "steward_office_protected_aisle",
-              "x": 7.4,
-              "z": 1.2,
-              "width": 1.8,
-              "depth": 1.2,
+              "x": 7.7,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 3.0,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1069,10 +1080,10 @@
           "protectedClearances": [
             {
               "id": "stair_and_service_protected_aisle",
-              "x": 7.4,
-              "z": 5.15,
-              "width": 1.8,
-              "depth": 1.2,
+              "x": 7.7,
+              "z": 3.3,
+              "width": 1.2,
+              "depth": 4.9,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1258,11 +1269,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            5.1
+            4.25
           ],
           "to": [
             9.2,
-            5.1
+            4.25
           ],
           "cutsVerticalCoreId": "town_hall_stair_core"
         },
@@ -1270,11 +1281,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            8.22,
+            8.3,
             0.3
           ],
           "to": [
-            8.22,
+            8.3,
             8.2
           ],
           "cutsVerticalCoreId": "town_hall_stair_core"
@@ -1503,6 +1514,42 @@
             2.4
           ],
           "swing": "in"
+        },
+        {
+          "id": "door_upper_cut_AA_landing_and_staff",
+          "separateObject": true,
+          "between": [
+            "landing_and_staff",
+            "primary_circulation"
+          ],
+          "to": "landing_and_staff",
+          "orientation": "horizontal",
+          "x": 8.3,
+          "z": 4.25,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
+        },
+        {
+          "id": "door_upper_cut_BB_landing_and_staff",
+          "separateObject": true,
+          "between": [
+            "landing_and_staff",
+            "primary_circulation"
+          ],
+          "to": "landing_and_staff",
+          "orientation": "vertical",
+          "x": 8.3,
+          "z": 2.75,
+          "clearOpeningMeters": [
+            1.2,
+            2.4
+          ],
+          "swing": "in",
+          "cutAligned": true
         }
       ],
       "exteriorEntrances": [],
@@ -1588,10 +1635,10 @@
         {
           "id": "window_upper_cut_west",
           "separateFrameGlassShutter": true,
-          "serves": "rear_archive",
+          "serves": "upper_archive",
           "side": "west",
           "x": 0.0,
-          "z": 5.1,
+          "z": 4.25,
           "orientation": "vertical",
           "openingMeters": [
             1.2,
@@ -1602,25 +1649,11 @@
         {
           "id": "window_upper_cut_east",
           "separateFrameGlassShutter": true,
-          "serves": "upper_service",
+          "serves": "landing_and_staff",
           "side": "east",
           "x": 9.5,
-          "z": 5.1,
+          "z": 4.25,
           "orientation": "vertical",
-          "openingMeters": [
-            1.2,
-            1.5
-          ],
-          "cutAligned": true
-        },
-        {
-          "id": "window_upper_cut_south",
-          "separateFrameGlassShutter": true,
-          "serves": "landing_and_staff",
-          "side": "south",
-          "x": 8.22,
-          "z": 0.0,
-          "orientation": "horizontal",
           "openingMeters": [
             1.2,
             1.5
@@ -1632,7 +1665,7 @@
           "separateFrameGlassShutter": true,
           "serves": "upper_service",
           "side": "north",
-          "x": 8.22,
+          "x": 8.3,
           "z": 8.5,
           "orientation": "horizontal",
           "openingMeters": [
@@ -1649,10 +1682,10 @@
           "type": "dogleg_stair",
           "footprint": {
             "id": "stair_footprint",
-            "x": 7.52,
-            "z": 2.88,
-            "width": 1.4,
-            "depth": 2.2,
+            "x": 7.4,
+            "z": 3.4,
+            "width": 1.8,
+            "depth": 1.7,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
@@ -1664,15 +1697,15 @@
           "type": "public_platform",
           "footprint": {
             "id": "lift_footprint",
-            "x": 7.52,
-            "z": 3.48,
-            "width": 1.56,
-            "depth": 1.6,
+            "x": 7.4,
+            "z": 5.35,
+            "width": 1.8,
+            "depth": 1.5,
             "kind": "vertical_circulation"
           },
           "landingDepthMeters": 1.5,
           "direction": "vertical platform",
-          "locatedInRoomId": "landing_and_staff"
+          "locatedInRoomId": "upper_service"
         }
       ],
       "furnishingLayouts": [
@@ -1734,10 +1767,10 @@
           "protectedClearances": [
             {
               "id": "upper_archive_protected_aisle",
-              "x": 0.3,
-              "z": 2.15,
-              "width": 1.8,
-              "depth": 1.2,
+              "x": 0.6,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 4.9,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1771,10 +1804,10 @@
           "protectedClearances": [
             {
               "id": "landing_and_staff_protected_aisle",
-              "x": 7.4,
-              "z": 2.15,
-              "width": 1.8,
-              "depth": 1.2,
+              "x": 7.7,
+              "z": 0.3,
+              "width": 1.2,
+              "depth": 4.9,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1858,10 +1891,10 @@
           "protectedClearances": [
             {
               "id": "rear_archive_protected_aisle",
-              "x": 0.3,
-              "z": 6.15,
-              "width": 1.8,
-              "depth": 1.2,
+              "x": 0.6,
+              "z": 5.3,
+              "width": 1.2,
+              "depth": 2.9,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -1895,10 +1928,10 @@
           "protectedClearances": [
             {
               "id": "upper_service_protected_aisle",
-              "x": 7.4,
-              "z": 6.15,
-              "width": 1.8,
-              "depth": 1.2,
+              "x": 7.7,
+              "z": 5.3,
+              "width": 1.2,
+              "depth": 2.9,
               "kind": "minimum_1_2m_aisle"
             },
             {
@@ -2034,11 +2067,11 @@
           "orientation": "longitudinal",
           "from": [
             0.3,
-            5.1
+            4.25
           ],
           "to": [
             9.2,
-            5.1
+            4.25
           ],
           "cutsVerticalCoreId": "town_hall_stair_core"
         },
@@ -2046,11 +2079,11 @@
           "id": "B-B",
           "orientation": "cross",
           "from": [
-            8.22,
+            8.3,
             0.3
           ],
           "to": [
-            8.22,
+            8.3,
             8.2
           ],
           "cutsVerticalCoreId": "town_hall_stair_core"
@@ -2066,10 +2099,10 @@
       "type": "dogleg_stair",
       "footprint": {
         "id": "stair_footprint",
-        "x": 7.52,
-        "z": 4.0,
-        "width": 1.4,
-        "depth": 2.2,
+        "x": 7.4,
+        "z": 3.4,
+        "width": 1.8,
+        "depth": 1.7,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -2098,10 +2131,10 @@
       "type": "public_platform",
       "footprint": {
         "id": "lift_footprint",
-        "x": 5.14,
-        "z": 4.0,
-        "width": 1.6,
-        "depth": 1.6,
+        "x": 7.4,
+        "z": 5.35,
+        "width": 1.8,
+        "depth": 1.5,
         "kind": "vertical_circulation"
       },
       "clearWidthMeters": 1.5,
@@ -2131,7 +2164,7 @@
       "id": "A-A",
       "cutLineId": "A-A",
       "axis": "x",
-      "cutCoordinateMeters": 5.1,
+      "cutCoordinateMeters": 4.25,
       "spanMeters": 9.5,
       "levels": [
         {
@@ -2217,8 +2250,8 @@
             "upper"
           ],
           "direction": "UP clockwise",
-          "startMeters": 7.52,
-          "endMeters": 8.92
+          "startMeters": 7.4,
+          "endMeters": 9.2
         },
         {
           "coreId": "town_hall_public_platform",
@@ -2228,8 +2261,8 @@
             "upper"
           ],
           "direction": "vertical platform",
-          "startMeters": 5.14,
-          "endMeters": 6.74
+          "startMeters": 7.4,
+          "endMeters": 9.2
         }
       ],
       "apertureSlices": [
@@ -2239,9 +2272,9 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 5.1,
+          "z": 4.25,
           "positionMeters": 0.0,
-          "orthogonalMeters": 5.1
+          "orthogonalMeters": 4.25
         },
         {
           "levelId": "ground",
@@ -2249,19 +2282,39 @@
           "kind": "window",
           "side": "east",
           "x": 9.5,
-          "z": 5.1,
+          "z": 4.25,
           "positionMeters": 9.5,
-          "orthogonalMeters": 5.1
+          "orthogonalMeters": 4.25
         },
         {
           "levelId": "ground",
-          "openingId": "approved_ground_door_05",
+          "openingId": "approved_ground_door_03",
           "kind": "door",
           "side": null,
-          "x": 4.15,
-          "z": 5.3,
-          "positionMeters": 4.15,
-          "orthogonalMeters": 5.3
+          "x": 2.1,
+          "z": 4.3,
+          "positionMeters": 2.1,
+          "orthogonalMeters": 4.3
+        },
+        {
+          "levelId": "ground",
+          "openingId": "approved_ground_door_04",
+          "kind": "door",
+          "side": null,
+          "x": 7.4,
+          "z": 4.3,
+          "positionMeters": 7.4,
+          "orthogonalMeters": 4.3
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_stair_and_service",
+          "kind": "door",
+          "side": null,
+          "x": 8.3,
+          "z": 4.25,
+          "positionMeters": 8.3,
+          "orthogonalMeters": 4.25
         },
         {
           "levelId": "upper",
@@ -2269,9 +2322,9 @@
           "kind": "window",
           "side": "west",
           "x": 0.0,
-          "z": 5.1,
+          "z": 4.25,
           "positionMeters": 0.0,
-          "orthogonalMeters": 5.1
+          "orthogonalMeters": 4.25
         },
         {
           "levelId": "upper",
@@ -2279,19 +2332,19 @@
           "kind": "window",
           "side": "east",
           "x": 9.5,
-          "z": 5.1,
+          "z": 4.25,
           "positionMeters": 9.5,
-          "orthogonalMeters": 5.1
+          "orthogonalMeters": 4.25
         },
         {
           "levelId": "upper",
-          "openingId": "approved_upper_door_03",
+          "openingId": "door_upper_cut_AA_landing_and_staff",
           "kind": "door",
           "side": null,
-          "x": 4.15,
-          "z": 5.3,
-          "positionMeters": 4.15,
-          "orthogonalMeters": 5.3
+          "x": 8.3,
+          "z": 4.25,
+          "positionMeters": 8.3,
+          "orthogonalMeters": 4.25
         }
       ],
       "furnitureSlices": [
@@ -2370,7 +2423,7 @@
       "id": "B-B",
       "cutLineId": "B-B",
       "axis": "z",
-      "cutCoordinateMeters": 8.22,
+      "cutCoordinateMeters": 8.3,
       "spanMeters": 8.5,
       "levels": [
         {
@@ -2440,8 +2493,8 @@
             "upper"
           ],
           "direction": "UP clockwise",
-          "startMeters": 4.0,
-          "endMeters": 6.2
+          "startMeters": 3.4,
+          "endMeters": 5.1
         },
         {
           "coreId": "town_hall_public_platform",
@@ -2451,11 +2504,21 @@
             "upper"
           ],
           "direction": "vertical platform",
-          "startMeters": 4.0,
-          "endMeters": 5.6
+          "startMeters": 5.35,
+          "endMeters": 6.85
         }
       ],
       "apertureSlices": [
+        {
+          "levelId": "ground",
+          "openingId": "town_hall_service_entry",
+          "kind": "door",
+          "side": "north",
+          "x": 8.3,
+          "z": 8.2,
+          "positionMeters": 8.2,
+          "orthogonalMeters": 8.3
+        },
         {
           "levelId": "ground",
           "openingId": "window_ground_stair_and_service",
@@ -2471,20 +2534,40 @@
           "openingId": "window_ground_cut_south",
           "kind": "window",
           "side": "south",
-          "x": 8.22,
+          "x": 8.3,
           "z": 0.0,
           "positionMeters": 0.0,
-          "orthogonalMeters": 8.22
+          "orthogonalMeters": 8.3
         },
         {
           "levelId": "ground",
-          "openingId": "window_ground_cut_north",
-          "kind": "window",
+          "openingId": "town_hall_service_entry",
+          "kind": "door",
           "side": "north",
-          "x": 8.22,
-          "z": 8.5,
-          "positionMeters": 8.5,
-          "orthogonalMeters": 8.22
+          "x": 8.3,
+          "z": 8.2,
+          "positionMeters": 8.2,
+          "orthogonalMeters": 8.3
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_AA_stair_and_service",
+          "kind": "door",
+          "side": null,
+          "x": 8.3,
+          "z": 4.25,
+          "positionMeters": 4.25,
+          "orthogonalMeters": 8.3
+        },
+        {
+          "levelId": "ground",
+          "openingId": "door_ground_cut_BB_stair_and_service",
+          "kind": "door",
+          "side": null,
+          "x": 8.3,
+          "z": 5.75,
+          "positionMeters": 5.75,
+          "orthogonalMeters": 8.3
         },
         {
           "levelId": "upper",
@@ -2498,23 +2581,33 @@
         },
         {
           "levelId": "upper",
-          "openingId": "window_upper_cut_south",
-          "kind": "window",
-          "side": "south",
-          "x": 8.22,
-          "z": 0.0,
-          "positionMeters": 0.0,
-          "orthogonalMeters": 8.22
-        },
-        {
-          "levelId": "upper",
           "openingId": "window_upper_cut_north",
           "kind": "window",
           "side": "north",
-          "x": 8.22,
+          "x": 8.3,
           "z": 8.5,
           "positionMeters": 8.5,
-          "orthogonalMeters": 8.22
+          "orthogonalMeters": 8.3
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_cut_AA_landing_and_staff",
+          "kind": "door",
+          "side": null,
+          "x": 8.3,
+          "z": 4.25,
+          "positionMeters": 4.25,
+          "orthogonalMeters": 8.3
+        },
+        {
+          "levelId": "upper",
+          "openingId": "door_upper_cut_BB_landing_and_staff",
+          "kind": "door",
+          "side": null,
+          "x": 8.3,
+          "z": 2.75,
+          "positionMeters": 2.75,
+          "orthogonalMeters": 8.3
         }
       ],
       "furnitureSlices": [

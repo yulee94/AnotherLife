@@ -39,7 +39,8 @@ namespace AL.Data.Runtime
             bool handoffCommitted,
             ProofOfWorthState proof,
             string lastOperationId,
-            FirstWorldProgressReadDisposition readDisposition)
+            FirstWorldProgressReadDisposition readDisposition,
+            string profileId)
         {
             Realm = realm;
             Revision = revision;
@@ -48,9 +49,11 @@ namespace AL.Data.Runtime
             Proof = proof;
             LastOperationId = lastOperationId ?? string.Empty;
             ReadDisposition = readDisposition;
+            ProfileId = profileId ?? string.Empty;
         }
 
         public RealmId Realm { get; }
+        public string ProfileId { get; }
         public long Revision { get; }
         public FirstWorldEntryTutorialState Tutorial { get; }
         public bool HandoffCommitted { get; }
@@ -95,7 +98,7 @@ namespace AL.Data.Runtime
     }
 
     /// <summary>
-    /// Versioned schema-v1 extension for the first-world tutorial and its
+    /// Versioned save extension for the first-world tutorial and its
     /// single durable handoff into the existing Proof-of-Worth state machine.
     /// Every write is reconstructed from one admitted typed command; callers
     /// cannot publish an arbitrary state snapshot.
@@ -184,7 +187,8 @@ namespace AL.Data.Runtime
                     true,
                     CreateGrantedProof(save.SelectedRealm),
                     data.LastOperationId,
-                    FirstWorldProgressReadDisposition.ReconciledFromLordship);
+                    FirstWorldProgressReadDisposition.ReconciledFromLordship,
+                    save.ProfileId);
                 return true;
             }
 
@@ -195,7 +199,8 @@ namespace AL.Data.Runtime
                 data.HandoffCommitted,
                 proof,
                 data.LastOperationId,
-                FirstWorldProgressReadDisposition.Durable);
+                FirstWorldProgressReadDisposition.Durable,
+                save.ProfileId);
             return true;
         }
 
@@ -251,7 +256,9 @@ namespace AL.Data.Runtime
                 request.Expected == null ||
                 string.IsNullOrWhiteSpace(request.TransactionId) ||
                 request.Expected.Realm == RealmId.None ||
-                candidate.SelectedRealm != request.Expected.Realm)
+                candidate.SelectedRealm != request.Expected.Realm ||
+                !string.Equals(candidate.ProfileId ?? string.Empty,
+                    request.Expected.ProfileId, StringComparison.Ordinal))
             {
                 message = "AL-FIRST-WORLD-REQUEST-INVALID";
                 return FirstWorldProgressPrepareDisposition.Rejected;
@@ -286,6 +293,17 @@ namespace AL.Data.Runtime
                     out FirstWorldProgressSnapshot expectedNext,
                     out string applyMessage))
             {
+                if (request.TutorialCommand == FirstWorldTutorialProgressCommand.Invalid &&
+                    request.ProofCommand != ProofOfWorthCommand.Invalid &&
+                    request.Expected.Proof != null &&
+                    ProofOfWorthPlanner.Apply(request.Expected.Proof, request.ProofCommand)
+                        .Status == ProofOfWorthStatus.DuplicateIgnored &&
+                    Equivalent(current, request.Expected))
+                {
+                    prepared = current;
+                    return FirstWorldProgressPrepareDisposition.Duplicate;
+                }
+
                 message = applyMessage;
                 return FirstWorldProgressPrepareDisposition.Rejected;
             }
@@ -501,7 +519,8 @@ namespace AL.Data.Runtime
                 handoff,
                 proof,
                 operationId,
-                FirstWorldProgressReadDisposition.Durable);
+                FirstWorldProgressReadDisposition.Durable,
+                current.ProfileId);
             return true;
         }
 
@@ -516,6 +535,7 @@ namespace AL.Data.Runtime
 
             if (left == null || right == null ||
                 left.Realm != right.Realm ||
+                !string.Equals(left.ProfileId, right.ProfileId, StringComparison.Ordinal) ||
                 left.Revision != right.Revision ||
                 left.HandoffCommitted != right.HandoffCommitted ||
                 !string.Equals(
@@ -582,7 +602,8 @@ namespace AL.Data.Runtime
                     true,
                     CreateGrantedProof(save.SelectedRealm),
                     string.Empty,
-                    FirstWorldProgressReadDisposition.ReconciledFromLordship);
+                    FirstWorldProgressReadDisposition.ReconciledFromLordship,
+                    save.ProfileId);
             }
 
             return new FirstWorldProgressSnapshot(
@@ -592,7 +613,8 @@ namespace AL.Data.Runtime
                 false,
                 null,
                 string.Empty,
-                FirstWorldProgressReadDisposition.LegacyDefault);
+                FirstWorldProgressReadDisposition.LegacyDefault,
+                save.ProfileId);
         }
 
         private static FirstWorldProgressData Encode(

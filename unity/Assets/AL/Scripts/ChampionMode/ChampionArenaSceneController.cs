@@ -2183,6 +2183,13 @@ namespace AL.ChampionMode
             {
                 _encounterResultText.color = new Color(0.84f, 0.88f, 0.92f);
                 _encounterResultText.text = "PRACTICE\nno committed reward";
+                if (FirstSessionChampionStart.IsFirstSessionLanding &&
+                    _guardianTrialCleared && !_encounterClearShown && _playerController != null)
+                {
+                    _encounterClearShown = true;
+                    ShowClearPanel("—", elapsed);
+                }
+
                 return;
             }
 
@@ -2220,6 +2227,7 @@ namespace AL.ChampionMode
 
         private void ShowClearPanel(string grade, float elapsed)
         {
+            bool practice = ResolveEncounterPresentation().VisiblyPractice;
             SetAppearanceInspection(false);
             _autoCombatController?.SetMode(AutoMode.Manual);
             _playerController?.SetControlLocked(true);
@@ -2236,7 +2244,9 @@ namespace AL.ChampionMode
                 _clearBackdropImage.gameObject.SetActive(true);
             }
 
-            Color gradeColor = grade == "S"
+            Color gradeColor = practice
+                ? new Color(0.84f, 0.88f, 0.92f)
+                : grade == "S"
                 ? new Color(1f, 0.86f, 0.36f)
                 : grade == "A"
                     ? new Color(0.58f, 1f, 0.72f)
@@ -2244,7 +2254,7 @@ namespace AL.ChampionMode
 
             if (_clearTitleText != null)
             {
-                _clearTitleText.text = "ENCOUNTER CLEAR " + grade;
+                _clearTitleText.text = practice ? "PRACTICE COMPLETE" : "ENCOUNTER CLEAR " + grade;
                 _clearTitleText.color = gradeColor;
             }
 
@@ -2266,12 +2276,16 @@ namespace AL.ChampionMode
 
             if (_clearDetailText != null)
             {
-                _clearDetailText.text = GetClearRecapLine(grade);
+                _clearDetailText.text = practice
+                    ? "Practice complete. No committed reward or progression."
+                    : GetClearRecapLine(grade);
             }
 
             if (_combatFeedText != null)
             {
-                _combatFeedText.text = ChampionHudCopy.ClearFeed;
+                _combatFeedText.text = practice
+                    ? "Practice complete. No committed reward or progression."
+                    : ChampionHudCopy.ClearFeed;
             }
 
             RefreshClearRewardText();

@@ -39,6 +39,10 @@ namespace AL.Data.Runtime
         public List<AL.Core.Interfaces.TerritoryData> Territories = new List<AL.Core.Interfaces.TerritoryData>();
         public List<RealmGemState> RealmGems = new List<RealmGemState>();
         public WishgateState Wishgate = new WishgateState();
+        // Optional schema-v2 extension. Omitted legacy saves stay loadable as
+        // an unearned Wishgate snapshot; the durable transaction installs this
+        // authority only after a verified profile-bound commit.
+        public WishgateTransactionState WishgateTransaction;
         public string CurrentChapterId;
         public WarmasterState Warmaster = new WarmasterState();
         public ChampionCustomizationState ChampionCustomization = new ChampionCustomizationState();
@@ -56,6 +60,15 @@ namespace AL.Data.Runtime
         // Optional schema-v2 extension. Missing legacy/schema-2 saves have no
         // active world event and do not invent one until a committed start.
         public WorldStatePersistentState WorldState;
+        // Optional schema-v2 extension. Missing legacy/schema-2 saves admit
+        // empty notification history/outbox until a durable record is committed.
+        public NotificationHistoryPersistentState NotificationHistory;
+        // Optional schema-v2 extension. Missing legacy/schema-2 saves admit
+        // empty Guild City seasons until a trusted-clock commit persists them.
+        public AL.Guilds.GuildCitySeasonPersistentState GuildCitySeason;
+        // Optional schema-v2 extension. Missing legacy/schema-2 saves migrate
+        // to empty raid-call/closed-instance authority until a trusted command commits.
+        public AL.Guilds.GuildRaidMusterPersistentState GuildRaidMuster;
         public int WarzoneCredits;
         public long LastSavedTimestamp;
         // Optional schema-v1 extension. Missing legacy saves admit empty
@@ -326,7 +339,38 @@ namespace AL.Data.Runtime
         public List<string> ConsequenceIntentIds = new List<string>();
         public List<string> AcquiredArtifactIds = new List<string>();
         public List<string> AppliedEffectKeys = new List<string>();
+        public List<string> AppliedOperationIds = new List<string>();
+        public List<Nvs01ConsequenceApplicationReceiptData> ApplicationReceipts =
+            new List<Nvs01ConsequenceApplicationReceiptData>();
         public string UnlockedChapterId = string.Empty;
+    }
+
+    [Serializable]
+    public class Nvs01ConsequenceApplicationReceiptData
+    {
+        public int ContractVersion;
+        public int Kind;
+        public string OperationId = string.Empty;
+        public string ProfileId = string.Empty;
+        public string ExpectedGenerationFingerprint = string.Empty;
+        public string CausalOperationId = string.Empty;
+        public string CausalPayloadFingerprint = string.Empty;
+        public string PredecessorReceiptFingerprint = string.Empty;
+        public string PredecessorExpectedGenerationFingerprint = string.Empty;
+        public string RealmId = string.Empty;
+        public string CorrelationId = string.Empty;
+        public long ExpectedQuestRevision;
+        public long CandidateQuestRevision;
+        public List<string> EffectKeys = new List<string>();
+        public string TargetChapterId = string.Empty;
+        public string TechnicalCurrencyId = string.Empty;
+        public long PreviousGoldBalance;
+        public long ResultingGoldBalance;
+        public float PreviousValeriusAffinity;
+        public float ResultingValeriusAffinity;
+        public string PreviousChapterId = string.Empty;
+        public string ResultingChapterId = string.Empty;
+        public string PlanFingerprint = string.Empty;
     }
 
     [Serializable]
@@ -568,6 +612,58 @@ namespace AL.Data.Runtime
     }
 
     [Serializable]
+    public sealed class WishgateTransactionState
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public int Status;
+        public long Revision;
+        public int Phase;
+        public string EntitlementId = string.Empty;
+        public string EarnReasonId = string.Empty;
+        public string RewardId = string.Empty;
+        public string RewardApplicationId = string.Empty;
+        public long EarnedUtcSeconds;
+        public long SelectedUtcSeconds;
+        public long AppliedUtcSeconds;
+        public long CommittedUtcSeconds;
+        public long EntitlementRevision;
+        public bool EntitlementIsSupported = true;
+        public bool IsComplete = true;
+        public string LastOperationId = string.Empty;
+        public string LastEventId = string.Empty;
+        public string LastRequestFingerprint = string.Empty;
+        public string ReceiptHash = string.Empty;
+        public string PostCommitNotificationCorrelationId = string.Empty;
+        public string AppliedRewardApplicationId = string.Empty;
+        public System.Collections.Generic.List<WishgateTransitionRecordState> Records =
+            new System.Collections.Generic.List<WishgateTransitionRecordState>();
+    }
+
+    [Serializable]
+    public sealed class WishgateTransitionRecordState
+    {
+        public string OperationId = string.Empty;
+        public string EventId = string.Empty;
+        public string CorrelationId = string.Empty;
+        public int Operation;
+        public string RequestFingerprint = string.Empty;
+        public string EntitlementId = string.Empty;
+        public string EarnReasonId = string.Empty;
+        public string RewardId = string.Empty;
+        public string RewardApplicationId = string.Empty;
+        public int ResultingPhase;
+        public long ResultingSnapshotRevision;
+        public long ResultingEntitlementRevision;
+        public long PlannedUtcSeconds;
+        public string ResultingStateHash = string.Empty;
+        public string PlanHash = string.Empty;
+        public string PostCommitNotificationCorrelationId = string.Empty;
+        public bool IsSupported = true;
+    }
+
+    [Serializable]
     public class NpcAffinityData
     {
         public string NpcId;
@@ -668,5 +764,47 @@ namespace AL.Data.Runtime
         public string InstanceId = string.Empty;
         public long CommittedRevision;
         public WorldStateInstanceRecord ResultingInstance = new WorldStateInstanceRecord();
+    }
+
+    [Serializable]
+    public sealed class NotificationHistoryPersistentState
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public List<NotificationHistoryRecord> Records = new List<NotificationHistoryRecord>();
+        public List<NotificationHistoryRecord> Outbox = new List<NotificationHistoryRecord>();
+    }
+
+    [Serializable]
+    public sealed class NotificationHistoryRecord
+    {
+        public string RecordId = string.Empty;
+        public int NotificationSchemaVersion;
+        public string DefinitionId = string.Empty;
+        public int DefinitionVersion;
+        public string SourceSystemId = string.Empty;
+        public string CorrelationId = string.Empty;
+        public long OccurredAtUtcTicks;
+        public List<NotificationHistoryParameterRecord> Parameters =
+            new List<NotificationHistoryParameterRecord>();
+        public int State;
+        public long AcknowledgedAtUtcTicks;
+        public long DismissedAtUtcTicks;
+        public long ExpiresAtUtcTicks;
+        public long LastDeliveryAttemptUtcTicks;
+        public int DeliveryAttemptCount;
+        public string SupersededByRecordId = string.Empty;
+        public int DurabilityPolicy;
+        public int PrivacyClass;
+        public bool RequiresAcknowledgement;
+    }
+
+    [Serializable]
+    public sealed class NotificationHistoryParameterRecord
+    {
+        public string Name = string.Empty;
+        public int Kind;
+        public string TextValue = string.Empty;
     }
 }
