@@ -3,6 +3,7 @@ using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Death;
+using AL.ChampionMode.Encounter;
 using AL.ChampionMode.Interaction;
 using AL.ChampionMode.Presentation;
 using AL.ChampionMode.Quests;
@@ -179,6 +180,8 @@ namespace AL.ChampionMode
         private FirstSessionInnerRealmSpawn _innerSpawn;
         private ChampionHudSession _hudSession;
 
+        public ChampionEncounterLoadPlan AuthoritativeEncounterLoadPlan { get; private set; }
+
         private void Start()
         {
             Bootloader.InitializeIfMissing();
@@ -193,6 +196,8 @@ namespace AL.ChampionMode
             }
 
             _realmId = realmContext.RealmId;
+            AuthoritativeEncounterLoadPlan =
+                ChampionEncounterProductionLoadPath.StartFromCommittedRealm(_realmId);
             ApplyRuntimeQuality();
             ApplyFirstSessionPresentationBudgets();
             BuildArena();
