@@ -1,0 +1,23 @@
+{
+    "name": "AL.MarketplaceSettlement.Tests",
+    "rootNamespace": "AL.Tests.EditMode.Marketplace",
+    "references": [
+        "AL.MarketplaceSettlement"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": true,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

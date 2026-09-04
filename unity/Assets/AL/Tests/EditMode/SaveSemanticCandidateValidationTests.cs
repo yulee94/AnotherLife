@@ -82,6 +82,12 @@ namespace AL.Tests.EditMode
             "\"CatalogVersion\":\"\",\"CatalogSha256\":\"\",\"StateDigest\":\"\"," +
             "\"DiscoveredFeatureIds\":[],\"VisibleRouteIds\":[]," +
             "\"VisibleObjectiveIds\":[],\"VisibleAllegianceMarkerIds\":[]}";
+        private const string EmptyTerritoryCaptureLedgerJson =
+            "{\"Version\":1,\"CatalogId\":\"territory.phase-b.baseline\"," +
+            "\"CatalogRawSha256\":\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"," +
+            "\"StateRevisionHash\":\"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\"," +
+            "\"ProfileSessionId\":\"profile-local-runtime\"," +
+            "\"Revisions\":[],\"Receipts\":[],\"Outbox\":[]}";
         private const string NeutralNvs01ProgressJson =
             "{\"Version\":0,\"PacketVersion\":\"\",\"PacketSha256\":\"\"," +
             "\"QuestId\":\"\",\"Revision\":0,\"StateId\":\"\",\"Objectives\":[]," +
@@ -161,6 +167,75 @@ namespace AL.Tests.EditMode
             Assert.That(
                 candidate.Diagnostics.Select(item => item.Code),
                 Does.Contain("SAVE_UNKNOWN_NESTED_FIELD"));
+        }
+
+        [Test]
+        public void TerritoryCaptureLedgerCurrentVersionIsWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"TerritoryCaptureLedger\":" + EmptyTerritoryCaptureLedgerJson),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
+        public void TerritoryCaptureLedgerForwardVersionStaysPreservedReadOnly()
+        {
+            string forward = EmptyTerritoryCaptureLedgerJson.Replace(
+                "\"Version\":1",
+                "\"Version\":2");
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"TerritoryCaptureLedger\":" + forward),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_TERRITORY_CAPTURE_LEDGER_VERSION_FORWARD"));
+        }
+
+        [Test]
+        public void TerritoryCaptureLedgerWithInvalidShapeIsMalformed()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"TerritoryCaptureLedger\":[]"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain("SAVE_TERRITORY_CAPTURE_LEDGER_INVALID"));
+        }
+
+        [Test]
+        public void TerritoryCaptureLedgerWithMalformedNestedRowIsReadOnly()
+        {
+            string malformed = EmptyTerritoryCaptureLedgerJson.Replace(
+                "\"Revisions\":[]",
+                "\"Revisions\":[{\"TerritoryId\":17,\"Revision\":\"bad\"}]");
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(extraTopLevel: ",\"TerritoryCaptureLedger\":" + malformed),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
         }
 
         [Test]

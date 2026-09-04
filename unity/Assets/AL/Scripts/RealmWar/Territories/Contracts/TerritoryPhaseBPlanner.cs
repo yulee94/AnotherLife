@@ -515,9 +515,10 @@ namespace AL.RealmWar.Territories.Contracts
             {
                 diagnostics.Add(Error("MalformedAuthorization", capture.TerritoryId, "Capture authorization is missing or malformed."));
             }
-            else if (authorization.Source != TerritoryCaptureAuthorizationSource.FakeTestOutcome)
+            else if (authorization.Source != TerritoryCaptureAuthorizationSource.FakeTestOutcome &&
+                authorization.Source != TerritoryCaptureAuthorizationSource.CommandResult)
             {
-                diagnostics.Add(Error("AuthorizationSourceUnavailable", capture.TerritoryId, "Production capture authorization sources remain unavailable in the pure unregistered planner."));
+                diagnostics.Add(Error("AuthorizationSourceUnavailable", capture.TerritoryId, "Battle-result capture authorization remains unavailable until that production source is registered."));
             }
 
             List<TerritoryCaptureReceipt> receiptRows = ValidateCaptureReceipts(receipts, diagnostics);
