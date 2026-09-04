@@ -548,6 +548,7 @@ namespace AL.Services.Local
                 return incoherent;
             }
 
+            bool committedReplay = false;
             if (IsCommittedAuthority(publishedAuthority))
             {
                 if (!string.Equals(
@@ -584,20 +585,17 @@ namespace AL.Services.Local
 
                 if (publishedRealm == request.RequestedRealmId)
                 {
+                    committedReplay = true;
+                }
+                else
+                {
                     return LegacyRealmResult(
-                        RealmSelectionStatus.AlreadyCommittedSameRealm,
+                        RealmSelectionStatus.RejectedDifferentRealm,
                         request.RequestedRealmId,
                         false,
                         false,
-                        "AL-REALM-ALREADY-COMMITTED");
+                        "AL-REALM-DIFFERENT-REALM-REJECTED");
                 }
-
-                return LegacyRealmResult(
-                    RealmSelectionStatus.RejectedDifferentRealm,
-                    request.RequestedRealmId,
-                    false,
-                    false,
-                    "AL-REALM-DIFFERENT-REALM-REJECTED");
             }
 
             if (RealmSelectionAuthority.IsDefinedPlayable(publishedRealm) &&
@@ -611,21 +609,29 @@ namespace AL.Services.Local
                     "AL-REALM-DIFFERENT-REALM-REJECTED");
             }
 
-            bool legacyMigration =
+            bool legacyMigration = !committedReplay &&
                 RealmSelectionAuthority.IsDefinedPlayable(publishedRealm) &&
                 publishedRealm == request.RequestedRealmId;
-            string transactionId = legacyMigration
+            string transactionId = committedReplay
+                ? publishedAuthority.TransactionId
+                : legacyMigration
                 ? RealmSelectionAuthority.MigrationTransactionId(
                     before.ProfileId,
                     publishedRealm)
                 : request.TransactionId;
-            string correlationId = legacyMigration
+            string correlationId = committedReplay
+                ? publishedAuthority.CorrelationId
+                : legacyMigration
                 ? transactionId
                 : request.CorrelationId;
-            string eventId = legacyMigration
+            string eventId = committedReplay
+                ? publishedAuthority.EventId
+                : legacyMigration
                 ? string.Empty
                 : RealmSelectionAuthority.EventId(transactionId);
-            string provenance = legacyMigration
+            string provenance = committedReplay
+                ? publishedAuthority.Provenance
+                : legacyMigration
                 ? RealmSelectionAuthority.LegacyMigrationProvenance
                 : RealmSelectionAuthority.InitialProvenance;
             RealmId committedRealm = legacyMigration
@@ -646,6 +652,15 @@ namespace AL.Services.Local
                         {
                             return SaveCandidateMutationPreparation.Rejected(
                                 "AL-SAVE-PROFILE-ID-MUTATION-REJECTED");
+                        }
+
+                        if (committedReplay)
+                        {
+                            return candidate.SelectedRealm == publishedRealm &&
+                                IsCommittedAuthority(candidate.RealmSelection)
+                                    ? SaveCandidateMutationPreparation.Duplicate()
+                                    : SaveCandidateMutationPreparation.Rejected(
+                                        "AL-REALM-AUTHORITY-CONFLICT");
                         }
 
                         if (legacyMigration &&
