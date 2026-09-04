@@ -65,6 +65,7 @@ namespace AL.Services.Local
                 string.Empty,
                 KingdomProductionProfileCatalog.AuthorityLedgerId,
                 false,
+                0,
                 Array.Empty<KingdomProductionContributionRule>());
         }
     }

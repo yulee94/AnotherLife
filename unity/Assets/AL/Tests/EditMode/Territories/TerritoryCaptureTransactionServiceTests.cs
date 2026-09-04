@@ -295,7 +295,39 @@ namespace AL.Tests.EditMode.Territories
         {
             FakeSaveGameService save = WritableSave();
             save.CurrentSave.SelectedRealm = RealmId.Crownlands;
-            var warzone = WarzoneService.CreateForTests(save);
+            save.CurrentSave.RealmSelection = new RealmSelectionAuthorityState
+            {
+                Version = 1,
+                Committed = true,
+                SelectedRealm = (int)RealmId.Crownlands,
+                ProfileId = "alp_territory_income_profile",
+                TransactionId = "tttttttttttttttttttttttttttttttt",
+                CorrelationId = "tttttttttttttttttttttttttttttttt",
+                OperationId = "al.save.schema2.realm-selection.v1",
+                EventId = "alr_evt_territory_income_event_01",
+                CatalogVersion = "0.1.0",
+                Provenance = "initial",
+                ReceiptFingerprint = AL.RealmSelection.RealmSelectionAuthority.ComputeReceiptFingerprint(
+                    "alp_territory_income_profile",
+                    RealmId.Crownlands,
+                    "tttttttttttttttttttttttttttttttt",
+                    "tttttttttttttttttttttttttttttttt",
+                    "al.save.schema2.realm-selection.v1",
+                    "alr_evt_territory_income_event_01",
+                    "initial",
+                    1),
+                Revision = 1
+            };
+            string catalogPath = System.IO.Path.Combine(
+                UnityEngine.Application.dataPath,
+                "AL",
+                "StreamingAssets",
+                "GameData",
+                "realm_specialized.v1.json");
+            AL.RealmSelection.RealmCatalogLoadResult parsed =
+                AL.RealmSelection.RealmCatalogRuntime.Parse(System.IO.File.ReadAllText(catalogPath));
+            Assert.True(parsed.IsSuccess, parsed.TechnicalCode);
+            var warzone = WarzoneService.CreateForTests(save, parsed.Snapshot);
             var service = TerritoryCaptureTransactionService.CreateForTests(save);
 
             long before = warzone.CalculatePassiveIncome(ResourceType.Gold);
