@@ -13,7 +13,7 @@ namespace AL.ChampionMode.Camera
 {
     public class CameraFollow : MonoBehaviour
     {
-        private const int ObstructionHitCapacity = 32;
+        private const int InitialObstructionQueryCapacity = 32;
         private const int ObstructionOverlapSearchSteps = 8;
         private const int ObstructionOverlapRefinementSteps = 8;
         private const float ObstructionSurfaceEpsilon = 0.01f;
@@ -82,10 +82,10 @@ namespace AL.ChampionMode.Camera
         private IDisposable _manualCursorOwnership;
         private int _presentationSuspensionCount;
         private int _presentationSuspensionGeneration;
-        private readonly RaycastHit[] _obstructionHits =
-            new RaycastHit[ObstructionHitCapacity];
-        private readonly Collider[] _obstructionOverlaps =
-            new Collider[ObstructionHitCapacity];
+        private RaycastHit[] _obstructionHits =
+            new RaycastHit[InitialObstructionQueryCapacity];
+        private Collider[] _obstructionOverlaps =
+            new Collider[InitialObstructionQueryCapacity];
         private bool _recoveringFromObstruction;
         private CharacterController _targetController;
         private ChampionController _targetChampionController;
@@ -857,14 +857,11 @@ namespace AL.ChampionMode.Camera
 
             Vector3 direction = offset / distance;
             float obstructionRadius = ResolveObstructionRadius();
-            int hitCount = Physics.SphereCastNonAlloc(
+            int hitCount = CaptureObstructionHits(
                 pivot,
                 obstructionRadius,
                 direction,
-                _obstructionHits,
-                distance,
-                _obstructionMask,
-                QueryTriggerInteraction.Ignore);
+                distance);
 
             float nearestDistance = distance;
             obstructed = false;
@@ -992,12 +989,7 @@ namespace AL.ChampionMode.Camera
 
         private bool HasObstructionOverlap(Vector3 position, float worldRadius)
         {
-            int overlapCount = Physics.OverlapSphereNonAlloc(
-                position,
-                worldRadius,
-                _obstructionOverlaps,
-                _obstructionMask,
-                QueryTriggerInteraction.Ignore);
+            int overlapCount = CaptureObstructionOverlaps(position, worldRadius);
             for (int index = 0; index < overlapCount; index++)
             {
                 if (!ShouldIgnoreObstruction(_obstructionOverlaps[index]))
@@ -1007,6 +999,69 @@ namespace AL.ChampionMode.Camera
             }
 
             return false;
+        }
+
+        private int CaptureObstructionHits(
+            Vector3 origin,
+            float radius,
+            Vector3 direction,
+            float distance)
+        {
+            while (true)
+            {
+                int hitCount = Physics.SphereCastNonAlloc(
+                    origin,
+                    radius,
+                    direction,
+                    _obstructionHits,
+                    distance,
+                    _obstructionMask,
+                    QueryTriggerInteraction.Ignore);
+                if (hitCount < _obstructionHits.Length)
+                {
+                    return hitCount;
+                }
+
+                // A full NonAlloc buffer is indistinguishable from a truncated
+                // result. Grow once for this density, retry, and retain the larger
+                // buffer so steady-state camera frames remain allocation-free.
+                _obstructionHits = new RaycastHit[
+                    ResolveExpandedQueryCapacity(_obstructionHits.Length)];
+            }
+        }
+
+        private int CaptureObstructionOverlaps(Vector3 position, float radius)
+        {
+            while (true)
+            {
+                int overlapCount = Physics.OverlapSphereNonAlloc(
+                    position,
+                    radius,
+                    _obstructionOverlaps,
+                    _obstructionMask,
+                    QueryTriggerInteraction.Ignore);
+                if (overlapCount < _obstructionOverlaps.Length)
+                {
+                    return overlapCount;
+                }
+
+                // Target-hierarchy colliders may fill the initial result set before
+                // a world collider appears. Capture the complete set before filtering.
+                _obstructionOverlaps = new Collider[
+                    ResolveExpandedQueryCapacity(_obstructionOverlaps.Length)];
+            }
+        }
+
+        private static int ResolveExpandedQueryCapacity(int currentCapacity)
+        {
+            if (currentCapacity >= int.MaxValue / 2)
+            {
+                return int.MaxValue;
+            }
+
+            return Mathf.Max(
+                InitialObstructionQueryCapacity,
+                currentCapacity * 2);
         }
 
         private float ResolveObstructionRadius()

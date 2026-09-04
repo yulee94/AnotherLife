@@ -34,9 +34,9 @@ WORLD_ATLAS_RELATIVE_PATH = (
     "al_world_atlas_narrative_catalog.json"
 )
 WORLD_ATLAS_SHA256 = (
-    "d3db74638b55128a46581e31d0c9d0ef9861b743b0b33d1ddf7a5571c9cfd711"
+    "9034e8fb8e4c6b611c7b9285e456338e719edd9a5a4ff76a5fd05a196d3c9c8a"
 )
-WORLD_ATLAS_CANONICAL_LENGTH = 29_895
+WORLD_ATLAS_CANONICAL_LENGTH = 34_835
 
 
 @dataclass(frozen=True)

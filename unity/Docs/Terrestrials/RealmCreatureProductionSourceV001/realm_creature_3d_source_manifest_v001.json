@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "packetId": "anotherlife-realm-creature-production-source",
-  "sourceVersion": "al-rcreature-2026-09-02-v001",
-  "createdAtUtc": "2026-09-02T06:07:11Z",
+  "sourceVersion": "al-rcreature-2026-09-03-v002",
+  "createdAtUtc": "2026-09-03T05:06:40Z",
   "authority": {
     "finalCreativeApprover": "user",
     "approved2DSourceVersion": "anotherlife.creature-2d-approved-source.v2",
@@ -19,9 +19,9 @@
   "qualityBar": {
     "style": "mystical medieval naturalism",
     "authoringTextureIntent": "8192x8192 native base color and 4096x4096 native normal/roughness/metallic for approved hero/elite production sources; 2048x2048 runtime maps are derivatives",
-    "ownerTierTexturePackets": 3,
-    "belowOwnerTierTexturePackets": 18,
-    "coverageDisposition": "Only Hollowbark Stalker, Reliquary Basilisk, and Cindermaw Salamander currently carry the 8K/4K authoring dimensions. Cindermaw remains UV/bake-blocked. All lower-resolution packets are retained as review/cleanup sources, not owner-tier production textures.",
+    "ownerTierTexturePackets": 2,
+    "belowOwnerTierTexturePackets": 19,
+    "coverageDisposition": "Hollowbark Stalker and Reliquary Basilisk retain complete owner-tier authoring maps. Cindermaw has clean 8K/4K rebakes but remains below tier because its rejected ray bake was replaced with a neutral normal fallback pending authored microdetail. Mere-Root and Crownstep require topology-matched texture rebuilds; all other lower-tier packets remain review sources.",
     "runtimeVfxSeparate": true
   },
   "provenance": {
@@ -41,10 +41,13 @@
       "Meshy candidate generation from approved 2D source evidence",
       "Blender structural inspection and candidate selection",
       "PBR packet retention; premium procedural map rebuilds for Hollowbark, Reliquary, and Cindermaw",
-      "Fail-closed review disposition with superseded/failed outputs excluded"
+      "Fail-closed review disposition with superseded/failed outputs excluded",
+      "Approved DCC geometry repairs and structural re-audit for five blocked packets",
+      "Cindermaw Meshy-7 retexture, triangulated non-overlapping UV rebuild, and tiled 8K/4K rebake",
+      "Independent hash, UV, schema, and fail-closed readiness validation"
     ],
     "licenseEvidence": "Generated through the project owner's Meshy account from AnotherLife-approved source evidence. No third-party source image is declared as an input. This is an evidence statement, not a universal legal-clearance claim.",
-    "editableSourceAvailability": "FBX and image maps are retained; native sculpt, rig, and complete editable DCC authoring files are not delivered."
+    "editableSourceAvailability": "FBX and image maps are retained for all selected sources; versioned Blender repair files and hash-bound DCC reports are retained for the remediated packets. Rigs remain undelivered."
   },
   "unityImportBoundary": {
     "path": "outside_unity_assets",
@@ -64,11 +67,11 @@
   },
   "summary": {
     "approved2D": 21,
-    "structuralPass": 17,
-    "blocked3D": 5,
-    "runtimeIntegrationState": "Blocked",
-    "ownerTierTexturePackets": 3,
-    "belowOwnerTierTexturePackets": 18
+    "structuralPass": 21,
+    "blocked3D": 0,
+    "ownerTierTexturePackets": 2,
+    "belowOwnerTierTexturePackets": 19,
+    "runtimeIntegrationState": "Blocked"
   },
   "models": [
     {
@@ -590,67 +593,27 @@
     {
       "source2dId": "tdf_boss_eldergrove_mere_root_leviathan",
       "modelId": "boss_eldergrove_mere_root_leviathan",
-      "status": "manual_dcc_required",
-      "blocker": "AI output has five rather than seven cervical vanes and insufficient shield-skull definition",
+      "status": "clean_geometry_pass_texture_rebuild_required",
+      "blocker": null,
       "selectedSource": {
-        "path": "Models/boss_eldergrove_mere_root_leviathan/boss_eldergrove_mere_root_leviathan_source_v001.fbx",
-        "bytes": 10216588,
-        "sha256": "3e5240324caef4edb2fdeb06628a00b5664fb070f4848acd5e7d027749e86d30"
+        "path": "Models/boss_eldergrove_mere_root_leviathan/boss_eldergrove_mere_root_leviathan_source_v002.fbx",
+        "bytes": 2482700,
+        "sha256": "d9aebc51f066359885444c3a1adcf061647fc1c12ae2c2fcccac68972e265356"
       },
-      "textures": [
-        {
-          "path": "Textures/boss_eldergrove_mere_root_leviathan/base_color.png",
-          "bytes": 3897720,
-          "sha256": "81e0889056b97835422a8cb62c12c66c508cf5b2ee95099c7b022273a8c64c7f",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/boss_eldergrove_mere_root_leviathan/metallic.png",
-          "bytes": 7425,
-          "sha256": "1dd1605b6052f9e4a73609288c1f6cd1d6b44f31ffe724477b4c307d0392d1ba",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/boss_eldergrove_mere_root_leviathan/normal.png",
-          "bytes": 3861654,
-          "sha256": "2b89e210e56124a01ee32551fa9133e97aafe88f8e1fc22d21afc72f29962227",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/boss_eldergrove_mere_root_leviathan/roughness.png",
-          "bytes": 686343,
-          "sha256": "4e6bfad6dcd6702de7c6b98f5d38dc163dc1f99f40307e80a683191a3b329aea",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        }
-      ],
+      "textures": [],
       "review": {
-        "path": "Review/boss_eldergrove_mere_root_leviathan_threequarter.png",
-        "bytes": 404134,
-        "sha256": "923375b08f69be6130a8aac354f47b1966b21e0dff5ace7f26a4d5dfab5561bd",
+        "path": "Review/boss_eldergrove_mere_root_leviathan_threequarter_v002.png",
+        "bytes": 95463,
+        "sha256": "cc782030b2fcb383ae4f0c24c28a8f7863c92ec17b458aeb36bcc5cdfedc2cc8",
         "dimensions": [
-          640,
-          640
+          512,
+          512
         ],
         "mediaType": "image/png"
       },
       "meshyTaskIds": [
-        "01a05b45-caf4-7239-991b-3f3f940abc39"
+        "01a05b45-caf4-7239-991b-3f3f940abc39",
+        "01a06522-ebd2-7564-958e-e974edb6b370"
       ],
       "rigged": false,
       "runtimeIntegrationState": "Blocked",
@@ -928,8 +891,8 @@
     {
       "source2dId": "tdf_elite_eldergrove_sunmane_thornstag",
       "modelId": "elite_eldergrove_sunmane_thornstag",
-      "status": "manual_dcc_required",
-      "blocker": "paired neck-hugging keratin rails and broad three-toed feet were lost",
+      "status": "clean_geometry_pass_texture_uplift_required",
+      "blocker": null,
       "selectedSource": {
         "path": "Models/elite_eldergrove_sunmane_thornstag/elite_eldergrove_sunmane_thornstag_source_v001.fbx",
         "bytes": 13625052,
@@ -997,12 +960,12 @@
     {
       "source2dId": "tdf_boss_crownlands_meridian_tempest_roc",
       "modelId": "boss_crownlands_meridian_tempest_roc",
-      "status": "manual_dcc_required",
-      "blocker": "AI output does not preserve exactly seven outer blades per wing plus the fixed left break and two tail rudders",
+      "status": "clean_geometry_pass_texture_uplift_required",
+      "blocker": null,
       "selectedSource": {
-        "path": "Models/boss_crownlands_meridian_tempest_roc/boss_crownlands_meridian_tempest_roc_source_v001.fbx",
-        "bytes": 10373900,
-        "sha256": "b85e97ddbd3f36b6bbfdb0d28820c31904d49532b1bfc5aac9199ad6be253c12"
+        "path": "Models/boss_crownlands_meridian_tempest_roc/boss_crownlands_meridian_tempest_roc_source_v002.fbx",
+        "bytes": 2022508,
+        "sha256": "c57ce1d832ac87a60e648d9041f15bf35450df9dd49ae8e4067a8f067c490858"
       },
       "textures": [
         {
@@ -1047,12 +1010,12 @@
         }
       ],
       "review": {
-        "path": "Review/boss_crownlands_meridian_tempest_roc_threequarter.png",
-        "bytes": 419575,
-        "sha256": "87087384902bfa29ae900619bac5ed78e71b8029f7bebd93d605e9e537f0ee46",
+        "path": "Review/boss_crownlands_meridian_tempest_roc_threequarter_v002.png",
+        "bytes": 114588,
+        "sha256": "ecee6d85b919564def662dc56b010505544d61ee6354bcab987b3244d526ffd9",
         "dimensions": [
-          640,
-          640
+          512,
+          512
         ],
         "mediaType": "image/png"
       },
@@ -1066,67 +1029,27 @@
     {
       "source2dId": "tdf_elite_crownlands_crownstep_lion",
       "modelId": "elite_crownlands_crownstep",
-      "status": "manual_dcc_required",
-      "blocker": "three sparse rooted neck/shoulder plate rows and five-digit paws were lost",
+      "status": "clean_geometry_pass_texture_rebuild_required",
+      "blocker": null,
       "selectedSource": {
-        "path": "Models/elite_crownlands_crownstep/elite_crownlands_crownstep_source_v001.fbx",
-        "bytes": 11175372,
-        "sha256": "e83952a8ee8b112c288657bf5728456ccf7adb3a7c5332974275f58580c836b0"
+        "path": "Models/elite_crownlands_crownstep/elite_crownlands_crownstep_source_v002.fbx",
+        "bytes": 2463084,
+        "sha256": "786cb1d3b2245c76b50da2baf0fcc976f2dee8e93fa195f8d9e8d8401d37e51a"
       },
-      "textures": [
-        {
-          "path": "Textures/elite_crownlands_crownstep/base_color.png",
-          "bytes": 4187380,
-          "sha256": "1dddf54aa42e362af544133f17a3dd356c02f3bb9a55d3a313493b1b420af847",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/elite_crownlands_crownstep/metallic.png",
-          "bytes": 801528,
-          "sha256": "58c6dba77bafca237bcaa191e93e8ed6c925d304d3f5d60cf63c277ac0439def",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/elite_crownlands_crownstep/normal.png",
-          "bytes": 4097407,
-          "sha256": "8a04414fff852f152a3e2f7cf6d91f4ff6d542ac6e120cff28e996e185f19a6a",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/elite_crownlands_crownstep/roughness.png",
-          "bytes": 847109,
-          "sha256": "a23fdbe89d628d4e0e16afd824104683ef7b446f14fcb11754c73bacef96993a",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        }
-      ],
+      "textures": [],
       "review": {
-        "path": "Review/elite_crownlands_crownstep_threequarter.png",
-        "bytes": 413156,
-        "sha256": "94667b658217837ef0cdda5946c373acd635de707c5ae02bbfa069541c2d5e32",
+        "path": "Review/elite_crownlands_crownstep_threequarter_v002.png",
+        "bytes": 107702,
+        "sha256": "002862d728cb6de8a0c673b27b33a1b30046654987858fec7da871abbf8c316a",
         "dimensions": [
-          640,
-          640
+          512,
+          512
         ],
         "mediaType": "image/png"
       },
       "meshyTaskIds": [
-        "01a05b41-dd68-757c-a4c3-2f5dbd67a16e"
+        "01a05b41-dd68-757c-a4c3-2f5dbd67a16e",
+        "01a06522-f510-75a3-b779-280aa4393c34"
       ],
       "rigged": false,
       "runtimeIntegrationState": "Blocked",
@@ -1523,18 +1446,18 @@
     {
       "source2dId": "tdf_elite_umbral_cindermaw_salamander",
       "modelId": "elite_umbral_cindermaw_salamander",
-      "status": "clean_geometry_pass_8k_texture_manual_uv_bake_required",
-      "blocker": "Silhouette and Umbral palette fit, but close-up UV projection remains polygonal; requires manual unwrap and texture bake before cinematic approval",
+      "status": "clean_geometry_pass_uv_bake_complete_normal_detail_rebuild_required",
+      "blocker": null,
       "selectedSource": {
-        "path": "Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v001.fbx",
-        "bytes": 1587292,
-        "sha256": "05a5cf925cdcf8f32a6dd305f29fb507783ad6bf00cfcfe9f7ed3612e05433b3"
+        "path": "Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v003.fbx",
+        "bytes": 3411692,
+        "sha256": "adc05ab231729a2189f1d956f90384aa051932ba34bc2c5929cd897b06a25fd5"
       },
       "textures": [
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/ao.png",
-          "bytes": 22519,
-          "sha256": "549458715a7bafb51bae3773abcf773ea2bf583684c7587cee21297e8dd777f2",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_v003/ao.png",
+          "bytes": 1822184,
+          "sha256": "ed950e0f356249373849fa21d4dce3554d630c4eca4f576ba2554e9e24947b57",
           "dimensions": [
             4096,
             4096
@@ -1542,9 +1465,9 @@
           "mediaType": "image/png"
         },
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/base_color.png",
-          "bytes": 37023327,
-          "sha256": "fd8c62e09ec7e940e0d2196606ba6a2d3d9d7f5af565a4fa2d51fc4af8011c46",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_v003/base_color.png",
+          "bytes": 28810646,
+          "sha256": "a709480726abbda16b93eee728145c4e3f3274b0342f4cf37cf7f3e07818185d",
           "dimensions": [
             8192,
             8192
@@ -1552,9 +1475,9 @@
           "mediaType": "image/png"
         },
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/metallic.png",
-          "bytes": 609449,
-          "sha256": "b74d2dd9c63a9e1f48d1a5861ccc6e36d506d90a1c6c1acfdd5a33bcde7c0489",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_v003/metallic.png",
+          "bytes": 1800800,
+          "sha256": "73175a0cbc3015a213090bac6e254f5a2f7494e6825fc1934b747929d0cb7031",
           "dimensions": [
             4096,
             4096
@@ -1562,9 +1485,9 @@
           "mediaType": "image/png"
         },
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/metallic_smoothness.png",
-          "bytes": 2771735,
-          "sha256": "815f48defafc55bc0e38a8d008cd54b22d53cd07db8f79390cb33654d5ab7e86",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_v003/normal.png",
+          "bytes": 230216,
+          "sha256": "ab45a172e1880d53a690ae5d26032c4f54520c75246294064cfa0977f7771990",
           "dimensions": [
             4096,
             4096
@@ -1572,70 +1495,20 @@
           "mediaType": "image/png"
         },
         {
-          "path": "Textures/elite_umbral_cindermaw_salamander/normal.png",
-          "bytes": 9488873,
-          "sha256": "767165c5da1b48d74ad5a9fc41da24be386e272be07437d909d268849146685c",
+          "path": "Textures/elite_umbral_cindermaw_salamander/retexture_uvclean_v003/roughness.png",
+          "bytes": 5756529,
+          "sha256": "feadcd3f9fe5e8c2fb4af0c33cf348ec5af238ccfb142d59950e02966608e00b",
           "dimensions": [
             4096,
             4096
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/elite_umbral_cindermaw_salamander/roughness.png",
-          "bytes": 1779507,
-          "sha256": "bfe7b69d404c49efd5b63f3c15804de623b3ef38b38e6a72d60f9fa51df7719a",
-          "dimensions": [
-            4096,
-            4096
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/elite_umbral_cindermaw_salamander/runtime_2k/ao.png",
-          "bytes": 6988,
-          "sha256": "12c77e4a41a055f618d9aa992c2950d8366a5b2cb554644eac215f5e814c8358",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/elite_umbral_cindermaw_salamander/runtime_2k/base_color.png",
-          "bytes": 3722552,
-          "sha256": "d46d95e0916ac22a5c7f41d0405b5931e748821e06e4e927f8be2c82495918d6",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/elite_umbral_cindermaw_salamander/runtime_2k/metallic_smoothness.png",
-          "bytes": 1043966,
-          "sha256": "3cc1a3229c2b486363eaf9df26bfe337473909351479bf25a34de5d68c66aa25",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "mediaType": "image/png"
-        },
-        {
-          "path": "Textures/elite_umbral_cindermaw_salamander/runtime_2k/normal.png",
-          "bytes": 2670353,
-          "sha256": "782381aa9232638ca4ff85b3a0daf05a382153403488662189bd18fc5a1e953a",
-          "dimensions": [
-            2048,
-            2048
           ],
           "mediaType": "image/png"
         }
       ],
       "review": {
-        "path": "Review/elite_umbral_cindermaw_salamander_threequarter.png",
-        "bytes": 185561,
-        "sha256": "e2a521b9fc73e3e33a2868b75b339438fee421c5396ca7634f8616ffc77962ee",
+        "path": "Review/elite_umbral_cindermaw_salamander_threequarter_v003.png",
+        "bytes": 100244,
+        "sha256": "815fb4d97ab9c8a01ff038c2e72ae1c02e77687ac47645fa2629363ed28db643",
         "dimensions": [
           512,
           512
@@ -1644,7 +1517,8 @@
       },
       "meshyTaskIds": [
         "01a05c28-150e-7126-a408-5140a978d549",
-        "01a05fa3-16b8-70f5-a0bd-cca9f316e455"
+        "01a05fa3-16b8-70f5-a0bd-cca9f316e455",
+        "01a06569-2956-73a2-a51e-bade35802fba"
       ],
       "rigged": false,
       "runtimeIntegrationState": "Blocked",

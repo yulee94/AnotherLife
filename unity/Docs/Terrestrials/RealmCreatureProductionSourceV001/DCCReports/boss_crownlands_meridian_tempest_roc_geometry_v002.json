@@ -1,0 +1,31 @@
+{
+  "modelId": "boss_crownlands_meridian_tempest_roc",
+  "sourceTaskIds": [
+    "01a05b56-8881-72f3-8860-6aec86577692"
+  ],
+  "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/boss_crownlands_meridian_tempest_roc/boss_crownlands_meridian_tempest_roc_source_v001.fbx",
+  "inputSha256": "b85e97ddbd3f36b6bbfdb0d28820c31904d49532b1bfc5aac9199ad6be253c12",
+  "output": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/boss_crownlands_meridian_tempest_roc/boss_crownlands_meridian_tempest_roc_source_v002.fbx",
+  "outputSha256": "c57ce1d832ac87a60e648d9041f15bf35450df9dd49ae8e4067a8f067c490858",
+  "editableBlend": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/DCC/boss_crownlands_meridian_tempest_roc_geometry_v002.blend",
+  "status": "clean_geometry_pass_texture_uplift_required",
+  "productionReady": false,
+  "rigged": false,
+  "runtimeIntegrationState": "Blocked",
+  "operations": [
+    "broadened the shield-skull plane while preserving beak and neck topology",
+    "shortened one isolated anatomical-left outer blade to establish the fixed break",
+    "preserved seven outer blades per wing, both tail rudders, and the existing UV layer"
+  ],
+  "metrics": {
+    "verticesChanged": 2863,
+    "outerBladesLeft": 7,
+    "outerBladesRight": 7,
+    "tailRudders": 2,
+    "leftWingFixedBreak": true,
+    "shieldSkullToNeckWidthRatio": 1.1741,
+    "nonManifoldEdgesBefore": 1301,
+    "nonManifoldEdgesAfter": 1301
+  },
+  "diagnostics": []
+}

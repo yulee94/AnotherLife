@@ -1,0 +1,88 @@
+{
+  "gameId": "another-life",
+  "harnessId": "mmv_harness_model_motion_skill_vfx_v001",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "authority": {
+    "catalogOwner": "model_motion_skill_vfx_harness",
+    "finalCreativeOwner": "project_owner",
+    "status": "validation_only",
+    "ownerDecisionRef": "kanban:t_d1345d15"
+  },
+  "verdictPolicy": {
+    "allowedVerdicts": ["PASS", "FAIL", "BLOCKED"],
+    "weightedScoreForbidden": true,
+    "aggregateRule": "any_fail_then_fail_else_any_blocked_then_blocked_else_pass",
+    "missingRequiredAxis": "FAIL",
+    "missingEvidence": "BLOCKED",
+    "ownerCreativeApproval": "separate_gate_not_harness_pass"
+  },
+  "requiredKinds": ["champion", "npc", "beast", "monster"],
+  "modelCheckFamilies": [
+    { "id": "mesh_topology", "stage": "blender_source" },
+    { "id": "uv_material", "stage": "blender_source" },
+    { "id": "scale_pivot", "stage": "blender_source" },
+    { "id": "skeleton_bind_pose", "stage": "blender_unity" },
+    { "id": "skin_deformation", "stage": "blender_unity" },
+    { "id": "animation_clips", "stage": "unity_import" },
+    { "id": "equipment_sockets", "stage": "unity_import" },
+    { "id": "colliders_hitboxes", "stage": "unity_import" },
+    { "id": "lod_impostor_budget", "stage": "unity_import" },
+    { "id": "catalog_references", "stage": "catalog" },
+    { "id": "pooling_cleanup", "stage": "runtime" },
+    { "id": "capture_anchors", "stage": "player_build" },
+    { "id": "performance_memory_thermal_overdraw", "stage": "player_build" }
+  ],
+  "requiredMotionAxes": [
+    {
+      "id": "walking",
+      "keys": ["locomotion.walk", "locomotion.crawl", "locomotion.fly", "locomotion.swim"],
+      "rule": "at_least_one"
+    },
+    {
+      "id": "running",
+      "keys": ["locomotion.run", "locomotion.sprint", "locomotion.fly"],
+      "rule": "at_least_one"
+    },
+    {
+      "id": "attacking",
+      "keys": ["attack.basic"],
+      "rule": "all"
+    },
+    {
+      "id": "special_attack",
+      "keys": ["attack.special", "attack.heavy", "attack.charged"],
+      "rule": "at_least_one"
+    },
+    {
+      "id": "cast_use",
+      "keys": ["skill.cast", "skill.anticipation"],
+      "rule": "at_least_one"
+    }
+  ],
+  "requiredSkillEffectAxes": [
+    { "id": "telegraph", "fields": ["telegraph"] },
+    { "id": "result_active", "fields": ["active"] },
+    { "id": "impact", "fields": ["impact"] },
+    { "id": "cleanup", "fields": ["cleanup"] },
+    { "id": "accessibility", "fields": ["accessibility"] }
+  ],
+  "requiredSkillMotionPhases": [
+    "anticipation",
+    "cast",
+    "channel",
+    "release",
+    "recovery"
+  ],
+  "playerBuildChecks": [
+    "presentation_capture",
+    "deterministic_anchors",
+    "performance_memory_thermal_overdraw"
+  ],
+  "acceptance": {
+    "requiredKindCount": 4,
+    "requiredMotionAxisCount": 5,
+    "requiredSkillEffectAxisCount": 5,
+    "weightedScoreForbidden": true
+  }
+}

@@ -20,7 +20,8 @@ namespace AL.RealmSelection
             string peopleName,
             string markName,
             string silhouetteLanguage,
-            string materialLanguage)
+            string materialLanguage,
+            IList<string> realmGemIds)
         {
             Id = id;
             RuntimeId = runtimeId;
@@ -29,6 +30,10 @@ namespace AL.RealmSelection
             MarkName = markName ?? string.Empty;
             SilhouetteLanguage = silhouetteLanguage ?? string.Empty;
             MaterialLanguage = materialLanguage ?? string.Empty;
+            var gemIds = realmGemIds == null
+                ? Array.Empty<string>()
+                : new List<string>(realmGemIds).ToArray();
+            RealmGemIds = Array.AsReadOnly(gemIds);
         }
         public string Id { get; }
         public RealmId RuntimeId { get; }
@@ -37,6 +42,7 @@ namespace AL.RealmSelection
         public string MarkName { get; }
         public string SilhouetteLanguage { get; }
         public string MaterialLanguage { get; }
+        public IReadOnlyList<string> RealmGemIds { get; }
     }
 
     public sealed class RealmCatalogSnapshot
@@ -221,7 +227,8 @@ namespace AL.RealmSelection
                     peopleName,
                     markName,
                     silhouetteLanguage,
-                    materialLanguage));
+                    materialLanguage,
+                    realmGemIds));
             }
 
             for (int i = 0; i < realmOrder.Length; i++)

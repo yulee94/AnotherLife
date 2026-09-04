@@ -31,6 +31,7 @@ from jsonschema import Draft202012Validator, FormatChecker, SchemaError, Validat
 
 import world_asset_inventory
 import test_four_realm_production_taxonomy
+import test_model_motion_skill_vfx_harness
 import test_realm_character_taxonomy
 import test_rig_motion_standard
 
@@ -63,6 +64,7 @@ REAL_CATALOGS = {
     "al-four-realm-production-taxonomy": "al_four_realm_production_taxonomy.json",
     "al-required-motion-manifest": "al_required_motion_manifest.json",
     "al-rig-motion-standard": "al_rig_motion_standard.json",
+    "al-model-motion-skill-vfx-harness": "al_model_motion_skill_vfx_harness.v1.json",
 }
 
 # Known source-data defects that legitimately fail their schema today. These are
@@ -110,6 +112,7 @@ def main():
         "realmTaxonomy": [],
         "fourRealmTaxonomy": [],
         "rigMotion": [],
+        "modelMotionSkillVfx": [],
     }
 
     # 1. Compile every schema (validity of the schema itself).
@@ -246,6 +249,28 @@ def main():
             + rig_motion_test_output.getvalue().strip()
         )
 
+    # 8. Model/motion/skill-VFX harness: explicit PASS/FAIL/BLOCKED, no scores.
+    suite = unittest.defaultTestLoader.loadTestsFromModule(
+        test_model_motion_skill_vfx_harness
+    )
+    harness_test_output = io.StringIO()
+    harness_result = unittest.TextTestRunner(
+        stream=harness_test_output,
+        verbosity=0,
+    ).run(suite)
+    harness_ok = harness_result.wasSuccessful()
+    harness_summary = (
+        f"{harness_result.testsRun} tests, "
+        f"{len(harness_result.failures)} failures, "
+        f"{len(harness_result.errors)} errors"
+    )
+    reports["modelMotionSkillVfx"].append((harness_ok, harness_summary))
+    if not harness_ok:
+        failures.append(
+            "model/motion/skill-VFX harness fail-closed tests failed: "
+            + harness_test_output.getvalue().strip()
+        )
+
     # ---- Report ----
     print("== Schema compilation ==")
     for key, ok, msg in reports["schemas"]:
@@ -290,6 +315,13 @@ def main():
         print(
             f"  [{'OK' if ok else 'FAIL'}] "
             f"al-rig-motion-standard  -> {msg}"
+        )
+
+    print("\n== Model/motion/skill-VFX harness ==")
+    for ok, msg in reports["modelMotionSkillVfx"]:
+        print(
+            f"  [{'OK' if ok else 'FAIL'}] "
+            f"al-model-motion-skill-vfx-harness  -> {msg}"
         )
 
     print()
