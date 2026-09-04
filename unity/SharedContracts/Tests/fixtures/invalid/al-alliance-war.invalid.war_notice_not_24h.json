@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "catalogId": "al_alliance_war_policy",
+  "game": "Another Life",
+  "sourceRevision": "alliance_war_policy_v1",
+  "machineIdentity": "Alliance",
+  "consumedContracts": {
+    "guildCatalogId": "al_guild_membership_policy",
+    "guildIdentity": "external_guild_snapshot",
+    "guildRoles": "external_guild_roles"
+  },
+  "scope": {
+    "realmBinding": "same_realm_only",
+    "memberSubject": "guild",
+    "proposalAuthority": "guild_master_only",
+    "acceptanceAuthority": "invited_guild_master_only",
+    "leadership": "derived_from_member_master",
+    "warDeclarationAuthority": "derived_alliance_leader_only",
+    "officersCanFormAlliancesOrDeclareWar": false,
+    "crossRealmWar": "rejected"
+  },
+  "relationStates": [
+    "ABSENT",
+    "PROPOSED",
+    "ACTIVE",
+    "COOLDOWN",
+    "SUSPENDED"
+  ],
+  "warStates": [
+    "NONE",
+    "DECLARED",
+    "ACTIVE",
+    "RECONCILIATION_PENDING",
+    "COOLING"
+  ],
+  "durations": {
+    "warNoticeHours": 12,
+    "warActiveHours": 168
+  },
+  "hostility": {
+    "forceHostilityWarState": "ACTIVE",
+    "neverOverride": [
+      "same_guild",
+      "same_alliance",
+      "city",
+      "beginner",
+      "accordant",
+      "forced_safe"
+    ]
+  },
+  "transitions": [
+    "propose",
+    "accept",
+    "decline",
+    "leave",
+    "disband",
+    "declare_war",
+    "propose_war_end",
+    "accept_war_end",
+    "decline_war_end"
+  ],
+  "pendingRequestPolicy": {
+    "proposalResolution": "invited_guild_master_or_proposer_cancel",
+    "warEndResolution": "opposing_derived_leader",
+    "membershipChangeFence": "accept_exact_alliance_and_guild_revisions",
+    "terminalResolution": "accept_xor_decline"
+  },
+  "replayPolicy": {
+    "operationIdentity": "operation_id",
+    "sameFingerprint": "already_committed",
+    "differentFingerprint": "conflict",
+    "unknownOutcome": "fail_closed_until_reconciled"
+  },
+  "authorityBoundary": {
+    "plannerScope": "engine_free_snapshot_only",
+    "excludedImplementations": [
+      "persistence",
+      "network",
+      "save",
+      "combat",
+      "ui",
+      "economy",
+      "city",
+      "raid"
+    ]
+  }
+}
