@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "catalogId": "al_pvp_harmful_effect_gate_policy",
+  "game": "Another Life",
+  "sourceRevision": "pvp_harmful_effect_gate_policy_v1",
+  "machineIdentity": "PvpHarmfulEffectGate",
+  "consumedContracts": {
+    "guildCatalogId": "al_guild_membership_policy",
+    "allianceCatalogId": "al_alliance_war_policy",
+    "zonePolicy": "immutable_zone_policy_snapshot"
+  },
+  "scope": {
+    "realmBinding": "same_realm_only",
+    "clientAuthority": true,
+    "healthMutation": false,
+    "hardcodedZones": false,
+    "runtimeTargeting": false,
+    "network": false,
+    "save": false
+  },
+  "effectKinds": [
+    "direct_hit",
+    "projectile",
+    "area_of_effect",
+    "damage_over_time_tick",
+    "chain",
+    "trap",
+    "pet_summon",
+    "reflect",
+    "splash",
+    "environmental",
+    "crowd_control"
+  ],
+  "precedence": [
+    "invalid_stale_unknown_or_cross_realm",
+    "forced_safe_zone",
+    "same_guild",
+    "same_effective_alliance",
+    "both_toggles_on_or_opposing_active_war"
+  ],
+  "forcedSafeZones": [
+    "city",
+    "beginner",
+    "accordant",
+    "forced_safe"
+  ],
+  "hostility": {
+    "forceHostilityWarState": "ACTIVE",
+    "warNoticeHours": 24,
+    "warActiveHours": 168,
+    "neverOverride": [
+      "same_guild",
+      "same_alliance",
+      "city",
+      "beginner",
+      "accordant",
+      "forced_safe"
+    ]
+  },
+  "presentation": {
+    "nameplateAuthoritative": false,
+    "warIconAuthoritative": false,
+    "eligibleWarPresentation": "war_hostile",
+    "eligibleTogglePresentation": "hostile"
+  },
+  "authorityBoundary": {
+    "plannerScope": "engine_free_snapshot_only",
+    "excludedImplementations": [
+      "persistence",
+      "network",
+      "save",
+      "health_mutation",
+      "runtime_targeting",
+      "ui",
+      "client_authority",
+      "hardcoded_zones"
+    ]
+  }
+}
