@@ -112,6 +112,31 @@ namespace AL.Tests.EditMode.Battle
                 return new ResearchState[0];
             }
 
+            public ResearchTroopCatalogQueryResult QueryResearch(string researchId)
+            {
+                return new ResearchTroopCatalogQueryResult(
+                    ResearchTroopCatalogStatus.CatalogUnavailable,
+                    "research",
+                    researchId ?? string.Empty,
+                    "AL-RSCH-CATALOG-UNAVAILABLE");
+            }
+
+            public ResearchTroopMutationResult TryStartResearch(string researchId)
+            {
+                return new ResearchTroopMutationResult(
+                    ResearchTroopCatalogStatus.CatalogUnavailable,
+                    false,
+                    false,
+                    "AL-RSCH-CATALOG-UNAVAILABLE",
+                    "research",
+                    researchId ?? string.Empty);
+            }
+
+            public ResearchTroopMutationResult TryCompleteResearch(string researchId)
+            {
+                return TryStartResearch(researchId);
+            }
+
             public void StartResearch(string researchId)
             {
             }

@@ -484,7 +484,7 @@ namespace AL.Tests.EditMode
                     "CreateNewSave",
                     EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
                 object authority = Invoke(saveService, "GetCurrentAuthority");
-                AssertStatus(authority, "MigrationRequired");
+                AssertStatus(authority, "Writable");
 
                 object resources = CreateRuntimeService(
                     "AL.Services.Local.LocalResourceService",
@@ -530,6 +530,8 @@ namespace AL.Tests.EditMode
                     "CreateNewSave",
                     EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
                 object legacyView = GetProperty(saveService, "CurrentSave");
+                SetField(legacyView, "SaveSchemaVersion", 1);
+                SetField(legacyView, "ProfileId", string.Empty);
 
                 SetField(saveService, "_currentSave", null);
                 SetField(saveService, "_readOnlyCandidate", legacyView);
@@ -1490,8 +1492,6 @@ namespace AL.Tests.EditMode
             string[] expectedResourceCallers =
             {
                 "Kingdom/Quests/LocalQuestService.cs",
-                "Kingdom/Research/LocalResearchService.cs",
-                "Services/Local/LocalTrainingService.cs",
                 "Utilities/DemoInitializer.cs"
             };
             CollectionAssert.AreEqual(expectedResourceCallers, resourceCallers);

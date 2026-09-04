@@ -1,6 +1,7 @@
 using System;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.Data.Definitions;
 using AL.RealmSelection;
 using UnityEngine;
@@ -66,6 +67,20 @@ namespace AL.Services.Local
                 return Result(RealmSelectionStatus.RealmDefinitionUnavailable, request.RequestedRealmId, false, false, "AL-REALM-DEFINITION-UNAVAILABLE");
             if (_saveGameService == null)
                 return Result(RealmSelectionStatus.ProfileUnavailable, request.RequestedRealmId, false, false, "AL-REALM-PROFILE-UNAVAILABLE");
+
+            if (_saveGameService is IProfileBoundRealmSelectionCandidateStore boundStore &&
+                _saveGameService is IProfileWriteAuthorityProvider authorityProvider &&
+                ProfileWriteAuthorityProviderGuard.IsCurrentWritable(authorityProvider))
+            {
+                RealmSelectionResult boundResult =
+                    boundStore.TryCommitProfileBoundRealmSelection(request);
+                if (boundResult.Status == RealmSelectionStatus.Committed)
+                {
+                    Debug.Log($"Realm committed: {request.RequestedRealmId}");
+                }
+
+                return boundResult;
+            }
 
             if (!(_saveGameService is ILegacyRealmSelectionCandidateStore candidateStore))
             {

@@ -48,7 +48,7 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(1, manifest.manifestVersion);
             Assert.AreEqual(SaveGameData.CurrentSaveFormatId, manifest.saveFormatId);
             Assert.AreEqual(SaveGameData.CurrentSaveSchemaVersion, manifest.currentSchemaVersion);
-            CollectionAssert.AreEqual(new[] { 0 }, manifest.supportedUpgradeSources);
+            CollectionAssert.AreEqual(new[] { 0, 1 }, manifest.supportedUpgradeSources);
             Assert.AreEqual("preserve_read_only", manifest.futureSchemaPolicy);
             Assert.AreEqual("preserve_read_only", manifest.bothInvalidPolicy);
         }
@@ -151,7 +151,7 @@ namespace AL.Tests.EditMode
                 object service = CreateSaveService(root);
                 Invoke(service, "Load");
 
-                Assert.AreEqual("LoadedPrimary", Status(service));
+                Assert.AreEqual("MigratedSchemaOne", Status(service));
                 SaveGameData loaded = CurrentSave(service);
                 Assert.NotNull(loaded);
                 Assert.AreEqual("Eldergrove", loaded.SelectedRealm.ToString());
@@ -229,10 +229,10 @@ namespace AL.Tests.EditMode
                 object service = CreateSaveService(root);
                 Invoke(service, "Load");
 
-                Assert.AreEqual("RecoveredFromBackup", Status(service));
+                Assert.AreEqual("MigratedSchemaOne", Status(service));
                 CollectionAssert.AreEqual(
                     backup,
-                    File.ReadAllBytes(Path.Combine(root, "save.json")));
+                    File.ReadAllBytes(Path.Combine(root, "save.backup.json")));
                 string[] quarantines = Directory.GetFiles(root, "save.json.corrupt-*");
                 Assert.AreEqual(1, quarantines.Length);
                 CollectionAssert.AreEqual(truncated, File.ReadAllBytes(quarantines[0]));
@@ -250,11 +250,9 @@ namespace AL.Tests.EditMode
             try
             {
                 ArrangeCompletedCorruptionRecovery(root);
-                string markerPath = Path.Combine(root, "save.recovery.stage5");
-                string[] fields = File.ReadAllText(markerPath).Split('|');
-                Assert.AreEqual(5, fields.Length);
-                fields[2] = new string('A', 43);
-                File.WriteAllText(markerPath, string.Join("|", fields));
+                string witnessPath = Path.Combine(root, "save.profile-migration.v1");
+                Assert.True(File.Exists(witnessPath));
+                File.WriteAllText(witnessPath, "{ \"ProfileId\": \"tampered\" }");
                 Dictionary<string, byte[]> tamperedEvidence = SnapshotDirectory(root);
 
                 object service = CreateSaveService(root);
@@ -264,7 +262,7 @@ namespace AL.Tests.EditMode
                 Assert.Null(CurrentSave(service));
                 Assert.That(
                     (string)GetProperty(service, "LastLoadMessage"),
-                    Does.Contain("AL-SAVE-INVALID-PRIMARY-RECOVERY-EVIDENCE-CONFLICT"));
+                    Does.Contain("AL-SAVE-SCHEMA-CORRELATION-CONFLICT"));
                 AssertDirectoryUnchanged(root, tamperedEvidence);
             }
             finally
@@ -314,8 +312,8 @@ namespace AL.Tests.EditMode
                 ReadFixture("current-schema-v1.json"));
             object recovery = CreateSaveService(root);
             Invoke(recovery, "Load");
-            Assert.AreEqual("RecoveredFromBackup", Status(recovery));
-            Assert.True(File.Exists(Path.Combine(root, "save.recovery.stage5")));
+            Assert.AreEqual("MigratedSchemaOne", Status(recovery));
+            Assert.True(File.Exists(Path.Combine(root, "save.profile-migration.v1")));
         }
 
         private static GoldenFixtureManifest LoadManifest()

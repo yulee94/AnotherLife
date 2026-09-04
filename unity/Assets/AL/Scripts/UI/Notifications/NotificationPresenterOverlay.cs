@@ -80,6 +80,7 @@ namespace AL.UI.Notifications
                 720f,
                 280f + 160f * (textScale - 1f));
             RefreshSafeArea();
+            Canvas.ForceUpdateCanvases();
             if (plan.MovesFocus && hasAction)
             {
                 focusScope.Activate(

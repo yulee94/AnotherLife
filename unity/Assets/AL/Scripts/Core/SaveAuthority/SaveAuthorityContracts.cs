@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("AL.SaveAuthority.Tests")]
 [assembly: InternalsVisibleTo("AL.Nvs01.Persistence.Tests")]
+[assembly: InternalsVisibleTo("AL.SaveAuthority.RuntimeBridge")]
 
 namespace AL.Core.SaveAuthority
 {
