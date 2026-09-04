@@ -1490,8 +1490,6 @@ namespace AL.Tests.EditMode
             string[] expectedResourceCallers =
             {
                 "Kingdom/Quests/LocalQuestService.cs",
-                "Kingdom/Research/LocalResearchService.cs",
-                "Services/Local/LocalTrainingService.cs",
                 "Utilities/DemoInitializer.cs"
             };
             CollectionAssert.AreEqual(expectedResourceCallers, resourceCallers);
