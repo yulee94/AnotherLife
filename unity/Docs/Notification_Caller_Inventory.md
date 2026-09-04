@@ -14,7 +14,6 @@ code must submit a typed `NotificationRequest` through `Enqueue`.
 
 | Wrapper | Production caller | Exact call sites | Owning migration | Phase B disposition |
 | --- | --- | ---: | --- | --- |
-| `ShowMessage` | `Kingdom/Narrative/WorldStateService.cs` | 1 | #172 | Retain unchanged. Migrate only with the world-state owning transaction and approved notification definition/content source. |
 | `ShowMessage` | `Services/Local/LocalBossLootService.cs` | 3 | #168 | Retain unchanged. Migrate only with the boss-reward owning transaction and approved notification definition/content source. |
 | `ShowError` | zero production callers | 0 | #177 follow-up | Remove only after the compatibility window and downstream implementation checks permit it. |
 | `ShowResourceGain` | zero production callers | 0 | #177 follow-up | Remove only after the compatibility window and downstream implementation checks permit it. |
@@ -28,7 +27,8 @@ implementations are contract boundaries, not production caller sites.
   the typed queue or claim a `Presented` receipt.
 - Raw wrappers create no durable history.
 - No new production caller may be added to this inventory.
-- `WorldStateService` and `LocalBossLootService` remain unchanged in Phase B.
+- `LocalBossLootService` remains unchanged in this inventory slice.
+- Typed world-event start/end notifications are staged by `WorldStateDurableService` after a verified persist.
 - Typed production caller migration is deferred until the owning issue and an
   approved definition/content source are ready.
 - The focused EditMode suite scans production source and fails if these exact
