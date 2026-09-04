@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "registryId": "anotherlife-realm-slice-evidence-registry",
+  "protocolId": "RSQ-PROTOCOL-v1.0.0",
+  "realmOrder": ["Stonehold", "Eldergrove", "Crownlands", "Umbral"],
+  "modes": {
+    "Adventure3D": {
+      "namespace": "3d",
+      "requiredChecks": [
+        "RSQ-3D-REN-001",
+        "RSQ-3D-CAM-001",
+        "RSQ-3D-NAV-001",
+        "RSQ-3D-CMB-001",
+        "RSQ-3D-UI-001",
+        "RSQ-3D-PERF-001",
+        "RSQ-3D-SAVE-001",
+        "RSQ-3D-NAR-001",
+        "RSQ-3D-INP-001",
+        "RSQ-3D-ACC-001",
+        "RSQ-3D-LOC-EN-001",
+        "RSQ-3D-LOC-KO-001"
+      ]
+    },
+    "Kingdom2_5D": {
+      "namespace": "2_5d",
+      "requiredChecks": [
+        "RSQ-2_5D-REN-001",
+        "RSQ-2_5D-CAM-001",
+        "RSQ-2_5D-NAV-001",
+        "RSQ-2_5D-CMB-001",
+        "RSQ-2_5D-UI-001",
+        "RSQ-2_5D-PERF-001",
+        "RSQ-2_5D-SAVE-001",
+        "RSQ-2_5D-NAR-001",
+        "RSQ-2_5D-INP-001",
+        "RSQ-2_5D-ACC-001",
+        "RSQ-2_5D-LOC-EN-001",
+        "RSQ-2_5D-LOC-KO-001"
+      ]
+    }
+  },
+  "requiredLocales": ["en-US", "ko-KR"],
+  "requiredInputClasses": ["keyboard_mouse", "controller"],
+  "requiredAccessibilityPresets": [
+    "default",
+    "text-200",
+    "reduced-motion",
+    "reduced-flash",
+    "reduced-vfx",
+    "audio-off-captions",
+    "non-color"
+  ],
+  "requiredPlatforms": ["WindowsPlayer"],
+  "signatureMethod": "hmac-sha256-v1",
+  "trustedSigners": {
+    "anotherlife-evidence-owner-v1": {
+      "role": "EVIDENCE_OWNER",
+      "subject": "evidence-owner"
+    },
+    "anotherlife-game-owner-v1": {
+      "role": "GAME_OWNER",
+      "subject": "game-owner"
+    }
+  },
+  "advancementActions": {
+    "Stonehold": "ADVANCE_TO_ELDERGROVE",
+    "Eldergrove": "ADVANCE_TO_CROWNLANDS",
+    "Crownlands": "ADVANCE_TO_UMBRAL",
+    "Umbral": "COMPLETE_REALM_SEQUENCE"
+  },
+  "reopenTriggers": [
+    "renderer",
+    "camera",
+    "realm_art",
+    "combat",
+    "narrative",
+    "platform",
+    "accessibility",
+    "save",
+    "evidence_control",
+    "artifact_failure",
+    "owner_reopen"
+  ]
+}
