@@ -48,6 +48,9 @@ namespace AL.Data.Runtime
         // Optional schema-v1 extension. Missing legacy state is admitted but
         // remains hidden until a matching authoritative snapshot is received.
         public MapDisclosurePersistentState MapDisclosure;
+        // Optional schema-v2 extension. Missing legacy/schema-2 saves have no
+        // active world event and do not invent one until a committed start.
+        public WorldStatePersistentState WorldState;
         public int WarzoneCredits;
         public long LastSavedTimestamp;
     }
@@ -295,5 +298,85 @@ namespace AL.Data.Runtime
         public int Diplomat;
         public int Sage;
         public int Rogue;
+    }
+
+    [Serializable]
+    public sealed class WorldStatePersistentState
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public long SnapshotRevision;
+        public long EffectRevision;
+        public long LastTrustedUtcSeconds;
+        public string PolicyRevision = string.Empty;
+        public string CatalogRevision = string.Empty;
+        public bool HasActiveInstance;
+        public WorldStateInstanceRecord ActiveInstance = new WorldStateInstanceRecord();
+        public List<WorldStateInstanceRecord> CompletedHistory =
+            new List<WorldStateInstanceRecord>();
+        public List<WorldStateReceiptRecord> OperationReceipts =
+            new List<WorldStateReceiptRecord>();
+    }
+
+    [Serializable]
+    public sealed class WorldStateInstanceRecord
+    {
+        public string InstanceId = string.Empty;
+        public string DefinitionId = string.Empty;
+        public int DefinitionSchemaVersion;
+        public string DefinitionContentVersion = string.Empty;
+        public string DefinitionSourceRevision = string.Empty;
+        public string CorrelationId = string.Empty;
+        public string OperationId = string.Empty;
+        public string SourceSystemId = string.Empty;
+        public string ExclusiveGroup = string.Empty;
+        public int State;
+        public long ScheduledAtUtcSeconds;
+        public long StartedAtUtcSeconds;
+        public long ExpectedEndAtUtcSeconds;
+        public long CompletedAtUtcSeconds;
+        public int CompletionReason;
+        public long Revision;
+        public long CommittedEffectRevision;
+        public List<WorldStateResolvedEffectRecord> ResolvedEffects =
+            new List<WorldStateResolvedEffectRecord>();
+    }
+
+    [Serializable]
+    public sealed class WorldStateResolvedEffectRecord
+    {
+        public string EffectId = string.Empty;
+        public string ConsumerId = string.Empty;
+        public int Operation;
+        public string ParameterHash = string.Empty;
+        public int ConsumerPlanSchemaVersion;
+        public bool Required;
+        public int RemovalOrder;
+        public List<WorldStateEffectParameterRecord> Parameters =
+            new List<WorldStateEffectParameterRecord>();
+    }
+
+    [Serializable]
+    public sealed class WorldStateEffectParameterRecord
+    {
+        public string Name = string.Empty;
+        public int Kind;
+        public long IntegerValue;
+        public double NumberValue;
+        public bool BooleanValue;
+        public string ReferenceValue = string.Empty;
+    }
+
+    [Serializable]
+    public sealed class WorldStateReceiptRecord
+    {
+        public string OperationId = string.Empty;
+        public string CorrelationId = string.Empty;
+        public string SemanticHash = string.Empty;
+        public int TransitionKind;
+        public string InstanceId = string.Empty;
+        public long CommittedRevision;
+        public WorldStateInstanceRecord ResultingInstance = new WorldStateInstanceRecord();
     }
 }
