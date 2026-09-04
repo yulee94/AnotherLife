@@ -1,0 +1,10 @@
+{
+  "modelId": "elite_umbral_cindermaw_salamander",
+  "input": "unity/ArtSource/Terrestrials/RealmCreatureProductionSourceV001/Models/elite_umbral_cindermaw_salamander/elite_umbral_cindermaw_salamander_source_v004.fbx",
+  "inputSha256": "9486be45241afe61ba04b4f2fedc4d751819acfd2e0d6181a97c1e4cddb2b9d6",
+  "uvLayer": "UVMap_Clean",
+  "uvFacesOutsideUnit": 0,
+  "uvZeroAreaFaces": 0,
+  "uvOverlappingFaces": 0,
+  "diagnostics": []
+}
