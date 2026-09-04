@@ -812,6 +812,7 @@ namespace AL.Data.Catalogs
                     "DeathPenalty",
                     "WorldState",
                     "NotificationHistory",
+                    "GuildCitySeason",
                     "WarzoneCredits",
                     "LastSavedTimestamp",
                     "TerritoryCaptureLedger",
