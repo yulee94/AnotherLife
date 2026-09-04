@@ -68,10 +68,19 @@ namespace AL.Services.Local
             if (_saveGameService == null)
                 return Result(RealmSelectionStatus.ProfileUnavailable, request.RequestedRealmId, false, false, "AL-REALM-PROFILE-UNAVAILABLE");
 
-            if (_saveGameService is IProfileBoundRealmSelectionCandidateStore boundStore &&
-                _saveGameService is IProfileWriteAuthorityProvider authorityProvider &&
-                ProfileWriteAuthorityProviderGuard.IsCurrentWritable(authorityProvider))
+            if (_saveGameService is IProfileBoundRealmSelectionCandidateStore boundStore)
             {
+                if (!(_saveGameService is IProfileWriteAuthorityProvider authorityProvider) ||
+                    !ProfileWriteAuthorityProviderGuard.IsCurrentWritable(authorityProvider))
+                {
+                    return Result(
+                        RealmSelectionStatus.ProfileUnavailable,
+                        request.RequestedRealmId,
+                        false,
+                        false,
+                        "AL-REALM-PROFILE-NOT-WRITABLE");
+                }
+
                 RealmSelectionResult boundResult =
                     boundStore.TryCommitProfileBoundRealmSelection(request);
                 if (boundResult.Status == RealmSelectionStatus.Committed)
