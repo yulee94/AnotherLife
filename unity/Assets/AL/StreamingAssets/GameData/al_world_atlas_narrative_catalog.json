@@ -1,8 +1,8 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "catalogId": "al_world_atlas_narrative_catalog",
   "game": "Another Life",
-  "sourcePacketId": "al_narrative_world_atlas_source_v002",
+  "sourcePacketId": "al_narrative_world_atlas_source_v003",
   "idFormat": "lowercase_snake_case",
   "sourceAuthorities": {
     "primaryMode": "codex_narrative_content",
@@ -13,6 +13,11 @@
       "id": "al_world_atlas_topology_query_contract_v001",
       "path": "unity/Docs/World_Atlas_Topology_And_Query_Contract.md",
       "mergeCommit": "a97d5e5cf0afc0701ff57d6d110ce056632b4eec"
+    },
+    "protectedZoneContract": {
+      "id": "al_world_atlas_protected_zone_query_contract_v001",
+      "path": "unity/Docs/World_Atlas_Topology_And_Query_Contract.md",
+      "issue": 181
     },
     "technicalConsumerIssue": 181
   },
@@ -32,6 +37,52 @@
       "balance values"
     ]
   },
+  "protectedZonePolicies": [
+    {
+      "id": "zone_policy_city_safe_v001",
+      "zoneKind": "city",
+      "protection": "forced_non_pvp",
+      "appliesTo": "all_player_harmful_effects",
+      "applicationRecheck": "required",
+      "warOverride": "blocked",
+      "enforcementStatus": "contract_only",
+      "mutationAuthority": "none"
+    },
+    {
+      "id": "zone_policy_beginner_safe_v001",
+      "zoneKind": "beginner",
+      "protection": "forced_non_pvp",
+      "appliesTo": "all_player_harmful_effects",
+      "applicationRecheck": "required",
+      "warOverride": "blocked",
+      "enforcementStatus": "contract_only",
+      "mutationAuthority": "none"
+    },
+    {
+      "id": "zone_policy_town_safe_v001",
+      "zoneKind": "town",
+      "protection": "forced_non_pvp",
+      "appliesTo": "all_player_harmful_effects",
+      "applicationRecheck": "required",
+      "warOverride": "blocked",
+      "enforcementStatus": "contract_only",
+      "mutationAuthority": "none"
+    }
+  ],
+  "protectedSubzones": [
+    { "id": "zone_protected_crownlands_city", "realmId": "crownlands", "parentAtlasZoneId": "zone_inner_crownlands", "zoneKind": "city", "policyId": "zone_policy_city_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_crownlands_beginner", "realmId": "crownlands", "parentAtlasZoneId": "zone_inner_crownlands", "zoneKind": "beginner", "policyId": "zone_policy_beginner_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_crownlands_town", "realmId": "crownlands", "parentAtlasZoneId": "zone_inner_crownlands", "zoneKind": "town", "policyId": "zone_policy_town_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_stonehold_city", "realmId": "stonehold", "parentAtlasZoneId": "zone_inner_stonehold", "zoneKind": "city", "policyId": "zone_policy_city_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_stonehold_beginner", "realmId": "stonehold", "parentAtlasZoneId": "zone_inner_stonehold", "zoneKind": "beginner", "policyId": "zone_policy_beginner_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_stonehold_town", "realmId": "stonehold", "parentAtlasZoneId": "zone_inner_stonehold", "zoneKind": "town", "policyId": "zone_policy_town_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_eldergrove_city", "realmId": "eldergrove", "parentAtlasZoneId": "zone_inner_eldergrove", "zoneKind": "city", "policyId": "zone_policy_city_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_eldergrove_beginner", "realmId": "eldergrove", "parentAtlasZoneId": "zone_inner_eldergrove", "zoneKind": "beginner", "policyId": "zone_policy_beginner_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_eldergrove_town", "realmId": "eldergrove", "parentAtlasZoneId": "zone_inner_eldergrove", "zoneKind": "town", "policyId": "zone_policy_town_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_umbral_city", "realmId": "umbral", "parentAtlasZoneId": "zone_inner_umbral", "zoneKind": "city", "policyId": "zone_policy_city_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_umbral_beginner", "realmId": "umbral", "parentAtlasZoneId": "zone_inner_umbral", "zoneKind": "beginner", "policyId": "zone_policy_beginner_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" },
+    { "id": "zone_protected_umbral_town", "realmId": "umbral", "parentAtlasZoneId": "zone_inner_umbral", "zoneKind": "town", "policyId": "zone_policy_town_safe_v001", "sceneReferenceStatus": "requested", "boundaryStatus": "requested", "mutationAuthority": "none" }
+  ],
   "abstractTopology": {
     "topologyId": "topology_launch_world_ring_v001",
     "macroNarrativeZoneId": "zone_crossroads_bridges",
@@ -689,7 +740,10 @@
       "all topology identities are globally unique lowercase snake-case values",
       "realm placement remains unresolved with no inferred assignment or compass orientation",
       "four transition zones, eight walls, and four boundary records preserve the exact safe-zone-to-warzone order",
-      "boundary realm, inner realm, atlas zone, wall, main gate, and outer warzone references resolve exactly"
+      "boundary realm, inner realm, atlas zone, wall, main gate, and outer warzone references resolve exactly",
+      "three immutable city, beginner, and town forced-non-PvP policies retain their exact v001 IDs and contract-only metadata",
+      "each realm exposes exactly one city, beginner, and town protected subzone in canonical realm and kind order",
+      "protected subzone parent-zone and policy references resolve exactly; duplicate, reversed, unknown, or mutable claims fail closed"
     ],
     "blockedRuntimeClaims": [
       "scene references",
