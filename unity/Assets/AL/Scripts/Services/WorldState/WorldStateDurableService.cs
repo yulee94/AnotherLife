@@ -185,6 +185,16 @@ namespace AL.Services.WorldState
             return Commit(_planner.PlanEnd(request, Snapshot()));
         }
 
+        public WorldStateStandaloneCommitResult CommitCancel(WorldStateCancelRequest request)
+        {
+            return Commit(_planner.PlanCancel(request, Snapshot()));
+        }
+
+        public WorldStateStandaloneCommitResult CommitReconcile()
+        {
+            return Commit(_planner.PlanReconcile(Snapshot()));
+        }
+
         private WorldStateStandaloneCommitResult Commit(WorldStatePlanningResult planned)
         {
             WorldStateSnapshot before = Snapshot();
