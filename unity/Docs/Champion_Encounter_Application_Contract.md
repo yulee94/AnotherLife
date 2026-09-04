@@ -1,6 +1,6 @@
 # Champion Encounter Application Contract
 
-Status: C4 durable consequences for issue #180
+Status: C5 presentation/route evidence for issue #180
 Primary mode: engineering
 Authoritative source: six-family production authority ledger accepted by #183 / PR #723
 
@@ -12,7 +12,7 @@ Consequently, the currently supported production load result is `CatalogUnavaila
 
 ## Deterministic load contract
 
-`ChampionEncounterLoadGateway.Start` is the engine-free load/application entry. `ChampionEncounterProductionLoadPath.StartFromCommittedRealm` is the production start/load path. `ChampionEncounterRuntimeGateway.Apply` is the C3 runtime consumer of that C2 snapshot/receipt. `ChampionEncounterConsequenceGateway.Apply` is the C4 durable-consequence orchestrator.
+`ChampionEncounterLoadGateway.Start` is the engine-free load/application entry. `ChampionEncounterProductionLoadPath.StartFromCommittedRealm` is the production start/load path. `ChampionEncounterRuntimeGateway.Apply` is the C3 runtime consumer of that C2 snapshot/receipt. `ChampionEncounterConsequenceGateway.Apply` is the C4 durable-consequence orchestrator. `ChampionEncounterPresentationGateway.Present` is the C5 HUD/clear/defeat/reward bind.
 
 1. Require a committed valid realm (`stonehold` / `eldergrove` / `crownlands` / `umbral`). Uncommitted or unknown realm returns `InvalidSource` with zero mutation.
 2. Require the request to name the exact #183 source-set version and SHA-256. Stale or mismatched snapshot/hash returns `CatalogUnavailable`.
@@ -21,7 +21,8 @@ Consequently, the currently supported production load result is `CatalogUnavaila
 5. After validation succeeds, the gateway asks the injected application owner to apply exactly one in-memory load snapshot. A rejected application produces no receipt. The owner must not persist results or grant rewards.
 6. The application identity is the encounter id. Exact receipt replay returns `DuplicateExact` and does not call the owner. Reusing the identity with a changed source fingerprint returns `CorrelationConflict`.
 7. C3 runtime apply consumes only a `Loaded` C2 receipt. Hybrid, unavailable, invalid, or non-finite identity/reference/value input is typed and non-mutating. Loader/caster/combat/boss start do not overlay hard-coded slots, `FindFirstValid`, or uncommitted-realm fallbacks. Boss death does not roll loot or mutate rewards.
-8. C4 applies one duplicate-safe encounter result only for `AuthoritativeQuest`. It orchestrates typed #168 boss/reward receipts and #137 profile/write authority and never writes saves or computes loot itself. Practice, first-session labeled practice, DevelopmentDemo, AuthoritativeBoss, uncommitted realm, and missing NVS correlation/realm identity fail closed with zero mutation. Exact result replay returns `DuplicateExact`. Changed reuse returns `CorrelationConflict`. Presentation/route evidence remains C5.
+8. C4 applies one duplicate-safe encounter result only for `AuthoritativeQuest`. It orchestrates typed #168 boss/reward receipts and #137 profile/write authority and never writes saves or computes loot itself. Practice, first-session labeled practice, DevelopmentDemo, AuthoritativeBoss, uncommitted realm, and missing NVS correlation/realm identity fail closed with zero mutation. Exact result replay returns `DuplicateExact`. Changed reuse returns `CorrelationConflict`.
+9. C5 binds HUD/clear/defeat/reward presentation to the C4 plan. `Applied`/`DuplicateExact` receipts present Clear or Defeat and preserve NVS correlation/realm identity. Practice and first-session labeled practice stay visibly practice with no committed reward or progression value. Missing, invalid, or unavailable C4 authority presents typed Unavailable or Pending. Correlation conflict and rejected application present Failure. Boss object null, local booleans, and loot callbacks are not presentation authority. C5 never writes saves or bypasses #168/#137/#177.
 
 ## Ownership boundaries
 
@@ -31,7 +32,7 @@ Consequently, the currently supported production load result is `CatalogUnavaila
 - #174 owns battle simulation and battle application. This gateway does not simulate combat.
 - #137 owns profile/write authority, durable candidate application, commit certainty, replay/recovery, and save migration. C4 requires a writable #137 snapshot and commits only through the injected profile-commit owner.
 - First-session `FirstFightCatalog` / `SkillCaster` practice remains labeled practice and cannot silently become `AuthoritativeQuest`.
-- NVS correlation and committed realm identity are preserved on the C4 receipt. C4 does not bypass the owning NVS adapter.
+- NVS correlation and committed realm identity are preserved on the C4 receipt and the C5 presentation plan. C4/C5 do not bypass the owning NVS adapter.
 
 ## Failure behavior
 
@@ -59,6 +60,12 @@ Consequently, the currently supported production load result is `CatalogUnavaila
 | Same C4 result id with changed identity | C4 `CorrelationConflict` | none |
 | Valid structural publication | `Loaded` then runtime `Applied` | one in-memory application call, one receipt, one runtime bind |
 | AuthoritativeQuest victory/defeat with writable #137 | C4 `Applied` | one #168 plan on victory, one #137 commit, one result receipt |
+| C4 Applied/DuplicateExact victory receipt | C5 `Clear` | none |
+| C4 Applied/DuplicateExact defeat receipt | C5 `Defeat` | none |
+| C4 PracticeSuppressed | C5 `Practice` | none |
+| C4 missing/invalid/unavailable authority | C5 `Unavailable` | none |
+| No C4 plan yet | C5 `Pending` | none |
+| C4 correlation conflict / rejected apply | C5 `Failure` | none |
 
 Diagnostics are stable technical codes and contain no player-facing copy. The implementation is bounded, allocation-only at request time, and adds no save-schema, package, coroutine, or per-frame work.
 
@@ -81,6 +88,8 @@ Focused EditMode tests prove:
 - C4 AuthoritativeQuest victory applies once through #168 and #137;
 - C4 exact replay is duplicate-safe and changed reuse is `CorrelationConflict`;
 - C4 practice, first-session labeled practice, fallback, uncommitted, and missing/unavailable authority paths fail closed with zero save mutation;
-- C4 defeat commits the encounter result without issuing a #168 reward.
-
-C5 presentation/route evidence remains a later owned gate.
+- C4 defeat commits the encounter result without issuing a #168 reward;
+- C5 receipt-backed Clear/Defeat preserves NVS correlation and realm identity;
+- C5 practice and first-session labeled practice stay visibly practice without committed reward or progression;
+- C5 missing/invalid/unavailable authority presents typed Unavailable or Pending with zero save mutation;
+- production HUD/clear/reward text binds to C5 plans, not boss-object null or loot callbacks.
