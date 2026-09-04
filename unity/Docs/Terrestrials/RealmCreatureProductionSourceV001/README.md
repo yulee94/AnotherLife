@@ -8,7 +8,7 @@ This tracked packet promotes the owner-approved 2D source identities and the sel
 - Owner-tier 8K/4K texture packets: **3 / 21**
 - Below owner-tier or texture-rebuild packets: **18 / 21**
 - Runtime integration: **Blocked**
-- Rigging: **not delivered**
+- Rigging: **one source-qualification slice only** — Fault-Crowned Colossus V001 under `ProductionSlices/FaultCrownedColossusV001/` (runtime still blocked)
 - Runtime VFX: **not delivered and must remain separate**
 
 The packet is source/review authority only. It creates no spawn, combat, reward, save, narrative, or runtime catalog authority. Mere-Root and Crownstep use replacement geometry and intentionally do not inherit incompatible atlases. Cindermaw now binds its triangulated, non-overlapping UV atlas to a v005 localized visual-polish source (snout offsets plus material-separated soot hide, obsidian fins, pale scars, and ash-paste underside) while preserving the hash-bound v004 topology and authored 4K tangent normal; v004 remains immutable evidence. Eighteen packets remain below the owner texture tier or need texture rebuilding. Runtime textures under `runtime_2k` are derived convenience packets, not permission to integrate models before texture, LOD, rig, animation, device, and failure-path gates pass.

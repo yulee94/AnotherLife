@@ -1,0 +1,19 @@
+{
+  "packetId": "four_realm_representative_npc_2d_source_v001",
+  "result": "PASS",
+  "rosterCount": 4,
+  "artifactCount": 29,
+  "imageCount": 25,
+  "checks": [
+    "manifest parses as UTF-8 JSON",
+    "exact four canonical roster IDs are bound once",
+    "delegated owner approval follows a clean independent review",
+    "all 25 PNGs are uniquely manifest-bound",
+    "packet-local .gitattributes pins PNG LFS and text LF",
+    "packet contains no cache/temp files",
+    "packet file set matches artifacts plus allowed .gitattributes",
+    "tracked packet text uses LF line endings"
+  ],
+  "errors": [],
+  "manifestSha256": "d7bc7b302d3c604a3ae82abfc0546690390fad3b728ffb890671b63e0fd22c31"
+}

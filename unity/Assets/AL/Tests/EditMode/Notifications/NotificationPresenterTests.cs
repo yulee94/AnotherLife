@@ -156,12 +156,13 @@ namespace AL.Tests.EditMode.Notifications
                 "EventSystem",
                 typeof(EventSystem),
                 typeof(StandaloneInputModule)));
+            EventSystem eventSystem = eventSystemObject.GetComponent<EventSystem>();
             GameObject priorSelection = Track(new GameObject(
                 "PriorSelection",
                 typeof(RectTransform),
                 typeof(Image),
                 typeof(Button)));
-            EventSystem.current.SetSelectedGameObject(priorSelection);
+            eventSystem.SetSelectedGameObject(priorSelection);
             UiAccessibilityPreferences.Configure(1.5f, true, true, true);
 
             NotificationQueueRecordSnapshot toastRecord = Record(
@@ -175,7 +176,7 @@ namespace AL.Tests.EditMode.Notifications
             NotificationPresenterOverlay overlay = NewOverlay();
             overlay.Show(toastPlan, null);
 
-            Assert.AreSame(priorSelection, EventSystem.current.currentSelectedGameObject);
+            Assert.AreSame(priorSelection, eventSystem.currentSelectedGameObject);
 
             NotificationQueueRecordSnapshot requiredRecord = Record(
                 Definition(
@@ -196,7 +197,7 @@ namespace AL.Tests.EditMode.Notifications
             Assert.GreaterOrEqual(overlay.TitleLabel.fontSize, 39);
             Assert.AreSame(
                 overlay.ActionButton.gameObject,
-                EventSystem.current.currentSelectedGameObject);
+                eventSystem.currentSelectedGameObject);
         }
 
         [Test]
