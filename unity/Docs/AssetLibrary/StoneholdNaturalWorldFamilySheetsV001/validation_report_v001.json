@@ -1,14 +1,9 @@
 {
   "ok": true,
   "integrityOk": true,
-  "reviewClosed": false,
+  "reviewClosed": true,
   "familyCount": 54,
-  "requireReview": false,
+  "requireReview": true,
   "errors": [],
-  "reviewErrors": [
-    "approval/review gate is not closed with APPROVE and PASS",
-    "independent review ID is absent or pending",
-    "independent review summary is absent or pending",
-    "readinessState is not approved_2d_source_only"
-  ]
+  "reviewErrors": []
 }

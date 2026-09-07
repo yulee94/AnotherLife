@@ -36,6 +36,7 @@ GENERATED_UNMANIFESTED = {
     "validation_report_v001.json",
     "generation_log_v001.json",
 }
+GENERATION_LOG_PATH = ROOT / "generation_log_v001.json"
 REQUIRED_GITATTR_LINES = (
     ".gitattributes text eol=lf",
     "*.md text eol=lf",
@@ -164,6 +165,50 @@ def check_families(manifest: dict) -> list[str]:
     return errors
 
 
+def check_generation_log(manifest: dict) -> list[str]:
+    errors: list[str] = []
+    log_path = ROOT / "generation_log_v001.json"
+    if not log_path.is_file():
+        return ["missing generation_log_v001.json"]
+    errors.extend(check_lf_text(log_path))
+    try:
+        log = json.loads(log_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return ["generation_log_v001.json is not valid JSON"]
+    catalog = json.loads(FAMILIES_PATH.read_text(encoding="utf-8"))
+    catalog_ids = [row["familyId"] for row in catalog["families"]]
+    manifest_ids = [row["familyId"] for row in manifest.get("families", [])]
+    log_ids = [row.get("familyId") for row in log.get("results", [])]
+    if log_ids != catalog_ids:
+        errors.append("generation-log family order/IDs do not match families_v001.json")
+    if log_ids != manifest_ids:
+        errors.append("generation-log family order/IDs do not match manifest families")
+    if len(log_ids) != EXPECTED_FAMILY_COUNT:
+        errors.append(f"generation-log count {len(log_ids)} != {EXPECTED_FAMILY_COUNT}")
+    if len(set(log_ids)) != len(log_ids):
+        errors.append("duplicate familyId in generation log")
+    if log.get("provider") != "Grok" or log.get("model") != "4.6 High":
+        errors.append("generation-log provider/model must remain Grok 4.6 High")
+    if log.get("imageModel") != "grok-imagine-image-2.0":
+        errors.append("generation-log imageModel must remain grok-imagine-image-2.0")
+    if log.get("errors"):
+        errors.append("generation-log still records errors")
+    for row in log.get("results", []):
+        fid = row.get("familyId")
+        rel = str(row.get("path") or "").replace("\\", "/")
+        expected = f"Sheets/{fid}_family_sheet_v001.png"
+        if rel != expected:
+            errors.append(f"generation-log path must be packet-relative {expected}")
+        if not row.get("ok"):
+            errors.append(f"generation-log not ok: {fid}")
+        if row.get("fallback") not in (None, "none"):
+            errors.append(f"generation-log fallback must be none: {fid}")
+        sheet = ROOT / expected
+        if sheet.is_file() and row.get("bytes") not in (None, sheet.stat().st_size):
+            errors.append(f"generation-log byte length mismatch: {fid}")
+    return errors
+
+
 def check_hashes(manifest: dict) -> list[str]:
     errors: list[str] = []
     for artifact in manifest.get("artifacts", []):
@@ -230,6 +275,7 @@ def validate(require_review: bool = False) -> dict:
     errors.extend(check_forbidden_files())
     errors.extend(check_exact_file_set(manifest))
     errors.extend(check_families(manifest))
+    errors.extend(check_generation_log(manifest))
     errors.extend(check_hashes(manifest))
     errors.extend(check_review_integrity(manifest))
     review_errors = check_review_closed(manifest)

@@ -4,7 +4,7 @@
 
 **Created:** 2026-09-05
 
-**Owner status:** `PENDING` visual approval
+**Owner status:** `APPROVE` (shown packet at `483b812c`, PR #785). 2D source only.
 
 **Provider:** Grok 4.6 High (`grok-imagine-image-2.0`)
 
@@ -111,21 +111,19 @@ flower, crystal formation, quarry dressing, plus the vegetation contact page.
 
 ## Hard holds
 
-- Owner visual approval is required before this packet is `APPROVE`.
+- Owner visual approval of this shown packet is recorded. Meshy, Blender, and 3D remain held.
+- Padlock/cage LOCKED-state glyphs, targeting highlights, text, scale ghosts, and presentation bases are not baked production geometry.
 - No invented navigation widths, harvest yields, or runtime VFX as mesh.
-- `t_bfde752c` stays blocked for 3D until this visual gate and geometry/nav
-  dimensions are locked.
+- `t_bfde752c` stays blocked for 3D until geometry/nav dimensions are locked.
 
 ## Validation
 
-Integrity may pass while owner review stays PENDING.
+Integrity and `--require-review` must both pass after this APPROVE record.
 
 ```
-PYTHONDONTWRITEBYTECODE=1 python validate_packet.py
+PYTHONDONTWRITEBYTECODE=1 python validate_packet.py --require-review
 PYTHONDONTWRITEBYTECODE=1 python test_validate_packet.py
 ```
-
-`--require-review` fails closed until owner APPROVE.
 
 ## Honest recon (this worker)
 

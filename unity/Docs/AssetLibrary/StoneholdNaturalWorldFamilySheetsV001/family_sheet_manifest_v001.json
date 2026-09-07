@@ -19,19 +19,19 @@
     "unity/Docs/AI/Meshy/meshy_execution_slagfall_environment_2026-08-31_v001.json"
   ],
   "approval": {
-    "authority": "project_owner visual ruling required",
-    "decision": "PENDING",
-    "independentReviewId": "pending",
-    "independentReviewVerdict": "PENDING",
-    "summary": "Independent visual/source review pending.",
+    "authority": "project_owner",
+    "decision": "APPROVE",
+    "independentReviewId": "kanban-t_2227272d-run-570",
+    "independentReviewVerdict": "PASS",
+    "summary": "Owner visual APPROVE of the seven shown contact sheets at 483b812c (PR #785, 2026-09-06). Independent review run 570: PASS as 2D concept candidates. Meshy/Blender/3D remain unauthorized.",
     "runtimeAuthority": false,
     "releaseAuthority": false,
     "meshyAuthorized": false
   },
   "readinessBoundary": {
-    "state": "pending_owner_visual_approval",
+    "state": "approved_2d_source_only",
     "permits": [
-      "owner visual review of 2D family sheets"
+      "2D family-sheet source for later 3D planning after geometry/nav lock"
     ],
     "forbids": [
       "Meshy",
@@ -1411,20 +1411,20 @@
     {
       "path": "validate_packet.py",
       "kind": "text",
-      "bytes": 10035,
-      "sha256": "646fb1eb89647e4d104b8bceeac8a72a76790875b216bb02bd698d756b7ee38d"
+      "bytes": 12440,
+      "sha256": "c33b2787610994c60ab76f60e3eee51045bb24fba15bf86924643a4b393a6a9b"
     },
     {
       "path": "test_validate_packet.py",
       "kind": "text",
-      "bytes": 5973,
-      "sha256": "5266be54fafeb281c861282eec99974b0b8cfca95df43e20e7ab0ab5e1315f41"
+      "bytes": 7638,
+      "sha256": "51f2baf3e948dd498202ab83256fd0284b538140cb5244ac70b33186c948dcc9"
     },
     {
       "path": "README.md",
       "kind": "text",
-      "bytes": 9552,
-      "sha256": "d3e74b73afea4a36d0ae765b10acd02800e7e437e130aacc526b7ffd2b4381a5"
+      "bytes": 9714,
+      "sha256": "e5f4bc5537cd89c763f957487e3c7624284b772bfc04a0c07255687f63d1af1c"
     },
     {
       "path": "Sheets/waf_terrain_surface_macro_landform_family_sheet_v001.png",
