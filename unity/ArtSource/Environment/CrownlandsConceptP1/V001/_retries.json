@@ -1,0 +1,42 @@
+[
+  {
+    "sheet": "crownlands_city_dwelling_interior_v001",
+    "reason": "attempt1 stair cores did not share plan coordinates across floors (ground east vs upper west)",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_capital_district_plan_v001",
+    "reason": "attempt1 oval/concentric Renaissance city with ring wall; attempt2 still a standalone circular island/disk with cliff perimeter all around; required organic L-/wedge pocket bounded by two impassable cliff edges, open opposite approach, broken offset nonradial streets, capital_crownspire only",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_capital_skyline_north_south_v001",
+    "reason": "attempt1 Gothic/cathedral drift, paired conical turrets, needle finials, rose window, excessive bilateral symmetry; required broad low horizontal chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums/meridian ribs, restrained brass/silver",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_capital_skyline_east_west_v001",
+    "reason": "attempt1 Gothic/cathedral drift, paired conical turrets, needle finials, rose windows, pointed-arch bays, excessive symmetry; required broad low horizontal chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums/meridian ribs, restrained brass/silver",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_city_street_grammar_v001",
+    "reason": "attempt1 church/chapel frontage as unified civic terrace; required clearly separate asymmetric enterable dwelling/market/service/public-hall modules along offset street with ordinary punched openings",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_city_market_service_public_hall_kit_v001",
+    "reason": "attempt1 public hall missing visible labeled 2.5m W x 3.0m H aperture with paired timber leaves, long iron strap hinges across each leaf, sliding iron latch, stone-block frame",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_capital_keep_shell_v001",
+    "reason": "attempt1 generic Gothic castle with round towers, conical roofs, needle finials, lancet repetition, pointed portal; required broad low rectangular civic keep with blunt octagonal meridian drums, truncated/hipped blue-slate caps, horizontal chalk-gold masses, no cones/needles/Gothic silhouette",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_capital_keep_section_v001",
+    "reason": "attempt1 steep church-like cross gable and ridge finial conflicted with civic keep shell/ground/upper; required truncated octagonal drums, low hipped blue-slate, low-hip cross with horizontal ridge, stairs that land, no needles",
+    "result": "PASS"
+  }
+]

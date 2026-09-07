@@ -1,0 +1,268 @@
+[
+  {
+    "familyId": "fam_crownlands_sequential_gate_wall_complex",
+    "source": "crownlands_sequential_gate_outer_face_v001.png",
+    "title": "Sequential outer-face elevation",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 997835,
+    "source_sha256": "9fbd9f4e07bfebba4a6c50124a06ab62bbf58dc638b9836cbb3fe1eaee7eea73",
+    "authoring": "crownlands_sequential_gate_outer_face_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4731670,
+    "authoring_sha256": "7d87cb4bc89dde7d7df1fe34e0a960e1203b54098f7ab88f3a9d7213f0cfcb5a",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_sequential_gate_wall_complex",
+    "source": "crownlands_sequential_gate_inner_face_v001.png",
+    "title": "Sequential inner-face elevation",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1013468,
+    "source_sha256": "c8baea04fd57dd8b49dce9c4c836f8c7c7eeae500324e91f3304ecbf55bd4e05",
+    "authoring": "crownlands_sequential_gate_inner_face_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4738317,
+    "authoring_sha256": "daa4529f9168daed6210a35c191e6f5f596df9359542edecd5c3ba35a214d22d",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_sequential_gate_wall_complex",
+    "source": "crownlands_sequential_gate_longitudinal_section_v001.png",
+    "title": "Sequential plan + 18 m passage section",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 814697,
+    "source_sha256": "225f031d0ba1558389377ed9344f429974c94a85930e42e3d901d54f80b59605",
+    "authoring": "crownlands_sequential_gate_longitudinal_section_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4067965,
+    "authoring_sha256": "6c45b8cb12dafa37c220e220dd215da0beac043110b20f86422dc30eaded9719",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_sequential_gate_wall_complex",
+    "source": "crownlands_sequential_wall_walltop_modules_v001.png",
+    "title": "Wall / walltop defender modules",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1019918,
+    "source_sha256": "8f7fd5bb8da71f22739a7a5fef1f7a3007b91cbf0773082d18b5ed789587d37b",
+    "authoring": "crownlands_sequential_wall_walltop_modules_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4736214,
+    "authoring_sha256": "ad1ada8d5232021dc72a378c576de1378935e6e53834ea894f9dd8e40d7d2d25",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_fortress_single_gate",
+    "source": "crownlands_fortress_plan_apron_v001.png",
+    "title": "One-gate fortress plan with 30 m clear apron",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 905896,
+    "source_sha256": "f81e3f3df0e0940938d7357db5ca4b38eeefb48aad741ed9288205cd2f599e4a",
+    "authoring": "crownlands_fortress_plan_apron_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4291244,
+    "authoring_sha256": "9693b78e5b7ec8ab71b7a4abfe2a665fe0f8720bd5312bb50f6c81b6c00204af",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_fortress_single_gate",
+    "source": "crownlands_fortress_elevations_v001.png",
+    "title": "One-gate fortress front/side elevations",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 999166,
+    "source_sha256": "e21fbcb804566fa4cfc955dd0e65d042d2a7e64df761643511130bcfc652d6fa",
+    "authoring": "crownlands_fortress_elevations_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4755937,
+    "authoring_sha256": "9fa6c63c6266a7ae5dad577c0bd9206530ff86a959d0f9f7d24918b8401f81fa",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_fortress_single_gate",
+    "source": "crownlands_fortress_keep_flag_anchor_v001.png",
+    "title": "Keep shell + central flag-anchor socket",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 929460,
+    "source_sha256": "d1d9a932ea638a5460688861dbf9e53c814df4159e0b507453c76ce2fc3b4cda",
+    "authoring": "crownlands_fortress_keep_flag_anchor_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4347170,
+    "authoring_sha256": "a4ab694edf0bc208857e620873477c90a52989c091f9319d9ffccbaed85c8f36",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_terrain",
+    "source": "crownlands_terrain_grades_worldscar_wallend_v001.png",
+    "title": "Inner/outer grade, Worldscar brink, wall-end",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1121104,
+    "source_sha256": "9d146e11b70e5b049c59241222463aaa271af44480cf611af0edf36580c49f52",
+    "authoring": "crownlands_terrain_grades_worldscar_wallend_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4936809,
+    "authoring_sha256": "74fcf1976e0c142db306ce3c2193126d70010756d3d164496113d9bbbf33aea8",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_terrain",
+    "source": "crownlands_terrain_bridge_abutment_180m_v001.png",
+    "title": "180 m bridge endpoints / abutment fit",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 913548,
+    "source_sha256": "9ba59f962348ae088e696b8fa2bf53cbb3669f9c1f622621c196cf26e74d57f3",
+    "authoring": "crownlands_terrain_bridge_abutment_180m_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4131046,
+    "authoring_sha256": "95a3c861104f9e5ab466c704c92b6bb59f8685a1ad993a31756d1db53bce2607",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_terrain",
+    "source": "crownlands_terrain_route_bed_v001.png",
+    "title": "Route bed/ruts/drainage + player-scale rocks",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 979769,
+    "source_sha256": "2ee12a51a68832528961fa5784d7a0d2185595d30c18953592c85b2e5b23fe0c",
+    "authoring": "crownlands_terrain_route_bed_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4394121,
+    "authoring_sha256": "cefe4f6d51a106469b62e7f0678b7c586eb6cb1bf048ed1fe6bdb8d99033d74f",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_ecosystem_dressing",
+    "source": "crownlands_ecosystem_composition_habitat_v001.png",
+    "title": "Ecosystem composition and habitat without animals",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1020412,
+    "source_sha256": "33482b86b5cbff7976fc89eea237fc73a592804d3e9a7f54b6472cc8285404dc",
+    "authoring": "crownlands_ecosystem_composition_habitat_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4481701,
+    "authoring_sha256": "4b77c15b1f277d9d471fd1ea1169d8294a02c8ed7e4354e2551d3152cc4f1558",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_ecosystem_dressing",
+    "source": "crownlands_cave_exterior_language_v001.png",
+    "title": "Cave exterior landform language",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1088542,
+    "source_sha256": "8e73af968feeca7e5b13505598c16119a36d58fe3b2372cf8e517de2f682faaa",
+    "authoring": "crownlands_cave_exterior_language_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4773796,
+    "authoring_sha256": "51462a2311e94057023a6189460027b89a9508c2460f7e2a8e1b701b411a7dda",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_material_lod",
+    "source": "crownlands_capital_city_material_kits_v001.png",
+    "title": "Capital/city material kits",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1247666,
+    "source_sha256": "56aeca09390a006d626b4c5760f22bb5d79af336a7ee80dbf2a8b2aec9c0b3a8",
+    "authoring": "crownlands_capital_city_material_kits_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5514723,
+    "authoring_sha256": "7c3d284cc254bee9d035fc6c4d4b582b1b99ed0a0911609c287f2f03b5db7e3b",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_material_lod",
+    "source": "crownlands_lod_material_lighting_reference_v001.png",
+    "title": "LOD / material / lighting reference",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1096270,
+    "source_sha256": "18236b685403055eca1dfc165c161f4773f6bcce31d7931f276e9d12b8c03f11",
+    "authoring": "crownlands_lod_material_lighting_reference_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4931346,
+    "authoring_sha256": "2b809e7304011ea8b67d80a726702d4bb2355cbf00b83858e84621ca57cb7574",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  }
+]

@@ -1,0 +1,478 @@
+{
+  "version": "V001",
+  "status": "AUTO_APPROVED_FOR_PRODUCTION_SUBJECT_TO_OWNER_INSPECTION",
+  "quality_target": "premium-AA dark-fantasy stylized realism; BDO-inspired directional bar, not parity",
+  "native_generation_resolution": [
+    1536,
+    1024
+  ],
+  "technical_plate_resolution": [
+    1800,
+    1200
+  ],
+  "authoring_resolution": [
+    7680,
+    5120
+  ],
+  "asset_count": 26,
+  "realm_specific_triptych_count": 5,
+  "contact_sheets": [
+    "Stonehold/stonehold_production_contact_sheet_v001.jpg",
+    "Crownlands/crownlands_production_contact_sheet_v001.jpg",
+    "Eldergrove/eldergrove_production_contact_sheet_v001.jpg",
+    "Umbral/umbral_production_contact_sheet_v001.jpg",
+    "Accordant/accordant_production_contact_sheet_v001.jpg"
+  ],
+  "technical_gate_plate_count": 5,
+  "technical_gate_plates": [
+    "Stonehold/stonehold_sequential_gate_technical_plate_v001.svg",
+    "Crownlands/crownlands_sequential_gate_technical_plate_v001.svg",
+    "Eldergrove/eldergrove_sequential_gate_technical_plate_v001.svg",
+    "Umbral/umbral_sequential_gate_technical_plate_v001.svg",
+    "Accordant/accordant_sequential_gate_technical_plate_v001.svg"
+  ],
+  "assets": [
+    {
+      "source": "Accordant/accordant_fortress_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 3064082,
+      "source_sha256": "f1d772f209ace91d06900e0e5a76813b82d309bda2d4b308543b3e50ca4eab22",
+      "authoring": "Accordant/accordant_fortress_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 7952145,
+      "authoring_sha256": "00c913c548460f9fa4369c4ccee561d9a4287b9dfc6fbd1f33efb85f1568fb5f",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Accordant/accordant_gate_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2199821,
+      "source_sha256": "6e1a9d642e6150bb4fe361fe78cdec2d8c4b3f832ad686ec52e44a7c1fad5c80",
+      "authoring": "Accordant/accordant_gate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5849509,
+      "authoring_sha256": "cd3476282a1528f257a04b394796ea3f63fa88fa07ec65792d12625566bf5098",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Accordant/accordant_interior_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2409840,
+      "source_sha256": "793d993044c1e1197f08f44e09f7dcf399de582398994fd2871fdd50b916fc32",
+      "authoring": "Accordant/accordant_interior_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6553609,
+      "authoring_sha256": "bc5c3a951f3fdbbd9bb1b38ee2902e77fae40894f97945d3b381be21da340e73",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Accordant/accordant_sequential_gate_technical_plate_v001.png",
+      "source_resolution": [
+        1800,
+        1200
+      ],
+      "source_bytes": 77342,
+      "source_sha256": "d7373ec69031d9608933299eedef0ae8a93d25a9e81fd324dc9abac850081c67",
+      "authoring": "Accordant/accordant_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 2630575,
+      "authoring_sha256": "718a7327a60e7c869bc24356c515ba0cce2b914f346089935afa96eef8483afd",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "accordant_architecture_source.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2629871,
+      "source_sha256": "70fcdf4db14d99873ebdb72acbdca6cd12e5a5373e1fbe08234c1da298b328d7",
+      "authoring": "accordant_architecture_source_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 7190277,
+      "authoring_sha256": "c75ddab623886241c53d92bc39aef40332be2d02e709a12193060b74ddb3a916",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Crownlands/crownlands_fortress_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2480019,
+      "source_sha256": "2959c608857ec3b41d82b1fd4178644c503d72f9f759ad25a83959039ee26416",
+      "authoring": "Crownlands/crownlands_fortress_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6356310,
+      "authoring_sha256": "af2bf77d1ab79bc9ece64490bf76eceae63995edd4a810c68f53518652834970",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Crownlands/crownlands_gate_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2526033,
+      "source_sha256": "d0a7937be55386f217afec0b080a50a738fdc5a115a4a5a6c222ba3106d508b1",
+      "authoring": "Crownlands/crownlands_gate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6632816,
+      "authoring_sha256": "1e1a62027c11f40673ab5fef2fd0e35dc6c99e0c701915b845eef0474cbcb36b",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Crownlands/crownlands_interior_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2778302,
+      "source_sha256": "e0b60184b0398f671c380255c483f639b0c76171fa273fe0cc8b5986a2091b6a",
+      "authoring": "Crownlands/crownlands_interior_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 7393157,
+      "authoring_sha256": "7ba456f378ebcd5502f48596da2462bd412d0109911bd61cee8a1a6da9fc9422",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Crownlands/crownlands_sequential_gate_technical_plate_v001.png",
+      "source_resolution": [
+        1800,
+        1200
+      ],
+      "source_bytes": 71609,
+      "source_sha256": "24a3f9dc20803fcddd6ceda800674f34e7565adbfe958cfde22f2788dc10d54a",
+      "authoring": "Crownlands/crownlands_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 2341557,
+      "authoring_sha256": "b6fd2418a12349a8f336029f3db8af772ae435e785e31225d016941af791b934",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "crownlands_architecture_source.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2425658,
+      "source_sha256": "b9ca36c892695dcaf1add30d64f1b7d184a6824773b1ec699239f869c36dce72",
+      "authoring": "crownlands_architecture_source_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6534221,
+      "authoring_sha256": "435c80755808599e39943e87dca76a280636d8031853e0a600d391d4f60faebb",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Eldergrove/eldergrove_fortress_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2077842,
+      "source_sha256": "815bd290603345751dd8919678eb898ea2ee7c55de3228842d117f66eefee57d",
+      "authoring": "Eldergrove/eldergrove_fortress_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5250464,
+      "authoring_sha256": "3a5cda966821861af5e527c04ec0b386c7fa213a371dcf5f2ef76a7002287c88",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Eldergrove/eldergrove_gate_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2517904,
+      "source_sha256": "e97b3354ca7ee3d3961fcdb37fa3117bbd4c91c718c7f0ab02c90cc7a9a0edaf",
+      "authoring": "Eldergrove/eldergrove_gate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6775834,
+      "authoring_sha256": "b84c56d8e2b2ab7020df6601863bc7ba9148ff4d9a76d86cedaad175f69914d1",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Eldergrove/eldergrove_interior_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2365358,
+      "source_sha256": "9cfdf0d046f60f3f84b251a7661d61b476b854f83ed5943b89af93e095b9f4f9",
+      "authoring": "Eldergrove/eldergrove_interior_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6380569,
+      "authoring_sha256": "d35c9f5ccf3a1c17b9bd0ca13d9342a3657baf786353e7c5fe4e6564faeeb1e6",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Eldergrove/eldergrove_sequential_gate_technical_plate_v001.png",
+      "source_resolution": [
+        1800,
+        1200
+      ],
+      "source_bytes": 69785,
+      "source_sha256": "acc0fc694d6902119a8f8d26629a2f90b0ce2107d443208f9022a6d56b56a9ce",
+      "authoring": "Eldergrove/eldergrove_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 2375585,
+      "authoring_sha256": "337952487eda0151bac1904a05944aafd423125077dfd545884aad82be6ea22f",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "eldergrove_architecture_source.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2788430,
+      "source_sha256": "f46a92d2768e5289a7975539abceea072aae0504ffdf1277876678edbfc4cdd7",
+      "authoring": "eldergrove_architecture_source_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 7581637,
+      "authoring_sha256": "1139b64e8c53034171109a5773d1cf911f34ff9ff2cda0e2ba52a1776e170770",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "shared_modular_kit_source.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2422709,
+      "source_sha256": "ccd0971eaead62819a74261d5ed4e76c182a13c9da8989b2de76bf0414178f22",
+      "authoring": "shared_modular_kit_source_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6489932,
+      "authoring_sha256": "9f8da10f88b7a4b1778a810257403af0cc52c94799ba2b6ecbe365cb7badd5ec",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Stonehold/stonehold_fortress_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2353633,
+      "source_sha256": "020df12ae1b61d004656d5f3ee8d0621c88eb12d2023c40c7c3a646ddb058af7",
+      "authoring": "Stonehold/stonehold_fortress_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5965246,
+      "authoring_sha256": "67735e323d4dcefabd4b672b16d665a1bd5f6fef92703f2a1577b021aca2e932",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Stonehold/stonehold_gate_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2195695,
+      "source_sha256": "f2a9f416177c21960ec6dcd775fd4322476e30200b7031d78252156e9f6b70ad",
+      "authoring": "Stonehold/stonehold_gate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5654896,
+      "authoring_sha256": "f443cde9700805d9352ee82ba404f7d027d418626ca99269b780cfc01c7751b2",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Stonehold/stonehold_interior_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2771757,
+      "source_sha256": "bbae6f50488f7757617b908266ab736467a264fca31706f99941f26a0711d07f",
+      "authoring": "Stonehold/stonehold_interior_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 7692059,
+      "authoring_sha256": "9816dd364e26638a57eb048834864d3b86474f8bc4be7cacb0381ac5ed579e89",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Stonehold/stonehold_sequential_gate_technical_plate_v001.png",
+      "source_resolution": [
+        1800,
+        1200
+      ],
+      "source_bytes": 68799,
+      "source_sha256": "9c69512a3d1338f45983a3d064b7a3c44ad3a43523f4ea7e6efec1681f11f24a",
+      "authoring": "Stonehold/stonehold_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 2289194,
+      "authoring_sha256": "7d5d795a9d9647793ef0da22407a815fb24abe73bcf0d701959e2bb720334f6d",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "stonehold_architecture_source.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2419516,
+      "source_sha256": "7c02b031790a31f1c33e4a71da68aee5acbbe1024970d1148fda18a95a9c3441",
+      "authoring": "stonehold_architecture_source_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6673581,
+      "authoring_sha256": "f364b57831175b0a4dd133d1ab30398487da6494e46b37486c1f50946f4b0a6d",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Umbral/umbral_fortress_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2376208,
+      "source_sha256": "32bd24126be62841b91de5cccc2f5b064260fc60afaf5d49d2af31472771fab1",
+      "authoring": "Umbral/umbral_fortress_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5885018,
+      "authoring_sha256": "23ca924971fd4e8ce0e017f149724bcf0711e863cf98a7aed13c5ca8a1d9ed36",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Umbral/umbral_gate_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2232986,
+      "source_sha256": "efe69439bcf0c0d8eaa9754a9553a1526290393f7a9b3edced16322384f61428",
+      "authoring": "Umbral/umbral_gate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5756649,
+      "authoring_sha256": "aeb623c57dfb57320576976a6b6261f514608f7dd895c06a7834d47ec01c0a15",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Umbral/umbral_interior_v001.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2239933,
+      "source_sha256": "79d483c7d9f14c6918e2779d65affebdc5b6d27b5a9124c8baf28a78b85fca05",
+      "authoring": "Umbral/umbral_interior_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6075358,
+      "authoring_sha256": "c85b8a574a55cfe4feb7b8b01792180cfd5d8a10e01ee308c997e6c156b9d634",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "Umbral/umbral_sequential_gate_technical_plate_v001.png",
+      "source_resolution": [
+        1800,
+        1200
+      ],
+      "source_bytes": 69681,
+      "source_sha256": "70f9ed38d587050705009df1b264beb0b7435fdd65c020cb8be96bb25cdfa122",
+      "authoring": "Umbral/umbral_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 2385521,
+      "authoring_sha256": "315f4383500b7a0022a3a73cb4a4d4a9607b54553a7cff0a6b1bb288a3e0cd60",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "source": "umbral_architecture_source.png",
+      "source_resolution": [
+        1536,
+        1024
+      ],
+      "source_bytes": 2334288,
+      "source_sha256": "555e541da9d6555e621f379726ba8977404994427b8c63faabca4294e6f14f3f",
+      "authoring": "umbral_architecture_source_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5871619,
+      "authoring_sha256": "2445406fe7183ab1576c6a12dc376f0cc15156eea42646d0c16a58b424909476",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    }
+  ]
+}

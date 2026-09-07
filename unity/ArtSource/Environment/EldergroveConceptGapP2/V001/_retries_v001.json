@@ -1,0 +1,62 @@
+[
+  {
+    "sheet": "eldergrove_sequential_gate_outer_face_v001",
+    "reason": "attempt1 giant exterior roots / climb-assist trunks",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_sequential_gate_inner_face_v001",
+    "reason": "attempt1 wrapping trees and missing inner walltop stair",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_sequential_gate_longitudinal_section_v001",
+    "reason": "attempts 1-5 and 7: courtyard/oculus, posts/frames, open hallway, one dark inset panel; independent PASS on bb508d5770c053fa with OUTER x=0 / INNER x=18 leaf planes, roof, inner-side stair",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_sequential_wall_walltop_modules_v001",
+    "reason": "attempts 1-6 exterior roots, stair tower, center as elevation not walk plan",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_fortress_plan_apron_v001",
+    "reason": "attempts 1-3 apron roots / open ungated gap / unlabeled apron; independent PASS on 0c2392135c823c61 closed paired GATE + labeled >=30m empty apron",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_fortress_elevations_v001",
+    "reason": "attempts 1-2 outer-face roots and keep silhouette drift",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_fortress_keep_flag_mast_v001",
+    "reason": "attempt1 hollow ring keep, wrapping roots, mast not detached",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_terrain_grades_worldscar_wallend_v001",
+    "reason": "attempts 1-2 cake-slab islands, door stele, root ladders",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_terrain_route_bed_v001",
+    "reason": "attempts 1-2 wavy mattress cut, missing ruts/gutter, teardrop rocks",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_ecosystem_family_orthos_v001",
+    "reason": "attempts 1-3 and 5 dead-stick / crystal-spike / cairn / overwrite; independent PASS on f9ad43191680b302 low blunt boulder mound",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_ecosystem_composition_plots_v001",
+    "reason": "attempt1 dead-stick tree and obstructed 2 m lane",
+    "result": "PASS"
+  },
+  {
+    "sheet": "eldergrove_interior_room_plates_v001",
+    "reason": "attempt1 giant interior root / tree portal in bronze ring",
+    "result": "PASS"
+  }
+]

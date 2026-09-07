@@ -1,0 +1,268 @@
+[
+  {
+    "familyId": "fam_eldergrove_sequential_gate_wall_complex",
+    "source": "eldergrove_sequential_gate_outer_face_v001.png",
+    "title": "Sequential outer-face elevation",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 845906,
+    "source_sha256": "564522b67ebdb784b8f13ad1826fecc3ba6378d75a3353e30b150dd5f0a34732",
+    "authoring": "eldergrove_sequential_gate_outer_face_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4263025,
+    "authoring_sha256": "b29db23b53103b8c272f33944ccfcae9b8b2666ed2376bc2f12ebf9a4ccf3130",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_sequential_gate_wall_complex",
+    "source": "eldergrove_sequential_gate_inner_face_v001.png",
+    "title": "Sequential inner-face elevation",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 893496,
+    "source_sha256": "e39a69d46b92e7de5406b308ad971d2df4b0b54facf27cdb232103098ff6a27c",
+    "authoring": "eldergrove_sequential_gate_inner_face_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4358574,
+    "authoring_sha256": "b169b2be65a1b8c5389a9842e31db178e8ec1c20d1eb0b262a6a138614bc110e",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_sequential_gate_wall_complex",
+    "source": "eldergrove_sequential_gate_longitudinal_section_v001.png",
+    "title": "Sequential plan + 18 m passage section",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 211544,
+    "source_sha256": "bb508d5770c053fa621547d8632dbfd3f2bb7e47ae67febcf5d5915f1d361511",
+    "authoring": "eldergrove_sequential_gate_longitudinal_section_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 3201980,
+    "authoring_sha256": "1ce8b42faf6a622f1da158692c2bc0a84b3e74c8a61a3c30c0b2a6b3d35b86c5",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_sequential_gate_wall_complex",
+    "source": "eldergrove_sequential_wall_walltop_modules_v001.png",
+    "title": "Wall / walltop defender modules",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 942434,
+    "source_sha256": "961721dbd0b46f5973b02a8de9c0595284d942cd0e760a238f42f76384000745",
+    "authoring": "eldergrove_sequential_wall_walltop_modules_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4387698,
+    "authoring_sha256": "a3f1f7472bde97c8fdf174861df0e0ffc7e64b0e6a4387cb30a79051b289742a",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_fortress_single_gate",
+    "source": "eldergrove_fortress_plan_apron_v001.png",
+    "title": "One-gate fortress plan with 30 m clear apron",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 337582,
+    "source_sha256": "0c2392135c823c61e5e029acbffbeb44a382bbacf82efd6970d573d17d58aa6b",
+    "authoring": "eldergrove_fortress_plan_apron_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4697489,
+    "authoring_sha256": "a8dc63c67a225c06a9974c1ef859d49902297ebae96d7420d561ba03b4fc3835",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_fortress_single_gate",
+    "source": "eldergrove_fortress_elevations_v001.png",
+    "title": "One-gate fortress front/side elevations",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 628400,
+    "source_sha256": "99deec66efaa969f06dad3bfadcf8f041b3237c87efa85bf8e93c53d2964b74a",
+    "authoring": "eldergrove_fortress_elevations_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 3291575,
+    "authoring_sha256": "76a4280ac60a220a2460436fadc0a0c409b3ed248e498b9e99f9b1f8b2e92daa",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_fortress_single_gate",
+    "source": "eldergrove_fortress_keep_flag_mast_v001.png",
+    "title": "Keep shell + central flag-mast socket",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 875604,
+    "source_sha256": "8b5954095404236b12c3a57c76ef4636f9bb873fe4275cd697ae13cab0dab681",
+    "authoring": "eldergrove_fortress_keep_flag_mast_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4014102,
+    "authoring_sha256": "6d02cb70f1f3d42bb8550dbb7a8b629687951f0dc370bd53adb8a0d776ef9f6a",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_terrain",
+    "source": "eldergrove_terrain_grades_worldscar_wallend_v001.png",
+    "title": "Inner/outer grade, Worldscar brink, wall-end",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1122011,
+    "source_sha256": "62f536f98c05b08cf27d23af5fe6e7912413def38e63fc1c69d32ebaec0496c8",
+    "authoring": "eldergrove_terrain_grades_worldscar_wallend_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5096362,
+    "authoring_sha256": "469801869e1db9c1ae1d263cab416c944acbb43bd749c1fde45659f119bdc6bc",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_terrain",
+    "source": "eldergrove_terrain_route_bed_v001.png",
+    "title": "Route bed/ruts/shoulders + player-scale rocks",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 999717,
+    "source_sha256": "0a8268af8b4c800d69d1eb3537c53da7e9683624e6b31dad0b68b84b53a39a78",
+    "authoring": "eldergrove_terrain_route_bed_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4251620,
+    "authoring_sha256": "bc728f8060504d02acc64830f17ea77b6f7e4926370585dbbcd7aa8259a46a60",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_terrain",
+    "source": "eldergrove_terrain_outer_biome_reads_v001.png",
+    "title": "PURE / UMBRAL BLEND / STONEHOLD BLEND reads",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 762415,
+    "source_sha256": "0911a5c424431cd59e4cbd2d180cdaafe5b2c8c1d85bfa66bfc1f48286dac81a",
+    "authoring": "eldergrove_terrain_outer_biome_reads_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 3666811,
+    "authoring_sha256": "00a4975d979c0f4ec988b0e1a0ac35ca199398ae1460638294264451f663913a",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_ecosystem_dressing",
+    "source": "eldergrove_ecosystem_family_orthos_v001.png",
+    "title": "Three vegetation + two rock/ground families",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 210164,
+    "source_sha256": "f9ad43191680b302c85a92940a5764db7b374dc0f20bc179269962c66a3fa3a0",
+    "authoring": "eldergrove_ecosystem_family_orthos_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 3188241,
+    "authoring_sha256": "8b2bb63027a4331c1047632fafdc1b797ef85421ff3053ef3e5642ec67ef9bf1",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_ecosystem_dressing",
+    "source": "eldergrove_ecosystem_composition_plots_v001.png",
+    "title": "Ecosystem composition plots",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1426644,
+    "source_sha256": "60c91029e138f1d16e3b1946918c768c4d8568486daccb7e665e9a931f001a0f",
+    "authoring": "eldergrove_ecosystem_composition_plots_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5829646,
+    "authoring_sha256": "714a844518ef9924a722f7b24d64ebd39d316816913aadb6a6739e8d3b22bafd",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_interior_furnishings",
+    "source": "eldergrove_interior_room_plates_v001.png",
+    "title": "Guard + root-maintenance furnished plans",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 992884,
+    "source_sha256": "ce1e28d4d3334afa960af5189a7cde18b414011b09d28b156db4f94005d5f469",
+    "authoring": "eldergrove_interior_room_plates_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4735859,
+    "authoring_sha256": "d15405deb37ef3a55ea5025fcc4d9c2f01b405d7281c5b28019b695e3794957d",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_eldergrove_interior_furnishings",
+    "source": "eldergrove_interior_civic_furniture_v001.png",
+    "title": "Service/civic plans + focal furniture orthos",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 952667,
+    "source_sha256": "ad4d6bcddb9391b626e58573f63d9edb09e4c85af135e656f55efbcc6fa0a30e",
+    "authoring": "eldergrove_interior_civic_furniture_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4366613,
+    "authoring_sha256": "d6fd2e79d07506fd8dbef63329f7b3aed0124be898bda97e7b30dd6ee3db934d",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  }
+]

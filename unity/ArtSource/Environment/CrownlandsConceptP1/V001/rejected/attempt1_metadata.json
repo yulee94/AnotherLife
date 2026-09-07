@@ -1,0 +1,98 @@
+[
+  {
+    "sheet": "crownlands_capital_district_plan_v001",
+    "attempt": 1,
+    "archived_as": "rejected/crownlands_capital_district_plan_v001_attempt1.png",
+    "source_bytes": 1297789,
+    "source_sha256": "4a44c70c58e9982c7822252ee6e1c5f2173a6082f6d2a01a69595fae1ca152fc",
+    "archived_sha256": "4a44c70c58e9982c7822252ee6e1c5f2173a6082f6d2a01a69595fae1ca152fc",
+    "reason": "attempt1 near-perfect oval/concentric Renaissance city with ring wall and keep-centered grain; required organic corner-enclosing broken offset terraces/streets, no circles/rings/radial spokes, capital_crownspire only named ID",
+    "archived_at": "2026-09-04T11:44:43.192962+00:00",
+    "status": "REJECTED",
+    "authority": "independent full-resolution review; generator HTTP 200 / prior visual_qa PASS was false-green"
+  },
+  {
+    "sheet": "crownlands_capital_skyline_north_south_v001",
+    "attempt": 1,
+    "archived_as": "rejected/crownlands_capital_skyline_north_south_v001_attempt1.png",
+    "source_bytes": 880454,
+    "source_sha256": "2b852ce043cc066f74458a9f2aa221d33e40f51b69e7d9b43aa3fd9381de4882",
+    "archived_sha256": "2b852ce043cc066f74458a9f2aa221d33e40f51b69e7d9b43aa3fd9381de4882",
+    "reason": "attempt1 Gothic/cathedral drift: paired conical turrets, needle finials, rose window, excessive bilateral symmetry; required broad low horizontal chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums/meridian ribs, restrained brass/silver",
+    "archived_at": "2026-09-04T11:44:43.210006+00:00",
+    "status": "REJECTED",
+    "authority": "independent full-resolution review; generator HTTP 200 / prior visual_qa PASS was false-green"
+  },
+  {
+    "sheet": "crownlands_capital_skyline_east_west_v001",
+    "attempt": 1,
+    "archived_as": "rejected/crownlands_capital_skyline_east_west_v001_attempt1.png",
+    "source_bytes": 858510,
+    "source_sha256": "47aafc24cce9b343cc2b75bf54900d2cd96e57c10c516883312b3628557000ef",
+    "archived_sha256": "47aafc24cce9b343cc2b75bf54900d2cd96e57c10c516883312b3628557000ef",
+    "reason": "attempt1 Gothic/cathedral drift: paired conical turrets, needle finials, rose windows, pointed-arch bays, excessive symmetry; required broad low horizontal chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums/meridian ribs, restrained brass/silver",
+    "archived_at": "2026-09-04T11:44:43.226956+00:00",
+    "status": "REJECTED",
+    "authority": "independent full-resolution review; generator HTTP 200 / prior visual_qa PASS was false-green"
+  },
+  {
+    "sheet": "crownlands_city_street_grammar_v001",
+    "attempt": 1,
+    "archived_as": "rejected/crownlands_city_street_grammar_v001_attempt1.png",
+    "source_bytes": 1175595,
+    "source_sha256": "5d63fe15462d4f67b2ea7f86b94b776ce8bb923ea9e601f7bae1953a53ad26f4",
+    "archived_sha256": "5d63fe15462d4f67b2ea7f86b94b776ce8bb923ea9e601f7bae1953a53ad26f4",
+    "reason": "attempt1 church/chapel frontage as unified civic terrace; required clearly separate asymmetric enterable dwelling/market/service/public-hall modules along offset street with ordinary punched openings",
+    "archived_at": "2026-09-04T11:44:43.247763+00:00",
+    "status": "REJECTED",
+    "authority": "independent full-resolution review; generator HTTP 200 / prior visual_qa PASS was false-green"
+  },
+  {
+    "sheet": "crownlands_city_market_service_public_hall_kit_v001",
+    "attempt": 1,
+    "archived_as": "rejected/crownlands_city_market_service_public_hall_kit_v001_attempt1.png",
+    "source_bytes": 1142862,
+    "source_sha256": "b7c9cb4dfaf30a7c7bc51e02bcf4260f52f29b8b5e74ab490a49ad7a70777379",
+    "archived_sha256": "b7c9cb4dfaf30a7c7bc51e02bcf4260f52f29b8b5e74ab490a49ad7a70777379",
+    "reason": "attempt1 public hall missing visible labeled 2.5m W x 3.0m H aperture with paired timber leaves, long iron strap hinges across each leaf, sliding iron latch, stone-block frame; modules present but hardware/dimension callout fail",
+    "archived_at": "2026-09-04T11:44:43.270140+00:00",
+    "status": "REJECTED",
+    "authority": "independent full-resolution review; generator HTTP 200 / prior visual_qa PASS was false-green"
+  },
+  {
+    "sheet": "crownlands_capital_district_plan_v001",
+    "attempt": 2,
+    "archived_as": "rejected/crownlands_capital_district_plan_v001_attempt2.png",
+    "source_bytes": 1323352,
+    "source_sha256": "57b07fc9f88c53f1341a84191a536d9efd3305e8e1a1e11fa86bbd224d6b1194",
+    "archived_sha256": "57b07fc9f88c53f1341a84191a536d9efd3305e8e1a1e11fa86bbd224d6b1194",
+    "reason": "attempt2 still a standalone roughly circular island/disk with cliff perimeter all around; required organic corner-enclosing irregular L-/wedge-shaped urban pocket bounded by two impassable terrain/cliff edges, open approach from opposite side, broken offset terraces and nonradial streets; no circular/oval island, ring perimeter, round plan, radial spokes; capital_crownspire only",
+    "archived_at": "2026-09-04T12:30:20.141712+00:00",
+    "status": "REJECTED",
+    "authority": "independent full-resolution review; generator HTTP 200 / prior visual_qa PASS was false-green"
+  },
+  {
+    "sheet": "crownlands_capital_keep_shell_v001",
+    "attempt": 1,
+    "archived_as": "rejected/crownlands_capital_keep_shell_v001_attempt1.png",
+    "source_bytes": 1028123,
+    "source_sha256": "c096597bd4bed97b1c6f441cbd99aa127adcc6700a626c6a4278b1d89b63e7bc",
+    "archived_sha256": "c096597bd4bed97b1c6f441cbd99aa127adcc6700a626c6a4278b1d89b63e7bc",
+    "reason": "attempt1 generic Gothic castle: round towers, conical roofs, needle finials, lancet repetition, pointed portal; required broad low rectangular/offset civic keep consistent with ground/upper plans, blunt octagonal meridian drums/pavilions, low stepped/hipped blue-slate caps, horizontal chalk-gold masses and meridian ribs; no conical turrets, needle finials, Gothic/cathedral silhouette",
+    "archived_at": "2026-09-04T12:30:20.141712+00:00",
+    "status": "REJECTED",
+    "authority": "independent full-resolution review; generator HTTP 200 / prior visual_qa PASS was false-green"
+  },
+  {
+    "sheet": "crownlands_capital_keep_section_v001",
+    "attempt": 1,
+    "archived_as": "rejected/crownlands_capital_keep_section_v001_attempt1.png",
+    "source_bytes": 1238233,
+    "source_sha256": "67fcfe1b189ece63df72fa4cb07f6d94f5fa8007a375a6dfd125a25a62c71e81",
+    "archived_sha256": "67fcfe1b189ece63df72fa4cb07f6d94f5fa8007a375a6dfd125a25a62c71e81",
+    "reason": "attempt1 conflicts with required civic keep shell/ground/upper: steep church-like cross-section gable, ridge needle/compass finial, missing blunt octagonal drums with low hipped pavilion caps; regenerate with shell to keep silhouette consistent",
+    "archived_at": "2026-09-04T12:30:20.141712+00:00",
+    "status": "REJECTED",
+    "authority": "independent full-resolution review; generator HTTP 200 / prior visual_qa PASS was false-green"
+  }
+]

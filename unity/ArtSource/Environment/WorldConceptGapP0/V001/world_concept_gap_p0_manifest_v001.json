@@ -1,0 +1,421 @@
+{
+  "version": "V001",
+  "packetId": "WorldConceptGapP0_V001",
+  "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION",
+  "priority": "P0",
+  "families": [
+    "fam_shared_door_hardware",
+    "fam_shared_save_pillar",
+    "fam_shared_adjacent_realm_bridge"
+  ],
+  "quality_target": "premium-AA dark-fantasy stylized realism; BDO-inspired directional bar, not parity",
+  "authority": {
+    "visual": "this packet",
+    "topology": "V013",
+    "sequentialGateTopology": "World2DProductionGuides V001 deterministic plates",
+    "bridgeLengthMeters": 180,
+    "conceptsDoNotControl": [
+      "catalog IDs",
+      "save IDs",
+      "gameplay",
+      "Meshy spend",
+      "Stonehold U1/U2/U3"
+    ]
+  },
+  "provider": "xai-oauth",
+  "chat_model": "grok-4.6",
+  "image_model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "aspect_ratio": "3:2",
+  "fallback_policy": "GPT-5.6 Sol only if Grok returns no answer",
+  "fallback_used": false,
+  "fallback_provider": null,
+  "native_generation_resolution": [
+    1248,
+    832
+  ],
+  "authoring_resolution": [
+    7680,
+    5120
+  ],
+  "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+  "asset_count": 15,
+  "contact_sheet": "world_concept_gap_p0_contact_sheet_v001.jpg",
+  "contact_sheet_bytes": 860124,
+  "contact_sheet_sha256": "ed6570808a90a57708fc818f56739cf6de4859fb201a557c7020cb12e0b35d1c",
+  "contact_sheet_resolution": [
+    1520,
+    2056
+  ],
+  "retries": [
+    {
+      "sheet": "stonehold_save_pillar_ornament_v001",
+      "reason": "attempt1 side socket and shelves changed shared silhouette",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_save_pillar_ornament_v001",
+      "reason": "attempt1 side-facing socket changed shared silhouette",
+      "result": "PASS"
+    }
+  ],
+  "rejected_attempts": [
+    "rejected/stonehold_save_pillar_ornament_v001_attempt1.png",
+    "rejected/crownlands_save_pillar_ornament_v001_attempt1.png"
+  ],
+  "visual_qa": {
+    "shared_door_hardware_orthos_v001": {
+      "verdict": "PASS",
+      "notes": "FRONT/SIDE/BACK civic timber-iron door, unoccluded hinges/latch/frame. Scale numerals garbled; not metric authority."
+    },
+    "stonehold_ceremonial_gate_leaf_v001": {
+      "verdict": "PASS",
+      "notes": "Single paired Embermist leaves, front/side/back, not sequential dual-gate collage."
+    },
+    "eldergrove_ceremonial_gate_leaf_v001": {
+      "verdict": "PASS",
+      "notes": "Single paired Moonroot leaves, bronze-collared roots, no neon/portal/animals."
+    },
+    "crownlands_ceremonial_gate_leaf_v001": {
+      "verdict": "PASS",
+      "notes": "Single paired Meridian leaves, pale limestone/silver/blue-slate, restrained bronze, not cathedral."
+    },
+    "umbral_ceremonial_gate_leaf_v001": {
+      "verdict": "PASS",
+      "notes": "Single paired Ashvein leaves, smoked-glass slits, ember hairline cracks, no portal/violet fog."
+    },
+    "shared_save_pillar_hero_form_v001": {
+      "verdict": "PASS",
+      "notes": "Shared 4.5m tapered bind-pillar, top socket, flared base, 1.8m mannequin."
+    },
+    "stonehold_save_pillar_ornament_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: side socket and shelves changed silhouette. Retry keeps top socket and shared taper with basalt/iron-gold overlay."
+    },
+    "eldergrove_save_pillar_ornament_v001": {
+      "verdict": "PASS",
+      "notes": "Shared silhouette, bronze root overlay, top socket, mannequin, readable 0-2m bar."
+    },
+    "crownlands_save_pillar_ornament_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: side-facing socket. Retry keeps top socket, limestone/silver/blue-slate overlay."
+    },
+    "umbral_save_pillar_ornament_v001": {
+      "verdict": "PASS",
+      "notes": "Shared silhouette, graphite/yoke bands, ember cracks, top socket, no portal."
+    },
+    "shared_adjacent_realm_bridge_kit_v001": {
+      "verdict": "PASS",
+      "notes": "Plan/elevation/section modular bay kit with Worldscar gulf and mannequin. 180m length remains V013; pixels show a representative bay not a measured 180m span."
+    },
+    "stonehold_bridge_abutment_v001": {
+      "verdict": "PASS",
+      "notes": "One abutment + deck stub + material callout. Basalt/iron-gold. Correct 0-2m bar."
+    },
+    "eldergrove_bridge_abutment_v001": {
+      "verdict": "PASS",
+      "notes": "One abutment + deck stub. Bronze-collared roots are visual overlay; Blender must not make them climbable."
+    },
+    "crownlands_bridge_abutment_v001": {
+      "verdict": "PASS",
+      "notes": "One abutment + deck stub. Pale limestone, silver ribs, blue-slate cap, restrained bronze."
+    },
+    "umbral_bridge_abutment_v001": {
+      "verdict": "PASS",
+      "notes": "One abutment + deck stub. Graphite/ash-timber/ember cracks. Pointed smoked-glass slits lean gothic; Blender should rebuild as fault slits, not cathedral tracery."
+    }
+  },
+  "all_visual_checks_pass": true,
+  "meshySpendAuthorized": false,
+  "blenderAuthorized": "deterministic rebuild from written dimensions after this visual approval",
+  "unityAndroidCatalogsSavesGameplay": false,
+  "assets": [
+    {
+      "familyId": "fam_shared_door_hardware",
+      "source": "shared_door_hardware_orthos_v001.png",
+      "title": "Shared civic door / frame / hinge orthos",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1068331,
+      "source_sha256": "38be5399dba4b5fc98ef34466351c919d4c37c12a5eab6a5d32ab4b7c3f0e3c0",
+      "authoring": "shared_door_hardware_orthos_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4888836,
+      "authoring_sha256": "83cd28217ca70752b753b36d6bf4f98730081f40614e5aa5c6e512780d5cd748",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_door_hardware",
+      "source": "stonehold_ceremonial_gate_leaf_v001.png",
+      "title": "Stonehold ceremonial gate-leaf family",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1278195,
+      "source_sha256": "db434a864fda8a7336431d114c1c5f78b341be6f5a29e570b6dbaa5f0c18bb9b",
+      "authoring": "stonehold_ceremonial_gate_leaf_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5423868,
+      "authoring_sha256": "4e2d85ba1f9f03875e00c857ae76f4c48eef9c16d9909aefabc6dd4e94cee176",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_door_hardware",
+      "source": "eldergrove_ceremonial_gate_leaf_v001.png",
+      "title": "Eldergrove ceremonial gate-leaf family",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1328081,
+      "source_sha256": "61c81b687dd7f54a57cf245b5dbed00f22fcb9c640f281c9d10541a33449f36c",
+      "authoring": "eldergrove_ceremonial_gate_leaf_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5608961,
+      "authoring_sha256": "950de300a08508b4129681e0f49a0c6179c7bc679fb8220d69b9c445c02eda3e",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_door_hardware",
+      "source": "crownlands_ceremonial_gate_leaf_v001.png",
+      "title": "Crownlands ceremonial gate-leaf family",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1164327,
+      "source_sha256": "d7bd557d17a9bfaec6106846f8496458f6cb99f480d88b06165c67a3352271a4",
+      "authoring": "crownlands_ceremonial_gate_leaf_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5179930,
+      "authoring_sha256": "80a9e1a3400d31360c4c0f67fbd4ab4051e5ef4f4e25bdb001a727e3fbf06883",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_door_hardware",
+      "source": "umbral_ceremonial_gate_leaf_v001.png",
+      "title": "Umbral ceremonial gate-leaf family",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1123191,
+      "source_sha256": "eb6b54f3aba96d193ca14a378301575e8807365f6d08523efc588eecb9cc6924",
+      "authoring": "umbral_ceremonial_gate_leaf_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5059662,
+      "authoring_sha256": "4d8c5fad7f933d95d128ac09dd3e51e528b88aa238539fd6c82b670bfa9fa51c",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_save_pillar",
+      "source": "shared_save_pillar_hero_form_v001.png",
+      "title": "Shared save-pillar hero form",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 862187,
+      "source_sha256": "ebd1657422524804e6edd84bf818438f85f61c3794cb5b8e126b9b4e5f80c3cb",
+      "authoring": "shared_save_pillar_hero_form_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3961134,
+      "authoring_sha256": "b043c463d228dabe3a19a72f4acec9ba256350528df9be4b01c29f4449f8604a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_save_pillar",
+      "source": "stonehold_save_pillar_ornament_v001.png",
+      "title": "Stonehold save-pillar ornament/material",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 856612,
+      "source_sha256": "1bc1baab69f0441691c4cb6e591690a4237d3a3517e599582dc6fbe1cfa1e25a",
+      "authoring": "stonehold_save_pillar_ornament_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4062675,
+      "authoring_sha256": "495261ecf3a396c12d8b0f7edb6077825718144e4210bba05c438962f04a8bd2",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_save_pillar",
+      "source": "eldergrove_save_pillar_ornament_v001.png",
+      "title": "Eldergrove save-pillar ornament/material",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 973712,
+      "source_sha256": "8c76456b2cfb6cdd4db0024ed3ebc30632a6353b1482ac3ddb1eac0c085d8823",
+      "authoring": "eldergrove_save_pillar_ornament_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4256707,
+      "authoring_sha256": "2b8e2d12458d24da657f47a1005e42d02330be019c0ae610e791047c7d9fbd84",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_save_pillar",
+      "source": "crownlands_save_pillar_ornament_v001.png",
+      "title": "Crownlands save-pillar ornament/material",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 920039,
+      "source_sha256": "0bc959c4d02005535e4ccdd559b292ff093bb1ec7b953c9a3280c54ca0058d97",
+      "authoring": "crownlands_save_pillar_ornament_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4372061,
+      "authoring_sha256": "021cdf8b988fb8059df62e567169754e29b3a23bc3e402bf27842f9d9bdba6cd",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_save_pillar",
+      "source": "umbral_save_pillar_ornament_v001.png",
+      "title": "Umbral save-pillar ornament/material",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 901256,
+      "source_sha256": "d0b38ec6f32966cb5e505191ed61c77a203e4505939caf0bf98554a8feb07f81",
+      "authoring": "umbral_save_pillar_ornament_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4097077,
+      "authoring_sha256": "fd602048656206a89585723e054075398de302b32f9edbe0545ff31ae80a9a74",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_adjacent_realm_bridge",
+      "source": "shared_adjacent_realm_bridge_kit_v001.png",
+      "title": "Shared 180 m adjacent-realm bridge kit",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 711452,
+      "source_sha256": "4da23a6cd80a22822be4c416c2d14cb7a2cfa2bbf193361ae6386accc0ed42a2",
+      "authoring": "shared_adjacent_realm_bridge_kit_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3621718,
+      "authoring_sha256": "a57dbb2d0beb38e4a9c10073ad6c7f5d9096fce8f5918cc61df7632156bcf1ab",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_adjacent_realm_bridge",
+      "source": "stonehold_bridge_abutment_v001.png",
+      "title": "Stonehold bridge abutment skin",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 970685,
+      "source_sha256": "b4a62c6935339a7ebb9203622bde39693e91a858e863e9b76c1c0a7fab7eb0bc",
+      "authoring": "stonehold_bridge_abutment_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4345760,
+      "authoring_sha256": "5a22d08f1809b6c2c03f8d6240aa016848193586df0626db2e13ad5b24b7de29",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_adjacent_realm_bridge",
+      "source": "eldergrove_bridge_abutment_v001.png",
+      "title": "Eldergrove bridge abutment skin",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1151550,
+      "source_sha256": "320a725fcd11c66e91857d0f70c73af5980216259f7b533092a927690b485a1f",
+      "authoring": "eldergrove_bridge_abutment_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4885119,
+      "authoring_sha256": "5ebf8580f4ab432a6630356c2a08adf3f387fe223e0c4c790d7fac9dde165cf1",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_adjacent_realm_bridge",
+      "source": "crownlands_bridge_abutment_v001.png",
+      "title": "Crownlands bridge abutment skin",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 860436,
+      "source_sha256": "9a8e401c58eaa2b2bcb177c47aa9390a75fcfd90a0314548b1d5650da20ab3e7",
+      "authoring": "crownlands_bridge_abutment_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4233691,
+      "authoring_sha256": "bb27f2d4e3726b24e0f1d0881f444ff92c6cc3b557ac00b0e27a4b9cd7cd4350",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_shared_adjacent_realm_bridge",
+      "source": "umbral_bridge_abutment_v001.png",
+      "title": "Umbral bridge abutment skin",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 996510,
+      "source_sha256": "0f42c683f7904c84d48bb3268a8ce43315dbda67b3262ba573e2d1b990c24f6f",
+      "authoring": "umbral_bridge_abutment_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4497610,
+      "authoring_sha256": "2b3eb536eff37647909610e4f8c52a56c1c6df1216888679974052b67096bd27",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "accordant_civic_ring_plan_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "True top-down CAD civic ring. Four equal blossom-stone thresholds, dashed outward sockets, muted cherry hatches, no keep/fortress apron/sequential dual-gate. Native sha256 a2fefc8c44a1a7b3."
+  },
+  "accordant_civic_ring_threshold_elevations_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Four equal-height ceremonial thresholds with closed blossom-stone disks, 1.8 m mannequin, civic roofs not keep towers. Mild cylindrical 3/4 is rebuildable as true front elevations. Native sha256 872835528a625217."
+  },
+  "accordant_civic_ring_massing_elevations_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Front+side orthographic low civic ring, four equal timber openings, asymmetric muted cherry beside not hiding doors, no keep. Native sha256 d476417ea11e8937."
+  },
+  "accordant_approach_crownlands_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Two-panel event approach. Off-event empty air plus closed grounded blossom-stone seal; on-event authored span present. REALM TERMINAL / ISLE ANCHOR labeled. Not a sequential dual-gate. Native sha256 3a8085c2478bb44c."
+  },
+  "accordant_approach_stonehold_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Off-event retracted span and closed grounded seal; on-event walkable span. Stonehold language stops at the terminal. No lava keep. Native sha256 32b7eb710b80e429."
+  },
+  "accordant_approach_eldergrove_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Off-event empty air plus closed grounded seal; on-event connected span. No root portal. Native sha256 188225de2882ad04."
+  },
+  "accordant_approach_umbral_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Off-event empty air plus grounded closed seal disk; on-event span present with seal withdrawn into a ring socket. Ash-terminal language only at the abutment. Native sha256 280a3a4050191889."
+  },
+  "accordant_assembly_floor_plan_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "True top-down furnished assembly: central round chamber, four equal galleries, stores/archive/mediation in the ring, readable wall thickness, traversable aisles. Not a keep. Native sha256 ae9ec78b98495e83."
+  },
+  "accordant_assembly_section_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: 3/4 dollhouse proscenium. Independent full-res PASS on native sha256 b064b1ef5f4ed0b5: flat architectural section, hatched wall thickness, opposite galleries, central chamber, equal floor, civic dome not keep. Rebuild from written ~18 m chamber, not pixels."
+  },
+  "accordant_assembly_furniture_orthos_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Top-down gallery with circulation plus isolated table, bench, archive niche, mediation table, blossom-stone seal disk, desk, crates, blank board, 1.8 m scale. Replace anatomical mannequin with a featureless gray volume in Blender. Native sha256 b5ad526c03ea04ad."
+  },
+  "accordant_ecosystem_family_orthos_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Player-scale kit: volumetric muted cherry standard + sapling, sedge clump, low blossom-stone setts, packed terrace paving. No animals, dragons, crystals, or theme-park pink blizzard. Native sha256 3e8e75441dda4cb7."
+  },
+  "accordant_ecosystem_composition_plots_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Four grounded plots; threshold terrace keeps a clear walking lane and a grounded seal disk; canopy plot is muted and gapped. Rebuild as front-elevation strips rather than 3/4 slabs. Native sha256 ff212a92b85699ff."
+  },
+  "accordant_spoke_bridges_on_event_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: short spoke disconnected mid-air. Independent full-res PASS on native sha256 e62e19d14e6ce6c7: four variable-length decks all continuously connect REALM TERMINAL to ISLE ANCHOR. Lengths are visual intent, not the 180 m adjacent-bridge rule."
+  },
+  "accordant_spoke_bridges_off_event_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Four off-event pairs: empty air, retracted bronze sockets, closed grounded blossom-stone seals, REALM TERMINAL / ISLE ANCHOR / OFF-EVENT labels. No walkable deck. Rebuild gap distances to express variable spoke lengths. Native sha256 d83cf15a3b75dac5."
+  }
+}

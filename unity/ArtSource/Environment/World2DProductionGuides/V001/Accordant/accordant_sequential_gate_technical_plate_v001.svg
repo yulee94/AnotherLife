@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+<defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#b77a87"/></marker><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity=".035"/></pattern></defs>
+<rect width="1800" height="1200" fill="#1b171a"/><rect width="1800" height="1200" fill="url(#grid)"/>
+<text x="80" y="78" fill="#eee8dc" font-family="Segoe UI,Arial" font-size="42" font-weight="700">ACCORDANT — EVENT APPROACH SEAL TECHNICAL PLATE V001</text>
+<text x="80" y="120" fill="#b77a87" font-family="Segoe UI,Arial" font-size="23">Petal Concord · four equal thresholds · restrained blossom-stone seals · DORMANT/OFF-EVENT PHYSICAL LOCK</text>
+<text x="80" y="158" fill="#9da7b0" font-family="Segoe UI,Arial" font-size="19">Topology/security authority; visual concept images supply material and ornamental detail.</text>
+
+<!-- PLAN -->
+<text x="80" y="222" fill="#eee8dc" font-family="Segoe UI,Arial" font-size="27" font-weight="700">PLAN — ONE OF FOUR EVENT-ONLY SEALED APPROACHES</text>
+<rect x="300" y="270" width="1200" height="250" rx="20" fill="#bdb8ad" stroke="#ddd5c8" stroke-opacity=".4" stroke-width="3"/>
+<rect x="350" y="330" width="1100" height="130" fill="#111419" stroke="#443b3c" stroke-width="8"/>
+<rect x="545" y="300" width="42" height="190" fill="#443b3c" stroke="#b77a87" stroke-width="5"/>
+<rect x="1213" y="300" width="42" height="190" fill="#443b3c" stroke="#b77a87" stroke-width="5"/>
+<path d="M100 395 H525 M1275 395 H1690" stroke="#b77a87" stroke-width="7"/><path d="M700 355 L1100 435 M700 435 L1100 355" stroke="#d45d62" stroke-width="9"/>
+<path d="M430 315 h80 v160 h-80 M1290 315 h80 v160 h-80" fill="none" stroke="#d7c79b" stroke-width="6"/>
+<text x="85" y="365" fill="#d7dde3" font-family="Segoe UI,Arial" font-size="22">REALM TERMINAL</text><text x="1520" y="365" fill="#d7dde3" font-family="Segoe UI,Arial" font-size="22">EVENT ISLE</text>
+<text x="505" y="555" fill="#b77a87" font-family="Segoe UI,Arial" font-size="21">RETRACTED SPAN</text><text x="1165" y="555" fill="#b77a87" font-family="Segoe UI,Arial" font-size="21">GROUNDED SEAL</text>
+<text x="735" y="555" fill="#d7dde3" font-family="Segoe UI,Arial" font-size="21">NO CROSSING OFF-EVENT</text>
+<text x="322" y="595" fill="#aeb7be" font-family="Segoe UI,Arial" font-size="18">Defender-side stair</text><text x="1280" y="595" fill="#aeb7be" font-family="Segoe UI,Arial" font-size="18">Defender-side stair</text>
+<text x="420" y="635" fill="#7f8b95" font-family="Segoe UI,Arial" font-size="17">Two independent denial reads · missing span plus closed physical seal · collision/navmesh/streaming fail closed</text>
+
+<!-- ELEVATION -->
+<text x="80" y="705" fill="#eee8dc" font-family="Segoe UI,Arial" font-size="27" font-weight="700">FRONT ELEVATION — UNIQUE REALM FACE</text>
+<path d="M120 1050 V805 H360 V750 H570 V810 H690 V695 H1110 V810 H1230 V750 H1440 V805 H1680 V1050 Z" fill="#bdb8ad" stroke="#ddd5c8" stroke-opacity=".45" stroke-width="4"/>
+<rect x="730" y="790" width="340" height="260" rx="16" fill="#443b3c" stroke="#b77a87" stroke-width="8"/>
+<path d="M900 790 V1050 M730 910 H1070" stroke="#b77a87" stroke-width="5" opacity=".75"/>
+<path d="M175 1050 L250 820 L325 1050 M1475 1050 L1550 820 L1625 1050" fill="none" stroke="#443b3c" stroke-width="28"/>
+<rect x="390" y="800" width="54" height="210" fill="#443b3c"/><rect x="1356" y="800" width="54" height="210" fill="#443b3c"/>
+<ellipse cx="900" cy="839" rx="17" ry="34" fill="#b77a87" transform="rotate(0 900 875)" opacity=".88"/> <ellipse cx="900" cy="839" rx="17" ry="34" fill="#b77a87" transform="rotate(72 900 875)" opacity=".88"/> <ellipse cx="900" cy="839" rx="17" ry="34" fill="#b77a87" transform="rotate(144 900 875)" opacity=".88"/> <ellipse cx="900" cy="839" rx="17" ry="34" fill="#b77a87" transform="rotate(216 900 875)" opacity=".88"/> <ellipse cx="900" cy="839" rx="17" ry="34" fill="#b77a87" transform="rotate(288 900 875)" opacity=".88"/><circle cx="900" cy="875" r="12" fill="#ead7b2"/>
+<text x="80" y="1135" fill="#9da7b0" font-family="Segoe UI,Arial" font-size="18">Approach IDs: socket_center_bridge_ring_slot_01..04 · Four approaches remain separately identifiable · No permanent travel shortcut</text>
+</svg>

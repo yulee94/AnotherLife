@@ -1,0 +1,616 @@
+{
+  "version": "V001",
+  "packetId": "AccordantConceptGapP1_V001",
+  "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION",
+  "priority": "P1",
+  "families": [
+    "fam_accordant_event_isle_civic_ring",
+    "fam_accordant_event_approaches",
+    "fam_accordant_assembly_interior",
+    "fam_accordant_cherry_canopy_ecosystem",
+    "fam_accordant_spoke_bridges"
+  ],
+  "quality_target": "premium-AA dark-fantasy stylized realism; BDO-inspired directional bar, not parity",
+  "authority": {
+    "visual": "this packet",
+    "topology": "V013 + accordant event-approach technical plate",
+    "stableIds": [
+      "zone_accordant_isle",
+      "world_event_accordant_isle",
+      "chunk_accordant_castle",
+      "chunk_accordant_surface",
+      "chunk_accordant_entrance_01",
+      "chunk_accordant_entrance_02",
+      "chunk_accordant_entrance_03",
+      "chunk_accordant_entrance_04",
+      "chunk_accordant_center_bridge_ring_slot_01",
+      "chunk_accordant_center_bridge_ring_slot_02",
+      "chunk_accordant_center_bridge_ring_slot_03",
+      "chunk_accordant_center_bridge_ring_slot_04",
+      "socket_center_bridge_ring_slot_01",
+      "socket_center_bridge_ring_slot_02",
+      "socket_center_bridge_ring_slot_03",
+      "socket_center_bridge_ring_slot_04",
+      "center_slot"
+    ],
+    "catalogIds": "inventory / catalogs, not this packet",
+    "direction": "A \u2014 Petal Concord",
+    "conceptsDoNotControl": [
+      "catalog IDs",
+      "save IDs",
+      "gameplay",
+      "Meshy spend",
+      "existing world inventory JSON",
+      "realmOrder",
+      "V013 topology",
+      "event-approach technical plate topology",
+      "Town Hall / Workshop",
+      "wish-dragon production"
+    ]
+  },
+  "identity": {
+    "realm": "accordant",
+    "direction": "Petal Concord",
+    "eventOnly": true,
+    "absentFromRealmOrder": true,
+    "notAFifthRealm": true,
+    "notAFortressKeep": true,
+    "notASequentialGate": true,
+    "materials": [
+      "neutral weathered stone",
+      "dark timber",
+      "restrained aged bronze",
+      "muted blossom-stone medallions",
+      "warm practical light",
+      "asymmetric cherry canopy"
+    ],
+    "forbidden": [
+      "fifth realm",
+      "capital city loop",
+      "fortress keep",
+      "sequential dual-gate",
+      "open off-event spans",
+      "theme-park pink",
+      "screen-filling petals",
+      "real-world animals",
+      "dragons",
+      "bosses",
+      "runtime VFX baked into geometry",
+      "one realm visually dominating"
+    ]
+  },
+  "provider": "xai-oauth",
+  "chat_model": "grok-4.6",
+  "image_model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "aspect_ratio": "3:2",
+  "fallback_policy": "GPT-5.6 Sol only if Grok returns no answer",
+  "fallback_used": false,
+  "fallback_provider": null,
+  "native_generation_resolution": [
+    1248,
+    832
+  ],
+  "authoring_resolution": [
+    7680,
+    5120
+  ],
+  "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+  "asset_count": 14,
+  "contact_sheet": "accordant_concept_gap_p1_contact_sheet_v001.jpg",
+  "contact_sheet_bytes": 698173,
+  "contact_sheet_sha256": "8b9cf21fa13124f18851f0bf4e831f93670992a45595a465d4dc931a689fb495",
+  "contact_sheet_resolution": [
+    2016,
+    1664
+  ],
+  "retries": [
+    {
+      "sheet": "accordant_assembly_section_v001",
+      "reason": "attempt1 3/4 dollhouse proscenium cutaway; retry is a flat architectural section with hatched wall thickness, opposite galleries, central chamber, equal floor",
+      "result": "PASS"
+    },
+    {
+      "sheet": "accordant_spoke_bridges_on_event_v001",
+      "reason": "attempt1 short spoke disconnected mid-air; retry all four decks continuously connect realm terminal to isle anchor at variable lengths",
+      "result": "PASS"
+    }
+  ],
+  "rejected_attempts": [
+    "rejected/accordant_assembly_section_v001_attempt1.png",
+    "rejected/accordant_spoke_bridges_on_event_v001_attempt1.png"
+  ],
+  "visual_qa": {
+    "accordant_civic_ring_plan_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "True top-down CAD civic ring. Four equal blossom-stone thresholds, dashed outward sockets, muted cherry hatches, no keep/fortress apron/sequential dual-gate. Native sha256 a2fefc8c44a1a7b3."
+    },
+    "accordant_civic_ring_threshold_elevations_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Four equal-height ceremonial thresholds with closed blossom-stone disks, 1.8 m mannequin, civic roofs not keep towers. Mild cylindrical 3/4 is rebuildable as true front elevations. Native sha256 872835528a625217."
+    },
+    "accordant_civic_ring_massing_elevations_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Front+side orthographic low civic ring, four equal timber openings, asymmetric muted cherry beside not hiding doors, no keep. Native sha256 d476417ea11e8937."
+    },
+    "accordant_approach_crownlands_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Two-panel event approach. Off-event empty air plus closed grounded blossom-stone seal; on-event authored span present. REALM TERMINAL / ISLE ANCHOR labeled. Not a sequential dual-gate. Native sha256 3a8085c2478bb44c."
+    },
+    "accordant_approach_stonehold_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Off-event retracted span and closed grounded seal; on-event walkable span. Stonehold language stops at the terminal. No lava keep. Native sha256 32b7eb710b80e429."
+    },
+    "accordant_approach_eldergrove_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Off-event empty air plus closed grounded seal; on-event connected span. No root portal. Native sha256 188225de2882ad04."
+    },
+    "accordant_approach_umbral_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Off-event empty air plus grounded closed seal disk; on-event span present with seal withdrawn into a ring socket. Ash-terminal language only at the abutment. Native sha256 280a3a4050191889."
+    },
+    "accordant_assembly_floor_plan_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "True top-down furnished assembly: central round chamber, four equal galleries, stores/archive/mediation in the ring, readable wall thickness, traversable aisles. Not a keep. Native sha256 ae9ec78b98495e83."
+    },
+    "accordant_assembly_section_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: 3/4 dollhouse proscenium. Independent full-res PASS on native sha256 b064b1ef5f4ed0b5: flat architectural section, hatched wall thickness, opposite galleries, central chamber, equal floor, civic dome not keep. Rebuild from written ~18 m chamber, not pixels."
+    },
+    "accordant_assembly_furniture_orthos_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Top-down gallery with circulation plus isolated table, bench, archive niche, mediation table, blossom-stone seal disk, desk, crates, blank board, 1.8 m scale. Replace anatomical mannequin with a featureless gray volume in Blender. Native sha256 b5ad526c03ea04ad."
+    },
+    "accordant_ecosystem_family_orthos_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Player-scale kit: volumetric muted cherry standard + sapling, sedge clump, low blossom-stone setts, packed terrace paving. No animals, dragons, crystals, or theme-park pink blizzard. Native sha256 3e8e75441dda4cb7."
+    },
+    "accordant_ecosystem_composition_plots_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Four grounded plots; threshold terrace keeps a clear walking lane and a grounded seal disk; canopy plot is muted and gapped. Rebuild as front-elevation strips rather than 3/4 slabs. Native sha256 ff212a92b85699ff."
+    },
+    "accordant_spoke_bridges_on_event_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: short spoke disconnected mid-air. Independent full-res PASS on native sha256 e62e19d14e6ce6c7: four variable-length decks all continuously connect REALM TERMINAL to ISLE ANCHOR. Lengths are visual intent, not the 180 m adjacent-bridge rule."
+    },
+    "accordant_spoke_bridges_off_event_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Four off-event pairs: empty air, retracted bronze sockets, closed grounded blossom-stone seals, REALM TERMINAL / ISLE ANCHOR / OFF-EVENT labels. No walkable deck. Rebuild gap distances to express variable spoke lengths. Native sha256 d83cf15a3b75dac5."
+    }
+  },
+  "assets": [
+    {
+      "familyId": "fam_accordant_event_isle_civic_ring",
+      "source": "accordant_civic_ring_plan_v001.png",
+      "title": "Civic-ring plan, four equal thresholds, not a keep",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 846436,
+      "source_sha256": "a2fefc8c44a1a7b3647b9684b119253a7ffd94da6a4d4c642486c80aadaeea1f",
+      "authoring": "accordant_civic_ring_plan_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3937626,
+      "authoring_sha256": "3d908aaacc3b940cfc5ca20bd1c3772f21f639413692e4e6c3bc22ff60254f89",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_event_isle_civic_ring",
+      "source": "accordant_civic_ring_threshold_elevations_v001.png",
+      "title": "Four equal threshold elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 872515,
+      "source_sha256": "872835528a62521701c955a17cbec385ecdd071928e9bbaa178448744a5b2148",
+      "authoring": "accordant_civic_ring_threshold_elevations_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4020058,
+      "authoring_sha256": "cc606a76099bfdd28f00a7a142cad9f149424bcb3e4a6321709d253f338f50c1",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_event_isle_civic_ring",
+      "source": "accordant_civic_ring_massing_elevations_v001.png",
+      "title": "Low civic-ring massing under cherry canopy",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 757738,
+      "source_sha256": "d476417ea11e8937e282761be9dab4f66dd146c3346cddf410f927feb764435d",
+      "authoring": "accordant_civic_ring_massing_elevations_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3665685,
+      "authoring_sha256": "2c4af22197820c576005adf6a14560599846fb66af9686d71b6a4e258795523f",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_event_approaches",
+      "source": "accordant_approach_crownlands_v001.png",
+      "title": "Crownlands approach: off-event gap+seal / on-event span",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 750304,
+      "source_sha256": "3a8085c2478bb44cdb9f72eb704ad59a46f2b1b91d19f6fd5d6f354b3e8d317a",
+      "authoring": "accordant_approach_crownlands_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3604192,
+      "authoring_sha256": "fee2d3b5ea3c3c34bb20b2a5b068c1c9dbe99b17a9d79b4618d1a9ae36daf13d",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_event_approaches",
+      "source": "accordant_approach_stonehold_v001.png",
+      "title": "Stonehold approach: off-event gap+seal / on-event span",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 785476,
+      "source_sha256": "32b7eb710b80e42998586dc1b58e2e63a2b93db5a18e30a499247686464b7291",
+      "authoring": "accordant_approach_stonehold_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3703760,
+      "authoring_sha256": "6c51dcfc32d8e83d4cbf6ca0ff27d26a408238cfacb68447a7d11f02ccc73af6",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_event_approaches",
+      "source": "accordant_approach_eldergrove_v001.png",
+      "title": "Eldergrove approach: off-event gap+seal / on-event span",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 686519,
+      "source_sha256": "188225de2882ad048166330d519d45be5e4c47521d1b6ebed50488d38b7ccb25",
+      "authoring": "accordant_approach_eldergrove_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3359697,
+      "authoring_sha256": "876cc0103c5b58654e42291166737d4ed5d106ce9d65ee3c43ca5525e34b74d4",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_event_approaches",
+      "source": "accordant_approach_umbral_v001.png",
+      "title": "Umbral approach: off-event gap+seal / on-event span",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 748069,
+      "source_sha256": "280a3a4050191889bbf171c0024a64b27e5342d7b58a4f1d43b8327d08260388",
+      "authoring": "accordant_approach_umbral_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3580474,
+      "authoring_sha256": "26c9b44b02985e146a82f83d81956865a01dc277798824fdd2048b3a5add40ba",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_assembly_interior",
+      "source": "accordant_assembly_floor_plan_v001.png",
+      "title": "Assembly floor plan, four equal galleries",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1147584,
+      "source_sha256": "ae9ec78b98495e836aa507a985343ed8d8abd72df47415eb7fa2a58d9b87a424",
+      "authoring": "accordant_assembly_floor_plan_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4885418,
+      "authoring_sha256": "a566eba105969fae215f9b64813467d76c80c856f8345dec1d5f713826897e2c",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_assembly_interior",
+      "source": "accordant_assembly_section_v001.png",
+      "title": "Assembly section through opposite galleries",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 867227,
+      "source_sha256": "b064b1ef5f4ed0b526a7d86954c4b8be0f8f17ea50d62d46f6aea63a4b2cc7ba",
+      "authoring": "accordant_assembly_section_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4294795,
+      "authoring_sha256": "6a3d7b02b840d8be0ca970b5dbdff7c5437785a355431bd025c469f2f1f0f030",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_assembly_interior",
+      "source": "accordant_assembly_furniture_orthos_v001.png",
+      "title": "Furnished gallery + focal furniture orthos",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 917061,
+      "source_sha256": "b5ad526c03ea04adc20ae0885d89ed7fc6c2fd37e8af29ee0c98906e0c810c40",
+      "authoring": "accordant_assembly_furniture_orthos_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4151465,
+      "authoring_sha256": "58e846dbaffbda8188e3f4b0ddee5e65ed026d1ad76a5872c16a2ce17810c745",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_cherry_canopy_ecosystem",
+      "source": "accordant_ecosystem_family_orthos_v001.png",
+      "title": "Cherry / ground / blossom-stone kit, player scale",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 725531,
+      "source_sha256": "3e8e75441dda4cb70dc177d145c0c00110288c82a9fbef83be14ee6ca4583756",
+      "authoring": "accordant_ecosystem_family_orthos_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3372893,
+      "authoring_sha256": "436180d97b341cde047b2635d09a8c1e29c08d87c63b8fa7fbadbc89fd16744d",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_cherry_canopy_ecosystem",
+      "source": "accordant_ecosystem_composition_plots_v001.png",
+      "title": "Ecosystem composition plots",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1268313,
+      "source_sha256": "ff212a92b85699ff063a5955f5afcecb9c419a86519e500ee6cb4ece6029b2ba",
+      "authoring": "accordant_ecosystem_composition_plots_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5308509,
+      "authoring_sha256": "6def4a842d2e60511836bb062a566d9aa7c5ff7ad451ac60cae433cc8d4bc3b2",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_spoke_bridges",
+      "source": "accordant_spoke_bridges_on_event_v001.png",
+      "title": "Four variable-length on-event spoke spans",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 900217,
+      "source_sha256": "e62e19d14e6ce6c72b50dc643f4d3b4a518b0883adc1fa5997f93bc471f489b5",
+      "authoring": "accordant_spoke_bridges_on_event_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4184076,
+      "authoring_sha256": "8409f9a0a4ddc674e8eec1de85ce3213b8e6c13bbd1a190032d3c15b3bb5957f",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_accordant_spoke_bridges",
+      "source": "accordant_spoke_bridges_off_event_v001.png",
+      "title": "Four off-event retracted spans + closed seals",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 964192,
+      "source_sha256": "d83cf15a3b75dac528ffdfbf328cc426b0511abc63b20482e2ec7cbc7c7c79ef",
+      "authoring": "accordant_spoke_bridges_off_event_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4229028,
+      "authoring_sha256": "ab795974427e5b566a0f146dde4fccc281a02e2e59a1d4b79d5cfa3af5d16375",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    }
+  ],
+  "enterable_notes": {
+    "civic_ring": "Low council ring with four equal thresholds. Not a keep.",
+    "assembly": "Central round chamber, four equal galleries, mediation, archive, stores, discreet security circulation.",
+    "approaches": "Off-event: retracted/absent span AND closed grounded blossom-stone seal. On-event: authored span only.",
+    "no_fake_shells": true
+  },
+  "dimensional_control_not_ai_numerals": {
+    "player_height_m": 1.8,
+    "civic_interior_door_m": [
+      1.2,
+      2.4
+    ],
+    "threshold_opening_m": [
+      4.8,
+      4.2
+    ],
+    "central_chamber_diameter_m": 18,
+    "gallery_m": [
+      10,
+      8
+    ],
+    "spoke_lengths": "variable visual intent; not the 180 m adjacent-bridge rule",
+    "off_event_denials": [
+      "physically absent or retracted span",
+      "closed grounded blossom-stone seal"
+    ]
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "umbral_capital_district_plan_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: near-circular/radial island with Y-fork and south approach. Attempt2 PASS: organic SE-corner-enclosing L/wedge hugging south+east basalt cliffs only; NW quadrant empty gray; controlled approach from the open west/NW; three offset fault-wedge seams through broken terraces; keep at SE head with X-brace piers. Not a ring, oval, or island. No city IDs. Perimeter cliffs are packet grain, not V013 continent topology. Scale-bar unlabeled; not metric authority."
+  },
+  "umbral_capital_skyline_north_south_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: keep-only elevations with pointed gothic lancets. Attempt2 PASS: labeled NORTH/SOUTH flat ortho, keep-centered civic cluster with flanking two-storey houses. SOUTH round-headed X-brace door. Black basalt, matte soot, rectangular slits on houses. Some keep windows retain slight pointed heads; Blender rebuilds as rectangular smoked slits. No cathedral nave, dragons, needles, or crystal."
+  },
+  "umbral_capital_skyline_east_west_v001": {
+    "verdict": "PASS",
+    "notes": "Labeled EAST/WEST flat ortho elevations. Keep-centered civic mass with X-brace piers, rectangular smoked slits, round-headed doors, black basalt and soot. Low 3–4 storey broad terrace, not needles, pagoda, or crystal. Both faces show a door. No Town Hall spectacle. Skyline keep is silhouette only."
+  },
+  "umbral_capital_keep_shell_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: pointed gothic ogive door and cutaway side. Attempt2 rejected: generic symmetric box palazzo. Attempt3 rejected: church stepped-gable with lancets. Attempt4 rejected: crow-step gables without explicit fault-wedge bites. Attempt5 PASS: broad asymmetrical stepped Three-Fault Ashvein keep; rectangular smoked slits with flat lintels; round-headed X-brace door; closed side elevation; three triangular masonry fault-wedge bites on roof/front/side; ash-timber/iron X-brace ribs on corner piers; 1.8 m mannequin; no spires. Roof plan is notched rather than a copy of the filled ground rectangle; Blender rebuilds plan from ground/upper/section, shell is massing/openings/material."
+  },
+  "umbral_capital_keep_section_v001": {
+    "verdict": "PASS",
+    "notes": "Longitudinal + cross sections of the same keep. Floor slabs, wall thickness, punched slit voids, stairs that land. Three occupied floors plus timber X-brace roof construction. Screened entry, council table, archive stacks, service stair. Sections are cut volumes rather than pure 2D hatch; rebuild from written 54 x 16 m intent. No cathedral vault spectacle, no needles."
+  },
+  "umbral_capital_keep_ground_plan_v001": {
+    "verdict": "PASS",
+    "notes": "True top-down furnished ground plan. South screened double-door entry, witness benches, court with round table, archive stacks both sides, east circular vault door, SW and NE stair cores, X-brace corner piers. Wall thickness, door swings, traversable aisles. Large streamed combat interior. No cathedral pews, neon, or dragons."
+  },
+  "umbral_capital_keep_upper_circulation_v001": {
+    "verdict": "PASS",
+    "notes": "Two true top-down plans: upper archive galleries/council overflow/clerks and walltop walk with merlons and X-brace yokes. SW and NE stair cores align with the ground-plan quadrants. Upper silhouette is chamfered/octagonal vs rectangular ground: rebuild one silhouette from written dimensions. Service corridor present. No needles, no 3/4 dollhouse."
+  },
+  "umbral_city_street_grammar_v001": {
+    "verdict": "PASS",
+    "notes": "Same street: plan + front elevation. 6 m width is intent only. Plan shows a three-fault seam in the paving and door ticks. Elevation is asymmetric: X-brace civic/market bay plus two-storey dwellings with punched doors and smoked slits. Three-Fault Ashvein cladding, not Embermist, Moonroot, or Meridian Oathroad. No dual-gate, no city IDs, no Town Hall/Workshop redesign."
+  },
+  "umbral_city_dwelling_shell_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: visually one-storey bungalow with door as tall as the facade, mismatched to furnished two-storey plates. Attempt2 PASS: visibly two-storey shell with string course, two rows of punched rectangular smoked slits, south timber door, east stair bulkhead on roof plan, west chimney, 1.8 m mannequin about one-third of facade height. Aligns to furnished 8x10 east-wall stair interior. No gothic ogive, no furniture on this sheet."
+  },
+  "umbral_city_dwelling_interior_v001": {
+    "verdict": "PASS",
+    "notes": "Two true top-down furnished plans, shared rectangle. Ground west hearth, center table, east-wall stair, south door. Upper east-wall stair landing, two beds, chests. Stairs share the east-wall coordinate. Traversable. No modern kitchen. No contradictory stairs."
+  },
+  "umbral_city_market_service_public_hall_kit_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: public hall missing visible labeled 2.5 m W x 3.0 m H aperture and complete hardware. Attempt2 rejected: label present but short hinges and no sliding latch bar. Attempt3 rejected: gothic side windows, short hinges, no sliding bar. Attempt4 PASS: three distinct labeled modules with traversable plans (market hatch/stores; service cistern/stores; public hall benches/clerk). Public hall door quotes 2.5 m W x 3.0 m H with dimension arrows, paired timber leaves, iron strap hinges, sliding iron latch bar across both leaves, stone-block frame. Rectangular smoked slits. Not a Town Hall or Workshop redesign."
+  },
+  "umbral_inner_cave_mouth_v001": {
+    "verdict": "PASS",
+    "notes": "Front/side human-scale refuge-gallery mouth, black-basalt lintel, modest X-brace tick, mannequin, packed-ash floor. Small lantern niche is an object, not glow. No dragon skull/eggs/neon/fortress."
+  },
+  "umbral_inner_cave_section_circulation_v001": {
+    "verdict": "PASS",
+    "notes": "Section + organic pocket plan: gallery, main chamber, alcoves, store niche, portcullis. Walkable floors. Height callouts 3.2 / 5.5 m are intent only. Timber X-brace props. No boss arena, no cathedral crypt nave, no crystal cavern."
+  },
+  "umbral_outer_cave_mouth_v001": {
+    "verdict": "PASS",
+    "notes": "War-scarred human dungeon mouth, broken ash-timber X-brace lintel, rubble at threshold. No fortress, no sequential gate, no 30 m apron diagram, no dragon. Rubble is cave talus, not a climb onto a fortress wall."
+  },
+  "umbral_outer_cave_loop_choke_section_v001": {
+    "verdict": "PASS",
+    "notes": "Section with landing floors + combat plan: west mouth choke, ring galleries, central cross-chamber with four crate cover blocks, closed circuit a player can run, north/east hold. Not a dragon perch or boss podium. No unauthored pits. Scale numerals not metric authority."
+  },
+  "umbral_cave_chamber_fitting_module_v001": {
+    "verdict": "PASS",
+    "notes": "Six isolated modules, two rows: inner gallery / node / alcove and outer combat gallery / cross-chamber / barred hold. Same basalt-and-timber language, generous gray, no overlap collage. Serves inner chamber plate and outer fittings. No dragons/neon/fortress."
+  }
+}

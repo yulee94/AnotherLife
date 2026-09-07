@@ -1,0 +1,52 @@
+[
+  {
+    "sheet": "crownlands_sequential_gate_outer_face_v001",
+    "reason": "attempt1 pointed pyramid drum caps and timber barn doors",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_sequential_gate_inner_face_v001",
+    "reason": "attempts 1-2 Gothic palmette/lancet tracery on leaves; attempt3 plain silver-rib leaves plus inner walltop stair",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_sequential_gate_longitudinal_section_v001",
+    "reason": "attempts 1-3 open proscenium / front-facing leaves; attempt4 CAD plan + subway side-cut with edge-on OUTER x=0 / INNER x=18 slabs",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_sequential_wall_walltop_modules_v001",
+    "reason": "attempt1 three pointed Gothic blind arches on left curtain; attempt2 blank ashlar + flat compass disc, true top-down walltop plan, inner-only stair",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_fortress_elevations_v001",
+    "reason": "attempts 1-2 pyramid caps/gold spikes; attempt3 Gothic lancet keep windows (false-green); attempts 4-6 pyramid drums/finials/arcade viaduct; attempt7 rectangular windows, flat tabletop drum terraces, one closed gate",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_fortress_keep_flag_anchor_v001",
+    "reason": "attempts 1-2 hollow ring/cones; attempt3 pointed drum and central roofs; attempts 4-6 pyramid elevation hats; attempt7 pointed spear/obelisk mast and ambiguous drum caps; attempt8 3/4 perspective center; attempt9 true top-down plan + true flat front elevation + broad flat drum terraces + blunt constant-diameter detached banner pole",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_terrain_grades_worldscar_wallend_v001",
+    "reason": "attempt1 3/4 block, pillar brink, triple-arch arcade; attempt2 bedding cut + fused wall-end",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_cave_exterior_language_v001",
+    "reason": "attempt1 round/arched left inner mouth; attempt2 free-standing gate portals; attempt3 square-lintel shelf mouth + storm-scarred outer cut",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_capital_city_material_kits_v001",
+    "reason": "attempt1 recessed niches cloned as cladding; attempt2 flat swatches + three wall-bay elevations",
+    "result": "PASS"
+  },
+  {
+    "sheet": "crownlands_lod_material_lighting_reference_v001",
+    "reason": "attempt1 church front-gable and round-arch windows; attempt2 hip-roof LOD0-3 + lantern object",
+    "result": "PASS"
+  }
+]

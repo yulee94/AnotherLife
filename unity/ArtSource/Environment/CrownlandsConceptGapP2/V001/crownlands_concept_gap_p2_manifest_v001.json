@@ -1,0 +1,699 @@
+{
+  "version": "V001",
+  "packetId": "CrownlandsConceptGapP2_V001",
+  "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION",
+  "priority": "P2",
+  "families": [
+    "fam_crownlands_sequential_gate_wall_complex",
+    "fam_crownlands_fortress_single_gate",
+    "fam_crownlands_terrain",
+    "fam_crownlands_ecosystem_dressing",
+    "fam_crownlands_material_lod"
+  ],
+  "quality_target": "premium-AA dark-fantasy stylized realism; BDO-inspired directional bar, not parity",
+  "authority": {
+    "visual": "this packet",
+    "topology": "V013 + crownlands_sequential_gate_technical_plate_v001",
+    "stableGateIds": [
+      "gate_crownlands_meridian",
+      "gate_crownlands_meridian_outer",
+      "wall_complex_crownlands_meridian"
+    ],
+    "catalogIds": "inventory / catalogs, not this packet",
+    "direction": "B \u2014 Meridian Oathroad",
+    "p1Authority": "unity/ArtSource/Environment/CrownlandsConceptP1/V001",
+    "p1Binding": {
+      "packetId": "CrownlandsConceptP1_V001",
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001",
+      "manifest": "crownlands_concept_p1_manifest_v001.json",
+      "manifest_sha256": "7316ec9e59966935463b04fd53d7e56266fd7bea6f4154920b576810ef8cb457",
+      "contact_sheet": "crownlands_concept_p1_contact_sheet_v001.jpg",
+      "contact_sheet_sha256": "b1f4b03766b80a21e6138752d945eec5f6a64c92eb53381e4eebbed68ecb560d",
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION",
+      "validation": "16/16 PASS",
+      "touched": false
+    },
+    "conceptsDoNotControl": [
+      "catalog IDs",
+      "save IDs",
+      "gameplay",
+      "Meshy spend",
+      "existing world inventory JSON",
+      "Stonehold packets",
+      "Eldergrove packets",
+      "CrownlandsConceptP1",
+      "V013 inner 33.3333% / outer 66.6667%",
+      "sequential-gate technical plate topology",
+      "30 m fortress apron metric",
+      "180 m adjacent-realm bridge length",
+      "Town Hall / Workshop"
+    ]
+  },
+  "identity": {
+    "realm": "crownlands",
+    "direction": "Meridian Oathroad",
+    "capitalId": "capital_crownspire",
+    "cityIds": [],
+    "fortressIds": [
+      "fortress_crownlands_01",
+      "fortress_crownlands_02",
+      "fortress_crownlands_03",
+      "fortress_crownlands_04"
+    ],
+    "fortressIdsArePlaceholders": true,
+    "materials": [
+      "chalk-gold ashlar limestone",
+      "deep blue slate",
+      "brass meridian ribs",
+      "cool silver edgework",
+      "restrained bronze",
+      "rain-dark mortar",
+      "packed oathroad grit"
+    ],
+    "forbidden": [
+      "circular/radial capital",
+      "Gothic cathedral",
+      "conical turret",
+      "needle spire",
+      "witch-hat caps",
+      "fake facade shells",
+      "modern drift",
+      "real-world animals",
+      "dragons",
+      "bosses",
+      "runtime VFX baked into geometry",
+      "Embermist palette swap",
+      "Moonroot roots",
+      "apron foliage/terrain/climb props",
+      "Town Hall / Workshop spectacle"
+    ]
+  },
+  "provider": "xai-oauth",
+  "chat_model": "grok-4.6",
+  "image_model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "aspect_ratio": "3:2",
+  "fallback_policy": "GPT-5.6 Sol only if Grok returns no answer",
+  "fallback_used": false,
+  "fallback_provider": null,
+  "native_generation_resolution": [
+    1248,
+    832
+  ],
+  "authoring_resolution": [
+    7680,
+    5120
+  ],
+  "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+  "asset_count": 14,
+  "contact_sheet": "crownlands_concept_gap_p2_contact_sheet_v001.jpg",
+  "contact_sheet_bytes": 817943,
+  "contact_sheet_sha256": "ec47f45475376833a16ba86a5d50f57847c2ae974a60af42573a30dacf01edf3",
+  "contact_sheet_resolution": [
+    2016,
+    1664
+  ],
+  "retries": [
+    {
+      "sheet": "crownlands_sequential_gate_outer_face_v001",
+      "reason": "attempt1 pointed pyramid drum caps and timber barn doors",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_sequential_gate_inner_face_v001",
+      "reason": "attempts 1-2 Gothic palmette/lancet tracery on leaves; attempt3 plain silver-rib leaves plus inner walltop stair",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_sequential_gate_longitudinal_section_v001",
+      "reason": "attempts 1-3 open proscenium / front-facing leaves; attempt4 CAD plan + subway side-cut with edge-on OUTER x=0 / INNER x=18 slabs",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_sequential_wall_walltop_modules_v001",
+      "reason": "attempt1 three pointed Gothic blind arches on left curtain; attempt2 blank ashlar + flat compass disc, true top-down walltop plan, inner-only stair",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_fortress_elevations_v001",
+      "reason": "attempts 1-2 pyramid caps/gold spikes; attempt3 Gothic lancet keep windows (false-green); attempts 4-6 pyramid drums/finials/arcade viaduct; attempt7 rectangular windows, flat tabletop drum terraces, one closed gate",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_fortress_keep_flag_anchor_v001",
+      "reason": "attempts 1-2 hollow ring/cones; attempt3 pointed drum and central roofs; attempts 4-6 pyramid elevation hats; attempt7 pointed spear/obelisk mast and ambiguous drum caps; attempt8 3/4 perspective center; attempt9 true top-down plan + true flat front elevation + broad flat drum terraces + blunt constant-diameter detached banner pole",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_terrain_grades_worldscar_wallend_v001",
+      "reason": "attempt1 3/4 block, pillar brink, triple-arch arcade; attempt2 bedding cut + fused wall-end",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_cave_exterior_language_v001",
+      "reason": "attempt1 round/arched left inner mouth; attempt2 free-standing gate portals; attempt3 square-lintel shelf mouth + storm-scarred outer cut",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_capital_city_material_kits_v001",
+      "reason": "attempt1 recessed niches cloned as cladding; attempt2 flat swatches + three wall-bay elevations",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_lod_material_lighting_reference_v001",
+      "reason": "attempt1 church front-gable and round-arch windows; attempt2 hip-roof LOD0-3 + lantern object",
+      "result": "PASS"
+    }
+  ],
+  "rejected_attempts": [
+    "rejected/crownlands_capital_city_material_kits_v001_attempt1.png",
+    "rejected/crownlands_cave_exterior_language_v001_attempt1.png",
+    "rejected/crownlands_cave_exterior_language_v001_attempt2.png",
+    "rejected/crownlands_fortress_elevations_v001_attempt1.png",
+    "rejected/crownlands_fortress_elevations_v001_attempt2.png",
+    "rejected/crownlands_fortress_elevations_v001_attempt3.png",
+    "rejected/crownlands_fortress_elevations_v001_attempt4.png",
+    "rejected/crownlands_fortress_elevations_v001_attempt5.png",
+    "rejected/crownlands_fortress_elevations_v001_attempt6.png",
+    "rejected/crownlands_fortress_keep_flag_anchor_v001_attempt1.png",
+    "rejected/crownlands_fortress_keep_flag_anchor_v001_attempt2.png",
+    "rejected/crownlands_fortress_keep_flag_anchor_v001_attempt3.png",
+    "rejected/crownlands_fortress_keep_flag_anchor_v001_attempt4.png",
+    "rejected/crownlands_fortress_keep_flag_anchor_v001_attempt5.png",
+    "rejected/crownlands_fortress_keep_flag_anchor_v001_attempt6.png",
+    "rejected/crownlands_fortress_keep_flag_anchor_v001_attempt7.png",
+    "rejected/crownlands_fortress_keep_flag_anchor_v001_attempt8.png",
+    "rejected/crownlands_lod_material_lighting_reference_v001_attempt1.png",
+    "rejected/crownlands_sequential_gate_inner_face_v001_attempt1.png",
+    "rejected/crownlands_sequential_gate_inner_face_v001_attempt2.png",
+    "rejected/crownlands_sequential_gate_longitudinal_section_v001_attempt1.png",
+    "rejected/crownlands_sequential_gate_longitudinal_section_v001_attempt2.png",
+    "rejected/crownlands_sequential_gate_longitudinal_section_v001_attempt3.png",
+    "rejected/crownlands_sequential_gate_outer_face_v001_attempt1.png",
+    "rejected/crownlands_sequential_wall_walltop_modules_v001_attempt1.png",
+    "rejected/crownlands_terrain_grades_worldscar_wallend_v001_attempt1.png"
+  ],
+  "visual_qa": {
+    "crownlands_sequential_gate_outer_face_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: pointed pyramid drum caps and timber barn doors. Retry PASS: true front elevation, long low curtain, exactly one gate, truncated/hipped drum caps, blank unclimbable outer face, merlon rhythm, Meridian chalk-gold / blue-slate / brass compass discs. Rebuild ceremonial leaves from gate_crownlands_meridian P0 limestone-and-silver language, not copied plank color. Illustrates gate_crownlands_meridian_outer visual language only."
+    },
+    "crownlands_sequential_gate_inner_face_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-2 rejected: Gothic palmette/lancet tracery on leaves. Attempt3 PASS: true front elevation, one inner gate, plain pale leaves with silver strap ribs, truncated hip drums, stone stair to walltop on this defender face only. No outer ladders. Sequence remains technical-plate topology / gate_crownlands_meridian."
+    },
+    "crownlands_sequential_gate_longitudinal_section_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-3 rejected: open proscenium / front-facing leaves. Attempt4 independent full-res PASS: LEFT CAD plan with two separate closed door-pairs at OUTER x=0 and INNER x=18, dashed roofed ~18 m passage, north stair hatch; RIGHT 2D subway side-cut with edge-on vertical barrier slabs occluding the tunnel, mannequin in the cavity, stair only beyond inner. Rebuild barriers from written 18 m, not pixels. wall_complex_crownlands_meridian."
+    },
+    "crownlands_sequential_wall_walltop_modules_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected (false-green): left curtain face had three pointed Gothic blind arches. Attempt2 independent full-res PASS: left blank ashlar curtain with flat horizontal blue-slate band and flat brass compass disc, zero openings/arcades; center true top-down ~2.4 m walltop walk plan with merlon ticks and stair hatch; right inner-only stair versus blank unclimbable outer face. Rebuild 2.4 m walk from written width, not pixels."
+    },
+    "crownlands_fortress_plan_apron_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Kept from the initial set. True top-down CAD, one connected polygonal perimeter, exactly one south entrance spanned by closed paired GATE leaves, low-broad enclosed palazzo keep with four blunt-octagon drums, separate central flag-anchor socket, continuous dashed boundary labeled >=30m EMPTY DEFENSIVE APRON with zero props. Apron pixels are not the 30 m metric. Placeholders fortress_crownlands_01..04 are not four forts."
+    },
+    "crownlands_fortress_elevations_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-2 rejected: pyramid caps / gold spikes / open arch. Attempt3 rejected on independent full-res: repeated pointed/lancet Gothic keep windows. Attempts 4-6 rejected: residual pyramid drum caps, gold finials, then a fairy-tale arcade viaduct. Attempt7 PASS: front+side orthographic elevations, long low solid wall, exactly one closed gate, rectangular flat-lintel punched windows, low broad palazzo keep behind the wall, drum caps as flat tabletop terraces with zero spikes/finials, blank unclimbable outer face, empty apron. Rebuild ceremonial leaves from gate_crownlands_meridian limestone-and-silver language. Consistent with current CrownlandsConceptP1 keep-shell civic language (not capital_crownspire itself)."
+    },
+    "crownlands_fortress_keep_flag_anchor_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-2 rejected: hollow ring keep, conical caps. Attempt3 rejected: pointed/pyramidal drum and central roofs with finials. Attempts 4-6 rejected: plan/elevation pyramid drum hats. Attempt7 rejected by parent native-resolution review for a pointed spear/obelisk mast and ambiguous non-walkable drum caps. Attempt8 rejected because the center keep was a 3/4 perspective view with visible side planes. Attempt9 parent native-resolution PASS: three isolated panels; true top-down solid enclosed keep roof plan with four broad flat octagonal drum tabletops and separate 4 m circular socket; true flat front elevation with rectangular windows, broad flat drum terraces, and low truncated central hip; detached constant-diameter 6 m banner pole on a separate 4 m plinth with blunt cap, zero taper/spear/needle/obelisk/finial."
+    },
+    "crownlands_terrain_grades_worldscar_wallend_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: 3/4 block, pillar-only brink, triple-arch arcade stele. Attempt2 PASS: left geologic bedding cut inner pale-to-outer broken; center sheer chalk-gold Worldscar mass; right horizontal masonry wall fused into impassable cliff with zero openings. Rebuild beds as offset nonperiodic blocks and the brink as a wide cliff elevation, not a copied pillar."
+    },
+    "crownlands_terrain_bridge_abutment_180m_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Kept from the initial set. Side elevation of Crownlands abutment on chalk Worldscar brink with shared 6 m deck leaving toward gulf; front pier with truncated hip cap; plan of abutment fit to brink and deck. 180 m span remains V013; pixels show endpoint fit only. No fortress, no sequential gate."
+    },
+    "crownlands_terrain_route_bed_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Kept from the initial set. Sliced-loaf cut with paired U-shaped wheel-rut depressions, raised shoulders, and a drainage box-gutter; top-down rutted packed-chalk lane; three unique angular chalk rocks with mannequin, not eggs/cones."
+    },
+    "crownlands_ecosystem_composition_habitat_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Kept from the initial set. Four grounded habitat plots without animals: chalk wallow bowl, grain-verge cover with clear travel lane, reliquary chalk hollow, storm-shelf perch with brass-rib fragment. Volumetric clumps. No real-world wildlife, no dragons."
+    },
+    "crownlands_cave_exterior_language_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected (false-green): LEFT INNER was a round/arched mouth. Attempt2 rejected: square lintel but free-standing gate portals (gate drift), not cave landform. Attempt3 independent full-res PASS: LEFT INNER is a square/rectangular mouth with flat horizontal lintel and 90-degree corners cut into a chalk-rib shelf; CENTER OUTER is a storm-scarred chalk cut; RIGHT shelf language with brass clamps and slate plates. Non-dragon. No skull/egg/treasure/gate. P1 inner_cave_mouth / outer_cave_mouth remain chamber-mouth authority; this sheet is exterior landform only."
+    },
+    "crownlands_capital_city_material_kits_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: recessed niche rooms instead of swatches, cloned niches as cladding. Attempt2 PASS: six flat sample boards (ashlar, blue slate, brass ribs, silver, bronze hardware, grit) plus three distinct front-elevation wall bays (palazzo window, dwelling door, market shutter) with hip eaves. Not a city plan, not Town Hall/Workshop, no invented city IDs."
+    },
+    "crownlands_lod_material_lighting_reference_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: church front-gable and round-arch windows. Attempt2 PASS: same hip-roof dwelling at LOD0-LOD3 (LOD3 silhouette), rectangular openings, ASHLAR/SLATE/BRASS/SILVER/GRIT chips, overcast versus dusk practical lantern as geometry. No cones, no Town Hall."
+    }
+  },
+  "assets": [
+    {
+      "familyId": "fam_crownlands_sequential_gate_wall_complex",
+      "source": "crownlands_sequential_gate_outer_face_v001.png",
+      "title": "Sequential outer-face elevation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 997835,
+      "source_sha256": "9fbd9f4e07bfebba4a6c50124a06ab62bbf58dc638b9836cbb3fe1eaee7eea73",
+      "authoring": "crownlands_sequential_gate_outer_face_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4731670,
+      "authoring_sha256": "7d87cb4bc89dde7d7df1fe34e0a960e1203b54098f7ab88f3a9d7213f0cfcb5a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_sequential_gate_wall_complex",
+      "source": "crownlands_sequential_gate_inner_face_v001.png",
+      "title": "Sequential inner-face elevation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1013468,
+      "source_sha256": "c8baea04fd57dd8b49dce9c4c836f8c7c7eeae500324e91f3304ecbf55bd4e05",
+      "authoring": "crownlands_sequential_gate_inner_face_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4738317,
+      "authoring_sha256": "daa4529f9168daed6210a35c191e6f5f596df9359542edecd5c3ba35a214d22d",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_sequential_gate_wall_complex",
+      "source": "crownlands_sequential_gate_longitudinal_section_v001.png",
+      "title": "Sequential plan + 18 m passage section",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 814697,
+      "source_sha256": "225f031d0ba1558389377ed9344f429974c94a85930e42e3d901d54f80b59605",
+      "authoring": "crownlands_sequential_gate_longitudinal_section_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4067965,
+      "authoring_sha256": "6c45b8cb12dafa37c220e220dd215da0beac043110b20f86422dc30eaded9719",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_sequential_gate_wall_complex",
+      "source": "crownlands_sequential_wall_walltop_modules_v001.png",
+      "title": "Wall / walltop defender modules",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1019918,
+      "source_sha256": "8f7fd5bb8da71f22739a7a5fef1f7a3007b91cbf0773082d18b5ed789587d37b",
+      "authoring": "crownlands_sequential_wall_walltop_modules_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4736214,
+      "authoring_sha256": "ad1ada8d5232021dc72a378c576de1378935e6e53834ea894f9dd8e40d7d2d25",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_fortress_single_gate",
+      "source": "crownlands_fortress_plan_apron_v001.png",
+      "title": "One-gate fortress plan with 30 m clear apron",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 905896,
+      "source_sha256": "f81e3f3df0e0940938d7357db5ca4b38eeefb48aad741ed9288205cd2f599e4a",
+      "authoring": "crownlands_fortress_plan_apron_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4291244,
+      "authoring_sha256": "9693b78e5b7ec8ab71b7a4abfe2a665fe0f8720bd5312bb50f6c81b6c00204af",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_fortress_single_gate",
+      "source": "crownlands_fortress_elevations_v001.png",
+      "title": "One-gate fortress front/side elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 999166,
+      "source_sha256": "e21fbcb804566fa4cfc955dd0e65d042d2a7e64df761643511130bcfc652d6fa",
+      "authoring": "crownlands_fortress_elevations_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4755937,
+      "authoring_sha256": "9fa6c63c6266a7ae5dad577c0bd9206530ff86a959d0f9f7d24918b8401f81fa",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_fortress_single_gate",
+      "source": "crownlands_fortress_keep_flag_anchor_v001.png",
+      "title": "Keep shell + central flag-anchor socket",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 929460,
+      "source_sha256": "d1d9a932ea638a5460688861dbf9e53c814df4159e0b507453c76ce2fc3b4cda",
+      "authoring": "crownlands_fortress_keep_flag_anchor_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4347170,
+      "authoring_sha256": "a4ab694edf0bc208857e620873477c90a52989c091f9319d9ffccbaed85c8f36",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_terrain",
+      "source": "crownlands_terrain_grades_worldscar_wallend_v001.png",
+      "title": "Inner/outer grade, Worldscar brink, wall-end",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1121104,
+      "source_sha256": "9d146e11b70e5b049c59241222463aaa271af44480cf611af0edf36580c49f52",
+      "authoring": "crownlands_terrain_grades_worldscar_wallend_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4936809,
+      "authoring_sha256": "74fcf1976e0c142db306ce3c2193126d70010756d3d164496113d9bbbf33aea8",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_terrain",
+      "source": "crownlands_terrain_bridge_abutment_180m_v001.png",
+      "title": "180 m bridge endpoints / abutment fit",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 913548,
+      "source_sha256": "9ba59f962348ae088e696b8fa2bf53cbb3669f9c1f622621c196cf26e74d57f3",
+      "authoring": "crownlands_terrain_bridge_abutment_180m_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4131046,
+      "authoring_sha256": "95a3c861104f9e5ab466c704c92b6bb59f8685a1ad993a31756d1db53bce2607",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_terrain",
+      "source": "crownlands_terrain_route_bed_v001.png",
+      "title": "Route bed/ruts/drainage + player-scale rocks",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 979769,
+      "source_sha256": "2ee12a51a68832528961fa5784d7a0d2185595d30c18953592c85b2e5b23fe0c",
+      "authoring": "crownlands_terrain_route_bed_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4394121,
+      "authoring_sha256": "cefe4f6d51a106469b62e7f0678b7c586eb6cb1bf048ed1fe6bdb8d99033d74f",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_ecosystem_dressing",
+      "source": "crownlands_ecosystem_composition_habitat_v001.png",
+      "title": "Ecosystem composition and habitat without animals",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1020412,
+      "source_sha256": "33482b86b5cbff7976fc89eea237fc73a592804d3e9a7f54b6472cc8285404dc",
+      "authoring": "crownlands_ecosystem_composition_habitat_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4481701,
+      "authoring_sha256": "4b77c15b1f277d9d471fd1ea1169d8294a02c8ed7e4354e2551d3152cc4f1558",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_ecosystem_dressing",
+      "source": "crownlands_cave_exterior_language_v001.png",
+      "title": "Cave exterior landform language",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1088542,
+      "source_sha256": "8e73af968feeca7e5b13505598c16119a36d58fe3b2372cf8e517de2f682faaa",
+      "authoring": "crownlands_cave_exterior_language_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4773796,
+      "authoring_sha256": "51462a2311e94057023a6189460027b89a9508c2460f7e2a8e1b701b411a7dda",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_material_lod",
+      "source": "crownlands_capital_city_material_kits_v001.png",
+      "title": "Capital/city material kits",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1247666,
+      "source_sha256": "56aeca09390a006d626b4c5760f22bb5d79af336a7ee80dbf2a8b2aec9c0b3a8",
+      "authoring": "crownlands_capital_city_material_kits_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5514723,
+      "authoring_sha256": "7c3d284cc254bee9d035fc6c4d4b582b1b99ed0a0911609c287f2f03b5db7e3b",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_crownlands_material_lod",
+      "source": "crownlands_lod_material_lighting_reference_v001.png",
+      "title": "LOD / material / lighting reference",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1096270,
+      "source_sha256": "18236b685403055eca1dfc165c161f4773f6bcce31d7931f276e9d12b8c03f11",
+      "authoring": "crownlands_lod_material_lighting_reference_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4931346,
+      "authoring_sha256": "2b809e7304011ea8b67d80a726702d4bb2355cbf00b83858e84621ca57cb7574",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    }
+  ],
+  "enterable_notes": {
+    "sequential": "Controlled passageway and walltop defender routes are enterable. Attacker bypass forbidden.",
+    "fortress": "Keep/interior must be a complete enterable space, not a black facade.",
+    "no_fake_shells": true
+  },
+  "dimensional_control_not_ai_numerals": {
+    "player_height_m": 1.8,
+    "civic_interior_door_m": [
+      1.2,
+      2.4
+    ],
+    "sequential_passage_m": 18,
+    "ceremonial_gate_opening_m": [
+      8,
+      6
+    ],
+    "walltop_walk_m": 2.4,
+    "fortress_apron_m": 30,
+    "apron_applies_to": "outer warzone fortresses; metric validators control 30 m; do not copy pixels",
+    "flag_anchor_plinth_m": {
+      "mast": 6,
+      "plinth": 4
+    },
+    "keep_visual_intent_m": {
+      "across": 36,
+      "to_walltop": 16
+    },
+    "route_km": 14.4,
+    "bridge_span_m": 180,
+    "bridge_deck_width_m": 6.0,
+    "bridge_rail_height_m": 1.1,
+    "inner_gate_id": "gate_crownlands_meridian",
+    "outer_gate_id": "gate_crownlands_meridian_outer",
+    "wall_complex_id": "wall_complex_crownlands_meridian",
+    "capital_id": "capital_crownspire",
+    "city_ids_invented": false
+  }
+}

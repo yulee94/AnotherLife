@@ -1,0 +1,72 @@
+{
+  "eldergrove_sequential_gate_outer_face_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: giant wrapping trunks as climb assists on the outer face. Retry PASS: true front elevation, long low curtain, exactly one timber/bronze gate, blank unclimbable pale-mineral masonry, timber banding only, no trees/roots/ladders/talus. Illustrates gate_eldergrove_greenveil_outer visual language only."
+  },
+  "eldergrove_sequential_gate_inner_face_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: wrapping trees and no clear inner walltop stair. Retry PASS: true front elevation, one inner gate, stone stair to walltop on this defender face only, two small bronze-collar root seats at the wall base under the 1.2 m budget, no wrapping trunks. Timber posts on the seats are hardware, not climb trunks."
+  },
+  "eldergrove_sequential_gate_longitudinal_section_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-5 and 7 rejected: courtyard/oculus, posts/frames as gates, open hallway, one dark inset roof panel, labeled collage. Independent full-res PASS on native sha256 bb508d5770c053fa: LEFT plan and RIGHT section with OUTER x=0 and INNER x=18 leaf planes at passage ends, continuous roofed ~18 m passage, stair only beyond inner on protected side. Frames/posts alone are not this sheet. Sequence remains technical-plate topology / wall_complex_eldergrove_greenveil. Rebuild barriers from written 18 m, not pixels."
+  },
+  "eldergrove_sequential_wall_walltop_modules_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-6 rejected: exterior roots, stair towers, center as standing wall elevation. Retry PASS: left curtain bay with no trees; center long-narrow walk as top-down paving with merlon ticks and a stair hatch; right inner-only stair versus blank unclimbable outer face. Rebuild the 2.4 m walk from written width, not pixels."
+  },
+  "eldergrove_fortress_plan_apron_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-3 rejected: apron roots, open ungated gap between piers, unlabeled apron. Independent full-res PASS on native sha256 0c2392135c823c61: true top-down CAD, one connected irregular perimeter, exactly one entrance spanned by closed paired timber gate leaves labeled GATE, low-broad enclosed keep, separate central flag-mast socket, continuous dashed boundary labeled >=30m EMPTY DEFENSIVE APRON with zero roots/terrain/foliage/props. Apron pixels are not the 30 m metric."
+  },
+  "eldergrove_fortress_elevations_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-2 rejected: roots on the outer face and keep silhouette drift. Retry PASS: front+side orthographic elevations, long low wall, exactly one gate, low broad rectangular keep behind the wall, blank unclimbable outer face, no roots/stumps/trees. Compact length; instance curtain from the plan."
+  },
+  "eldergrove_fortress_keep_flag_mast_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: hollow oculus keep and wrapping roots; mast fused/classical. Retry PASS: solid enclosed keep roof plan with a separate 4 m flag plinth below; low broad keep elevation with no mast and no giant roots; isolated 6 m mast on a blocking plinth as a detached socketed object."
+  },
+  "eldergrove_terrain_grades_worldscar_wallend_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-2 rejected: 3/4 cake-slab islands, decorative door stele, root ladders. Retry PASS: left geologic grade cut with organic slope; center nonperiodic Worldscar macro cliff front elevation; right horizontal masonry wall fused into an impassable cliff, no door/stele/roots. Rebuild beds as offset nonperiodic blocks, not copied stripes."
+  },
+  "eldergrove_terrain_route_bed_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-2 rejected: 3/4 wavy mattress cut, missing ruts/gutter, teardrop rocks. Retry PASS: sliced-loaf cut with paired wheel-rut depressions, raised shoulders, and a drainage box-gutter; top-down rutted packed-silt lane; three unique angular rocks with a squat fractured boulder, not eggs."
+  },
+  "eldergrove_terrain_outer_biome_reads_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Kept from the initial set. Three labeled PURE / UMBRAL BLEND / STONEHOLD BLEND landform reads of Moonroot Vigil geology. Forms differ by ash-dark veins vs basalt-grit pockets rather than a fifth-realm recolor. Rebuild as front-elevation outcrops; do not instance three identical 3/4 island meshes."
+  },
+  "eldergrove_ecosystem_family_orthos_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-3 and 5 rejected: leafless dead-stick Hollowbark, upright crystal/spike mineral piles, stacked cairn, later overwrite. Independent full-res PASS on native sha256 f9ad43191680b302: grounded leafy Hollowbark, sedge, fern, low blunt pale-mineral boulder mound (not crystals/blades), non-climb-assist rootnest with bronze collars."
+  },
+  "eldergrove_ecosystem_composition_plots_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: dead-stick tree and obstructed route. Retry PASS: four grounded plots; plot 3 has a clear packed-silt travel lane with plants only on the verges; volumetric clumps; no crystal spikes or picket fences. Rebuild as front-elevation strips rather than 3/4 islands."
+  },
+  "eldergrove_interior_room_plates_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: giant interior root / tree-in-bronze-ring portal blocking the joinery floor. Retry PASS: two true top-down plans; guard/ready room with racks, benches, desk, door swing, stair bulkhead, complete walls; joinery floor with workbenches, bronze collars as table tools, herbal still, wagon door, stores, walkable aisles. Zero living trees, zero root portals."
+  },
+  "eldergrove_interior_civic_furniture_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Kept from the initial set. Two stacked true top-down civic/service plans with circulation plus eight isolated focal furniture orthos (map table, herbal bench, archive niche, joinery jig, cot, clamp bench, blank notice board, steward desk) and a 1.8 m mannequin. Corner bronze seats are tiny wall hardware."
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "crownlands_capital_district_plan_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: oval/concentric Renaissance city with ring wall. Attempt2 rejected (false-green): standalone roughly circular island/disk with cliff perimeter all around. Attempt3 PASS: organic L-/wedge-shaped urban pocket, north+east impassable chalk cliffs meeting at a corner, open south-west approach, broken offset nonradial streets, keep as broad rectangle at NE cliff-head, capital_crownspire only named ID. No circular island, no ring perimeter, no radial spokes. Scale-bar numerals not metric authority."
+  },
+  "crownlands_capital_skyline_north_south_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: Gothic/cathedral drift, paired conical turrets, needle finials, rose window, excessive twin-tower symmetry. Attempt2 PASS: NORTH/SOUTH flat orthos, broad low chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums with low caps and meridian ribs, rectangular punched openings, restrained brass/silver. SOUTH door is a segmental meridian arch with a small compass oculus, not Gothic tracery. No cones, no needles."
+  },
+  "crownlands_capital_skyline_east_west_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: Gothic/cathedral drift, paired conical turrets, needle finials, rose windows, pointed-arch bays, copy symmetry. Attempt2 PASS: EAST/WEST flat orthos, broad low chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums (WEST stepped and not a copy of EAST), restrained brass/silver meridian ticks. Round-arch keep lights, not lancets. No cones, no rose windows, no needles."
+  },
+  "crownlands_capital_keep_shell_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: generic Gothic castle with round towers, conical roofs, needle finials, lancet repetition, pointed portal, hollow courtyard. Attempt2 PASS: roof/front/side of one enterable civic council-keep. Broad low rectangular chalk-gold hall, four blunt octagonal meridian drums with truncated/hipped blue-slate caps, no cones, no needle finials. Rectangular punched windows, segmental door, brass meridian ribs, 1.8 m mannequin. Roof plan shows octagonal corner pavilions and compass as a flat disc. Blender rebuilds enterable keep from this shell plus section/ground/upper plans, not from skyline pixels. Unify closed hip vs open walltop and SW stair type from written 56 x 18 m intent."
+  },
+  "crownlands_capital_keep_section_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: silhouette conflict with required civic keep — steep church-like cross gable, ridge needle/compass finial, missing truncated octagonal drums. Attempt2 PASS: longitudinal + cross of the same civic palazzo keep. Truncated pavilion drums, low hipped blue-slate, cross section is a low hip with horizontal ridge not a gable triangle. Floor slabs, hatched wall thickness, punched voids, stairs that land. Three occupied floors plus roof. Compass as a flat roof disc, not a needle. Rebuild from written 56 x 18 m intent. No cathedral vault spectacle, no cones, no needles."
+  },
+  "crownlands_capital_keep_ground_plan_v001": {
+    "verdict": "PASS",
+    "notes": "True top-down furnished ground plan. South vestibule, court with round meridian table, clerks' desks both sides, north circular vault door, SW spiral and NE switchback stair cores. Wall thickness, door swings, traversable aisles. Large streamed combat interior. No cathedral pews, neon, or dragons."
+  },
+  "crownlands_capital_keep_upper_circulation_v001": {
+    "verdict": "PASS",
+    "notes": "Two true top-down plans: upper record galleries/strategy/clerks and walltop walk with merlons. SW and NE stair cores align with the ground-plan quadrants; Blender should unify the SW spiral-vs-straight type and drop extra interior gallery steps. Chamfered upper corners vs round-drum ground: rebuild one silhouette from written dimensions. No needles, no 3/4 dollhouse."
+  },
+  "crownlands_city_street_grammar_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: church/chapel frontage as a unified civic terrace. Attempt2 PASS: plan + front of one 6 m street. Four clearly separate asymmetric enterable modules with ordinary punched openings: dwelling (door+window), market (serving hatch), service (utilitarian door, barrel/shelf), public hall (paired doors, taller mass). Staggered/offset building line. No church gables, no rose windows, no city IDs, no Town Hall/Workshop redesign."
+  },
+  "crownlands_city_dwelling_shell_v001": {
+    "verdict": "PASS",
+    "notes": "Roof plan / front / side of one two-storey house. Stair bulkhead on roof plan proves an interior void. Punched door and windows, chalk-gold ashlar, deep blue slate, brass downpipe, 1.8 m mannequin. No furniture, no needles, no fake shell."
+  },
+  "crownlands_city_dwelling_interior_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: ground stair on east wall, upper stair on west wall (impossible circulation). Attempt2 PASS: two true top-down furnished plans, shared rectangle. Ground west hearth, center table, east stair, south door. Upper east stair landing, two beds, chests. Stairs share the east-wall coordinate. Traversable. No modern kitchen."
+  },
+  "crownlands_city_market_service_public_hall_kit_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: public hall missing visible labeled 2.5 m W x 3.0 m H aperture and complete hardware. Attempt2 PASS: three distinct labeled modules with traversable plans (market hatch/stores; service cistern/stores; public hall benches/clerk). Public hall door quotes 2.5 m W x 3.0 m H with dimension bar, paired timber leaves, long iron strap hinges on each leaf, sliding iron latch, stone-block frame. Not a Town Hall or Workshop redesign."
+  },
+  "crownlands_inner_cave_mouth_v001": {
+    "verdict": "PASS",
+    "notes": "Front/side human-scale refuge-gallery mouth, chalk-gold ashlar lintel, modest brass meridian tick, mannequin. No dragon skull/eggs/neon/fortress."
+  },
+  "crownlands_inner_cave_section_circulation_v001": {
+    "verdict": "PASS",
+    "notes": "Section + organic pocket plan: gallery, main chamber, alcoves, store niche, portcullis. Walkable floors. Height callouts 3.2 / 5.5 m are intent only. No boss arena, no cathedral crypt nave."
+  },
+  "crownlands_outer_cave_mouth_v001": {
+    "verdict": "PASS",
+    "notes": "War-scarred human dungeon mouth, brass-rib lintel, rubble at threshold. No fortress, no sequential gate, no 30 m apron diagram, no dragon. Rubble is cave talus, not a climb onto a fortress wall."
+  },
+  "crownlands_outer_cave_loop_choke_section_v001": {
+    "verdict": "PASS",
+    "notes": "Section with landing floors + combat plan: south mouth choke, ring galleries, central cross-chamber with crate cover, north hold. Closed circuit a player can run. Not a dragon perch or boss podium. No unauthored pits. Scale numerals not metric authority."
+  },
+  "crownlands_cave_chamber_fitting_module_v001": {
+    "verdict": "PASS",
+    "notes": "Six isolated modules, two rows: inner gallery / node / alcove and outer combat gallery / cross-chamber / barred hold. Same chalk-and-brass language, generous gray, no overlap collage. Serves inner chamber plate and outer fittings. No dragons/neon/fortress."
+  }
+}

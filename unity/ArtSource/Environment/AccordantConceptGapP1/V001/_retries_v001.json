@@ -1,0 +1,12 @@
+[
+  {
+    "sheet": "accordant_assembly_section_v001",
+    "reason": "attempt1 3/4 dollhouse proscenium cutaway; retry is a flat architectural section with hatched wall thickness, opposite galleries, central chamber, equal floor",
+    "result": "PASS"
+  },
+  {
+    "sheet": "accordant_spoke_bridges_on_event_v001",
+    "reason": "attempt1 short spoke disconnected mid-air; retry all four decks continuously connect realm terminal to isle anchor at variable lengths",
+    "result": "PASS"
+  }
+]

@@ -1,0 +1,67 @@
+{
+  "eldergrove_capital_district_plan_v001": {
+    "verdict": "PASS",
+    "notes": "True top-down roof-plan footprints in an organic inner pocket with a single controlled approach. Dark-timber roofs, pale-stone streets, bronze edge ticks, keep at civic head. No city IDs. Rim geology is a bowl, not V013 continent topology. Door ticks weak; use city modules for apertures. Scale bar unlabeled; numerals not metric authority."
+  },
+  "eldergrove_capital_skyline_north_south_v001": {
+    "verdict": "PASS",
+    "notes": "Two flat ortho elevations, houses-keep-houses, low 2–3 storey curve. North rear, south main door. Pale mineral stone, dark timber, bronze collars, spaced leafless trunks not dense canopy. Keep-centered cluster rather than a long terrace street. No Open Crown oculus, neon, dragons, or Embermist iron."
+  },
+  "eldergrove_capital_skyline_east_west_v001": {
+    "verdict": "PASS",
+    "notes": "Labeled EAST/WEST flat ortho street-wall, houses-keep-houses, punched doors. Pale foliage is spaced not dense. Near-symmetric keep cluster; east door larger than west. Moonroot Vigil. No Town Hall spectacle."
+  },
+  "eldergrove_capital_hero_keep_shell_v001": {
+    "verdict": "PASS",
+    "notes": "Roof/walltop plan + front + side of one enterable warden-keep. Wall thickness, walltop stair, punched main door, 1.8 m mannequin, bronze root collars. Roof panel is courtyard/walltop proving an interior void, not a fake shell. Side roof slightly 3/4. Blender rebuilds enterable keep from this shell plus interior program, not from skyline pixels."
+  },
+  "eldergrove_capital_keep_interior_program_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: ground/upper stair cores did not share plan coordinates (impossible circulation). Attempt2 PASS: two true top-down furnished plans, clover silhouette shared. Ground circular moot with map table, herbal benches, stores, root-maintenance lobe. Upper archive niches, bunks, stores. NE and south stair cores align across floors; Blender should drop the extra east upper stair or treat it as walltop only. Root-maintenance lobe is tight but door-connected. Large streamed combat interior. No neon/dragons/Open Crown."
+  },
+  "eldergrove_city_street_plan_elevation_v001": {
+    "verdict": "PASS",
+    "notes": "Same street: plan + front elevation with house/shop/service/workshop mix. 6 m label is intent only. Plan still slightly 3/4 on masses but street width and door openings readable. Moonroot Vigil cladding, not Embermist palette-swap. No dual-gate collage, no city IDs."
+  },
+  "eldergrove_city_house_module_v001": {
+    "verdict": "PASS",
+    "notes": "Front/side/interior plan of one house. Hearth, table, stair to loft, wall thickness, punched door, bronze collar. Traversable. No modern kitchen. One-storey plus loft rather than full two-storey; rebuild from written 8x10 m / loft stair."
+  },
+  "eldergrove_city_shop_module_v001": {
+    "verdict": "PASS",
+    "notes": "Hatch-front with timber shutter, side elevation, furnished plan with counter/stores/loft stair. No glass shopfront. Plan street opening vs hatch: rebuild as hatch + side door. Jars as simple geometry, not cute sprites."
+  },
+  "eldergrove_city_service_module_v001": {
+    "verdict": "PASS",
+    "notes": "Cistern grate, buckets, dry-herb stores, counter, front and side doors. No modern plumbing. Traversable. Material swatches are a legend, not overlapping collage."
+  },
+  "eldergrove_city_workshop_module_v001": {
+    "verdict": "PASS",
+    "notes": "Wagon door, chimney/hood side, plan with workbenches, herbal still, bark stock, bronze-collar language, clear aisle. NOT a smithy: no anvils, coal, or magma."
+  },
+  "eldergrove_inner_cave_mouth_v001": {
+    "verdict": "PASS",
+    "notes": "Front/side human-scale refuge-gallery mouth, timber-bronze lintel, pale mineral, desaturated root ribs, mannequin. No dragon skull/eggs/neon/fortress."
+  },
+  "eldergrove_inner_cave_section_circulation_v001": {
+    "verdict": "PASS",
+    "notes": "Section + organic pocket plan: gallery, main chamber, alcoves, store niche, portcullis. Walkable floors. Section is a rock-mass cut rather than a pure 2D drawing; plan is true top-down. No boss arena."
+  },
+  "eldergrove_inner_cave_chamber_kit_v001": {
+    "verdict": "PASS",
+    "notes": "Three isolated modules: propped gallery, node chamber with three openings, store alcove. Same language, generous gray, no overlap collage."
+  },
+  "eldergrove_outer_cave_mouth_v001": {
+    "verdict": "PASS",
+    "notes": "War-scarred human dungeon mouth, broken bronze lintel, rubble at threshold. No fortress, no sequential gate, no 30 m apron diagram, no dragon. Rubble is cave talus, not a climb onto a fortress wall."
+  },
+  "eldergrove_outer_cave_section_combat_circulation_v001": {
+    "verdict": "PASS",
+    "notes": "Section with landing ramp + combat plan: mouth choke, split gallery, cover blocks, looping return, rear hold. 2 m clearance callout is intent. Not a dragon perch or boss podium. No unauthored pits. Scale numerals not metric authority."
+  },
+  "eldergrove_outer_cave_chamber_kit_v001": {
+    "verdict": "PASS",
+    "notes": "Three isolated combat modules: gallery with cover roots, cross-chamber, barred hold/alcove. No dragons/neon/fortress."
+  }
+}

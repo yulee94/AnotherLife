@@ -1,0 +1,64 @@
+{
+  "shared_door_hardware_orthos_v001": {
+    "verdict": "PASS",
+    "notes": "FRONT/SIDE/BACK civic timber-iron door, unoccluded hinges/latch/frame. Scale numerals garbled; not metric authority."
+  },
+  "stonehold_ceremonial_gate_leaf_v001": {
+    "verdict": "PASS",
+    "notes": "Single paired Embermist leaves, front/side/back, not sequential dual-gate collage."
+  },
+  "eldergrove_ceremonial_gate_leaf_v001": {
+    "verdict": "PASS",
+    "notes": "Single paired Moonroot leaves, bronze-collared roots, no neon/portal/animals."
+  },
+  "crownlands_ceremonial_gate_leaf_v001": {
+    "verdict": "PASS",
+    "notes": "Single paired Meridian leaves, pale limestone/silver/blue-slate, restrained bronze, not cathedral."
+  },
+  "umbral_ceremonial_gate_leaf_v001": {
+    "verdict": "PASS",
+    "notes": "Single paired Ashvein leaves, smoked-glass slits, ember hairline cracks, no portal/violet fog."
+  },
+  "shared_save_pillar_hero_form_v001": {
+    "verdict": "PASS",
+    "notes": "Shared 4.5m tapered bind-pillar, top socket, flared base, 1.8m mannequin."
+  },
+  "stonehold_save_pillar_ornament_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: side socket and shelves changed silhouette. Retry keeps top socket and shared taper with basalt/iron-gold overlay."
+  },
+  "eldergrove_save_pillar_ornament_v001": {
+    "verdict": "PASS",
+    "notes": "Shared silhouette, bronze root overlay, top socket, mannequin, readable 0-2m bar."
+  },
+  "crownlands_save_pillar_ornament_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: side-facing socket. Retry keeps top socket, limestone/silver/blue-slate overlay."
+  },
+  "umbral_save_pillar_ornament_v001": {
+    "verdict": "PASS",
+    "notes": "Shared silhouette, graphite/yoke bands, ember cracks, top socket, no portal."
+  },
+  "shared_adjacent_realm_bridge_kit_v001": {
+    "verdict": "PASS",
+    "notes": "Plan/elevation/section modular bay kit with Worldscar gulf and mannequin. 180m length remains V013; pixels show a representative bay not a measured 180m span."
+  },
+  "stonehold_bridge_abutment_v001": {
+    "verdict": "PASS",
+    "notes": "One abutment + deck stub + material callout. Basalt/iron-gold. Correct 0-2m bar."
+  },
+  "eldergrove_bridge_abutment_v001": {
+    "verdict": "PASS",
+    "notes": "One abutment + deck stub. Bronze-collared roots are visual overlay; Blender must not make them climbable."
+  },
+  "crownlands_bridge_abutment_v001": {
+    "verdict": "PASS",
+    "notes": "One abutment + deck stub. Pale limestone, silver ribs, blue-slate cap, restrained bronze."
+  },
+  "umbral_bridge_abutment_v001": {
+    "verdict": "PASS",
+    "notes": "One abutment + deck stub. Graphite/ash-timber/ember cracks. Pointed smoked-glass slits lean gothic; Blender should rebuild as fault slits, not cathedral tracery."
+  }
+}
