@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using AL.Data.Catalogs;
+using AL.Data.Runtime;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -843,8 +844,8 @@ namespace AL.Tests.EditMode
                 });
             return new SaveSemanticValidationPolicy(
                 CurrentSaveFormatId,
-                1,
-                1,
+                SaveGameData.CurrentSaveSchemaVersion,
+                SaveGameData.CurrentProfileInitializationVersion,
                 authority,
                 maximumInputBytes);
         }
@@ -858,13 +859,16 @@ namespace AL.Tests.EditMode
         private static byte[] CreateForwardSchemaBytes(byte[] currentBytes)
         {
             string currentJson = StrictUtf8.GetString(currentBytes);
-            var schemaPattern = new Regex("\"SaveSchemaVersion\"\\s*:\\s*1");
+            var schemaPattern = new Regex(
+                "\"SaveSchemaVersion\"\\s*:\\s*" +
+                SaveGameData.CurrentSaveSchemaVersion);
             Assert.True(
                 schemaPattern.IsMatch(currentJson),
-                "Expected the generated current save to contain schema version 1.");
+                "Expected the generated current save to contain the current schema version.");
             string forwardJson = schemaPattern.Replace(
                 currentJson,
-                "\"SaveSchemaVersion\": 2",
+                "\"SaveSchemaVersion\": " +
+                (SaveGameData.CurrentSaveSchemaVersion + 1),
                 1);
             return StrictUtf8.GetBytes(forwardJson);
         }

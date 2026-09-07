@@ -38,7 +38,7 @@ namespace AL.Tests.EditMode
                 Assert.AreEqual(service.CurrentSave.ProfileId, authority.ProfileId);
                 Assert.IsFalse(ProfileMutationContainment.ProductionWriteActivationEnabled);
                 Assert.AreEqual(
-                    32,
+                    35,
                     ProfileMutationSurfaceCatalog.ProductionSurfaces.Count);
                 Assert.AreEqual(
                     ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation,

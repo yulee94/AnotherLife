@@ -427,7 +427,7 @@ namespace AL.Data.Runtime
                 classFamilyId,
                 StringComparison.Ordinal);
             bool sameConfirm = customization.IdentityConfirmed == request.ConfirmIdentity;
-            bool sameResult = string.Equals(
+            bool sameResult = string.IsNullOrEmpty(request.LastResultId) || string.Equals(
                 customization.LastResultId ?? string.Empty,
                 request.LastResultId ?? string.Empty,
                 StringComparison.Ordinal);

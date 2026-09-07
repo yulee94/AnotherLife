@@ -25,6 +25,20 @@ namespace AL.Tests.EditMode.ProductionScenes
             Path.GetFullPath(Path.Combine(Application.dataPath, "..", "ProjectSettings", "EditorBuildSettings.asset"));
 
         [Test]
+        public void CharacterCreationFolderHasAStableValidAssetGuid()
+        {
+            const string folderPath = "Assets/AL/Scripts/UI/CharacterCreation";
+            string metaPath = Path.Combine(Application.dataPath, "AL/Scripts/UI/CharacterCreation.meta");
+            string guidLine = File.ReadAllLines(metaPath).Single(line => line.StartsWith("guid: ", StringComparison.Ordinal));
+            string guid = guidLine.Substring("guid: ".Length);
+
+            Assert.That(guid, Does.Match("^[0-9a-f]{32}$"), "A malformed folder GUID breaks asset refresh during scene generation.");
+            Assert.That(AssetDatabase.IsValidFolder(folderPath), Is.True);
+            Assert.That(AssetDatabase.AssetPathToGUID(folderPath), Is.EqualTo(guid));
+            Assert.That(AssetDatabase.GUIDToAssetPath(guid), Is.EqualTo(folderPath));
+        }
+
+        [Test]
         public void ValidCommittedScenesAreATypedNoOp()
         {
             object result = R.StaticMethod(R.GeneratorType, "GenerateMissingProductionScenes");

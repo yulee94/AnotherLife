@@ -11,6 +11,8 @@ using AL.Data.Runtime;
 using AL.VerticalSlice;
 using AL.VerticalSlice.Combat;
 using AL.Kingdom.Greybox;
+using AL.RealmWar.Territories;
+using AL.RealmWar.Territories.Contracts;
 using AL.Slice;
 using System;
 using System.Collections.Generic;
@@ -322,15 +324,7 @@ namespace AL.Utilities
 
             CreateButton(canvasObj.transform, "SECURE BORDER", new Vector2(252, -662), () =>
             {
-                var realm = ServiceLocator.Get<IRealmService>().CurrentRealmId;
-                if (realm == RealmId.None)
-                {
-                    realm = RealmId.Crownlands;
-                    ServiceLocator.Get<IRealmService>().SelectRealm(realm);
-                }
-
-                ServiceLocator.Get<ITerritoryService>().CaptureTerritory("T5", realm);
-                SetStatus($"Prototype border outpost secured for {realm}.");
+                ApplyAcceptedTerritoryCapture(null);
             });
 
             CreateButton(canvasObj.transform, "BATTLE SIM", new Vector2(252, -716), RunTestBattle);
@@ -524,6 +518,20 @@ namespace AL.Utilities
             labelRect.anchorMax = Vector2.one;
             labelRect.offsetMin = Vector2.zero;
             labelRect.offsetMax = Vector2.zero;
+        }
+
+        public TerritoryCaptureApplicationResult ApplyAcceptedTerritoryCapture(
+            TerritoryCaptureAcceptedCommandResult acceptedResult)
+        {
+            ServiceLocator.TryGet(out ITerritoryService territoryService);
+            ServiceLocator.TryGet(out ISaveGameService saveGameService);
+            TerritoryCaptureApplicationResult result =
+                TerritoryCaptureCaller.ApplyAcceptedResult(
+                    territoryService,
+                    saveGameService,
+                    acceptedResult);
+            SetStatus(TerritoryCapturePresentation.Describe(result));
+            return result;
         }
 
         private void SetStatus(string message)

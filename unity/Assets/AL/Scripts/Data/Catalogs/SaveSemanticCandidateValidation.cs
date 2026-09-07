@@ -798,6 +798,7 @@ namespace AL.Data.Catalogs
                     "Territories",
                     "RealmGems",
                     "Wishgate",
+                    "WishgateTransaction",
                     "CurrentChapterId",
                     "Warmaster",
                     "ChampionCustomization",
@@ -811,6 +812,8 @@ namespace AL.Data.Catalogs
                     "DeathPenalty",
                     "WorldState",
                     "NotificationHistory",
+                    "GuildCitySeason",
+                    "GuildRaidMuster",
                     "WarzoneCredits",
                     "LastSavedTimestamp",
                     "TerritoryCaptureLedger",
@@ -899,6 +902,51 @@ namespace AL.Data.Catalogs
 
         private static readonly HashSet<string> WishgateFields =
             Fields("IsEarned", "EarnReason", "LastRewardId", "LastRewardChosenTimestamp");
+
+        private static readonly HashSet<string> WishgateTransactionFields =
+            Fields(
+                "Version",
+                "Status",
+                "Revision",
+                "Phase",
+                "EntitlementId",
+                "EarnReasonId",
+                "RewardId",
+                "RewardApplicationId",
+                "EarnedUtcSeconds",
+                "SelectedUtcSeconds",
+                "AppliedUtcSeconds",
+                "CommittedUtcSeconds",
+                "EntitlementRevision",
+                "EntitlementIsSupported",
+                "IsComplete",
+                "LastOperationId",
+                "LastEventId",
+                "LastRequestFingerprint",
+                "ReceiptHash",
+                "PostCommitNotificationCorrelationId",
+                "AppliedRewardApplicationId",
+                "Records");
+
+        private static readonly HashSet<string> WishgateTransitionRecordFields =
+            Fields(
+                "OperationId",
+                "EventId",
+                "CorrelationId",
+                "Operation",
+                "RequestFingerprint",
+                "EntitlementId",
+                "EarnReasonId",
+                "RewardId",
+                "RewardApplicationId",
+                "ResultingPhase",
+                "ResultingSnapshotRevision",
+                "ResultingEntitlementRevision",
+                "PlannedUtcSeconds",
+                "ResultingStateHash",
+                "PlanHash",
+                "PostCommitNotificationCorrelationId",
+                "IsSupported");
 
         private static readonly HashSet<string> WarmasterFields =
             Fields(
@@ -1640,6 +1688,7 @@ namespace AL.Data.Catalogs
             ValidateTerritoryRows(root, policy.Authority, collector, state);
             ValidateRealmGemRows(root, policy.Authority, collector, state);
             ValidateWishgate(root, policy.Authority, collector, state);
+            ValidateWishgateTransaction(root, collector, state);
             ValidateWarmaster(root, isLegacySchema, policy.Authority, collector, state);
             ValidateChampionCustomization(
                 root,
@@ -3882,6 +3931,116 @@ namespace AL.Data.Catalogs
                     "SAVE_WISHGATE_REWARD_CONTRADICTORY",
                     path,
                     SaveSemanticDomain.Envelope);
+            }
+        }
+
+        private static void ValidateWishgateTransaction(
+            StrictJsonObject root,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.WishgateTransaction";
+            StrictJsonValue value;
+            if (!root.TryGet("WishgateTransaction", out value) ||
+                value is StrictJsonNull)
+            {
+                return;
+            }
+
+            var authority = value as StrictJsonObject;
+            if (authority == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WISHGATE_TRANSACTION_INVALID",
+                    path,
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                authority,
+                WishgateTransactionFields,
+                path,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    authority,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Envelope,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_WISHGATE_TRANSACTION_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            if (version > 1)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_WISHGATE_TRANSACTION_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Envelope,
+                    rawOnly: true);
+                return;
+            }
+
+            StrictJsonValue recordsValue;
+            if (authority.TryGet("Records", out recordsValue) &&
+                !(recordsValue is StrictJsonNull))
+            {
+                var records = recordsValue as StrictJsonArray;
+                if (records == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_WISHGATE_TRANSACTION_RECORDS_INVALID",
+                        path + ".Records",
+                        SaveSemanticDomain.Envelope);
+                    return;
+                }
+
+                for (int i = 0; i < records.Items.Count; i++)
+                {
+                    var record = records.Items[i] as StrictJsonObject;
+                    if (record == null)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_WISHGATE_TRANSACTION_RECORD_INVALID",
+                            path + ".Records[" + i + "]",
+                            SaveSemanticDomain.Envelope);
+                        continue;
+                    }
+
+                    InspectUnexpectedProperties(
+                        record,
+                        WishgateTransitionRecordFields,
+                        path + ".Records[" + i + "]",
+                        SaveSemanticDomain.Envelope,
+                        collector,
+                        state);
+                }
             }
         }
 

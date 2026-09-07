@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +9,8 @@ using AL.Data.Runtime;
 using AL.Services.Local;
 using AL.UI.Kingdom;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace AL.Tests.EditMode
 {
@@ -59,19 +62,11 @@ namespace AL.Tests.EditMode
             string root = NewRoot();
             try
             {
-                ISaveGameService writer = CreateSaveService(root);
-                writer.CreateNewSave(RealmId.Stonehold);
-                Assert.IsTrue(
-                    MvpLoopSaveAuthority.TryCommit(
-                        writer,
-                        new MvpLoopCommitRequest(
-                            Guid.NewGuid().ToString("N"),
-                            RealmId.Stonehold,
-                            ClassFamily.Warrior,
-                            true,
-                            "ch01_stonehold",
-                            string.Empty,
-                            0)).Persisted);
+                ISaveGameService writer =
+                    ProfileBoundKingdomTestFixture.CreateLordshipSave(
+                        root,
+                        RealmId.Stonehold,
+                        ClassFamily.Warrior);
 
                 var gameData = new LocalGameDataService();
                 KingdomOneBuildResult constructed = KingdomOneBuildCommand.TryExecute(
@@ -96,6 +91,8 @@ namespace AL.Tests.EditMode
                         building != null &&
                         building.BuildingId == "TownHall" &&
                         building.Level == 1));
+                byte[] afterConstruct = File.ReadAllBytes(
+                    Path.Combine(root, "save.json"));
 
                 KingdomOneBuildResult replay = KingdomOneBuildCommand.TryExecute(
                     reader,
@@ -103,6 +100,142 @@ namespace AL.Tests.EditMode
                 Assert.IsTrue(replay.Accepted, replay.Message);
                 Assert.IsFalse(replay.Persisted, replay.Message);
                 Assert.AreEqual(1, MvpLoopSaveCodec.Read(reader.CurrentSave).LastBuildLevel);
+                CollectionAssert.AreEqual(
+                    afterConstruct,
+                    File.ReadAllBytes(Path.Combine(root, "save.json")));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void SchemaTwoTownHallRequiresEarnedLordshipWithoutChangingDisk()
+        {
+            string root = NewRoot();
+            try
+            {
+                LocalSaveGameService save =
+                    ProfileBoundKingdomTestFixture.CreateIdentitySave(
+                        root,
+                        RealmId.Stonehold,
+                        ClassFamily.Warrior);
+                byte[] before = File.ReadAllBytes(Path.Combine(root, "save.json"));
+
+                KingdomOneBuildResult rejected = KingdomOneBuildCommand.TryExecute(
+                    save,
+                    new LocalGameDataService());
+
+                Assert.That(rejected.Accepted, Is.False, rejected.Message);
+                Assert.That(rejected.Persisted, Is.False, rejected.Message);
+                Assert.That(
+                    MvpLoopSaveCodec.Read(save.CurrentSave).LastBuildId,
+                    Is.EqualTo(string.Empty));
+                CollectionAssert.AreEqual(
+                    before,
+                    File.ReadAllBytes(Path.Combine(root, "save.json")));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void ProfileBoundTownHallRootRejectsDifferentRealmWithoutChangingDisk()
+        {
+            string root = NewRoot();
+            try
+            {
+                LocalSaveGameService save =
+                    ProfileBoundKingdomTestFixture.CreateLordshipSave(
+                        root,
+                        RealmId.Stonehold,
+                        ClassFamily.Warrior);
+                byte[] before = File.ReadAllBytes(Path.Combine(root, "save.json"));
+
+                SaveCandidateCommitResult rejected =
+                    ((IProfileBoundKingdomOneBuildCandidateStore)save)
+                    .TryCommitProfileBoundKingdomOneBuild(
+                        new KingdomOneBuildCommitRequest(
+                            Guid.NewGuid().ToString("N"),
+                            RealmId.Crownlands));
+
+                Assert.That(
+                    rejected.Outcome,
+                    Is.Not.EqualTo(SaveCandidateCommitOutcome.Committed)
+                        .And.Not.EqualTo(SaveCandidateCommitOutcome.Duplicate));
+                Assert.That(
+                    MvpLoopSaveCodec.Read(save.CurrentSave).LastBuildId,
+                    Is.EqualTo(string.Empty));
+                CollectionAssert.AreEqual(
+                    before,
+                    File.ReadAllBytes(Path.Combine(root, "save.json")));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void SchemaTwoReplayStillConsultsProfileBoundAuthority()
+        {
+            var save = new TrackingProfileBoundKingdomSaveService();
+
+            KingdomOneBuildResult replay = KingdomOneBuildCommand.TryExecute(
+                save,
+                new LocalGameDataService());
+
+            Assert.That(replay.Accepted, Is.True, replay.Message);
+            Assert.That(replay.Persisted, Is.False, replay.Message);
+            Assert.That(replay.Level, Is.EqualTo(1));
+            Assert.That(save.CommitCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void SchemaTwoTownHallLevelTwoIsRejectedWithoutChangingDisk()
+        {
+            string root = NewRoot();
+            try
+            {
+                LocalSaveGameService save =
+                    ProfileBoundKingdomTestFixture.CreateLordshipSave(
+                        root,
+                        RealmId.Stonehold,
+                        ClassFamily.Warrior);
+                byte[] before = File.ReadAllBytes(Path.Combine(root, "save.json"));
+                save.CurrentSave.Buildings.Add(new BuildingState
+                {
+                    BuildingId = KingdomOneBuildCommand.BuildingId,
+                    Level = 2
+                });
+                SaveGameData candidate = JsonUtility.FromJson<SaveGameData>(
+                    JsonUtility.ToJson(save.CurrentSave));
+                Assert.That(
+                    KingdomOneBuildSaveCodec.PrepareCandidate(
+                        candidate,
+                        new KingdomOneBuildCommitRequest(
+                            Guid.NewGuid().ToString("N"),
+                            RealmId.Stonehold),
+                        out string prepareMessage),
+                    Is.EqualTo(KingdomOneBuildPrepareDisposition.Rejected),
+                    prepareMessage);
+                LogAssert.Expect(
+                    LogType.Error,
+                    "AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT: The published legacy " +
+                    "save could not be pinned to an exact primary generation.");
+
+                KingdomOneBuildResult rejected = KingdomOneBuildCommand.TryExecute(
+                    save,
+                    new LocalGameDataService());
+
+                Assert.That(rejected.Accepted, Is.False, rejected.Message);
+                Assert.That(rejected.Persisted, Is.False, rejected.Message);
+                CollectionAssert.AreEqual(
+                    before,
+                    File.ReadAllBytes(Path.Combine(root, "save.json")));
             }
             finally
             {
@@ -180,6 +313,76 @@ namespace AL.Tests.EditMode
             if (Directory.Exists(root))
             {
                 Directory.Delete(root, true);
+            }
+        }
+
+        private sealed class TrackingProfileBoundKingdomSaveService :
+            ISaveGameService,
+            IProfileBoundKingdomOneBuildCandidateStore
+        {
+            internal TrackingProfileBoundKingdomSaveService()
+            {
+                CurrentSave = new SaveGameData
+                {
+                    SaveFormatId = SaveGameData.CurrentSaveFormatId,
+                    SaveSchemaVersion = SaveGameData.CurrentSaveSchemaVersion,
+                    ProfileInitializationVersion =
+                        SaveGameData.CurrentProfileInitializationVersion,
+                    ProfileId = "11111111-1111-4111-8111-111111111111",
+                    SelectedRealm = RealmId.Stonehold,
+                    ChampionCustomization = new ChampionCustomizationState
+                    {
+                        ClassFamilyId = "warrior",
+                        IdentityConfirmed = true,
+                        LastResultId = "ch01_stonehold",
+                        Username = "KingdomTester"
+                    },
+                    Buildings = new List<BuildingState>
+                    {
+                        new BuildingState
+                        {
+                            BuildingId = KingdomOneBuildCommand.BuildingId,
+                            Level = KingdomOneBuildCommand.CompletedLevel
+                        }
+                    }
+                };
+            }
+
+            public SaveGameData CurrentSave { get; }
+            public SaveLoadStatus LastLoadStatus => SaveLoadStatus.LoadedPrimary;
+            public string LastLoadMessage => string.Empty;
+            public SaveOperationStatus LastSaveStatus => SaveOperationStatus.None;
+            public string LastSaveMessage => string.Empty;
+            internal int CommitCount { get; private set; }
+
+            SaveCandidateCommitResult
+                IProfileBoundKingdomOneBuildCandidateStore
+                    .TryCommitProfileBoundKingdomOneBuild(
+                        KingdomOneBuildCommitRequest request)
+            {
+                CommitCount++;
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Duplicate,
+                    CurrentSave,
+                    string.Empty);
+            }
+
+            public void Save()
+            {
+            }
+
+            public void Load()
+            {
+            }
+
+            public bool HasSave() => true;
+
+            public void CreateNewSave(RealmId realmId)
+            {
+            }
+
+            public void DeleteSave()
+            {
             }
         }
     }

@@ -279,6 +279,25 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void GuildRaidMusterCurrentVersionIsRecognizedAndWritable()
+        {
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(
+                    extraTopLevel:
+                    ",\"GuildRaidMuster\":{\"Version\":1,\"Revision\":0," +
+                    "\"Calls\":[],\"Receipts\":[]}"),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.Valid,
+                candidate.Outcome,
+                string.Join(
+                    ", ",
+                    candidate.Diagnostics.Select(item => item.Code + " " + item.Path)));
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
         public void NotificationHistoryForwardVersionStaysPreservedReadOnly()
         {
             string forward = EmptyNotificationHistoryJson.Replace(
@@ -1311,13 +1330,14 @@ namespace AL.Tests.EditMode
                 SaveCandidateSourceGeneration.Primary,
                 futurePolicy);
 
-            Assert.AreEqual(SaveSemanticCandidateOutcome.DegradedMalformed, candidate.Outcome);
+            Assert.AreEqual(SaveSemanticCandidateOutcome.MigrationRequired, candidate.Outcome);
             Assert.AreNotEqual(
                 SaveSemanticCandidateOutcome.RepairableWithDataChange,
                 candidate.Outcome);
+            Assert.False(candidate.IsWritable);
             Assert.That(
                 candidate.Diagnostics.Select(item => item.Code),
-                Does.Contain("SAVE_LOWER_SCHEMA_UNSUPPORTED"));
+                Does.Contain("SAVE_PROFILE_ID_MIGRATION_REQUIRED"));
         }
 
         [Test]
@@ -1333,7 +1353,8 @@ namespace AL.Tests.EditMode
                     SaveSemanticCandidateOutcome.RepairableWithDataChange,
                     SaveSemanticCandidateOutcome.Invalid,
                     SaveSemanticCandidateOutcome.ForwardSchemaReadOnly,
-                    SaveSemanticCandidateOutcome.OversizePreservedReadOnly
+                    SaveSemanticCandidateOutcome.OversizePreservedReadOnly,
+                    SaveSemanticCandidateOutcome.MigrationRequired
                 },
                 Enum.GetValues(typeof(SaveSemanticCandidateOutcome)));
         }

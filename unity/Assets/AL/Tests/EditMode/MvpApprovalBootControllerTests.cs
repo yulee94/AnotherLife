@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Data.Runtime;
+using AL.RealmSelection;
 using AL.Services.Local;
 using AL.UI;
 using NUnit.Framework;
@@ -189,9 +191,14 @@ namespace AL.Tests.EditMode
             var coordinator = new LaunchReadinessCoordinator();
             int generation = coordinator.AttemptGeneration;
             Assert.That(coordinator.TryPublishBootLoad(new LaunchBootLoadEvidence(
-                generation, "approval-stack", 1, SaveLoadStatus.LoadedPrimary, 1, 1)), Is.True);
+                generation,
+                "approval-stack",
+                1,
+                SaveLoadStatus.LoadedPrimary,
+                SaveGameData.CurrentSaveSchemaVersion,
+                SaveGameData.CurrentProfileInitializationVersion)), Is.True);
             Assert.That(coordinator.TryPublishCatalog(new LaunchCatalogEvidence(
-                generation, 7, "0.1.0", 4)), Is.True);
+                generation, 7, RealmCatalogRuntime.SupportedVersion, 4)), Is.True);
             Assert.That(coordinator.TryEstablishMedia(
                 generation, LaunchMediaPresentation.StaticFallbackEstablished), Is.True);
             Assert.That(coordinator.TryPublishDestination(new LaunchDestinationEvidence(

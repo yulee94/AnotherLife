@@ -1,5 +1,7 @@
 using System.Reflection;
 using AL.Core.Interfaces;
+using AL.Data.Runtime;
+using AL.RealmSelection;
 using AL.UI;
 using NUnit.Framework;
 using UnityEngine;
@@ -290,8 +292,8 @@ namespace AL.Tests.EditMode
                 "stack-001",
                 1,
                 SaveLoadStatus.CreatedNew,
-                1,
-                1);
+                SaveGameData.CurrentSaveSchemaVersion,
+                SaveGameData.CurrentProfileInitializationVersion);
         }
 
         private static LaunchCatalogEvidence Catalog(int generation)
@@ -299,7 +301,7 @@ namespace AL.Tests.EditMode
             return new LaunchCatalogEvidence(
                 generation,
                 7,
-                "0.1.0",
+                RealmCatalogRuntime.SupportedVersion,
                 4);
         }
 

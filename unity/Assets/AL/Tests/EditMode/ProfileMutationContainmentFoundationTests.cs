@@ -72,6 +72,9 @@ namespace AL.Tests.EditMode
                     ProfileMutationSurfaceIds.RealmSelection,
                     ProfileMutationSurfaceIds.Nvs01Progress,
                     ProfileMutationSurfaceIds.MvpLoop,
+                    ProfileMutationSurfaceIds.FirstSession,
+                    ProfileMutationSurfaceIds.KingdomOneBuild,
+                    ProfileMutationSurfaceIds.KingdomTeaching,
                     ProfileMutationSurfaceIds.DeleteSave
                 },
                 descriptors.Select(item => item.StableId).ToArray());
@@ -83,6 +86,57 @@ namespace AL.Tests.EditMode
                 descriptors.Single(item =>
                     item.StableId == ProfileMutationSurfaceIds.DeleteSave).Disposition,
                 Is.EqualTo(ProfileMutationSurfaceDisposition.Dormant));
+        }
+
+        [Test]
+        public void FirstSessionCatalogEntryIsNarrowAndSeparateFromLegacyMvp()
+        {
+            var descriptors = ProfileMutationSurfaceCatalog.ProductionSurfaces;
+            var firstSession = descriptors.Single(item =>
+                item.StableId == ProfileMutationSurfaceIds.FirstSession);
+            Assert.That(firstSession.Disposition,
+                Is.EqualTo(ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation));
+            Assert.That(firstSession.ContractType,
+                Is.EqualTo(typeof(IProfileBoundFirstSessionCandidateStore)));
+            CollectionAssert.AreEquivalent(
+                new[] { "TryCommitFirstSessionIdentity", "TryCommitFirstSessionProgress" },
+                firstSession.ContractType.GetMethods().Select(method => method.Name));
+            Assert.False(firstSession.ContractType.GetMethods()
+                .SelectMany(method => method.GetParameters())
+                .Any(parameter => typeof(Delegate).IsAssignableFrom(parameter.ParameterType)));
+            Assert.That(descriptors.Single(item =>
+                    item.StableId == ProfileMutationSurfaceIds.MvpLoop).ContractType,
+                Is.EqualTo(typeof(ILegacyMvpLoopCandidateStore)));
+        }
+
+        [Test]
+        public void KingdomProfileBoundEntriesExposeOnlyTypedCommands()
+        {
+            var descriptors = ProfileMutationSurfaceCatalog.ProductionSurfaces;
+            var oneBuild = descriptors.Single(item =>
+                item.StableId == ProfileMutationSurfaceIds.KingdomOneBuild);
+            var teaching = descriptors.Single(item =>
+                item.StableId == ProfileMutationSurfaceIds.KingdomTeaching);
+
+            Assert.That(oneBuild.Disposition,
+                Is.EqualTo(ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation));
+            Assert.That(oneBuild.ContractType,
+                Is.EqualTo(typeof(IProfileBoundKingdomOneBuildCandidateStore)));
+            Assert.That(teaching.Disposition,
+                Is.EqualTo(ProfileMutationSurfaceDisposition.NarrowProfileBoundOperation));
+            Assert.That(teaching.ContractType,
+                Is.EqualTo(typeof(IProfileBoundKingdomTeachingCandidateStore)));
+            CollectionAssert.AreEqual(
+                new[] { "TryCommitProfileBoundKingdomOneBuild" },
+                oneBuild.ContractType.GetMethods().Select(method => method.Name));
+            CollectionAssert.AreEqual(
+                new[] { "TryCommitProfileBoundKingdomTeaching" },
+                teaching.ContractType.GetMethods().Select(method => method.Name));
+            Assert.False(new[] { oneBuild, teaching }
+                .SelectMany(item => item.ContractType.GetMethods())
+                .SelectMany(method => method.GetParameters())
+                .Any(parameter =>
+                    typeof(Delegate).IsAssignableFrom(parameter.ParameterType)));
         }
 
         [Test]

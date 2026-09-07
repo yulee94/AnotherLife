@@ -15,6 +15,7 @@
 /unity/Assets/AL/StreamingAssets/GameData/al_generated_scene_manifest.v1.json text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_main_quest_line_runtime.v1.json  text eol=lf
 /unity/Assets/AL/StreamingAssets/GameData/al_boss_reward_source_catalog.json  text eol=lf
+/unity/Assets/AL/StreamingAssets/GameData/al_realm_gem_wishgate_content_catalog.json text eol=lf
 /unity/Packages/packages-lock.json                                            text eol=lf
 
 # Deterministic QA policy, baseline, evidence schema, and captured reports.
@@ -36,6 +37,7 @@
 
 # Hash-bound Shot070 Vaeloryn motion-source reports.
 /unity/Docs/Cinematics/Shot070VaelorynSourceV002/**/*.json text eol=lf
+/unity/Docs/Cinematics/Shot070VaelorynShotScaleV001/**/*.json text eol=lf
 
 # Hash-bound launch-cinematic packaging catalog and packet.
 /unity/Assets/AL/StreamingAssets/GameData/al_launch_cinematic_runtime.v1.json text eol=lf

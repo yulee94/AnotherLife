@@ -39,6 +39,10 @@ namespace AL.Data.Runtime
         public List<AL.Core.Interfaces.TerritoryData> Territories = new List<AL.Core.Interfaces.TerritoryData>();
         public List<RealmGemState> RealmGems = new List<RealmGemState>();
         public WishgateState Wishgate = new WishgateState();
+        // Optional schema-v2 extension. Omitted legacy saves stay loadable as
+        // an unearned Wishgate snapshot; the durable transaction installs this
+        // authority only after a verified profile-bound commit.
+        public WishgateTransactionState WishgateTransaction;
         public string CurrentChapterId;
         public WarmasterState Warmaster = new WarmasterState();
         public ChampionCustomizationState ChampionCustomization = new ChampionCustomizationState();
@@ -62,6 +66,9 @@ namespace AL.Data.Runtime
         // Optional schema-v2 extension. Missing legacy/schema-2 saves admit
         // empty Guild City seasons until a trusted-clock commit persists them.
         public AL.Guilds.GuildCitySeasonPersistentState GuildCitySeason;
+        // Optional schema-v2 extension. Missing legacy/schema-2 saves migrate
+        // to empty raid-call/closed-instance authority until a trusted command commits.
+        public AL.Guilds.GuildRaidMusterPersistentState GuildRaidMuster;
         public int WarzoneCredits;
         public long LastSavedTimestamp;
         // Optional schema-v1 extension. Missing legacy saves admit empty
@@ -602,6 +609,58 @@ namespace AL.Data.Runtime
         public string EarnReason;
         public string LastRewardId;
         public long LastRewardChosenTimestamp;
+    }
+
+    [Serializable]
+    public sealed class WishgateTransactionState
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public int Status;
+        public long Revision;
+        public int Phase;
+        public string EntitlementId = string.Empty;
+        public string EarnReasonId = string.Empty;
+        public string RewardId = string.Empty;
+        public string RewardApplicationId = string.Empty;
+        public long EarnedUtcSeconds;
+        public long SelectedUtcSeconds;
+        public long AppliedUtcSeconds;
+        public long CommittedUtcSeconds;
+        public long EntitlementRevision;
+        public bool EntitlementIsSupported = true;
+        public bool IsComplete = true;
+        public string LastOperationId = string.Empty;
+        public string LastEventId = string.Empty;
+        public string LastRequestFingerprint = string.Empty;
+        public string ReceiptHash = string.Empty;
+        public string PostCommitNotificationCorrelationId = string.Empty;
+        public string AppliedRewardApplicationId = string.Empty;
+        public System.Collections.Generic.List<WishgateTransitionRecordState> Records =
+            new System.Collections.Generic.List<WishgateTransitionRecordState>();
+    }
+
+    [Serializable]
+    public sealed class WishgateTransitionRecordState
+    {
+        public string OperationId = string.Empty;
+        public string EventId = string.Empty;
+        public string CorrelationId = string.Empty;
+        public int Operation;
+        public string RequestFingerprint = string.Empty;
+        public string EntitlementId = string.Empty;
+        public string EarnReasonId = string.Empty;
+        public string RewardId = string.Empty;
+        public string RewardApplicationId = string.Empty;
+        public int ResultingPhase;
+        public long ResultingSnapshotRevision;
+        public long ResultingEntitlementRevision;
+        public long PlannedUtcSeconds;
+        public string ResultingStateHash = string.Empty;
+        public string PlanHash = string.Empty;
+        public string PostCommitNotificationCorrelationId = string.Empty;
+        public bool IsSupported = true;
     }
 
     [Serializable]

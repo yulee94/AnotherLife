@@ -395,6 +395,221 @@ namespace AL.Tests.EditMode.Guilds
         }
 
         [Test]
+        public void MembershipStatePolicyDefinesStableFailClosedLifecycle()
+        {
+            GuildMembershipPolicySnapshot policy = Policy();
+
+            Assert.That((int)GuildMembershipState.Active, Is.Zero);
+            Assert.That((int)GuildMembershipState.Inactive, Is.EqualTo(1));
+            Assert.That((int)GuildMembershipState.Restricted, Is.EqualTo(2));
+            Assert.That((int)GuildMembershipState.PendingLeave, Is.EqualTo(3));
+            Assert.That((int)GuildMembershipState.Banned, Is.EqualTo(4));
+            Assert.That(policy.StatePolicies.Select(row => row.State), Is.EqualTo(new[]
+            {
+                GuildMembershipState.Active,
+                GuildMembershipState.Restricted,
+                GuildMembershipState.PendingLeave,
+                GuildMembershipState.Banned,
+                GuildMembershipState.Inactive
+            }));
+            Assert.That(policy.StatePolicies.Single(row =>
+                row.State == GuildMembershipState.Restricted).GrantsRoleAuthority, Is.False);
+            Assert.That(policy.StatePolicies.Single(row =>
+                row.State == GuildMembershipState.PendingLeave).LeaveResult,
+                Is.EqualTo(GuildMembershipState.Inactive));
+            Assert.That(policy.StatePolicies.Single(row =>
+                row.State == GuildMembershipState.Banned).BlocksSameGuildEntry, Is.True);
+        }
+
+        [Test]
+        public void RestrictedMembershipReservesTheAccountWithoutGrantingAuthority()
+        {
+            GuildMembershipPolicySnapshot policy = Policy();
+            var planner = new GuildMembershipTransitionPlanner(policy);
+            GuildAuthoritySnapshot state = WithMemberState(
+                GuildWithThreeMembers(planner, policy.Binding),
+                AccountOfficer,
+                GuildMembershipState.Restricted);
+
+            Assert.That(planner.Plan(NextRequest(
+                state, GuildOperation.Invite, "restricted_invite", AccountOfficer,
+                targetAccountId: AccountApplicant, targetRealmId: RealmStonehold,
+                pendingRequestId: "restricted_pending"), state).Status,
+                Is.EqualTo(GuildPlanningStatus.Unauthorized));
+            Assert.That(planner.Plan(Request(
+                GuildOperation.Create, "restricted_create", AccountOfficer, GuildBeta,
+                state.Revision, 0, policy.Binding), state).Status,
+                Is.EqualTo(GuildPlanningStatus.Conflict));
+        }
+
+        [Test]
+        public void DuplicateRestrictedReservationAcrossGuildsIsMalformed()
+        {
+            GuildMembershipPolicySnapshot policy = Policy();
+            var planner = new GuildMembershipTransitionPlanner(policy);
+            GuildAuthoritySnapshot state = WithMemberState(
+                GuildWithThreeMembers(planner, policy.Binding),
+                AccountOfficer,
+                GuildMembershipState.Restricted);
+            GuildSnapshot beta = new GuildSnapshot(
+                GuildBeta,
+                RealmStonehold,
+                1,
+                GuildStatus.Active,
+                new[]
+                {
+                    new GuildMemberSnapshot(
+                        AccountApplicant, RealmStonehold, GuildRole.Master,
+                        GuildMembershipState.Active),
+                    new GuildMemberSnapshot(
+                        AccountOfficer, RealmStonehold, GuildRole.Member,
+                        GuildMembershipState.Restricted)
+                }.OrderBy(row => row.AccountId, StringComparer.Ordinal));
+            state = CopyAuthority(state, guilds: state.Guilds.Concat(new[] { beta })
+                .OrderBy(row => row.GuildId, StringComparer.Ordinal).ToArray());
+
+            Assert.That(planner.Plan(NextRequest(
+                state, GuildOperation.Invite, "duplicate_reservation", AccountMaster,
+                targetAccountId: AccountMember, targetRealmId: RealmStonehold,
+                pendingRequestId: "duplicate_reservation_pending"), state).Status,
+                Is.EqualTo(GuildPlanningStatus.Malformed));
+        }
+
+        [Test]
+        public void LeaveUsesExactRevisionForRestrictedAndPendingLeaveStates()
+        {
+            GuildMembershipPolicySnapshot policy = Policy();
+            var planner = new GuildMembershipTransitionPlanner(policy);
+            GuildAuthoritySnapshot state = WithMemberState(
+                GuildWithThreeMembers(planner, policy.Binding),
+                AccountOfficer,
+                GuildMembershipState.Restricted);
+            GuildSnapshot guild = state.Guilds.Single(row => row.GuildId == GuildAlpha);
+
+            Assert.That(planner.Plan(Request(
+                GuildOperation.Leave, "restricted_leave_stale_authority", AccountOfficer,
+                GuildAlpha, state.Revision - 1, guild.Revision, policy.Binding), state).Status,
+                Is.EqualTo(GuildPlanningStatus.StaleAuthority));
+            Assert.That(planner.Plan(Request(
+                GuildOperation.Leave, "restricted_leave_stale", AccountOfficer, GuildAlpha,
+                state.Revision, guild.Revision - 1, policy.Binding), state).Status,
+                Is.EqualTo(GuildPlanningStatus.StaleGuild));
+
+            state = Apply(planner.Plan(NextRequest(
+                state, GuildOperation.Leave, "restricted_leave", AccountOfficer), state));
+            Assert.That(state.Guilds.Single().Members.Single(row =>
+                row.AccountId == AccountOfficer).State,
+                Is.EqualTo(GuildMembershipState.PendingLeave));
+
+            state = Apply(planner.Plan(NextRequest(
+                state, GuildOperation.Leave, "pending_leave_complete", AccountOfficer), state));
+            Assert.That(state.Guilds.Single().Members.Single(row =>
+                row.AccountId == AccountOfficer).State,
+                Is.EqualTo(GuildMembershipState.Inactive));
+        }
+
+        [Test]
+        public void KickPreservesBannedCycleWithoutReservingAnotherGuild()
+        {
+            GuildMembershipPolicySnapshot policy = Policy();
+            var planner = new GuildMembershipTransitionPlanner(policy);
+            GuildAuthoritySnapshot state = GuildWithThreeMembers(planner, policy.Binding);
+
+            state = Apply(planner.Plan(NextRequest(
+                state, GuildOperation.Kick, "ban_member", AccountMaster,
+                targetAccountId: AccountMember), state));
+            Assert.That(state.Guilds.Single().Members.Single(row =>
+                row.AccountId == AccountMember).State,
+                Is.EqualTo(GuildMembershipState.Banned));
+            Assert.That(planner.Plan(NextRequest(
+                state, GuildOperation.Invite, "reinvite_banned", AccountMaster,
+                targetAccountId: AccountMember, targetRealmId: RealmStonehold,
+                pendingRequestId: "pending_banned"), state).Status,
+                Is.EqualTo(GuildPlanningStatus.Conflict));
+            Assert.That(planner.Plan(Request(
+                GuildOperation.Create, "banned_create_elsewhere", AccountMember, GuildBeta,
+                state.Revision, 0, policy.Binding), state).Status,
+                Is.EqualTo(GuildPlanningStatus.Prepared));
+        }
+
+        [Test]
+        public void BannedMembershipCannotBeRevivedByInjectedPendingEvidence()
+        {
+            GuildMembershipPolicySnapshot policy = Policy();
+            var planner = new GuildMembershipTransitionPlanner(policy);
+            GuildAuthoritySnapshot state = WithMemberState(
+                GuildWithThreeMembers(planner, policy.Binding),
+                AccountMember,
+                GuildMembershipState.Banned);
+            GuildSnapshot guild = state.Guilds.Single(row => row.GuildId == GuildAlpha);
+            var pending = new GuildPendingRequest(
+                "injected_banned_pending",
+                GuildPendingRequestKind.Invitation,
+                GuildAlpha,
+                AccountMember,
+                RealmStonehold,
+                guild.Revision,
+                true);
+            state = CopyAuthority(state, pendingRequests: new[] { pending });
+
+            GuildPlanningResult result = planner.Plan(NextRequest(
+                state, GuildOperation.Accept, "accept_injected_banned", AccountMember,
+                pendingRequestId: pending.RequestId), state);
+
+            Assert.That(result.Status, Is.EqualTo(GuildPlanningStatus.Conflict));
+            Assert.That(result.Plan, Is.Null);
+            Assert.That(result.Diagnostics.Single().Code,
+                Is.EqualTo("AL-GUILD-ACCOUNT-CYCLE-BLOCKED"));
+        }
+
+        [Test]
+        public void UnknownFutureMembershipStateIsPreservedReadOnly()
+        {
+            GuildMembershipPolicySnapshot policy = Policy();
+            var planner = new GuildMembershipTransitionPlanner(policy);
+            GuildAuthoritySnapshot state = WithMemberState(
+                GuildWithThreeMembers(planner, policy.Binding),
+                AccountMember,
+                (GuildMembershipState)99);
+
+            GuildPlanningResult result = planner.Plan(Request(
+                GuildOperation.Create, "unknown_state_create", AccountApplicant, GuildBeta,
+                state.Revision, 0, policy.Binding), state);
+
+            Assert.That(result.Status, Is.EqualTo(GuildPlanningStatus.Unsupported));
+            Assert.That(result.Plan, Is.Null);
+            Assert.That(result.Diagnostics.Single().Code,
+                Is.EqualTo("AL-GUILD-MEMBERSHIP-STATE-UNSUPPORTED"));
+            Assert.That(state.Guilds.Single().Members.Single(row =>
+                row.AccountId == AccountMember).State, Is.EqualTo((GuildMembershipState)99));
+        }
+
+        [Test]
+        public void InactiveMembershipCanRejoinWithoutDuplicatingIdentity()
+        {
+            GuildMembershipPolicySnapshot policy = Policy();
+            var planner = new GuildMembershipTransitionPlanner(policy);
+            GuildAuthoritySnapshot state = WithMemberState(
+                GuildWithThreeMembers(planner, policy.Binding),
+                AccountMember,
+                GuildMembershipState.Inactive);
+
+            state = Apply(planner.Plan(NextRequest(
+                state, GuildOperation.Invite, "invite_inactive", AccountMaster,
+                targetAccountId: AccountMember, targetRealmId: RealmStonehold,
+                pendingRequestId: "pending_inactive"), state));
+            state = Apply(planner.Plan(NextRequest(
+                state, GuildOperation.Accept, "accept_inactive", AccountMember,
+                pendingRequestId: "pending_inactive"), state));
+
+            GuildMemberSnapshot[] rows = state.Guilds.Single().Members.Where(row =>
+                row.AccountId == AccountMember).ToArray();
+            Assert.That(rows, Has.Length.EqualTo(1));
+            Assert.That(rows.Single().State, Is.EqualTo(GuildMembershipState.Active));
+            Assert.That(rows.Single().Role, Is.EqualTo(GuildRole.Member));
+        }
+
+        [Test]
         public void CallerCollectionsAreCopiedAndEquivalentPlansHaveStableHashes()
         {
             GuildMembershipPolicySnapshot policy = Policy();
@@ -433,8 +648,8 @@ namespace AL.Tests.EditMode.Guilds
         {
             var binding = new GuildCatalogBinding(
                 1,
-                "1.0.0",
-                "guild_membership_policy_v1",
+                "1.1.0",
+                "guild_membership_policy_v2",
                 CatalogHash);
             return new GuildMembershipPolicySnapshot(
                 GuildCatalogStatus.Ready,
@@ -445,6 +660,7 @@ namespace AL.Tests.EditMode.Guilds
                     new GuildRolePolicy(GuildRole.Officer, true, true, false, false, false, false, false, true),
                     new GuildRolePolicy(GuildRole.Member, false, false, false, false, false, false, false, false)
                 },
+                StatePolicies(),
                 true,
                 1,
                 GuildRole.Member,
@@ -457,6 +673,26 @@ namespace AL.Tests.EditMode.Guilds
                     GuildEffectDomain.Raid
                 },
                 true);
+        }
+
+        private static GuildMembershipStatePolicy[] StatePolicies()
+        {
+            return new[]
+            {
+                new GuildMembershipStatePolicy(
+                    GuildMembershipState.Active, true, true,
+                    GuildMembershipState.PendingLeave, GuildMembershipState.Banned, true),
+                new GuildMembershipStatePolicy(
+                    GuildMembershipState.Restricted, true, false,
+                    GuildMembershipState.PendingLeave, GuildMembershipState.Banned, true),
+                new GuildMembershipStatePolicy(
+                    GuildMembershipState.PendingLeave, true, false,
+                    GuildMembershipState.Inactive, null, true),
+                new GuildMembershipStatePolicy(
+                    GuildMembershipState.Banned, false, false, null, null, true),
+                new GuildMembershipStatePolicy(
+                    GuildMembershipState.Inactive, false, false, null, null, false)
+            };
         }
 
         private static GuildAuthoritySnapshot EmptySnapshot(GuildCatalogBinding binding)
@@ -578,6 +814,23 @@ namespace AL.Tests.EditMode.Guilds
                 pendingRequests ?? source.PendingRequests,
                 receipts ?? source.Receipts,
                 source.IsComplete);
+        }
+
+        private static GuildAuthoritySnapshot WithMemberState(
+            GuildAuthoritySnapshot source,
+            string accountId,
+            GuildMembershipState state)
+        {
+            GuildSnapshot guild = source.Guilds.Single(row => row.GuildId == GuildAlpha);
+            GuildMemberSnapshot[] members = guild.Members.Select(row =>
+                    row.AccountId == accountId
+                        ? new GuildMemberSnapshot(row.AccountId, row.ImmutableRealmId, row.Role, state)
+                        : row)
+                .ToArray();
+            var candidateGuild = new GuildSnapshot(
+                guild.GuildId, guild.ImmutableRealmId, guild.Revision, guild.Status, members);
+            return CopyAuthority(source, guilds: source.Guilds.Select(row =>
+                row.GuildId == GuildAlpha ? candidateGuild : row).ToArray());
         }
     }
 }

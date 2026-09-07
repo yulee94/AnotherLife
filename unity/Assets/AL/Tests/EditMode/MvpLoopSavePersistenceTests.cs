@@ -95,30 +95,37 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void FreshMvpSaveReloadsConfirmedChampionLastResultAndOneBuild()
+        public void LegacyMvpSaveMigratesConfirmedChampionLastResultAndOneBuild()
         {
             string root = NewRoot();
             try
             {
-                ISaveGameService writer = CreateSaveService(root);
-                writer.CreateNewSave(RealmId.Eldergrove);
-
-                MvpLoopCommitResult commit = MvpLoopSaveAuthority.TryCommit(
-                    writer,
-                    new MvpLoopCommitRequest(
-                        Guid.NewGuid().ToString("N"),
-                        RealmId.Eldergrove,
-                        ClassFamily.Ranger,
-                        true,
-                        LastResultId,
-                        MvpLoopSaveCodec.DefaultOneBuildId,
-                        1,
-                        Username));
-                Assert.IsTrue(commit.Accepted, commit.Message);
-                Assert.IsTrue(commit.Persisted, commit.Message);
+                // Retain legacy result/build compatibility without granting these
+                // writes to the new schema-2 first-session identity adapter.
+                SaveGameData legacy = UnityEngine.JsonUtility.FromJson<SaveGameData>(
+                    PreChangeSchemaV1Json());
+                legacy.SelectedRealm = RealmId.Eldergrove;
+                var request = new MvpLoopCommitRequest(
+                    Guid.NewGuid().ToString("N"),
+                    RealmId.Eldergrove,
+                    ClassFamily.Ranger,
+                    true,
+                    LastResultId,
+                    MvpLoopSaveCodec.DefaultOneBuildId,
+                    1,
+                    Username);
+                Assert.That(MvpLoopSaveCodec.PrepareCandidate(legacy, request, out string message),
+                    Is.EqualTo(MvpLoopPrepareDisposition.Prepared), message);
+                Assert.That(MvpLoopSaveCodec.PrepareCandidate(legacy, request, out message),
+                    Is.EqualTo(MvpLoopPrepareDisposition.Duplicate), message);
+                string legacyJson = UnityEngine.JsonUtility.ToJson(legacy);
+                File.WriteAllText(Path.Combine(root, "save.json"), legacyJson);
 
                 ISaveGameService reader = CreateSaveService(root);
                 reader.Load();
+                Assert.That(reader.CurrentSave.SaveSchemaVersion, Is.EqualTo(2));
+                Assert.That(File.ReadAllText(Path.Combine(root, "save.backup.json")),
+                    Is.EqualTo(legacyJson), "Migration must retain the exact predecessor.");
                 MvpLoopSnapshot snapshot = MvpLoopSaveCodec.Read(reader.CurrentSave);
                 Assert.AreEqual(RealmId.Eldergrove, snapshot.Realm);
                 Assert.AreEqual(ClassFamily.Ranger, snapshot.ClassFamily);
@@ -161,9 +168,9 @@ namespace AL.Tests.EditMode
                     RealmId.Crownlands,
                     ClassFamily.Warrior,
                     true,
-                    LastResultId,
-                    MvpLoopSaveCodec.DefaultOneBuildId,
-                    1,
+                    string.Empty,
+                    string.Empty,
+                    0,
                     Username);
                 Assert.IsTrue(MvpLoopSaveAuthority.TryCommit(service, request).Persisted);
                 MvpLoopCommitResult replay = MvpLoopSaveAuthority.TryCommit(service, request);

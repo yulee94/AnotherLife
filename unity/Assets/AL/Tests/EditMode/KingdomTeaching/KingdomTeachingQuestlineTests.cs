@@ -8,6 +8,7 @@ using AL.ChampionMode.Quests;
 using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.Data.Catalogs.WorldAtlas;
 using AL.Data.Runtime;
 using AL.Services.Local;
@@ -130,20 +131,11 @@ namespace AL.Tests.EditMode.KingdomTeaching
             Directory.CreateDirectory(root);
             try
             {
-                ISaveGameService writer = CreateSaveService(root);
-                writer.CreateNewSave(RealmId.Stonehold);
-                Assert.That(
-                    MvpLoopSaveAuthority.TryCommit(
-                        writer,
-                        new MvpLoopCommitRequest(
-                            Guid.NewGuid().ToString("N"),
-                            RealmId.Stonehold,
-                            ClassFamily.Warrior,
-                            true,
-                            ProofOfWorthIds.StoneholdVariantId,
-                            string.Empty,
-                            0)).Persisted,
-                    Is.True);
+                ISaveGameService writer =
+                    ProfileBoundKingdomTestFixture.CreateLordshipSave(
+                        root,
+                        RealmId.Stonehold,
+                        ClassFamily.Warrior);
 
                 KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
                 KingdomTeachingCommitResult outOfOrder =
@@ -477,20 +469,11 @@ namespace AL.Tests.EditMode.KingdomTeaching
             Directory.CreateDirectory(root);
             try
             {
-                ISaveGameService save = CreateSaveService(root);
-                save.CreateNewSave(RealmId.Crownlands);
-                Assert.That(
-                    MvpLoopSaveAuthority.TryCommit(
-                        save,
-                        new MvpLoopCommitRequest(
-                            Guid.NewGuid().ToString("N"),
-                            RealmId.Crownlands,
-                            ClassFamily.Mage,
-                            true,
-                            ProofOfWorthIds.CrownlandsVariantId,
-                            string.Empty,
-                            0)).Persisted,
-                    Is.True);
+                ISaveGameService save =
+                    ProfileBoundKingdomTestFixture.CreateLordshipSave(
+                        root,
+                        RealmId.Crownlands,
+                        ClassFamily.Mage);
 
                 KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
                 var host = new GameObject("KingdomTeachingDirectorTests.Host");
@@ -633,20 +616,11 @@ namespace AL.Tests.EditMode.KingdomTeaching
             Directory.CreateDirectory(root);
             try
             {
-                ISaveGameService save = CreateSaveService(root);
-                save.CreateNewSave(RealmId.Crownlands);
-                Assert.That(
-                    MvpLoopSaveAuthority.TryCommit(
-                        save,
-                        new MvpLoopCommitRequest(
-                            Guid.NewGuid().ToString("N"),
-                            RealmId.Crownlands,
-                            ClassFamily.Mage,
-                            true,
-                            ProofOfWorthIds.CrownlandsVariantId,
-                            string.Empty,
-                            0)).Persisted,
-                    Is.True);
+                ISaveGameService save =
+                    ProfileBoundKingdomTestFixture.CreateLordshipSave(
+                        root,
+                        RealmId.Crownlands,
+                        ClassFamily.Mage);
                 KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
 
                 object result = InvokeKingdomTeachingStore(
@@ -688,20 +662,11 @@ namespace AL.Tests.EditMode.KingdomTeaching
             Directory.CreateDirectory(root);
             try
             {
-                ISaveGameService save = CreateSaveService(root);
-                save.CreateNewSave(RealmId.Crownlands);
-                Assert.That(
-                    MvpLoopSaveAuthority.TryCommit(
-                        save,
-                        new MvpLoopCommitRequest(
-                            Guid.NewGuid().ToString("N"),
-                            RealmId.Crownlands,
-                            ClassFamily.Mage,
-                            true,
-                            ProofOfWorthIds.CrownlandsVariantId,
-                            string.Empty,
-                            0)).Persisted,
-                    Is.True);
+                ISaveGameService save =
+                    ProfileBoundKingdomTestFixture.CreateLordshipSave(
+                        root,
+                        RealmId.Crownlands,
+                        ClassFamily.Mage);
                 KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
                 Assert.That(
                     KingdomTeachingSaveAuthority.TryAdvance(
@@ -738,6 +703,68 @@ namespace AL.Tests.EditMode.KingdomTeaching
                     Directory.Delete(root, true);
                 }
             }
+        }
+
+        [Test]
+        public void LegacyTeachingAdapterRetainsCatalogOrderAndTownHallGate()
+        {
+            var save = new LegacyTeachingSaveService(
+                RealmId.Stonehold,
+                ClassFamily.Warrior);
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+
+            SaveCandidateCommitResult catalogConflict =
+                ((ILegacyKingdomTeachingCandidateStore)save)
+                .TryCommitLegacyKingdomTeaching(
+                    new KingdomTeachingCommitRequest(
+                        Guid.NewGuid().ToString("N"),
+                        RealmId.Stonehold,
+                        catalog.QuestId,
+                        "teach_tampered_step",
+                        catalog.Steps[0].CompletionEvent,
+                        0,
+                        1,
+                        catalog.Steps.Count));
+            Assert.That(
+                catalogConflict.Outcome,
+                Is.EqualTo(SaveCandidateCommitOutcome.Rejected));
+
+            KingdomTeachingCommitResult first =
+                KingdomTeachingSaveAuthority.TryAdvance(
+                    save,
+                    catalog,
+                    catalog.Steps[0].CompletionEvent);
+            Assert.That(first.Accepted, Is.True, first.Message);
+            Assert.That(first.Persisted, Is.True, first.Message);
+
+            KingdomTeachingCommitResult beforeBuild =
+                KingdomTeachingSaveAuthority.TryAdvance(
+                    save,
+                    catalog,
+                    catalog.Steps[1].CompletionEvent);
+            Assert.That(beforeBuild.Accepted, Is.False, beforeBuild.Message);
+            Assert.That(
+                KingdomTeachingQuestline.Evaluate(save.CurrentSave, catalog)
+                    .ProgressValue,
+                Is.EqualTo(1));
+
+            save.CurrentSave.Buildings.Add(new BuildingState
+            {
+                BuildingId = KingdomOneBuildCommand.BuildingId,
+                Level = KingdomOneBuildCommand.CompletedLevel
+            });
+            KingdomTeachingCommitResult second =
+                KingdomTeachingSaveAuthority.TryAdvance(
+                    save,
+                    catalog,
+                    catalog.Steps[1].CompletionEvent);
+            Assert.That(second.Accepted, Is.True, second.Message);
+            Assert.That(second.Persisted, Is.True, second.Message);
+            Assert.That(
+                KingdomTeachingQuestline.Evaluate(save.CurrentSave, catalog)
+                    .ProgressValue,
+                Is.EqualTo(2));
+            Assert.That(save.CommitCount, Is.EqualTo(4));
         }
 
         [TestCase("open_construction_dock")]
@@ -840,10 +867,10 @@ namespace AL.Tests.EditMode.KingdomTeaching
             KingdomTeachingCommitRequest request)
         {
             Type storeType = typeof(LocalSaveGameService).Assembly.GetType(
-                "AL.Services.Local.ILegacyKingdomTeachingCandidateStore",
+                "AL.Services.Local.IProfileBoundKingdomTeachingCandidateStore",
                 throwOnError: true);
             MethodInfo commit = storeType.GetMethod(
-                "TryCommitLegacyKingdomTeaching",
+                "TryCommitProfileBoundKingdomTeaching",
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.That(commit, Is.Not.Null);
             return commit.Invoke(save, new object[] { request });
@@ -870,6 +897,111 @@ namespace AL.Tests.EditMode.KingdomTeaching
             catch (TargetInvocationException exception)
             {
                 throw exception.InnerException;
+            }
+        }
+
+        private sealed class LegacyTeachingSaveService :
+            ISaveGameService,
+            ILegacyKingdomTeachingCandidateStore
+        {
+            internal LegacyTeachingSaveService(
+                RealmId realm,
+                ClassFamily classFamily)
+            {
+                Assert.That(
+                    MvpLoopSaveCodec.TryEncodeClassFamily(
+                        classFamily,
+                        out string classFamilyId),
+                    Is.True);
+                CurrentSave = new SaveGameData
+                {
+                    SaveFormatId = SaveGameData.CurrentSaveFormatId,
+                    SaveSchemaVersion =
+                        SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion,
+                    ProfileInitializationVersion =
+                        SaveAuthorityTechnicalLimits
+                            .LegacyProfileInitializationVersion,
+                    SelectedRealm = realm,
+                    ChampionCustomization = new ChampionCustomizationState
+                    {
+                        ClassFamilyId = classFamilyId,
+                        IdentityConfirmed = true,
+                        LastResultId = ProofOfWorthLordship.ResolveMarkId(realm),
+                        Username = "LegacyKingdom"
+                    },
+                    Buildings = new List<BuildingState>(),
+                    Quests = new List<QuestState>()
+                };
+            }
+
+            public SaveGameData CurrentSave { get; private set; }
+            public SaveLoadStatus LastLoadStatus => SaveLoadStatus.LoadedPrimary;
+            public string LastLoadMessage => string.Empty;
+            public SaveOperationStatus LastSaveStatus => SaveOperationStatus.SavedPrimary;
+            public string LastSaveMessage => string.Empty;
+            internal int CommitCount { get; private set; }
+
+            SaveCandidateCommitResult
+                ILegacyKingdomTeachingCandidateStore
+                    .TryCommitLegacyKingdomTeaching(
+                        KingdomTeachingCommitRequest request)
+            {
+                CommitCount++;
+                KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+                MethodInfo resolve = typeof(LocalSaveGameService).GetMethod(
+                    "TryResolveKingdomTeachingStep",
+                    BindingFlags.Static | BindingFlags.NonPublic);
+                Assert.That(resolve, Is.Not.Null);
+                object[] arguments = { request, catalog, false };
+                if (!(bool)resolve.Invoke(null, arguments))
+                {
+                    return Result(
+                        SaveCandidateCommitOutcome.Rejected,
+                        "AL-KINGDOM-TEACHING-CATALOG-CONFLICT");
+                }
+
+                bool requiresTownHall = (bool)arguments[2];
+                SaveGameData candidate = JsonUtility.FromJson<SaveGameData>(
+                    JsonUtility.ToJson(CurrentSave));
+                KingdomTeachingPrepareDisposition disposition =
+                    KingdomTeachingSaveCodec.PrepareCandidate(
+                        candidate,
+                        request,
+                        requiresTownHall,
+                        out string message);
+                switch (disposition)
+                {
+                    case KingdomTeachingPrepareDisposition.Prepared:
+                        CurrentSave = candidate;
+                        return Result(SaveCandidateCommitOutcome.Committed, message);
+                    case KingdomTeachingPrepareDisposition.Duplicate:
+                        return Result(SaveCandidateCommitOutcome.Duplicate, message);
+                    default:
+                        return Result(SaveCandidateCommitOutcome.Rejected, message);
+                }
+            }
+
+            private SaveCandidateCommitResult Result(
+                SaveCandidateCommitOutcome outcome,
+                string message) =>
+                new SaveCandidateCommitResult(outcome, CurrentSave, message);
+
+            public void Save()
+            {
+            }
+
+            public void Load()
+            {
+            }
+
+            public bool HasSave() => true;
+
+            public void CreateNewSave(RealmId realmId)
+            {
+            }
+
+            public void DeleteSave()
+            {
             }
         }
     }

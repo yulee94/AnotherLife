@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "catalogId": "al_guild_membership_policy",
   "game": "Another Life",
-  "sourceRevision": "guild_membership_policy_v1",
+  "sourceRevision": "guild_membership_policy_v2",
   "machineIdentity": "Guild",
   "playerFacingTerms": {
     "primary": "Guild",
@@ -14,7 +14,7 @@
     "subject": "account",
     "realmBinding": "immutable_account_realm",
     "sameRealmCharactersShareMembership": true,
-    "crossGuildUniqueness": "one_active_membership_per_account",
+    "crossGuildUniqueness": "one_reserving_membership_per_account",
     "requiredActiveMasterCount": 1,
     "joinedRole": "Member"
   },
@@ -53,6 +53,53 @@
       "canOpenRaidCalls": false
     }
   ],
+  "membershipStates": [
+    {
+      "state": "Active",
+      "reservesAccount": true,
+      "grantsRoleAuthority": true,
+      "leaveResult": "PendingLeave",
+      "kickResult": "Banned",
+      "blocksSameGuildEntry": true
+    },
+    {
+      "state": "Restricted",
+      "reservesAccount": true,
+      "grantsRoleAuthority": false,
+      "leaveResult": "PendingLeave",
+      "kickResult": "Banned",
+      "blocksSameGuildEntry": true
+    },
+    {
+      "state": "PendingLeave",
+      "reservesAccount": true,
+      "grantsRoleAuthority": false,
+      "leaveResult": "Inactive",
+      "kickResult": null,
+      "blocksSameGuildEntry": true
+    },
+    {
+      "state": "Banned",
+      "reservesAccount": false,
+      "grantsRoleAuthority": false,
+      "leaveResult": null,
+      "kickResult": null,
+      "blocksSameGuildEntry": true
+    },
+    {
+      "state": "Inactive",
+      "reservesAccount": false,
+      "grantsRoleAuthority": false,
+      "leaveResult": null,
+      "kickResult": null,
+      "blocksSameGuildEntry": false
+    }
+  ],
+  "membershipStatePolicy": {
+    "revisionFence": "exact_authority_and_guild_revisions",
+    "unknownState": "preserve_read_only",
+    "bannedScope": "same_guild_cycle"
+  },
   "transitions": [
     "create",
     "join",

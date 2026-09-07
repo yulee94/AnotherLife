@@ -147,7 +147,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.IsTrue(PropBool(plan, "IsValid"), Failures(plan));
             var options = (BuildPlayerOptions)Invoke(plan, "CreateBuildPlayerOptions");
             Assert.AreEqual(BuildTarget.StandaloneWindows64, options.target);
-            Assert.AreEqual(BuildOptions.Development, options.options);
+            Assert.AreEqual(ExpectedBuildOptions(), options.options);
             Assert.AreEqual(ExpectedExecutable(root), options.locationPathName);
             Assert.That(options.extraScriptingDefines, Is.Empty,
                 "The normal Player must remain structurally unflavored.");
@@ -162,7 +162,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.That(options.scenes, Has.None.EqualTo("Assets/Test.unity"));
             Assert.That(options.scenes, Has.Some.EqualTo("Assets/AL/Scenes/ChampionArena.unity"));
             Assert.AreEqual("StandaloneWindows64", Prop(plan, "Target").ToString());
-            Assert.AreEqual(BuildOptions.Development, (BuildOptions)Prop(plan, "Options"));
+            Assert.AreEqual(ExpectedBuildOptions(), (BuildOptions)Prop(plan, "Options"));
         }
 
         [Test]
@@ -281,7 +281,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             CollectionAssert.AreEqual(new[] { ExpectedOutputDirectory(state.ProjectRoot) }, state.DeletedPaths);
             Assert.NotNull(state.CapturedOptions);
             Assert.AreEqual(BuildTarget.StandaloneWindows64, state.CapturedOptions.Value.target);
-            Assert.AreEqual(BuildOptions.Development, state.CapturedOptions.Value.options);
+            Assert.AreEqual(ExpectedBuildOptions(), state.CapturedOptions.Value.options);
             Assert.AreEqual(ExpectedExecutable(state.ProjectRoot), state.CapturedOptions.Value.locationPathName);
             Assert.AreEqual(ExpectedSummaryPath(state.ProjectRoot), state.WrittenPath);
             Assert.That(state.WrittenContents, Does.Contain("\"status\": \"Succeeded\""));
@@ -648,6 +648,9 @@ namespace AL.Tests.EditMode.ProductionScenes
 
         private static string ExpectedExecutable(string root) =>
             Path.Combine(ExpectedOutputDirectory(root), "AnotherLifeUnity.exe");
+
+        private static BuildOptions ExpectedBuildOptions() =>
+            BuildOptions.Development | BuildOptions.NoUniqueIdentifier;
 
         private static string ExpectedApprovalOutputDirectory(string root) =>
             Path.GetFullPath(Path.Combine(root, "Builds", "Validation", "Windows64MvpApproval"));

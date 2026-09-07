@@ -64,8 +64,65 @@ class GuildMembershipContractTests(unittest.TestCase):
         self.assertEqual("account", catalog["membershipScope"]["subject"])
         self.assertTrue(catalog["membershipScope"]["sameRealmCharactersShareMembership"])
         self.assertEqual(
+            "one_reserving_membership_per_account",
+            catalog["membershipScope"]["crossGuildUniqueness"],
+        )
+        self.assertEqual(
             ["Master", "Officer", "Member"],
             [row["role"] for row in catalog["roles"]],
+        )
+        self.assertEqual(
+            [
+                {
+                    "state": "Active",
+                    "reservesAccount": True,
+                    "grantsRoleAuthority": True,
+                    "leaveResult": "PendingLeave",
+                    "kickResult": "Banned",
+                    "blocksSameGuildEntry": True,
+                },
+                {
+                    "state": "Restricted",
+                    "reservesAccount": True,
+                    "grantsRoleAuthority": False,
+                    "leaveResult": "PendingLeave",
+                    "kickResult": "Banned",
+                    "blocksSameGuildEntry": True,
+                },
+                {
+                    "state": "PendingLeave",
+                    "reservesAccount": True,
+                    "grantsRoleAuthority": False,
+                    "leaveResult": "Inactive",
+                    "kickResult": None,
+                    "blocksSameGuildEntry": True,
+                },
+                {
+                    "state": "Banned",
+                    "reservesAccount": False,
+                    "grantsRoleAuthority": False,
+                    "leaveResult": None,
+                    "kickResult": None,
+                    "blocksSameGuildEntry": True,
+                },
+                {
+                    "state": "Inactive",
+                    "reservesAccount": False,
+                    "grantsRoleAuthority": False,
+                    "leaveResult": None,
+                    "kickResult": None,
+                    "blocksSameGuildEntry": False,
+                },
+            ],
+            catalog["membershipStates"],
+        )
+        self.assertEqual(
+            {
+                "revisionFence": "exact_authority_and_guild_revisions",
+                "unknownState": "preserve_read_only",
+                "bannedScope": "same_guild_cycle",
+            },
+            catalog["membershipStatePolicy"],
         )
         officer = catalog["roles"][1]
         self.assertTrue(officer["canManageInvitations"])
