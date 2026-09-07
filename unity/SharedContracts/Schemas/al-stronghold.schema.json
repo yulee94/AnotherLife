@@ -1,0 +1,956 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "al-stronghold.schema.json",
+  "allOf": [
+    {
+      "properties": {
+        "levels": {
+          "items": {
+            "properties": {
+              "visualProfileId": { "pattern": "^stronghold_visual_" },
+              "gateProfileId": { "pattern": "^stronghold_gate_" },
+              "guardRosterProfileId": { "pattern": "^stronghold_roster_" },
+              "upgradeCostProfileId": { "pattern": "^stronghold_cost_" },
+              "guardStatsProfileId": { "pattern": "^stronghold_stats_" },
+              "survivorRegenerationProfileId": { "pattern": "^stronghold_survivor_regeneration_" },
+              "reinforcementTimingProfileId": { "pattern": "^stronghold_reinforcement_timing_" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "title": "Stronghold v1 inert source slots; numeric balance and placement unapproved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "catalogId",
+    "schemaVersion",
+    "contentVersion",
+    "sourceRevision",
+    "productionEligible",
+    "scope",
+    "mappingAuthority",
+    "takeoverDurationMilliseconds",
+    "ownerRareCostProfileId",
+    "ownerRareResources",
+    "territories",
+    "strongholds",
+    "levels"
+  ],
+  "properties": {
+    "catalogId": {
+      "const": "al_stronghold_catalog"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "contentVersion": {
+      "const": 1
+    },
+    "sourceRevision": {
+      "const": "stronghold_contract_v1"
+    },
+    "productionEligible": {
+      "const": false
+    },
+    "scope": {
+      "const": "engine_free_planner_only"
+    },
+    "mappingAuthority": {
+      "const": "legacy_flags_only_not_world_placement"
+    },
+    "takeoverDurationMilliseconds": {
+      "const": 180000
+    },
+    "ownerRareCostProfileId": {
+      "const": "stronghold_owner_rare_9_to_10_v1"
+    },
+    "ownerRareResources": {
+      "const": {
+        "stonehold": "DeepOre",
+        "eldergrove": "WorldSap",
+        "crownlands": "RoyalSigil",
+        "umbral": "DarkCrystal"
+      }
+    },
+    "territories": {
+      "const": [
+        {
+          "territoryId": "T1",
+          "strongholdProfileId": "stronghold_t1"
+        },
+        {
+          "territoryId": "T2",
+          "strongholdProfileId": null
+        },
+        {
+          "territoryId": "T3",
+          "strongholdProfileId": null
+        },
+        {
+          "territoryId": "T4",
+          "strongholdProfileId": "stronghold_t4"
+        },
+        {
+          "territoryId": "T5",
+          "strongholdProfileId": null
+        }
+      ]
+    },
+    "strongholds": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "kind",
+            "wallRingIds",
+            "continuousWallRequired",
+            "gateIds",
+            "statueIds",
+            "commandNpcId",
+            "upgradeNpcId",
+            "upgradeNpcRole"
+          ],
+          "properties": {
+            "id": {
+              "const": "stronghold_t1"
+            },
+            "kind": {
+              "const": "Fortress"
+            },
+            "wallRingIds": {
+              "const": [
+                "stronghold_t1_wall_ring"
+              ]
+            },
+            "continuousWallRequired": {
+              "const": true
+            },
+            "gateIds": {
+              "const": [
+                "stronghold_t1_gate"
+              ]
+            },
+            "statueIds": {
+              "const": [
+                "stronghold_t1_statue"
+              ]
+            },
+            "commandNpcId": {
+              "const": "stronghold_t1_command"
+            },
+            "upgradeNpcId": {
+              "const": "stronghold_t1_upgrade"
+            },
+            "upgradeNpcRole": {
+              "const": "Unresolved"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "kind",
+            "wallRingIds",
+            "continuousWallRequired",
+            "gateIds",
+            "statueIds",
+            "commandNpcId",
+            "upgradeNpcId",
+            "upgradeNpcRole"
+          ],
+          "properties": {
+            "id": {
+              "const": "stronghold_t4"
+            },
+            "kind": {
+              "const": "Fortress"
+            },
+            "wallRingIds": {
+              "const": [
+                "stronghold_t4_wall_ring"
+              ]
+            },
+            "continuousWallRequired": {
+              "const": true
+            },
+            "gateIds": {
+              "const": [
+                "stronghold_t4_gate"
+              ]
+            },
+            "statueIds": {
+              "const": [
+                "stronghold_t4_statue"
+              ]
+            },
+            "commandNpcId": {
+              "const": "stronghold_t4_command"
+            },
+            "upgradeNpcId": {
+              "const": "stronghold_t4_upgrade"
+            },
+            "upgradeNpcRole": {
+              "const": "Unresolved"
+            }
+          }
+        }
+      ]
+    },
+    "levels": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 1
+            },
+            "milestone": {
+              "const": "Standard"
+            },
+            "commandNpcRequired": {
+              "const": false
+            },
+            "mageGuardsRequired": {
+              "const": false
+            },
+            "fullGateUpgrade": {
+              "const": false
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l01_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l01_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l01_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l01_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l01_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l01_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l01_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 2
+            },
+            "milestone": {
+              "const": "Standard"
+            },
+            "commandNpcRequired": {
+              "const": false
+            },
+            "mageGuardsRequired": {
+              "const": false
+            },
+            "fullGateUpgrade": {
+              "const": false
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l02_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l02_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l02_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l02_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l02_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l02_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l02_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 3
+            },
+            "milestone": {
+              "const": "Standard"
+            },
+            "commandNpcRequired": {
+              "const": false
+            },
+            "mageGuardsRequired": {
+              "const": false
+            },
+            "fullGateUpgrade": {
+              "const": false
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l03_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l03_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l03_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l03_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l03_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l03_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l03_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 4
+            },
+            "milestone": {
+              "const": "Standard"
+            },
+            "commandNpcRequired": {
+              "const": false
+            },
+            "mageGuardsRequired": {
+              "const": false
+            },
+            "fullGateUpgrade": {
+              "const": false
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l04_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l04_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l04_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l04_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l04_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l04_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l04_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 5
+            },
+            "milestone": {
+              "const": "MajorGateMilestone"
+            },
+            "commandNpcRequired": {
+              "const": true
+            },
+            "mageGuardsRequired": {
+              "const": true
+            },
+            "fullGateUpgrade": {
+              "const": true
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l05_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l05_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l05_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l05_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l05_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l05_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l05_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 6
+            },
+            "milestone": {
+              "const": "Standard"
+            },
+            "commandNpcRequired": {
+              "const": true
+            },
+            "mageGuardsRequired": {
+              "const": true
+            },
+            "fullGateUpgrade": {
+              "const": true
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l06_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l06_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l06_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l06_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l06_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l06_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l06_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 7
+            },
+            "milestone": {
+              "const": "Standard"
+            },
+            "commandNpcRequired": {
+              "const": true
+            },
+            "mageGuardsRequired": {
+              "const": true
+            },
+            "fullGateUpgrade": {
+              "const": true
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l07_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l07_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l07_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l07_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l07_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l07_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l07_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 8
+            },
+            "milestone": {
+              "const": "Standard"
+            },
+            "commandNpcRequired": {
+              "const": true
+            },
+            "mageGuardsRequired": {
+              "const": true
+            },
+            "fullGateUpgrade": {
+              "const": true
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l08_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l08_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l08_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l08_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l08_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l08_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l08_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 9
+            },
+            "milestone": {
+              "const": "Standard"
+            },
+            "commandNpcRequired": {
+              "const": true
+            },
+            "mageGuardsRequired": {
+              "const": true
+            },
+            "fullGateUpgrade": {
+              "const": true
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l09_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l09_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l09_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l09_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l09_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l09_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l09_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "milestone",
+            "commandNpcRequired",
+            "mageGuardsRequired",
+            "fullGateUpgrade",
+            "visualProfileId",
+            "gateProfileId",
+            "guardRosterProfileId",
+            "upgradeCostProfileId",
+            "guardStatsProfileId",
+            "survivorRegenerationProfileId",
+            "reinforcementTimingProfileId",
+            "balance"
+          ],
+          "properties": {
+            "level": {
+              "const": 10
+            },
+            "milestone": {
+              "const": "CapstoneMilestone"
+            },
+            "commandNpcRequired": {
+              "const": true
+            },
+            "mageGuardsRequired": {
+              "const": true
+            },
+            "fullGateUpgrade": {
+              "const": true
+            },
+            "visualProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l10_v1$",
+              "maxLength": 128
+            },
+            "gateProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l10_v1$",
+              "maxLength": 128
+            },
+            "guardRosterProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l10_v1$",
+              "maxLength": 128
+            },
+            "upgradeCostProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l10_v1$",
+              "maxLength": 128
+            },
+            "guardStatsProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l10_v1$",
+              "maxLength": 128
+            },
+            "survivorRegenerationProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l10_v1$",
+              "maxLength": 128
+            },
+            "reinforcementTimingProfileId": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*_l10_v1$",
+              "maxLength": 128
+            },
+            "balance": {
+              "const": null
+            }
+          }
+        }
+      ]
+    }
+  }
+}

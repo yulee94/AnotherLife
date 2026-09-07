@@ -1,0 +1,227 @@
+{
+  "catalogId": "al_stronghold_catalog",
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "sourceRevision": "stronghold_contract_v1",
+  "productionEligible": false,
+  "scope": "engine_free_planner_only",
+  "mappingAuthority": "legacy_flags_only_not_world_placement",
+  "takeoverDurationMilliseconds": 180000,
+  "ownerRareCostProfileId": "stronghold_owner_rare_9_to_10_v1",
+  "ownerRareResources": {
+    "stonehold": "DeepOre",
+    "eldergrove": "WorldSap",
+    "crownlands": "RoyalSigil",
+    "umbral": "DarkCrystal"
+  },
+  "territories": [
+    {
+      "territoryId": "T1",
+      "strongholdProfileId": "stronghold_t1"
+    },
+    {
+      "territoryId": "T2",
+      "strongholdProfileId": "stronghold_t1"
+    },
+    {
+      "territoryId": "T3",
+      "strongholdProfileId": null
+    },
+    {
+      "territoryId": "T4",
+      "strongholdProfileId": "stronghold_t4"
+    },
+    {
+      "territoryId": "T5",
+      "strongholdProfileId": null
+    }
+  ],
+  "strongholds": [
+    {
+      "id": "stronghold_t1",
+      "kind": "Fortress",
+      "wallRingIds": [
+        "stronghold_t1_wall_ring"
+      ],
+      "continuousWallRequired": true,
+      "gateIds": [
+        "stronghold_t1_gate"
+      ],
+      "statueIds": [
+        "stronghold_t1_statue"
+      ],
+      "commandNpcId": "stronghold_t1_command",
+      "upgradeNpcId": "stronghold_t1_upgrade",
+      "upgradeNpcRole": "Unresolved"
+    },
+    {
+      "id": "stronghold_t4",
+      "kind": "Fortress",
+      "wallRingIds": [
+        "stronghold_t4_wall_ring"
+      ],
+      "continuousWallRequired": true,
+      "gateIds": [
+        "stronghold_t4_gate"
+      ],
+      "statueIds": [
+        "stronghold_t4_statue"
+      ],
+      "commandNpcId": "stronghold_t4_command",
+      "upgradeNpcId": "stronghold_t4_upgrade",
+      "upgradeNpcRole": "Unresolved"
+    }
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "milestone": "Standard",
+      "commandNpcRequired": false,
+      "mageGuardsRequired": false,
+      "fullGateUpgrade": false,
+      "visualProfileId": "stronghold_visual_l01_v1",
+      "gateProfileId": "stronghold_gate_l01_v1",
+      "guardRosterProfileId": "stronghold_roster_l01_v1",
+      "upgradeCostProfileId": "stronghold_cost_l01_v1",
+      "guardStatsProfileId": "stronghold_stats_l01_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l01_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l01_v1",
+      "balance": null
+    },
+    {
+      "level": 2,
+      "milestone": "Standard",
+      "commandNpcRequired": false,
+      "mageGuardsRequired": false,
+      "fullGateUpgrade": false,
+      "visualProfileId": "stronghold_visual_l02_v1",
+      "gateProfileId": "stronghold_gate_l02_v1",
+      "guardRosterProfileId": "stronghold_roster_l02_v1",
+      "upgradeCostProfileId": "stronghold_cost_l02_v1",
+      "guardStatsProfileId": "stronghold_stats_l02_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l02_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l02_v1",
+      "balance": null
+    },
+    {
+      "level": 3,
+      "milestone": "Standard",
+      "commandNpcRequired": false,
+      "mageGuardsRequired": false,
+      "fullGateUpgrade": false,
+      "visualProfileId": "stronghold_visual_l03_v1",
+      "gateProfileId": "stronghold_gate_l03_v1",
+      "guardRosterProfileId": "stronghold_roster_l03_v1",
+      "upgradeCostProfileId": "stronghold_cost_l03_v1",
+      "guardStatsProfileId": "stronghold_stats_l03_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l03_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l03_v1",
+      "balance": null
+    },
+    {
+      "level": 4,
+      "milestone": "Standard",
+      "commandNpcRequired": false,
+      "mageGuardsRequired": false,
+      "fullGateUpgrade": false,
+      "visualProfileId": "stronghold_visual_l04_v1",
+      "gateProfileId": "stronghold_gate_l04_v1",
+      "guardRosterProfileId": "stronghold_roster_l04_v1",
+      "upgradeCostProfileId": "stronghold_cost_l04_v1",
+      "guardStatsProfileId": "stronghold_stats_l04_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l04_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l04_v1",
+      "balance": null
+    },
+    {
+      "level": 5,
+      "milestone": "MajorGateMilestone",
+      "commandNpcRequired": true,
+      "mageGuardsRequired": true,
+      "fullGateUpgrade": true,
+      "visualProfileId": "stronghold_visual_l05_v1",
+      "gateProfileId": "stronghold_gate_l05_v1",
+      "guardRosterProfileId": "stronghold_roster_l05_v1",
+      "upgradeCostProfileId": "stronghold_cost_l05_v1",
+      "guardStatsProfileId": "stronghold_stats_l05_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l05_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l05_v1",
+      "balance": null
+    },
+    {
+      "level": 6,
+      "milestone": "Standard",
+      "commandNpcRequired": true,
+      "mageGuardsRequired": true,
+      "fullGateUpgrade": true,
+      "visualProfileId": "stronghold_visual_l06_v1",
+      "gateProfileId": "stronghold_gate_l06_v1",
+      "guardRosterProfileId": "stronghold_roster_l06_v1",
+      "upgradeCostProfileId": "stronghold_cost_l06_v1",
+      "guardStatsProfileId": "stronghold_stats_l06_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l06_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l06_v1",
+      "balance": null
+    },
+    {
+      "level": 7,
+      "milestone": "Standard",
+      "commandNpcRequired": true,
+      "mageGuardsRequired": true,
+      "fullGateUpgrade": true,
+      "visualProfileId": "stronghold_visual_l07_v1",
+      "gateProfileId": "stronghold_gate_l07_v1",
+      "guardRosterProfileId": "stronghold_roster_l07_v1",
+      "upgradeCostProfileId": "stronghold_cost_l07_v1",
+      "guardStatsProfileId": "stronghold_stats_l07_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l07_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l07_v1",
+      "balance": null
+    },
+    {
+      "level": 8,
+      "milestone": "Standard",
+      "commandNpcRequired": true,
+      "mageGuardsRequired": true,
+      "fullGateUpgrade": true,
+      "visualProfileId": "stronghold_visual_l08_v1",
+      "gateProfileId": "stronghold_gate_l08_v1",
+      "guardRosterProfileId": "stronghold_roster_l08_v1",
+      "upgradeCostProfileId": "stronghold_cost_l08_v1",
+      "guardStatsProfileId": "stronghold_stats_l08_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l08_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l08_v1",
+      "balance": null
+    },
+    {
+      "level": 9,
+      "milestone": "Standard",
+      "commandNpcRequired": true,
+      "mageGuardsRequired": true,
+      "fullGateUpgrade": true,
+      "visualProfileId": "stronghold_visual_l09_v1",
+      "gateProfileId": "stronghold_gate_l09_v1",
+      "guardRosterProfileId": "stronghold_roster_l09_v1",
+      "upgradeCostProfileId": "stronghold_cost_l09_v1",
+      "guardStatsProfileId": "stronghold_stats_l09_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l09_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l09_v1",
+      "balance": null
+    },
+    {
+      "level": 10,
+      "milestone": "CapstoneMilestone",
+      "commandNpcRequired": true,
+      "mageGuardsRequired": true,
+      "fullGateUpgrade": true,
+      "visualProfileId": "stronghold_visual_l10_v1",
+      "gateProfileId": "stronghold_gate_l10_v1",
+      "guardRosterProfileId": "stronghold_roster_l10_v1",
+      "upgradeCostProfileId": "stronghold_cost_l10_v1",
+      "guardStatsProfileId": "stronghold_stats_l10_v1",
+      "survivorRegenerationProfileId": "stronghold_survivor_regeneration_l10_v1",
+      "reinforcementTimingProfileId": "stronghold_reinforcement_timing_l10_v1",
+      "balance": null
+    }
+  ]
+}
