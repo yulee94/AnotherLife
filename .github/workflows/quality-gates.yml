@@ -75,6 +75,27 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Building production evidence gate
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/building-production-evidence.txt"
+          try {
+            & python tools/game-data/test_validate_building_production_evidence.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Building production evidence tests exited with code $LASTEXITCODE."
+            }
+            & python tools/game-data/validate_building_production_evidence.py --require-production-eligible *>&1 |
+              Tee-Object -FilePath $transcript -Append
+            if ($LASTEXITCODE -ne 2) {
+              throw "Blocked building evidence gate must exit 2, received $LASTEXITCODE."
+            }
+            $global:LASTEXITCODE = 0
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Boss reward source catalog gate
         shell: pwsh
         timeout-minutes: 5
@@ -353,6 +374,7 @@ jobs:
           path: |
             artifacts/repository-hygiene.txt
             artifacts/six-family-production-authority.txt
+            artifacts/building-production-evidence.txt
             artifacts/android-unity-package-tests.txt
             artifacts/reproducible-build-contract.txt
             artifacts/deterministic-qa-contract.txt
