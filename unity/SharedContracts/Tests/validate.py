@@ -49,6 +49,7 @@ REAL_CATALOGS = {
     "al-alliance-war": "al_alliance_war_policy.json",
     "al-pvp-harmful-effect-gate": "al_pvp_harmful_effect_gate_policy.json",
     "al-realm-dungeon": "al_realm_dungeon_catalog.json",
+    "al-stronghold": "al_stronghold_catalog.json",
     "al-guild-membership": "al_guild_membership_policy.json",
     "al-guild-progression": "al_guild_progression_policy.json",
     "al-guild-raid-muster": "al_guild_raid_muster_policy.json",
