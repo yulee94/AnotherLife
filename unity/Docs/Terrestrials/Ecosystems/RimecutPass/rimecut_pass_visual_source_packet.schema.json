@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.local/schemas/rimecut-pass-visual-source-packet-v1.json",
+  "title": "Rimecut Pass Visual Source Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "packetId", "sourceVersion", "parentRosterSourceVersion",
+    "createdDate", "promptDocument", "authority", "readiness", "habitat",
+    "placementReference", "environmentKit", "productionEnvelope",
+    "sourceBudgets", "sourceAssets", "externalInputs"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": "1.0.0"},
+    "packetId": {"const": "tdf_packet_rimecut_pass_visual_source_v001"},
+    "sourceVersion": {"const": "tdf-eco-rimecut-2026-07-29-v001"},
+    "parentRosterSourceVersion": {"type": "string"},
+    "createdDate": {"type": "string", "format": "date"},
+    "promptDocument": {"type": "string"},
+    "authority": {"type": "object"},
+    "readiness": {"type": "object"},
+    "habitat": {"type": "object"},
+    "placementReference": {"type": "object"},
+    "environmentKit": {"type": "object"},
+    "productionEnvelope": {"type": "object"},
+    "sourceBudgets": {"type": "object"},
+    "sourceAssets": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assetId", "path", "roles", "state", "qaDisposition", "byteLength",
+          "sha256", "gitLfsOid", "gitLfsSize", "generationCall"
+        ],
+        "properties": {
+          "assetId": {"type": "string", "pattern": "^tdf_asset_"},
+          "path": {"type": "string", "pattern": "^unity/Docs/.+\\.png$"},
+          "roles": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "state": {"const": "ReadyForUserReview"},
+          "qaDisposition": {"const": "PassWithConcern"},
+          "byteLength": {"type": "integer", "minimum": 1, "maximum": 4194304},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "gitLfsOid": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "gitLfsSize": {"type": "integer", "minimum": 1},
+          "generationCall": {"type": "string", "pattern": "^call_"}
+        }
+      }
+    },
+    "externalInputs": {"type": "array", "maxItems": 0}
+  }
+}
