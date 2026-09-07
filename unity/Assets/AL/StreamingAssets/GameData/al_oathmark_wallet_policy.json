@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "al_oathmark_wallet_policy",
+  "sourceRevision": "oathmark_wallet_v1",
+  "currencyCatalogId": "al_oathmark_marketplace_policy",
+  "saveSchemaVersion": 2,
+  "accountBinding": "local_profile_identity",
+  "initialBalance": 0,
+  "maximumReceipts": 2048,
+  "earningSourcesEnabled": false
+}

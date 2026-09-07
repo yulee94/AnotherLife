@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "al-oathmark-wallet.schema.json",
+  "title": "Profile-bound Oathmark wallet installation policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "catalogId", "sourceRevision", "currencyCatalogId", "saveSchemaVersion", "accountBinding", "initialBalance", "maximumReceipts", "earningSourcesEnabled"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "catalogId": {"const": "al_oathmark_wallet_policy"},
+    "sourceRevision": {"const": "oathmark_wallet_v1"},
+    "currencyCatalogId": {"const": "al_oathmark_marketplace_policy"},
+    "saveSchemaVersion": {"const": 2},
+    "accountBinding": {"const": "local_profile_identity"},
+    "initialBalance": {"const": 0},
+    "maximumReceipts": {"type": "integer", "minimum": 1, "maximum": 2048},
+    "earningSourcesEnabled": {"const": false}
+  }
+}
