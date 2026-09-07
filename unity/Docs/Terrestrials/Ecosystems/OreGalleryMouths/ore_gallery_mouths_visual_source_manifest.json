@@ -1,0 +1,159 @@
+{
+  "$schema": "./ore_gallery_mouths_visual_source_packet.schema.json",
+  "schemaVersion": "1.0.0",
+  "packetId": "tdf_packet_ore_gallery_mouths_visual_source_v001",
+  "sourceVersion": "tdf-eco-ore-gallery-2026-07-29-v001",
+  "parentRosterSourceVersion": "tdf-eco-2026-07-27-v001",
+  "createdDate": "2026-07-29",
+  "authority": {
+    "terrestrialDesignSource": true,
+    "runtime": false,
+    "gameplay": false,
+    "narrative": false,
+    "save": false,
+    "userCreativeApproval": false
+  },
+  "readiness": {
+    "technicalPacketState": "TechnicalReviewReady",
+    "userCreativeState": "NotRequested",
+    "runtimeIntegrationState": "Blocked",
+    "visualQaState": "PassWithConcern"
+  },
+  "habitat": {
+    "habitatId": "tdf_habitat_stonehold_ore_gallery_mouths",
+    "realmId": "stonehold",
+    "state": "ReadyForUserReview",
+    "environmentKitId": "tdf_envkit_stonehold_ore_gallery_mouths",
+    "protectedIdentity": "gallery_mouth_load_bearing_columns_ground_plane_value",
+    "neighborHabitatIds": [
+      "tdf_habitat_stonehold_rimecut_pass",
+      "tdf_habitat_stonehold_slagfall_quarry"
+    ],
+    "sharedTransitionIds": [
+      "tdf_transition_stonehold_ore_gallery_mouths_to_rimecut_pass",
+      "tdf_transition_stonehold_ore_gallery_mouths_to_slagfall_quarry"
+    ]
+  },
+  "fauna": {
+    "profileId": "tdf_fauna_stonehold_oreveil_isopod",
+    "state": "ReadyForUserReview",
+    "qaDisposition": "PassWithConcern",
+    "picturedVariant": "oreveil_gallery_mouth_adult",
+    "unpicturedVariants": ["oreveil_deeper_gallery_structural_variant"],
+    "protectedIdentity": "overlapping_lateral_plates_recessed_head_sensory_front_edge",
+    "scaleChampionUnits": {"length": 0.60, "width": 0.36, "height": 0.22},
+    "anatomyLock": {
+      "frontSensoryShields": 1,
+      "primaryTrunkPlates": 9,
+      "locomotorLegPairs": 7,
+      "debrisSiftingMouthAppendages": 2,
+      "tailLatches": 1,
+      "curlShape": "asymmetric_oval_shield_to_tail_latch_no_rolling"
+    },
+    "rigFamilyId": "tdf_rig_multiped_low",
+    "materialFamilyIds": ["tdf_matfam_opaque_chitin", "tdf_matfam_stonehold_slate_iron"]
+  },
+  "environmentKit": {
+    "propFamilyIds": [
+      "tdf_prop_stonehold_ore_gallery_collapsed_throat_shell",
+      "tdf_prop_stonehold_ore_gallery_natural_column_buttress",
+      "tdf_prop_stonehold_ore_gallery_settled_debris_bench",
+      "tdf_prop_stonehold_ore_gallery_cold_melt_channel_cut",
+      "tdf_prop_stonehold_ore_gallery_safe_slate_ground_plane",
+      "tdf_prop_stonehold_ore_gallery_wet_black_contact_patch",
+      "tdf_prop_stonehold_ore_gallery_pale_calcite_fracture_seam",
+      "tdf_prop_stonehold_ore_gallery_fungal_moss_crust_patch"
+    ],
+    "requiredParticles": 0,
+    "requiredDynamicLights": 0,
+    "requiredWaterFamilies": 0,
+    "requiredEmissionFamilies": 0
+  },
+  "productionEnvelope": {
+    "habitatReviewCellMeters": {"width": 128, "length": 128},
+    "habitatCompressedTargetMiB": {"minimum": 6, "maximum": 8},
+    "habitatHardCeilingMiB": 12,
+    "faunaLod0Triangles": {"minimum": 7500, "maximum": 9500},
+    "faunaBones": {"minimum": 28, "maximum": 36},
+    "faunaCompressedTargetMiB": {"minimum": 2, "maximum": 3},
+    "faunaHardCeilingMiB": 6,
+    "faunaMaximumMaterials": 1,
+    "faunaTextureSetMaximum": "one_1k_color_normal_packed_set",
+    "faunaClipMaximum": 6,
+    "lod1RatioPercent": {"minimum": 50, "maximum": 55},
+    "lod2RatioPercent": {"minimum": 18, "maximum": 22},
+    "distantRatioPercent": {"minimum": 5, "maximum": 7}
+  },
+  "sourceBudgets": {
+    "finalCount": 5,
+    "finalBytes": 14904501,
+    "retainedInputCount": 2,
+    "retainedInputBytes": 5939249,
+    "totalCount": 7,
+    "totalBytes": 20843750,
+    "maximumCompressedBytesPerImage": 4194304,
+    "playerBuildBytes": 0,
+    "runtimeResidentBytes": 0
+  },
+  "sourceAssets": [
+    {
+      "assetId": "tdf_asset_fauna_stonehold_oreveil_isopod_identity_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/OreGalleryMouths/ConceptSheets/tdf_fauna_stonehold_oreveil_isopod_identity_v001.png",
+      "roles": ["identity", "anatomy", "scale", "curl"],
+      "byteLength": 2585624,
+      "sha256": "218f167ed31948d78269bfd3e269dcc70809cae98db9694fcd59e60345d32a21",
+      "generationCall": "call_CqQTIG0Ww4cn651G8RhY5mqA"
+    },
+    {
+      "assetId": "tdf_asset_fauna_stonehold_oreveil_isopod_motion_contact_lod_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/OreGalleryMouths/ConceptSheets/tdf_fauna_stonehold_oreveil_isopod_motion_contact_lod_v001.png",
+      "roles": ["motion", "contact", "curl", "reduction"],
+      "byteLength": 2605648,
+      "sha256": "10e03279d9f068388cd520cae6ed6b6581700ee473dc1e1a43924f2ec2c8fa03",
+      "generationCall": "call_wmIyrlRO1zG2ZaRCikodTQbu"
+    },
+    {
+      "assetId": "tdf_asset_habitat_stonehold_ore_gallery_mouths_establishing_placement_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/OreGalleryMouths/ConceptSheets/tdf_habitat_stonehold_ore_gallery_mouths_establishing_placement_v001.png",
+      "roles": ["establishing", "mouth_column_ground_value", "placement", "effects_off"],
+      "byteLength": 3383698,
+      "sha256": "5c99991895accab487b436dc77f1c897450cf0dd3d08ae68ad159f3d1a56a1e2",
+      "generationCall": "call_OK7XT5b4yhRh0YDgCAgPd1pV"
+    },
+    {
+      "assetId": "tdf_asset_habitat_stonehold_ore_gallery_mouths_layout_transition_readability_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/OreGalleryMouths/ConceptSheets/tdf_habitat_stonehold_ore_gallery_mouths_layout_transition_readability_v001.png",
+      "roles": ["illustrative_spatial_grammar", "neighbor_transitions", "grayscale", "effects_off"],
+      "byteLength": 3201702,
+      "sha256": "e401269d2362ec63d225f2ee94eeb20c8df742b031932bad69fff3ee3d474fd2",
+      "generationCall": "call_ji9AVWfsTy2Mez6pA5vSu3Yj"
+    },
+    {
+      "assetId": "tdf_asset_habitat_stonehold_ore_gallery_mouths_material_kit_reduction_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/OreGalleryMouths/ConceptSheets/tdf_habitat_stonehold_ore_gallery_mouths_material_kit_reduction_v001.png",
+      "roles": ["environment_kit", "materials", "progressive_reduction", "distant_placement"],
+      "byteLength": 3127829,
+      "sha256": "a87e5b6004d7b0e7ba9423ec26682bfc4bdb5ccddcc072785589ea977267fda2",
+      "generationCall": "call_EsIiebz2oph05HVlFH8hFUt8"
+    }
+  ],
+  "generationInputs": [
+    {
+      "assetId": "tdf_asset_input_fauna_stonehold_oreveil_isopod_identity_base_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/OreGalleryMouths/GenerationInputs/tdf_input_fauna_stonehold_oreveil_isopod_identity_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "byteLength": 2581064,
+      "sha256": "21a7101a0f503a151366890d29783f8cfbeca5a5921323c8c6bed87e3d1545bd",
+      "generationCall": "call_IwS8nQTzDglxCm3wPdufk1yV"
+    },
+    {
+      "assetId": "tdf_asset_input_habitat_stonehold_ore_gallery_equal_facade_base_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/OreGalleryMouths/GenerationInputs/tdf_input_habitat_stonehold_ore_gallery_equal_facade_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "byteLength": 3358185,
+      "sha256": "b4ae1fbfe9a9be381110059c7715f05bfa173980a1ab65e4b931821df730a6f0",
+      "generationCall": "call_AedpBkuTpgqfQIoTczdR3Cjd"
+    }
+  ],
+  "externalInputs": []
+}
