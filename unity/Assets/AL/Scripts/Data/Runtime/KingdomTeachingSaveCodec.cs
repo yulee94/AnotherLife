@@ -5,6 +5,96 @@ using AL.Core.Interfaces;
 
 namespace AL.Data.Runtime
 {
+    public enum KingdomOneBuildPrepareDisposition
+    {
+        Prepared = 0,
+        Duplicate = 1,
+        Rejected = 2
+    }
+
+    public readonly struct KingdomOneBuildCommitRequest
+    {
+        public KingdomOneBuildCommitRequest(
+            string transactionId,
+            RealmId expectedRealm)
+        {
+            TransactionId = transactionId ?? string.Empty;
+            ExpectedRealm = expectedRealm;
+        }
+
+        public string TransactionId { get; }
+        public RealmId ExpectedRealm { get; }
+    }
+
+    /// <summary>
+    /// Schema-v2 mutation codec for the single approved Kingdom construct.
+    /// Callers cannot choose a building id or level.
+    /// </summary>
+    public static class KingdomOneBuildSaveCodec
+    {
+        public const string BuildingId = MvpLoopSaveCodec.DefaultOneBuildId;
+        public const int CompletedLevel = 1;
+
+        public static KingdomOneBuildPrepareDisposition PrepareCandidate(
+            SaveGameData candidate,
+            KingdomOneBuildCommitRequest request,
+            out string message)
+        {
+            message = string.Empty;
+            if (candidate == null ||
+                string.IsNullOrWhiteSpace(request.TransactionId) ||
+                request.ExpectedRealm == RealmId.None ||
+                candidate.SelectedRealm != request.ExpectedRealm)
+            {
+                message = "AL-KINGDOM-ONE-BUILD-REQUEST-INVALID";
+                return KingdomOneBuildPrepareDisposition.Rejected;
+            }
+
+            MvpLoopSnapshot identity = MvpLoopSaveCodec.Read(candidate);
+            if (!identity.HasConfirmedChampion ||
+                !AL.ChampionMode.Quests.ProofOfWorthLordship.IsGranted(candidate))
+            {
+                message = "AL-KINGDOM-ONE-BUILD-LORDSHIP-REQUIRED";
+                return KingdomOneBuildPrepareDisposition.Rejected;
+            }
+
+            candidate.Buildings ??= new List<BuildingState>();
+            BuildingState existing = null;
+            for (int index = 0; index < candidate.Buildings.Count; index++)
+            {
+                BuildingState building = candidate.Buildings[index];
+                if (building == null ||
+                    !string.Equals(
+                        building.BuildingId,
+                        BuildingId,
+                        StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                if (existing != null || building.Level != CompletedLevel)
+                {
+                    message = "AL-KINGDOM-ONE-BUILD-STATE-CONFLICT";
+                    return KingdomOneBuildPrepareDisposition.Rejected;
+                }
+
+                existing = building;
+            }
+
+            if (existing != null)
+            {
+                return KingdomOneBuildPrepareDisposition.Duplicate;
+            }
+
+            candidate.Buildings.Add(new BuildingState
+            {
+                BuildingId = BuildingId,
+                Level = CompletedLevel
+            });
+            return KingdomOneBuildPrepareDisposition.Prepared;
+        }
+    }
+
     public enum KingdomTeachingPrepareDisposition
     {
         Prepared = 0,

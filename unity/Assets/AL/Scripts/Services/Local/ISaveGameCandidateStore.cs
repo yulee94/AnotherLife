@@ -169,6 +169,26 @@ namespace AL.Services.Local
     }
 
     /// <summary>
+    /// Schema-v2 entry point for exactly one canonical TownHall build.
+    /// The request carries no caller-selected building id, level, or callback.
+    /// </summary>
+    internal interface IProfileBoundKingdomOneBuildCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitProfileBoundKingdomOneBuild(
+            KingdomOneBuildCommitRequest request);
+    }
+
+    /// <summary>
+    /// Schema-v2 entry point for one ordered canonical Kingdom teaching step.
+    /// The save root reloads the catalog before preparing the candidate.
+    /// </summary>
+    internal interface IProfileBoundKingdomTeachingCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitProfileBoundKingdomTeaching(
+            KingdomTeachingCommitRequest request);
+    }
+
+    /// <summary>
     /// Schema-v1 private-kingdom teaching mutation entry point. The typed
     /// request can advance only one ordered catalog step in SaveGameData.Quests.
     /// </summary>

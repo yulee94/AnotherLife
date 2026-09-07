@@ -1208,37 +1208,14 @@ namespace AL.Services.Local
                     "AL-KINGDOM-TEACHING-CATALOG-INVALID");
             }
 
-            if (request.ExpectedProgress < 0 ||
-                request.ExpectedProgress >= teachingCatalog.Steps.Count ||
-                request.StepCount != teachingCatalog.Steps.Count ||
-                !string.Equals(
-                    request.QuestId,
-                    teachingCatalog.QuestId,
-                    StringComparison.Ordinal))
+            if (!TryResolveKingdomTeachingStep(
+                    request,
+                    teachingCatalog,
+                    out bool requiresTownHall))
             {
                 return LegacyCandidateRejected(
                     "AL-KINGDOM-TEACHING-CATALOG-CONFLICT");
             }
-
-            KingdomTeachingStep expectedStep =
-                teachingCatalog.Steps[request.ExpectedProgress];
-            if (!string.Equals(
-                    request.StepId,
-                    expectedStep.Id,
-                    StringComparison.Ordinal) ||
-                !string.Equals(
-                    request.CompletionEvent,
-                    expectedStep.CompletionEvent,
-                    StringComparison.Ordinal))
-            {
-                return LegacyCandidateRejected(
-                    "AL-KINGDOM-TEACHING-CATALOG-CONFLICT");
-            }
-
-            bool requiresTownHall = string.Equals(
-                expectedStep.Interaction,
-                "construct_town_hall",
-                StringComparison.Ordinal);
 
             if (!TryEnterLegacyCandidateCoordinator(
                     LegacyKingdomTeachingOperationId))
@@ -2356,6 +2333,9 @@ namespace AL.Services.Local
                         true,
                         diskChanged,
                         SaveCandidateSourceGeneration.Backup);
+                    ObservePrimaryAuthority(recoveredSave);
+                    ActivatePublishedWritableAuthority(
+                        ProfileAuthoritySourceGeneration.Primary);
                     SetLoadStatus(
                         SaveLoadStatus.RecoveredFromBackup,
                         recoveryMessage,
@@ -2448,6 +2428,9 @@ namespace AL.Services.Local
                         true,
                         true,
                         diskChanged);
+                    ObservePrimaryAuthority(recoveredSave);
+                    ActivatePublishedWritableAuthority(
+                        ProfileAuthoritySourceGeneration.Primary);
                     SetLoadStatus(
                         SaveLoadStatus.RecoveredFromBackup,
                         recoveryMessage,

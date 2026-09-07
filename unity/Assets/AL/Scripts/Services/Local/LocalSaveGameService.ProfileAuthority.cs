@@ -11,6 +11,8 @@ using AL.Data.Catalogs;
 using AL.Data.Runtime;
 using AL.RealmSelection;
 using AL.ChampionMode.Death;
+using AL.ChampionMode.Quests;
+using AL.UI.Kingdom;
 
 namespace AL.Services.Local
 {
@@ -22,6 +24,10 @@ namespace AL.Services.Local
             "save.profile-migration.pending";
         private const string ProfileBoundRealmOperationId =
             "al.save.schema2.realm-selection.v1";
+        private const string ProfileBoundKingdomOneBuildOperationId =
+            "al.save.schema2.kingdom-one-build.v1";
+        private const string ProfileBoundKingdomTeachingOperationId =
+            "al.save.schema2.kingdom-teaching.v1";
 
         private string _authorityEpoch = string.Empty;
         private string _verifiedGenerationFingerprint = string.Empty;
@@ -542,6 +548,7 @@ namespace AL.Services.Local
                 return incoherent;
             }
 
+            bool committedReplay = false;
             if (IsCommittedAuthority(publishedAuthority))
             {
                 if (!string.Equals(
@@ -578,20 +585,17 @@ namespace AL.Services.Local
 
                 if (publishedRealm == request.RequestedRealmId)
                 {
+                    committedReplay = true;
+                }
+                else
+                {
                     return LegacyRealmResult(
-                        RealmSelectionStatus.AlreadyCommittedSameRealm,
+                        RealmSelectionStatus.RejectedDifferentRealm,
                         request.RequestedRealmId,
                         false,
                         false,
-                        "AL-REALM-ALREADY-COMMITTED");
+                        "AL-REALM-DIFFERENT-REALM-REJECTED");
                 }
-
-                return LegacyRealmResult(
-                    RealmSelectionStatus.RejectedDifferentRealm,
-                    request.RequestedRealmId,
-                    false,
-                    false,
-                    "AL-REALM-DIFFERENT-REALM-REJECTED");
             }
 
             if (RealmSelectionAuthority.IsDefinedPlayable(publishedRealm) &&
@@ -605,21 +609,29 @@ namespace AL.Services.Local
                     "AL-REALM-DIFFERENT-REALM-REJECTED");
             }
 
-            bool legacyMigration =
+            bool legacyMigration = !committedReplay &&
                 RealmSelectionAuthority.IsDefinedPlayable(publishedRealm) &&
                 publishedRealm == request.RequestedRealmId;
-            string transactionId = legacyMigration
+            string transactionId = committedReplay
+                ? publishedAuthority.TransactionId
+                : legacyMigration
                 ? RealmSelectionAuthority.MigrationTransactionId(
                     before.ProfileId,
                     publishedRealm)
                 : request.TransactionId;
-            string correlationId = legacyMigration
+            string correlationId = committedReplay
+                ? publishedAuthority.CorrelationId
+                : legacyMigration
                 ? transactionId
                 : request.CorrelationId;
-            string eventId = legacyMigration
+            string eventId = committedReplay
+                ? publishedAuthority.EventId
+                : legacyMigration
                 ? string.Empty
                 : RealmSelectionAuthority.EventId(transactionId);
-            string provenance = legacyMigration
+            string provenance = committedReplay
+                ? publishedAuthority.Provenance
+                : legacyMigration
                 ? RealmSelectionAuthority.LegacyMigrationProvenance
                 : RealmSelectionAuthority.InitialProvenance;
             RealmId committedRealm = legacyMigration
@@ -640,6 +652,15 @@ namespace AL.Services.Local
                         {
                             return SaveCandidateMutationPreparation.Rejected(
                                 "AL-SAVE-PROFILE-ID-MUTATION-REJECTED");
+                        }
+
+                        if (committedReplay)
+                        {
+                            return candidate.SelectedRealm == publishedRealm &&
+                                IsCommittedAuthority(candidate.RealmSelection)
+                                    ? SaveCandidateMutationPreparation.Duplicate()
+                                    : SaveCandidateMutationPreparation.Rejected(
+                                        "AL-REALM-AUTHORITY-CONFLICT");
                         }
 
                         if (legacyMigration &&
@@ -688,6 +709,213 @@ namespace AL.Services.Local
                 request.RequestedRealmId,
                 bound,
                 legacyMigration);
+        }
+
+        SaveCandidateCommitResult
+            IProfileBoundKingdomOneBuildCandidateStore
+            .TryCommitProfileBoundKingdomOneBuild(
+                KingdomOneBuildCommitRequest request)
+        {
+            if (!RealmSelectionAuthority.IsBoundedIdentity(
+                    request.TransactionId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-ONE-BUILD-TRANSACTION-INVALID");
+            }
+
+            if (!TryGetWritableKingdomAuthority(
+                    request.ExpectedRealm,
+                    out ProfileWriteAuthoritySnapshot authority))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-ONE-BUILD-PROFILE-READ-ONLY");
+            }
+
+            ProfileBoundSaveCandidateCommitResult bound =
+                ((IProfileBoundSaveGameCandidateStore)this).TryCommitCandidate(
+                    ProfileAuthorityExpectation.From(authority),
+                    ProfileBoundKingdomOneBuildOperationId,
+                    request.TransactionId,
+                    candidate =>
+                    {
+                        if (!HasExactSchemaTwoMetadata(candidate) ||
+                            candidate.SelectedRealm != request.ExpectedRealm)
+                        {
+                            return SaveCandidateMutationPreparation.Rejected(
+                                "AL-KINGDOM-ONE-BUILD-AUTHORITY-CONFLICT");
+                        }
+
+                        KingdomOneBuildPrepareDisposition disposition =
+                            KingdomOneBuildSaveCodec.PrepareCandidate(
+                                candidate,
+                                request,
+                                out string message);
+                        if (!HasExactSchemaTwoMetadata(candidate) ||
+                            candidate.SelectedRealm != request.ExpectedRealm)
+                        {
+                            return SaveCandidateMutationPreparation.Rejected(
+                                "AL-KINGDOM-ONE-BUILD-AUTHORITY-CONFLICT");
+                        }
+
+                        switch (disposition)
+                        {
+                            case KingdomOneBuildPrepareDisposition.Prepared:
+                                return SaveCandidateMutationPreparation.Prepared();
+                            case KingdomOneBuildPrepareDisposition.Duplicate:
+                                return SaveCandidateMutationPreparation.Duplicate();
+                            default:
+                                return SaveCandidateMutationPreparation.Rejected(
+                                    string.IsNullOrWhiteSpace(message)
+                                        ? "AL-KINGDOM-ONE-BUILD-REQUEST-INVALID"
+                                        : message);
+                        }
+                    });
+            return bound?.CommitResult ??
+                LegacyCandidateRejected(
+                    "AL-KINGDOM-ONE-BUILD-COMMIT-UNAVAILABLE");
+        }
+
+        SaveCandidateCommitResult
+            IProfileBoundKingdomTeachingCandidateStore
+            .TryCommitProfileBoundKingdomTeaching(
+                KingdomTeachingCommitRequest request)
+        {
+            if (!RealmSelectionAuthority.IsBoundedIdentity(
+                    request.TransactionId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-TRANSACTION-INVALID");
+            }
+
+            KingdomTeachingCatalog teachingCatalog;
+            try
+            {
+                teachingCatalog = KingdomTeachingCatalog.LoadCanonical();
+            }
+            catch (Exception)
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-CATALOG-INVALID");
+            }
+
+            if (!TryResolveKingdomTeachingStep(
+                    request,
+                    teachingCatalog,
+                    out bool requiresTownHall))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-CATALOG-CONFLICT");
+            }
+
+            if (!TryGetWritableKingdomAuthority(
+                    request.ExpectedRealm,
+                    out ProfileWriteAuthoritySnapshot authority))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-PROFILE-READ-ONLY");
+            }
+
+            ProfileBoundSaveCandidateCommitResult bound =
+                ((IProfileBoundSaveGameCandidateStore)this).TryCommitCandidate(
+                    ProfileAuthorityExpectation.From(authority),
+                    ProfileBoundKingdomTeachingOperationId,
+                    request.TransactionId,
+                    candidate =>
+                    {
+                        if (!HasExactSchemaTwoMetadata(candidate) ||
+                            candidate.SelectedRealm != request.ExpectedRealm ||
+                            !ProofOfWorthLordship.IsGranted(candidate))
+                        {
+                            return SaveCandidateMutationPreparation.Rejected(
+                                "AL-KINGDOM-TEACHING-AUTHORITY-CONFLICT");
+                        }
+
+                        KingdomTeachingPrepareDisposition disposition =
+                            KingdomTeachingSaveCodec.PrepareCandidate(
+                                candidate,
+                                request,
+                                requiresTownHall,
+                                out string message);
+                        if (!HasExactSchemaTwoMetadata(candidate) ||
+                            candidate.SelectedRealm != request.ExpectedRealm)
+                        {
+                            return SaveCandidateMutationPreparation.Rejected(
+                                "AL-KINGDOM-TEACHING-AUTHORITY-CONFLICT");
+                        }
+
+                        switch (disposition)
+                        {
+                            case KingdomTeachingPrepareDisposition.Prepared:
+                                return SaveCandidateMutationPreparation.Prepared();
+                            case KingdomTeachingPrepareDisposition.Duplicate:
+                                return SaveCandidateMutationPreparation.Duplicate();
+                            default:
+                                return SaveCandidateMutationPreparation.Rejected(
+                                    string.IsNullOrWhiteSpace(message)
+                                        ? "AL-KINGDOM-TEACHING-REQUEST-INVALID"
+                                        : message);
+                        }
+                    });
+            return bound?.CommitResult ??
+                LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-COMMIT-UNAVAILABLE");
+        }
+
+        private bool TryGetWritableKingdomAuthority(
+            AL.Core.RealmId expectedRealm,
+            out ProfileWriteAuthoritySnapshot authority)
+        {
+            authority = GetCurrentAuthority();
+            return HasExactSchemaTwoProfile(_currentSave) &&
+                expectedRealm != AL.Core.RealmId.None &&
+                _currentSave.SelectedRealm == expectedRealm &&
+                authority != null &&
+                authority.Status == ProfileWriteAuthorityStatus.Writable &&
+                authority.SelectedSourceGeneration ==
+                    ProfileAuthoritySourceGeneration.Primary &&
+                string.Equals(
+                    authority.ProfileId,
+                    _currentSave.ProfileId,
+                    StringComparison.Ordinal);
+        }
+
+        private static bool TryResolveKingdomTeachingStep(
+            KingdomTeachingCommitRequest request,
+            KingdomTeachingCatalog catalog,
+            out bool requiresTownHall)
+        {
+            requiresTownHall = false;
+            if (catalog == null ||
+                request.ExpectedProgress < 0 ||
+                request.ExpectedProgress >= catalog.Steps.Count ||
+                request.StepCount != catalog.Steps.Count ||
+                !string.Equals(
+                    request.QuestId,
+                    catalog.QuestId,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            KingdomTeachingStep expectedStep =
+                catalog.Steps[request.ExpectedProgress];
+            if (!string.Equals(
+                    request.StepId,
+                    expectedStep.Id,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    request.CompletionEvent,
+                    expectedStep.CompletionEvent,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            requiresTownHall = string.Equals(
+                expectedStep.Interaction,
+                "construct_town_hall",
+                StringComparison.Ordinal);
+            return true;
         }
 
         DeathPenaltyCommitResult
