@@ -1,0 +1,72 @@
+{
+  "crownlands_sequential_gate_outer_face_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: pointed pyramid drum caps and timber barn doors. Retry PASS: true front elevation, long low curtain, exactly one gate, truncated/hipped drum caps, blank unclimbable outer face, merlon rhythm, Meridian chalk-gold / blue-slate / brass compass discs. Rebuild ceremonial leaves from gate_crownlands_meridian P0 limestone-and-silver language, not copied plank color. Illustrates gate_crownlands_meridian_outer visual language only."
+  },
+  "crownlands_sequential_gate_inner_face_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-2 rejected: Gothic palmette/lancet tracery on leaves. Attempt3 PASS: true front elevation, one inner gate, plain pale leaves with silver strap ribs, truncated hip drums, stone stair to walltop on this defender face only. No outer ladders. Sequence remains technical-plate topology / gate_crownlands_meridian."
+  },
+  "crownlands_sequential_gate_longitudinal_section_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-3 rejected: open proscenium / front-facing leaves. Attempt4 independent full-res PASS: LEFT CAD plan with two separate closed door-pairs at OUTER x=0 and INNER x=18, dashed roofed ~18 m passage, north stair hatch; RIGHT 2D subway side-cut with edge-on vertical barrier slabs occluding the tunnel, mannequin in the cavity, stair only beyond inner. Rebuild barriers from written 18 m, not pixels. wall_complex_crownlands_meridian."
+  },
+  "crownlands_sequential_wall_walltop_modules_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected (false-green): left curtain face had three pointed Gothic blind arches. Attempt2 independent full-res PASS: left blank ashlar curtain with flat horizontal blue-slate band and flat brass compass disc, zero openings/arcades; center true top-down ~2.4 m walltop walk plan with merlon ticks and stair hatch; right inner-only stair versus blank unclimbable outer face. Rebuild 2.4 m walk from written width, not pixels."
+  },
+  "crownlands_fortress_plan_apron_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Kept from the initial set. True top-down CAD, one connected polygonal perimeter, exactly one south entrance spanned by closed paired GATE leaves, low-broad enclosed palazzo keep with four blunt-octagon drums, separate central flag-anchor socket, continuous dashed boundary labeled >=30m EMPTY DEFENSIVE APRON with zero props. Apron pixels are not the 30 m metric. Placeholders fortress_crownlands_01..04 are not four forts."
+  },
+  "crownlands_fortress_elevations_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-2 rejected: pyramid caps / gold spikes / open arch. Attempt3 rejected on independent full-res: repeated pointed/lancet Gothic keep windows. Attempts 4-6 rejected: residual pyramid drum caps, gold finials, then a fairy-tale arcade viaduct. Attempt7 PASS: front+side orthographic elevations, long low solid wall, exactly one closed gate, rectangular flat-lintel punched windows, low broad palazzo keep behind the wall, drum caps as flat tabletop terraces with zero spikes/finials, blank unclimbable outer face, empty apron. Rebuild ceremonial leaves from gate_crownlands_meridian limestone-and-silver language. Consistent with current CrownlandsConceptP1 keep-shell civic language (not capital_crownspire itself)."
+  },
+  "crownlands_fortress_keep_flag_anchor_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempts 1-2 rejected: hollow ring keep, conical caps. Attempt3 rejected: pointed/pyramidal drum and central roofs with finials. Attempts 4-6 rejected: plan/elevation pyramid drum hats. Attempt7 rejected by parent native-resolution review for a pointed spear/obelisk mast and ambiguous non-walkable drum caps. Attempt8 rejected because the center keep was a 3/4 perspective view with visible side planes. Attempt9 parent native-resolution PASS: three isolated panels; true top-down solid enclosed keep roof plan with four broad flat octagonal drum tabletops and separate 4 m circular socket; true flat front elevation with rectangular windows, broad flat drum terraces, and low truncated central hip; detached constant-diameter 6 m banner pole on a separate 4 m plinth with blunt cap, zero taper/spear/needle/obelisk/finial."
+  },
+  "crownlands_terrain_grades_worldscar_wallend_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: 3/4 block, pillar-only brink, triple-arch arcade stele. Attempt2 PASS: left geologic bedding cut inner pale-to-outer broken; center sheer chalk-gold Worldscar mass; right horizontal masonry wall fused into impassable cliff with zero openings. Rebuild beds as offset nonperiodic blocks and the brink as a wide cliff elevation, not a copied pillar."
+  },
+  "crownlands_terrain_bridge_abutment_180m_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Kept from the initial set. Side elevation of Crownlands abutment on chalk Worldscar brink with shared 6 m deck leaving toward gulf; front pier with truncated hip cap; plan of abutment fit to brink and deck. 180 m span remains V013; pixels show endpoint fit only. No fortress, no sequential gate."
+  },
+  "crownlands_terrain_route_bed_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Kept from the initial set. Sliced-loaf cut with paired U-shaped wheel-rut depressions, raised shoulders, and a drainage box-gutter; top-down rutted packed-chalk lane; three unique angular chalk rocks with mannequin, not eggs/cones."
+  },
+  "crownlands_ecosystem_composition_habitat_v001": {
+    "verdict": "PASS",
+    "retry": false,
+    "notes": "Kept from the initial set. Four grounded habitat plots without animals: chalk wallow bowl, grain-verge cover with clear travel lane, reliquary chalk hollow, storm-shelf perch with brass-rib fragment. Volumetric clumps. No real-world wildlife, no dragons."
+  },
+  "crownlands_cave_exterior_language_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected (false-green): LEFT INNER was a round/arched mouth. Attempt2 rejected: square lintel but free-standing gate portals (gate drift), not cave landform. Attempt3 independent full-res PASS: LEFT INNER is a square/rectangular mouth with flat horizontal lintel and 90-degree corners cut into a chalk-rib shelf; CENTER OUTER is a storm-scarred chalk cut; RIGHT shelf language with brass clamps and slate plates. Non-dragon. No skull/egg/treasure/gate. P1 inner_cave_mouth / outer_cave_mouth remain chamber-mouth authority; this sheet is exterior landform only."
+  },
+  "crownlands_capital_city_material_kits_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: recessed niche rooms instead of swatches, cloned niches as cladding. Attempt2 PASS: six flat sample boards (ashlar, blue slate, brass ribs, silver, bronze hardware, grit) plus three distinct front-elevation wall bays (palazzo window, dwelling door, market shutter) with hip eaves. Not a city plan, not Town Hall/Workshop, no invented city IDs."
+  },
+  "crownlands_lod_material_lighting_reference_v001": {
+    "verdict": "PASS",
+    "retry": true,
+    "notes": "Attempt1 rejected: church front-gable and round-arch windows. Attempt2 PASS: same hip-roof dwelling at LOD0-LOD3 (LOD3 silhouette), rectangular openings, ASHLAR/SLATE/BRASS/SILVER/GRIT chips, overcast versus dusk practical lantern as geometry. No cones, no Town Hall."
+  }
+}

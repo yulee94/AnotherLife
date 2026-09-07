@@ -1,0 +1,38 @@
+{
+  "provider": "xai-oauth",
+  "chat_model": "grok-4.6",
+  "image_model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "aspect_ratio": "3:2",
+  "fallback_policy": "GPT-5.6 Sol only if Grok returns no answer",
+  "fallback_used": false,
+  "results": [
+    {
+      "name": "stonehold_save_pillar_ornament_v001",
+      "http": 200,
+      "path": "D:\\AnotherLife\\unity\\ArtSource\\Environment\\WorldConceptGapP0\\V001\\stonehold_save_pillar_ornament_v001.png",
+      "bytes": 273661,
+      "ok": true,
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false
+    },
+    {
+      "name": "crownlands_save_pillar_ornament_v001",
+      "http": 200,
+      "path": "D:\\AnotherLife\\unity\\ArtSource\\Environment\\WorldConceptGapP0\\V001\\crownlands_save_pillar_ornament_v001.png",
+      "bytes": 285207,
+      "ok": true,
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false
+    }
+  ],
+  "errors": {}
+}

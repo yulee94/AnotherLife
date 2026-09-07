@@ -1,0 +1,98 @@
+{
+  "scope": "Historical reference custody; no fresh visual/runtime acceptance claimed",
+  "packetValidators": [
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/validate_accordant_concept_gap_p1_v001.py",
+      "returncode": 0,
+      "output": "SHEETS 14\nASSETS 14\nQA_PASS 14 /14\nSTATUS AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION\nFALLBACK_USED False\nPASS\n"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/validate_crownlands_concept_gap_p2_v001.py",
+      "returncode": 0,
+      "output": "SHEETS 14\nASSETS 14\nQA_PASS 14 /14\nSTATUS AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION\nFALLBACK_USED False\nPASS\n"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/validate_crownlands_concept_p1_v001.py",
+      "returncode": 0,
+      "output": "SHEETS 16\nASSETS 16\nQA_PASS 16 /16\nGROK 16 FALLBACK 0\nSTATUS AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION\nPASS\n"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/validate_eldergrove_concept_gap_p2_v001.py",
+      "returncode": 0,
+      "output": "SHEETS 14\nASSETS 14\nQA_PASS 14 /14\nSTATUS AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION\nFALLBACK_USED False\nPASS\n"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/validate_eldergrove_concept_p1_v001.py",
+      "returncode": 0,
+      "output": "SHEETS 16\nASSETS 16\nQA_PASS 16 /16\nSTATUS AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION\nPASS\n"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/validate_umbral_concept_p1_v001.py",
+      "returncode": 0,
+      "output": "SHEETS 16\nASSETS 16\nQA_PASS 16 /16\nGROK 16 FALLBACK 0\nSTATUS AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION\nPASS\n"
+    }
+  ],
+  "manifestHashAudits": [
+    {
+      "path": "unity\\ArtSource\\Environment\\AccordantConceptGapP1\\V001\\accordant_concept_gap_p1_manifest_v001.json",
+      "checked": 28,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION"
+    },
+    {
+      "path": "unity\\ArtSource\\Environment\\CrownlandsConceptGapP2\\V001\\crownlands_concept_gap_p2_manifest_v001.json",
+      "checked": 28,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION"
+    },
+    {
+      "path": "unity\\ArtSource\\Environment\\CrownlandsConceptP1\\V001\\crownlands_concept_p1_manifest_v001.json",
+      "checked": 32,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION"
+    },
+    {
+      "path": "unity\\ArtSource\\Environment\\EldergroveConceptGapP2\\V001\\eldergrove_concept_gap_p2_manifest_v001.json",
+      "checked": 28,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION"
+    },
+    {
+      "path": "unity\\ArtSource\\Environment\\EldergroveConceptP1\\V001\\eldergrove_concept_p1_manifest_v001.json",
+      "checked": 32,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION"
+    },
+    {
+      "path": "unity\\ArtSource\\Environment\\StoneholdConceptGapP2\\V001\\stonehold_concept_gap_p2_manifest_v001.json",
+      "checked": 28,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION"
+    },
+    {
+      "path": "unity\\ArtSource\\Environment\\StoneholdConceptP1\\V001\\stonehold_concept_p1_manifest_v001.json",
+      "checked": 32,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION"
+    },
+    {
+      "path": "unity\\ArtSource\\Environment\\UmbralConceptP1\\V001\\umbral_concept_p1_manifest_v001.json",
+      "checked": 32,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION"
+    },
+    {
+      "path": "unity\\ArtSource\\Environment\\World2DProductionGuides\\V001\\world_2d_production_manifest_v001.json",
+      "checked": 52,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_PRODUCTION_SUBJECT_TO_OWNER_INSPECTION"
+    },
+    {
+      "path": "unity\\ArtSource\\Environment\\WorldConceptGapP0\\V001\\world_concept_gap_p0_manifest_v001.json",
+      "checked": 30,
+      "errors": [],
+      "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION"
+    }
+  ],
+  "missingReviewLinks": []
+}

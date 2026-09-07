@@ -1,0 +1,306 @@
+[
+  {
+    "familyId": "fam_crownlands_capital",
+    "source": "crownlands_capital_district_plan_v001.png",
+    "title": "Capital Crownspire top-down district plan",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1151600,
+    "source_sha256": "1d653c12fb7239afe4a77b5f3218dc39340e07ccd0ea7aa5ccf85b2412da4ca8",
+    "authoring": "crownlands_capital_district_plan_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5128540,
+    "authoring_sha256": "0220a44fc641607b6b63f3afef70ad4db80088ea2629b33f641428a418631bec",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_capital",
+    "source": "crownlands_capital_skyline_north_south_v001.png",
+    "title": "Capital north/south skyline elevations",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 921769,
+    "source_sha256": "d5c8bdde95f35112b50592b1a0c8d138072a73266f22e473c34cc572ec0d8a2d",
+    "authoring": "crownlands_capital_skyline_north_south_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4319547,
+    "authoring_sha256": "0b9a542eb19002170e19104c202926200a063b90d9e8ba7948614c174d06cd37",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_capital",
+    "source": "crownlands_capital_skyline_east_west_v001.png",
+    "title": "Capital east/west skyline elevations",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 740139,
+    "source_sha256": "8178a9c2e45620778aefaf4d09b63e32254e42bbcec3ab800e12126c71eab716",
+    "authoring": "crownlands_capital_skyline_east_west_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 3719984,
+    "authoring_sha256": "e25d3af3e823b9735638919ac0e7669fbe26020a06e0ccfae209913ec54b4607",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_capital",
+    "source": "crownlands_capital_keep_shell_v001.png",
+    "title": "Crownspire keep shell orthos",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 948275,
+    "source_sha256": "db1b57aa4f80f3c1831bc7c522daccc8edc463818a6ee17ebb078ab3821de2a8",
+    "authoring": "crownlands_capital_keep_shell_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4501611,
+    "authoring_sha256": "d871b84d085f586446334f7f2ef858abedb37d1cfaeb7ee63f1ec9439078fbba",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_capital",
+    "source": "crownlands_capital_keep_section_v001.png",
+    "title": "Keep longitudinal/cross section",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1007287,
+    "source_sha256": "fdea370be812a9686b63fb497af3ac0b0dbdc5b45b3b6d2fabd7e8c1b2c0220a",
+    "authoring": "crownlands_capital_keep_section_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4685830,
+    "authoring_sha256": "2a0471e2fda2d63cfbdd2b7521f9a07e3280afca00fc565b6650f2b2770b1dbf",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_capital",
+    "source": "crownlands_capital_keep_ground_plan_v001.png",
+    "title": "Furnished keep ground plan",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1295885,
+    "source_sha256": "707cd36149db7d2659d39755b64ab1d20ef03afa5e0ad0aa723aef311fea5930",
+    "authoring": "crownlands_capital_keep_ground_plan_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5694450,
+    "authoring_sha256": "8504e8e829b47411d1fce1e5bfb4eeac5ad5a8e1e11fc219a440e550bc278d35",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_capital",
+    "source": "crownlands_capital_keep_upper_circulation_v001.png",
+    "title": "Furnished upper/walltop circulation",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1189797,
+    "source_sha256": "060e6e32b8b2bccebaf63b0ddfd4a27bedf3c2fe18a4e1f5511a99891e49e7ba",
+    "authoring": "crownlands_capital_keep_upper_circulation_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5361208,
+    "authoring_sha256": "16653611d9750f0a99c9a7fea9726c0c3cd92add272f80d0da6fb5252bcc03a1",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_city_kit",
+    "source": "crownlands_city_street_grammar_v001.png",
+    "title": "6 m city street grammar + elevations",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1017509,
+    "source_sha256": "0ac6368fe7ea4bd841af8d1f297431df72707efecf99e67ad22e664da8b5405d",
+    "authoring": "crownlands_city_street_grammar_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4731969,
+    "authoring_sha256": "a69c09b9732115a9e5b3ecab6a2c5eb1ea1a7494834ded38cbbeaf00e789c31c",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_city_kit",
+    "source": "crownlands_city_dwelling_shell_v001.png",
+    "title": "Dwelling shell orthos",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 932411,
+    "source_sha256": "9fc8a32106f09c78e21c440ef991380ffcdc00e781b0cac62e6d9c7c664ca097",
+    "authoring": "crownlands_city_dwelling_shell_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4461594,
+    "authoring_sha256": "3174ea488fa4abd48e3885457728d74ef5b357eecbd118c2d61f7234ebfec0c4",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_city_kit",
+    "source": "crownlands_city_dwelling_interior_v001.png",
+    "title": "Dwelling furnished interior",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1022361,
+    "source_sha256": "fff61f69fcaa32209183b1d8c22301e91ca1c237648959a143ee8ed8679590de",
+    "authoring": "crownlands_city_dwelling_interior_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4808278,
+    "authoring_sha256": "d7da4249cd04a05b00ad2da11dd76609932cbb1729c655aa4111f430e4608388",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_city_kit",
+    "source": "crownlands_city_market_service_public_hall_kit_v001.png",
+    "title": "Market/service/public-hall kit 2.5x3.0 m",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1210729,
+    "source_sha256": "5492e6db779fbcee0aac48440eeca3c8e05e6f915cea9b2af2f1c452b2566fdc",
+    "authoring": "crownlands_city_market_service_public_hall_kit_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5372150,
+    "authoring_sha256": "dd5f9cc8a50af3c47ed6b1696944a0d3ff9f2e778a6b04659ccc2e5f04bbcd5f",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_inner_cave_dungeon",
+    "source": "crownlands_inner_cave_mouth_v001.png",
+    "title": "Inner non-dragon cave mouth",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1152803,
+    "source_sha256": "df27924252f107b0694512e08b7b6378020db95bf814424468937c66f7141d28",
+    "authoring": "crownlands_inner_cave_mouth_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5024827,
+    "authoring_sha256": "c252bd07f5ee5f49e9a5b5cf7794ecca1a19477df7052d2d2453f402f2d0bb4a",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_inner_cave_dungeon",
+    "source": "crownlands_inner_cave_section_circulation_v001.png",
+    "title": "Inner cave section + circulation",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1004590,
+    "source_sha256": "17676b5335362b61239269e477726c4fb7c1b60a44f6aa540a3b00989d90688b",
+    "authoring": "crownlands_inner_cave_section_circulation_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4664202,
+    "authoring_sha256": "92d76d14aba166f094e4466310ba4079a90fd81c00239cdf1dfd1ade447fe0fa",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_outer_cave_dungeon",
+    "source": "crownlands_outer_cave_mouth_v001.png",
+    "title": "Outer warzone non-dragon cave mouth",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1149846,
+    "source_sha256": "7d5b730bdd541e2198ee169fc62316dae90ed713649712f88716a0cd79ce206f",
+    "authoring": "crownlands_outer_cave_mouth_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4894215,
+    "authoring_sha256": "e80ef3188b03cf10423ce7209acf42969e52fc0fa42eb64c6c540dde1584a516",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_outer_cave_dungeon",
+    "source": "crownlands_outer_cave_loop_choke_section_v001.png",
+    "title": "Outer cave loop/choke section",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1149583,
+    "source_sha256": "1aa77e21861b035a61a2277042cb41f9a2343880ee94669d2ea904a84655322c",
+    "authoring": "crownlands_outer_cave_loop_choke_section_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5065445,
+    "authoring_sha256": "0bf9ddca62ceb337defdaf80b29fa93186d46d7cc346d0aed45229c5f3ba8e20",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_crownlands_inner_cave_dungeon",
+    "source": "crownlands_cave_chamber_fitting_module_v001.png",
+    "title": "Cave chamber/fitting module kit",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1273115,
+    "source_sha256": "49ac5aa626544278ba8e782af79c19fd206405fa7d9f4be77ca975996d5b87a0",
+    "authoring": "crownlands_cave_chamber_fitting_module_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5496381,
+    "authoring_sha256": "67ede6a8ca4a661c7cc07607a020aaa6abd9b3353a334d6e3b604a58c6fb0761",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  }
+]

@@ -1,0 +1,505 @@
+{
+  "version": "V001",
+  "packetId": "StoneholdConceptP1_V001",
+  "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION",
+  "priority": "P1",
+  "families": [
+    "fam_stonehold_capital",
+    "fam_stonehold_city_kit",
+    "fam_stonehold_inner_cave_dungeon",
+    "fam_stonehold_outer_cave_dungeon"
+  ],
+  "quality_target": "premium-AA dark-fantasy stylized realism; BDO-inspired directional bar, not parity",
+  "authority": {
+    "visual": "this packet",
+    "topology": "V013",
+    "catalogIds": "inventory / catalogs, not this packet",
+    "conceptsDoNotControl": [
+      "catalog IDs",
+      "save IDs",
+      "gameplay",
+      "Meshy spend",
+      "Stonehold U1/U2/U3",
+      "V013 inner 33.3333% / outer 66.6667%",
+      "sequential-gate plates",
+      "30 m fortress apron metric"
+    ]
+  },
+  "identity": {
+    "realm": "stonehold",
+    "direction": "Tempered Embermist / Faultline Bastion",
+    "materials": [
+      "matte dark basalt",
+      "heat-darkened iron",
+      "restrained iron-gold edgework",
+      "soot",
+      "ash"
+    ],
+    "forbidden": [
+      "dwarven caricature",
+      "lava theme",
+      "dragons",
+      "bosses",
+      "modern drift",
+      "fake facade shells"
+    ]
+  },
+  "provider": "xai-oauth",
+  "chat_model": "grok-4.6",
+  "image_model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "aspect_ratio": "3:2",
+  "fallback_policy": "GPT-5.6 Sol only if Grok returns no answer",
+  "fallback_used": false,
+  "fallback_provider": null,
+  "native_generation_resolution": [
+    1248,
+    832
+  ],
+  "authoring_resolution": [
+    7680,
+    5120
+  ],
+  "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+  "asset_count": 16,
+  "contact_sheet": "stonehold_concept_p1_contact_sheet_v001.jpg",
+  "contact_sheet_bytes": 875873,
+  "contact_sheet_sha256": "b241275054dda1505d9887fddcdee02d74c39030daa75eb72ecd1c727bb24fbd",
+  "contact_sheet_resolution": [
+    2016,
+    1664
+  ],
+  "retries": [
+    {
+      "sheet": "stonehold_capital_district_plan_v001",
+      "reason": "attempt1 3/4 axonometric island diorama",
+      "result": "PASS"
+    },
+    {
+      "sheet": "stonehold_capital_skyline_north_south_v001",
+      "reason": "attempt1 ziggurat 3/4; attempt2 piled mountain-city",
+      "result": "PASS"
+    },
+    {
+      "sheet": "stonehold_capital_skyline_east_west_v001",
+      "reason": "attempt1 mismatched 3/4 castles; attempt2 stepped ziggurat",
+      "result": "PASS"
+    }
+  ],
+  "rejected_attempts": [
+    "rejected/stonehold_capital_district_plan_v001_attempt1.png",
+    "rejected/stonehold_capital_skyline_north_south_v001_attempt1.png",
+    "rejected/stonehold_capital_skyline_north_south_v001_attempt2.png",
+    "rejected/stonehold_capital_skyline_east_west_v001_attempt1.png",
+    "rejected/stonehold_capital_skyline_east_west_v001_attempt2.png"
+  ],
+  "visual_qa": {
+    "stonehold_capital_district_plan_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: 3/4 axonometric island diorama, facades occluding roofs. Retry is near-ortho roof-plan footprints in an organic oval pocket with a single controlled approach. Rim geology is a bowl, not V013 continent topology. Door ticks weak; use city modules for apertures. Scale numerals not metric authority."
+    },
+    "stonehold_capital_skyline_north_south_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: 3/4 ziggurat mountain. Attempt2 rejected: piled mountain-city. Attempt3 PASS: flat ortho houses-keep-houses; north rear, south main door. Embermist. No dragons/lava."
+    },
+    "stonehold_capital_skyline_east_west_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: two different 3/4 castle clusters. Attempt2 rejected: stepped ziggurat. Attempt3 PASS: flat ortho street-wall, houses-keep-houses, labeled east/west, mannequin. Coherent with N/S attempt3."
+    },
+    "stonehold_capital_hero_keep_shell_v001": {
+      "verdict": "PASS",
+      "notes": "Roof plan + front + side of one battered keep. Wall thickness, walltop stair, punched main door, 1.8 m mannequin. Shell is simpler than skyline keep block; Blender rebuilds enterable keep from this shell plus interior program, not from skyline pixels."
+    },
+    "stonehold_capital_keep_interior_program_v001": {
+      "verdict": "PASS",
+      "notes": "Two true top-down furnished plans, not a dollhouse cutaway. Ground: receiving hall, smithing/stores/mess. Upper: command, barracks, armory. Side stairs align. Large streamed combat interior. No lava/dragons."
+    },
+    "stonehold_city_street_plan_elevation_v001": {
+      "verdict": "PASS",
+      "notes": "Same street: roof-ish plan + front elevation with house/shop/service/workshop mix. Plan still slightly 3/4 on roofs but street width and door ticks readable. Embermist. No dual-gate collage."
+    },
+    "stonehold_city_house_module_v001": {
+      "verdict": "PASS",
+      "notes": "Front/side/interior plan of one house. Hearth, table, stair to loft, traversable. No modern kitchen."
+    },
+    "stonehold_city_shop_module_v001": {
+      "verdict": "PASS",
+      "notes": "Hatch-front, side door, furnished plan with counter/stores/loft stair. Iron rolling curtain is material language, not glass shopfront. Plan street door vs hatch: rebuild as hatch + side door."
+    },
+    "stonehold_city_service_module_v001": {
+      "verdict": "PASS",
+      "notes": "Cistern grate, buckets, dry stores, counter, door swings. No modern plumbing. Traversable."
+    },
+    "stonehold_city_workshop_module_v001": {
+      "verdict": "PASS",
+      "notes": "Wagon door, chimney side, plan with two anvils, quench trough, coal bunker (not lava), tool racks, 2 m aisle."
+    },
+    "stonehold_inner_cave_mouth_v001": {
+      "verdict": "PASS",
+      "notes": "Front/side human-scale ore-gallery mouth, timber-iron lintel, mannequin. No dragon skull/eggs/lava."
+    },
+    "stonehold_inner_cave_section_circulation_v001": {
+      "verdict": "PASS",
+      "notes": "Section + organic pocket plan: gallery, main chamber, alcoves, store niche, portcullis. Walkable floors, labeled 3.2/5.5 m heights are intent only. No boss arena."
+    },
+    "stonehold_inner_cave_chamber_kit_v001": {
+      "verdict": "PASS",
+      "notes": "Three isolated modules: propped gallery, node chamber with three openings, store alcove. Same language, generous gray, no overlap collage."
+    },
+    "stonehold_outer_cave_mouth_v001": {
+      "verdict": "PASS",
+      "notes": "War-scarred human dungeon mouth, iron-gold clamps, rubble at threshold. No fortress, no sequential gate, no 30 m apron diagram, no dragon. Rubble is cave talus, not a climb onto a fortress wall."
+    },
+    "stonehold_outer_cave_section_combat_circulation_v001": {
+      "verdict": "PASS",
+      "notes": "Section with shoring + combat plan: mouth choke, looping ring, cover blocks, rear hold. Not a dragon perch or boss podium. No unauthored pits."
+    },
+    "stonehold_outer_cave_chamber_kit_v001": {
+      "verdict": "PASS",
+      "notes": "Three isolated combat modules: gallery with cover columns, cross-chamber corners, barred hold/alcove. No dragons/lava/fortress."
+    }
+  },
+  "assets": [
+    {
+      "familyId": "fam_stonehold_capital",
+      "source": "stonehold_capital_district_plan_v001.png",
+      "title": "Capital Anvildeep top-down district plan",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1488669,
+      "source_sha256": "88c84c7a04b2f3887183dcaddbd18c2231f47a360143a643fe0638df1170dc1e",
+      "authoring": "stonehold_capital_district_plan_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 6153917,
+      "authoring_sha256": "07b98f9800922667be8ac07e9c500e0e2f1113e07ac4c2ccbf09c369cc3bac1f",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_capital",
+      "source": "stonehold_capital_skyline_north_south_v001.png",
+      "title": "Capital north/south skyline elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 806461,
+      "source_sha256": "afe6116e0c45fe0cf490317c4e716161eba6ad6ca8ecc47ee2da18dcfd655b01",
+      "authoring": "stonehold_capital_skyline_north_south_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3866108,
+      "authoring_sha256": "53cef54c58ea2b707ca7c724c44da7ee70ec2fc2151aadc1d77913e716e47397",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_capital",
+      "source": "stonehold_capital_skyline_east_west_v001.png",
+      "title": "Capital east/west skyline elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 722986,
+      "source_sha256": "703e0d9d0b33f71e1b3203c1da46414e4df99bf393cdbb2bb735f12b975c9856",
+      "authoring": "stonehold_capital_skyline_east_west_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3522232,
+      "authoring_sha256": "d4b584042302b2debfe1421f7942295deaf62c4ed26302e2b157d8a2709480e5",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_capital",
+      "source": "stonehold_capital_hero_keep_shell_v001.png",
+      "title": "Enterable hero keep shell orthos",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 918823,
+      "source_sha256": "7bf3fcb3cc91c2514a44a0e295884a5c422ed64ef2d1a66a9dc8de9bfe0393a7",
+      "authoring": "stonehold_capital_hero_keep_shell_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4269076,
+      "authoring_sha256": "4f2d5176d76b343b3fd0c7cfbce553fb79f1cec20d6b8620e48eb6e9d82fb041",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_capital",
+      "source": "stonehold_capital_keep_interior_program_v001.png",
+      "title": "Keep furnished interior program plans",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1177227,
+      "source_sha256": "6a8833f372d80fbb484a8d948adf49b347ae719aaa14a92c5da2d2311a1f30da",
+      "authoring": "stonehold_capital_keep_interior_program_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5216827,
+      "authoring_sha256": "527b70d15dd0eae500ebbd2e9af0bdcdebbd2a6206b26594e7fbf179632ca437",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_city_kit",
+      "source": "stonehold_city_street_plan_elevation_v001.png",
+      "title": "City street plan and elevation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 991783,
+      "source_sha256": "ec908914f29183fde38aecc29183eef2a14cea990b5cb6bb6cdf03cae6baf58c",
+      "authoring": "stonehold_city_street_plan_elevation_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4606652,
+      "authoring_sha256": "d818241ff49353e0b940e297f13a6a5568c92688c229ff5bfde9e4cf80d6a565",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_city_kit",
+      "source": "stonehold_city_house_module_v001.png",
+      "title": "House module exterior + interior",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1078264,
+      "source_sha256": "afe327df7844dae23e9e8249346a6ceaafa140b691b93088030a3c9dfcf742a9",
+      "authoring": "stonehold_city_house_module_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4761851,
+      "authoring_sha256": "4c29da877af0a5399dd01dbbadbd341923a43fe787b26119662e4415e2cac1df",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_city_kit",
+      "source": "stonehold_city_shop_module_v001.png",
+      "title": "Shop module exterior + interior",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 955974,
+      "source_sha256": "05806961e37e04a9ddb70eda6f7616c9fac74ca1b92b2ccff199e47501a4a2a5",
+      "authoring": "stonehold_city_shop_module_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4327421,
+      "authoring_sha256": "9288f2b13d3971235f725f7b92f1aa4a50320679572195131d582dbe00b4c080",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_city_kit",
+      "source": "stonehold_city_service_module_v001.png",
+      "title": "Service module exterior + interior",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1115670,
+      "source_sha256": "f9868dc496d5260ad7a2717e84d53e1a45990e4df2cb313c24bcd1666a6fa906",
+      "authoring": "stonehold_city_service_module_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4897040,
+      "authoring_sha256": "a543e3e6fff5fbc3c04d2207431794a5fcad4a7bca7f318592c32775c9bd7a3a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_city_kit",
+      "source": "stonehold_city_workshop_module_v001.png",
+      "title": "Workshop module exterior + interior",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1134728,
+      "source_sha256": "c4dfaec79ad70afe197628976bc3d7bcfda7227981e8973d6908271026c3c191",
+      "authoring": "stonehold_city_workshop_module_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4982505,
+      "authoring_sha256": "98f70591a458acdc9a7daeb4ecf0391c9f6ce709c3f73a7bdc3a9fd5aa921101",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_inner_cave_dungeon",
+      "source": "stonehold_inner_cave_mouth_v001.png",
+      "title": "Inner non-dragon cave mouth",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1079663,
+      "source_sha256": "a6c3cb7b1d4dad60c41a8471caa442394048a0f36ceec42c1a2e5600a78b0097",
+      "authoring": "stonehold_inner_cave_mouth_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4799341,
+      "authoring_sha256": "cfed3b6bbfe8dfadb1a69425f00136ed70bd757cb9813fd4f096ea1dd32117d6",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_inner_cave_dungeon",
+      "source": "stonehold_inner_cave_section_circulation_v001.png",
+      "title": "Inner cave section + circulation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1040537,
+      "source_sha256": "e66c7308a87dd435859bdf48acb6c8a6a7753e3bdb95e237d3591ae5df5a3d76",
+      "authoring": "stonehold_inner_cave_section_circulation_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4496933,
+      "authoring_sha256": "1fba2b004dadad640e2d6fe76483692d5703b4ba9eb08269b4a792b831d907b2",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_inner_cave_dungeon",
+      "source": "stonehold_inner_cave_chamber_kit_v001.png",
+      "title": "Inner cave chamber kit",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 798118,
+      "source_sha256": "047b93f46990714a8bdd167b6cdcee8a489756486d897d544d51c959e7a48db3",
+      "authoring": "stonehold_inner_cave_chamber_kit_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3829950,
+      "authoring_sha256": "b8f3ba9b871193b1afcdd2b560bfbec9f0e5f553c0648c4b6e4eb04b3ce1e6ad",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_outer_cave_dungeon",
+      "source": "stonehold_outer_cave_mouth_v001.png",
+      "title": "Outer warzone non-dragon cave mouth",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 814270,
+      "source_sha256": "7e318ed988111a5c4c51e188fcc8a5723c7869b7c1f6fd73edf4de37c0ab2ed5",
+      "authoring": "stonehold_outer_cave_mouth_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3800101,
+      "authoring_sha256": "74dcb1332a67b9db799341b139f99c804c7e60f3fed0965cc713bb16e5fbd006",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_outer_cave_dungeon",
+      "source": "stonehold_outer_cave_section_combat_circulation_v001.png",
+      "title": "Outer cave section + combat circulation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1104598,
+      "source_sha256": "04c68fc0adf8d03cafe4b503879666cc096d46ef3cf1f14d513569e39235a932",
+      "authoring": "stonehold_outer_cave_section_combat_circulation_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4833234,
+      "authoring_sha256": "6e7eb17e7974a2e19254e976ee89f54658bfa091c6965b6284e8deb58674164e",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    },
+    {
+      "familyId": "fam_stonehold_outer_cave_dungeon",
+      "source": "stonehold_outer_cave_chamber_kit_v001.png",
+      "title": "Outer cave combat chamber kit",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 849683,
+      "source_sha256": "2cdb6db9d8b6b42ef5de5812c22a9f60eccb52bd625968cb342fc3d4816ae90b",
+      "authoring": "stonehold_outer_cave_chamber_kit_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4038056,
+      "authoring_sha256": "69f5b25934e294a3c2e76625ea1430086628893373bd6d42540f281759848918",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+    }
+  ],
+  "enterable_notes": {
+    "capital_and_city": "Where buildings are represented they are enterable. Small interiors (house/shop/service/workshop) are seamless. Large combat interiors (hero keep) are streamed.",
+    "no_fake_shells": true
+  },
+  "dimensional_control_not_ai_numerals": {
+    "player_height_m": 1.8,
+    "civic_interior_door_m": [
+      1.2,
+      2.4
+    ],
+    "street_width_m": 6,
+    "keep_visual_intent_m": {
+      "across": 48,
+      "to_walltop": 18
+    },
+    "house_footprint_m": [
+      8,
+      10
+    ],
+    "inner_cave_mouth_m": [
+      4.5,
+      3.6
+    ],
+    "outer_cave_mouth_m": [
+      6.0,
+      4.2
+    ],
+    "fortress_apron_m": 30,
+    "apron_applies_to": "outer warzone fortresses, not this cave/capital packet; do not copy pixels for 30 m",
+    "capital_id": "capital_anvildeep",
+    "inner_cities_per_realm": 3,
+    "inner_caves_per_realm": 1,
+    "outer_caves_per_realm": 1
+  }
+}

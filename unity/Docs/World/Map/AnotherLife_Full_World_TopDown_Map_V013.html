@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AnotherLife Full World Top-Down Map V013 — Owner Approved</title>
+<style>
+:root{color-scheme:dark;--bg:#090d13;--panel:#111720;--ink:#edf2f7;--muted:#9ca8b5;--line:#344050;--gold:#d7b15b;--green:#4ad481;--violet:#a987ff}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}.artifact{display:grid;grid-template-columns:1200px 360px;gap:18px;width:1598px;padding:20px}.map-shell{width:1200px;height:1200px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#07111b;box-shadow:0 22px 55px rgba(0,0,0,.28)}svg{display:block;width:100%;height:100%}.side{height:1200px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:22px 20px;display:flex;flex-direction:column;overflow:hidden}.eyebrow{font:700 11px/1.2 Consolas,monospace;letter-spacing:.14em;color:var(--gold)}h1{font:700 27px/1.12 Georgia,serif;margin:9px 0 7px}.subtitle{font-size:12px;line-height:1.4;color:var(--muted)}.status{margin:13px 0 14px;border:1px solid var(--gold);color:var(--gold);border-radius:7px;padding:8px 9px;font:700 10px Consolas,monospace;letter-spacing:.05em}.section{padding:11px 0;border-top:1px solid #2a3441}.section h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px;color:#d7dee8}.section ul{padding-left:17px;margin:0;color:var(--muted);font-size:11px;line-height:1.42}.section strong{color:var(--ink)}.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px}.key{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:7px}.sw{width:18px;height:11px;border:1px solid rgba(255,255,255,.25);border-radius:2px}.icon{width:18px;height:18px;border:2px solid #d8dee7;display:inline-block}.icon.capital{transform:rotate(45deg);width:13px;height:13px}.icon.city{border-radius:50%}.icon.fort{border-color:#e7b960;position:relative}.icon.pillar{border-radius:50%;width:9px;height:18px;border-color:#b789ff}.icon.cave{border-radius:10px 10px 2px 2px;border-bottom-color:transparent}.source-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px}.source-strip img{display:block;width:100%;height:62px;object-fit:contain;background:#060a0f;border:1px solid #3a4654;border-radius:5px}.buttons{margin-top:auto;display:grid;gap:9px}.buttons button{appearance:none;border:1px solid #556276;background:#19212c;color:#eef3f8;border-radius:8px;min-height:44px;padding:10px 12px;text-align:left;font-weight:700;cursor:pointer}.buttons button.primary{border-color:#d7b15b;background:#2b2518;color:#f4d991}.buttons button:hover{filter:brightness(1.12)}.foot{margin-top:12px;font:10px/1.35 Consolas,monospace;color:#778494}.realm-title{font:700 36px Georgia,serif;letter-spacing:.08em;fill:#f6f0df;paint-order:stroke;stroke:#07111b;stroke-width:8px;stroke-linejoin:round}.realm-sub{font:700 18px Consolas,monospace;letter-spacing:.08em;fill:#d7dee8;paint-order:stroke;stroke:#07111b;stroke-width:6px}.map-label{font:700 14px "Segoe UI",Arial,sans-serif;fill:#f2f5f8;paint-order:stroke;stroke:#111820;stroke-width:5px;stroke-linejoin:round}.small-label{font:700 15px Consolas,monospace;fill:#dce3ea;paint-order:stroke;stroke:#111820;stroke-width:4px}.micro{font:700 12px Consolas,monospace;fill:#e7edf2;paint-order:stroke;stroke:#111820;stroke-width:3px}.biome{font:700 13px Consolas,monospace;fill:#f3f6f8;paint-order:stroke;stroke:#10161e;stroke-width:4px}.bridge-label{font:700 14px Consolas,monospace;fill:#c7d0da;paint-order:stroke;stroke:#07111b;stroke-width:3px}.wall{fill:none;stroke:#171c23;stroke-width:18;stroke-linecap:round}.wall-hi{fill:none;stroke:#596574;stroke-width:4;stroke-linecap:round}.road{stroke:#4d4338;stroke-width:13;fill:none;stroke-linecap:round}.road-hi{stroke:#9b8464;stroke-width:2;fill:none;stroke-dasharray:8 7}.bridge{stroke:#f0df18;stroke-width:10;fill:none;stroke-linecap:round}.bridge-rail{stroke:#fff69a;stroke-width:3;fill:none}.sealed{stroke:#f0df18;stroke-width:16;fill:none;stroke-linecap:round}.sealed-hi{stroke:#fff69a;stroke-width:3;fill:none}.shore{fill:none;stroke:#9f8f73;stroke-width:5}.inner-zone{fill-opacity:.82;stroke:#e4d7bb;stroke-opacity:.48;stroke-width:3}.gate{stroke:#f2c75e;stroke-width:13;stroke-linecap:round}.attack{stroke:#4ad481;stroke-width:6;fill:none;marker-end:url(#arrowGreen)}.divider{stroke:#637182;stroke-width:5}.terrain-end{fill:#262d35;stroke:#7d8997;stroke-width:3}.fort-wall{fill:#19212a;stroke:#e0b35a;stroke-width:3}.fort-core{fill:#555f6c;stroke:#e8edf1;stroke-width:2}.capital-mark{fill:#d7b15b;stroke:#fff0c1;stroke-width:3}.city-mark{fill:#2b3542;stroke:#dce5ec;stroke-width:3}.pillar-mark{fill:#835bc5;stroke:#d6c3ff;stroke-width:3}.cave-mark{fill:#171c22;stroke:#e0e6ec;stroke-width:3}.blossom-petal{fill:#ffc0d7;stroke:#ffe3ec;stroke-width:2}.blossom-core{fill:#f3d36a;stroke:#fff1b5;stroke-width:1.5}.seal-bar{stroke:#e2d6ff;stroke-width:8;stroke-linecap:round}.compass{fill:#111925;stroke:#8f9baa;stroke-width:3}.count-tag{fill:#111925;stroke:#536071;stroke-width:2}
+</style>
+</head>
+<body>
+<main class="artifact">
+<section class="map-shell" aria-label="Full AnotherLife world top-down map">
+<svg id="world-map" viewBox="0 0 3200 3200" role="img" aria-labelledby="mapTitle mapDesc">
+<title id="mapTitle">AnotherLife full-world top-down topology confirmation map</title>
+<desc id="mapDesc">Scaled top-down world map: each realm has a 14.4 km end-to-end route taking about 40 minutes at 6 m/s. All eight adjacent-realm bridges are equal 180 m crossings taking about 30 seconds. Organic inner realms occupy exactly one third and are gated-only.</desc>
+<defs>
+<radialGradient id="worldscar" cx="50%" cy="48%" r="74%"><stop offset="0" stop-color="#21102e"/><stop offset=".46" stop-color="#10091a"/><stop offset=".82" stop-color="#07060d"/><stop offset="1" stop-color="#020307"/></radialGradient>
+<pattern id="scarVeil" width="280" height="240" patternUnits="userSpaceOnUse"><path d="M-30 190C45 120 95 245 168 165S285 85 330 150" fill="none" stroke="#71408d" stroke-width="8" opacity=".18"/><path d="M58 20L92 70L70 104L111 151" fill="none" stroke="#c37cff" stroke-width="4" opacity=".13"/><circle cx="215" cy="55" r="38" fill="none" stroke="#6a3c80" stroke-width="5" opacity=".12"/></pattern>
+<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#50315f" stroke-width="1" opacity=".12"/></pattern>
+<marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4ad481"/></marker>
+<filter id="soft"><feGaussianBlur stdDeviation="14"/></filter><filter id="riftGlow"><feGaussianBlur stdDeviation="9" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="3200" height="3200" fill="url(#worldscar)"/>
+<rect width="3200" height="3200" fill="url(#scarVeil)"/>
+<rect width="3200" height="3200" fill="url(#grid)"/>
+<rect x="30" y="30" width="3140" height="3140" rx="130" fill="none" stroke="#6e3e87" stroke-width="16" opacity=".55" filter="url(#riftGlow)"/>
+<g opacity=".22"><circle cx="1600" cy="1600" r="1080" fill="none" stroke="#76508a" stroke-width="4" stroke-dasharray="18 22"/><circle cx="1600" cy="1600" r="690" fill="none" stroke="#76508a" stroke-width="3" stroke-dasharray="10 20"/></g>
+<g id="bridges"></g><g id="realms"></g><g id="center-island"></g><g id="overlay"></g>
+</svg>
+</section>
+<aside class="side">
+<div class="eyebrow">ANOTHERLIFE · WORLD LAYOUT AUTHORITY</div>
+<h1>Full World Top-Down Map</h1>
+<div class="subtitle">A scaled 2D top-down world map—not a topology diagram—with continent, route, bridge, cave, city, wall, and fortress placement.</div>
+<div class="status">V013 · OWNER APPROVED · 3D PRODUCTION AUTHORIZED</div>
+<section class="section">
+<h2>Locked scope shown</h2>
+<ul>
+<li><strong>Northwest</strong> Stonehold · <strong>Northeast</strong> Crownlands</li>
+<li><strong>Southeast</strong> Umbral · <strong>Southwest</strong> Eldergrove</li>
+<li>Cherry-blossom-themed, event-only Accordant Isle</li>
+<li>Four Accordant approaches sealed outside events</li>
+<li>Two independent bridges per adjacent realm pair</li>
+<li>Bridge positions and orientations follow the supplied owner drawing</li>
+<li>Broad realm bodies and inward necks follow the original hand-drawn layout</li>
+<li>In/Out drawing controls area and placement—not a rectangular inner shape</li>
+<li>All inter-continent gaps and the map exterior are the Worldscar</li>
+<li>No swimming, jumping, flying, or off-bridge continent crossing</li>
+</ul>
+</section>
+<section class="section">
+<h2>Every realm contains</h2>
+<ul>
+<li>Organic inner area: measured 33.3% of the continent</li>
+<li>Inner contents: 1 capital, 3 cities, 1 cave/dungeon</li>
+<li>Boundary: continuous wall/terrain closure with outer gate, passage, inner gate</li>
+<li>Only the gated doors permit entry; no wall-end or terrain bypass</li>
+<li>Outer warzone: measured 66.7%, with 4 fortresses, 2 save pillars, and 1 cave/dungeon</li>
+<li>Biomes: pure gate region plus two adjacent-realm blends</li>
+<li>Far-end to far-end traversable realm route: approximately 40 minutes</li>
+</ul>
+</section>
+<section class="section">
+<h2>Traversal timing authority</h2>
+<ul>
+<li>Every adjacent-realm bridge: <strong>30 sec / 180 m</strong></li>
+<li>Accordant center bridges may be longer as required</li>
+<li>Main gate → nearest fortress: <strong>10 min / 3.6 km</strong></li>
+<li>Main gate → nearest adjacent bridge: <strong>15 min / 5.4 km</strong></li>
+<li>Main gate → opposing fortress: <strong>20–25 min / 7.2–9.0 km</strong></li>
+<li>Map scale: <strong>1 map unit = 10 m</strong></li>
+</ul>
+</section>
+<section class="section">
+<h2>Map legend</h2>
+<div class="legend">
+<div class="key"><span class="icon capital"></span>Capital</div><div class="key"><span class="icon city"></span>City</div>
+<div class="key"><span class="icon fort"></span>Fortress</div><div class="key"><span class="icon pillar"></span>Save pillar</div>
+<div class="key"><span class="icon cave"></span>Inner/outer cave</div><div class="key"><span class="sw" style="background:#d7b15b"></span>Dual gate</div>
+<div class="key"><span class="sw" style="background:#f0df18"></span>Realm bridge</div><div class="key"><span class="sw" style="background:#f0df18;border-color:#a987ff"></span>Center bridge + seal</div>
+<div class="key"><span class="sw" style="background:#d889a8"></span>Cherry-blossom isle</div>
+<div class="key"><span class="sw" style="background:#160b20;border-color:#a35fc4"></span>Worldscar abyss</div>
+</div>
+</section>
+<section class="section">
+<h2>Owner drawing references</h2>
+<div class="source-strip"><img src="References/Owner_Realm_Layout_2026-07-27.png" alt="Owner realm layout"><img src="References/Owner_Bridge_Topology_2026-09-01.png" alt="Owner bridge topology"><img src="References/Owner_InOut_Bridge_Layout_2026-09-02_contrast.png" alt="Owner inner outer realm layout"></div>
+<ul><li>Realm silhouette, bridge, and In/Out placement each follow their supplied source.</li><li>Measured area ratios and traversal times are approved overlays.</li></ul>
+</section>
+<div class="buttons">
+<button class="primary" data-hermes-send="Show the current AnotherLife 3D world-production status based on approved world map V013.">V013 approved — show 3D status</button>
+<button data-hermes-send="Reopen review of approved AnotherLife world map V013 before further 3D work.">Reopen map review</button>
+</div>
+<div class="foot">Owner approval recorded 2026-09-02. Scale authority: 10 m/map unit; adjacent bridges 180 m; realm routes 14.4 km.</div>
+</aside>
+</main>
+<script>
+(() => {
+const NS='http://www.w3.org/2000/svg',svg=document.getElementById('world-map'),bridges=document.getElementById('bridges'),realmsLayer=document.getElementById('realms'),centerLayer=document.getElementById('center-island'),overlay=document.getElementById('overlay'),C={x:1600,y:1600},METERS_PER_UNIT=10;
+function el(tag,attrs={},parent=svg){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);parent.appendChild(n);return n}
+function txt(parent,x,y,text,cls,anchor='middle'){const n=el('text',{x,y,class:cls,'text-anchor':anchor},parent);n.textContent=text;return n}
+function line(parent,x1,y1,x2,y2,cls){return el('line',{x1,y1,x2,y2,class:cls},parent)}
+function poly(points){return points.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}
+function polygonArea(points){let sum=0;for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length];sum+=a.x*b.y-b.x*a.y}return Math.abs(sum)*.5}
+function rotate(p,turns){let q={x:p.x,y:p.y};for(let i=0;i<turns;i++)q={x:C.x-(q.y-C.y),y:C.y+(q.x-C.x)};return q}
+function rotateVector(v,turns){let q={x:v.x,y:v.y};for(let i=0;i<turns;i++)q={x:-q.y,y:q.x};return q}
+function pathD(points){return'M'+points.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join('L')}
+function norm(v){const d=Math.hypot(v.x,v.y)||1;return{x:v.x/d,y:v.y/d}}
+function topY(x){return 190+12*Math.sin((x-170)/1420*Math.PI*2)+6*Math.sin((x-170)/1420*Math.PI*6+.4)}
+function leftX(y){return 185+10*Math.sin((y-180)/1410*Math.PI*2+.5)+5*Math.sin((y-180)/1410*Math.PI*5)}
+function sampleRange(a,b,n,fn){return Array.from({length:n+1},(_,i)=>fn(a+(b-a)*i/n))}
+function baseLand(){const pts=[];sampleRange(180,1591,48,x=>({x,y:topY(x)})).forEach(p=>pts.push(p));sampleRange(topY(1591),1030,20,y=>({x:1591,y})).slice(1).forEach(p=>pts.push(p));[{x:1550,y:1080},{x:1510,y:1180},{x:1450,y:1285},{x:1360,y:1385},{x:1240,y:1470},{x:1120,y:1530},{x:1030,y:1591}].forEach(p=>pts.push(p));sampleRange(1030,180,30,x=>({x,y:1591+10*Math.sin((x-180)/850*Math.PI*2+.3)})).slice(1).forEach(p=>pts.push(p));sampleRange(1591,topY(180),42,y=>({x:leftX(y),y})).slice(1).forEach(p=>pts.push(p));return pts}
+const BASE_LAND=baseLand(),BASE_AREA=polygonArea(BASE_LAND);
+function innerFor(d){const top=sampleRange(180,180+d,30,x=>({x,y:topY(x)})),T=top[top.length-1],L={x:leftX(180+d),y:180+d},control={x:180+d*.79,y:180+d*.79},wall=Array.from({length:121},(_,i)=>{const q=i/120,u=1-q;return{x:u*u*T.x+2*u*q*control.x+q*q*L.x,y:u*u*T.y+2*u*q*control.y+q*q*L.y}}),left=sampleRange(L.y,topY(180),30,y=>({x:leftX(y),y})).slice(1);return{points:[...top,...wall.slice(1),...left],wall}}
+function baseGeometry(){let lo=420,hi=1320,best=null;for(let i=0;i<70;i++){const d=(lo+hi)/2,candidate=innerFor(d),ratio=polygonArea(candidate.points)/BASE_AREA;best={d,ratio,...candidate};if(ratio<1/3)lo=d;else hi=d}return best}
+const BASE_GEOM=baseGeometry();
+function symbolCapital(g,x,y,label){const k=el('g',{transform:`translate(${x} ${y})`},g);el('rect',{x:-27,y:-27,width:54,height:54,transform:'rotate(45)',class:'capital-mark'},k);el('circle',{cx:0,cy:0,r:11,fill:'#1b222b',stroke:'#fff0c1','stroke-width':3},k);txt(k,0,76,label,'small-label')}
+function symbolCity(g,x,y,label){const k=el('g',{transform:`translate(${x} ${y})`},g);el('circle',{cx:0,cy:0,r:28,class:'city-mark'},k);el('rect',{x:-14,y:-14,width:11,height:28,fill:'#dce5ec'},k);el('rect',{x:4,y:-9,width:11,height:23,fill:'#dce5ec'},k);txt(k,0,53,label,'micro')}
+function symbolCave(g,x,y,label){el('path',{d:`M${x-30},${y+28}V${y}A30,30 0 0 1 ${x+30},${y}V${y+28}Z`,class:'cave-mark'},g);txt(g,x,y+55,label,'micro')}
+function symbolPillar(g,x,y,label){el('rect',{x:x-9,y:y-30,width:18,height:60,rx:5,class:'pillar-mark'},g);el('circle',{cx:x,cy:y-33,r:13,class:'pillar-mark'},g);txt(g,x,y+52,label,'micro')}
+function symbolFort(g,x,y,rotation,label){const k=el('g',{transform:`translate(${x} ${y}) rotate(${rotation})`},g);el('path',{d:'M-34-30H34V30H-34V-30M-10 30H10',class:'fort-wall','fill-rule':'evenodd'},k);el('rect',{x:-14,y:-12,width:28,height:24,rx:2,class:'fort-core'},k);el('circle',{cx:0,cy:0,r:5,fill:'#a987ff'},k);txt(k,0,55,label,'micro')}
+function blossom(g,x,y,s=1){const k=el('g',{transform:`translate(${x} ${y}) scale(${s})`},g);for(let i=0;i<5;i++){const a=Math.PI*2*i/5-Math.PI/2;el('circle',{cx:Math.cos(a)*15,cy:Math.sin(a)*15,r:13,class:'blossom-petal'},k)}el('circle',{cx:0,cy:0,r:7,class:'blossom-core'},k)}
+function drawAdjacentBridge(a,b,index){const len=Math.hypot(b.x-a.x,b.y-a.y),deck=line(bridges,a.x,a.y,b.x,b.y,'bridge');deck.setAttribute('data-adjacent-bridge-map-length',len.toFixed(3));deck.setAttribute('data-adjacent-bridge-meters',(len*METERS_PER_UNIT).toFixed(0));deck.setAttribute('data-crossing-seconds','30');line(bridges,a.x,a.y,b.x,b.y,'bridge-rail');txt(bridges,(a.x+b.x)/2,(a.y+b.y)/2-18,`BRIDGE ${index} · 180 M · 30 SEC`,'bridge-label')}
+function drawCenterBridge(a,b,turns){const A=rotate(a,turns),B=rotate(b,turns),deck=line(bridges,A.x,A.y,B.x,B.y,'sealed');deck.setAttribute('data-center-bridge-variable-length','true');line(bridges,A.x,A.y,B.x,B.y,'sealed-hi');const v=norm({x:B.x-A.x,y:B.y-A.y}),n={x:-v.y,y:v.x},p={x:B.x-v.x*34,y:B.y-v.y*34};line(bridges,p.x-n.x*34,p.y-n.y*34,p.x+n.x*34,p.y+n.y*34,'seal-bar')}
+// Owner bridge drawing, to-scale: all eight adjacent bridges are exactly 18 units = 180 m.
+[[{x:1591,y:400},{x:1609,y:400},1],[{x:1591,y:700},{x:1609,y:700},2],[{x:2500,y:1591},{x:2500,y:1609},1],[{x:2800,y:1591},{x:2800,y:1609},2],[{x:1591,y:2500},{x:1609,y:2500},1],[{x:1591,y:2800},{x:1609,y:2800},2],[{x:400,y:1591},{x:400,y:1609},1],[{x:700,y:1591},{x:700,y:1609},2]].forEach(v=>drawAdjacentBridge(v[0],v[1],v[2]));
+for(let turn=0;turn<4;turn++)drawCenterBridge({x:1390,y:1390},{x:1450,y:1450},turn);
+const realms=[
+{id:'stonehold',name:'STONEHOLD',dir:'NORTHWEST',capital:'ANVILDEEP',turn:0,base:'#54463b',inner:'#786048',pure:'#675142',blendA:'#355842',blendB:'#596273',blendAText:'ELDERGROVE BLEND',blendBText:'CROWNLANDS BLEND'},
+{id:'crownlands',name:'CROWNLANDS',dir:'NORTHEAST',capital:'CROWNSPIRE',turn:1,base:'#46546b',inner:'#817755',pure:'#59677e',blendA:'#596273',blendB:'#4c355d',blendAText:'STONEHOLD BLEND',blendBText:'UMBRAL BLEND'},
+{id:'umbral',name:'UMBRAL',dir:'SOUTHEAST',capital:'VEILSPIRE',turn:2,base:'#32223f',inner:'#5a356d',pure:'#432953',blendA:'#4c355d',blendB:'#29483f',blendAText:'CROWNLANDS BLEND',blendBText:'ELDERGROVE BLEND'},
+{id:'eldergrove',name:'ELDERGROVE',dir:'SOUTHWEST',capital:'WORLDROOT',turn:3,base:'#234535',inner:'#386b4a',pure:'#2f5941',blendA:'#29483f',blendB:'#355842',blendAText:'UMBRAL BLEND',blendBText:'STONEHOLD BLEND'}];
+function drawRealm(r){const g=el('g',{'data-realm':r.id,'data-inner-area-ratio':BASE_GEOM.ratio.toFixed(6),'data-inner-access':'outer-gate>sealed-passage>inner-gate-only','data-end-to-end-route-meters':'14400'},realmsLayer),land=BASE_LAND.map(p=>rotate(p,r.turn)),inner=BASE_GEOM.points.map(p=>rotate(p,r.turn)),wall=BASE_GEOM.wall.map(p=>rotate(p,r.turn));const defs=svg.querySelector('defs'),clip=el('clipPath',{id:`clip-${r.id}`},defs);el('polygon',{points:poly(land)},clip);el('polygon',{points:poly(land),fill:r.base},g);const biomes=el('g',{'clip-path':`url(#clip-${r.id})`},g),bands=[[{x:800,y:650},{x:1750,y:650},{x:1750,y:1750},{x:800,y:1750},r.pure],[{x:170,y:170},{x:1600,y:170},{x:1600,y:880},{x:700,y:880},r.blendA],[{x:170,y:800},{x:880,y:800},{x:880,y:1600},{x:170,y:1600},r.blendB]];bands.forEach(b=>el('polygon',{points:poly(b.slice(0,4).map(p=>rotate(p,r.turn))),fill:b[4],opacity:.95},biomes));el('polygon',{points:poly(inner),fill:r.inner,class:'inner-zone'},g);el('polygon',{points:poly(land),class:'shore'},g);
+// Exact one-third organic inner boundary, fully closed except dual-gate passage.
+const left=wall.slice(0,53),right=wall.slice(68),wallPath=pts=>pathD(pts);[left,right].forEach(pts=>{el('path',{d:wallPath(pts),class:'wall'},g);el('path',{d:wallPath(pts),class:'wall-hi'},g)});[left[0],right[right.length-1]].forEach(p=>el('circle',{cx:p.x,cy:p.y,r:34,class:'terrain-end'},g));const mid=wall[60],tan=norm({x:wall[63].x-wall[57].x,y:wall[63].y-wall[57].y}),innerDir=rotateVector(norm({x:-1,y:-1}),r.turn),outerGate={x:mid.x-innerDir.x*34,y:mid.y-innerDir.y*34},innerGate={x:mid.x+innerDir.x*34,y:mid.y+innerDir.y*34};line(g,outerGate.x-tan.x*42,outerGate.y-tan.y*42,outerGate.x+tan.x*42,outerGate.y+tan.y*42,'gate');line(g,innerGate.x-tan.x*42,innerGate.y-tan.y*42,innerGate.x+tan.x*42,innerGate.y+tan.y*42,'gate');line(g,mid.x-tan.x*54,mid.y-tan.y*54,mid.x+tan.x*54,mid.y+tan.y*54,'divider');line(g,mid.x-innerDir.x*115,mid.y-innerDir.y*115,mid.x+innerDir.x*105,mid.y+innerDir.y*105,'attack');txt(g,mid.x+tan.x*130,mid.y+tan.y*130,'DUAL GATE · ONLY ENTRY','micro');
+function P(x,y){return rotate({x,y},r.turn)}const capital=P(470,470),cities=[P(700,350),P(350,700),P(700,700)],innerCave=P(300,520);symbolCapital(g,capital.x,capital.y,r.capital);cities.forEach((p,i)=>{line(g,capital.x,capital.y,p.x,p.y,'road');symbolCity(g,p.x,p.y,`CITY ${i+1}`)});symbolCave(g,innerCave.x,innerCave.y,'INNER CAVE');
+const forts=[P(1210,420),P(1430,780),P(1210,1230),P(760,1430)];forts.forEach((p,i)=>symbolFort(g,p.x,p.y,r.turn*90,`F${i+1}`));[P(1030,850),P(850,1060)].forEach((p,i)=>symbolPillar(g,p.x,p.y,`SAVE ${i+1}`));const outerCave={x:mid.x-innerDir.x*190,y:mid.y-innerDir.y*190};symbolCave(g,outerCave.x,outerCave.y,'OUTER CAVE · 3 MIN');line(g,mid.x,mid.y,outerCave.x,outerCave.y,'road-hi');
+[P(1160,930),P(1250,620),P(650,1250)].forEach((p,i)=>txt(g,p.x,p.y,[`PURE REALM BIOME`,r.blendAText,r.blendBText][i],'biome'));const name=P(520,1030);txt(g,name.x,name.y,r.name,'realm-title');txt(g,name.x,name.y+34,r.dir,'realm-sub');const innerLabel=P(560,560),outerLabel=P(1180,1080);txt(g,innerLabel.x,innerLabel.y,`INNER · ${(BASE_GEOM.ratio*100).toFixed(1)}%`,'small-label');txt(g,outerLabel.x,outerLabel.y,`OUTER · ${(100-BASE_GEOM.ratio*100).toFixed(1)}%`,'small-label');
+// 14.4 km authored traversal line: geometry is scaled to 1 unit = 10 m.
+let route=[{x:250,y:250},{x:500,y:450},{x:720,y:700},{x:980,y:950},{x:1305,y:1225}],fixed=0;for(let i=1;i<route.length-1;i++)fixed+=Math.hypot(route[i].x-route[i-1].x,route[i].y-route[i-1].y);const prev=route[route.length-2],last=route[route.length-1],v=norm({x:last.x-prev.x,y:last.y-prev.y}),need=1440-fixed;route[route.length-1]={x:prev.x+v.x*need,y:prev.y+v.y*need};const worldRoute=route.map(p=>rotate(p,r.turn)),routePath=el('path',{d:pathD(worldRoute),fill:'none',stroke:'#f4e6b2','stroke-width':7,'stroke-dasharray':'24 18',opacity:.78},g);routePath.setAttribute('data-route-map-length','1440');routePath.setAttribute('data-route-meters','14400');const rp=worldRoute[2];txt(g,rp.x,rp.y-24,'END-TO-END ROUTE · 14.4 KM · ≈40 MIN','micro')}
+realms.forEach(drawRealm);
+// Cherry-blossom Accordant Isle.
+const island=[];for(let i=0;i<44;i++){const a=Math.PI*2*i/44,rad=220*(.93+.07*Math.sin(i*2.3));island.push({x:C.x+Math.cos(a)*rad,y:C.y+Math.sin(a)*rad})}el('polygon',{points:poly(island),fill:'#7b5266',stroke:'#f0b4cb','stroke-width':7},centerLayer);el('circle',{cx:C.x,cy:C.y,r:135,fill:'#3a2836',stroke:'#ffc1d8','stroke-width':5},centerLayer);[.2,1.1,2.2,3.2,4.2,5.3].forEach((a,i)=>blossom(centerLayer,C.x+Math.cos(a)*(i%2?165:145),C.y+Math.sin(a)*(i%2?165:145),1.15));symbolCapital(centerLayer,C.x,C.y-8,'EVENT CASTLE');symbolCave(centerLayer,C.x,C.y+112,'EVENT CAVERN');txt(centerLayer,C.x,C.y-270,'ACCORDANT ISLE','realm-title');txt(centerLayer,C.x,C.y-230,'CHERRY BLOSSOM · EVENT ONLY · SEALED','realm-sub');
+// Scale, Worldscar, compass, and audit.
+txt(overlay,1600,110,'WORLD SCAR · BOTTOMLESS ARCANE CHASM · BRIDGE-ONLY TRAVERSAL','realm-sub');const scale=el('g',{transform:'translate(2320 2980)'},overlay);line(scale,0,0,500,0,'divider');[0,100,500].forEach(x=>line(scale,x,-18,x,18,'divider'));txt(scale,0,45,'0','micro');txt(scale,100,45,'1 KM','micro');txt(scale,500,45,'5 KM','micro');txt(scale,250,-28,'MAP SCALE · 1 UNIT = 10 M','small-label');const compass=el('g',{transform:'translate(2920 240)'},overlay);el('circle',{cx:0,cy:0,r:100,class:'compass'},compass);el('path',{d:'M0-82L20-14L0-28L-20-14Z',fill:'#e7c56f'},compass);txt(compass,0,-118,'N','realm-sub');txt(compass,0,132,'S','realm-sub');txt(compass,132,5,'E','realm-sub');txt(compass,-132,5,'W','realm-sub');const audit=el('g',{transform:'translate(170 2890)'},overlay);el('rect',{x:0,y:0,width:930,height:190,rx:14,class:'count-tag'},audit);txt(audit,26,34,'SCALED WORLD MAP AUDIT','small-label','start');txt(audit,26,68,'4 REALMS · EACH AUTHORED END-TO-END ROUTE 14.4 KM / ≈40 MIN','micro','start');txt(audit,26,98,'8 ADJACENT BRIDGES · EACH EXACTLY 180 M / 30 SEC · CENTER BRIDGES VARIABLE','micro','start');txt(audit,26,128,'EACH REALM: INNER 33.3% WITH CAPITAL + 3 CITIES + CAVE','micro','start');txt(audit,26,158,'OUTER 66.7% WITH 4 FORTS + 2 SAVES + CAVE + 3 BIOMES','micro','start');txt(audit,26,184,'OUTER CAVE ≈3 MIN FROM DUAL GATE · INNER ACCESS GATED ONLY','micro','start');
+window.mapAudit={metersPerMapUnit:METERS_PER_UNIT,innerRatio:Number(BASE_GEOM.ratio.toFixed(6)),adjacentBridgeLengths:[...document.querySelectorAll('[data-adjacent-bridge-map-length]')].map(e=>Number(e.dataset.adjacentBridgeMapLength)),realmRouteMeters:[...document.querySelectorAll('[data-route-meters]')].map(e=>Number(e.dataset.routeMeters))};
+})();
+</script>
+</body>
+</html>

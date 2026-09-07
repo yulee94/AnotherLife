@@ -1,0 +1,691 @@
+{
+  "version": "V001",
+  "packetId": "EldergroveConceptGapP2_V001",
+  "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION",
+  "priority": "P2",
+  "families": [
+    "fam_eldergrove_sequential_gate_wall_complex",
+    "fam_eldergrove_fortress_single_gate",
+    "fam_eldergrove_terrain",
+    "fam_eldergrove_ecosystem_dressing",
+    "fam_eldergrove_interior_furnishings"
+  ],
+  "quality_target": "premium-AA dark-fantasy stylized realism; BDO-inspired directional bar, not parity",
+  "authority": {
+    "visual": "this packet",
+    "topology": "V013 + eldergrove_sequential_gate_technical_plate_v001",
+    "stableGateIds": [
+      "gate_eldergrove_greenveil",
+      "gate_eldergrove_greenveil_outer",
+      "wall_complex_eldergrove_greenveil"
+    ],
+    "catalogIds": "inventory / catalogs, not this packet",
+    "direction": "B \u2014 Moonroot Vigil",
+    "conceptsDoNotControl": [
+      "catalog IDs",
+      "save IDs",
+      "gameplay",
+      "Meshy spend",
+      "existing world inventory JSON",
+      "Stonehold packets",
+      "EldergroveConceptP1",
+      "V013 inner 33.3333% / outer 66.6667%",
+      "sequential-gate technical plate topology",
+      "30 m fortress apron metric",
+      "Town Hall / Workshop"
+    ]
+  },
+  "identity": {
+    "realm": "eldergrove",
+    "direction": "Moonroot Vigil",
+    "fortressIds": [
+      "fortress_eldergrove_01",
+      "fortress_eldergrove_02",
+      "fortress_eldergrove_03",
+      "fortress_eldergrove_04"
+    ],
+    "fortressIdsArePlaceholders": true,
+    "materials": [
+      "pale mineral stone",
+      "dark timber",
+      "aged bronze root collars",
+      "desaturated bark",
+      "restrained moon-silver",
+      "pale-gold"
+    ],
+    "forbidden": [
+      "bright-green-only cue",
+      "neon bioluminescence",
+      "root portal",
+      "cute sprites",
+      "fake facade shells",
+      "dense canopy hiding traversal",
+      "modern drift",
+      "real-world animals",
+      "dragons",
+      "bosses",
+      "runtime VFX baked into geometry",
+      "Embermist palette swap",
+      "apron roots/foliage/terrain/climb props",
+      "Open Crown Arbor Town Hall spectacle"
+    ]
+  },
+  "provider": "xai-oauth",
+  "chat_model": "grok-4.6",
+  "image_model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "aspect_ratio": "3:2",
+  "fallback_policy": "GPT-5.6 Sol only if Grok returns no answer",
+  "fallback_used": false,
+  "fallback_provider": null,
+  "native_generation_resolution": [
+    1248,
+    832
+  ],
+  "authoring_resolution": [
+    7680,
+    5120
+  ],
+  "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+  "asset_count": 14,
+  "contact_sheet": "eldergrove_concept_gap_p2_contact_sheet_v001.jpg",
+  "contact_sheet_bytes": 754670,
+  "contact_sheet_sha256": "e16b43c51598bce4c08c4c49b70013bf6451250bf23eab9a6467104c59cc11ff",
+  "contact_sheet_resolution": [
+    2016,
+    1664
+  ],
+  "retries": [
+    {
+      "sheet": "eldergrove_sequential_gate_outer_face_v001",
+      "reason": "attempt1 giant exterior roots / climb-assist trunks",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_sequential_gate_inner_face_v001",
+      "reason": "attempt1 wrapping trees and missing inner walltop stair",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_sequential_gate_longitudinal_section_v001",
+      "reason": "attempts 1-5 and 7: courtyard/oculus, posts/frames, open hallway, one dark inset panel; independent PASS on bb508d5770c053fa with OUTER x=0 / INNER x=18 leaf planes, roof, inner-side stair",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_sequential_wall_walltop_modules_v001",
+      "reason": "attempts 1-6 exterior roots, stair tower, center as elevation not walk plan",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_fortress_plan_apron_v001",
+      "reason": "attempts 1-3 apron roots / open ungated gap / unlabeled apron; independent PASS on 0c2392135c823c61 closed paired GATE + labeled >=30m empty apron",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_fortress_elevations_v001",
+      "reason": "attempts 1-2 outer-face roots and keep silhouette drift",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_fortress_keep_flag_mast_v001",
+      "reason": "attempt1 hollow ring keep, wrapping roots, mast not detached",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_terrain_grades_worldscar_wallend_v001",
+      "reason": "attempts 1-2 cake-slab islands, door stele, root ladders",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_terrain_route_bed_v001",
+      "reason": "attempts 1-2 wavy mattress cut, missing ruts/gutter, teardrop rocks",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_ecosystem_family_orthos_v001",
+      "reason": "attempts 1-3 and 5 dead-stick / crystal-spike / cairn / overwrite; independent PASS on f9ad43191680b302 low blunt boulder mound",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_ecosystem_composition_plots_v001",
+      "reason": "attempt1 dead-stick tree and obstructed 2 m lane",
+      "result": "PASS"
+    },
+    {
+      "sheet": "eldergrove_interior_room_plates_v001",
+      "reason": "attempt1 giant interior root / tree portal in bronze ring",
+      "result": "PASS"
+    }
+  ],
+  "rejected_attempts": [
+    "rejected/eldergrove_ecosystem_composition_plots_v001_attempt1.png",
+    "rejected/eldergrove_ecosystem_family_orthos_v001_attempt1.png",
+    "rejected/eldergrove_ecosystem_family_orthos_v001_attempt2.png",
+    "rejected/eldergrove_ecosystem_family_orthos_v001_attempt3.png",
+    "rejected/eldergrove_ecosystem_family_orthos_v001_attempt5.png",
+    "rejected/eldergrove_fortress_elevations_v001_attempt1.png",
+    "rejected/eldergrove_fortress_elevations_v001_attempt2.png",
+    "rejected/eldergrove_fortress_keep_flag_mast_v001_attempt1.png",
+    "rejected/eldergrove_fortress_plan_apron_v001_attempt1.png",
+    "rejected/eldergrove_fortress_plan_apron_v001_attempt2.png",
+    "rejected/eldergrove_fortress_plan_apron_v001_attempt3.png",
+    "rejected/eldergrove_interior_room_plates_v001_attempt1.png",
+    "rejected/eldergrove_sequential_gate_inner_face_v001_attempt1.png",
+    "rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt1.png",
+    "rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt2.png",
+    "rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt3.png",
+    "rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt4.png",
+    "rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt5.png",
+    "rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt7.png",
+    "rejected/eldergrove_sequential_gate_outer_face_v001_attempt1.png",
+    "rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt1.png",
+    "rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt2.png",
+    "rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt3.png",
+    "rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt4.png",
+    "rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt5.png",
+    "rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt6.png",
+    "rejected/eldergrove_terrain_grades_worldscar_wallend_v001_attempt1.png",
+    "rejected/eldergrove_terrain_grades_worldscar_wallend_v001_attempt2.png",
+    "rejected/eldergrove_terrain_outer_biome_reads_v001_attempt1.png",
+    "rejected/eldergrove_terrain_route_bed_v001_attempt1.png",
+    "rejected/eldergrove_terrain_route_bed_v001_attempt2.png"
+  ],
+  "visual_qa": {
+    "eldergrove_sequential_gate_outer_face_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: giant wrapping trunks as climb assists on the outer face. Retry PASS: true front elevation, long low curtain, exactly one timber/bronze gate, blank unclimbable pale-mineral masonry, timber banding only, no trees/roots/ladders/talus. Illustrates gate_eldergrove_greenveil_outer visual language only."
+    },
+    "eldergrove_sequential_gate_inner_face_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: wrapping trees and no clear inner walltop stair. Retry PASS: true front elevation, one inner gate, stone stair to walltop on this defender face only, two small bronze-collar root seats at the wall base under the 1.2 m budget, no wrapping trunks. Timber posts on the seats are hardware, not climb trunks."
+    },
+    "eldergrove_sequential_gate_longitudinal_section_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-5 and 7 rejected: courtyard/oculus, posts/frames as gates, open hallway, one dark inset roof panel, labeled collage. Independent full-res PASS on native sha256 bb508d5770c053fa: LEFT plan and RIGHT section with OUTER x=0 and INNER x=18 leaf planes at passage ends, continuous roofed ~18 m passage, stair only beyond inner on protected side. Frames/posts alone are not this sheet. Sequence remains technical-plate topology / wall_complex_eldergrove_greenveil. Rebuild barriers from written 18 m, not pixels."
+    },
+    "eldergrove_sequential_wall_walltop_modules_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-6 rejected: exterior roots, stair towers, center as standing wall elevation. Retry PASS: left curtain bay with no trees; center long-narrow walk as top-down paving with merlon ticks and a stair hatch; right inner-only stair versus blank unclimbable outer face. Rebuild the 2.4 m walk from written width, not pixels."
+    },
+    "eldergrove_fortress_plan_apron_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-3 rejected: apron roots, open ungated gap between piers, unlabeled apron. Independent full-res PASS on native sha256 0c2392135c823c61: true top-down CAD, one connected irregular perimeter, exactly one entrance spanned by closed paired timber gate leaves labeled GATE, low-broad enclosed keep, separate central flag-mast socket, continuous dashed boundary labeled >=30m EMPTY DEFENSIVE APRON with zero roots/terrain/foliage/props. Apron pixels are not the 30 m metric."
+    },
+    "eldergrove_fortress_elevations_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-2 rejected: roots on the outer face and keep silhouette drift. Retry PASS: front+side orthographic elevations, long low wall, exactly one gate, low broad rectangular keep behind the wall, blank unclimbable outer face, no roots/stumps/trees. Compact length; instance curtain from the plan."
+    },
+    "eldergrove_fortress_keep_flag_mast_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: hollow oculus keep and wrapping roots; mast fused/classical. Retry PASS: solid enclosed keep roof plan with a separate 4 m flag plinth below; low broad keep elevation with no mast and no giant roots; isolated 6 m mast on a blocking plinth as a detached socketed object."
+    },
+    "eldergrove_terrain_grades_worldscar_wallend_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-2 rejected: 3/4 cake-slab islands, decorative door stele, root ladders. Retry PASS: left geologic grade cut with organic slope; center nonperiodic Worldscar macro cliff front elevation; right horizontal masonry wall fused into an impassable cliff, no door/stele/roots. Rebuild beds as offset nonperiodic blocks, not copied stripes."
+    },
+    "eldergrove_terrain_route_bed_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-2 rejected: 3/4 wavy mattress cut, missing ruts/gutter, teardrop rocks. Retry PASS: sliced-loaf cut with paired wheel-rut depressions, raised shoulders, and a drainage box-gutter; top-down rutted packed-silt lane; three unique angular rocks with a squat fractured boulder, not eggs."
+    },
+    "eldergrove_terrain_outer_biome_reads_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Kept from the initial set. Three labeled PURE / UMBRAL BLEND / STONEHOLD BLEND landform reads of Moonroot Vigil geology. Forms differ by ash-dark veins vs basalt-grit pockets rather than a fifth-realm recolor. Rebuild as front-elevation outcrops; do not instance three identical 3/4 island meshes."
+    },
+    "eldergrove_ecosystem_family_orthos_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempts 1-3 and 5 rejected: leafless dead-stick Hollowbark, upright crystal/spike mineral piles, stacked cairn, later overwrite. Independent full-res PASS on native sha256 f9ad43191680b302: grounded leafy Hollowbark, sedge, fern, low blunt pale-mineral boulder mound (not crystals/blades), non-climb-assist rootnest with bronze collars."
+    },
+    "eldergrove_ecosystem_composition_plots_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: dead-stick tree and obstructed route. Retry PASS: four grounded plots; plot 3 has a clear packed-silt travel lane with plants only on the verges; volumetric clumps; no crystal spikes or picket fences. Rebuild as front-elevation strips rather than 3/4 islands."
+    },
+    "eldergrove_interior_room_plates_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: giant interior root / tree-in-bronze-ring portal blocking the joinery floor. Retry PASS: two true top-down plans; guard/ready room with racks, benches, desk, door swing, stair bulkhead, complete walls; joinery floor with workbenches, bronze collars as table tools, herbal still, wagon door, stores, walkable aisles. Zero living trees, zero root portals."
+    },
+    "eldergrove_interior_civic_furniture_v001": {
+      "verdict": "PASS",
+      "retry": false,
+      "notes": "Kept from the initial set. Two stacked true top-down civic/service plans with circulation plus eight isolated focal furniture orthos (map table, herbal bench, archive niche, joinery jig, cot, clamp bench, blank notice board, steward desk) and a 1.8 m mannequin. Corner bronze seats are tiny wall hardware."
+    }
+  },
+  "assets": [
+    {
+      "familyId": "fam_eldergrove_sequential_gate_wall_complex",
+      "source": "eldergrove_sequential_gate_outer_face_v001.png",
+      "title": "Sequential outer-face elevation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 845906,
+      "source_sha256": "564522b67ebdb784b8f13ad1826fecc3ba6378d75a3353e30b150dd5f0a34732",
+      "authoring": "eldergrove_sequential_gate_outer_face_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4263025,
+      "authoring_sha256": "b29db23b53103b8c272f33944ccfcae9b8b2666ed2376bc2f12ebf9a4ccf3130",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_sequential_gate_wall_complex",
+      "source": "eldergrove_sequential_gate_inner_face_v001.png",
+      "title": "Sequential inner-face elevation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 893496,
+      "source_sha256": "e39a69d46b92e7de5406b308ad971d2df4b0b54facf27cdb232103098ff6a27c",
+      "authoring": "eldergrove_sequential_gate_inner_face_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4358574,
+      "authoring_sha256": "b169b2be65a1b8c5389a9842e31db178e8ec1c20d1eb0b262a6a138614bc110e",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_sequential_gate_wall_complex",
+      "source": "eldergrove_sequential_gate_longitudinal_section_v001.png",
+      "title": "Sequential plan + 18 m passage section",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 211544,
+      "source_sha256": "bb508d5770c053fa621547d8632dbfd3f2bb7e47ae67febcf5d5915f1d361511",
+      "authoring": "eldergrove_sequential_gate_longitudinal_section_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3201980,
+      "authoring_sha256": "1ce8b42faf6a622f1da158692c2bc0a84b3e74c8a61a3c30c0b2a6b3d35b86c5",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_sequential_gate_wall_complex",
+      "source": "eldergrove_sequential_wall_walltop_modules_v001.png",
+      "title": "Wall / walltop defender modules",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 942434,
+      "source_sha256": "961721dbd0b46f5973b02a8de9c0595284d942cd0e760a238f42f76384000745",
+      "authoring": "eldergrove_sequential_wall_walltop_modules_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4387698,
+      "authoring_sha256": "a3f1f7472bde97c8fdf174861df0e0ffc7e64b0e6a4387cb30a79051b289742a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_fortress_single_gate",
+      "source": "eldergrove_fortress_plan_apron_v001.png",
+      "title": "One-gate fortress plan with 30 m clear apron",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 337582,
+      "source_sha256": "0c2392135c823c61e5e029acbffbeb44a382bbacf82efd6970d573d17d58aa6b",
+      "authoring": "eldergrove_fortress_plan_apron_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4697489,
+      "authoring_sha256": "a8dc63c67a225c06a9974c1ef859d49902297ebae96d7420d561ba03b4fc3835",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_fortress_single_gate",
+      "source": "eldergrove_fortress_elevations_v001.png",
+      "title": "One-gate fortress front/side elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 628400,
+      "source_sha256": "99deec66efaa969f06dad3bfadcf8f041b3237c87efa85bf8e93c53d2964b74a",
+      "authoring": "eldergrove_fortress_elevations_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3291575,
+      "authoring_sha256": "76a4280ac60a220a2460436fadc0a0c409b3ed248e498b9e99f9b1f8b2e92daa",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_fortress_single_gate",
+      "source": "eldergrove_fortress_keep_flag_mast_v001.png",
+      "title": "Keep shell + central flag-mast socket",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 875604,
+      "source_sha256": "8b5954095404236b12c3a57c76ef4636f9bb873fe4275cd697ae13cab0dab681",
+      "authoring": "eldergrove_fortress_keep_flag_mast_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4014102,
+      "authoring_sha256": "6d02cb70f1f3d42bb8550dbb7a8b629687951f0dc370bd53adb8a0d776ef9f6a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_terrain",
+      "source": "eldergrove_terrain_grades_worldscar_wallend_v001.png",
+      "title": "Inner/outer grade, Worldscar brink, wall-end",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1122011,
+      "source_sha256": "62f536f98c05b08cf27d23af5fe6e7912413def38e63fc1c69d32ebaec0496c8",
+      "authoring": "eldergrove_terrain_grades_worldscar_wallend_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5096362,
+      "authoring_sha256": "469801869e1db9c1ae1d263cab416c944acbb43bd749c1fde45659f119bdc6bc",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_terrain",
+      "source": "eldergrove_terrain_route_bed_v001.png",
+      "title": "Route bed/ruts/shoulders + player-scale rocks",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 999717,
+      "source_sha256": "0a8268af8b4c800d69d1eb3537c53da7e9683624e6b31dad0b68b84b53a39a78",
+      "authoring": "eldergrove_terrain_route_bed_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4251620,
+      "authoring_sha256": "bc728f8060504d02acc64830f17ea77b6f7e4926370585dbbcd7aa8259a46a60",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_terrain",
+      "source": "eldergrove_terrain_outer_biome_reads_v001.png",
+      "title": "PURE / UMBRAL BLEND / STONEHOLD BLEND reads",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 762415,
+      "source_sha256": "0911a5c424431cd59e4cbd2d180cdaafe5b2c8c1d85bfa66bfc1f48286dac81a",
+      "authoring": "eldergrove_terrain_outer_biome_reads_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3666811,
+      "authoring_sha256": "00a4975d979c0f4ec988b0e1a0ac35ca199398ae1460638294264451f663913a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_ecosystem_dressing",
+      "source": "eldergrove_ecosystem_family_orthos_v001.png",
+      "title": "Three vegetation + two rock/ground families",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 210164,
+      "source_sha256": "f9ad43191680b302c85a92940a5764db7b374dc0f20bc179269962c66a3fa3a0",
+      "authoring": "eldergrove_ecosystem_family_orthos_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3188241,
+      "authoring_sha256": "8b2bb63027a4331c1047632fafdc1b797ef85421ff3053ef3e5642ec67ef9bf1",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_ecosystem_dressing",
+      "source": "eldergrove_ecosystem_composition_plots_v001.png",
+      "title": "Ecosystem composition plots",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1426644,
+      "source_sha256": "60c91029e138f1d16e3b1946918c768c4d8568486daccb7e665e9a931f001a0f",
+      "authoring": "eldergrove_ecosystem_composition_plots_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5829646,
+      "authoring_sha256": "714a844518ef9924a722f7b24d64ebd39d316816913aadb6a6739e8d3b22bafd",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_interior_furnishings",
+      "source": "eldergrove_interior_room_plates_v001.png",
+      "title": "Guard + root-maintenance furnished plans",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 992884,
+      "source_sha256": "ce1e28d4d3334afa960af5189a7cde18b414011b09d28b156db4f94005d5f469",
+      "authoring": "eldergrove_interior_room_plates_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4735859,
+      "authoring_sha256": "d15405deb37ef3a55ea5025fcc4d9c2f01b405d7281c5b28019b695e3794957d",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    },
+    {
+      "familyId": "fam_eldergrove_interior_furnishings",
+      "source": "eldergrove_interior_civic_furniture_v001.png",
+      "title": "Service/civic plans + focal furniture orthos",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 952667,
+      "source_sha256": "ad4d6bcddb9391b626e58573f63d9edb09e4c85af135e656f55efbcc6fa0a30e",
+      "authoring": "eldergrove_interior_civic_furniture_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4366613,
+      "authoring_sha256": "d6fd2e79d07506fd8dbef63329f7b3aed0124be898bda97e7b30dd6ee3db934d",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused for this sheet"
+    }
+  ],
+  "enterable_notes": {
+    "sequential": "Controlled passageway and walltop defender routes are enterable. Attacker bypass forbidden.",
+    "fortress": "Keep/interior must be a complete enterable space, not a black facade.",
+    "no_fake_shells": true
+  },
+  "dimensional_control_not_ai_numerals": {
+    "player_height_m": 1.8,
+    "civic_interior_door_m": [
+      1.2,
+      2.4
+    ],
+    "sequential_passage_m": 18,
+    "ceremonial_gate_opening_m": [
+      8,
+      6
+    ],
+    "walltop_walk_m": 2.4,
+    "fortress_apron_m": 30,
+    "apron_applies_to": "outer warzone fortresses; metric validators control 30 m; do not copy pixels",
+    "flag_mast_plinth_m": {
+      "mast": 6,
+      "plinth": 4
+    },
+    "keep_visual_intent_m": {
+      "across": 36,
+      "to_walltop": 16
+    },
+    "route_km": 14.4,
+    "inner_gate_id": "gate_eldergrove_greenveil",
+    "outer_gate_id": "gate_eldergrove_greenveil_outer",
+    "wall_complex_id": "wall_complex_eldergrove_greenveil"
+  }
+}

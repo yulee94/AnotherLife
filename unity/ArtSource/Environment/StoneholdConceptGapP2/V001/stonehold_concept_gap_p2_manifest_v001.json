@@ -1,0 +1,580 @@
+{
+  "version": "V001",
+  "packetId": "StoneholdConceptGapP2_V001",
+  "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION",
+  "priority": "P0",
+  "families": [
+    "fam_stonehold_sequential_gate_wall_complex",
+    "fam_stonehold_fortress_single_gate",
+    "fam_stonehold_terrain",
+    "fam_stonehold_ecosystem_dressing",
+    "fam_stonehold_interior_furnishings",
+    "fam_stonehold_civic_fort_props"
+  ],
+  "quality_target": "premium-AA dark-fantasy stylized realism; BDO-inspired directional bar, not parity",
+  "authority": {
+    "visual": "this packet",
+    "topology": "V013 + stonehold_sequential_gate_technical_plate_v001",
+    "stableGateIds": [
+      "gate_stonehold_faultline",
+      "gate_stonehold_faultline_outer",
+      "wall_complex_stonehold_faultline"
+    ],
+    "catalogIds": "inventory / catalogs, not this packet",
+    "conceptsDoNotControl": [
+      "catalog IDs",
+      "save IDs",
+      "gameplay",
+      "Meshy spend",
+      "Stonehold U1/U2/U3",
+      "V013 inner 33.3333% / outer 66.6667%",
+      "sequential-gate technical plate topology",
+      "30 m fortress apron metric"
+    ]
+  },
+  "identity": {
+    "realm": "stonehold",
+    "direction": "Tempered Embermist / Faultline Bastion",
+    "materials": [
+      "matte dark basalt",
+      "heat-darkened iron",
+      "restrained iron-gold edgework",
+      "soot",
+      "ash"
+    ],
+    "forbidden": [
+      "dwarven caricature",
+      "lava theme",
+      "dragons",
+      "bosses",
+      "modern drift",
+      "fake facade shells",
+      "climb-assist apron",
+      "stick/spike/fence vegetation"
+    ]
+  },
+  "provider": "xai-oauth",
+  "chat_model": "grok-4.6",
+  "image_model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "aspect_ratio": "3:2",
+  "fallback_policy": "GPT-5.6 Sol only if Grok returns no answer",
+  "fallback_used": false,
+  "fallback_provider": null,
+  "native_generation_resolution": [
+    1248,
+    832
+  ],
+  "authoring_resolution": [
+    7680,
+    5120
+  ],
+  "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+  "asset_count": 14,
+  "contact_sheet": "stonehold_concept_gap_p2_contact_sheet_v001.jpg",
+  "contact_sheet_bytes": 731928,
+  "contact_sheet_sha256": "31a72740ad37acbe9767b2d9c96c743074a0c9abc201899cd37c9174c77b301f",
+  "contact_sheet_resolution": [
+    2016,
+    1664
+  ],
+  "retries": [
+    {
+      "sheet": "stonehold_sequential_gate_section_plan_v001",
+      "reason": "attempt1 plus-shaped courtyard / single chamber",
+      "result": "PASS"
+    },
+    {
+      "sheet": "stonehold_sequential_wall_module_kit_v001",
+      "reason": "attempt1 timber leaves + climbable rubble",
+      "result": "PASS"
+    },
+    {
+      "sheet": "stonehold_walltop_defender_modules_v001",
+      "reason": "attempt1 lava + outer ladder",
+      "result": "PASS"
+    },
+    {
+      "sheet": "stonehold_fortress_plan_apron_v001",
+      "reason": "attempt1 3/4 + apron stairs + fountain",
+      "result": "PASS"
+    },
+    {
+      "sheet": "stonehold_fortress_elevations_v001",
+      "reason": "attempt1 round keep; attempt2 drum/octagonal tower",
+      "result": "PASS"
+    },
+    {
+      "sheet": "stonehold_terrain_route_bed_rocks_v001",
+      "reason": "attempt1 metal rails + egg rocks",
+      "result": "PASS"
+    },
+    {
+      "sheet": "stonehold_ecosystem_family_orthos_v001",
+      "reason": "attempt1 FractureFan vertical palisade",
+      "result": "PASS"
+    }
+  ],
+  "rejected_attempts": [
+    "rejected/stonehold_sequential_gate_section_plan_v001_attempt1.png",
+    "rejected/stonehold_sequential_wall_module_kit_v001_attempt1.png",
+    "rejected/stonehold_walltop_defender_modules_v001_attempt1.png",
+    "rejected/stonehold_fortress_plan_apron_v001_attempt1.png",
+    "rejected/stonehold_fortress_elevations_v001_attempt1.png",
+    "rejected/stonehold_fortress_elevations_v001_attempt2.png",
+    "rejected/stonehold_terrain_route_bed_rocks_v001_attempt1.png",
+    "rejected/stonehold_ecosystem_family_orthos_v001_attempt1.png"
+  ],
+  "visual_qa": {
+    "stonehold_sequential_gate_section_plan_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: plus-shaped courtyard and single-chamber cutaway, not outer to passage to inner. Retry PASS: horizontal wall band with two barrier planes and longitudinal tunnel section. Road markings look modern; rebuild as packed basalt. Sequence does not replace the technical plate or gate_stonehold_faultline."
+    },
+    "stonehold_sequential_wall_module_kit_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: timber barn doors and climbable rubble at wall-end. Retry PASS: three isolated front elevations, one leaf pair, cliff seating without a ramp. Leaves still show X-brace; Blender rebuilds as layered dark-iron plates. One pair only, not outer+inner twins."
+    },
+    "stonehold_walltop_defender_modules_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: lava at base and outer-face ladder. Retry PASS: cold merlon elevation, inner-side stair module, blank outer face. Left panel is an inner-face elevation rather than a true walk plan; rebuild walk from 2.4 m width intent."
+    },
+    "stonehold_fortress_plan_apron_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: 3/4 axonometric, stairs into apron, central fountain. Retry PASS: near-ortho polygonal plan, one flush gate, empty dashed apron, flag as circle+mast-dot, low keep roof. Apron pixels are not the 30 m metric; fortress contract remains fail-closed."
+    },
+    "stonehold_fortress_elevations_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: round drum keep, compact gatehouse not a perimeter. Attempt2 rejected: still a drum/octagonal tower. Attempt3 PASS: low rectangular keep behind a one-gate wall, front+side, no talus/stairs. Compact length; instance curtain wall from the plan, not from pixels."
+    },
+    "stonehold_fortress_keep_flag_anchor_v001": {
+      "verdict": "PASS",
+      "notes": "Keep roof plan, low-broad front, isolated 6 m flag mast with empty socket and mannequin. Extra plinth views are the same object. No cathedral, no second gate."
+    },
+    "stonehold_terrain_geology_worldscar_v001": {
+      "verdict": "PASS",
+      "notes": "Left geologic cut is still somewhat bedded; right Worldscar brink has macro/meso/micro fracture, mannequin, no cones, no lightning/magma. Rebuild strata as nonperiodic offset blocks, not a layered cake."
+    },
+    "stonehold_terrain_route_bed_rocks_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: metal tram rails, 3/4 slab, egg-smooth scaled rocks. Retry PASS: rut depressions in section, packed-ash top-down with stone shoulders, angular player-scale rocks + mannequin."
+    },
+    "stonehold_ecosystem_family_orthos_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: FractureFan as vertical crystal palisade. Retry PASS: sedge clump, fern mass, ironbell bush, lower radiating fan, talus pile, mannequin. Fan still slightly crystalline; rebuild as low broken-fan fins. Ironbell is a bushy bell cluster, not fence posts."
+    },
+    "stonehold_ecosystem_composition_plots_v001": {
+      "verdict": "PASS",
+      "notes": "Four isolated 8 m elevation strips: exposed ridge, sheltered fault, route verge with clear lane, Worldscar exposure. Grounded volumetric clumps, no stick/spike/fence drift, no animals."
+    },
+    "stonehold_interior_guard_forge_rooms_v001": {
+      "verdict": "PASS",
+      "notes": "Two true top-down furnished plans. Guard: racks, desk, stair, door swing, 1.2 m walls. Forge: two anvils, quench, packed-fuel bunker not lava, wagon doors, stores, circulation. Slight wall-top 3/4; not a dollhouse cutaway."
+    },
+    "stonehold_interior_service_civic_rooms_v001": {
+      "verdict": "PASS",
+      "notes": "Service/stores with racks, cistern, crates, counter, aisles. Civic chamber with table, chairs, steward desk, shelves, door swings. Complete walls, no fake shells, no readable writing."
+    },
+    "stonehold_civic_props_orthos_v001": {
+      "verdict": "PASS",
+      "notes": "Eight isolated civic furnishings + 1.8 m mannequin. Blank notice board. Embermist timber/basalt/iron. Slight 3/4 on objects; not a room collage."
+    },
+    "stonehold_fort_props_orthos_v001": {
+      "verdict": "PASS",
+      "notes": "Eight isolated fort furnishings: single cot not bunk, empty rack, one crate, gate-control empty sockets, mannequin. Locker door slightly modern; rebuild as timber/iron. No weapons, no collage."
+    }
+  },
+  "assets": [
+    {
+      "familyId": "fam_stonehold_sequential_gate_wall_complex",
+      "source": "stonehold_sequential_gate_section_plan_v001.png",
+      "title": "Sequential two-barrier plan + section",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 378601,
+      "source_sha256": "32b18779e8ad2a45ea373049364bf6b3b7e28753672e0e5762e3d85cd056f4eb",
+      "authoring": "stonehold_sequential_gate_section_plan_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 2343752,
+      "authoring_sha256": "46c1abe7a3901a77a1781ceacd335b34da63257e223713b4130982e7a137cac5",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "retry": true,
+        "notes": "Attempt1 rejected: plus-shaped courtyard and single-chamber cutaway, not outer to passage to inner. Retry PASS: horizontal wall band with two barrier planes and longitudinal tunnel section. Road markings look modern; rebuild as packed basalt. Sequence does not replace the technical plate or gate_stonehold_faultline."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_sequential_gate_wall_complex",
+      "source": "stonehold_sequential_wall_module_kit_v001.png",
+      "title": "Wall / buttress / one-pair leaf modules",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 911226,
+      "source_sha256": "c6f17ad29229435111fb9347f8f84546821334a90caab60b2f77f222528131a4",
+      "authoring": "stonehold_sequential_wall_module_kit_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4259693,
+      "authoring_sha256": "af4e9bee57bbba7a276e09c55d806f665b2a401fc1f25cb25a7a8eb7ca89c905",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "retry": true,
+        "notes": "Attempt1 rejected: timber barn doors and climbable rubble at wall-end. Retry PASS: three isolated front elevations, one leaf pair, cliff seating without a ramp. Leaves still show X-brace; Blender rebuilds as layered dark-iron plates. One pair only, not outer+inner twins."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_sequential_gate_wall_complex",
+      "source": "stonehold_walltop_defender_modules_v001.png",
+      "title": "Defendable walltop walk / merlon / defender stair",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 717085,
+      "source_sha256": "0a3c91d4c3eef3c2444101e4f48360705ac66172f5e0482e4bf95454bf78e523",
+      "authoring": "stonehold_walltop_defender_modules_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3607191,
+      "authoring_sha256": "fa2c87a327f77e525f9c4542c8548db3f2dc14c8d566b2d4a89c42e4fe1521ba",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "retry": true,
+        "notes": "Attempt1 rejected: lava at base and outer-face ladder. Retry PASS: cold merlon elevation, inner-side stair module, blank outer face. Left panel is an inner-face elevation rather than a true walk plan; rebuild walk from 2.4 m width intent."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_fortress_single_gate",
+      "source": "stonehold_fortress_plan_apron_v001.png",
+      "title": "One-gate fortress plan with 30 m clear apron",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 912944,
+      "source_sha256": "48f5ce69389f41685fa16d8816ff5e7b58d455ec004f21339bc1294f6acec70c",
+      "authoring": "stonehold_fortress_plan_apron_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4391443,
+      "authoring_sha256": "43dd6373236f10afe3370d84b6f7b0dd46a9c49a5e28db986864777ab0973540",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "retry": true,
+        "notes": "Attempt1 rejected: 3/4 axonometric, stairs into apron, central fountain. Retry PASS: near-ortho polygonal plan, one flush gate, empty dashed apron, flag as circle+mast-dot, low keep roof. Apron pixels are not the 30 m metric; fortress contract remains fail-closed."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_fortress_single_gate",
+      "source": "stonehold_fortress_elevations_v001.png",
+      "title": "One-gate fortress front/side elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 773151,
+      "source_sha256": "d3f833b62dfa8295d7e8f39a1fbb71cd4da46cd6016877c5be296375c2231338",
+      "authoring": "stonehold_fortress_elevations_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3818424,
+      "authoring_sha256": "59cb89561a5f0744c54725328a3b92ae1581718734718ca69388f4c1e06453f8",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "retry": true,
+        "notes": "Attempt1 rejected: round drum keep, compact gatehouse not a perimeter. Attempt2 rejected: still a drum/octagonal tower. Attempt3 PASS: low rectangular keep behind a one-gate wall, front+side, no talus/stairs. Compact length; instance curtain wall from the plan, not from pixels."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_fortress_single_gate",
+      "source": "stonehold_fortress_keep_flag_anchor_v001.png",
+      "title": "Keep shell + central flag-anchor",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 847115,
+      "source_sha256": "7bb581f1b4a8d86277eb1c050ce143c125c5d7638717b53aa0a52b7d132f2e61",
+      "authoring": "stonehold_fortress_keep_flag_anchor_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3955515,
+      "authoring_sha256": "2c82e1f97f0d6d7146a852e771261be10722696b5afc39b09140fdd840ba97a5",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "notes": "Keep roof plan, low-broad front, isolated 6 m flag mast with empty socket and mannequin. Extra plinth views are the same object. No cathedral, no second gate."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_terrain",
+      "source": "stonehold_terrain_geology_worldscar_v001.png",
+      "title": "Nonperiodic strata + Worldscar brink",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1290948,
+      "source_sha256": "4a2f5d025984db50025a583dfefc2cc370a3e65eabe1ec04a231a5cd468fbdf1",
+      "authoring": "stonehold_terrain_geology_worldscar_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5397905,
+      "authoring_sha256": "8f96d47a0c44989b9278391433844ebc4602f229426d9405a6f3a211faa98b6a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "notes": "Left geologic cut is still somewhat bedded; right Worldscar brink has macro/meso/micro fracture, mannequin, no cones, no lightning/magma. Rebuild strata as nonperiodic offset blocks, not a layered cake."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_terrain",
+      "source": "stonehold_terrain_route_bed_rocks_v001.png",
+      "title": "Route bed/ruts/shoulders + player-scale rocks",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 910485,
+      "source_sha256": "906ed7b095d279f3ae3353872b2e2c908781742157132431e64f1f0a5580e63a",
+      "authoring": "stonehold_terrain_route_bed_rocks_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4049524,
+      "authoring_sha256": "8f496def1feeb03d676637cf98aa1efb85490b2f240f65b4262cbca6c6b69708",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "retry": true,
+        "notes": "Attempt1 rejected: metal tram rails, 3/4 slab, egg-smooth scaled rocks. Retry PASS: rut depressions in section, packed-ash top-down with stone shoulders, angular player-scale rocks + mannequin."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_ecosystem_dressing",
+      "source": "stonehold_ecosystem_family_orthos_v001.png",
+      "title": "Sedge / fern / ironbell / fins / talus families",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 670533,
+      "source_sha256": "1d227e0a076abd6bcb0c898253d3e39657da19c4cb758a16264a372761333dc9",
+      "authoring": "stonehold_ecosystem_family_orthos_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3369329,
+      "authoring_sha256": "044d55cca665d4b1b6e74b8dd31c730718d465f5bba7fabe5fc8b37a24d6d1b0",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "retry": true,
+        "notes": "Attempt1 rejected: FractureFan as vertical crystal palisade. Retry PASS: sedge clump, fern mass, ironbell bush, lower radiating fan, talus pile, mannequin. Fan still slightly crystalline; rebuild as low broken-fan fins. Ironbell is a bushy bell cluster, not fence posts."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_ecosystem_dressing",
+      "source": "stonehold_ecosystem_composition_plots_v001.png",
+      "title": "Ecosystem composition plots",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1388262,
+      "source_sha256": "967a0e328cc923937ec936ea51764681b7b1c3eee4843c892ae21d656f5340f4",
+      "authoring": "stonehold_ecosystem_composition_plots_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5879350,
+      "authoring_sha256": "ffefded893f519e15d6b404cce578bd74ee05eb88514f286a1580efd4064225e",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "notes": "Four isolated 8 m elevation strips: exposed ridge, sheltered fault, route verge with clear lane, Worldscar exposure. Grounded volumetric clumps, no stick/spike/fence drift, no animals."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_interior_furnishings",
+      "source": "stonehold_interior_guard_forge_rooms_v001.png",
+      "title": "Guard + forge furnished plans",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1197988,
+      "source_sha256": "99143baf6094b8c718a04eb123e480f0cb44e44a2c47e52e7966b998bf1ad88d",
+      "authoring": "stonehold_interior_guard_forge_rooms_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5342127,
+      "authoring_sha256": "9db4ec49376bb4f8ec51021021a1aaa160a1bd6e76c602d6df2e50133d90a08d",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "notes": "Two true top-down furnished plans. Guard: racks, desk, stair, door swing, 1.2 m walls. Forge: two anvils, quench, packed-fuel bunker not lava, wagon doors, stores, circulation. Slight wall-top 3/4; not a dollhouse cutaway."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_interior_furnishings",
+      "source": "stonehold_interior_service_civic_rooms_v001.png",
+      "title": "Service + civic furnished plans",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1186211,
+      "source_sha256": "3639eb3f87f27230485c0678d01dadf52274bbcc526caa2f047167ca5d3c2876",
+      "authoring": "stonehold_interior_service_civic_rooms_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5143718,
+      "authoring_sha256": "82d39832916f228f804689d985c90bbfaaa3f0ef40a072c21802a5a83c8d784a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "notes": "Service/stores with racks, cistern, crates, counter, aisles. Civic chamber with table, chairs, steward desk, shelves, door swings. Complete walls, no fake shells, no readable writing."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_civic_fort_props",
+      "source": "stonehold_civic_props_orthos_v001.png",
+      "title": "Civic prop orthos with player scale",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 847102,
+      "source_sha256": "712085822d28187c2d25bc2ecd0911acd649a56762d8846bc8cf9c34a58f2399",
+      "authoring": "stonehold_civic_props_orthos_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3979669,
+      "authoring_sha256": "47c01fc7c52bea89c2758db84897103f17d1356ccade93344c8b75ff9e89ac52",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "notes": "Eight isolated civic furnishings + 1.8 m mannequin. Blank notice board. Embermist timber/basalt/iron. Slight 3/4 on objects; not a room collage."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    },
+    {
+      "familyId": "fam_stonehold_civic_fort_props",
+      "source": "stonehold_fort_props_orthos_v001.png",
+      "title": "Fort prop orthos with player scale",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 914879,
+      "source_sha256": "990e7aae11692c4a8ad561ba444130f3320e5c9309dac053f94af71adf69938d",
+      "authoring": "stonehold_fort_props_orthos_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4199499,
+      "authoring_sha256": "d2b6be6b4a3cb6c3dfcf2c92ffaca754bff53dd344d0a68c65ea26991cbdde31",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "visual_qa": {
+        "verdict": "PASS",
+        "notes": "Eight isolated fort furnishings: single cot not bunk, empty rack, one crate, gate-control empty sockets, mannequin. Locker door slightly modern; rebuild as timber/iron. No weapons, no collage."
+      },
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "fallback": false
+    }
+  ]
+}

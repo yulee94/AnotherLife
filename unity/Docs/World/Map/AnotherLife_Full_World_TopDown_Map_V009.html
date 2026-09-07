@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AnotherLife Full World Top-Down Map V009</title>
+<style>
+:root{color-scheme:dark;--bg:#090d13;--panel:#111720;--ink:#edf2f7;--muted:#9ca8b5;--line:#344050;--gold:#d7b15b;--green:#4ad481;--violet:#a987ff}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}.artifact{display:grid;grid-template-columns:1200px 360px;gap:18px;width:1598px;padding:20px}.map-shell{width:1200px;height:1200px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#07111b;box-shadow:0 22px 55px rgba(0,0,0,.28)}svg{display:block;width:100%;height:100%}.side{height:1200px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:22px 20px;display:flex;flex-direction:column;overflow:hidden}.eyebrow{font:700 11px/1.2 Consolas,monospace;letter-spacing:.14em;color:var(--gold)}h1{font:700 27px/1.12 Georgia,serif;margin:9px 0 7px}.subtitle{font-size:12px;line-height:1.4;color:var(--muted)}.status{margin:13px 0 14px;border:1px solid var(--gold);color:var(--gold);border-radius:7px;padding:8px 9px;font:700 10px Consolas,monospace;letter-spacing:.05em}.section{padding:11px 0;border-top:1px solid #2a3441}.section h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px;color:#d7dee8}.section ul{padding-left:17px;margin:0;color:var(--muted);font-size:11px;line-height:1.42}.section strong{color:var(--ink)}.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px}.key{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:7px}.sw{width:18px;height:11px;border:1px solid rgba(255,255,255,.25);border-radius:2px}.icon{width:18px;height:18px;border:2px solid #d8dee7;display:inline-block}.icon.capital{transform:rotate(45deg);width:13px;height:13px}.icon.city{border-radius:50%}.icon.fort{border-color:#e7b960;position:relative}.icon.pillar{border-radius:50%;width:9px;height:18px;border-color:#b789ff}.icon.cave{border-radius:10px 10px 2px 2px;border-bottom-color:transparent}.source-strip{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}.source-strip img{display:block;width:100%;height:72px;object-fit:contain;background:#060a0f;border:1px solid #3a4654;border-radius:5px}.buttons{margin-top:auto;display:grid;gap:9px}.buttons button{appearance:none;border:1px solid #556276;background:#19212c;color:#eef3f8;border-radius:8px;min-height:44px;padding:10px 12px;text-align:left;font-weight:700;cursor:pointer}.buttons button.primary{border-color:#d7b15b;background:#2b2518;color:#f4d991}.buttons button:hover{filter:brightness(1.12)}.foot{margin-top:12px;font:10px/1.35 Consolas,monospace;color:#778494}.realm-title{font:700 27px Georgia,serif;letter-spacing:.08em;fill:#f6f0df;paint-order:stroke;stroke:#07111b;stroke-width:8px;stroke-linejoin:round}.realm-sub{font:700 14px Consolas,monospace;letter-spacing:.08em;fill:#d7dee8;paint-order:stroke;stroke:#07111b;stroke-width:6px}.map-label{font:700 14px "Segoe UI",Arial,sans-serif;fill:#f2f5f8;paint-order:stroke;stroke:#111820;stroke-width:5px;stroke-linejoin:round}.small-label{font:700 11px Consolas,monospace;fill:#dce3ea;paint-order:stroke;stroke:#111820;stroke-width:4px}.micro{font:700 9px Consolas,monospace;fill:#e7edf2;paint-order:stroke;stroke:#111820;stroke-width:3px}.biome{font:700 10px Consolas,monospace;fill:#f3f6f8;paint-order:stroke;stroke:#10161e;stroke-width:4px}.bridge-label{font:700 9px Consolas,monospace;fill:#c7d0da;paint-order:stroke;stroke:#07111b;stroke-width:3px}.wall{fill:none;stroke:#171c23;stroke-width:18;stroke-linecap:round}.wall-hi{fill:none;stroke:#596574;stroke-width:4;stroke-linecap:round}.road{stroke:#4d4338;stroke-width:13;fill:none;stroke-linecap:round}.road-hi{stroke:#9b8464;stroke-width:2;fill:none;stroke-dasharray:8 7}.bridge{stroke:#f0df18;stroke-width:18;fill:none;stroke-linecap:round}.bridge-rail{stroke:#fff69a;stroke-width:3;fill:none}.sealed{stroke:#f0df18;stroke-width:16;fill:none;stroke-linecap:round}.sealed-hi{stroke:#fff69a;stroke-width:3;fill:none}.shore{fill:none;stroke:#9f8f73;stroke-width:5}.inner-zone{fill-opacity:.82;stroke:#e4d7bb;stroke-opacity:.48;stroke-width:3}.gate{stroke:#f2c75e;stroke-width:13;stroke-linecap:round}.attack{stroke:#4ad481;stroke-width:6;fill:none;marker-end:url(#arrowGreen)}.divider{stroke:#637182;stroke-width:5}.terrain-end{fill:#262d35;stroke:#7d8997;stroke-width:3}.fort-wall{fill:#19212a;stroke:#e0b35a;stroke-width:3}.fort-core{fill:#555f6c;stroke:#e8edf1;stroke-width:2}.capital-mark{fill:#d7b15b;stroke:#fff0c1;stroke-width:3}.city-mark{fill:#2b3542;stroke:#dce5ec;stroke-width:3}.pillar-mark{fill:#835bc5;stroke:#d6c3ff;stroke-width:3}.cave-mark{fill:#171c22;stroke:#e0e6ec;stroke-width:3}.blossom-petal{fill:#ffc0d7;stroke:#ffe3ec;stroke-width:2}.blossom-core{fill:#f3d36a;stroke:#fff1b5;stroke-width:1.5}.seal-bar{stroke:#e2d6ff;stroke-width:8;stroke-linecap:round}.compass{fill:#111925;stroke:#8f9baa;stroke-width:3}.count-tag{fill:#111925;stroke:#536071;stroke-width:2}
+</style>
+</head>
+<body>
+<main class="artifact">
+<section class="map-shell" aria-label="Full AnotherLife world top-down map">
+<svg id="world-map" viewBox="0 0 2400 2400" role="img" aria-labelledby="mapTitle mapDesc">
+<title id="mapTitle">AnotherLife full-world top-down topology confirmation map</title>
+<desc id="mapDesc">Stonehold north, Crownlands east, Umbral south, Eldergrove west, and event-only Accordant Isle at center. Each realm shows its inner settlements, boundary wall, outer fortresses, save pillars and biome transitions.</desc>
+<defs>
+<radialGradient id="ocean" cx="50%" cy="48%" r="72%"><stop offset="0" stop-color="#13283b"/><stop offset=".58" stop-color="#0a1a29"/><stop offset="1" stop-color="#050c14"/></radialGradient>
+<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#30506a" stroke-width="1" opacity=".18"/></pattern>
+<marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4ad481"/></marker>
+<filter id="soft"><feGaussianBlur stdDeviation="14"/></filter>
+</defs>
+<rect width="2400" height="2400" fill="url(#ocean)"/>
+<rect width="2400" height="2400" fill="url(#grid)"/>
+<g opacity=".28"><circle cx="1200" cy="1200" r="760" fill="none" stroke="#53718b" stroke-width="3" stroke-dasharray="14 18"/><circle cx="1200" cy="1200" r="490" fill="none" stroke="#53718b" stroke-width="2" stroke-dasharray="8 18"/></g>
+<g id="bridges"></g><g id="realms"></g><g id="center-island"></g><g id="overlay"></g>
+</svg>
+</section>
+<aside class="side">
+<div class="eyebrow">ANOTHERLIFE · WORLD LAYOUT AUTHORITY</div>
+<h1>Full World Top-Down Map</h1>
+<div class="subtitle">A decision-ready trace of both owner drawings: the original realm silhouettes and the later yellow bridge-placement sketch.</div>
+<div class="status">V009 · OWNER DRAWINGS TRACED · FINAL MAP CONFIRMATION REQUIRED</div>
+<section class="section">
+<h2>Locked scope shown</h2>
+<ul>
+<li><strong>Northwest</strong> Stonehold · <strong>Northeast</strong> Crownlands</li>
+<li><strong>Southeast</strong> Umbral · <strong>Southwest</strong> Eldergrove</li>
+<li>Cherry-blossom-themed, event-only Accordant Isle</li>
+<li>Four Accordant approaches sealed outside events</li>
+<li>Two independent bridges per adjacent realm pair</li>
+<li>Bridge positions and orientations follow the supplied owner drawing</li>
+<li>Broad realm bodies and inward necks follow the original hand-drawn layout</li>
+</ul>
+</section>
+<section class="section">
+<h2>Every realm contains</h2>
+<ul>
+<li>Inner corner: measured 33.3% of the continent</li>
+<li>Inner contents: 1 capital, 3 cities, 1 public cave/dungeon</li>
+<li>Boundary: cornering wall, outer gate, passage, inner gate</li>
+<li>Outer warzone: measured 66.7%, with 4 fortresses and 2 save pillars</li>
+<li>Biomes: pure gate region plus two adjacent-realm blends</li>
+</ul>
+</section>
+<section class="section">
+<h2>Traversal timing authority</h2>
+<ul>
+<li>Bridge deck end-to-end: <strong>30 sec / 180 m</strong></li>
+<li>Main gate → nearest fortress: <strong>10 min / 3.6 km</strong></li>
+<li>Main gate → nearest adjacent bridge: <strong>15 min / 5.4 km</strong></li>
+<li>Main gate → opposing fortress: <strong>20–25 min / 7.2–9.0 km</strong></li>
+</ul>
+</section>
+<section class="section">
+<h2>Map legend</h2>
+<div class="legend">
+<div class="key"><span class="icon capital"></span>Capital</div><div class="key"><span class="icon city"></span>City</div>
+<div class="key"><span class="icon fort"></span>Fortress</div><div class="key"><span class="icon pillar"></span>Save pillar</div>
+<div class="key"><span class="icon cave"></span>Public cave</div><div class="key"><span class="sw" style="background:#d7b15b"></span>Dual gate</div>
+<div class="key"><span class="sw" style="background:#f0df18"></span>Realm bridge</div><div class="key"><span class="sw" style="background:#f0df18;border-color:#a987ff"></span>Center bridge + seal</div>
+<div class="key"><span class="sw" style="background:#d889a8"></span>Cherry-blossom isle</div>
+</div>
+</section>
+<section class="section">
+<h2>Owner drawing references</h2>
+<div class="source-strip"><img src="References/Owner_Realm_Layout_2026-07-27.png" alt="Owner realm layout"><img src="References/Owner_Bridge_Topology_2026-09-01.png" alt="Owner bridge topology"></div>
+<ul><li>Realm silhouettes follow the left source; bridge locations follow the right.</li><li>Measured area ratios and traversal times are later approved overlays.</li></ul>
+</section>
+<div class="buttons">
+<button class="primary" data-hermes-send="Approve AnotherLife full-world 2D top-down map V009 as the topology authority and resume 3D production.">Approve map and resume 3D</button>
+<button data-hermes-send="I need corrections to AnotherLife full-world 2D top-down map V009. Keep 3D production paused.">Request map corrections</button>
+</div>
+<div class="foot">Both owner drawings are preserved with SHA-256 provenance under Map/References. Dragons and bosses excluded.</div>
+</aside>
+</main>
+<script>
+(() => {
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('world-map');
+const bridges=document.getElementById('bridges');
+const realmsLayer=document.getElementById('realms');
+const centerLayer=document.getElementById('center-island');
+const overlay=document.getElementById('overlay');
+const C={x:1200,y:1200};
+function el(tag,attrs={},parent=svg){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);parent.appendChild(n);return n}
+function txt(parent,x,y,text,cls,anchor='middle'){const n=el('text',{x,y,class:cls,'text-anchor':anchor},parent);n.textContent=text;return n}
+function seeded(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function landPoints(cx,cy,rx,ry,seed,count=42){const r=seeded(seed),pts=[];for(let i=0;i<count;i++){const a=Math.PI*2*i/count;const wobble=.91+r()*.14;pts.push([cx+Math.cos(a)*rx*wobble,cy+Math.sin(a)*ry*wobble])}return pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}
+function polar(cx,cy,r,a){return{x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r}}
+function sectorPath(cx,cy,r0,r1,a0,a1){const p0=polar(cx,cy,r0,a0),p1=polar(cx,cy,r1,a0),p2=polar(cx,cy,r1,a1),p3=polar(cx,cy,r0,a1);const large=Math.abs(a1-a0)>Math.PI?1:0;return`M${p0.x},${p0.y}L${p1.x},${p1.y}A${r1},${r1} 0 ${large} 1 ${p2.x},${p2.y}L${p3.x},${p3.y}A${r0},${r0} 0 ${large} 0 ${p0.x},${p0.y}Z`}
+function arcPath(cx,cy,r,a0,a1){const p0=polar(cx,cy,r,a0),p1=polar(cx,cy,r,a1);return`M${p0.x},${p0.y}A${r},${r} 0 0 1 ${p1.x},${p1.y}`}
+function line(parent,x1,y1,x2,y2,cls){return el('line',{x1,y1,x2,y2,class:cls},parent)}
+function drawBridge(a,b,offset,index){const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),nx=-dy/len,ny=dx/len;const x1=a.x+nx*offset,y1=a.y+ny*offset,x2=b.x+nx*offset,y2=b.y+ny*offset;line(bridges,x1,y1,x2,y2,'bridge');line(bridges,x1,y1,x2,y2,'bridge-rail');const mx=(x1+x2)/2,my=(y1+y2)/2;txt(bridges,mx,my-10,`BRIDGE ${index} · 30 SEC`,'bridge-label')}
+function fortress(g,x,y,rotation,label){const f=el('g',{transform:`translate(${x} ${y}) rotate(${rotation})`},g);el('path',{d:'M-28-24H28V24H-28V-24M-8 24H8',class:'fort-wall','fill-rule':'evenodd'},f);el('rect',{x:-11,y:-10,width:22,height:20,rx:2,class:'fort-core'},f);el('circle',{cx:0,cy:0,r:4,fill:'#a987ff'},f);txt(f,0,43,label,'micro')}
+function capital(g,x,y,label){const k=el('g',{transform:`translate(${x} ${y})`},g);el('rect',{x:-21,y:-21,width:42,height:42,transform:'rotate(45)',class:'capital-mark'},k);el('circle',{cx:0,cy:0,r:9,fill:'#1b222b',stroke:'#fff0c1','stroke-width':3},k);txt(k,0,58,label,'small-label')}
+function city(g,x,y,label){const k=el('g',{transform:`translate(${x} ${y})`},g);el('circle',{cx:0,cy:0,r:23,class:'city-mark'},k);el('rect',{x:-11,y:-11,width:9,height:22,fill:'#dce5ec'},k);el('rect',{x:3,y:-7,width:9,height:18,fill:'#dce5ec'},k);txt(k,0,42,label,'micro')}
+function pillar(g,x,y,label){el('rect',{x:x-7,y:y-24,width:14,height:48,rx:5,class:'pillar-mark'},g);el('circle',{cx:x,cy:y-26,r:11,class:'pillar-mark'},g);txt(g,x,y+42,label,'micro')}
+function cave(g,x,y){el('path',{d:`M${x-24},${y+22}V${y}A24,24 0 0 1 ${x+24},${y}V${y+22}Z`,class:'cave-mark'},g);txt(g,x,y+42,'PUBLIC CAVE','micro')}
+function blossom(g,x,y,scale=1){const tree=el('g',{transform:`translate(${x} ${y}) scale(${scale})`},g);for(let i=0;i<5;i++){const a=Math.PI*2*i/5-Math.PI/2;el('circle',{cx:Math.cos(a)*12,cy:Math.sin(a)*12,r:11,class:'blossom-petal'},tree)}el('circle',{cx:0,cy:0,r:6,class:'blossom-core'},tree)}
+function biomeLabel(g,cx,cy,r,a,text){const p=polar(cx,cy,r,a);txt(g,p.x,p.y,text,'biome')}
+function poly(points){return points.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}
+function polygonArea(points){let sum=0;for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length];sum+=a.x*b.y-b.x*a.y}return Math.abs(sum)*.5}
+function polygonCentroid(points){let twiceArea=0,cx=0,cy=0;for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],cross=a.x*b.y-b.x*a.y;twiceArea+=cross;cx+=(a.x+b.x)*cross;cy+=(a.y+b.y)*cross}return{x:cx/(3*twiceArea),y:cy/(3*twiceArea)}}
+function continentGeometry(r){
+ const W=720,L=600,frontHalf=112,outerHalf=360,steps=52,ux=Math.cos(r.a),uy=Math.sin(r.a),tx=-uy,ty=ux;
+ const world=(s,t)=>({x:r.cx-ux*s+tx*t,y:r.cy-uy*s+ty*t});
+ const halfWidth=s=>{const q=Math.max(0,Math.min(1,(s+L/2)/L)),ease=q*q*(3-2*q);return frontHalf+(outerHalf-frontHalf)*ease+34*Math.sin(Math.PI*q)};
+ const front=t=>-L/2+16*Math.sin(Math.PI*2*(t/(frontHalf*2)+.5))+7*Math.sin(Math.PI*4*(t/(frontHalf*2)+.5)+.5);
+ const outer=t=>L/2+24*Math.sin(Math.PI*2*(t/(outerHalf*2)+.5)+.65)+11*Math.sin(Math.PI*4*(t/(outerHalf*2)+.5)-.3);
+ const sidePlus=s=>halfWidth(s)+20*Math.sin(Math.PI*(s+L/2)/L)+8*Math.sin(Math.PI*3*(s+L/2)/L);
+ const sideMinus=s=>-halfWidth(s)-18*Math.sin(Math.PI*(s+L/2)/L)-7*Math.sin(Math.PI*3*(s+L/2)/L+.2);
+ const range=(start,end,count)=>Array.from({length:count+1},(_,i)=>start+(end-start)*i/count);
+ const localLand=[];range(-frontHalf,frontHalf,steps).forEach(t=>localLand.push({s:front(t),t}));range(front(frontHalf),outer(outerHalf),steps/2).slice(1).forEach(s=>localLand.push({s,t:sidePlus(s)}));range(outerHalf,-outerHalf,steps).slice(1).forEach(t=>localLand.push({s:outer(t),t}));range(outer(-outerHalf),front(-frontHalf),steps/2).slice(1).forEach(s=>localLand.push({s,t:sideMinus(s)}));
+ const landWorld=localLand.map(p=>world(p.s,p.t)),totalArea=polygonArea(localLand.map(p=>({x:p.s,y:p.t})));
+ const bend=(q)=>28*Math.sin(Math.PI*2*q)+11*Math.sin(Math.PI*4*q+.35)-11*Math.sin(.35);
+ function innerLocal(base){const wall=range(0,1,60).map(q=>{const s=base+bend(q);const t=sideMinus(s)+(sidePlus(s)-sideMinus(s))*q;return{s,t}});const result=[...wall];range(base,outer(outerHalf),steps/2).slice(1).forEach(s=>result.push({s,t:sidePlus(s)}));range(outerHalf,-outerHalf,steps).slice(1).forEach(t=>result.push({s:outer(t),t}));range(outer(-outerHalf),base,steps/2).slice(1).forEach(s=>result.push({s,t:sideMinus(s)}));return{wall,points:result}}
+ let low=-L/2+35,high=L/2-35,best=null;for(let i=0;i<60;i++){const base=(low+high)/2,candidate=innerLocal(base),ratio=polygonArea(candidate.points.map(p=>({x:p.s,y:p.t})))/totalArea;best={base,ratio,...candidate};if(ratio>1/3)low=base;else high=base}
+ const innerWorld=best.points.map(p=>world(p.s,p.t)),wallWorld=best.wall.map(p=>world(p.s,p.t));return{W,L,frontHalf,outerHalf,world,front,outer,sidePlus,sideMinus,land:landWorld,inner:innerWorld,wall:wallWorld,wallLocal:best.wall,wallBase:best.base,ratio:polygonArea(best.points.map(p=>({x:p.s,y:p.t})))/totalArea,centroid:polygonCentroid(innerWorld)}
+}
+const realms=[
+{id:'stonehold',name:'STONEHOLD',dir:'NORTHWEST',capital:'ANVILDEEP',gate:'FAULTLINE GATE',cx:720,cy:720,a:Math.PI/4,base:'#54463b',inner:'#786048',pure:'#675142',plus:'#355842',minus:'#596273',plusText:'ELDERGROVE BLEND',minusText:'CROWNLANDS BLEND',seed:101},
+{id:'crownlands',name:'CROWNLANDS',dir:'NORTHEAST',capital:'CROWNSPIRE',gate:'MERIDIAN GATE',cx:1680,cy:720,a:Math.PI*3/4,base:'#46546b',inner:'#817755',pure:'#59677e',plus:'#596273',minus:'#4c355d',plusText:'STONEHOLD BLEND',minusText:'UMBRAL BLEND',seed:202},
+{id:'umbral',name:'UMBRAL',dir:'SOUTHEAST',capital:'VEILSPIRE',gate:'ASHVEIN GATE',cx:1680,cy:1680,a:-Math.PI*3/4,base:'#32223f',inner:'#5a356d',pure:'#432953',plus:'#4c355d',minus:'#29483f',plusText:'CROWNLANDS BLEND',minusText:'ELDERGROVE BLEND',seed:303},
+{id:'eldergrove',name:'ELDERGROVE',dir:'SOUTHWEST',capital:'WORLDROOT',gate:'GREENVEIL GATE',cx:720,cy:1680,a:-Math.PI/4,base:'#234535',inner:'#386b4a',pure:'#2f5941',plus:'#29483f',minus:'#355842',plusText:'UMBRAL BLEND',minusText:'STONEHOLD BLEND',seed:404}
+];
+const byId=Object.fromEntries(realms.map(r=>[r.id,r]));
+// Physical bridge topology traced from the owner drawings. Paired routes are intentionally far apart.
+drawBridge({x:1040,y:405},{x:1360,y:405},0,1);drawBridge({x:1040,y:615},{x:1360,y:615},0,2);
+drawBridge({x:1785,y:1040},{x:1785,y:1360},0,1);drawBridge({x:1995,y:1040},{x:1995,y:1360},0,2);
+drawBridge({x:1040,y:1785},{x:1360,y:1785},0,1);drawBridge({x:1040,y:1995},{x:1360,y:1995},0,2);
+drawBridge({x:405,y:1040},{x:405,y:1360},0,1);drawBridge({x:615,y:1040},{x:615,y:1360},0,2);
+// Four event-only center spokes, drawn behind land.
+realms.forEach(r=>{const dx=C.x-r.cx,dy=C.y-r.cy,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len;const s={x:r.cx+ux*270,y:r.cy+uy*270},e={x:C.x-ux*165,y:C.y-uy*165};line(bridges,s.x,s.y,e.x,e.y,'sealed');line(bridges,s.x,s.y,e.x,e.y,'sealed-hi');const bx=e.x-ux*30,by=e.y-uy*30,nx=-uy,ny=ux;line(bridges,bx-nx*28,by-ny*28,bx+nx*28,by+ny*28,'seal-bar')});
+function drawRealm(r){
+const g=el('g',{'data-realm':r.id},realmsLayer),geom=continentGeometry(r),ux=Math.cos(r.a),uy=Math.sin(r.a),tangent={x:-uy,y:ux};g.setAttribute('data-inner-area-ratio',geom.ratio.toFixed(6));
+const defs=svg.querySelector('defs'),clip=el('clipPath',{id:`clip-${r.id}`},defs);el('polygon',{points:poly(geom.land)},clip);el('polygon',{points:poly(geom.land),fill:r.base},g);const sectors=el('g',{'clip-path':`url(#clip-${r.id})`},g);
+function band(t0,t1,fill){const points=[geom.world(-geom.L/2-50,t0),geom.world(-geom.L/2-50,t1),geom.world(geom.wallBase+65,t1),geom.world(geom.wallBase+65,t0)];el('polygon',{points:poly(points),fill,opacity:.96},sectors)}
+const tMin=geom.sideMinus(geom.wallBase),tMax=geom.sidePlus(geom.wallBase),third=(tMax-tMin)/3;band(tMin,tMin+third,r.minus);band(tMin+third,tMin+third*2,r.pure);band(tMin+third*2,tMax,r.plus);
+el('polygon',{points:poly(geom.inner),fill:r.inner,class:'inner-zone'},g);el('polygon',{points:poly(geom.land),class:'shore'},g);
+const innerPercent=(geom.ratio*100).toFixed(1),outerPercent=(100-geom.ratio*100).toFixed(1),innerCenterS=(geom.wallBase+geom.L/2)*.5+5,capitalPoint=geom.world(innerCenterS,0);
+const innerLabel=geom.world(geom.wallBase+55,0),outerLabel=geom.world(-geom.L/2+70,0);txt(g,innerLabel.x,innerLabel.y,`INNER SAFE · ${innerPercent}%`,'small-label');txt(g,outerLabel.x,outerLabel.y,`OUTER WARZONE · ${outerPercent}%`,'small-label');
+// The measured boundary is a bent wall whose enclosed polygon is exactly one-third of continent area.
+const wallPath=points=>'M'+points.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join('L'),leftWall=geom.wall.slice(3,26),rightWall=geom.wall.slice(35,58);[leftWall,rightWall].forEach(points=>{el('path',{d:wallPath(points),class:'wall'},g);el('path',{d:wallPath(points),class:'wall-hi'},g)});[leftWall[0],rightWall[rightWall.length-1]].forEach(p=>el('circle',{cx:p.x,cy:p.y,r:28,class:'terrain-end'},g));
+const gateMid=geom.world(geom.wallBase,0),outerGate=geom.world(geom.wallBase-30,0),innerGate=geom.world(geom.wallBase+30,0);line(g,outerGate.x-tangent.x*36,outerGate.y-tangent.y*36,outerGate.x+tangent.x*36,outerGate.y+tangent.y*36,'gate');line(g,innerGate.x-tangent.x*36,innerGate.y-tangent.y*36,innerGate.x+tangent.x*36,innerGate.y+tangent.y*36,'gate');line(g,gateMid.x-tangent.x*47,gateMid.y-tangent.y*47,gateMid.x+tangent.x*47,gateMid.y+tangent.y*47,'divider');const attackStart=geom.world(geom.wallBase-95,0),attackEnd=geom.world(geom.wallBase+88,0);line(g,attackStart.x,attackStart.y,attackEnd.x,attackEnd.y,'attack');txt(g,gateMid.x+tangent.x*91,gateMid.y+tangent.y*91,r.gate,'micro');
+// Inner settlements remain inside the exact measured inner polygon.
+line(g,capitalPoint.x,capitalPoint.y,innerGate.x,innerGate.y,'road');line(g,capitalPoint.x,capitalPoint.y,innerGate.x,innerGate.y,'road-hi');const cityLocal=[{s:innerCenterS+62,t:0},{s:innerCenterS-15,t:118},{s:innerCenterS-15,t:-118}],cityPts=cityLocal.map(p=>geom.world(p.s,p.t));cityPts.forEach(p=>{line(g,capitalPoint.x,capitalPoint.y,p.x,p.y,'road');line(g,capitalPoint.x,capitalPoint.y,p.x,p.y,'road-hi')});capital(g,capitalPoint.x,capitalPoint.y,r.capital);cityPts.forEach((p,i)=>city(g,p.x,p.y,`CITY ${i+1}`));const cavePt=geom.world(Math.min(geom.L/2-48,innerCenterS+82),-170);cave(g,cavePt.x,cavePt.y);
+const fortLocal=[{s:-geom.L/2+76,t:-235},{s:-geom.L/2+76,t:235},{s:geom.wallBase-66,t:-180},{s:geom.wallBase-66,t:180}];fortLocal.map(p=>geom.world(p.s,p.t)).forEach((p,i)=>fortress(g,p.x,p.y,(r.a+Math.PI/2)*180/Math.PI,`F${i+1}`));[{s:geom.wallBase-105,t:-82},{s:geom.wallBase-105,t:82}].map(p=>geom.world(p.s,p.t)).forEach((p,i)=>pillar(g,p.x,p.y,`SAVE ${i+1}`));
+const biomeS=(-geom.L/2+geom.wallBase)*.5;[{t:0,text:'PURE REALM BIOME'},{t:225,text:r.plusText},{t:-225,text:r.minusText}].forEach(item=>{const p=geom.world(biomeS,item.t);txt(g,p.x,p.y,item.text,'biome')});
+const title=geom.world(geom.L/2-28,0);txt(g,title.x,title.y,r.name,'realm-title');txt(g,title.x,title.y+30,r.dir,'realm-sub');r.areaRatio=geom.ratio}
+realms.forEach(drawRealm);window.mapAreaAudit=Object.fromEntries(realms.map(r=>[r.id,{inner:Number(r.areaRatio.toFixed(6)),outer:Number((1-r.areaRatio).toFixed(6))}]));
+// Accordant Isle: cherry-blossom sanctuary, visible but sealed outside events.
+const centerPts=landPoints(C.x,C.y,160,145,909,34);el('polygon',{points:centerPts,fill:'#7b5266'},centerLayer);el('polygon',{points:centerPts,fill:'none',stroke:'#f0b4cb','stroke-width':6},centerLayer);el('circle',{cx:C.x,cy:C.y,r:98,fill:'#3a2836',stroke:'#ffc1d8','stroke-width':4},centerLayer);[.1,.9,2.15,3.1,4.05,5.35].forEach((a,i)=>{const p=polar(C.x,C.y,i%2?112:101,a);blossom(centerLayer,p.x,p.y,i%2?1.05:.9)});capital(centerLayer,C.x,C.y-5,'EVENT CASTLE');cave(centerLayer,C.x,C.y+82);txt(centerLayer,C.x,C.y-205,'ACCORDANT ISLE','realm-title');txt(centerLayer,C.x,C.y-174,'CHERRY BLOSSOM SANCTUARY · EVENT ONLY · APPROACHES SEALED','realm-sub');
+// Owner-selected quadrant placement and map audit tags.
+const compass=el('g',{transform:'translate(2160 210)'},overlay);el('circle',{cx:0,cy:0,r:86,class:'compass'},compass);el('path',{d:'M0-70L18-12L0-24L-18-12Z',fill:'#e7c56f'},compass);txt(compass,0,-100,'N','realm-sub');txt(compass,0,112,'S','realm-sub');txt(compass,112,5,'E','realm-sub');txt(compass,-112,5,'W','realm-sub');txt(compass,0,5,'PLACEMENT','micro');txt(compass,0,24,'SELECTED','micro');
+const audit=el('g',{transform:'translate(160 2160)'},overlay);el('rect',{x:0,y:0,width:690,height:142,rx:12,class:'count-tag'},audit);txt(audit,24,31,'MAP AUDIT','small-label','start');txt(audit,24,59,'4 OWNER-ASSIGNED REALMS · 1 EVENT ISLAND · 12 BRIDGES','micro','start');txt(audit,24,84,'EACH CONTINENT: MEASURED INNER 33.3% · OUTER 66.7%','micro','start');txt(audit,24,109,'1 CAPITAL · 3 CITIES · 4 FORTRESSES · 2 SAVE PILLARS · 1 CAVE','micro','start');txt(audit,24,134,'BRIDGE 30 SEC · GATE ROUTES 10 / 15 / 20–25 MIN','micro','start');
+})();
+</script>
+</body>
+</html>

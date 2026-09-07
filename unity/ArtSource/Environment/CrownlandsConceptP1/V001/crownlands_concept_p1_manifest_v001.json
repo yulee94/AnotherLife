@@ -1,0 +1,713 @@
+{
+  "version": "V001",
+  "packetId": "CrownlandsConceptP1_V001",
+  "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION",
+  "priority": "P3",
+  "families": [
+    "fam_crownlands_capital",
+    "fam_crownlands_city_kit",
+    "fam_crownlands_inner_cave_dungeon",
+    "fam_crownlands_outer_cave_dungeon"
+  ],
+  "quality_target": "premium-AA dark-fantasy stylized realism; BDO-inspired directional bar, not parity",
+  "authority": {
+    "visual": "this packet",
+    "topology": "V013",
+    "catalogIds": "inventory / catalogs, not this packet",
+    "architectureLanguageOnly": "unity/ArtSource/Environment/World2DProductionGuides/V001/crownlands_architecture_source.png",
+    "direction": "B \u2014 Meridian Oathroad",
+    "conceptsDoNotControl": [
+      "catalog IDs",
+      "save IDs",
+      "gameplay",
+      "Meshy spend",
+      "existing world inventory JSON",
+      "Stonehold packets",
+      "Eldergrove packets",
+      "V013 inner 33.3333% / outer 66.6667%",
+      "sequential-gate plates",
+      "30 m fortress apron metric",
+      "Town Hall / Workshop"
+    ]
+  },
+  "identity": {
+    "realm": "crownlands",
+    "direction": "Meridian Oathroad",
+    "capitalId": "capital_crownspire",
+    "cityIds": [],
+    "cityIdPolicy": "three V013 inner-city pads; do not invent city IDs",
+    "materials": [
+      "grounded chalk-gold ashlar",
+      "deep blue slate",
+      "brass meridian ribs",
+      "compass-rose crests",
+      "cool silver",
+      "restrained bronze"
+    ],
+    "forbidden": [
+      "delicate needle spires",
+      "generic cathedral",
+      "excessive gold",
+      "ungrounded white-marble palace",
+      "color-only variants",
+      "fake facade shells",
+      "inaccessible interiors",
+      "copied proprietary BDO forms",
+      "modern drift",
+      "real-world animals",
+      "dragons",
+      "bosses",
+      "runtime VFX baked into geometry",
+      "Embermist palette swap",
+      "Moonroot Vigil root collars",
+      "Town Hall / Workshop redesign"
+    ]
+  },
+  "provider": "xai-oauth",
+  "chat_model": "grok-4.6",
+  "image_model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "aspect_ratio": "3:2",
+  "fallback_policy": "GPT-5.6 Sol only if Grok returns no answer",
+  "fallback_used": false,
+  "fallback_provider": null,
+  "native_generation_resolution": [
+    1248,
+    832
+  ],
+  "authoring_resolution": [
+    7680,
+    5120
+  ],
+  "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+  "asset_count": 16,
+  "contact_sheet": "crownlands_concept_p1_contact_sheet_v001.jpg",
+  "contact_sheet_bytes": 961701,
+  "contact_sheet_sha256": "b1f4b03766b80a21e6138752d945eec5f6a64c92eb53381e4eebbed68ecb560d",
+  "contact_sheet_resolution": [
+    2016,
+    1664
+  ],
+  "retries": [
+    {
+      "sheet": "crownlands_city_dwelling_interior_v001",
+      "reason": "attempt1 stair cores did not share plan coordinates across floors (ground east vs upper west)",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_capital_district_plan_v001",
+      "reason": "attempt1 oval/concentric Renaissance city with ring wall; attempt2 still a standalone circular island/disk with cliff perimeter all around; required organic L-/wedge pocket bounded by two impassable cliff edges, open opposite approach, broken offset nonradial streets, capital_crownspire only",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_capital_skyline_north_south_v001",
+      "reason": "attempt1 Gothic/cathedral drift, paired conical turrets, needle finials, rose window, excessive bilateral symmetry; required broad low horizontal chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums/meridian ribs, restrained brass/silver",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_capital_skyline_east_west_v001",
+      "reason": "attempt1 Gothic/cathedral drift, paired conical turrets, needle finials, rose windows, pointed-arch bays, excessive symmetry; required broad low horizontal chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums/meridian ribs, restrained brass/silver",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_city_street_grammar_v001",
+      "reason": "attempt1 church/chapel frontage as unified civic terrace; required clearly separate asymmetric enterable dwelling/market/service/public-hall modules along offset street with ordinary punched openings",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_city_market_service_public_hall_kit_v001",
+      "reason": "attempt1 public hall missing visible labeled 2.5m W x 3.0m H aperture with paired timber leaves, long iron strap hinges across each leaf, sliding iron latch, stone-block frame",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_capital_keep_shell_v001",
+      "reason": "attempt1 generic Gothic castle with round towers, conical roofs, needle finials, lancet repetition, pointed portal; required broad low rectangular civic keep with blunt octagonal meridian drums, truncated/hipped blue-slate caps, horizontal chalk-gold masses, no cones/needles/Gothic silhouette",
+      "result": "PASS"
+    },
+    {
+      "sheet": "crownlands_capital_keep_section_v001",
+      "reason": "attempt1 steep church-like cross gable and ridge finial conflicted with civic keep shell/ground/upper; required truncated octagonal drums, low hipped blue-slate, low-hip cross with horizontal ridge, stairs that land, no needles",
+      "result": "PASS"
+    }
+  ],
+  "rejected_attempts": [
+    "rejected/crownlands_capital_district_plan_v001_attempt1.png",
+    "rejected/crownlands_capital_district_plan_v001_attempt2.png",
+    "rejected/crownlands_capital_keep_section_v001_attempt1.png",
+    "rejected/crownlands_capital_keep_shell_v001_attempt1.png",
+    "rejected/crownlands_capital_skyline_east_west_v001_attempt1.png",
+    "rejected/crownlands_capital_skyline_north_south_v001_attempt1.png",
+    "rejected/crownlands_city_dwelling_interior_v001_attempt1.png",
+    "rejected/crownlands_city_market_service_public_hall_kit_v001_attempt1.png",
+    "rejected/crownlands_city_street_grammar_v001_attempt1.png"
+  ],
+  "visual_qa": {
+    "crownlands_capital_district_plan_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: oval/concentric Renaissance city with ring wall. Attempt2 rejected (false-green): standalone roughly circular island/disk with cliff perimeter all around. Attempt3 PASS: organic L-/wedge-shaped urban pocket, north+east impassable chalk cliffs meeting at a corner, open south-west approach, broken offset nonradial streets, keep as broad rectangle at NE cliff-head, capital_crownspire only named ID. No circular island, no ring perimeter, no radial spokes. Scale-bar numerals not metric authority."
+    },
+    "crownlands_capital_skyline_north_south_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: Gothic/cathedral drift, paired conical turrets, needle finials, rose window, excessive twin-tower symmetry. Attempt2 PASS: NORTH/SOUTH flat orthos, broad low chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums with low caps and meridian ribs, rectangular punched openings, restrained brass/silver. SOUTH door is a segmental meridian arch with a small compass oculus, not Gothic tracery. No cones, no needles."
+    },
+    "crownlands_capital_skyline_east_west_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: Gothic/cathedral drift, paired conical turrets, needle finials, rose windows, pointed-arch bays, copy symmetry. Attempt2 PASS: EAST/WEST flat orthos, broad low chalk-gold civic masses, stepped blue-slate hipped roofs, blunt observatory drums (WEST stepped and not a copy of EAST), restrained brass/silver meridian ticks. Round-arch keep lights, not lancets. No cones, no rose windows, no needles."
+    },
+    "crownlands_capital_keep_shell_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: generic Gothic castle with round towers, conical roofs, needle finials, lancet repetition, pointed portal, hollow courtyard. Attempt2 PASS: roof/front/side of one enterable civic council-keep. Broad low rectangular chalk-gold hall, four blunt octagonal meridian drums with truncated/hipped blue-slate caps, no cones, no needle finials. Rectangular punched windows, segmental door, brass meridian ribs, 1.8 m mannequin. Roof plan shows octagonal corner pavilions and compass as a flat disc. Blender rebuilds enterable keep from this shell plus section/ground/upper plans, not from skyline pixels. Unify closed hip vs open walltop and SW stair type from written 56 x 18 m intent."
+    },
+    "crownlands_capital_keep_section_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: silhouette conflict with required civic keep \u2014 steep church-like cross gable, ridge needle/compass finial, missing truncated octagonal drums. Attempt2 PASS: longitudinal + cross of the same civic palazzo keep. Truncated pavilion drums, low hipped blue-slate, cross section is a low hip with horizontal ridge not a gable triangle. Floor slabs, hatched wall thickness, punched voids, stairs that land. Three occupied floors plus roof. Compass as a flat roof disc, not a needle. Rebuild from written 56 x 18 m intent. No cathedral vault spectacle, no cones, no needles."
+    },
+    "crownlands_capital_keep_ground_plan_v001": {
+      "verdict": "PASS",
+      "notes": "True top-down furnished ground plan. South vestibule, court with round meridian table, clerks' desks both sides, north circular vault door, SW spiral and NE switchback stair cores. Wall thickness, door swings, traversable aisles. Large streamed combat interior. No cathedral pews, neon, or dragons."
+    },
+    "crownlands_capital_keep_upper_circulation_v001": {
+      "verdict": "PASS",
+      "notes": "Two true top-down plans: upper record galleries/strategy/clerks and walltop walk with merlons. SW and NE stair cores align with the ground-plan quadrants; Blender should unify the SW spiral-vs-straight type and drop extra interior gallery steps. Chamfered upper corners vs round-drum ground: rebuild one silhouette from written dimensions. No needles, no 3/4 dollhouse."
+    },
+    "crownlands_city_street_grammar_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: church/chapel frontage as a unified civic terrace. Attempt2 PASS: plan + front of one 6 m street. Four clearly separate asymmetric enterable modules with ordinary punched openings: dwelling (door+window), market (serving hatch), service (utilitarian door, barrel/shelf), public hall (paired doors, taller mass). Staggered/offset building line. No church gables, no rose windows, no city IDs, no Town Hall/Workshop redesign."
+    },
+    "crownlands_city_dwelling_shell_v001": {
+      "verdict": "PASS",
+      "notes": "Roof plan / front / side of one two-storey house. Stair bulkhead on roof plan proves an interior void. Punched door and windows, chalk-gold ashlar, deep blue slate, brass downpipe, 1.8 m mannequin. No furniture, no needles, no fake shell."
+    },
+    "crownlands_city_dwelling_interior_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: ground stair on east wall, upper stair on west wall (impossible circulation). Attempt2 PASS: two true top-down furnished plans, shared rectangle. Ground west hearth, center table, east stair, south door. Upper east stair landing, two beds, chests. Stairs share the east-wall coordinate. Traversable. No modern kitchen."
+    },
+    "crownlands_city_market_service_public_hall_kit_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: public hall missing visible labeled 2.5 m W x 3.0 m H aperture and complete hardware. Attempt2 PASS: three distinct labeled modules with traversable plans (market hatch/stores; service cistern/stores; public hall benches/clerk). Public hall door quotes 2.5 m W x 3.0 m H with dimension bar, paired timber leaves, long iron strap hinges on each leaf, sliding iron latch, stone-block frame. Not a Town Hall or Workshop redesign."
+    },
+    "crownlands_inner_cave_mouth_v001": {
+      "verdict": "PASS",
+      "notes": "Front/side human-scale refuge-gallery mouth, chalk-gold ashlar lintel, modest brass meridian tick, mannequin. No dragon skull/eggs/neon/fortress."
+    },
+    "crownlands_inner_cave_section_circulation_v001": {
+      "verdict": "PASS",
+      "notes": "Section + organic pocket plan: gallery, main chamber, alcoves, store niche, portcullis. Walkable floors. Height callouts 3.2 / 5.5 m are intent only. No boss arena, no cathedral crypt nave."
+    },
+    "crownlands_outer_cave_mouth_v001": {
+      "verdict": "PASS",
+      "notes": "War-scarred human dungeon mouth, brass-rib lintel, rubble at threshold. No fortress, no sequential gate, no 30 m apron diagram, no dragon. Rubble is cave talus, not a climb onto a fortress wall."
+    },
+    "crownlands_outer_cave_loop_choke_section_v001": {
+      "verdict": "PASS",
+      "notes": "Section with landing floors + combat plan: south mouth choke, ring galleries, central cross-chamber with crate cover, north hold. Closed circuit a player can run. Not a dragon perch or boss podium. No unauthored pits. Scale numerals not metric authority."
+    },
+    "crownlands_cave_chamber_fitting_module_v001": {
+      "verdict": "PASS",
+      "notes": "Six isolated modules, two rows: inner gallery / node / alcove and outer combat gallery / cross-chamber / barred hold. Same chalk-and-brass language, generous gray, no overlap collage. Serves inner chamber plate and outer fittings. No dragons/neon/fortress."
+    }
+  },
+  "assets": [
+    {
+      "familyId": "fam_crownlands_capital",
+      "source": "crownlands_capital_district_plan_v001.png",
+      "title": "Capital Crownspire top-down district plan",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1151600,
+      "source_sha256": "1d653c12fb7239afe4a77b5f3218dc39340e07ccd0ea7aa5ccf85b2412da4ca8",
+      "authoring": "crownlands_capital_district_plan_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5128540,
+      "authoring_sha256": "0220a44fc641607b6b63f3afef70ad4db80088ea2629b33f641428a418631bec",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_capital",
+      "source": "crownlands_capital_skyline_north_south_v001.png",
+      "title": "Capital north/south skyline elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 921769,
+      "source_sha256": "d5c8bdde95f35112b50592b1a0c8d138072a73266f22e473c34cc572ec0d8a2d",
+      "authoring": "crownlands_capital_skyline_north_south_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4319547,
+      "authoring_sha256": "0b9a542eb19002170e19104c202926200a063b90d9e8ba7948614c174d06cd37",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_capital",
+      "source": "crownlands_capital_skyline_east_west_v001.png",
+      "title": "Capital east/west skyline elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 740139,
+      "source_sha256": "8178a9c2e45620778aefaf4d09b63e32254e42bbcec3ab800e12126c71eab716",
+      "authoring": "crownlands_capital_skyline_east_west_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3719984,
+      "authoring_sha256": "e25d3af3e823b9735638919ac0e7669fbe26020a06e0ccfae209913ec54b4607",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_capital",
+      "source": "crownlands_capital_keep_shell_v001.png",
+      "title": "Crownspire keep shell orthos",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 948275,
+      "source_sha256": "db1b57aa4f80f3c1831bc7c522daccc8edc463818a6ee17ebb078ab3821de2a8",
+      "authoring": "crownlands_capital_keep_shell_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4501611,
+      "authoring_sha256": "d871b84d085f586446334f7f2ef858abedb37d1cfaeb7ee63f1ec9439078fbba",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_capital",
+      "source": "crownlands_capital_keep_section_v001.png",
+      "title": "Keep longitudinal/cross section",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1007287,
+      "source_sha256": "fdea370be812a9686b63fb497af3ac0b0dbdc5b45b3b6d2fabd7e8c1b2c0220a",
+      "authoring": "crownlands_capital_keep_section_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4685830,
+      "authoring_sha256": "2a0471e2fda2d63cfbdd2b7521f9a07e3280afca00fc565b6650f2b2770b1dbf",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_capital",
+      "source": "crownlands_capital_keep_ground_plan_v001.png",
+      "title": "Furnished keep ground plan",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1295885,
+      "source_sha256": "707cd36149db7d2659d39755b64ab1d20ef03afa5e0ad0aa723aef311fea5930",
+      "authoring": "crownlands_capital_keep_ground_plan_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5694450,
+      "authoring_sha256": "8504e8e829b47411d1fce1e5bfb4eeac5ad5a8e1e11fc219a440e550bc278d35",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_capital",
+      "source": "crownlands_capital_keep_upper_circulation_v001.png",
+      "title": "Furnished upper/walltop circulation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1189797,
+      "source_sha256": "060e6e32b8b2bccebaf63b0ddfd4a27bedf3c2fe18a4e1f5511a99891e49e7ba",
+      "authoring": "crownlands_capital_keep_upper_circulation_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5361208,
+      "authoring_sha256": "16653611d9750f0a99c9a7fea9726c0c3cd92add272f80d0da6fb5252bcc03a1",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_city_kit",
+      "source": "crownlands_city_street_grammar_v001.png",
+      "title": "6 m city street grammar + elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1017509,
+      "source_sha256": "0ac6368fe7ea4bd841af8d1f297431df72707efecf99e67ad22e664da8b5405d",
+      "authoring": "crownlands_city_street_grammar_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4731969,
+      "authoring_sha256": "a69c09b9732115a9e5b3ecab6a2c5eb1ea1a7494834ded38cbbeaf00e789c31c",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_city_kit",
+      "source": "crownlands_city_dwelling_shell_v001.png",
+      "title": "Dwelling shell orthos",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 932411,
+      "source_sha256": "9fc8a32106f09c78e21c440ef991380ffcdc00e781b0cac62e6d9c7c664ca097",
+      "authoring": "crownlands_city_dwelling_shell_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4461594,
+      "authoring_sha256": "3174ea488fa4abd48e3885457728d74ef5b357eecbd118c2d61f7234ebfec0c4",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_city_kit",
+      "source": "crownlands_city_dwelling_interior_v001.png",
+      "title": "Dwelling furnished interior",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1022361,
+      "source_sha256": "fff61f69fcaa32209183b1d8c22301e91ca1c237648959a143ee8ed8679590de",
+      "authoring": "crownlands_city_dwelling_interior_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4808278,
+      "authoring_sha256": "d7da4249cd04a05b00ad2da11dd76609932cbb1729c655aa4111f430e4608388",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_city_kit",
+      "source": "crownlands_city_market_service_public_hall_kit_v001.png",
+      "title": "Market/service/public-hall kit 2.5x3.0 m",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1210729,
+      "source_sha256": "5492e6db779fbcee0aac48440eeca3c8e05e6f915cea9b2af2f1c452b2566fdc",
+      "authoring": "crownlands_city_market_service_public_hall_kit_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5372150,
+      "authoring_sha256": "dd5f9cc8a50af3c47ed6b1696944a0d3ff9f2e778a6b04659ccc2e5f04bbcd5f",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_inner_cave_dungeon",
+      "source": "crownlands_inner_cave_mouth_v001.png",
+      "title": "Inner non-dragon cave mouth",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1152803,
+      "source_sha256": "df27924252f107b0694512e08b7b6378020db95bf814424468937c66f7141d28",
+      "authoring": "crownlands_inner_cave_mouth_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5024827,
+      "authoring_sha256": "c252bd07f5ee5f49e9a5b5cf7794ecca1a19477df7052d2d2453f402f2d0bb4a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_inner_cave_dungeon",
+      "source": "crownlands_inner_cave_section_circulation_v001.png",
+      "title": "Inner cave section + circulation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1004590,
+      "source_sha256": "17676b5335362b61239269e477726c4fb7c1b60a44f6aa540a3b00989d90688b",
+      "authoring": "crownlands_inner_cave_section_circulation_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4664202,
+      "authoring_sha256": "92d76d14aba166f094e4466310ba4079a90fd81c00239cdf1dfd1ade447fe0fa",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_outer_cave_dungeon",
+      "source": "crownlands_outer_cave_mouth_v001.png",
+      "title": "Outer warzone non-dragon cave mouth",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1149846,
+      "source_sha256": "7d5b730bdd541e2198ee169fc62316dae90ed713649712f88716a0cd79ce206f",
+      "authoring": "crownlands_outer_cave_mouth_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4894215,
+      "authoring_sha256": "e80ef3188b03cf10423ce7209acf42969e52fc0fa42eb64c6c540dde1584a516",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_outer_cave_dungeon",
+      "source": "crownlands_outer_cave_loop_choke_section_v001.png",
+      "title": "Outer cave loop/choke section",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1149583,
+      "source_sha256": "1aa77e21861b035a61a2277042cb41f9a2343880ee94669d2ea904a84655322c",
+      "authoring": "crownlands_outer_cave_loop_choke_section_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5065445,
+      "authoring_sha256": "0bf9ddca62ceb337defdaf80b29fa93186d46d7cc346d0aed45229c5f3ba8e20",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_crownlands_inner_cave_dungeon",
+      "source": "crownlands_cave_chamber_fitting_module_v001.png",
+      "title": "Cave chamber/fitting module kit",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1273115,
+      "source_sha256": "49ac5aa626544278ba8e782af79c19fd206405fa7d9f4be77ca975996d5b87a0",
+      "authoring": "crownlands_cave_chamber_fitting_module_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5496381,
+      "authoring_sha256": "67ede6a8ca4a661c7cc07607a020aaa6abd9b3353a334d6e3b604a58c6fb0761",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    }
+  ],
+  "enterable_notes": {
+    "capital_and_city": "Where buildings are represented they are enterable. Small interiors (dwelling/market/service/public-hall) are seamless. Large combat interiors (hero keep) are streamed.",
+    "no_fake_shells": true,
+    "public_hall_opening_m": [
+      2.5,
+      3.0
+    ],
+    "town_hall_workshop_untouched": true
+  },
+  "dimensional_control_not_ai_numerals": {
+    "player_height_m": 1.8,
+    "civic_interior_door_m": [
+      1.2,
+      2.4
+    ],
+    "public_hall_opening_m": [
+      2.5,
+      3.0
+    ],
+    "street_width_m": 6,
+    "keep_visual_intent_m": {
+      "across": 56,
+      "to_walltop": 18
+    },
+    "dwelling_footprint_m": [
+      8,
+      10
+    ],
+    "inner_cave_mouth_m": [
+      4.5,
+      3.6
+    ],
+    "outer_cave_mouth_m": [
+      6.0,
+      4.2
+    ],
+    "outer_cave_route_from_dual_gate_s": 180,
+    "fortress_apron_m": 30,
+    "apron_applies_to": "outer warzone fortresses, not this cave/capital packet; do not copy pixels for 30 m",
+    "capital_id": "capital_crownspire",
+    "inner_cities_per_realm": 3,
+    "city_ids_invented": false,
+    "inner_caves_per_realm": 1,
+    "outer_caves_per_realm": 1
+  }
+}

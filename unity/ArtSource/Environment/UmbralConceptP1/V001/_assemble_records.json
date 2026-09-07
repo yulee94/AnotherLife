@@ -1,0 +1,306 @@
+[
+  {
+    "familyId": "fam_umbral_capital",
+    "source": "umbral_capital_district_plan_v001.png",
+    "title": "Capital Veilspire top-down district plan",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1144168,
+    "source_sha256": "7a61c80b4d257d31ab0c26bf6b2979926a5f1b705f9d38ed3708fba0c91243c5",
+    "authoring": "umbral_capital_district_plan_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5457392,
+    "authoring_sha256": "d26cd5f78c3b676d1250b6cac1a7560ef93fa7599468283941a642702b7c20a9",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_capital",
+    "source": "umbral_capital_skyline_north_south_v001.png",
+    "title": "Capital north/south skyline elevations",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 871695,
+    "source_sha256": "bff07866b36e30da731680d6687d902a7b0484b34d67641b994a40ae48ac0b71",
+    "authoring": "umbral_capital_skyline_north_south_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4455581,
+    "authoring_sha256": "e39206f6a5545484d7dd8dac9dc9340b1b2c39e225779df41580b5975cbf2395",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_capital",
+    "source": "umbral_capital_skyline_east_west_v001.png",
+    "title": "Capital east/west skyline elevations",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 735285,
+    "source_sha256": "237f0fe90e598ea357c1fd8a754ac2421fb52d407e9afc20ed36c34d83e3c209",
+    "authoring": "umbral_capital_skyline_east_west_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4154619,
+    "authoring_sha256": "93c8c5d7f4e898ab72ba5659df9160e5e5f86c44fbeeef1531265175cc5b2dfd",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_capital",
+    "source": "umbral_capital_keep_shell_v001.png",
+    "title": "Veilspire keep shell orthos",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1042069,
+    "source_sha256": "4e220b215877fc7c0ed1bafd3ffc7ef73315e6a79c74fc13e7674d4815e43fb6",
+    "authoring": "umbral_capital_keep_shell_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5160959,
+    "authoring_sha256": "ea4a676d1cb762a74ab57cfc8e211e37c3ca78aa18b00115a4d017884ab03791",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_capital",
+    "source": "umbral_capital_keep_section_v001.png",
+    "title": "Keep longitudinal/cross section",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 899307,
+    "source_sha256": "0b821f79210b836b6a701cf72f9dd3a73062c53b1967d60f0946ede47efa3fcb",
+    "authoring": "umbral_capital_keep_section_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4729534,
+    "authoring_sha256": "ea3f9e9add41ed3112aa459e006ef0a040ac1847f35187c75d92830a0d2f5f69",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_capital",
+    "source": "umbral_capital_keep_ground_plan_v001.png",
+    "title": "Furnished keep ground plan",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1070268,
+    "source_sha256": "f8d6ca48cfdd0f664ee45380f7a86e66667f98b51faafc34b458952fd5f949d5",
+    "authoring": "umbral_capital_keep_ground_plan_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5238783,
+    "authoring_sha256": "4c677522f91d5b2883d8f5a784ffd2d4da5105a6650ee00228300034664560ed",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_capital",
+    "source": "umbral_capital_keep_upper_circulation_v001.png",
+    "title": "Furnished upper/walltop/service circulation",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 945255,
+    "source_sha256": "de6f4984ece4a31b5ad603d2ee79964adeca80911a6fd907de1e2947d48dec2f",
+    "authoring": "umbral_capital_keep_upper_circulation_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4774433,
+    "authoring_sha256": "443e0e24703293d9c04c583a3594eb4a6dfe194b79563f5f96dbceb8923338c6",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_city_kit",
+    "source": "umbral_city_street_grammar_v001.png",
+    "title": "6 m asymmetric city street grammar + elevations",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 876358,
+    "source_sha256": "f1e4bf2196088e9afa8ec6e3d055281dcb7ca28e4a043cb9884a828162a7fc5c",
+    "authoring": "umbral_city_street_grammar_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4559542,
+    "authoring_sha256": "4b3e3dfd451fbe0d57d1a56f61a7350f2e87d8d146811f7a8f4812a7b5358404",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_city_kit",
+    "source": "umbral_city_dwelling_shell_v001.png",
+    "title": "Dwelling shell orthos",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 910621,
+    "source_sha256": "29bd6240da8af14bf80040530f039107e4aa2d2db90256ec6e9f6264eab873f8",
+    "authoring": "umbral_city_dwelling_shell_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4572270,
+    "authoring_sha256": "7af24eacf4622718cbd47b8cce3a80b97ac1a82a3777aeee47f51024b5960548",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_city_kit",
+    "source": "umbral_city_dwelling_interior_v001.png",
+    "title": "Dwelling furnished interior",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 902368,
+    "source_sha256": "93ff3eb537c49cd2bc6c25fb6a40b72a0c678dbe5f39696e85ff202e83ce24fd",
+    "authoring": "umbral_city_dwelling_interior_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4698853,
+    "authoring_sha256": "46b62c92ca92d8b6b32be967d3d3069cc3705dece8b6ecad683314335cd70d80",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_city_kit",
+    "source": "umbral_city_market_service_public_hall_kit_v001.png",
+    "title": "Market/service/public-hall kit 2.5x3.0 m",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 915863,
+    "source_sha256": "9ae448ff61931fc7f601e6da917efd85f9acd4d4caddbeb79989ca342cbd6e5b",
+    "authoring": "umbral_city_market_service_public_hall_kit_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4836716,
+    "authoring_sha256": "0870c266d978774153f7d21fdb35bb62baaa1b99951162fa884490c8e1e027ff",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_inner_cave_dungeon",
+    "source": "umbral_inner_cave_mouth_v001.png",
+    "title": "Inner non-dragon cave mouth",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 842298,
+    "source_sha256": "6803e373a0c825f180596546cd33cf3954a38271ad5fd0f93314a9da74c568bb",
+    "authoring": "umbral_inner_cave_mouth_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4411706,
+    "authoring_sha256": "03dfe4df2f7fcef29be60e73202acfed332c1cc8f2e7eaee2c8e96b09a6190f2",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_inner_cave_dungeon",
+    "source": "umbral_inner_cave_section_circulation_v001.png",
+    "title": "Inner cave section + circulation",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1065915,
+    "source_sha256": "c801996b7694014b7d8a9da61a5fe9457b7b57d14387f34ebdd2a334d6a52131",
+    "authoring": "umbral_inner_cave_section_circulation_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5123844,
+    "authoring_sha256": "f869f94fbb9d93fbab8e7e7d8c2c4f11f6c06df5e3a7fd61d077ff644b899579",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_outer_cave_dungeon",
+    "source": "umbral_outer_cave_mouth_v001.png",
+    "title": "Outer warzone non-dragon cave mouth",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 975531,
+    "source_sha256": "ad89c002221dcf98469d380277e6359b8d94af861d17d2885f7df6f074fc3898",
+    "authoring": "umbral_outer_cave_mouth_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4800282,
+    "authoring_sha256": "7bb5c3306cfd82f908d750a0ca3f1f2bbcd8dc7b75454f3b74ecb37600344883",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_outer_cave_dungeon",
+    "source": "umbral_outer_cave_loop_choke_section_v001.png",
+    "title": "Outer cave loop/choke section",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 727860,
+    "source_sha256": "b11973339d1741dfed93c6c38e770a4fb96a18543413e00d0e04ebfddd7318f4",
+    "authoring": "umbral_outer_cave_loop_choke_section_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 4020891,
+    "authoring_sha256": "2eec76c8b8b833c4a33190e9818f764aa471d5154a62e3fbddc2406d6cda782b",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  },
+  {
+    "familyId": "fam_umbral_inner_cave_dungeon",
+    "source": "umbral_cave_chamber_fitting_module_v001.png",
+    "title": "Cave chamber/fitting module kit",
+    "source_resolution": [
+      1248,
+      832
+    ],
+    "source_bytes": 1045855,
+    "source_sha256": "6563b52a0d454152d3017b138342c5d76b2e2ae4a80d1bbe0394290edb2a918d",
+    "authoring": "umbral_cave_chamber_fitting_module_v001_8k_authoring.jpg",
+    "authoring_resolution": [
+      7680,
+      5120
+    ],
+    "authoring_bytes": 5146061,
+    "authoring_sha256": "bf436abbff3db844c9c6abcd6302847a40780295b621ecd4dc41a00bb217d485",
+    "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation"
+  }
+]

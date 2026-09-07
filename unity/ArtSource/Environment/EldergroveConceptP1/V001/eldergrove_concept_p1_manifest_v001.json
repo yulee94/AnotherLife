@@ -1,0 +1,650 @@
+{
+  "version": "V001",
+  "packetId": "EldergroveConceptP1_V001",
+  "status": "AUTO_APPROVED_FOR_DETERMINISTIC_BLENDER_SUBJECT_TO_OWNER_INSPECTION",
+  "priority": "P2",
+  "families": [
+    "fam_eldergrove_capital",
+    "fam_eldergrove_city_kit",
+    "fam_eldergrove_inner_cave_dungeon",
+    "fam_eldergrove_outer_cave_dungeon"
+  ],
+  "quality_target": "premium-AA dark-fantasy stylized realism; BDO-inspired directional bar, not parity",
+  "authority": {
+    "visual": "this packet",
+    "topology": "V013",
+    "catalogIds": "inventory / catalogs, not this packet",
+    "architectureLanguageOnly": "unity/ArtSource/Environment/World2DProductionGuides/V001/eldergrove_architecture_source.png",
+    "direction": "B \u2014 Moonroot Vigil",
+    "conceptsDoNotControl": [
+      "catalog IDs",
+      "save IDs",
+      "gameplay",
+      "Meshy spend",
+      "existing world inventory JSON",
+      "Stonehold packets",
+      "V013 inner 33.3333% / outer 66.6667%",
+      "sequential-gate plates",
+      "30 m fortress apron metric",
+      "Town Hall / Workshop"
+    ]
+  },
+  "identity": {
+    "realm": "eldergrove",
+    "direction": "Moonroot Vigil",
+    "capitalId": "capital_worldroot",
+    "cityIds": [],
+    "cityIdPolicy": "three V013 inner-city pads; do not invent city IDs",
+    "materials": [
+      "pale mineral stone",
+      "dark timber",
+      "aged bronze root collars",
+      "desaturated bark",
+      "restrained moon-silver",
+      "pale-gold"
+    ],
+    "forbidden": [
+      "bright-green-only cue",
+      "neon bioluminescence",
+      "root portal",
+      "cute sprites",
+      "fake facade shells",
+      "dense canopy hiding traversal",
+      "modern drift",
+      "real-world animals",
+      "dragons",
+      "bosses",
+      "runtime VFX baked into geometry",
+      "Embermist palette swap",
+      "Open Crown Arbor Town Hall spectacle"
+    ]
+  },
+  "provider": "xai-oauth",
+  "chat_model": "grok-4.6",
+  "image_model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "aspect_ratio": "3:2",
+  "fallback_policy": "GPT-5.6 Sol only if Grok returns no answer",
+  "fallback_used": false,
+  "fallback_provider": null,
+  "native_generation_resolution": [
+    1248,
+    832
+  ],
+  "authoring_resolution": [
+    7680,
+    5120
+  ],
+  "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+  "asset_count": 16,
+  "contact_sheet": "eldergrove_concept_p1_contact_sheet_v001.jpg",
+  "contact_sheet_bytes": 926087,
+  "contact_sheet_sha256": "25ea64fae5dc048cd7dffc82904d18e41018ec76e4b88d27e0f7dafe7a0a0201",
+  "contact_sheet_resolution": [
+    2016,
+    1664
+  ],
+  "retries": [
+    {
+      "sheet": "eldergrove_capital_keep_interior_program_v001",
+      "reason": "attempt1 stair cores did not share plan coordinates across floors",
+      "result": "PASS"
+    }
+  ],
+  "rejected_attempts": [
+    "rejected/eldergrove_capital_keep_interior_program_v001_attempt1.png"
+  ],
+  "visual_qa": {
+    "eldergrove_capital_district_plan_v001": {
+      "verdict": "PASS",
+      "notes": "True top-down roof-plan footprints in an organic inner pocket with a single controlled approach. Dark-timber roofs, pale-stone streets, bronze edge ticks, keep at civic head. No city IDs. Rim geology is a bowl, not V013 continent topology. Door ticks weak; use city modules for apertures. Scale bar unlabeled; numerals not metric authority."
+    },
+    "eldergrove_capital_skyline_north_south_v001": {
+      "verdict": "PASS",
+      "notes": "Two flat ortho elevations, houses-keep-houses, low 2\u20133 storey curve. North rear, south main door. Pale mineral stone, dark timber, bronze collars, spaced leafless trunks not dense canopy. Keep-centered cluster rather than a long terrace street. No Open Crown oculus, neon, dragons, or Embermist iron."
+    },
+    "eldergrove_capital_skyline_east_west_v001": {
+      "verdict": "PASS",
+      "notes": "Labeled EAST/WEST flat ortho street-wall, houses-keep-houses, punched doors. Pale foliage is spaced not dense. Near-symmetric keep cluster; east door larger than west. Moonroot Vigil. No Town Hall spectacle."
+    },
+    "eldergrove_capital_hero_keep_shell_v001": {
+      "verdict": "PASS",
+      "notes": "Roof/walltop plan + front + side of one enterable warden-keep. Wall thickness, walltop stair, punched main door, 1.8 m mannequin, bronze root collars. Roof panel is courtyard/walltop proving an interior void, not a fake shell. Side roof slightly 3/4. Blender rebuilds enterable keep from this shell plus interior program, not from skyline pixels."
+    },
+    "eldergrove_capital_keep_interior_program_v001": {
+      "verdict": "PASS",
+      "retry": true,
+      "notes": "Attempt1 rejected: ground/upper stair cores did not share plan coordinates (impossible circulation). Attempt2 PASS: two true top-down furnished plans, clover silhouette shared. Ground circular moot with map table, herbal benches, stores, root-maintenance lobe. Upper archive niches, bunks, stores. NE and south stair cores align across floors; Blender should drop the extra east upper stair or treat it as walltop only. Root-maintenance lobe is tight but door-connected. Large streamed combat interior. No neon/dragons/Open Crown."
+    },
+    "eldergrove_city_street_plan_elevation_v001": {
+      "verdict": "PASS",
+      "notes": "Same street: plan + front elevation with house/shop/service/workshop mix. 6 m label is intent only. Plan still slightly 3/4 on masses but street width and door openings readable. Moonroot Vigil cladding, not Embermist palette-swap. No dual-gate collage, no city IDs."
+    },
+    "eldergrove_city_house_module_v001": {
+      "verdict": "PASS",
+      "notes": "Front/side/interior plan of one house. Hearth, table, stair to loft, wall thickness, punched door, bronze collar. Traversable. No modern kitchen. One-storey plus loft rather than full two-storey; rebuild from written 8x10 m / loft stair."
+    },
+    "eldergrove_city_shop_module_v001": {
+      "verdict": "PASS",
+      "notes": "Hatch-front with timber shutter, side elevation, furnished plan with counter/stores/loft stair. No glass shopfront. Plan street opening vs hatch: rebuild as hatch + side door. Jars as simple geometry, not cute sprites."
+    },
+    "eldergrove_city_service_module_v001": {
+      "verdict": "PASS",
+      "notes": "Cistern grate, buckets, dry-herb stores, counter, front and side doors. No modern plumbing. Traversable. Material swatches are a legend, not overlapping collage."
+    },
+    "eldergrove_city_workshop_module_v001": {
+      "verdict": "PASS",
+      "notes": "Wagon door, chimney/hood side, plan with workbenches, herbal still, bark stock, bronze-collar language, clear aisle. NOT a smithy: no anvils, coal, or magma."
+    },
+    "eldergrove_inner_cave_mouth_v001": {
+      "verdict": "PASS",
+      "notes": "Front/side human-scale refuge-gallery mouth, timber-bronze lintel, pale mineral, desaturated root ribs, mannequin. No dragon skull/eggs/neon/fortress."
+    },
+    "eldergrove_inner_cave_section_circulation_v001": {
+      "verdict": "PASS",
+      "notes": "Section + organic pocket plan: gallery, main chamber, alcoves, store niche, portcullis. Walkable floors. Section is a rock-mass cut rather than a pure 2D drawing; plan is true top-down. No boss arena."
+    },
+    "eldergrove_inner_cave_chamber_kit_v001": {
+      "verdict": "PASS",
+      "notes": "Three isolated modules: propped gallery, node chamber with three openings, store alcove. Same language, generous gray, no overlap collage."
+    },
+    "eldergrove_outer_cave_mouth_v001": {
+      "verdict": "PASS",
+      "notes": "War-scarred human dungeon mouth, broken bronze lintel, rubble at threshold. No fortress, no sequential gate, no 30 m apron diagram, no dragon. Rubble is cave talus, not a climb onto a fortress wall."
+    },
+    "eldergrove_outer_cave_section_combat_circulation_v001": {
+      "verdict": "PASS",
+      "notes": "Section with landing ramp + combat plan: mouth choke, split gallery, cover blocks, looping return, rear hold. 2 m clearance callout is intent. Not a dragon perch or boss podium. No unauthored pits. Scale numerals not metric authority."
+    },
+    "eldergrove_outer_cave_chamber_kit_v001": {
+      "verdict": "PASS",
+      "notes": "Three isolated combat modules: gallery with cover roots, cross-chamber, barred hold/alcove. No dragons/neon/fortress."
+    }
+  },
+  "assets": [
+    {
+      "familyId": "fam_eldergrove_capital",
+      "source": "eldergrove_capital_district_plan_v001.png",
+      "title": "Capital Worldroot top-down district plan",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1419561,
+      "source_sha256": "aad8e9bb0ed6a1cf0e181bd43922d515a76e03d6ee8ceb91758e0a9e8f10b54b",
+      "authoring": "eldergrove_capital_district_plan_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5987483,
+      "authoring_sha256": "9a3f8abcef87046df1113a73150ff202276417c5d25db4bf9cb9dbe0c9bb750b",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_capital",
+      "source": "eldergrove_capital_skyline_north_south_v001.png",
+      "title": "Capital north/south skyline elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 801208,
+      "source_sha256": "f11089dbe1450f642f2c993b948bb750b2ff87898615cdaaf4c052e7cc0b71e4",
+      "authoring": "eldergrove_capital_skyline_north_south_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3722011,
+      "authoring_sha256": "002c712d0e3e6eee3aa163b740abfd7e1a21499c1b1cef7bbde69ade9cccc990",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_capital",
+      "source": "eldergrove_capital_skyline_east_west_v001.png",
+      "title": "Capital east/west skyline elevations",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1041840,
+      "source_sha256": "6ccded72f6c0d2435b74885f64b1ea5791eb079157ae7c3db954d2d90bab3fd3",
+      "authoring": "eldergrove_capital_skyline_east_west_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4568610,
+      "authoring_sha256": "ed3a1f7cce42466882e7aaee37a65a149dc5fcb3f6d6c35fe01069d32df1b0ae",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_capital",
+      "source": "eldergrove_capital_hero_keep_shell_v001.png",
+      "title": "Enterable hero keep shell orthos",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 775147,
+      "source_sha256": "96b8d7568fc68f4f7044a6da5d161ba2922a6d7f351f61af3c3e60de096c7336",
+      "authoring": "eldergrove_capital_hero_keep_shell_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 3671367,
+      "authoring_sha256": "0dd86ab987d50e275a6358fb41a68141b284e71b01be68625083bb652eb51cb0",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_capital",
+      "source": "eldergrove_capital_keep_interior_program_v001.png",
+      "title": "Keep furnished interior program plans",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1217240,
+      "source_sha256": "d56237e6d69c059d2816ee7a13bd3615c2044ac64c3441171fb3a72825dea6f4",
+      "authoring": "eldergrove_capital_keep_interior_program_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5217924,
+      "authoring_sha256": "6afcedd33996935a4d2b1cfb9f62151acbf24f958c1fa578b2ba1459e670157a",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_city_kit",
+      "source": "eldergrove_city_street_plan_elevation_v001.png",
+      "title": "City street plan and elevation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1023551,
+      "source_sha256": "43dd01ba29137e01affa8f051e943c5aea3acb720cfa058fb30412497bcb1f20",
+      "authoring": "eldergrove_city_street_plan_elevation_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4750032,
+      "authoring_sha256": "08df03cb69b3e5fb290002c0ea6e79492f008adf44a413ca10c76986be504ea4",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_city_kit",
+      "source": "eldergrove_city_house_module_v001.png",
+      "title": "House module exterior + interior",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1044937,
+      "source_sha256": "5b9a6ca6a60c870ba028ba7c3d70d02377b90deb0cdef1ef799426b62ceeb2d5",
+      "authoring": "eldergrove_city_house_module_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4661816,
+      "authoring_sha256": "895d46e1257389bd7556718cc40b02a31d1220d3b2e3977bc669e4c04d46d57b",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_city_kit",
+      "source": "eldergrove_city_shop_module_v001.png",
+      "title": "Shop module exterior + interior",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1134288,
+      "source_sha256": "43e467622372f70002d8e9eca1521ff64ffbd66ebbd86e0853a2e7ab7df7d539",
+      "authoring": "eldergrove_city_shop_module_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4924115,
+      "authoring_sha256": "98648e1fad85183281c679c861946a33ef7f6134ddc5f9ccd43ba728980d16c2",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_city_kit",
+      "source": "eldergrove_city_service_module_v001.png",
+      "title": "Service module exterior + interior",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1171015,
+      "source_sha256": "c38527ae5b2378f15f07001e7cdac1aa0db708addadec4d4dc3c92f533243434",
+      "authoring": "eldergrove_city_service_module_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 5134617,
+      "authoring_sha256": "d6609cdad9e09c1cb68804fb52d8bb167dbf97809c38167aa7eb8ef81960a756",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_city_kit",
+      "source": "eldergrove_city_workshop_module_v001.png",
+      "title": "Workshop module exterior + interior",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1106085,
+      "source_sha256": "e57ae8ab78e6c6d081d8eb59b6bc1b66ffc639a16c04a3c0d62f85017e8951e7",
+      "authoring": "eldergrove_city_workshop_module_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4815376,
+      "authoring_sha256": "cf460c34ef15524d5cb152be7ede0e07ba3745f53f055aaabb07bdfc9c4c5be5",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_inner_cave_dungeon",
+      "source": "eldergrove_inner_cave_mouth_v001.png",
+      "title": "Inner non-dragon cave mouth",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1176557,
+      "source_sha256": "804b9273f38f31c4b1152c6d4102ca23483a1f53c58efe60ae62c2bc61e513e3",
+      "authoring": "eldergrove_inner_cave_mouth_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4947453,
+      "authoring_sha256": "cd1698f948d679dcca87f203d643ca74f7d0e16dbd076b9a73655c6397bf79e4",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_inner_cave_dungeon",
+      "source": "eldergrove_inner_cave_section_circulation_v001.png",
+      "title": "Inner cave section + circulation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 1092569,
+      "source_sha256": "fc6096cadd5af6473e0b89779f0f430ae818aa0ce789b8f0ed0b56c1b8577234",
+      "authoring": "eldergrove_inner_cave_section_circulation_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4773128,
+      "authoring_sha256": "6dbd87a735a005854752523b42761a113243c754e8838396c058df839384a305",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_inner_cave_dungeon",
+      "source": "eldergrove_inner_cave_chamber_kit_v001.png",
+      "title": "Inner cave chamber kit",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 971667,
+      "source_sha256": "2aabb9b3aae8a979b325f6d3580dfec14b52c3e1e7f6a3a14ff75a4df86311a7",
+      "authoring": "eldergrove_inner_cave_chamber_kit_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4432324,
+      "authoring_sha256": "8fd388fd769009e25aa4df5e84f5c0b01d587e476818a596932268d8f1c05d09",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_outer_cave_dungeon",
+      "source": "eldergrove_outer_cave_mouth_v001.png",
+      "title": "Outer warzone non-dragon cave mouth",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 890409,
+      "source_sha256": "d117be5fba59bd2800609c56946a06d8aad1dabc980a7a0728e979fcb2de64f8",
+      "authoring": "eldergrove_outer_cave_mouth_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4002617,
+      "authoring_sha256": "c526272d3ce022f72edae67d640db079b0eadf6a217e5d59a96f68cab7076450",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_outer_cave_dungeon",
+      "source": "eldergrove_outer_cave_section_combat_circulation_v001.png",
+      "title": "Outer cave section + combat circulation",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 958930,
+      "source_sha256": "d6d2f6c6000c49a1220c71388241b800fe3336137888f9361873b2ed1140c831",
+      "authoring": "eldergrove_outer_cave_section_combat_circulation_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4184397,
+      "authoring_sha256": "b768fba0f270c077ad2541cf7e43a8e4fafaabf99a95890ec56ee831aeb94c30",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    },
+    {
+      "familyId": "fam_eldergrove_outer_cave_dungeon",
+      "source": "eldergrove_outer_cave_chamber_kit_v001.png",
+      "title": "Outer cave combat chamber kit",
+      "source_resolution": [
+        1248,
+        832
+      ],
+      "source_bytes": 889022,
+      "source_sha256": "c7779a4586b8937b65538cfd4dc99e98d397beb0b838b0bc506296d99b416749",
+      "authoring": "eldergrove_outer_cave_chamber_kit_v001_8k_authoring.jpg",
+      "authoring_resolution": [
+        7680,
+        5120
+      ],
+      "authoring_bytes": 4090674,
+      "authoring_sha256": "322a072dc13bf5640d78788a73013f1bd72ccf955024eccb03ddb5c10fa10a1e",
+      "authoring_provenance": "Lanczos upscale with conservative unsharp mask; not native 8K generation",
+      "provider": "xai-oauth",
+      "chat_model": "grok-4.6",
+      "image_model": "grok-imagine-image-2.0",
+      "quality": "medium",
+      "aspect_ratio": "3:2",
+      "fallback": false,
+      "fallback_provider": null,
+      "fallback_model": null,
+      "provenance": "Grok 4.6 High directing grok-imagine-image-2.0; native 3:2; GPT-5.6 Sol unused"
+    }
+  ],
+  "enterable_notes": {
+    "capital_and_city": "Where buildings are represented they are enterable. Small interiors (house/shop/service/workshop) are seamless. Large combat interiors (hero keep) are streamed.",
+    "no_fake_shells": true
+  },
+  "dimensional_control_not_ai_numerals": {
+    "player_height_m": 1.8,
+    "civic_interior_door_m": [
+      1.2,
+      2.4
+    ],
+    "street_width_m": 6,
+    "keep_visual_intent_m": {
+      "across": 52,
+      "to_walltop": 16
+    },
+    "house_footprint_m": [
+      8,
+      10
+    ],
+    "inner_cave_mouth_m": [
+      4.5,
+      3.6
+    ],
+    "outer_cave_mouth_m": [
+      6.0,
+      4.2
+    ],
+    "outer_cave_route_from_dual_gate_s": 180,
+    "fortress_apron_m": 30,
+    "apron_applies_to": "outer warzone fortresses, not this cave/capital packet; do not copy pixels for 30 m",
+    "capital_id": "capital_worldroot",
+    "inner_cities_per_realm": 3,
+    "city_ids_invented": false,
+    "inner_caves_per_realm": 1,
+    "outer_caves_per_realm": 1
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "id": "anotherlife_owner_world_map_sources_v004",
+  "approvalStatus": "owner_approved",
+  "approvedMapVersion": "V013",
+  "approvedDate": "2026-09-02",
+  "sources": [
+    {
+      "role": "realm_silhouette_and_macro_layout",
+      "file": "Owner_Realm_Layout_2026-07-27.png",
+      "sha256": "8a5dc66d2df6b922f812e26b6442481df8a825c4391a68d76a748ac1c9390bf7"
+    },
+    {
+      "role": "bridge_position_and_orientation",
+      "file": "Owner_Bridge_Topology_2026-09-01.png",
+      "sha256": "d25aeddecaf69e41abad2beeb10d5b05e1ff8fe6eb3bac94048ee8ad6543b1f3"
+    },
+    {
+      "role": "inner_outer_continent_layout_and_bridge_spacing",
+      "file": "Owner_InOut_Bridge_Layout_2026-09-02.png",
+      "contrastPreviewFile": "Owner_InOut_Bridge_Layout_2026-09-02_contrast.png",
+      "sha256": "9ca655e9e643f45b0c96e63614401b6a3b29f750804959f375ea2b4de48b6993"
+    }
+  ],
+  "approvedAdditions": {
+    "realmPlacement": "northwest_stonehold,northeast_crownlands,southeast_umbral,southwest_eldergrove",
+    "innerOuterAreaRatio": "1:2",
+    "adjacentRealmBridgeCount": 8,
+    "adjacentRealmBridgeLengthMeters": 180,
+    "adjacentRealmBridgeCrossingSeconds": 30,
+    "adjacentRealmBridgesEqualLength": true,
+    "accordantBridgeLengths": "variable_as_required",
+    "mapMetersPerUnit": 10,
+    "realmEndToEndRouteMeters": 14400,
+    "realmEndToEndRouteMinutesAtSixMetersPerSecond": 40,
+    "cavesPerRealm": {
+      "inner": 1,
+      "outer": 1,
+      "outerDistanceFromDualGateMinutes": 3
+    },
+    "innerRealmShape": "organic_owner_placement_reference_not_rectangular_constraint",
+    "innerRealmAccess": "outer_gate_then_sealed_passage_then_inner_gate_only",
+    "wallEndBehavior": "terminates_into_impassable_terrain_no_bypass",
+    "interContinentBoundary": "worldscar_bottomless_arcane_chasm_bridge_only",
+    "accordantTheme": "cherry_blossom_event_only"
+  },
+  "consumerMap": "../AnotherLife_Full_World_TopDown_Map_V013.html"
+}

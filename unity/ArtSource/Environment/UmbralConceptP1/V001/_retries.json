@@ -1,0 +1,52 @@
+[
+  {
+    "name": "umbral_capital_skyline_north_south_v001",
+    "attempt": 1,
+    "reason": "Keep-only elevations with pointed gothic lancet windows; not a houses-keep-houses city skyline."
+  },
+  {
+    "name": "umbral_capital_keep_shell_v001",
+    "attempt": 1,
+    "reason": "Pointed gothic ogive door; right side was a stepped cutaway rather than a closed elevation."
+  },
+  {
+    "name": "umbral_capital_district_plan_v001",
+    "attempt": 1,
+    "reason": "Near-circular/radial island with Y-fork and south approach; required organic SE-corner-enclosing broken/offset terraces following three fault wedges, open NW approach, no ring/island."
+  },
+  {
+    "name": "umbral_capital_keep_shell_v001",
+    "attempt": 2,
+    "reason": "Generic symmetric box palazzo; required broad asymmetrical stepped Three-Fault Ashvein keep matching ground/upper/section and skylines, three dominant fault-wedge cuts, smoked slits, ash-metal ribs, no Gothic/spires."
+  },
+  {
+    "name": "umbral_city_dwelling_shell_v001",
+    "attempt": 1,
+    "reason": "Visually one-storey bungalow mismatched to furnished two-storey floor plates; required visibly two-storey shell with punched door/windows and east stair opening."
+  },
+  {
+    "name": "umbral_city_market_service_public_hall_kit_v001",
+    "attempt": 1,
+    "reason": "Public hall missing visible labeled 2.5 m W x 3.0 m H aperture and complete hardware (paired timber leaves, long iron strap hinges, sliding latch, stone-block frame)."
+  },
+  {
+    "name": "umbral_capital_keep_shell_v001",
+    "attempt": 3,
+    "reason": "Church stepped-gable with pointed gothic lancet windows; not rectangular smoked slits, not three dominant fault-wedge cuts."
+  },
+  {
+    "name": "umbral_city_market_service_public_hall_kit_v001",
+    "attempt": 2,
+    "reason": "Label 2.5 m W x 3.0 m H present but hinges were short pintles and sliding latch bar was not explicit."
+  },
+  {
+    "name": "umbral_capital_keep_shell_v001",
+    "attempt": 4,
+    "reason": "Rectangular slits and asymmetry present, but crow-step church gables; three dominant fault-wedge masonry bites not explicit."
+  },
+  {
+    "name": "umbral_city_market_service_public_hall_kit_v001",
+    "attempt": 3,
+    "reason": "Label present; hinges still short; no sliding latch bar; pointed gothic side windows."
+  }
+]

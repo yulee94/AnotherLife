@@ -1,0 +1,20 @@
+{
+  "id": "anotherlife_owner_bridge_topology_2026_09_01",
+  "sourceType": "owner_drawn_reference",
+  "sourceFile": "Owner_Bridge_Topology_2026-09-01.png",
+  "sha256": "d25aeddecaf69e41abad2beeb10d5b05e1ff8fe6eb3bac94048ee8ad6543b1f3",
+  "authority": {
+    "adjacentRealmPairs": 4,
+    "bridgesPerAdjacentPair": 2,
+    "outerBridgeCount": 8,
+    "centerSpokeBridgeCount": 4,
+    "layout": [
+      "two horizontal north bridges",
+      "two vertical east bridges",
+      "two horizontal south bridges",
+      "two vertical west bridges",
+      "one diagonal center bridge per realm"
+    ]
+  },
+  "consumerMap": "../AnotherLife_Full_World_TopDown_Map_V006.html"
+}

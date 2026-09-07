@@ -1,0 +1,3498 @@
+{
+  "purpose": "source-custody-only",
+  "fileCount": 582,
+  "files": [
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/.gitattributes",
+      "bytes": 183,
+      "sha256": "6d64c91cbb9ca7822ff27ce097e6d25e0fdf6407d05bb79ac7a431ea62773c9e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/_assemble_records.json",
+      "bytes": 10023,
+      "sha256": "c8d9dcd04bb28e4ff9e3d1290d65033affe4fd84edd828968ce40dddff434bb8",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/_rejected_v001.json",
+      "bytes": 127,
+      "sha256": "befef10fa4759846d52867f6dc187e7d42eebd24e8f527486392e4e66db1694d",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/_retries_v001.json",
+      "bytes": 493,
+      "sha256": "ab6d8067ae8bae8c810a9ae858aa22df1da72ebb8cb4d1ef61373c8c94808ca4",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_approach_crownlands_v001.png",
+      "bytes": 750304,
+      "sha256": "3a8085c2478bb44cdb9f72eb704ad59a46f2b1b91d19f6fd5d6f354b3e8d317a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_approach_crownlands_v001_8k_authoring.jpg",
+      "bytes": 3604192,
+      "sha256": "fee2d3b5ea3c3c34bb20b2a5b068c1c9dbe99b17a9d79b4618d1a9ae36daf13d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_approach_eldergrove_v001.png",
+      "bytes": 686519,
+      "sha256": "188225de2882ad048166330d519d45be5e4c47521d1b6ebed50488d38b7ccb25",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_approach_eldergrove_v001_8k_authoring.jpg",
+      "bytes": 3359697,
+      "sha256": "876cc0103c5b58654e42291166737d4ed5d106ce9d65ee3c43ca5525e34b74d4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_approach_stonehold_v001.png",
+      "bytes": 785476,
+      "sha256": "32b7eb710b80e42998586dc1b58e2e63a2b93db5a18e30a499247686464b7291",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_approach_stonehold_v001_8k_authoring.jpg",
+      "bytes": 3703760,
+      "sha256": "6c51dcfc32d8e83d4cbf6ca0ff27d26a408238cfacb68447a7d11f02ccc73af6",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_approach_umbral_v001.png",
+      "bytes": 748069,
+      "sha256": "280a3a4050191889bbf171c0024a64b27e5342d7b58a4f1d43b8327d08260388",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_approach_umbral_v001_8k_authoring.jpg",
+      "bytes": 3580474,
+      "sha256": "26c9b44b02985e146a82f83d81956865a01dc277798824fdd2048b3a5add40ba",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_assembly_floor_plan_v001.png",
+      "bytes": 1147584,
+      "sha256": "ae9ec78b98495e836aa507a985343ed8d8abd72df47415eb7fa2a58d9b87a424",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_assembly_floor_plan_v001_8k_authoring.jpg",
+      "bytes": 4885418,
+      "sha256": "a566eba105969fae215f9b64813467d76c80c856f8345dec1d5f713826897e2c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_assembly_furniture_orthos_v001.png",
+      "bytes": 917061,
+      "sha256": "b5ad526c03ea04adc20ae0885d89ed7fc6c2fd37e8af29ee0c98906e0c810c40",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_assembly_furniture_orthos_v001_8k_authoring.jpg",
+      "bytes": 4151465,
+      "sha256": "58e846dbaffbda8188e3f4b0ddee5e65ed026d1ad76a5872c16a2ce17810c745",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_assembly_section_v001.png",
+      "bytes": 867227,
+      "sha256": "b064b1ef5f4ed0b526a7d86954c4b8be0f8f17ea50d62d46f6aea63a4b2cc7ba",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_assembly_section_v001_8k_authoring.jpg",
+      "bytes": 4294795,
+      "sha256": "6a3d7b02b840d8be0ca970b5dbdff7c5437785a355431bd025c469f2f1f0f030",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_civic_ring_massing_elevations_v001.png",
+      "bytes": 757738,
+      "sha256": "d476417ea11e8937e282761be9dab4f66dd146c3346cddf410f927feb764435d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_civic_ring_massing_elevations_v001_8k_authoring.jpg",
+      "bytes": 3665685,
+      "sha256": "2c4af22197820c576005adf6a14560599846fb66af9686d71b6a4e258795523f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_civic_ring_plan_v001.png",
+      "bytes": 846436,
+      "sha256": "a2fefc8c44a1a7b3647b9684b119253a7ffd94da6a4d4c642486c80aadaeea1f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_civic_ring_plan_v001_8k_authoring.jpg",
+      "bytes": 3937626,
+      "sha256": "3d908aaacc3b940cfc5ca20bd1c3772f21f639413692e4e6c3bc22ff60254f89",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_civic_ring_threshold_elevations_v001.png",
+      "bytes": 872515,
+      "sha256": "872835528a62521701c955a17cbec385ecdd071928e9bbaa178448744a5b2148",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_civic_ring_threshold_elevations_v001_8k_authoring.jpg",
+      "bytes": 4020058,
+      "sha256": "cc606a76099bfdd28f00a7a142cad9f149424bcb3e4a6321709d253f338f50c1",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_concept_gap_p1_contact_sheet_v001.jpg",
+      "bytes": 698173,
+      "sha256": "8b9cf21fa13124f18851f0bf4e831f93670992a45595a465d4dc931a689fb495",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_concept_gap_p1_manifest_v001.json",
+      "bytes": 25187,
+      "sha256": "bba6d878483520ed234eb29c62d0d9e57276d82ec7f9615554bc42b10529433a",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_ecosystem_composition_plots_v001.png",
+      "bytes": 1268313,
+      "sha256": "ff212a92b85699ff063a5955f5afcecb9c419a86519e500ee6cb4ece6029b2ba",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_ecosystem_composition_plots_v001_8k_authoring.jpg",
+      "bytes": 5308509,
+      "sha256": "6def4a842d2e60511836bb062a566d9aa7c5ff7ad451ac60cae433cc8d4bc3b2",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_ecosystem_family_orthos_v001.png",
+      "bytes": 725531,
+      "sha256": "3e8e75441dda4cb70dc177d145c0c00110288c82a9fbef83be14ee6ca4583756",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_ecosystem_family_orthos_v001_8k_authoring.jpg",
+      "bytes": 3372893,
+      "sha256": "436180d97b341cde047b2635d09a8c1e29c08d87c63b8fa7fbadbc89fd16744d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_spoke_bridges_off_event_v001.png",
+      "bytes": 964192,
+      "sha256": "d83cf15a3b75dac528ffdfbf328cc426b0511abc63b20482e2ec7cbc7c7c79ef",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_spoke_bridges_off_event_v001_8k_authoring.jpg",
+      "bytes": 4229028,
+      "sha256": "ab795974427e5b566a0f146dde4fccc281a02e2e59a1d4b79d5cfa3af5d16375",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_spoke_bridges_on_event_v001.png",
+      "bytes": 900217,
+      "sha256": "e62e19d14e6ce6c72b50dc643f4d3b4a518b0883adc1fa5997f93bc471f489b5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/accordant_spoke_bridges_on_event_v001_8k_authoring.jpg",
+      "bytes": 4184076,
+      "sha256": "8409f9a0a4ddc674e8eec1de85ce3213b8e6c13bbd1a190032d3c15b3bb5957f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/assemble_accordant_concept_gap_p1_v001.py",
+      "bytes": 6754,
+      "sha256": "f72c1ad54ebba6d6d4f200baadb2d761e563a790dba3eae271199104fb4d3b11",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/build_accordant_concept_gap_p1_manifest_v001.py",
+      "bytes": 9769,
+      "sha256": "8ee7affe84bc9af8d221264caf0329c6b7cf53a0cbc8d49b96b58883845f3af2",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/generate_accordant_concept_gap_p1_v001.py",
+      "bytes": 32204,
+      "sha256": "8d7a8def0c960cbebf9e654351b0811cc56160714ab16777815a9eef482a9623",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/generation_run.json",
+      "bytes": 7503,
+      "sha256": "dfedb85529e9acb1b39e4979c8d477d6e6a4ef48ad2163ebe4bc8dcd18b59e5c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/prompt_log_v001.json",
+      "bytes": 51867,
+      "sha256": "172c4af0f5836d479fd92baba94ff9e548a625215df875ebcecd969eb5033325",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/rejected/accordant_assembly_section_v001_attempt1.png",
+      "bytes": 988062,
+      "sha256": "c58e519707d126410f1806efcfe316dd042db7f57347fb161fbcb5b716172fac",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/rejected/accordant_spoke_bridges_on_event_v001_attempt1.png",
+      "bytes": 955445,
+      "sha256": "0e00bffe0d1c6788727c0dd884c0a2abad6aefbb3f4f010d0f2132a2372a1dbb",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/validate_accordant_concept_gap_p1_v001.py",
+      "bytes": 13236,
+      "sha256": "e53fd3325f2ea7b4136f7241a65838f0e5be0ead27c78345ee79d692708600b5",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/AccordantConceptGapP1/V001/visual_qa_v001.json",
+      "bytes": 4444,
+      "sha256": "9647aa49774dcd7349d720d5f66a989489af74dade0c8f4a57a2bc5eb968d23d",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/.gitattributes",
+      "bytes": 183,
+      "sha256": "6d64c91cbb9ca7822ff27ce097e6d25e0fdf6407d05bb79ac7a431ea62773c9e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/_assemble_records.json",
+      "bytes": 10098,
+      "sha256": "c7184384b63cf7cad0abcb7308dde15e9fc0e1f5229299861c9694fdfffc3a72",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/_rejected_v001.json",
+      "bytes": 1811,
+      "sha256": "197178c2711aebe9b6892b5a35320338bb95cb9136498ea33118802a3e1bd856",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/_retries_v001.json",
+      "bytes": 2495,
+      "sha256": "534881e00d4af03c5929677449bcfa974ba0f4148a87bef5ac5152b2a1506375",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/assemble_crownlands_concept_gap_p2_v001.py",
+      "bytes": 6782,
+      "sha256": "b674a64f648d6e34f43789cd23eadb094768bb35f9908326125eca7b527cf5b6",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/build_crownlands_concept_gap_p2_manifest_v001.py",
+      "bytes": 10983,
+      "sha256": "03fee0053204d85d1016431adec2e2c4a8c3945161047c4cde4e24781ac71f6c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_capital_city_material_kits_v001.png",
+      "bytes": 1247666,
+      "sha256": "56aeca09390a006d626b4c5760f22bb5d79af336a7ee80dbf2a8b2aec9c0b3a8",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_capital_city_material_kits_v001_8k_authoring.jpg",
+      "bytes": 5514723,
+      "sha256": "7c3d284cc254bee9d035fc6c4d4b582b1b99ed0a0911609c287f2f03b5db7e3b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_cave_exterior_language_v001.png",
+      "bytes": 1088542,
+      "sha256": "8e73af968feeca7e5b13505598c16119a36d58fe3b2372cf8e517de2f682faaa",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_cave_exterior_language_v001_8k_authoring.jpg",
+      "bytes": 4773796,
+      "sha256": "51462a2311e94057023a6189460027b89a9508c2460f7e2a8e1b701b411a7dda",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_concept_gap_p2_contact_sheet_v001.jpg",
+      "bytes": 817943,
+      "sha256": "ec47f45475376833a16ba86a5d50f57847c2ae974a60af42573a30dacf01edf3",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_concept_gap_p2_manifest_v001.json",
+      "bytes": 32947,
+      "sha256": "86ffee8d6c24f6210bdb5971c6dc3f6af2eacb23dbc8a66dbf2b4bff31670bc8",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_ecosystem_composition_habitat_v001.png",
+      "bytes": 1020412,
+      "sha256": "33482b86b5cbff7976fc89eea237fc73a592804d3e9a7f54b6472cc8285404dc",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_ecosystem_composition_habitat_v001_8k_authoring.jpg",
+      "bytes": 4481701,
+      "sha256": "4b77c15b1f277d9d471fd1ea1169d8294a02c8ed7e4354e2551d3152cc4f1558",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_fortress_elevations_v001.png",
+      "bytes": 999166,
+      "sha256": "e21fbcb804566fa4cfc955dd0e65d042d2a7e64df761643511130bcfc652d6fa",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_fortress_elevations_v001_8k_authoring.jpg",
+      "bytes": 4755937,
+      "sha256": "9fa6c63c6266a7ae5dad577c0bd9206530ff86a959d0f9f7d24918b8401f81fa",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_fortress_keep_flag_anchor_v001.png",
+      "bytes": 929460,
+      "sha256": "d1d9a932ea638a5460688861dbf9e53c814df4159e0b507453c76ce2fc3b4cda",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_fortress_keep_flag_anchor_v001_8k_authoring.jpg",
+      "bytes": 4347170,
+      "sha256": "a4ab694edf0bc208857e620873477c90a52989c091f9319d9ffccbaed85c8f36",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_fortress_plan_apron_v001.png",
+      "bytes": 905896,
+      "sha256": "f81e3f3df0e0940938d7357db5ca4b38eeefb48aad741ed9288205cd2f599e4a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_fortress_plan_apron_v001_8k_authoring.jpg",
+      "bytes": 4291244,
+      "sha256": "9693b78e5b7ec8ab71b7a4abfe2a665fe0f8720bd5312bb50f6c81b6c00204af",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_lod_material_lighting_reference_v001.png",
+      "bytes": 1096270,
+      "sha256": "18236b685403055eca1dfc165c161f4773f6bcce31d7931f276e9d12b8c03f11",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_lod_material_lighting_reference_v001_8k_authoring.jpg",
+      "bytes": 4931346,
+      "sha256": "2b809e7304011ea8b67d80a726702d4bb2355cbf00b83858e84621ca57cb7574",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_sequential_gate_inner_face_v001.png",
+      "bytes": 1013468,
+      "sha256": "c8baea04fd57dd8b49dce9c4c836f8c7c7eeae500324e91f3304ecbf55bd4e05",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_sequential_gate_inner_face_v001_8k_authoring.jpg",
+      "bytes": 4738317,
+      "sha256": "daa4529f9168daed6210a35c191e6f5f596df9359542edecd5c3ba35a214d22d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_sequential_gate_longitudinal_section_v001.png",
+      "bytes": 814697,
+      "sha256": "225f031d0ba1558389377ed9344f429974c94a85930e42e3d901d54f80b59605",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_sequential_gate_longitudinal_section_v001_8k_authoring.jpg",
+      "bytes": 4067965,
+      "sha256": "6c45b8cb12dafa37c220e220dd215da0beac043110b20f86422dc30eaded9719",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_sequential_gate_outer_face_v001.png",
+      "bytes": 997835,
+      "sha256": "9fbd9f4e07bfebba4a6c50124a06ab62bbf58dc638b9836cbb3fe1eaee7eea73",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_sequential_gate_outer_face_v001_8k_authoring.jpg",
+      "bytes": 4731670,
+      "sha256": "7d87cb4bc89dde7d7df1fe34e0a960e1203b54098f7ab88f3a9d7213f0cfcb5a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_sequential_wall_walltop_modules_v001.png",
+      "bytes": 1019918,
+      "sha256": "8f7fd5bb8da71f22739a7a5fef1f7a3007b91cbf0773082d18b5ed789587d37b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_sequential_wall_walltop_modules_v001_8k_authoring.jpg",
+      "bytes": 4736214,
+      "sha256": "ad1ada8d5232021dc72a378c576de1378935e6e53834ea894f9dd8e40d7d2d25",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_terrain_bridge_abutment_180m_v001.png",
+      "bytes": 913548,
+      "sha256": "9ba59f962348ae088e696b8fa2bf53cbb3669f9c1f622621c196cf26e74d57f3",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_terrain_bridge_abutment_180m_v001_8k_authoring.jpg",
+      "bytes": 4131046,
+      "sha256": "95a3c861104f9e5ab466c704c92b6bb59f8685a1ad993a31756d1db53bce2607",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_terrain_grades_worldscar_wallend_v001.png",
+      "bytes": 1121104,
+      "sha256": "9d146e11b70e5b049c59241222463aaa271af44480cf611af0edf36580c49f52",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_terrain_grades_worldscar_wallend_v001_8k_authoring.jpg",
+      "bytes": 4936809,
+      "sha256": "74fcf1976e0c142db306ce3c2193126d70010756d3d164496113d9bbbf33aea8",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_terrain_route_bed_v001.png",
+      "bytes": 979769,
+      "sha256": "2ee12a51a68832528961fa5784d7a0d2185595d30c18953592c85b2e5b23fe0c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/crownlands_terrain_route_bed_v001_8k_authoring.jpg",
+      "bytes": 4394121,
+      "sha256": "cefe4f6d51a106469b62e7f0678b7c586eb6cb1bf048ed1fe6bdb8d99033d74f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/generate_crownlands_concept_gap_p2_v001.py",
+      "bytes": 43039,
+      "sha256": "4a108c9fa551c6ba84d1cd6029b8abc9d0e0df76027176196b98c610324c4c97",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/generation_run.json",
+      "bytes": 7682,
+      "sha256": "ffe645fbb9b6dde666280acce8ffdfe5495eaeb4c2f61677dd4c3da7f1e3dded",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_capital_city_material_kits_v001_attempt1.png",
+      "bytes": 317281,
+      "sha256": "c424f0fb0cc6b5b4c0701fa1efc1782cdb3e8ad948338ff510530aba832c32b7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_cave_exterior_language_v001_attempt1.png",
+      "bytes": 1607189,
+      "sha256": "c1b589e3d079ac1fb89106756b10b7098dca5f14e92c2906154bd42384ebfd0d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_cave_exterior_language_v001_attempt2.png",
+      "bytes": 235397,
+      "sha256": "9c9f5d81cb726a8158ba50f729a05bfca739e75a7587b2878c6d4df51e6e4188",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_elevations_v001_attempt1.png",
+      "bytes": 253488,
+      "sha256": "e5afbfad63f23169616a2bcec5eda37f77805ef28233fdacd914a49deaaba140",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_elevations_v001_attempt2.png",
+      "bytes": 237000,
+      "sha256": "5f4caa5d50637dd1f0c6b0e10fb2375bee5cf1ce8224292ea0277dfe2abedd6a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_elevations_v001_attempt3.png",
+      "bytes": 779289,
+      "sha256": "d11c7e9119d747506998d17080954bb208bcd449214bbb33350ab149c562241a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_elevations_v001_attempt4.png",
+      "bytes": 237921,
+      "sha256": "790f0be750dadbb076356177f0d16bd0e41a2cc4ef814d41c7e62613807e8c9e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_elevations_v001_attempt5.png",
+      "bytes": 302188,
+      "sha256": "7dd037d659494270b9c94503f47dd6debd68152beeb906fd0dbb740b8f1bc3e2",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_elevations_v001_attempt6.png",
+      "bytes": 230555,
+      "sha256": "698b6b4365c5427c57f3cfb83c56ecc153125dab60b3e913fb74828e837c3d88",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_keep_flag_anchor_v001_attempt1.png",
+      "bytes": 300341,
+      "sha256": "9d459b78c8f695eef607190bf54d7936bf7abee97bf95d28558f6329c6e7375f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_keep_flag_anchor_v001_attempt2.png",
+      "bytes": 265772,
+      "sha256": "0729c48c06b001fe6d40701a8cddb74f6d5bf8a9ca01cbc8857bcbc8744a9710",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_keep_flag_anchor_v001_attempt3.png",
+      "bytes": 933460,
+      "sha256": "b7700ab368f08062d4460aa4bb006b63e9455d2f7c0a14af3391b25eccb45d8e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_keep_flag_anchor_v001_attempt4.png",
+      "bytes": 291287,
+      "sha256": "26003d663ab746539050e5a2c25eaa70f8fb5a19a37611841a1651bb06ff2a2e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_keep_flag_anchor_v001_attempt5.png",
+      "bytes": 288147,
+      "sha256": "27836997228f6d4a1eb44ec6e460c8df967116833733c6e3d81d5edc849b4b37",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_keep_flag_anchor_v001_attempt6.png",
+      "bytes": 282641,
+      "sha256": "3066214062653105f53bbccdcaeccf1437ca4487097994eaa8542a84a5694a88",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_keep_flag_anchor_v001_attempt7.png",
+      "bytes": 918043,
+      "sha256": "10da253ed0c065ed12afac5352747d161ec921600adcf72b3b4206d57a2d80cb",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_fortress_keep_flag_anchor_v001_attempt8.png",
+      "bytes": 288166,
+      "sha256": "bf6106ad43c7a1083d0f0a89d186e2a20ca1b12bfb2411d55e62f7709f698854",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_lod_material_lighting_reference_v001_attempt1.png",
+      "bytes": 353407,
+      "sha256": "a24f32162373edf9cb3969bb462aa9c5152025aec15ccff2f16e7dec00c4cd67",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_sequential_gate_inner_face_v001_attempt1.png",
+      "bytes": 314817,
+      "sha256": "8bd2c12e90acfa78ab9d7e22b212baa11fffc0152745206bc6a0fe21296de56d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_sequential_gate_inner_face_v001_attempt2.png",
+      "bytes": 356248,
+      "sha256": "eae596661e0ae50bb669b6408eeda12dcc3270287dbb4b8da5691816f5e32c09",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_sequential_gate_longitudinal_section_v001_attempt1.png",
+      "bytes": 266886,
+      "sha256": "4ac33bc0df972039884940c3c97f086ad404e35eb303ecf365bb95ecfe792019",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_sequential_gate_longitudinal_section_v001_attempt2.png",
+      "bytes": 293479,
+      "sha256": "3517c009d6c162302af45976e50a549ff23e0e92e43132305d75416e16362c7f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_sequential_gate_longitudinal_section_v001_attempt3.png",
+      "bytes": 259800,
+      "sha256": "1689a5f658208c1ea610fc20a23a8822b9288411e7353d03f922024b51e5aacc",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_sequential_gate_outer_face_v001_attempt1.png",
+      "bytes": 330292,
+      "sha256": "6f0323db285bc24e4d9f3de4a163eb13c6e4c6e6ae5c60a7cd83c0f87d237861",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_sequential_wall_walltop_modules_v001_attempt1.png",
+      "bytes": 982985,
+      "sha256": "16f5ada4536ad008603720db6e0cc40313e58ec72aec57253fb26cceb449019f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/rejected/crownlands_terrain_grades_worldscar_wallend_v001_attempt1.png",
+      "bytes": 340100,
+      "sha256": "5d1c51ef209cd4178350ccee0facbcaec5da40e388b868bb149e8acd11760066",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/validate_crownlands_concept_gap_p2_v001.py",
+      "bytes": 12627,
+      "sha256": "bd4a373325badbf26f251825b458be986c50dfd66bd695bfdf029385f763768d",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptGapP2/V001/visual_qa_v001.json",
+      "bytes": 7540,
+      "sha256": "e2e5806ec3e0cfe696713556fd5281fbfcb3d22f4ee8c7e6c19595fcb3469f2b",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/.gitattributes",
+      "bytes": 183,
+      "sha256": "6d64c91cbb9ca7822ff27ce097e6d25e0fdf6407d05bb79ac7a431ea62773c9e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/_assemble_records.json",
+      "bytes": 11263,
+      "sha256": "5aea8118626d11a96097b0250dcdcd9c209dbceb14c2b0184102c1ed259c9527",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/_retries.json",
+      "bytes": 2659,
+      "sha256": "09e272aaa78058e606a2130721abef956403f81b8c30aba18741490cc7dd403c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/assemble_crownlands_concept_p1_v001.py",
+      "bytes": 6799,
+      "sha256": "daf824c54a5ad6db8bc3a58aacb0b1793d37e30e87597a2feb06202fdb75ee9d",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/build_crownlands_concept_p1_manifest_v001.py",
+      "bytes": 10360,
+      "sha256": "a81daefc1fd8c7b6da73d70b2d3eceb3f02de9138f4845ae252befa01476bbc0",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_district_plan_v001.png",
+      "bytes": 1151600,
+      "sha256": "1d653c12fb7239afe4a77b5f3218dc39340e07ccd0ea7aa5ccf85b2412da4ca8",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_district_plan_v001_8k_authoring.jpg",
+      "bytes": 5128540,
+      "sha256": "0220a44fc641607b6b63f3afef70ad4db80088ea2629b33f641428a418631bec",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_keep_ground_plan_v001.png",
+      "bytes": 1295885,
+      "sha256": "707cd36149db7d2659d39755b64ab1d20ef03afa5e0ad0aa723aef311fea5930",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_keep_ground_plan_v001_8k_authoring.jpg",
+      "bytes": 5694450,
+      "sha256": "8504e8e829b47411d1fce1e5bfb4eeac5ad5a8e1e11fc219a440e550bc278d35",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_keep_section_v001.png",
+      "bytes": 1007287,
+      "sha256": "fdea370be812a9686b63fb497af3ac0b0dbdc5b45b3b6d2fabd7e8c1b2c0220a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_keep_section_v001_8k_authoring.jpg",
+      "bytes": 4685830,
+      "sha256": "2a0471e2fda2d63cfbdd2b7521f9a07e3280afca00fc565b6650f2b2770b1dbf",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_keep_shell_v001.png",
+      "bytes": 948275,
+      "sha256": "db1b57aa4f80f3c1831bc7c522daccc8edc463818a6ee17ebb078ab3821de2a8",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_keep_shell_v001_8k_authoring.jpg",
+      "bytes": 4501611,
+      "sha256": "d871b84d085f586446334f7f2ef858abedb37d1cfaeb7ee63f1ec9439078fbba",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_keep_upper_circulation_v001.png",
+      "bytes": 1189797,
+      "sha256": "060e6e32b8b2bccebaf63b0ddfd4a27bedf3c2fe18a4e1f5511a99891e49e7ba",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_keep_upper_circulation_v001_8k_authoring.jpg",
+      "bytes": 5361208,
+      "sha256": "16653611d9750f0a99c9a7fea9726c0c3cd92add272f80d0da6fb5252bcc03a1",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_skyline_east_west_v001.png",
+      "bytes": 740139,
+      "sha256": "8178a9c2e45620778aefaf4d09b63e32254e42bbcec3ab800e12126c71eab716",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_skyline_east_west_v001_8k_authoring.jpg",
+      "bytes": 3719984,
+      "sha256": "e25d3af3e823b9735638919ac0e7669fbe26020a06e0ccfae209913ec54b4607",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_skyline_north_south_v001.png",
+      "bytes": 921769,
+      "sha256": "d5c8bdde95f35112b50592b1a0c8d138072a73266f22e473c34cc572ec0d8a2d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_capital_skyline_north_south_v001_8k_authoring.jpg",
+      "bytes": 4319547,
+      "sha256": "0b9a542eb19002170e19104c202926200a063b90d9e8ba7948614c174d06cd37",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_cave_chamber_fitting_module_v001.png",
+      "bytes": 1273115,
+      "sha256": "49ac5aa626544278ba8e782af79c19fd206405fa7d9f4be77ca975996d5b87a0",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_cave_chamber_fitting_module_v001_8k_authoring.jpg",
+      "bytes": 5496381,
+      "sha256": "67ede6a8ca4a661c7cc07607a020aaa6abd9b3353a334d6e3b604a58c6fb0761",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_city_dwelling_interior_v001.png",
+      "bytes": 1022361,
+      "sha256": "fff61f69fcaa32209183b1d8c22301e91ca1c237648959a143ee8ed8679590de",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_city_dwelling_interior_v001_8k_authoring.jpg",
+      "bytes": 4808278,
+      "sha256": "d7da4249cd04a05b00ad2da11dd76609932cbb1729c655aa4111f430e4608388",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_city_dwelling_shell_v001.png",
+      "bytes": 932411,
+      "sha256": "9fc8a32106f09c78e21c440ef991380ffcdc00e781b0cac62e6d9c7c664ca097",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_city_dwelling_shell_v001_8k_authoring.jpg",
+      "bytes": 4461594,
+      "sha256": "3174ea488fa4abd48e3885457728d74ef5b357eecbd118c2d61f7234ebfec0c4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_city_market_service_public_hall_kit_v001.png",
+      "bytes": 1210729,
+      "sha256": "5492e6db779fbcee0aac48440eeca3c8e05e6f915cea9b2af2f1c452b2566fdc",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_city_market_service_public_hall_kit_v001_8k_authoring.jpg",
+      "bytes": 5372150,
+      "sha256": "dd5f9cc8a50af3c47ed6b1696944a0d3ff9f2e778a6b04659ccc2e5f04bbcd5f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_city_street_grammar_v001.png",
+      "bytes": 1017509,
+      "sha256": "0ac6368fe7ea4bd841af8d1f297431df72707efecf99e67ad22e664da8b5405d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_city_street_grammar_v001_8k_authoring.jpg",
+      "bytes": 4731969,
+      "sha256": "a69c09b9732115a9e5b3ecab6a2c5eb1ea1a7494834ded38cbbeaf00e789c31c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_concept_p1_contact_sheet_v001.jpg",
+      "bytes": 961701,
+      "sha256": "b1f4b03766b80a21e6138752d945eec5f6a64c92eb53381e4eebbed68ecb560d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_concept_p1_manifest_v001.json",
+      "bytes": 32547,
+      "sha256": "369f575e7b1235cf57d74c79bfa1ac661d486c6eed3c82c61c6a63a468338830",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_inner_cave_mouth_v001.png",
+      "bytes": 1152803,
+      "sha256": "df27924252f107b0694512e08b7b6378020db95bf814424468937c66f7141d28",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_inner_cave_mouth_v001_8k_authoring.jpg",
+      "bytes": 5024827,
+      "sha256": "c252bd07f5ee5f49e9a5b5cf7794ecca1a19477df7052d2d2453f402f2d0bb4a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_inner_cave_section_circulation_v001.png",
+      "bytes": 1004590,
+      "sha256": "17676b5335362b61239269e477726c4fb7c1b60a44f6aa540a3b00989d90688b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_inner_cave_section_circulation_v001_8k_authoring.jpg",
+      "bytes": 4664202,
+      "sha256": "92d76d14aba166f094e4466310ba4079a90fd81c00239cdf1dfd1ade447fe0fa",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_outer_cave_loop_choke_section_v001.png",
+      "bytes": 1149583,
+      "sha256": "1aa77e21861b035a61a2277042cb41f9a2343880ee94669d2ea904a84655322c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_outer_cave_loop_choke_section_v001_8k_authoring.jpg",
+      "bytes": 5065445,
+      "sha256": "0bf9ddca62ceb337defdaf80b29fa93186d46d7cc346d0aed45229c5f3ba8e20",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_outer_cave_mouth_v001.png",
+      "bytes": 1149846,
+      "sha256": "7d5b730bdd541e2198ee169fc62316dae90ed713649712f88716a0cd79ce206f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/crownlands_outer_cave_mouth_v001_8k_authoring.jpg",
+      "bytes": 4894215,
+      "sha256": "e80ef3188b03cf10423ce7209acf42969e52fc0fa42eb64c6c540dde1584a516",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/generate_crownlands_concept_p1_v001.py",
+      "bytes": 38558,
+      "sha256": "a28e9a338c834c66f8d531bc7bfc7884599b5368567363f236665ee92ecd8ca5",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/generation_run.json",
+      "bytes": 8722,
+      "sha256": "fc02e1b261b1abc9f29a5286e8d02dfe4211c8def79e84dae6537afbeac78751",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/attempt1_metadata.json",
+      "bytes": 6914,
+      "sha256": "f401769ae9ec0575ed3a7bd78f7f2cac847c40af415eaaf5f2ea2219769690ff",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/crownlands_capital_district_plan_v001_attempt1.png",
+      "bytes": 1297789,
+      "sha256": "4a44c70c58e9982c7822252ee6e1c5f2173a6082f6d2a01a69595fae1ca152fc",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/crownlands_capital_district_plan_v001_attempt2.png",
+      "bytes": 1323352,
+      "sha256": "57b07fc9f88c53f1341a84191a536d9efd3305e8e1a1e11fa86bbd224d6b1194",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/crownlands_capital_keep_section_v001_attempt1.png",
+      "bytes": 1238233,
+      "sha256": "67fcfe1b189ece63df72fa4cb07f6d94f5fa8007a375a6dfd125a25a62c71e81",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/crownlands_capital_keep_shell_v001_attempt1.png",
+      "bytes": 1028123,
+      "sha256": "c096597bd4bed97b1c6f441cbd99aa127adcc6700a626c6a4278b1d89b63e7bc",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/crownlands_capital_skyline_east_west_v001_attempt1.png",
+      "bytes": 858510,
+      "sha256": "47aafc24cce9b343cc2b75bf54900d2cd96e57c10c516883312b3628557000ef",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/crownlands_capital_skyline_north_south_v001_attempt1.png",
+      "bytes": 880454,
+      "sha256": "2b852ce043cc066f74458a9f2aa221d33e40f51b69e7d9b43aa3fd9381de4882",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/crownlands_city_dwelling_interior_v001_attempt1.png",
+      "bytes": 359568,
+      "sha256": "548d8223ac63dde5d47f4faa9e7538f37532e33f5f6aae9f8ec8b2e0ccf86009",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/crownlands_city_market_service_public_hall_kit_v001_attempt1.png",
+      "bytes": 1142862,
+      "sha256": "b7c9cb4dfaf30a7c7bc51e02bcf4260f52f29b8b5e74ab490a49ad7a70777379",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/rejected/crownlands_city_street_grammar_v001_attempt1.png",
+      "bytes": 1175595,
+      "sha256": "5d63fe15462d4f67b2ea7f86b94b776ce8bb923ea9e601f7bae1953a53ad26f4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/validate_crownlands_concept_p1_v001.py",
+      "bytes": 11053,
+      "sha256": "a8e48b5ca87ff01bbb5afe3ec112a3c01e863250b631950ef2885936ea67c05d",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/CrownlandsConceptP1/V001/visual_qa_v001.json",
+      "bytes": 7458,
+      "sha256": "6591bd4a9896580021d87870275ecc4d148bb09d2e2085727eb63ad04da6adad",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/.gitattributes",
+      "bytes": 183,
+      "sha256": "6d64c91cbb9ca7822ff27ce097e6d25e0fdf6407d05bb79ac7a431ea62773c9e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/_assemble_records.json",
+      "bytes": 10089,
+      "sha256": "96f703ee6f736927223ed0f087529236705e667a83d00acc735074361db02d05",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/_rejected_v001.json",
+      "bytes": 2201,
+      "sha256": "76f43de565b371bb94f7be4ff90bde309c92ac2b951ef4ce05a04cdf5b8dac1a",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/_retries_v001.json",
+      "bytes": 2259,
+      "sha256": "cebd88e7cda94781637b11035c43ddb27c55ab4eb51606403aea1b25991a7498",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/assemble_eldergrove_concept_gap_p2_v001.py",
+      "bytes": 6797,
+      "sha256": "be0521b3df85a0e19fc9a304633f7c77833fac708ccae09bbc2b5704c5fbad79",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/build_eldergrove_concept_gap_p2_manifest_v001.py",
+      "bytes": 9739,
+      "sha256": "1e3b43c61fc738c74643f9125a5ed425ea38b881ac4d27732d3d186f2da0bced",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_concept_gap_p2_contact_sheet_v001.jpg",
+      "bytes": 754670,
+      "sha256": "e16b43c51598bce4c08c4c49b70013bf6451250bf23eab9a6467104c59cc11ff",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_concept_gap_p2_manifest_v001.json",
+      "bytes": 30910,
+      "sha256": "28af094a7fd3aa3bb33f839f40faacdc922e5edee2dd0a588bdfc749643a575e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_ecosystem_composition_plots_v001.png",
+      "bytes": 1426644,
+      "sha256": "60c91029e138f1d16e3b1946918c768c4d8568486daccb7e665e9a931f001a0f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_ecosystem_composition_plots_v001_8k_authoring.jpg",
+      "bytes": 5829646,
+      "sha256": "714a844518ef9924a722f7b24d64ebd39d316816913aadb6a6739e8d3b22bafd",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_ecosystem_family_orthos_v001.png",
+      "bytes": 210164,
+      "sha256": "f9ad43191680b302c85a92940a5764db7b374dc0f20bc179269962c66a3fa3a0",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_ecosystem_family_orthos_v001_8k_authoring.jpg",
+      "bytes": 3188241,
+      "sha256": "8b2bb63027a4331c1047632fafdc1b797ef85421ff3053ef3e5642ec67ef9bf1",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_fortress_elevations_v001.png",
+      "bytes": 628400,
+      "sha256": "99deec66efaa969f06dad3bfadcf8f041b3237c87efa85bf8e93c53d2964b74a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_fortress_elevations_v001_8k_authoring.jpg",
+      "bytes": 3291575,
+      "sha256": "76a4280ac60a220a2460436fadc0a0c409b3ed248e498b9e99f9b1f8b2e92daa",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_fortress_keep_flag_mast_v001.png",
+      "bytes": 875604,
+      "sha256": "8b5954095404236b12c3a57c76ef4636f9bb873fe4275cd697ae13cab0dab681",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_fortress_keep_flag_mast_v001_8k_authoring.jpg",
+      "bytes": 4014102,
+      "sha256": "6d02cb70f1f3d42bb8550dbb7a8b629687951f0dc370bd53adb8a0d776ef9f6a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_fortress_plan_apron_v001.png",
+      "bytes": 337582,
+      "sha256": "0c2392135c823c61e5e029acbffbeb44a382bbacf82efd6970d573d17d58aa6b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_fortress_plan_apron_v001_8k_authoring.jpg",
+      "bytes": 4697489,
+      "sha256": "a8dc63c67a225c06a9974c1ef859d49902297ebae96d7420d561ba03b4fc3835",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_interior_civic_furniture_v001.png",
+      "bytes": 952667,
+      "sha256": "ad4d6bcddb9391b626e58573f63d9edb09e4c85af135e656f55efbcc6fa0a30e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_interior_civic_furniture_v001_8k_authoring.jpg",
+      "bytes": 4366613,
+      "sha256": "d6fd2e79d07506fd8dbef63329f7b3aed0124be898bda97e7b30dd6ee3db934d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_interior_room_plates_v001.png",
+      "bytes": 992884,
+      "sha256": "ce1e28d4d3334afa960af5189a7cde18b414011b09d28b156db4f94005d5f469",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_interior_room_plates_v001_8k_authoring.jpg",
+      "bytes": 4735859,
+      "sha256": "d15405deb37ef3a55ea5025fcc4d9c2f01b405d7281c5b28019b695e3794957d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_sequential_gate_inner_face_v001.png",
+      "bytes": 893496,
+      "sha256": "e39a69d46b92e7de5406b308ad971d2df4b0b54facf27cdb232103098ff6a27c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_sequential_gate_inner_face_v001_8k_authoring.jpg",
+      "bytes": 4358574,
+      "sha256": "b169b2be65a1b8c5389a9842e31db178e8ec1c20d1eb0b262a6a138614bc110e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_sequential_gate_longitudinal_section_v001.png",
+      "bytes": 211544,
+      "sha256": "bb508d5770c053fa621547d8632dbfd3f2bb7e47ae67febcf5d5915f1d361511",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_sequential_gate_longitudinal_section_v001_8k_authoring.jpg",
+      "bytes": 3201980,
+      "sha256": "1ce8b42faf6a622f1da158692c2bc0a84b3e74c8a61a3c30c0b2a6b3d35b86c5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_sequential_gate_outer_face_v001.png",
+      "bytes": 845906,
+      "sha256": "564522b67ebdb784b8f13ad1826fecc3ba6378d75a3353e30b150dd5f0a34732",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_sequential_gate_outer_face_v001_8k_authoring.jpg",
+      "bytes": 4263025,
+      "sha256": "b29db23b53103b8c272f33944ccfcae9b8b2666ed2376bc2f12ebf9a4ccf3130",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_sequential_wall_walltop_modules_v001.png",
+      "bytes": 942434,
+      "sha256": "961721dbd0b46f5973b02a8de9c0595284d942cd0e760a238f42f76384000745",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_sequential_wall_walltop_modules_v001_8k_authoring.jpg",
+      "bytes": 4387698,
+      "sha256": "a3f1f7472bde97c8fdf174861df0e0ffc7e64b0e6a4387cb30a79051b289742a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_terrain_grades_worldscar_wallend_v001.png",
+      "bytes": 1122011,
+      "sha256": "62f536f98c05b08cf27d23af5fe6e7912413def38e63fc1c69d32ebaec0496c8",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_terrain_grades_worldscar_wallend_v001_8k_authoring.jpg",
+      "bytes": 5096362,
+      "sha256": "469801869e1db9c1ae1d263cab416c944acbb43bd749c1fde45659f119bdc6bc",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_terrain_outer_biome_reads_v001.png",
+      "bytes": 762415,
+      "sha256": "0911a5c424431cd59e4cbd2d180cdaafe5b2c8c1d85bfa66bfc1f48286dac81a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_terrain_outer_biome_reads_v001_8k_authoring.jpg",
+      "bytes": 3666811,
+      "sha256": "00a4975d979c0f4ec988b0e1a0ac35ca199398ae1460638294264451f663913a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_terrain_route_bed_v001.png",
+      "bytes": 999717,
+      "sha256": "0a8268af8b4c800d69d1eb3537c53da7e9683624e6b31dad0b68b84b53a39a78",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/eldergrove_terrain_route_bed_v001_8k_authoring.jpg",
+      "bytes": 4251620,
+      "sha256": "bc728f8060504d02acc64830f17ea77b6f7e4926370585dbbcd7aa8259a46a60",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/generate_eldergrove_concept_gap_p2_v001.py",
+      "bytes": 40393,
+      "sha256": "566d929d75d596828d3f7fade211423eb515e48e209e27fa1c4fedd5ef89bde9",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/generation_run.json",
+      "bytes": 7639,
+      "sha256": "b94c18cd49328bb8ad8ec1fa01822491ad53f41da35cd094b6f29b93feeada13",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_ecosystem_composition_plots_v001_attempt1.png",
+      "bytes": 385583,
+      "sha256": "69f0666ce2418b62f808b69b0c047652854ca915c15079de802970bb72005b03",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_ecosystem_family_orthos_v001_attempt1.png",
+      "bytes": 213366,
+      "sha256": "a9169c83e68ce395fc1d74d32f24accc8fb0d4d659ee7a8273cd22262b145562",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_ecosystem_family_orthos_v001_attempt2.png",
+      "bytes": 674469,
+      "sha256": "725bfb7b56d67ea9ce66d28050b85204e455dddd6c3ed598bb5c3064347821f3",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_ecosystem_family_orthos_v001_attempt3.png",
+      "bytes": 228758,
+      "sha256": "0d8601a74379b016ef0a78ff0308606da3b81679a79d419de77025283d94642f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_ecosystem_family_orthos_v001_attempt5.png",
+      "bytes": 199623,
+      "sha256": "2ccc9095250fb22922ca8d4725de8b83c96274632823d679834c4be153c9ba94",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_fortress_elevations_v001_attempt1.png",
+      "bytes": 262910,
+      "sha256": "3d02881e541d7c535355766fc40f890e30e932a4feb0173f8b2821833231e89a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_fortress_elevations_v001_attempt2.png",
+      "bytes": 247867,
+      "sha256": "7a471091661c33fd626155a3a34a213ad402c7b3c3b7c21f95c14d29da78ed27",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_fortress_keep_flag_mast_v001_attempt1.png",
+      "bytes": 259343,
+      "sha256": "6f174daafaf05e1a7d85fe8f9e634dc409c76942b83b864c7826f7a31301502c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_fortress_plan_apron_v001_attempt1.png",
+      "bytes": 257404,
+      "sha256": "3db3fecd1fb154533b0da345ab5b4ca409523ddb27f4a27292223a60fd2492fd",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_fortress_plan_apron_v001_attempt2.png",
+      "bytes": 769584,
+      "sha256": "7f629642563104cb17d15e161a964db0fc6d69106c9d5f78c8901d5a45031490",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_fortress_plan_apron_v001_attempt3.png",
+      "bytes": 322366,
+      "sha256": "84f0ae3162235c297785d53f70e2f1a0385bbcba12223048384f205e298d431f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_interior_room_plates_v001_attempt1.png",
+      "bytes": 325559,
+      "sha256": "cdd072552b6e1e8f5e94d61c43d9baded018d20bbde64a04c77064a3ddf3a0bb",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_gate_inner_face_v001_attempt1.png",
+      "bytes": 312705,
+      "sha256": "6292d7bee09ff34394bdd61b7765ed6bd6277a9cb3cd12959bad9c09d56b0f56",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt1.png",
+      "bytes": 251155,
+      "sha256": "6551bd2d3f9b6ec3eaa641b46963b284c66c5c0d7a8e1d6b38ffa31137e0ce8c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt2.png",
+      "bytes": 234627,
+      "sha256": "c13848765042b8d840245cb613a5a7c8c66c97cbeea144c1845497c379c2701b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt3.png",
+      "bytes": 240838,
+      "sha256": "ad41cfd65b22bdd488524ba333a5ea77aeed021af5653aaa654fdff775b12084",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt4.png",
+      "bytes": 677976,
+      "sha256": "efbf459c36a4719fc1b0b387f45b39aadfd97f38f2ea5ec4cf6973cb492853c7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt5.png",
+      "bytes": 262830,
+      "sha256": "4acea02a0171e7fc0bb7d3a8506a498dc0c4caccb2d317a34c33dc500e0e0b64",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_gate_longitudinal_section_v001_attempt7.png",
+      "bytes": 201249,
+      "sha256": "0582d49228e4d1b504de09bc0ec2a2b7d2015c141ab3ecc9070173581c64161a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_gate_outer_face_v001_attempt1.png",
+      "bytes": 374211,
+      "sha256": "2df6c7f06e9683f108e087d059f820f8bc164973f79ff519d512f467193fec1c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt1.png",
+      "bytes": 281284,
+      "sha256": "136707668b0c94255814b199210ab5c6220903f20ef10cc2668f8b894eef8aeb",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt2.png",
+      "bytes": 294617,
+      "sha256": "f32b0749f72a375954f344cc17d162693b08c04b5313da1499263c6efd433b3c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt3.png",
+      "bytes": 281999,
+      "sha256": "c0437e2957e380ad84c894e71897fa4f7062a6afb44b715c97ce9c8be1a2072e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt4.png",
+      "bytes": 331805,
+      "sha256": "7797b494182c3326b18a632af515694d31a92d71ce5ad728c38bd0d90cfa743f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt5.png",
+      "bytes": 314054,
+      "sha256": "de4f0c4448c88cffb7d014e0ef0c9987145acfe268e3f80cf4e38cf248744fb2",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_sequential_wall_walltop_modules_v001_attempt6.png",
+      "bytes": 337080,
+      "sha256": "818a49bf237e1606da660ac7398b980be092f116d3ce42df0a55859601df23b4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_terrain_grades_worldscar_wallend_v001_attempt1.png",
+      "bytes": 397590,
+      "sha256": "321f454af04400a8cbe1efe8d75714b95731b9a952e56b5939d5202080388372",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_terrain_grades_worldscar_wallend_v001_attempt2.png",
+      "bytes": 351507,
+      "sha256": "fbfda9eb156b739260a218a4b486b7722d7c0e0aa128fdf55fa5d148abd95659",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_terrain_outer_biome_reads_v001_attempt1.png",
+      "bytes": 250326,
+      "sha256": "383a7014e10d98ace6130dcd71c1eb4f45becdf5fdb3f390cc84e4388e6b0b09",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_terrain_route_bed_v001_attempt1.png",
+      "bytes": 324103,
+      "sha256": "95e37a34f870496f252adc15d80aa63b7a0a6cbda61db53884c95a0c6627a40a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/rejected/eldergrove_terrain_route_bed_v001_attempt2.png",
+      "bytes": 289466,
+      "sha256": "2a11311bba795bd86c5b74f034f6d09c494c561b0a746e0d16c293e35c1c3752",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/validate_eldergrove_concept_gap_p2_v001.py",
+      "bytes": 12412,
+      "sha256": "32cea70d0e0ba3a98681e50eebf6c6c6213fd9c9a1af6858447e7474dadfd993",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptGapP2/V001/visual_qa_v001.json",
+      "bytes": 6342,
+      "sha256": "b2b1f1702895d9181b57941a7888f1a3f37548bc45951a1ac3f52679bb504f0d",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/.gitattributes",
+      "bytes": 183,
+      "sha256": "6d64c91cbb9ca7822ff27ce097e6d25e0fdf6407d05bb79ac7a431ea62773c9e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/_assemble_records.json",
+      "bytes": 11265,
+      "sha256": "513b034d75126bc3c585d85ec7cff00f4eff1f1b61ace91b45fe186466a09eb1",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/assemble_eldergrove_concept_p1_v001.py",
+      "bytes": 6811,
+      "sha256": "3d83e5d52eb07e87602bb98749decd08c280bcfff06891c0e0e3f57832072714",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/build_eldergrove_concept_p1_manifest_v001.py",
+      "bytes": 8866,
+      "sha256": "88d9dd2ba9e94826cf123b675f14bf61d4fe5f5107b86f5233bb7695bd770100",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_district_plan_v001.png",
+      "bytes": 1419561,
+      "sha256": "aad8e9bb0ed6a1cf0e181bd43922d515a76e03d6ee8ceb91758e0a9e8f10b54b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_district_plan_v001_8k_authoring.jpg",
+      "bytes": 5987483,
+      "sha256": "9a3f8abcef87046df1113a73150ff202276417c5d25db4bf9cb9dbe0c9bb750b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_hero_keep_shell_v001.png",
+      "bytes": 775147,
+      "sha256": "96b8d7568fc68f4f7044a6da5d161ba2922a6d7f351f61af3c3e60de096c7336",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_hero_keep_shell_v001_8k_authoring.jpg",
+      "bytes": 3671367,
+      "sha256": "0dd86ab987d50e275a6358fb41a68141b284e71b01be68625083bb652eb51cb0",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_keep_interior_program_v001.png",
+      "bytes": 1217240,
+      "sha256": "d56237e6d69c059d2816ee7a13bd3615c2044ac64c3441171fb3a72825dea6f4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_keep_interior_program_v001_8k_authoring.jpg",
+      "bytes": 5217924,
+      "sha256": "6afcedd33996935a4d2b1cfb9f62151acbf24f958c1fa578b2ba1459e670157a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_skyline_east_west_v001.png",
+      "bytes": 1041840,
+      "sha256": "6ccded72f6c0d2435b74885f64b1ea5791eb079157ae7c3db954d2d90bab3fd3",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_skyline_east_west_v001_8k_authoring.jpg",
+      "bytes": 4568610,
+      "sha256": "ed3a1f7cce42466882e7aaee37a65a149dc5fcb3f6d6c35fe01069d32df1b0ae",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_skyline_north_south_v001.png",
+      "bytes": 801208,
+      "sha256": "f11089dbe1450f642f2c993b948bb750b2ff87898615cdaaf4c052e7cc0b71e4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_capital_skyline_north_south_v001_8k_authoring.jpg",
+      "bytes": 3722011,
+      "sha256": "002c712d0e3e6eee3aa163b740abfd7e1a21499c1b1cef7bbde69ade9cccc990",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_house_module_v001.png",
+      "bytes": 1044937,
+      "sha256": "5b9a6ca6a60c870ba028ba7c3d70d02377b90deb0cdef1ef799426b62ceeb2d5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_house_module_v001_8k_authoring.jpg",
+      "bytes": 4661816,
+      "sha256": "895d46e1257389bd7556718cc40b02a31d1220d3b2e3977bc669e4c04d46d57b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_service_module_v001.png",
+      "bytes": 1171015,
+      "sha256": "c38527ae5b2378f15f07001e7cdac1aa0db708addadec4d4dc3c92f533243434",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_service_module_v001_8k_authoring.jpg",
+      "bytes": 5134617,
+      "sha256": "d6609cdad9e09c1cb68804fb52d8bb167dbf97809c38167aa7eb8ef81960a756",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_shop_module_v001.png",
+      "bytes": 1134288,
+      "sha256": "43e467622372f70002d8e9eca1521ff64ffbd66ebbd86e0853a2e7ab7df7d539",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_shop_module_v001_8k_authoring.jpg",
+      "bytes": 4924115,
+      "sha256": "98648e1fad85183281c679c861946a33ef7f6134ddc5f9ccd43ba728980d16c2",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_street_plan_elevation_v001.png",
+      "bytes": 1023551,
+      "sha256": "43dd01ba29137e01affa8f051e943c5aea3acb720cfa058fb30412497bcb1f20",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_street_plan_elevation_v001_8k_authoring.jpg",
+      "bytes": 4750032,
+      "sha256": "08df03cb69b3e5fb290002c0ea6e79492f008adf44a413ca10c76986be504ea4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_workshop_module_v001.png",
+      "bytes": 1106085,
+      "sha256": "e57ae8ab78e6c6d081d8eb59b6bc1b66ffc639a16c04a3c0d62f85017e8951e7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_city_workshop_module_v001_8k_authoring.jpg",
+      "bytes": 4815376,
+      "sha256": "cf460c34ef15524d5cb152be7ede0e07ba3745f53f055aaabb07bdfc9c4c5be5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_concept_p1_contact_sheet_v001.jpg",
+      "bytes": 926087,
+      "sha256": "25ea64fae5dc048cd7dffc82904d18e41018ec76e4b88d27e0f7dafe7a0a0201",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_concept_p1_manifest_v001.json",
+      "bytes": 26933,
+      "sha256": "6fc0275b158f90e2d4820dc923dae5c5115579fe5505d9f8114761c6189a8012",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_inner_cave_chamber_kit_v001.png",
+      "bytes": 971667,
+      "sha256": "2aabb9b3aae8a979b325f6d3580dfec14b52c3e1e7f6a3a14ff75a4df86311a7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_inner_cave_chamber_kit_v001_8k_authoring.jpg",
+      "bytes": 4432324,
+      "sha256": "8fd388fd769009e25aa4df5e84f5c0b01d587e476818a596932268d8f1c05d09",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_inner_cave_mouth_v001.png",
+      "bytes": 1176557,
+      "sha256": "804b9273f38f31c4b1152c6d4102ca23483a1f53c58efe60ae62c2bc61e513e3",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_inner_cave_mouth_v001_8k_authoring.jpg",
+      "bytes": 4947453,
+      "sha256": "cd1698f948d679dcca87f203d643ca74f7d0e16dbd076b9a73655c6397bf79e4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_inner_cave_section_circulation_v001.png",
+      "bytes": 1092569,
+      "sha256": "fc6096cadd5af6473e0b89779f0f430ae818aa0ce789b8f0ed0b56c1b8577234",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_inner_cave_section_circulation_v001_8k_authoring.jpg",
+      "bytes": 4773128,
+      "sha256": "6dbd87a735a005854752523b42761a113243c754e8838396c058df839384a305",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_outer_cave_chamber_kit_v001.png",
+      "bytes": 889022,
+      "sha256": "c7779a4586b8937b65538cfd4dc99e98d397beb0b838b0bc506296d99b416749",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_outer_cave_chamber_kit_v001_8k_authoring.jpg",
+      "bytes": 4090674,
+      "sha256": "322a072dc13bf5640d78788a73013f1bd72ccf955024eccb03ddb5c10fa10a1e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_outer_cave_mouth_v001.png",
+      "bytes": 890409,
+      "sha256": "d117be5fba59bd2800609c56946a06d8aad1dabc980a7a0728e979fcb2de64f8",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_outer_cave_mouth_v001_8k_authoring.jpg",
+      "bytes": 4002617,
+      "sha256": "c526272d3ce022f72edae67d640db079b0eadf6a217e5d59a96f68cab7076450",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_outer_cave_section_combat_circulation_v001.png",
+      "bytes": 958930,
+      "sha256": "d6d2f6c6000c49a1220c71388241b800fe3336137888f9361873b2ed1140c831",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/eldergrove_outer_cave_section_combat_circulation_v001_8k_authoring.jpg",
+      "bytes": 4184397,
+      "sha256": "b768fba0f270c077ad2541cf7e43a8e4fafaabf99a95890ec56ee831aeb94c30",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/generate_eldergrove_concept_p1_v001.py",
+      "bytes": 30260,
+      "sha256": "9fa516ab7cd8697eb8a48b1bd1df2449068e6a0dd593d7a44ca9f3e63c046d69",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/generation_run.json",
+      "bytes": 8828,
+      "sha256": "3fb2a49378b77e8d408456178f600c1e0d6148a9ca574b186ecc263910134ba1",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/rejected/eldergrove_capital_keep_interior_program_v001_attempt1.png",
+      "bytes": 371662,
+      "sha256": "287057e9abdfd799992737897edeac266061e06a8f26c5e64edd9fed437dbb56",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/validate_eldergrove_concept_p1_v001.py",
+      "bytes": 10170,
+      "sha256": "60073c8d942603012c9b2671b81cbcf21b24dd0c4cccc01fa7c804b274761924",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/EldergroveConceptP1/V001/visual_qa_v001.json",
+      "bytes": 5277,
+      "sha256": "72c933e12afebbc0a0f41d166dd0a7965200dc5763d1bf2437d5795a7b7d0fed",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/_assemble_records.json",
+      "bytes": 9993,
+      "sha256": "4427b2ad3bf003d6f085ed522f5a74158a762a0171c8add470dbd752bd2eecbb",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/assemble_stonehold_concept_gap_p2_v001.py",
+      "bytes": 6729,
+      "sha256": "48d01eaf5ee608ddbcc5b421b221c9476859c52b1ac7dbd3dc91513ffcbb55c4",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/generate_stonehold_concept_gap_p2_v001.py",
+      "bytes": 25924,
+      "sha256": "087d101367582627dd2f8456d8537e3b06cc0981cc37312180696158ce706e0c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/generation_run.json",
+      "bytes": 6673,
+      "sha256": "9f143bf34c2e25a080437f183d0b740bd21f9215df68dada304a85e69f321b37",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/rejected/stonehold_ecosystem_family_orthos_v001_attempt1.png",
+      "bytes": 233852,
+      "sha256": "e90190614f8be8aa96c4a4251fcf84a1a6dbae5fe9f263d0d843d91b7f94615f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/rejected/stonehold_fortress_elevations_v001_attempt1.png",
+      "bytes": 318290,
+      "sha256": "27680344212a054ee66324eec7e9f28b315e994c90099d60ce002870a881022a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/rejected/stonehold_fortress_elevations_v001_attempt2.png",
+      "bytes": 258541,
+      "sha256": "7f79eddb87678b51636b35defddbafeaf6cf061dfcda7d563873218d06449ef9",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/rejected/stonehold_fortress_plan_apron_v001_attempt1.png",
+      "bytes": 306157,
+      "sha256": "aec73d10a45e0b738cc85e74bed415e69e5a00212ba13ab5e6b9f0e848a1e07c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/rejected/stonehold_sequential_gate_section_plan_v001_attempt1.png",
+      "bytes": 299823,
+      "sha256": "716a7d45df785a43525bc2ddbf0d9e4368d427edcea7c711501ad533921bb833",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/rejected/stonehold_sequential_wall_module_kit_v001_attempt1.png",
+      "bytes": 320535,
+      "sha256": "5a73fa32cc5f031f4630c11b73b2702fe0e1302db547f7db29b7398ecbcb5c36",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/rejected/stonehold_terrain_route_bed_rocks_v001_attempt1.png",
+      "bytes": 285718,
+      "sha256": "96befc23e1a4d6052cfa16276cefdc220c72631d9cd796ed3128892747904678",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/rejected/stonehold_walltop_defender_modules_v001_attempt1.png",
+      "bytes": 243787,
+      "sha256": "121c662b7c822dde186736b894e65f21cef14508c4df2f8cbcc2995ce8ac0e1c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_civic_props_orthos_v001.png",
+      "bytes": 847102,
+      "sha256": "712085822d28187c2d25bc2ecd0911acd649a56762d8846bc8cf9c34a58f2399",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_civic_props_orthos_v001_8k_authoring.jpg",
+      "bytes": 3979669,
+      "sha256": "47c01fc7c52bea89c2758db84897103f17d1356ccade93344c8b75ff9e89ac52",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_concept_gap_p2_contact_sheet_v001.jpg",
+      "bytes": 731928,
+      "sha256": "31a72740ad37acbe9767b2d9c96c743074a0c9abc201899cd37c9174c77b301f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_concept_gap_p2_manifest_v001.json",
+      "bytes": 25469,
+      "sha256": "c887eb53a8d9b1ef96b13b71a936e7e160c844cf9d0bb8f50f1bd6339f90de9f",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_ecosystem_composition_plots_v001.png",
+      "bytes": 1388262,
+      "sha256": "967a0e328cc923937ec936ea51764681b7b1c3eee4843c892ae21d656f5340f4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_ecosystem_composition_plots_v001_8k_authoring.jpg",
+      "bytes": 5879350,
+      "sha256": "ffefded893f519e15d6b404cce578bd74ee05eb88514f286a1580efd4064225e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_ecosystem_family_orthos_v001.png",
+      "bytes": 670533,
+      "sha256": "1d227e0a076abd6bcb0c898253d3e39657da19c4cb758a16264a372761333dc9",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_ecosystem_family_orthos_v001_8k_authoring.jpg",
+      "bytes": 3369329,
+      "sha256": "044d55cca665d4b1b6e74b8dd31c730718d465f5bba7fabe5fc8b37a24d6d1b0",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_fort_props_orthos_v001.png",
+      "bytes": 914879,
+      "sha256": "990e7aae11692c4a8ad561ba444130f3320e5c9309dac053f94af71adf69938d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_fort_props_orthos_v001_8k_authoring.jpg",
+      "bytes": 4199499,
+      "sha256": "d2b6be6b4a3cb6c3dfcf2c92ffaca754bff53dd344d0a68c65ea26991cbdde31",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_fortress_elevations_v001.png",
+      "bytes": 773151,
+      "sha256": "d3f833b62dfa8295d7e8f39a1fbb71cd4da46cd6016877c5be296375c2231338",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_fortress_elevations_v001_8k_authoring.jpg",
+      "bytes": 3818424,
+      "sha256": "59cb89561a5f0744c54725328a3b92ae1581718734718ca69388f4c1e06453f8",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_fortress_keep_flag_anchor_v001.png",
+      "bytes": 847115,
+      "sha256": "7bb581f1b4a8d86277eb1c050ce143c125c5d7638717b53aa0a52b7d132f2e61",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_fortress_keep_flag_anchor_v001_8k_authoring.jpg",
+      "bytes": 3955515,
+      "sha256": "2c82e1f97f0d6d7146a852e771261be10722696b5afc39b09140fdd840ba97a5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_fortress_plan_apron_v001.png",
+      "bytes": 912944,
+      "sha256": "48f5ce69389f41685fa16d8816ff5e7b58d455ec004f21339bc1294f6acec70c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_fortress_plan_apron_v001_8k_authoring.jpg",
+      "bytes": 4391443,
+      "sha256": "43dd6373236f10afe3370d84b6f7b0dd46a9c49a5e28db986864777ab0973540",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_interior_guard_forge_rooms_v001.png",
+      "bytes": 1197988,
+      "sha256": "99143baf6094b8c718a04eb123e480f0cb44e44a2c47e52e7966b998bf1ad88d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_interior_guard_forge_rooms_v001_8k_authoring.jpg",
+      "bytes": 5342127,
+      "sha256": "9db4ec49376bb4f8ec51021021a1aaa160a1bd6e76c602d6df2e50133d90a08d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_interior_service_civic_rooms_v001.png",
+      "bytes": 1186211,
+      "sha256": "3639eb3f87f27230485c0678d01dadf52274bbcc526caa2f047167ca5d3c2876",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_interior_service_civic_rooms_v001_8k_authoring.jpg",
+      "bytes": 5143718,
+      "sha256": "82d39832916f228f804689d985c90bbfaaa3f0ef40a072c21802a5a83c8d784a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_sequential_gate_section_plan_v001.png",
+      "bytes": 378601,
+      "sha256": "32b18779e8ad2a45ea373049364bf6b3b7e28753672e0e5762e3d85cd056f4eb",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_sequential_gate_section_plan_v001_8k_authoring.jpg",
+      "bytes": 2343752,
+      "sha256": "46c1abe7a3901a77a1781ceacd335b34da63257e223713b4130982e7a137cac5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_sequential_wall_module_kit_v001.png",
+      "bytes": 911226,
+      "sha256": "c6f17ad29229435111fb9347f8f84546821334a90caab60b2f77f222528131a4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_sequential_wall_module_kit_v001_8k_authoring.jpg",
+      "bytes": 4259693,
+      "sha256": "af4e9bee57bbba7a276e09c55d806f665b2a401fc1f25cb25a7a8eb7ca89c905",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_terrain_geology_worldscar_v001.png",
+      "bytes": 1290948,
+      "sha256": "4a2f5d025984db50025a583dfefc2cc370a3e65eabe1ec04a231a5cd468fbdf1",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_terrain_geology_worldscar_v001_8k_authoring.jpg",
+      "bytes": 5397905,
+      "sha256": "8f96d47a0c44989b9278391433844ebc4602f229426d9405a6f3a211faa98b6a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_terrain_route_bed_rocks_v001.png",
+      "bytes": 910485,
+      "sha256": "906ed7b095d279f3ae3353872b2e2c908781742157132431e64f1f0a5580e63a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_terrain_route_bed_rocks_v001_8k_authoring.jpg",
+      "bytes": 4049524,
+      "sha256": "8f496def1feeb03d676637cf98aa1efb85490b2f240f65b4262cbca6c6b69708",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_walltop_defender_modules_v001.png",
+      "bytes": 717085,
+      "sha256": "0a3c91d4c3eef3c2444101e4f48360705ac66172f5e0482e4bf95454bf78e523",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptGapP2/V001/stonehold_walltop_defender_modules_v001_8k_authoring.jpg",
+      "bytes": 3607191,
+      "sha256": "fa2c87a327f77e525f9c4542c8548db3f2dc14c8d566b2d4a89c42e4fe1521ba",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/_assemble_records.json",
+      "bytes": 11215,
+      "sha256": "526ebec5fdccde419982fa9e35277eb5c0a900eddb8edfd2c8107577bc1f25e6",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/assemble_stonehold_concept_p1_v001.py",
+      "bytes": 6768,
+      "sha256": "249e22e5b790752a3878a4987025572d381f23a5eaaedcd96006eaf782d6aef0",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/generate_stonehold_concept_p1_v001.py",
+      "bytes": 23251,
+      "sha256": "c4df9401857c25a523890ebcbb5ef75d528229a1defc842c3ef769b1bf68a4a0",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/generation_run.json",
+      "bytes": 7521,
+      "sha256": "6721fa3de33202025b1cb76e1d437f101e0fcaa724f0d12a99d208460bf6e413",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/rejected/stonehold_capital_district_plan_v001_attempt1.png",
+      "bytes": 413369,
+      "sha256": "ec938b3d79ea592ce50013ff25303c2f2d1ebe8d53ab643f73453cc97e54b2c5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/rejected/stonehold_capital_skyline_east_west_v001_attempt1.png",
+      "bytes": 257198,
+      "sha256": "bc6cdda4175d4924d83836e315972173c774cd23f55899abd169cd9c41324333",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/rejected/stonehold_capital_skyline_east_west_v001_attempt2.png",
+      "bytes": 245635,
+      "sha256": "4438b2221d16d43535a02cadca7a10ee85d718b33cd864b5434773b9d53d5a49",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/rejected/stonehold_capital_skyline_north_south_v001_attempt1.png",
+      "bytes": 282687,
+      "sha256": "d58ee4a25b67cfa3da957471423bb6d77dba9ff175f84bb12f1b0f83286dc4c7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/rejected/stonehold_capital_skyline_north_south_v001_attempt2.png",
+      "bytes": 275162,
+      "sha256": "c83bff9ae91a0b044d38056c6e0fda89281fe7afd6d991d9f946b29525e9c82c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_district_plan_v001.png",
+      "bytes": 1488669,
+      "sha256": "88c84c7a04b2f3887183dcaddbd18c2231f47a360143a643fe0638df1170dc1e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_district_plan_v001_8k_authoring.jpg",
+      "bytes": 6153917,
+      "sha256": "07b98f9800922667be8ac07e9c500e0e2f1113e07ac4c2ccbf09c369cc3bac1f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_hero_keep_shell_v001.png",
+      "bytes": 918823,
+      "sha256": "7bf3fcb3cc91c2514a44a0e295884a5c422ed64ef2d1a66a9dc8de9bfe0393a7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_hero_keep_shell_v001_8k_authoring.jpg",
+      "bytes": 4269076,
+      "sha256": "4f2d5176d76b343b3fd0c7cfbce553fb79f1cec20d6b8620e48eb6e9d82fb041",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_keep_interior_program_v001.png",
+      "bytes": 1177227,
+      "sha256": "6a8833f372d80fbb484a8d948adf49b347ae719aaa14a92c5da2d2311a1f30da",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_keep_interior_program_v001_8k_authoring.jpg",
+      "bytes": 5216827,
+      "sha256": "527b70d15dd0eae500ebbd2e9af0bdcdebbd2a6206b26594e7fbf179632ca437",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_skyline_east_west_v001.png",
+      "bytes": 722986,
+      "sha256": "703e0d9d0b33f71e1b3203c1da46414e4df99bf393cdbb2bb735f12b975c9856",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_skyline_east_west_v001_8k_authoring.jpg",
+      "bytes": 3522232,
+      "sha256": "d4b584042302b2debfe1421f7942295deaf62c4ed26302e2b157d8a2709480e5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_skyline_north_south_v001.png",
+      "bytes": 806461,
+      "sha256": "afe6116e0c45fe0cf490317c4e716161eba6ad6ca8ecc47ee2da18dcfd655b01",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_capital_skyline_north_south_v001_8k_authoring.jpg",
+      "bytes": 3866108,
+      "sha256": "53cef54c58ea2b707ca7c724c44da7ee70ec2fc2151aadc1d77913e716e47397",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_house_module_v001.png",
+      "bytes": 1078264,
+      "sha256": "afe327df7844dae23e9e8249346a6ceaafa140b691b93088030a3c9dfcf742a9",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_house_module_v001_8k_authoring.jpg",
+      "bytes": 4761851,
+      "sha256": "4c29da877af0a5399dd01dbbadbd341923a43fe787b26119662e4415e2cac1df",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_service_module_v001.png",
+      "bytes": 1115670,
+      "sha256": "f9868dc496d5260ad7a2717e84d53e1a45990e4df2cb313c24bcd1666a6fa906",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_service_module_v001_8k_authoring.jpg",
+      "bytes": 4897040,
+      "sha256": "a543e3e6fff5fbc3c04d2207431794a5fcad4a7bca7f318592c32775c9bd7a3a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_shop_module_v001.png",
+      "bytes": 955974,
+      "sha256": "05806961e37e04a9ddb70eda6f7616c9fac74ca1b92b2ccff199e47501a4a2a5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_shop_module_v001_8k_authoring.jpg",
+      "bytes": 4327421,
+      "sha256": "9288f2b13d3971235f725f7b92f1aa4a50320679572195131d582dbe00b4c080",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_street_plan_elevation_v001.png",
+      "bytes": 991783,
+      "sha256": "ec908914f29183fde38aecc29183eef2a14cea990b5cb6bb6cdf03cae6baf58c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_street_plan_elevation_v001_8k_authoring.jpg",
+      "bytes": 4606652,
+      "sha256": "d818241ff49353e0b940e297f13a6a5568c92688c229ff5bfde9e4cf80d6a565",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_workshop_module_v001.png",
+      "bytes": 1134728,
+      "sha256": "c4dfaec79ad70afe197628976bc3d7bcfda7227981e8973d6908271026c3c191",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_city_workshop_module_v001_8k_authoring.jpg",
+      "bytes": 4982505,
+      "sha256": "98f70591a458acdc9a7daeb4ecf0391c9f6ce709c3f73a7bdc3a9fd5aa921101",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_concept_p1_contact_sheet_v001.jpg",
+      "bytes": 875873,
+      "sha256": "b241275054dda1505d9887fddcdee02d74c39030daa75eb72ecd1c727bb24fbd",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_concept_p1_manifest_v001.json",
+      "bytes": 19984,
+      "sha256": "b5885f6c5131522f5d33ba520ddc0899b27647524b8b432b6a111039d847f50c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_inner_cave_chamber_kit_v001.png",
+      "bytes": 798118,
+      "sha256": "047b93f46990714a8bdd167b6cdcee8a489756486d897d544d51c959e7a48db3",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_inner_cave_chamber_kit_v001_8k_authoring.jpg",
+      "bytes": 3829950,
+      "sha256": "b8f3ba9b871193b1afcdd2b560bfbec9f0e5f553c0648c4b6e4eb04b3ce1e6ad",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_inner_cave_mouth_v001.png",
+      "bytes": 1079663,
+      "sha256": "a6c3cb7b1d4dad60c41a8471caa442394048a0f36ceec42c1a2e5600a78b0097",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_inner_cave_mouth_v001_8k_authoring.jpg",
+      "bytes": 4799341,
+      "sha256": "cfed3b6bbfe8dfadb1a69425f00136ed70bd757cb9813fd4f096ea1dd32117d6",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_inner_cave_section_circulation_v001.png",
+      "bytes": 1040537,
+      "sha256": "e66c7308a87dd435859bdf48acb6c8a6a7753e3bdb95e237d3591ae5df5a3d76",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_inner_cave_section_circulation_v001_8k_authoring.jpg",
+      "bytes": 4496933,
+      "sha256": "1fba2b004dadad640e2d6fe76483692d5703b4ba9eb08269b4a792b831d907b2",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_outer_cave_chamber_kit_v001.png",
+      "bytes": 849683,
+      "sha256": "2cdb6db9d8b6b42ef5de5812c22a9f60eccb52bd625968cb342fc3d4816ae90b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_outer_cave_chamber_kit_v001_8k_authoring.jpg",
+      "bytes": 4038056,
+      "sha256": "69f5b25934e294a3c2e76625ea1430086628893373bd6d42540f281759848918",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_outer_cave_mouth_v001.png",
+      "bytes": 814270,
+      "sha256": "7e318ed988111a5c4c51e188fcc8a5723c7869b7c1f6fd73edf4de37c0ab2ed5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_outer_cave_mouth_v001_8k_authoring.jpg",
+      "bytes": 3800101,
+      "sha256": "74dcb1332a67b9db799341b139f99c804c7e60f3fed0965cc713bb16e5fbd006",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_outer_cave_section_combat_circulation_v001.png",
+      "bytes": 1104598,
+      "sha256": "04c68fc0adf8d03cafe4b503879666cc096d46ef3cf1f14d513569e39235a932",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/StoneholdConceptP1/V001/stonehold_outer_cave_section_combat_circulation_v001_8k_authoring.jpg",
+      "bytes": 4833234,
+      "sha256": "6e7eb17e7974a2e19254e976ee89f54658bfa091c6965b6284e8deb58674164e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/.gitattributes",
+      "bytes": 183,
+      "sha256": "6d64c91cbb9ca7822ff27ce097e6d25e0fdf6407d05bb79ac7a431ea62773c9e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/_assemble_records.json",
+      "bytes": 11081,
+      "sha256": "1eda91b35531a42f690a8740fe15e592318b0b21d9b5d68bb0e5bea97a840ea6",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/_retries.json",
+      "bytes": 2312,
+      "sha256": "4581849a93cf48d8219443f3fb94409143d985631bcd317eb5d6ebfdf6ae16d5",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/assemble_umbral_concept_p1_v001.py",
+      "bytes": 6685,
+      "sha256": "c306bd355268f17b0858b7143e9d074b15d5526d1031dd2c7ff5eeb4c33f6c22",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/build_umbral_concept_p1_manifest_v001.py",
+      "bytes": 10627,
+      "sha256": "85b1feb41c40c951fbeb23721526086e80575dc303aca54d3a9af5c883922ee0",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/generate_umbral_concept_p1_v001.py",
+      "bytes": 40334,
+      "sha256": "4303439df41a92fa904db6ec411db6f5ff37fc035ec341957f827096a4d20e8e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/generation_run.json",
+      "bytes": 8523,
+      "sha256": "2db33f1b1abcbf67732847618ea3e7cba7b730e8be3d760c651c73fc7cd56116",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/prompt_log_v001.json",
+      "bytes": 69629,
+      "sha256": "26173aba7cab3ff88232090b83f6c23dd235e9f8f6068a4418ae31ffcd7a30d2",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_capital_district_plan_v001_attempt1.png",
+      "bytes": 931732,
+      "sha256": "ae7c4b163a596973e15ee61af3e3a79c2bcf66b2933cb0b9578f1ed0618222d8",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_capital_keep_shell_v001_attempt1.png",
+      "bytes": 282804,
+      "sha256": "6bc31ecb3015902d6eaa01109b3bf3257fc45611914bc0f7371b6b5fddf973e0",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_capital_keep_shell_v001_attempt2.png",
+      "bytes": 717961,
+      "sha256": "c61f237860541a7f69b5270f4f2b6c700fd07dbd4007a1725d39d7432cd93010",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_capital_keep_shell_v001_attempt3.png",
+      "bytes": 306023,
+      "sha256": "261e6d6303103ccbb5fcb0813abd9d3af0753392022000485be8f138a0502f69",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_capital_keep_shell_v001_attempt4.png",
+      "bytes": 320722,
+      "sha256": "e43c3fa4f72ebc693511f892aa43d32fc620edd194c2044475feebc0cf019380",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_capital_skyline_north_south_v001_attempt1.png",
+      "bytes": 265842,
+      "sha256": "0d9946dcf5ae5cbc16e272c43be00f9355f95ab058178791eb36f83e3f34832a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_city_dwelling_shell_v001_attempt1.png",
+      "bytes": 845976,
+      "sha256": "f28dc71d4ee67712fd8722e24ea8f21db3293ff611b5bc396947442882c70215",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_city_market_service_public_hall_kit_v001_attempt1.png",
+      "bytes": 991869,
+      "sha256": "e2ac84d254714a6f7ebf7304061a1b06e7aa3922765ec666c10fb60effb5b628",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_city_market_service_public_hall_kit_v001_attempt2.png",
+      "bytes": 310333,
+      "sha256": "0e164ef866e8384ed478949e50345af920e6f86592618851938e47e530f6d153",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/rejected/umbral_city_market_service_public_hall_kit_v001_attempt3.png",
+      "bytes": 356704,
+      "sha256": "7939975408093d6f2d50510565c60b269427ba9819f628fe86bd334f7c05a6de",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_district_plan_v001.png",
+      "bytes": 1144168,
+      "sha256": "7a61c80b4d257d31ab0c26bf6b2979926a5f1b705f9d38ed3708fba0c91243c5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_district_plan_v001_8k_authoring.jpg",
+      "bytes": 5457392,
+      "sha256": "d26cd5f78c3b676d1250b6cac1a7560ef93fa7599468283941a642702b7c20a9",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_keep_ground_plan_v001.png",
+      "bytes": 1070268,
+      "sha256": "f8d6ca48cfdd0f664ee45380f7a86e66667f98b51faafc34b458952fd5f949d5",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_keep_ground_plan_v001_8k_authoring.jpg",
+      "bytes": 5238783,
+      "sha256": "4c677522f91d5b2883d8f5a784ffd2d4da5105a6650ee00228300034664560ed",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_keep_section_v001.png",
+      "bytes": 899307,
+      "sha256": "0b821f79210b836b6a701cf72f9dd3a73062c53b1967d60f0946ede47efa3fcb",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_keep_section_v001_8k_authoring.jpg",
+      "bytes": 4729534,
+      "sha256": "ea3f9e9add41ed3112aa459e006ef0a040ac1847f35187c75d92830a0d2f5f69",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_keep_shell_v001.png",
+      "bytes": 1042069,
+      "sha256": "4e220b215877fc7c0ed1bafd3ffc7ef73315e6a79c74fc13e7674d4815e43fb6",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_keep_shell_v001_8k_authoring.jpg",
+      "bytes": 5160959,
+      "sha256": "ea4a676d1cb762a74ab57cfc8e211e37c3ca78aa18b00115a4d017884ab03791",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_keep_upper_circulation_v001.png",
+      "bytes": 945255,
+      "sha256": "de6f4984ece4a31b5ad603d2ee79964adeca80911a6fd907de1e2947d48dec2f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_keep_upper_circulation_v001_8k_authoring.jpg",
+      "bytes": 4774433,
+      "sha256": "443e0e24703293d9c04c583a3594eb4a6dfe194b79563f5f96dbceb8923338c6",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_skyline_east_west_v001.png",
+      "bytes": 735285,
+      "sha256": "237f0fe90e598ea357c1fd8a754ac2421fb52d407e9afc20ed36c34d83e3c209",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_skyline_east_west_v001_8k_authoring.jpg",
+      "bytes": 4154619,
+      "sha256": "93c8c5d7f4e898ab72ba5659df9160e5e5f86c44fbeeef1531265175cc5b2dfd",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_skyline_north_south_v001.png",
+      "bytes": 871695,
+      "sha256": "bff07866b36e30da731680d6687d902a7b0484b34d67641b994a40ae48ac0b71",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_capital_skyline_north_south_v001_8k_authoring.jpg",
+      "bytes": 4455581,
+      "sha256": "e39206f6a5545484d7dd8dac9dc9340b1b2c39e225779df41580b5975cbf2395",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_cave_chamber_fitting_module_v001.png",
+      "bytes": 1045855,
+      "sha256": "6563b52a0d454152d3017b138342c5d76b2e2ae4a80d1bbe0394290edb2a918d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_cave_chamber_fitting_module_v001_8k_authoring.jpg",
+      "bytes": 5146061,
+      "sha256": "bf436abbff3db844c9c6abcd6302847a40780295b621ecd4dc41a00bb217d485",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_city_dwelling_interior_v001.png",
+      "bytes": 902368,
+      "sha256": "93ff3eb537c49cd2bc6c25fb6a40b72a0c678dbe5f39696e85ff202e83ce24fd",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_city_dwelling_interior_v001_8k_authoring.jpg",
+      "bytes": 4698853,
+      "sha256": "46b62c92ca92d8b6b32be967d3d3069cc3705dece8b6ecad683314335cd70d80",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_city_dwelling_shell_v001.png",
+      "bytes": 910621,
+      "sha256": "29bd6240da8af14bf80040530f039107e4aa2d2db90256ec6e9f6264eab873f8",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_city_dwelling_shell_v001_8k_authoring.jpg",
+      "bytes": 4572270,
+      "sha256": "7af24eacf4622718cbd47b8cce3a80b97ac1a82a3777aeee47f51024b5960548",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_city_market_service_public_hall_kit_v001.png",
+      "bytes": 915863,
+      "sha256": "9ae448ff61931fc7f601e6da917efd85f9acd4d4caddbeb79989ca342cbd6e5b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_city_market_service_public_hall_kit_v001_8k_authoring.jpg",
+      "bytes": 4836716,
+      "sha256": "0870c266d978774153f7d21fdb35bb62baaa1b99951162fa884490c8e1e027ff",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_city_street_grammar_v001.png",
+      "bytes": 876358,
+      "sha256": "f1e4bf2196088e9afa8ec6e3d055281dcb7ca28e4a043cb9884a828162a7fc5c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_city_street_grammar_v001_8k_authoring.jpg",
+      "bytes": 4559542,
+      "sha256": "4b3e3dfd451fbe0d57d1a56f61a7350f2e87d8d146811f7a8f4812a7b5358404",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_concept_p1_contact_sheet_v001.jpg",
+      "bytes": 832710,
+      "sha256": "dd73f48359505fce0ac4ec8013f7d8b0d8e7720bffc8bd32c74e338fc79c8b4f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_concept_p1_manifest_v001.json",
+      "bytes": 32148,
+      "sha256": "a1a0c680293a86f7872973e0ae475fb8f8e2669f17e226b0ad736f091f1d261f",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_inner_cave_mouth_v001.png",
+      "bytes": 842298,
+      "sha256": "6803e373a0c825f180596546cd33cf3954a38271ad5fd0f93314a9da74c568bb",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_inner_cave_mouth_v001_8k_authoring.jpg",
+      "bytes": 4411706,
+      "sha256": "03dfe4df2f7fcef29be60e73202acfed332c1cc8f2e7eaee2c8e96b09a6190f2",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_inner_cave_section_circulation_v001.png",
+      "bytes": 1065915,
+      "sha256": "c801996b7694014b7d8a9da61a5fe9457b7b57d14387f34ebdd2a334d6a52131",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_inner_cave_section_circulation_v001_8k_authoring.jpg",
+      "bytes": 5123844,
+      "sha256": "f869f94fbb9d93fbab8e7e7d8c2c4f11f6c06df5e3a7fd61d077ff644b899579",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_outer_cave_loop_choke_section_v001.png",
+      "bytes": 727860,
+      "sha256": "b11973339d1741dfed93c6c38e770a4fb96a18543413e00d0e04ebfddd7318f4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_outer_cave_loop_choke_section_v001_8k_authoring.jpg",
+      "bytes": 4020891,
+      "sha256": "2eec76c8b8b833c4a33190e9818f764aa471d5154a62e3fbddc2406d6cda782b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_outer_cave_mouth_v001.png",
+      "bytes": 975531,
+      "sha256": "ad89c002221dcf98469d380277e6359b8d94af861d17d2885f7df6f074fc3898",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/umbral_outer_cave_mouth_v001_8k_authoring.jpg",
+      "bytes": 4800282,
+      "sha256": "7bb5c3306cfd82f908d750a0ca3f1f2bbcd8dc7b75454f3b74ecb37600344883",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/validate_umbral_concept_p1_v001.py",
+      "bytes": 12107,
+      "sha256": "ceb907f2b12ca4affe52a14bc470f507524e1f2c14e4d8937fae371144e73834",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/UmbralConceptP1/V001/visual_qa_v001.json",
+      "bytes": 7282,
+      "sha256": "95de10ed8d25f1471b4af9a478dd8f0fb6961c0b88caa45dee64011cd555cf43",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_fortress_v001.png",
+      "bytes": 3064082,
+      "sha256": "f1d772f209ace91d06900e0e5a76813b82d309bda2d4b308543b3e50ca4eab22",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_fortress_v001_8k_authoring.jpg",
+      "bytes": 7952145,
+      "sha256": "00c913c548460f9fa4369c4ccee561d9a4287b9dfc6fbd1f33efb85f1568fb5f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_gate_v001.png",
+      "bytes": 2199821,
+      "sha256": "6e1a9d642e6150bb4fe361fe78cdec2d8c4b3f832ad686ec52e44a7c1fad5c80",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_gate_v001_8k_authoring.jpg",
+      "bytes": 5849509,
+      "sha256": "cd3476282a1528f257a04b394796ea3f63fa88fa07ec65792d12625566bf5098",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_interior_v001.png",
+      "bytes": 2409840,
+      "sha256": "793d993044c1e1197f08f44e09f7dcf399de582398994fd2871fdd50b916fc32",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_interior_v001_8k_authoring.jpg",
+      "bytes": 6553609,
+      "sha256": "bc5c3a951f3fdbbd9bb1b38ee2902e77fae40894f97945d3b381be21da340e73",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_production_contact_sheet_v001.jpg",
+      "bytes": 1701610,
+      "sha256": "046f1a1241aaf4141ce4a9f4e8d45743af6238fe20765860cbe251e387352170",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_sequential_gate_technical_plate_v001.png",
+      "bytes": 77342,
+      "sha256": "d7373ec69031d9608933299eedef0ae8a93d25a9e81fd324dc9abac850081c67",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_sequential_gate_technical_plate_v001.svg",
+      "bytes": 4407,
+      "sha256": "bf1c89a9f1e62f9d99be723517b243e1800aad8c6401a628ebf1d1d77b0f82ba",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Accordant/accordant_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "bytes": 2630575,
+      "sha256": "718a7327a60e7c869bc24356c515ba0cce2b914f346089935afa96eef8483afd",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_fortress_v001.png",
+      "bytes": 2480019,
+      "sha256": "2959c608857ec3b41d82b1fd4178644c503d72f9f759ad25a83959039ee26416",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_fortress_v001_8k_authoring.jpg",
+      "bytes": 6356310,
+      "sha256": "af2bf77d1ab79bc9ece64490bf76eceae63995edd4a810c68f53518652834970",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_gate_v001.png",
+      "bytes": 2526033,
+      "sha256": "d0a7937be55386f217afec0b080a50a738fdc5a115a4a5a6c222ba3106d508b1",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_gate_v001_8k_authoring.jpg",
+      "bytes": 6632816,
+      "sha256": "1e1a62027c11f40673ab5fef2fd0e35dc6c99e0c701915b845eef0474cbcb36b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_interior_v001.png",
+      "bytes": 2778302,
+      "sha256": "e0b60184b0398f671c380255c483f639b0c76171fa273fe0cc8b5986a2091b6a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_interior_v001_8k_authoring.jpg",
+      "bytes": 7393157,
+      "sha256": "7ba456f378ebcd5502f48596da2462bd412d0109911bd61cee8a1a6da9fc9422",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_production_contact_sheet_v001.jpg",
+      "bytes": 1731221,
+      "sha256": "68df40f3b6a2c8ed7ba6253cf1f8fcc408a6ff5183217f6570e738ab63ff214b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_sequential_gate_technical_plate_v001.png",
+      "bytes": 71609,
+      "sha256": "24a3f9dc20803fcddd6ceda800674f34e7565adbfe958cfde22f2788dc10d54a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_sequential_gate_technical_plate_v001.svg",
+      "bytes": 3854,
+      "sha256": "0f8617579034050be11a64e4fc55720d904a1ff35c20d9e49228c9b93a816ff0",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Crownlands/crownlands_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "bytes": 2341557,
+      "sha256": "b6fd2418a12349a8f336029f3db8af772ae435e785e31225d016941af791b934",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_fortress_v001.png",
+      "bytes": 2077842,
+      "sha256": "815bd290603345751dd8919678eb898ea2ee7c55de3228842d117f66eefee57d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_fortress_v001_8k_authoring.jpg",
+      "bytes": 5250464,
+      "sha256": "3a5cda966821861af5e527c04ec0b386c7fa213a371dcf5f2ef76a7002287c88",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_gate_v001.png",
+      "bytes": 2517904,
+      "sha256": "e97b3354ca7ee3d3961fcdb37fa3117bbd4c91c718c7f0ab02c90cc7a9a0edaf",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_gate_v001_8k_authoring.jpg",
+      "bytes": 6775834,
+      "sha256": "b84c56d8e2b2ab7020df6601863bc7ba9148ff4d9a76d86cedaad175f69914d1",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_interior_v001.png",
+      "bytes": 2365358,
+      "sha256": "9cfdf0d046f60f3f84b251a7661d61b476b854f83ed5943b89af93e095b9f4f9",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_interior_v001_8k_authoring.jpg",
+      "bytes": 6380569,
+      "sha256": "d35c9f5ccf3a1c17b9bd0ca13d9342a3657baf786353e7c5fe4e6564faeeb1e6",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_production_contact_sheet_v001.jpg",
+      "bytes": 1531890,
+      "sha256": "a86100d1be6237a0254830f196874293d24e86cf7bc3e03d08bfb8ae5223caea",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_sequential_gate_technical_plate_v001.png",
+      "bytes": 69785,
+      "sha256": "acc0fc694d6902119a8f8d26629a2f90b0ce2107d443208f9022a6d56b56a9ce",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_sequential_gate_technical_plate_v001.svg",
+      "bytes": 3820,
+      "sha256": "7570cad9bd67da14b398a478ac3c7967ef1d9985d6863f35b318a2ccab665f3e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Eldergrove/eldergrove_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "bytes": 2375585,
+      "sha256": "337952487eda0151bac1904a05944aafd423125077dfd545884aad82be6ea22f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_fortress_v001.png",
+      "bytes": 2353633,
+      "sha256": "020df12ae1b61d004656d5f3ee8d0621c88eb12d2023c40c7c3a646ddb058af7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_fortress_v001_8k_authoring.jpg",
+      "bytes": 5965246,
+      "sha256": "67735e323d4dcefabd4b672b16d665a1bd5f6fef92703f2a1577b021aca2e932",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_gate_v001.png",
+      "bytes": 2195695,
+      "sha256": "f2a9f416177c21960ec6dcd775fd4322476e30200b7031d78252156e9f6b70ad",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_gate_v001_8k_authoring.jpg",
+      "bytes": 5654896,
+      "sha256": "f443cde9700805d9352ee82ba404f7d027d418626ca99269b780cfc01c7751b2",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_interior_v001.png",
+      "bytes": 2771757,
+      "sha256": "bbae6f50488f7757617b908266ab736467a264fca31706f99941f26a0711d07f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_interior_v001_8k_authoring.jpg",
+      "bytes": 7692059,
+      "sha256": "9816dd364e26638a57eb048834864d3b86474f8bc4be7cacb0381ac5ed579e89",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_production_contact_sheet_v001.jpg",
+      "bytes": 1639288,
+      "sha256": "fcbb802479ae76b21023ef313ce3f64aa4a880b5cb3d073ac5686f36dc083f35",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_sequential_gate_technical_plate_v001.png",
+      "bytes": 68799,
+      "sha256": "9c69512a3d1338f45983a3d064b7a3c44ad3a43523f4ea7e6efec1681f11f24a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_sequential_gate_technical_plate_v001.svg",
+      "bytes": 3782,
+      "sha256": "b45b2fa48eb0e1c0d42d0ef91f57be5980c6ec0aafd9967f06e1618c621c8462",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Stonehold/stonehold_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "bytes": 2289194,
+      "sha256": "7d5d795a9d9647793ef0da22407a815fb24abe73bcf0d701959e2bb720334f6d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_fortress_v001.png",
+      "bytes": 2376208,
+      "sha256": "32bd24126be62841b91de5cccc2f5b064260fc60afaf5d49d2af31472771fab1",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_fortress_v001_8k_authoring.jpg",
+      "bytes": 5885018,
+      "sha256": "23ca924971fd4e8ce0e017f149724bcf0711e863cf98a7aed13c5ca8a1d9ed36",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_gate_v001.png",
+      "bytes": 2232986,
+      "sha256": "efe69439bcf0c0d8eaa9754a9553a1526290393f7a9b3edced16322384f61428",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_gate_v001_8k_authoring.jpg",
+      "bytes": 5756649,
+      "sha256": "aeb623c57dfb57320576976a6b6261f514608f7dd895c06a7834d47ec01c0a15",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_interior_v001.png",
+      "bytes": 2239933,
+      "sha256": "79d483c7d9f14c6918e2779d65affebdc5b6d27b5a9124c8baf28a78b85fca05",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_interior_v001_8k_authoring.jpg",
+      "bytes": 6075358,
+      "sha256": "c85b8a574a55cfe4feb7b8b01792180cfd5d8a10e01ee308c997e6c156b9d634",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_production_contact_sheet_v001.jpg",
+      "bytes": 1449545,
+      "sha256": "5aa5bdfb357f77250bf8f74523fb2f322787edec7316a452bed4ba305802fd9d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_sequential_gate_technical_plate_v001.png",
+      "bytes": 69681,
+      "sha256": "70f9ed38d587050705009df1b264beb0b7435fdd65c020cb8be96bb25cdfa122",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_sequential_gate_technical_plate_v001.svg",
+      "bytes": 3809,
+      "sha256": "d65f4538970315391055831fcf418e0a8f3ab15f0dbc055e00bf42ac851d251c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/Umbral/umbral_sequential_gate_technical_plate_v001_8k_authoring.jpg",
+      "bytes": 2385521,
+      "sha256": "315f4383500b7a0022a3a73cb4a4d4a9607b54553a7cff0a6b1bb288a3e0cd60",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/accordant_architecture_source.png",
+      "bytes": 2629871,
+      "sha256": "70fcdf4db14d99873ebdb72acbdca6cd12e5a5373e1fbe08234c1da298b328d7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/accordant_architecture_source_8k_authoring.jpg",
+      "bytes": 7190277,
+      "sha256": "c75ddab623886241c53d92bc39aef40332be2d02e709a12193060b74ddb3a916",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/crownlands_architecture_source.png",
+      "bytes": 2425658,
+      "sha256": "b9ca36c892695dcaf1add30d64f1b7d184a6824773b1ec699239f869c36dce72",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/crownlands_architecture_source_8k_authoring.jpg",
+      "bytes": 6534221,
+      "sha256": "435c80755808599e39943e87dca76a280636d8031853e0a600d391d4f60faebb",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/eldergrove_architecture_source.png",
+      "bytes": 2788430,
+      "sha256": "f46a92d2768e5289a7975539abceea072aae0504ffdf1277876678edbfc4cdd7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/eldergrove_architecture_source_8k_authoring.jpg",
+      "bytes": 7581637,
+      "sha256": "1139b64e8c53034171109a5773d1cf911f34ff9ff2cda0e2ba52a1776e170770",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/shared_modular_kit_source.png",
+      "bytes": 2422709,
+      "sha256": "ccd0971eaead62819a74261d5ed4e76c182a13c9da8989b2de76bf0414178f22",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/shared_modular_kit_source_8k_authoring.jpg",
+      "bytes": 6489932,
+      "sha256": "9f8da10f88b7a4b1778a810257403af0cc52c94799ba2b6ecbe365cb7badd5ec",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/stonehold_architecture_source.png",
+      "bytes": 2419516,
+      "sha256": "7c02b031790a31f1c33e4a71da68aee5acbbe1024970d1148fda18a95a9c3441",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/stonehold_architecture_source_8k_authoring.jpg",
+      "bytes": 6673581,
+      "sha256": "f364b57831175b0a4dd133d1ab30398487da6494e46b37486c1f50946f4b0a6d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/umbral_architecture_source.png",
+      "bytes": 2334288,
+      "sha256": "555e541da9d6555e621f379726ba8977404994427b8c63faabca4294e6f14f3f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/umbral_architecture_source_8k_authoring.jpg",
+      "bytes": 5871619,
+      "sha256": "2445406fe7183ab1576c6a12dc376f0cc15156eea42646d0c16a58b424909476",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/World2DProductionGuides/V001/world_2d_production_manifest_v001.json",
+      "bytes": 17696,
+      "sha256": "432be1a5b3721a5f8fa555d6a663a5cb47f40d40704f896ddf16094d606d5893",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/assemble_world_concept_gap_p0_v001.py",
+      "bytes": 6690,
+      "sha256": "0f883de8ff76c6d4bc672aefbc4c44b111be9a13954dc767e09e3e5efcd12ba3",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/crownlands_bridge_abutment_v001.png",
+      "bytes": 860436,
+      "sha256": "9a8e401c58eaa2b2bcb177c47aa9390a75fcfd90a0314548b1d5650da20ab3e7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/crownlands_bridge_abutment_v001_8k_authoring.jpg",
+      "bytes": 4233691,
+      "sha256": "bb27f2d4e3726b24e0f1d0881f444ff92c6cc3b557ac00b0e27a4b9cd7cd4350",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/crownlands_ceremonial_gate_leaf_v001.png",
+      "bytes": 1164327,
+      "sha256": "d7bd557d17a9bfaec6106846f8496458f6cb99f480d88b06165c67a3352271a4",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/crownlands_ceremonial_gate_leaf_v001_8k_authoring.jpg",
+      "bytes": 5179930,
+      "sha256": "80a9e1a3400d31360c4c0f67fbd4ab4051e5ef4f4e25bdb001a727e3fbf06883",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/crownlands_save_pillar_ornament_v001.png",
+      "bytes": 920039,
+      "sha256": "0bc959c4d02005535e4ccdd559b292ff093bb1ec7b953c9a3280c54ca0058d97",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/crownlands_save_pillar_ornament_v001_8k_authoring.jpg",
+      "bytes": 4372061,
+      "sha256": "021cdf8b988fb8059df62e567169754e29b3a23bc3e402bf27842f9d9bdba6cd",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/eldergrove_bridge_abutment_v001.png",
+      "bytes": 1151550,
+      "sha256": "320a725fcd11c66e91857d0f70c73af5980216259f7b533092a927690b485a1f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/eldergrove_bridge_abutment_v001_8k_authoring.jpg",
+      "bytes": 4885119,
+      "sha256": "5ebf8580f4ab432a6630356c2a08adf3f387fe223e0c4c790d7fac9dde165cf1",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/eldergrove_ceremonial_gate_leaf_v001.png",
+      "bytes": 1328081,
+      "sha256": "61c81b687dd7f54a57cf245b5dbed00f22fcb9c640f281c9d10541a33449f36c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/eldergrove_ceremonial_gate_leaf_v001_8k_authoring.jpg",
+      "bytes": 5608961,
+      "sha256": "950de300a08508b4129681e0f49a0c6179c7bc679fb8220d69b9c445c02eda3e",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/eldergrove_save_pillar_ornament_v001.png",
+      "bytes": 973712,
+      "sha256": "8c76456b2cfb6cdd4db0024ed3ebc30632a6353b1482ac3ddb1eac0c085d8823",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/eldergrove_save_pillar_ornament_v001_8k_authoring.jpg",
+      "bytes": 4256707,
+      "sha256": "2b8e2d12458d24da657f47a1005e42d02330be019c0ae610e791047c7d9fbd84",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/generate_world_concept_gap_p0_v001.py",
+      "bytes": 21425,
+      "sha256": "555b4a2405c4580bb2c0ce418070eb7880a2289f391f164c0ed0844125cc428c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/generation_run.json",
+      "bytes": 1171,
+      "sha256": "a6696a65c51a5b1f2b8c1e201332ebbeb4d030b65e4d883bd326b5e2e82f24f8",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/rejected/crownlands_save_pillar_ornament_v001_attempt1.png",
+      "bytes": 277233,
+      "sha256": "4ae28a75864da8a3567f09c4be73f733ebc907feb1e1a374a3fb6e2de9225cea",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/rejected/stonehold_save_pillar_ornament_v001_attempt1.png",
+      "bytes": 291841,
+      "sha256": "e11851a0d863ff8d14d4d2477a7e6bab235328465f3d86efb54b826863a3c9ee",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/shared_adjacent_realm_bridge_kit_v001.png",
+      "bytes": 711452,
+      "sha256": "4da23a6cd80a22822be4c416c2d14cb7a2cfa2bbf193361ae6386accc0ed42a2",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/shared_adjacent_realm_bridge_kit_v001_8k_authoring.jpg",
+      "bytes": 3621718,
+      "sha256": "a57dbb2d0beb38e4a9c10073ad6c7f5d9096fce8f5918cc61df7632156bcf1ab",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/shared_door_hardware_orthos_v001.png",
+      "bytes": 1068331,
+      "sha256": "38be5399dba4b5fc98ef34466351c919d4c37c12a5eab6a5d32ab4b7c3f0e3c0",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/shared_door_hardware_orthos_v001_8k_authoring.jpg",
+      "bytes": 4888836,
+      "sha256": "83cd28217ca70752b753b36d6bf4f98730081f40614e5aa5c6e512780d5cd748",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/shared_save_pillar_hero_form_v001.png",
+      "bytes": 862187,
+      "sha256": "ebd1657422524804e6edd84bf818438f85f61c3794cb5b8e126b9b4e5f80c3cb",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/shared_save_pillar_hero_form_v001_8k_authoring.jpg",
+      "bytes": 3961134,
+      "sha256": "b043c463d228dabe3a19a72f4acec9ba256350528df9be4b01c29f4449f8604a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/stonehold_bridge_abutment_v001.png",
+      "bytes": 970685,
+      "sha256": "b4a62c6935339a7ebb9203622bde39693e91a858e863e9b76c1c0a7fab7eb0bc",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/stonehold_bridge_abutment_v001_8k_authoring.jpg",
+      "bytes": 4345760,
+      "sha256": "5a22d08f1809b6c2c03f8d6240aa016848193586df0626db2e13ad5b24b7de29",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/stonehold_ceremonial_gate_leaf_v001.png",
+      "bytes": 1278195,
+      "sha256": "db434a864fda8a7336431d114c1c5f78b341be6f5a29e570b6dbaa5f0c18bb9b",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/stonehold_ceremonial_gate_leaf_v001_8k_authoring.jpg",
+      "bytes": 5423868,
+      "sha256": "4e2d85ba1f9f03875e00c857ae76f4c48eef9c16d9909aefabc6dd4e94cee176",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/stonehold_save_pillar_ornament_v001.png",
+      "bytes": 856612,
+      "sha256": "1bc1baab69f0441691c4cb6e591690a4237d3a3517e599582dc6fbe1cfa1e25a",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/stonehold_save_pillar_ornament_v001_8k_authoring.jpg",
+      "bytes": 4062675,
+      "sha256": "495261ecf3a396c12d8b0f7edb6077825718144e4210bba05c438962f04a8bd2",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/umbral_bridge_abutment_v001.png",
+      "bytes": 996510,
+      "sha256": "0f42c683f7904c84d48bb3268a8ce43315dbda67b3262ba573e2d1b990c24f6f",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/umbral_bridge_abutment_v001_8k_authoring.jpg",
+      "bytes": 4497610,
+      "sha256": "2b3eb536eff37647909610e4f8c52a56c1c6df1216888679974052b67096bd27",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/umbral_ceremonial_gate_leaf_v001.png",
+      "bytes": 1123191,
+      "sha256": "eb6b54f3aba96d193ca14a378301575e8807365f6d08523efc588eecb9cc6924",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/umbral_ceremonial_gate_leaf_v001_8k_authoring.jpg",
+      "bytes": 5059662,
+      "sha256": "4d8c5fad7f933d95d128ac09dd3e51e528b88aa238539fd6c82b670bfa9fa51c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/umbral_save_pillar_ornament_v001.png",
+      "bytes": 901256,
+      "sha256": "d0b38ec6f32966cb5e505191ed61c77a203e4505939caf0bf98554a8feb07f81",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/umbral_save_pillar_ornament_v001_8k_authoring.jpg",
+      "bytes": 4097077,
+      "sha256": "fd602048656206a89585723e054075398de302b32f9edbe0545ff31ae80a9a74",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/visual_qa_v001.json",
+      "bytes": 2842,
+      "sha256": "f8041948b6ba10794a857e81507eec43bbe530d70febf20b22615d91e592c8a4",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/world_concept_gap_p0_contact_sheet_v001.jpg",
+      "bytes": 860124,
+      "sha256": "ed6570808a90a57708fc818f56739cf6de4859fb201a557c7020cb12e0b35d1c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/ArtSource/Environment/WorldConceptGapP0/V001/world_concept_gap_p0_manifest_v001.json",
+      "bytes": 16182,
+      "sha256": "c9c397beb0b8e26953a3eebf04de7e03e5a1aca7abd15061daa002919a1d3194",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Architecture/Stonehold_Modular_Architecture_Contact_Sheet_V002.html",
+      "bytes": 8492,
+      "sha256": "2d58c75c4a89fa14742c8474bcd936befd24147e02f9c078da276623dda4853c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Architecture/Stonehold_Modular_Architecture_Contact_Sheet_V002.png",
+      "bytes": 411876,
+      "sha256": "56937f540635870c3a687806d7ee8c4a1481210e14b499a930de3e73c7b08183",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/Architecture/Stonehold_Modular_Architecture_Contact_Sheet_V002_APPROVAL.md",
+      "bytes": 1306,
+      "sha256": "e74fa1a6d9c3d7618fe29804e6a8e97c5ae71ed2eb0ba1ce401981bdb3f9ffdd",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Accordant_Concept_Gap_P1_Packet_V001.html",
+      "bytes": 10121,
+      "sha256": "82fa3f7bcb2aa7e727c0b314a6b609d1521b84af09a2a25ae4c9d58ebed11c2d",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Accordant_Concept_Gap_P1_Packet_V001.md",
+      "bytes": 5173,
+      "sha256": "75f6460d9841d43d168a84b399a7e9ebc347402ae15b5fc986ede56c67856079",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Accordant_Concept_Gap_P1_Packet_V001_DECISION.md",
+      "bytes": 3906,
+      "sha256": "c62ace5800db5ceadeab9331d25fb1f76f8df4e04697406acefab60dad4e3f61",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Crownlands_Concept_Gap_P2_Packet_V001.html",
+      "bytes": 10121,
+      "sha256": "b421b83efbaea22a8a3d7b3958e24200dc94fc8e0edd98acd8fb5ff5fc056c85",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Crownlands_Concept_Gap_P2_Packet_V001.md",
+      "bytes": 8179,
+      "sha256": "4661f617a13d837232fc0891eeae4d403c745a105b2c6ae4d3fe653dbad2fefb",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Crownlands_Concept_Gap_P2_Packet_V001_DECISION.md",
+      "bytes": 5979,
+      "sha256": "54031c89bc0570ec9fa8901498fcaebb9aa0a98be80c108853031a228d31f208",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Crownlands_Concept_P1_Packet_V001.html",
+      "bytes": 9674,
+      "sha256": "2eb997efb457db3f930021b23ececdb3deefb4f25879ee88b9b7a9f3fd88a69a",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Crownlands_Concept_P1_Packet_V001.md",
+      "bytes": 5972,
+      "sha256": "7778a87160b4a6eb316d8a28d0f288627b99e34719c198d7a9e8d1b476188222",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Crownlands_Concept_P1_Packet_V001_DECISION.md",
+      "bytes": 4641,
+      "sha256": "cc036b54b3d88093f35129763e499d44dfc2726fa2b87efa9b24a03821040e6d",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Eldergrove_Concept_Gap_P2_Packet_V001.html",
+      "bytes": 9548,
+      "sha256": "7b72e9306ae163952ec14cf1ac224da4ac625f1b43870f97697387ab9a971552",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Eldergrove_Concept_Gap_P2_Packet_V001.md",
+      "bytes": 6448,
+      "sha256": "590fa0ff7282a8a3431efb64dc83b465c632847e4ae0a70340df428b2c39db28",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Eldergrove_Concept_Gap_P2_Packet_V001_DECISION.md",
+      "bytes": 4809,
+      "sha256": "050738ffb0dabfb1f7f36d62c52b0f58301017e3e0e99044ca0b682d8e9ba73e",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Eldergrove_Concept_P1_Packet_V001.html",
+      "bytes": 9287,
+      "sha256": "34db5069ad8558bc8226f6725f470d9559bb61f91ebe4352cdf4a4418e607dcd",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Eldergrove_Concept_P1_Packet_V001.md",
+      "bytes": 5257,
+      "sha256": "ec412ecf82619c39efb0c58fd0aed3534fda0611b483baff10fdc8c9facf844b",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Eldergrove_Concept_P1_Packet_V001_DECISION.md",
+      "bytes": 2864,
+      "sha256": "5b499fe19f1537843bc832945e5226cc9a929626cd9281fab6293380845f9a6c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Stonehold_Concept_Gap_P2_Packet_V001.html",
+      "bytes": 9064,
+      "sha256": "fc017387336fb35022faad0965d0cd816d8cdaeeafd29aab2381020105953ccc",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Stonehold_Concept_Gap_P2_Packet_V001.md",
+      "bytes": 5577,
+      "sha256": "ed3c2f6e84067e1973bbede15e40128c78b76a849276dd246456ec6c11dc064a",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Stonehold_Concept_Gap_P2_Packet_V001_DECISION.md",
+      "bytes": 3398,
+      "sha256": "f82a3e5750b7df12d55732630b0797d3cf05afd6b60ee8e947d10c42b17a3ff7",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Stonehold_Concept_P1_Packet_V001.html",
+      "bytes": 9083,
+      "sha256": "16f841ab3550d1990200b9ef424c697ca224caba0439c059c71a1460577d578f",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Stonehold_Concept_P1_Packet_V001.md",
+      "bytes": 4435,
+      "sha256": "581bd4c0fac045e3add684e214ffe083cecfe0288d35ed37e89e3d257c8cc8b4",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Stonehold_Concept_P1_Packet_V001_DECISION.md",
+      "bytes": 2657,
+      "sha256": "0230cc7993c58b64a2c72bcdc01fecf9d30a3ae2fd0887cdad937e81ad502c80",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Umbral_Concept_P1_Packet_V001.html",
+      "bytes": 9369,
+      "sha256": "75a3f36327e80d87f549aa8edcee2ef4d365cec6104ee64d1746107b9b9e548c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Umbral_Concept_P1_Packet_V001.md",
+      "bytes": 6012,
+      "sha256": "519c4dfb17849dede9c990ae9776e4bed95eeeec5826b3ce06e19ad12415a7ff",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/Umbral_Concept_P1_Packet_V001_DECISION.md",
+      "bytes": 4011,
+      "sha256": "efae18f3d3fac9cdd222ef7b0d2a0a62ed3876b32b9a698a77fd680ae4ea548c",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/World_2D_to_3D_Production_Guide_V001.md",
+      "bytes": 10071,
+      "sha256": "b2bfb1e92ca01a005c85e3baa66680c0e0af11073692c91e1950ed8a53b7de8a",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/World_2D_to_3D_Production_Review_V001.html",
+      "bytes": 11205,
+      "sha256": "d343457757f0571cc11f8bae9f16ee0de1f1c23fb6b736ad40301f5de2e707e2",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/World_2D_to_3D_Production_Review_V001_DECISION.md",
+      "bytes": 2383,
+      "sha256": "9d56adea02ceaa51fb5bfb2d823b95b62eeed3a00e4b0e1c5232d84302291052",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/World_Concept_Gap_P0_Packet_V001.html",
+      "bytes": 8419,
+      "sha256": "79122548d129cf3ebcc1d1a0a0f4b1c2d3a2db9014dea0b9989d1762c4c2afea",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/World_Concept_Gap_P0_Packet_V001.md",
+      "bytes": 5055,
+      "sha256": "9662ef297513fcdb846cd49879f19eca94805c9a0cbce03107303966a3e3e231",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/Environment/World/World_Concept_Gap_P0_Packet_V001_DECISION.md",
+      "bytes": 2757,
+      "sha256": "303f3bf2c62c105cb67bb1e3da616f218cc53e5426ea814ab5c3eea5f9697d18",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V001.html",
+      "bytes": 18750,
+      "sha256": "0ef559e973c21362e5d1cda36d7deca6c65057256a165b60cdf92471c6fd0070",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V001.png",
+      "bytes": 865585,
+      "sha256": "8c0af7f87614abe028974d41ec1edd0b467a63690ca57d5fbd754f422a8ee4ac",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V002.html",
+      "bytes": 19820,
+      "sha256": "6837794f9d03f1725ecaaa2bac60de384d57798c26f606023f62b7b311a190f6",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V002.png",
+      "bytes": 818204,
+      "sha256": "93dcbd866d919960e6d8447d9af3dac109bfc8e2cbc49ab51ccced392ae02029",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V003.html",
+      "bytes": 20577,
+      "sha256": "c69568a30bb51dd826b2f59d04233145af1fbfce6b430f897b88c96a51ffd8f0",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V003.png",
+      "bytes": 827033,
+      "sha256": "086af611192c738b4dbe0564d03cba8d4a379277912145e3807ed9932d523982",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V004.html",
+      "bytes": 23693,
+      "sha256": "cc00973b12813d2abbda70f640238b801ad892ad97db5f46fc90001b5b9f8901",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V004.png",
+      "bytes": 769891,
+      "sha256": "87ce77742dd1af08b00793b28b7555ae06f5546cee1040c77cf7efc0f2ba521d",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V005.html",
+      "bytes": 24210,
+      "sha256": "2b961b778b6217304d44f1f3feb94b57fbab861e3dbd94fe2e4834833e0094e5",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V005.png",
+      "bytes": 829500,
+      "sha256": "23b88d2bf56c49f3ea19ac8ffd6fb016480dce08485cef60ab7ce066647b37ff",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V006.html",
+      "bytes": 24345,
+      "sha256": "07d0ab2860b368dbe17d740d85c2c44ea53b6f65c21b7247318a5bed4a99380a",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V006.png",
+      "bytes": 833393,
+      "sha256": "297b0e88b12314d2f53fa2db96425d5019d67b9cc2019895a1996177ebb9e3ee",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V007.html",
+      "bytes": 24697,
+      "sha256": "79b6780c714446dec1a62ce24f793eebf49c7cd76bdafdc34435a7c46dfdc263",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V007.png",
+      "bytes": 836650,
+      "sha256": "77c1ac6ba1e13a87109be461c7cb507a918c5a1c743c49c5d497c0c4091e232c",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V008.html",
+      "bytes": 24468,
+      "sha256": "95bfd54897c238c466ecedfd047d879d9d6cee64bc3d07a908ef2e34a06ed777",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V008.png",
+      "bytes": 835933,
+      "sha256": "5ecc7dc9ac1e27897e614a36d56b37796eeae65f9a5f02800fc6b4360afa49d9",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V009.html",
+      "bytes": 24847,
+      "sha256": "7a8e811bbf7771c3ead67ff19701852492474bfd8ae5f60ce6bb3f0904eaa4f1",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V009.png",
+      "bytes": 830105,
+      "sha256": "833798139c4323d0eaebc1005735e22a438945a443e8dd9619e3e461e9e871ef",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V010.html",
+      "bytes": 26101,
+      "sha256": "0c8cdd9ca2e10f4a513029ec6c6d55f28e539be0ef1aebacfc29cf4a57734f53",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V010.png",
+      "bytes": 1031210,
+      "sha256": "a1bc9f4eea47ebcceb2ca802d449fc70c600dc91d63affc1e7f0282201156937",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V011.html",
+      "bytes": 26737,
+      "sha256": "b438812607a06f64639043661d98fc78b519bc39b06016bc6721ac65899db2d7",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V011.png",
+      "bytes": 997705,
+      "sha256": "0e361b02f6952e172973c21f88dc237f2ef38b7cd7595de06a34446e2244da97",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V012.html",
+      "bytes": 27005,
+      "sha256": "40540a7532f2c69ba7bf244b8d2291b7ac5e0d5b160a3c43cfe1c8cbfd6551b9",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V012.png",
+      "bytes": 1001475,
+      "sha256": "f5c07596d07fd2c38a6c740a1539875ca19c5ddbbebca90215595ffc473b97ae",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V013.html",
+      "bytes": 25223,
+      "sha256": "93415224b632e39dabc072ce2158152cf4adbc807914228847d088b06b8aac2a",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V013.png",
+      "bytes": 629541,
+      "sha256": "b580f13eda01c530c6b3394beb62b65e2431de59d72da636c7bbc1083096b923",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/AnotherLife_Full_World_TopDown_Map_V013_APPROVAL.md",
+      "bytes": 2029,
+      "sha256": "20de745b79b97b753fa25548e85cf82a60538b1067976858260778ff94bead0a",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/References/Owner_Bridge_Topology_2026-09-01.json",
+      "bytes": 661,
+      "sha256": "470cfda80c443620640bb365b1e7f7207e7b7876177a248bafda683894c116f4",
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unity/Docs/World/Map/References/Owner_Bridge_Topology_2026-09-01.png",
+      "bytes": 18267,
+      "sha256": "d25aeddecaf69e41abad2beeb10d5b05e1ff8fe6eb3bac94048ee8ad6543b1f3",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/References/Owner_InOut_Bridge_Layout_2026-09-02.png",
+      "bytes": 25542,
+      "sha256": "9ca655e9e643f45b0c96e63614401b6a3b29f750804959f375ea2b4de48b6993",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/References/Owner_InOut_Bridge_Layout_2026-09-02_contrast.png",
+      "bytes": 12881,
+      "sha256": "2d3d114acb7373e11281fc614cc320aad6097761f9ec97dbe420282a1d94ce70",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/References/Owner_Realm_Layout_2026-07-27.png",
+      "bytes": 17425,
+      "sha256": "8a5dc66d2df6b922f812e26b6442481df8a825c4391a68d76a748ac1c9390bf7",
+      "hashMode": "raw"
+    },
+    {
+      "path": "unity/Docs/World/Map/References/Owner_World_Map_Sources.json",
+      "bytes": 1934,
+      "sha256": "9e98f101058c96c74496da1071c12d6d34e51bc2a25ce8df840676e1653b03a7",
+      "hashMode": "utf8-lf"
+    }
+  ]
+}
