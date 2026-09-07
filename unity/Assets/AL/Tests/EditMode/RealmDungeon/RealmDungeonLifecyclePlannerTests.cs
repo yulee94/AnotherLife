@@ -160,6 +160,46 @@ namespace AL.Tests.EditMode.RealmDungeon
         }
 
         [Test]
+        public void NonKillEventsPreserveCommittedCooldownAndReceipt()
+        {
+            RealmDungeonLifecyclePlanner planner = Planner();
+            RealmDungeonAuthoritySnapshot cooling = planner.Plan(
+                Request(RealmDungeonOperation.CommitDefeat, "operation_kill"),
+                Alive(RealmDungeonLifeState.AliveEngaged)).Plan.CandidateSnapshot;
+
+            foreach (RealmDungeonNonKillKind kind in Enum.GetValues(typeof(RealmDungeonNonKillKind)))
+            {
+                if (kind == RealmDungeonNonKillKind.None)
+                {
+                    continue;
+                }
+
+                RealmDungeonPlanningResult result = planner.Plan(
+                    Request(
+                        RealmDungeonOperation.RecordNonKill,
+                        "operation_nonkill",
+                        clock: ClockZero + 1,
+                        expectedRevision: cooling.Revision,
+                        nonKillKind: kind),
+                    cooling);
+                Assert.That(result.Status, Is.EqualTo(RealmDungeonPlanningStatus.Prepared), kind.ToString());
+                Assert.That(result.Plan.CandidateSnapshot.NextEligibleAtUnixSeconds,
+                    Is.EqualTo(ClockZero + CooldownSeconds), kind.ToString());
+                Assert.That(result.Plan.CandidateSnapshot.DefeatCommittedAtUnixSeconds, Is.EqualTo(ClockZero));
+                Assert.That(result.Plan.CandidateSnapshot.Receipts, Is.EqualTo(cooling.Receipts));
+                Assert.That(result.Plan.RewardReceipt, Is.Null);
+
+                RealmDungeonPlanningResult eligible = planner.Plan(
+                    Request(RealmDungeonOperation.Observe, "operation_eligible",
+                        clock: ClockZero + CooldownSeconds,
+                        expectedRevision: result.Plan.CandidateSnapshot.Revision),
+                    result.Plan.CandidateSnapshot);
+                Assert.That(eligible.Plan.CandidateSnapshot.LifeState,
+                    Is.EqualTo(RealmDungeonLifeState.RespawnEligible));
+            }
+        }
+
+        [Test]
         public void ReplayRestartAndConflictingKillKeepOneDefeatReceipt()
         {
             RealmDungeonLifecyclePlanner planner = Planner();
@@ -260,6 +300,36 @@ namespace AL.Tests.EditMode.RealmDungeon
         }
 
         [Test]
+        public void ActiveLeaseCannotReplaceSpawnCycleButExactRetryPreservesIt()
+        {
+            RealmDungeonLifecyclePlanner planner = Planner();
+            RealmDungeonAuthoritySnapshot manifesting = planner.Plan(
+                Request(RealmDungeonOperation.BeginManifestation, "operation_begin",
+                    leaseId: LeaseId, spawnCycleId: SpawnCycleId, presentationApproved: true),
+                Alive(RealmDungeonLifeState.RespawnEligible, presentationApproved: true)).Plan.CandidateSnapshot;
+
+            RealmDungeonPlanningResult conflicting = planner.Plan(
+                Request(RealmDungeonOperation.BeginManifestation, "operation_replace_cycle",
+                    expectedRevision: manifesting.Revision, leaseId: LeaseId,
+                    spawnCycleId: "spawn_cycle_other", presentationApproved: true),
+                manifesting);
+            Assert.That(conflicting.Status, Is.EqualTo(RealmDungeonPlanningStatus.Rejected));
+            Assert.That(conflicting.Reason, Is.EqualTo(RealmDungeonRejectReason.DuplicateLease));
+            Assert.That(conflicting.Plan, Is.Null);
+            Assert.That(manifesting.SpawnCycleId, Is.EqualTo(SpawnCycleId));
+
+            RealmDungeonPlanningResult retry = planner.Plan(
+                Request(RealmDungeonOperation.BeginManifestation, "operation_begin",
+                    expectedRevision: manifesting.Revision, leaseId: LeaseId,
+                    spawnCycleId: SpawnCycleId, presentationApproved: true),
+                manifesting);
+            Assert.That(retry.Status, Is.EqualTo(RealmDungeonPlanningStatus.Prepared));
+            Assert.That(retry.Plan.CandidateSnapshot.LeaseId, Is.EqualTo(LeaseId));
+            Assert.That(retry.Plan.CandidateSnapshot.SpawnCycleId, Is.EqualTo(SpawnCycleId));
+            Assert.That(retry.Plan.CandidateSnapshot.Targetable, Is.False);
+        }
+
+        [Test]
         public void InwardPortalAndMissingBundleFailClosedWithoutGenericFallback()
         {
             RealmDungeonLifecyclePlanner planner = Planner();
@@ -288,6 +358,110 @@ namespace AL.Tests.EditMode.RealmDungeon
             Assert.That(missingBundle.UsedGenericFallback, Is.False);
             Assert.That(eligible.LifeState, Is.EqualTo(RealmDungeonLifeState.RespawnEligible));
             Assert.That(planner.Catalog.ProductionEligible, Is.False);
+        }
+
+        [Test]
+        public void PortalTraversalRequiresExactActiveManifestationBinding()
+        {
+            RealmDungeonLifecyclePlanner planner = Planner();
+            foreach (RealmDungeonLifeState state in Enum.GetValues(typeof(RealmDungeonLifeState)))
+            {
+                RealmDungeonPlanningResult unfenced = planner.Plan(
+                    Request(RealmDungeonOperation.TraversePortal, "operation_unfenced",
+                        traversal: RealmDungeonPortalTraversal.Outward),
+                    Alive(state));
+                Assert.That(unfenced.Status, Is.Not.EqualTo(RealmDungeonPlanningStatus.Prepared), state.ToString());
+            }
+
+            RealmDungeonAuthoritySnapshot manifesting = planner.Plan(
+                Request(RealmDungeonOperation.BeginManifestation, "operation_begin",
+                    leaseId: LeaseId, spawnCycleId: SpawnCycleId, presentationApproved: true),
+                Alive(RealmDungeonLifeState.RespawnEligible, presentationApproved: true)).Plan.CandidateSnapshot;
+            RealmDungeonPlanningResult matching = planner.Plan(
+                Request(RealmDungeonOperation.TraversePortal, "operation_outward",
+                    expectedRevision: manifesting.Revision, traversal: RealmDungeonPortalTraversal.Outward,
+                    leaseId: LeaseId, spawnCycleId: SpawnCycleId, presentationApproved: true),
+                manifesting);
+            Assert.That(matching.Status, Is.EqualTo(RealmDungeonPlanningStatus.Prepared));
+            Assert.That(matching.Plan.CandidateSnapshot.Targetable, Is.False);
+
+            foreach (RealmDungeonPortalTraversal traversal in new[]
+                { RealmDungeonPortalTraversal.None, RealmDungeonPortalTraversal.Inward, RealmDungeonPortalTraversal.Ambient })
+            {
+                Assert.That(planner.Plan(
+                    Request(RealmDungeonOperation.TraversePortal, "operation_invalid_direction",
+                        expectedRevision: manifesting.Revision, traversal: traversal,
+                        leaseId: LeaseId, spawnCycleId: SpawnCycleId, presentationApproved: true),
+                    manifesting).Status, Is.EqualTo(RealmDungeonPlanningStatus.Rejected));
+            }
+
+            Assert.That(planner.Plan(
+                Request(RealmDungeonOperation.TraversePortal, "operation_wrong_lease",
+                    expectedRevision: manifesting.Revision, traversal: RealmDungeonPortalTraversal.Outward,
+                    leaseId: "lease_other", spawnCycleId: SpawnCycleId, presentationApproved: true),
+                manifesting).Status, Is.EqualTo(RealmDungeonPlanningStatus.Rejected));
+            Assert.That(planner.Plan(
+                Request(RealmDungeonOperation.TraversePortal, "operation_wrong_cycle",
+                    expectedRevision: manifesting.Revision, traversal: RealmDungeonPortalTraversal.Outward,
+                    leaseId: LeaseId, spawnCycleId: "cycle_other", presentationApproved: true),
+                manifesting).Status, Is.EqualTo(RealmDungeonPlanningStatus.Rejected));
+            Assert.That(planner.Plan(
+                Request(RealmDungeonOperation.TraversePortal, "operation_wrong_portal",
+                    expectedRevision: manifesting.Revision, traversal: RealmDungeonPortalTraversal.Outward,
+                    leaseId: LeaseId, spawnCycleId: SpawnCycleId, presentationApproved: true,
+                    portalId: "portal_other"),
+                manifesting).Status, Is.EqualTo(RealmDungeonPlanningStatus.Rejected));
+            Assert.That(planner.Plan(
+                Request(RealmDungeonOperation.TraversePortal, "operation_missing_presentation",
+                    expectedRevision: manifesting.Revision, traversal: RealmDungeonPortalTraversal.Outward,
+                    leaseId: LeaseId, spawnCycleId: SpawnCycleId),
+                manifesting).Status, Is.EqualTo(RealmDungeonPlanningStatus.Unavailable));
+        }
+
+        [Test]
+        public void ManifestationBoundariesRejectWrongPortalAndForbiddenDirection()
+        {
+            RealmDungeonLifecyclePlanner planner = Planner();
+            RealmDungeonAuthoritySnapshot eligible = Alive(RealmDungeonLifeState.RespawnEligible, presentationApproved: true);
+            RealmDungeonAuthoritySnapshot manifesting = planner.Plan(
+                Request(RealmDungeonOperation.BeginManifestation, "operation_begin",
+                    leaseId: LeaseId, spawnCycleId: SpawnCycleId, presentationApproved: true),
+                eligible).Plan.CandidateSnapshot;
+
+            foreach (RealmDungeonOperation operation in new[]
+                { RealmDungeonOperation.BeginManifestation, RealmDungeonOperation.CompleteManifestation })
+            {
+                RealmDungeonAuthoritySnapshot snapshot = operation == RealmDungeonOperation.BeginManifestation
+                    ? eligible : manifesting;
+                foreach (RealmDungeonPortalTraversal traversal in new[]
+                    { RealmDungeonPortalTraversal.Inward, RealmDungeonPortalTraversal.Ambient })
+                {
+                    Assert.That(planner.Plan(
+                        Request(operation, "operation_forbidden_direction",
+                            expectedRevision: snapshot.Revision, leaseId: LeaseId,
+                            spawnCycleId: SpawnCycleId, presentationApproved: true, traversal: traversal),
+                        snapshot).Status, Is.EqualTo(RealmDungeonPlanningStatus.Rejected), operation + ":" + traversal);
+                }
+
+                foreach (string portalId in new[] { "portal_other", string.Empty })
+                {
+                    Assert.That(planner.Plan(
+                        Request(operation, "operation_wrong_portal",
+                            expectedRevision: snapshot.Revision, leaseId: LeaseId,
+                            spawnCycleId: SpawnCycleId, presentationApproved: true, portalId: portalId),
+                        snapshot).Status, Is.EqualTo(RealmDungeonPlanningStatus.Rejected), operation.ToString());
+                }
+            }
+        }
+
+        [Test]
+        public void CompleteManifestationRejectsMissingSnapshotLease()
+        {
+            RealmDungeonPlanningResult result = Planner().Plan(
+                Request(RealmDungeonOperation.CompleteManifestation, "operation_empty_lease", presentationApproved: true),
+                Alive(RealmDungeonLifeState.Manifesting, presentationApproved: true));
+            Assert.That(result.Status, Is.EqualTo(RealmDungeonPlanningStatus.Rejected));
+            Assert.That(result.Plan, Is.Null);
         }
 
         [Test]
@@ -467,7 +641,8 @@ namespace AL.Tests.EditMode.RealmDungeon
             RealmDungeonPortalTraversal traversal = RealmDungeonPortalTraversal.None,
             string leaseId = "",
             string spawnCycleId = "",
-            bool presentationApproved = false)
+            bool presentationApproved = false,
+            string portalId = null)
         {
             return new RealmDungeonTransitionRequest(
                 operation,
@@ -475,7 +650,7 @@ namespace AL.Tests.EditMode.RealmDungeon
                 dungeonId,
                 raidDragonId,
                 entranceId,
-                dungeonId + "_portal",
+                portalId ?? dungeonId + "_portal",
                 DefeatId,
                 leaseId,
                 spawnCycleId,

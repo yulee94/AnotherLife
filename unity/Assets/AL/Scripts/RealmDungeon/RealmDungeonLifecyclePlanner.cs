@@ -58,6 +58,23 @@ namespace AL.RealmDungeon
                 return Reject(RealmDungeonPlanningStatus.Rejected, RealmDungeonRejectReason.UnknownDungeon);
             }
 
+            if (request.Operation == RealmDungeonOperation.TraversePortal ||
+                request.Operation == RealmDungeonOperation.BeginManifestation ||
+                request.Operation == RealmDungeonOperation.CompleteManifestation)
+            {
+                if (!IsStableId(request.PortalId) ||
+                    !string.Equals(dungeon.PortalId, request.PortalId, StringComparison.Ordinal))
+                {
+                    return Reject(RealmDungeonPlanningStatus.Rejected, RealmDungeonRejectReason.UnknownDungeon);
+                }
+
+                if (request.Traversal == RealmDungeonPortalTraversal.Inward ||
+                    request.Traversal == RealmDungeonPortalTraversal.Ambient)
+                {
+                    return Reject(RealmDungeonPlanningStatus.Rejected, RealmDungeonRejectReason.InwardPortalTraversal);
+                }
+            }
+
             if (request.ExpectedRevision != snapshot.Revision)
             {
                 return Reject(RealmDungeonPlanningStatus.InvalidRequest, RealmDungeonRejectReason.InvalidRequest);
@@ -254,7 +271,7 @@ namespace AL.RealmDungeon
                     snapshot,
                     snapshot.LifeState,
                     snapshot.DefeatCommittedAtUnixSeconds,
-                    0,
+                    snapshot.NextEligibleAtUnixSeconds,
                     request.TrustedClockUnixSeconds,
                     snapshot.LeaseId,
                     snapshot.SpawnCycleId,
@@ -269,12 +286,18 @@ namespace AL.RealmDungeon
             RealmDungeonAuthoritySnapshot snapshot,
             string fingerprint)
         {
-            if (request.Traversal == RealmDungeonPortalTraversal.Inward ||
-                request.Traversal == RealmDungeonPortalTraversal.Ambient)
+            if (request.Traversal != RealmDungeonPortalTraversal.Outward ||
+                snapshot.LifeState != RealmDungeonLifeState.Manifesting ||
+                !IsStableId(snapshot.LeaseId) || !IsStableId(snapshot.SpawnCycleId) ||
+                !string.Equals(snapshot.LeaseId, request.LeaseId, StringComparison.Ordinal) ||
+                !string.Equals(snapshot.SpawnCycleId, request.SpawnCycleId, StringComparison.Ordinal))
             {
-                return Reject(
-                    RealmDungeonPlanningStatus.Rejected,
-                    RealmDungeonRejectReason.InwardPortalTraversal);
+                return Reject(RealmDungeonPlanningStatus.Rejected, RealmDungeonRejectReason.Unsupported);
+            }
+
+            if (!request.PresentationApproved || !snapshot.PresentationApproved)
+            {
+                return Reject(RealmDungeonPlanningStatus.Unavailable, RealmDungeonRejectReason.MissingPresentationBundle);
             }
 
             return Observe(request, snapshot, fingerprint);
@@ -298,8 +321,9 @@ namespace AL.RealmDungeon
             }
 
             if (snapshot.LifeState == RealmDungeonLifeState.Manifesting &&
-                !string.IsNullOrEmpty(snapshot.LeaseId) &&
-                !string.Equals(snapshot.LeaseId, request.LeaseId, StringComparison.Ordinal))
+                (!IsStableId(snapshot.LeaseId) || !IsStableId(snapshot.SpawnCycleId) ||
+                 !string.Equals(snapshot.LeaseId, request.LeaseId, StringComparison.Ordinal) ||
+                 !string.Equals(snapshot.SpawnCycleId, request.SpawnCycleId, StringComparison.Ordinal)))
             {
                 return Reject(RealmDungeonPlanningStatus.Rejected, RealmDungeonRejectReason.DuplicateLease);
             }
@@ -313,13 +337,6 @@ namespace AL.RealmDungeon
             if (!IsStableId(request.LeaseId) || !IsStableId(request.SpawnCycleId))
             {
                 return Reject(RealmDungeonPlanningStatus.InvalidRequest, RealmDungeonRejectReason.InvalidRequest);
-            }
-
-            if (request.Traversal == RealmDungeonPortalTraversal.Inward)
-            {
-                return Reject(
-                    RealmDungeonPlanningStatus.Rejected,
-                    RealmDungeonRejectReason.InwardPortalTraversal);
             }
 
             return Prepare(
@@ -356,6 +373,7 @@ namespace AL.RealmDungeon
             }
 
             if (snapshot.LifeState != RealmDungeonLifeState.Manifesting ||
+                !IsStableId(snapshot.LeaseId) || !IsStableId(snapshot.SpawnCycleId) ||
                 !string.Equals(snapshot.LeaseId, request.LeaseId, StringComparison.Ordinal) ||
                 !string.Equals(snapshot.SpawnCycleId, request.SpawnCycleId, StringComparison.Ordinal))
             {
