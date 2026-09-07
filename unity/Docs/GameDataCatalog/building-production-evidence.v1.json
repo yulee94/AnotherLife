@@ -1,0 +1,631 @@
+{
+  "schemaVersion": 1,
+  "packetId": "al_building_production_evidence_v1",
+  "auditedRevision": "a958885b1c99c3bfaa1df191099b49761f2ff425",
+  "evidenceKind": "blocked_source_audit_not_production_authority",
+  "sources": [
+    {
+      "role": "authority_ledger",
+      "path": "unity/Docs/GameDataCatalog/six-family-production-authority.v1.json",
+      "sourceRevision": "a958885b1c99c3bfaa1df191099b49761f2ff425",
+      "rawSha256": "84854a664935f28fb520e047159edb7cb9b03aafe4aa470283e1e362cd0b48d9"
+    },
+    {
+      "role": "technical_source",
+      "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v003.json",
+      "sourceRevision": "a958885b1c99c3bfaa1df191099b49761f2ff425",
+      "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439"
+    },
+    {
+      "role": "building_art",
+      "path": "unity/Assets/AL/StreamingAssets/GameData/al_building_catalog.json",
+      "sourceRevision": "a958885b1c99c3bfaa1df191099b49761f2ff425",
+      "rawSha256": "345165973c397c9c115118dd72e7d7777a3cb22a4c9bb1c61067f44df828b263"
+    },
+    {
+      "role": "wire_buildings",
+      "path": "unity/Assets/AL/StreamingAssets/GameData/buildings.json",
+      "sourceRevision": "a958885b1c99c3bfaa1df191099b49761f2ff425",
+      "rawSha256": "9dfaa81320584316b9866a99851eaebf1c1cb2884b188c9cade9addd0e0be493"
+    },
+    {
+      "role": "profile_loader",
+      "path": "unity/Assets/AL/Scripts/Services/Local/KingdomProductionProfileCatalog.cs",
+      "sourceRevision": "a958885b1c99c3bfaa1df191099b49761f2ff425",
+      "rawSha256": "55ea7538a0fc45c688d4171a91e5967544bd5444f6a6dd95d4500e3886953807"
+    },
+    {
+      "role": "contribution_provider",
+      "path": "unity/Assets/AL/Scripts/Services/Local/KingdomProductionContributionProvider.cs",
+      "sourceRevision": "a958885b1c99c3bfaa1df191099b49761f2ff425",
+      "rawSha256": "e8c832cd361a339317a333d298c6384b99ddba8dae820880d419a8251d8ed3bb"
+    },
+    {
+      "role": "live_consumer",
+      "path": "unity/Assets/AL/Scripts/Services/Local/KingdomProductionConsumer.cs",
+      "sourceRevision": "a958885b1c99c3bfaa1df191099b49761f2ff425",
+      "rawSha256": "e824f5317c0f0af4d718838cc6eb548530d35aac8dff67cd6adbc273a27fe386"
+    },
+    {
+      "role": "provider_test_fixtures",
+      "path": "unity/Assets/AL/Tests/EditMode/KingdomProductionContributionProviderTests.cs",
+      "sourceRevision": "a958885b1c99c3bfaa1df191099b49761f2ff425",
+      "rawSha256": "6d44b881a6ae5b300064ddcbd4ce87300caefc5c324c718c032896c06ecbaba5"
+    }
+  ],
+  "productionEligible": false,
+  "resolvedBlockerIds": [],
+  "blockers": [
+    {
+      "id": "buildings.production_profiles",
+      "type": "behavior",
+      "status": "open",
+      "evidenceStatus": "provider_implemented_source_missing"
+    },
+    {
+      "id": "buildings.asset_refs",
+      "type": "asset",
+      "status": "open",
+      "evidenceStatus": "partial_realm_dimensional"
+    }
+  ],
+  "productionSourceObservation": {
+    "providerImplemented": true,
+    "consumerRegistered": true,
+    "profileRecords": "absent_in_canonical_gamedata",
+    "testFixtures": "not_balance_authority",
+    "nonProducingPolicy": "recommend_explicit_profiles_not_inferred_zero_rates",
+    "runtimeDefaults": "not_production_authority",
+    "pr417": "unaccepted_not_source_authority"
+  },
+  "buildings": [
+    {
+      "canonicalId": "town_hall",
+      "progressionEvidence": {
+        "order": 0,
+        "canonicalId": "town_hall",
+        "legacyBuildingId": "TownHall",
+        "nameRef": "building.town_hall.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_town_hall",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/town_hall.png",
+      "assetDimension": "realm",
+      "modelEvidence": [
+        {
+          "realm_id": "crownlands",
+          "model_id": "building_crownlands_town_hall_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Runtime/Crownlands_TownHall_Production.prefab",
+            "guid": "40d5f7687fed640fd8c0d4b1868ff0ef",
+            "sha256": "71ea52234ec8aea93b91bf39ae41d111fa1a7d54cf181f54894e895d23463b46"
+          }
+        },
+        {
+          "realm_id": "stonehold",
+          "model_id": "building_stonehold_town_hall_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Stonehold/Production/TownHall/Runtime/Stonehold_TownHall_Production.prefab",
+            "guid": "8efaf25037c3b444f86bfe62ea193ed7",
+            "sha256": "6dfcab4c4f36fceae06bb83b56a2a7034c74a53f6d027370f5eca830f96341b2"
+          }
+        },
+        {
+          "realm_id": "eldergrove",
+          "model_id": "building_eldergrove_town_hall_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/TownHall/Runtime/Eldergrove_TownHall_Production.prefab",
+            "guid": "64552283a5bd040f08d3f41d6a94ca5a",
+            "sha256": "2d91fc0a7cf825facabe995ef9d04204b0cc1471ad19fded3093f9602699b16e"
+          }
+        },
+        {
+          "realm_id": "umbral",
+          "model_id": "building_umbral_town_hall_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Umbral/Production/TownHall/Runtime/Umbral_TownHall_Production.prefab",
+            "guid": "1a01ccaafe3d44864b31d30ef7091279",
+            "sha256": "252665d5d111fdafdf95f11996a28f49ab5381e836802e8e0aa1fba3aa3a953e"
+          }
+        }
+      ],
+      "modelEvidenceStatus": "partial_family_evidence"
+    },
+    {
+      "canonicalId": "farm",
+      "progressionEvidence": {
+        "order": 1,
+        "canonicalId": "farm",
+        "legacyBuildingId": "Farm",
+        "nameRef": "building.farm.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_farm",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/farm.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "lumber_mill",
+      "progressionEvidence": {
+        "order": 2,
+        "canonicalId": "lumber_mill",
+        "legacyBuildingId": "LumberMill",
+        "nameRef": "building.lumber_mill.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_lumber_mill",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/lumber_mill.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "quarry",
+      "progressionEvidence": {
+        "order": 3,
+        "canonicalId": "quarry",
+        "legacyBuildingId": "Quarry",
+        "nameRef": "building.quarry.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_quarry",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/quarry.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "gold_mine",
+      "progressionEvidence": {
+        "order": 4,
+        "canonicalId": "gold_mine",
+        "legacyBuildingId": "GoldMine",
+        "nameRef": "building.gold_mine.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_gold_mine",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/gold_mine.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "barracks",
+      "progressionEvidence": {
+        "order": 5,
+        "canonicalId": "barracks",
+        "legacyBuildingId": "Barracks",
+        "nameRef": "building.barracks.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_barracks",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/barracks.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "academy",
+      "progressionEvidence": {
+        "order": 6,
+        "canonicalId": "academy",
+        "legacyBuildingId": "Academy",
+        "nameRef": "building.academy.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_academy",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/academy.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "market",
+      "progressionEvidence": {
+        "order": 7,
+        "canonicalId": "market",
+        "legacyBuildingId": "Market",
+        "nameRef": "building.market.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_market",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/market.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "storehouse",
+      "progressionEvidence": {
+        "order": 8,
+        "canonicalId": "storehouse",
+        "legacyBuildingId": "Storehouse",
+        "nameRef": "building.storehouse.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_storehouse",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/storehouse.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "forge",
+      "progressionEvidence": {
+        "order": 9,
+        "canonicalId": "forge",
+        "legacyBuildingId": "Forge",
+        "nameRef": "building.forge.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_forge",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/forge.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "stable",
+      "progressionEvidence": {
+        "order": 10,
+        "canonicalId": "stable",
+        "legacyBuildingId": "Stable",
+        "nameRef": "building.stable.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_stable",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/stable.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "workshop",
+      "progressionEvidence": {
+        "order": 11,
+        "canonicalId": "workshop",
+        "legacyBuildingId": "Workshop",
+        "nameRef": "building.workshop.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_workshop",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/workshop.png",
+      "assetDimension": "realm",
+      "modelEvidence": [
+        {
+          "realm_id": "crownlands",
+          "model_id": "building_crownlands_workshop_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/Runtime/Crownlands_Stormwright_Production.prefab",
+            "guid": "af08230ec23a84ed59fe22cb35dc22df",
+            "sha256": "e6af605f86ae0f3ad2986d70070a6dbe72b5f9560d2ef92c104af812d55c7cb5"
+          }
+        },
+        {
+          "realm_id": "stonehold",
+          "model_id": "building_stonehold_workshop_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Stonehold/Production/Runtime/Stonehold_Workshop_Production.prefab",
+            "guid": "fa8beffdd2c1045579a3fbd5c25ef181",
+            "sha256": "388b56eeb5cfb1cefd19bcdc188fe4beeff5fa817860e37a876b7315ac002106"
+          }
+        },
+        {
+          "realm_id": "eldergrove",
+          "model_id": "building_eldergrove_workshop_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/Runtime/Eldergrove_Workshop_Production.prefab",
+            "guid": "856e9f0cea18f4647812c4467a05d991",
+            "sha256": "d6756aa97c2e92b0d2b59806ce67de03d6500e25e2e3a44a463cdcb28a92daf1"
+          }
+        },
+        {
+          "realm_id": "umbral",
+          "model_id": "building_umbral_workshop_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Umbral/Production/Runtime/Umbral_Veilwright_Production.prefab",
+            "guid": "197149fd997cd4a59b110b4722bc7e68",
+            "sha256": "c4f559a4c572f63b5a4136ca74d1d2fb9b77c4f042cb9a2166d2e1d931e1a691"
+          }
+        }
+      ],
+      "modelEvidenceStatus": "partial_family_evidence"
+    },
+    {
+      "canonicalId": "embassy",
+      "progressionEvidence": {
+        "order": 12,
+        "canonicalId": "embassy",
+        "legacyBuildingId": "Embassy",
+        "nameRef": "building.embassy.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_embassy",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/embassy.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "wall",
+      "progressionEvidence": {
+        "order": 13,
+        "canonicalId": "wall",
+        "legacyBuildingId": "Wall",
+        "nameRef": "building.wall.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_wall",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/wall.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    },
+    {
+      "canonicalId": "watchtower",
+      "progressionEvidence": {
+        "order": 14,
+        "canonicalId": "watchtower",
+        "legacyBuildingId": "Watchtower",
+        "nameRef": "building.watchtower.name",
+        "initialLevel": 0,
+        "maxLevel": 10,
+        "costProfileId": "building_upgrade_cost_watchtower",
+        "durationProfileId": "building_upgrade_duration_common",
+        "prerequisiteProfileId": "building_prerequisite_none",
+        "realmEligibilityProfileId": "building_realm_eligibility_all"
+      },
+      "productionStatus": "unavailable",
+      "productionProfile": null,
+      "missingProductionFields": [
+        "outputs",
+        "rates",
+        "caps",
+        "resourceBindings",
+        "failurePolicy"
+      ],
+      "rejectedWireProfileIds": [
+        "resource_output"
+      ],
+      "rejectedWireAssetRef": "Assets/AL/Art/Buildings/watchtower.png",
+      "assetDimension": "unavailable",
+      "modelEvidence": [],
+      "modelEvidenceStatus": "unavailable"
+    }
+  ],
+  "unavailableAnchors": [
+    "ManaShrine",
+    "Mine"
+  ],
+  "generationGate": {
+    "status": "blocked",
+    "outputPaths": [],
+    "activationTargets": []
+  }
+}

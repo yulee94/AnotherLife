@@ -55,6 +55,7 @@ REAL_CATALOGS = {
     "al-guild-raid-muster": "al_guild_raid_muster_policy.json",
     "al-guild-city-season": "al_guild_city_season_policy.json",
     "al-oathmark-marketplace": "al_oathmark_marketplace_policy.json",
+    "al-oathmark-wallet": "al_oathmark_wallet_policy.json",
     "al-map-disclosure": "al_map_disclosure_catalog.json",
     "al-realm": "al_realm_catalog.json",
     "al-realm-gem-wishgate-content": "al_realm_gem_wishgate_content_catalog.json",
