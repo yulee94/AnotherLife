@@ -28,6 +28,8 @@ namespace AL.Data.Runtime
         // progression and death-penalty authority together.
         public ChampionProgressionState ChampionProgression;
         public DeathPenaltyAuthorityState DeathPenalty;
+        // Optional schema-2 extension, installed at zero without resource conversion.
+        public AL.Data.Catalogs.OathmarkWalletState OathmarkWallet;
         public List<ResourceData> Resources = new List<ResourceData>();
         public List<BuildingState> Buildings = new List<BuildingState>();
         public List<TroopInventoryData> Troops = new List<TroopInventoryData>();

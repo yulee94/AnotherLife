@@ -771,7 +771,7 @@ namespace AL.Data.Catalogs
         }
     }
 
-    public static class SaveSemanticCandidateValidator
+    public static partial class SaveSemanticCandidateValidator
     {
         public const int MaximumDomainRows = 4096;
         public const int MaximumResourceRows = 256;
@@ -810,6 +810,7 @@ namespace AL.Data.Catalogs
                     "RealmSelection",
                     "ChampionProgression",
                     "DeathPenalty",
+                    "OathmarkWallet",
                     "WorldState",
                     "NotificationHistory",
                     "GuildCitySeason",
@@ -1706,6 +1707,7 @@ namespace AL.Data.Catalogs
             ValidateRealmSelection(root, collector, state);
             ValidateChampionProgression(root, collector, state);
             ValidateDeathPenalty(root, collector, state);
+            ValidateOathmarkWallet(root, collector, state);
             ValidateWorldState(root, collector, state);
             ValidateNotificationHistory(root, collector, state);
 
