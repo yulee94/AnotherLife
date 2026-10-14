@@ -1,0 +1,1359 @@
+{
+  "status": "LOCAL_REVIEW_BUNDLE_VERIFIED_NOT_PUBLISHED_NOT_GAME_BUILD",
+  "entries": 270,
+  "bytes": 3127557,
+  "zipSha256": "4E13F5D9DA0B454315337FC6BEDEE2F503C23BF3224B0E8D7BC6C648C6EB8160",
+  "manifest": [
+    {
+      "entry": "CombatD3/access.verified",
+      "bytes": 6,
+      "sha256": "8697CA930D29CECAB2AE4FD051F07AB7A87846D2E6254FB4B517FEA2CC9D5450"
+    },
+    {
+      "entry": "CombatD3/DECISION_RECEIPT.json",
+      "bytes": 800,
+      "sha256": "E279C45575DBB1E214C98DC0AAD233DE1186030E81CDE8E316B03B41FA82E96E"
+    },
+    {
+      "entry": "CombatD3/EXACT_CANDIDATE_FILES.json",
+      "bytes": 5580,
+      "sha256": "860082EACD75B5F9E971F055FB0B75AED2B0FC44EFB109FA965FAD801C40AE40"
+    },
+    {
+      "entry": "CombatD3/EXPECTED_TESTS.json",
+      "bytes": 34207,
+      "sha256": "9F79F56E4D72935799F9DA70DE9C3DAE0BC1425C201C1B274C6382D19DA32DBB"
+    },
+    {
+      "entry": "CombatD3/FOUNDATION_RECEIPT.json",
+      "bytes": 811,
+      "sha256": "46FCC9235D262A05050E9396DCB03D3BA380A0E6F558BCFC1C03ADD1BDDC57B1"
+    },
+    {
+      "entry": "CombatD3/HANDOFF.md",
+      "bytes": 3902,
+      "sha256": "5942618F72DE344A10DD5DF73FD324E27202C9B1992447B4C6E8F61C34BE3520"
+    },
+    {
+      "entry": "CombatD3/PACKET_PINS.json",
+      "bytes": 5661,
+      "sha256": "AC10C226C897DC7AED7E36D28A2EA0ACE45336C3F5EE5E808272F5ABDDCA8378"
+    },
+    {
+      "entry": "CombatD3/SOURCE_PINS.json",
+      "bytes": 4494,
+      "sha256": "F1FFCAC54B82224B6DC57BA36EEFCA4F4FE334F673D36E96445E7892FE21D696"
+    },
+    {
+      "entry": "CombatD3/STATIC_VALIDATION.json",
+      "bytes": 3328,
+      "sha256": "EC99E412AC207F696F6F0FE1D2CBFAF05EBCDB1CEFCA4F4F1119828EA1B97630"
+    },
+    {
+      "entry": "CombatD3/source/ActionContextV2.cs",
+      "bytes": 2667,
+      "sha256": "3F3C5D0B0CAB55272F353E3CD306B45468B1E2FCE4B4DDB24002549FE2ADA4D7"
+    },
+    {
+      "entry": "CombatD3/source/ActionProjectionV2.cs",
+      "bytes": 5597,
+      "sha256": "667548B5C56A759057A8AE6586D3BEE46ED790685625FC8F6371BC19AB94A25B"
+    },
+    {
+      "entry": "CombatD3/source/ChargedEffectsV2.cs",
+      "bytes": 5058,
+      "sha256": "3155D08E9FAC9346019F90AEA1250EDF03B8E020321F47A0D2CDE09797AE7DA5"
+    },
+    {
+      "entry": "CombatD3/source/CombatCodecV2.cs",
+      "bytes": 8932,
+      "sha256": "328000302C3C8A64425AAAF855763700ED0E23BBFEFBD2E66BBC6965428C1133"
+    },
+    {
+      "entry": "CombatD3/source/CombatReplayV2.cs",
+      "bytes": 18197,
+      "sha256": "141D43121B92F90C0C331D9EDD72C53949D4EADB29D19A92C97A2A97824969A1"
+    },
+    {
+      "entry": "CombatD3/source/ContractsV2.cs",
+      "bytes": 21275,
+      "sha256": "AD0C61B35B666A2427A92AB27BFFCC8D851CE7C91FC42E27F7B9DAA692749A62"
+    },
+    {
+      "entry": "CombatD3/source/OutcomeFollowupsV2.cs",
+      "bytes": 1317,
+      "sha256": "8D7294FF42A7BE9EC7223BF7022ADD5AB558CDF24C9286D9A388754B3CA345D9"
+    },
+    {
+      "entry": "CombatD3/source/RootActionResultsV2.cs",
+      "bytes": 10119,
+      "sha256": "A7CDE5BDD61CDA618DCCB9A22116CE5D81978B224EB397C31810FAF02483E868"
+    },
+    {
+      "entry": "CombatD3/source/StoryCombat.V2.Candidate.csproj",
+      "bytes": 639,
+      "sha256": "05F3208B09A033E23F1EDB19AD8FEE777C27E8FD8D6985E5D7F6D77EF86F09BE"
+    },
+    {
+      "entry": "CombatD3/source/TimedEffectsV2.cs",
+      "bytes": 2145,
+      "sha256": "E9A84610F880D523F13F69E5A38B30332139D280539A6292267BE7B44EA73A80"
+    },
+    {
+      "entry": "CombatD3/tests/Program.C1.cs",
+      "bytes": 8721,
+      "sha256": "57B76E905DE42BDFE0720C295CD944F6C9D0D66A58D2CB14A71A5CAC2FDCD8D2"
+    },
+    {
+      "entry": "CombatD3/tests/Program.C2.cs",
+      "bytes": 14141,
+      "sha256": "265DFE3CFCBA1FDE3DD450A26A0BDE1C35938EB710CACE1215C1CB7BEC2AB0FC"
+    },
+    {
+      "entry": "CombatD3/tests/Program.C3.cs",
+      "bytes": 26682,
+      "sha256": "996FB980D8AD3D712DC8140C861C580A5B212488B7913F8E8BE367B1799FB8A3"
+    },
+    {
+      "entry": "CombatD3/tests/Program.cs",
+      "bytes": 18912,
+      "sha256": "DCFAC3DA647F66DBE758EE5B73F9AA3D140C2842831EF3B17E4DC078A8ACE2C1"
+    },
+    {
+      "entry": "CombatD3/tests/Program.D1.cs",
+      "bytes": 24739,
+      "sha256": "706E22A96DBAEDEE02CD8039B753D63A3923EFBBB9CEC787E4661C8B29D9591F"
+    },
+    {
+      "entry": "CombatD3/tests/Program.D2.cs",
+      "bytes": 30175,
+      "sha256": "4797B228BE1A05EB303B59F6D11F319C8627B0CEE1BA1AABF65C7D5C2F25E63F"
+    },
+    {
+      "entry": "CombatD3/tests/Program.D3.cs",
+      "bytes": 22585,
+      "sha256": "6AA997AE3DBDC8FC652DAE9657CDFE376386D0ACF9CEB8DF97C2446EF5E58B76"
+    },
+    {
+      "entry": "CombatD3/tests/StoryCombat.V2.Candidate.Tests.csproj",
+      "bytes": 713,
+      "sha256": "1141372ABA5E84A0BA6870F5B2B3803CE793515FF292B2331C6C93A8070B4CED"
+    },
+    {
+      "entry": "CombatD3/tests/NuGet/Migrations/1",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "entry": "SDK252/ACCESS.json",
+      "bytes": 270,
+      "sha256": "C57690FC44F6ED719B95D262F7A4EA4DE7DC589DA5DB800713A5DF8E08AEBA34"
+    },
+    {
+      "entry": "SDK252/access.verified",
+      "bytes": 8,
+      "sha256": "1C34F88707B55E6104C4EB20E71FFA3D33E414B71EF689A15FAD0640D0AC58CB"
+    },
+    {
+      "entry": "SDK252/ANCESTOR_PINS.json",
+      "bytes": 5974,
+      "sha256": "36F3D81BED341D62AC1597392EED489FBF8A362F8A6880875630A12128A123A3"
+    },
+    {
+      "entry": "SDK252/Check-Preparation.ps1",
+      "bytes": 5222,
+      "sha256": "69BCC81F704A43F67E000D62BE7191565A4A5C09D2EA6FD177BB83CA4A911508"
+    },
+    {
+      "entry": "SDK252/CompileEvidence.targets",
+      "bytes": 537,
+      "sha256": "661747DCCCC3C985D14FE899491DCFDF70CD546CC771A32A7F1BDD276CE61267"
+    },
+    {
+      "entry": "SDK252/COMPILER_EXPECTATIONS.json",
+      "bytes": 74440,
+      "sha256": "B6F8663B13332FC0BF8E8032EDFC6DE8A9AE164F28ECECDCC2453E0605D44A72"
+    },
+    {
+      "entry": "SDK252/Compiler-Paths.ps1",
+      "bytes": 5733,
+      "sha256": "D3FBB1D5F24DC772234FD9B1857182E0932B4B045588340D6DAF5494436AF73B"
+    },
+    {
+      "entry": "SDK252/CORRECTION.md",
+      "bytes": 3097,
+      "sha256": "823B9FB01CF0A51CFE809A205539CCB3CC65F782D035FAEE9AD521A8988986EF"
+    },
+    {
+      "entry": "SDK252/EXPECTED_GRAPH.json",
+      "bytes": 6245,
+      "sha256": "684C3A6FBEBA3F3227B64CC325234721D8E89DEB63DEE1F491A4070B1B565AA9"
+    },
+    {
+      "entry": "SDK252/EXPECTED_TESTS.json",
+      "bytes": 15654,
+      "sha256": "C8974B6274BDB663346E718D28B06BC59B12F93FFCD7284DA740B84E20E0A53B"
+    },
+    {
+      "entry": "SDK252/FOUNDATION_RECEIPT.json",
+      "bytes": 706,
+      "sha256": "7C72C3C815AC2CAE60B8DBE12B3429E96F1A9C8454E4F5B6149B9C30C1B10CA0"
+    },
+    {
+      "entry": "SDK252/PACKET_PINS.json",
+      "bytes": 5976,
+      "sha256": "CEB746E0676BDAC874F59E9A9C62D981429896717C1C553E13E148A7DC63C650"
+    },
+    {
+      "entry": "SDK252/PREPARATION_HISTORY.json",
+      "bytes": 802,
+      "sha256": "E2DAA03A2F08489E40AA199947699B2BB175594579FBC70ACB320032DA761A81"
+    },
+    {
+      "entry": "SDK252/PREPARATION_STATUS.json",
+      "bytes": 678,
+      "sha256": "D117700283CA1D947EF26C24A60ED63ADA7BF3738C24A4FB00EF20AF25912135"
+    },
+    {
+      "entry": "SDK252/Prepare-Packet.ps1",
+      "bytes": 6763,
+      "sha256": "36E7880B040EB8AB02C23027A3E29B86C56C7660C0E9EA257BB4485B22824AA0"
+    },
+    {
+      "entry": "SDK252/RECIPE.md",
+      "bytes": 8252,
+      "sha256": "35F66CF9CB6152D78C125B532A6D20644AA17EC6C1202BA26D28C4058BE298A3"
+    },
+    {
+      "entry": "SDK252/Review-Compiler.ps1",
+      "bytes": 8455,
+      "sha256": "C9A9C93690867965B2709A11FCE20E1FA72F39971A16B92C5A2C7342C8958F7B"
+    },
+    {
+      "entry": "SDK252/ROOT_ADMISSION.template.json",
+      "bytes": 682,
+      "sha256": "F9E91FE780DDC6DD5A6F5F2E0A75CE796B5A767C7AFCC370A961F1649DF7B70B"
+    },
+    {
+      "entry": "SDK252/Root-Launcher.ps1",
+      "bytes": 12719,
+      "sha256": "6D98194D4B356773CA6712919F106DA782FAFF5EBF7EF85FF46999989DF9D7D8"
+    },
+    {
+      "entry": "SDK252/SDK_CALLS.json",
+      "bytes": 8451,
+      "sha256": "F2B28C1A25EE39F65B1A7A6BC9203795DBE373D6F7679C587CFD16589E676720"
+    },
+    {
+      "entry": "SDK252/SOURCE_GRAPH_PINS.json",
+      "bytes": 5408,
+      "sha256": "AD02F5256EED0AAE9BC89D58B0E6A17221D2EA2DD3DEA7CC37D71DE904C142DC"
+    },
+    {
+      "entry": "SDK252/SOURCE_PINS.json",
+      "bytes": 17280,
+      "sha256": "77D0C907503B0964C3F6262F738771C1AE4370CEDDD87ACD8E137684E3B1D2DF"
+    },
+    {
+      "entry": "SDK252/STATIC_VALIDATION.json",
+      "bytes": 2048,
+      "sha256": "FBE0B1377688636CB3FAEEF0D7F638A485E8C419CE196CDFBB00B410DAFD51C8"
+    },
+    {
+      "entry": "SDK252/TEST_ROSTER_PROVENANCE.json",
+      "bytes": 34209,
+      "sha256": "FDD8AC61C6742F6F85EDE577E0BF97E17905557F6ADBB0F8DBAA4600A2E36682"
+    },
+    {
+      "entry": "SDK252/Test-RosterRule.ps1",
+      "bytes": 609,
+      "sha256": "1A78889829A22C4C3E9977C49DA9F9ABDEDE82FE801E5A9144153BCAB90B87E3"
+    },
+    {
+      "entry": "SDK252/Test-WrapperCorrections.ps1",
+      "bytes": 9221,
+      "sha256": "81E584696A7BF1B7027F0017E36F0C248434C76F82DC248ED107152C243ADA77"
+    },
+    {
+      "entry": "SDK252/Verify-Graph.ps1",
+      "bytes": 3881,
+      "sha256": "2F55E6CD28E58479F96759E9B72D3A9D5282E76E352F4F796CB6F933F20E40E3"
+    },
+    {
+      "entry": "SDK252/WRAPPER_PURE_TESTS.json",
+      "bytes": 9627,
+      "sha256": "1F358C095E821206D338B6977EEA47C304F548C8ED4D6DE1435B5CE64F88417A"
+    },
+    {
+      "entry": "SDK252/pure-mock-evidence/mock-positive.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "entry": "StoryPresentation/CATALOG_SCHEMA.json",
+      "bytes": 3587,
+      "sha256": "A94BE27EDF5A6B117E54241C9F122E1A0A35EE19ACBDA39FDC9241E3F37B96AD"
+    },
+    {
+      "entry": "StoryPresentation/CATALOG_TEMPLATE.json",
+      "bytes": 171,
+      "sha256": "5BE4DA03D587CA506CCE1CA17C225BB730D54AE5AB51950C3C6F0356561CF874"
+    },
+    {
+      "entry": "StoryPresentation/DRAFT_STATUS.json",
+      "bytes": 1474,
+      "sha256": "B04968E6B91D020DFDA1F62D0E3F55BA640B4E688CFC9A37357EC77BF18E5970"
+    },
+    {
+      "entry": "StoryPresentation/FOUNDATION_RECEIPT.json",
+      "bytes": 6682,
+      "sha256": "A7BDFDFF4F7A549289C3FC294FDD7B24B66AA43E754CBED4609A3D04780460CD"
+    },
+    {
+      "entry": "StoryPresentation/PACKET.json",
+      "bytes": 2910,
+      "sha256": "3DEAA36D819A8463C755300F8DE9E1F5A9E94DBE826D124B074A436853BD35C7"
+    },
+    {
+      "entry": "StoryPresentation/README.md",
+      "bytes": 6076,
+      "sha256": "D899BEEA554510D4EA141E69964A0377CDA24A4413E030B166CF59242B11B047"
+    },
+    {
+      "entry": "StoryPresentation/SOURCE_RECEIPT.json",
+      "bytes": 3421,
+      "sha256": "59B73C532CFF2E829173BC6015799E5FFE466EB5C506A640A5678798EC8FDE2A"
+    },
+    {
+      "entry": "StoryPresentation/VALIDATION.json",
+      "bytes": 3275,
+      "sha256": "E9964BE1B75A1671ADA377324FE27C64EB51BF36498D729278E5BE3CBCCD8AAA"
+    },
+    {
+      "entry": "StoryPresentation/candidate/Assets/AL/Scripts/UI/DevelopmentStoryPresentationJson.cs",
+      "bytes": 3422,
+      "sha256": "02538B0233425B8114D43D69A76DFC9DCC095410E28D71FBFB89D10811B39EEA"
+    },
+    {
+      "entry": "StoryPresentation/candidate/Assets/AL/Scripts/UI/DevelopmentStoryPresentationJson.cs.meta",
+      "bytes": 243,
+      "sha256": "DE6CD11197A12044E41C562A1999BB2C92C737E8617C45FC01C41A2AC7AB45BF"
+    },
+    {
+      "entry": "StoryPresentation/candidate/Assets/AL/Scripts/UI/StoryTurn/DevelopmentStoryCatalogPresentation.cs",
+      "bytes": 10575,
+      "sha256": "CFF3F22688C576EDBA3DABEF7B3EA8D25FA1A1FDE2B61D840C11E707F9E55065"
+    },
+    {
+      "entry": "StoryPresentation/candidate/Assets/AL/Scripts/UI/StoryTurn/DevelopmentStoryCatalogPresentation.cs.meta",
+      "bytes": 243,
+      "sha256": "20B91CFE4EA2ED0033996EBA73328C2DECB75E703FA1D90070114B7A359C3E25"
+    },
+    {
+      "entry": "StoryPresentation/candidate/Assets/AL/Tests/PlayMode/StoryTurn/DevelopmentStoryCatalogPresentationTests.cs",
+      "bytes": 12295,
+      "sha256": "82688EBDB4664A561BD0E689BF837D17AD31C4F0A4B7D87919CE681D82983CB2"
+    },
+    {
+      "entry": "StoryPresentation/candidate/Assets/AL/Tests/PlayMode/StoryTurn/DevelopmentStoryCatalogPresentationTests.cs.meta",
+      "bytes": 243,
+      "sha256": "5E4C2C8AA0BA1C720FF4AC422BA4B70E21EFB5A73AEAF4EA763FD328030147E7"
+    },
+    {
+      "entry": "StoryBoot/ACCESS_PROBE.txt",
+      "bytes": 11,
+      "sha256": "680964439F71930092E89FE6B9CCED2AAEAF744266B3C86836614D8781C5D8DF"
+    },
+    {
+      "entry": "StoryBoot/DECLARED_FOOTPRINT.json",
+      "bytes": 1073,
+      "sha256": "87AD12686EBCCC9F1FD33D32A07B776D32CD5A9FAE563C93A3F85DDB6ACF11AD"
+    },
+    {
+      "entry": "StoryBoot/FOUNDATION_RECEIPT.json",
+      "bytes": 1122,
+      "sha256": "576FCFE95BC09222856FD0BEC484CA3B872DE5DD56C3E7970DD04C87D018A58F"
+    },
+    {
+      "entry": "StoryBoot/PACKET.json",
+      "bytes": 3244,
+      "sha256": "5ED7421CBD5FAC7946EBA2E5DB3404189ABA3A17774705CF9DF862F9CC0C6ACD"
+    },
+    {
+      "entry": "StoryBoot/PREFLIGHT.json",
+      "bytes": 299,
+      "sha256": "33D722F16B9AF9AF825B79B87BF67D4E3BB72DB4CBFCDD0DBDB8463A4E75C00D"
+    },
+    {
+      "entry": "StoryBoot/PROMOTION_CANDIDATES.json",
+      "bytes": 3726,
+      "sha256": "5E0EF3B8F7C1A8F518F83017C9D7D76EFEA1F76EBD64AB1178AADDBBCE3D3118"
+    },
+    {
+      "entry": "StoryBoot/README.md",
+      "bytes": 5274,
+      "sha256": "F1EEF78EF8E94EF7A7BFA8B8CEF462D283A6F2EFD8F3BB4C4E80888163BA602C"
+    },
+    {
+      "entry": "StoryBoot/SOURCE_PINS.json",
+      "bytes": 5446,
+      "sha256": "787AB57E8EEA3A3B7BBD9BEE309E9289069832581FB03AB593D6AD6F45AAB618"
+    },
+    {
+      "entry": "StoryBoot/SOURCE_VALIDATION.json",
+      "bytes": 1020,
+      "sha256": "8BEF1DD78E7B3CA024FDEED275523E70E19DB50AF1E24B49FB05E954D94EECCC"
+    },
+    {
+      "entry": "StoryBoot/VERIFY_SOURCE.ps1",
+      "bytes": 3657,
+      "sha256": "EB4F5D2289C7E877FD1A15AC0BB653A23D50F82C2976CEB136828F571D4023E0"
+    },
+    {
+      "entry": "StoryBoot/candidate/Assets/AL/Scripts/UI/BootController.cs",
+      "bytes": 57324,
+      "sha256": "137E0A364062738F5D747CA5C4118B0E66A708C7830F87135AAE3FB10ABDB2C3"
+    },
+    {
+      "entry": "StoryBoot/candidate/Assets/AL/Scripts/UI/IAccountStoryPreparation.cs",
+      "bytes": 587,
+      "sha256": "87D1C734A43E5157AFCFE4F6609C2A7CD8A9F24C722D1572E2228DC9CBEC8E9A"
+    },
+    {
+      "entry": "StoryBoot/candidate/Assets/AL/Scripts/UI/IAccountStoryPreparation.cs.meta",
+      "bytes": 243,
+      "sha256": "60B94BC75AF9353B93E8FB660C2A1504F1CEFA83806AD86755DF3B9B2B7D18C0"
+    },
+    {
+      "entry": "StoryBoot/candidate/Assets/AL/Scripts/UI/StoryTurn/AccountStoryComposition.cs",
+      "bytes": 5584,
+      "sha256": "7FD53DD09CCB94DDF0573F79A43F3F7F59C162FC3BCA3E907B2D319E5CBC7B21"
+    },
+    {
+      "entry": "StoryBoot/candidate/Assets/AL/Tests/PlayMode/StoryTurn/AccountStoryPreparationTests.cs",
+      "bytes": 15349,
+      "sha256": "5E508CAB647D4E05DEB0900E33BB3721506CB087473620E393EF6EBAFAB2624E"
+    },
+    {
+      "entry": "StoryBoot/candidate/Assets/AL/Tests/PlayMode/StoryTurn/AccountStoryPreparationTests.cs.meta",
+      "bytes": 243,
+      "sha256": "79D8AA9D9A23BED107FA44E1C5A50F8175FDB336CF6D7C4EA4A6960C142FD5B4"
+    },
+    {
+      "entry": "StoryBoot/preimages/AccountStoryComposition.cs",
+      "bytes": 1855,
+      "sha256": "AF85E882069C44C43CA800F2F1ABB7A5A7B3DCB28567433AFAF68C7EB754DEBB"
+    },
+    {
+      "entry": "StoryBoot/preimages/BootController.cs",
+      "bytes": 54292,
+      "sha256": "A6622620EFEB325B00F0F6A561E23AE248AAAA028EFC53A9F5F56691887F8B1E"
+    },
+    {
+      "entry": "FiniteStage1/access.verified",
+      "bytes": 8,
+      "sha256": "1C34F88707B55E6104C4EB20E71FFA3D33E414B71EF689A15FAD0640D0AC58CB"
+    },
+    {
+      "entry": "FiniteStage1/BASE_BINDINGS.json",
+      "bytes": 2349,
+      "sha256": "37C312AC9F44F3E42344AC7D6DB41E3D51118806C18FFE58E64DC73CF7F1C8B8"
+    },
+    {
+      "entry": "FiniteStage1/CANDIDATE_CLOSURE.json",
+      "bytes": 5019,
+      "sha256": "83AC4CB2CB1F407254AF58D93270448BE4BB580EF09533668430816FE48D655B"
+    },
+    {
+      "entry": "FiniteStage1/DELIMITER_CHECKS.json",
+      "bytes": 1724,
+      "sha256": "9E50CDF25D4C081E779830AB17BFF3D96AF9E5A6BCBE0DDC2A85B115CA7CB37F"
+    },
+    {
+      "entry": "FiniteStage1/edit-core.ps1",
+      "bytes": 6329,
+      "sha256": "606E0E68E71C3B416A93FEFFD8DE2C00146E65B999956A974F634514510D768E"
+    },
+    {
+      "entry": "FiniteStage1/EXPECTED_CASES.json",
+      "bytes": 1451,
+      "sha256": "A54843062009219152ACE6D818F8C825045979AB7DEAD17C4EAEB2DEF4CE78FF"
+    },
+    {
+      "entry": "FiniteStage1/FOUNDATION_RECEIPT.json",
+      "bytes": 2364,
+      "sha256": "62740EE4E56EF8347EE99AD69DC09F04383FB74E080D58D19846E889295FE697"
+    },
+    {
+      "entry": "FiniteStage1/HANDOFF.json",
+      "bytes": 1016,
+      "sha256": "DC5BC0E38319E81436FEADC2221ADD38FF8C9F9B9E9CB55BAB295D8AAFB06D46"
+    },
+    {
+      "entry": "FiniteStage1/PACKET_SHA256.json",
+      "bytes": 5457,
+      "sha256": "325A22897A835E4CDB0C0C8BAE8502A1608EECB8F58E136304E4B165C241122C"
+    },
+    {
+      "entry": "FiniteStage1/SOURCE_CHECKS.json",
+      "bytes": 323,
+      "sha256": "B8492171E2D99BE10E3976B4FA20A90677777EC1C693967B5C566CB9E0BDDCBE"
+    },
+    {
+      "entry": "FiniteStage1/SPEC.md",
+      "bytes": 5957,
+      "sha256": "BF4E422BDA18A0E0A984D845289D545A15F16F6C18BD6D080907F27197CFF1BD"
+    },
+    {
+      "entry": "FiniteStage1/XML25_PROPOSAL.json",
+      "bytes": 461,
+      "sha256": "BE60E1F2E13DB4EF3B1D37B86DA063507A8E9BE3756CFA2B53FD73F2BAA5581C"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/AccountService/FiniteAttemptCatalog.cs",
+      "bytes": 4283,
+      "sha256": "099BC215F81D67304A0BF1798C7A1C60AC40CE7072455B59EDA9F7AE79753461"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/AccountService.Tests/FiniteAttemptTests.cs",
+      "bytes": 12985,
+      "sha256": "EAD560C28A6EAC23418F4F64CF96CAA6075A1A487207531DF4B147C600A27798"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/AccountService.Tests/Program.cs",
+      "bytes": 116282,
+      "sha256": "5D892FDF615ABCDE9E98036054F6BBA9B6E1FF6647D161303EF72565BD390E3B"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/StoryCombat.Core/Contracts.cs",
+      "bytes": 6179,
+      "sha256": "D8BB4419A48D56FC67355775F13077E4AFB5CB30FAD037A9D7CD13B3206298D1"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/StoryCombat.Core/FiniteAttemptPolicy.cs",
+      "bytes": 2040,
+      "sha256": "A7D3CB28B72C472F4F432B820580D65962623B608254894E742260D64D1BAA8D"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/StoryCombat.Core/SnapshotCodec.cs",
+      "bytes": 4490,
+      "sha256": "69A321855440C098F852B0EA7C21AC3A133C82A5BB7FE42389E621069611DA63"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/StoryCombat.Core/StoryCombat.Core.csproj",
+      "bytes": 426,
+      "sha256": "26A2848B3F494992C5157624CA48EB067BE8FABEADD29A41BAF00C2210C1347D"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/StoryCombat.Core/TurnReplay.cs",
+      "bytes": 5282,
+      "sha256": "1B737FDB920270AC8A569C110A71274D8D6EA2C7FB451E8AC70F3923BC5BA9FB"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/StoryJournal.Core/Contracts.cs",
+      "bytes": 3683,
+      "sha256": "B14C7DA66D092DD8ADC1F7E0B741983575E4B0C902263939DFB3A5CB7D6CD0B8"
+    },
+    {
+      "entry": "FiniteStage1/source/backend/StoryJournal.Core/StrictJournal.cs",
+      "bytes": 7641,
+      "sha256": "7B28064221D99581F1B2C7B0F1E5D8DA803116E1F62D3781EE31D12F5B52B289"
+    },
+    {
+      "entry": "FiniteStage1/source/unity/Assets/AL/StreamingAssets/GameData/kingdom_attempt_limits.v1.json",
+      "bytes": 139,
+      "sha256": "15BDA6C82102B71E1DA8709548DB7EC8A655876E818CDF1D960C878483EEA3EE"
+    },
+    {
+      "entry": "FiniteStage1/source/unity/SharedContracts/Schemas/kingdom_attempt_limits.v1.schema.json",
+      "bytes": 1888,
+      "sha256": "3E065CFF12BFD88389C834268A2796A4DEAEDCE7D4C3DF7295FFC7EEDB753AF6"
+    },
+    {
+      "entry": "FiniteStage2Pure/ACCESS.json",
+      "bytes": 220,
+      "sha256": "1594268838FD7FED3829D259066B1DDD49834F4B8BCF982928E998D5030F3121"
+    },
+    {
+      "entry": "FiniteStage2Pure/access.verified",
+      "bytes": 2,
+      "sha256": "2689367B205C16CE32ED4200942B8B8B1E262DFC70D9BC9FBC77C49699A4F1DF"
+    },
+    {
+      "entry": "FiniteStage2Pure/BASE_BINDINGS.json",
+      "bytes": 2838,
+      "sha256": "1A8A14F77CBFB59AB715AAE859D25D36D2351E0603DDF45BB1FB2E9B37325CA7"
+    },
+    {
+      "entry": "FiniteStage2Pure/CANDIDATE_CLOSURE.json",
+      "bytes": 1651,
+      "sha256": "AF8F0C0BDA45237A7C84AE886A209DB499B9BB8C607C0FF9E8EAF1071C5E282D"
+    },
+    {
+      "entry": "FiniteStage2Pure/DECLARED_SUBSET.json",
+      "bytes": 268,
+      "sha256": "6CFCCF762FC5CCB8612B33093FA3AF3F2C57159B2DA9AE8056780AECD160BED9"
+    },
+    {
+      "entry": "FiniteStage2Pure/FOUNDATION_RECEIPT.json",
+      "bytes": 648,
+      "sha256": "8EC0B7E87EE0BB6C7F5B89D1C05F9125D81CBCC21E992A77025CBF815958A98D"
+    },
+    {
+      "entry": "FiniteStage2Pure/HANDOFF.md",
+      "bytes": 3732,
+      "sha256": "83671ECF41C8CB8EB66AE1C555277DA342AC59F60E545EF06582CE4FDF9DA411"
+    },
+    {
+      "entry": "FiniteStage2Pure/PACKET_SHA256.json",
+      "bytes": 1970,
+      "sha256": "67D1D8B35FFBF593D1F4675E2380A09F3357998CBBF69780A0775F4CEEF7FC91"
+    },
+    {
+      "entry": "FiniteStage2Pure/VALIDATION.json",
+      "bytes": 401,
+      "sha256": "15FB04FB2E5D88E057D8AC39465D05B669EA1A3A2474080C634A2228DA24E889"
+    },
+    {
+      "entry": "FiniteStage2Pure/source/backend/AccountService/KingdomStoryCatalog.cs",
+      "bytes": 8663,
+      "sha256": "FD621F2786E14F793FB1C9DEBE4DFD623DE8A52FBD859BADD748F6297D02D87F"
+    },
+    {
+      "entry": "FiniteStage2Pure/source/backend/AccountService.Tests/FiniteAttemptHostTests.cs",
+      "bytes": 6136,
+      "sha256": "2DEC6CC9135B60FE5F644920284622D6F43EC8112B21A86C45DA6361249522E4"
+    },
+    {
+      "entry": "FiniteStage2Pure/source/unity/Assets/AL/StreamingAssets/GameData/kingdom_story_runtime.v1.json",
+      "bytes": 156,
+      "sha256": "148CA6C309B1D0A593900BA79DEC5BCE58C680E0F452E85AC7154A3217B9CAE0"
+    },
+    {
+      "entry": "FiniteStage2Pure/source/unity/SharedContracts/Schemas/kingdom-story-runtime.v1.schema.json",
+      "bytes": 8490,
+      "sha256": "36CD780B656CF48C3F8E2D9D59EE36559492E2CA3917B72A5608BCC672E80BBA"
+    },
+    {
+      "entry": "FiniteStage2Spec/ACCESS.json",
+      "bytes": 278,
+      "sha256": "2B762F80E70832F03AF794497C57FAD38AC7C7FCDB6E250B92156DFC2501F093"
+    },
+    {
+      "entry": "FiniteStage2Spec/access.verified",
+      "bytes": 18,
+      "sha256": "303988AC624B551A59AC1FEF0C54607CC03829458EB795B0CBCFF0A02074CBD0"
+    },
+    {
+      "entry": "FiniteStage2Spec/CLIENT_DEPENDENCIES.json",
+      "bytes": 933,
+      "sha256": "D74228ED4C91DCE0BDADE175EEAAF0737F32C7F1437EDC34C85493DE4A0D5586"
+    },
+    {
+      "entry": "FiniteStage2Spec/FORMAT_PROPOSAL.json",
+      "bytes": 481,
+      "sha256": "68ED2B6F1F58E7EF27E9358610724AE783D849AB89D305E6C361B0B9EE69FABB"
+    },
+    {
+      "entry": "FiniteStage2Spec/FOUNDATION_RECEIPT.json",
+      "bytes": 739,
+      "sha256": "245B6905C17FCE5A0108E79FDFF929608BF5DCB89A6678E70E8B708176B3BDF2"
+    },
+    {
+      "entry": "FiniteStage2Spec/HANDOFF.md",
+      "bytes": 1569,
+      "sha256": "E5932C9B9E3B4A746B9DD0F7DAB1ACD2C4830831A082D155B218DC683EF04487"
+    },
+    {
+      "entry": "FiniteStage2Spec/PACKET_SHA256.json",
+      "bytes": 1464,
+      "sha256": "B2C824B1C2B52B8A89E34BF741D7A83B683E7664A8E60697375CEA0414D7463C"
+    },
+    {
+      "entry": "FiniteStage2Spec/PROPOSED_FOOTPRINT.json",
+      "bytes": 27386,
+      "sha256": "B4556BA8664D81C573F8D22BCF1F729497A6BC6DFD1E6EE2B657F1DE1B009819"
+    },
+    {
+      "entry": "FiniteStage2Spec/SOURCE_PINS.json",
+      "bytes": 2868,
+      "sha256": "CD85C5BCEDDBD8B7705BA36988BD5AB2DEC41D3F916BE7DFB94BA4C8CD1C59D0"
+    },
+    {
+      "entry": "FiniteStage2Spec/SPEC.md",
+      "bytes": 17435,
+      "sha256": "CCD529DB01B0FC019FD2D4FBBF0D105C2D73C93920EEA651FAE299F85D69612D"
+    },
+    {
+      "entry": "FiniteStage2Spec/VALIDATION.json",
+      "bytes": 240,
+      "sha256": "E05F30E3A53B0BF0FA6A79202790014083BCDE2C30E9A66F113F6551EC6DEF18"
+    },
+    {
+      "entry": "MechanicsESpec/access.verified",
+      "bytes": 6,
+      "sha256": "8697CA930D29CECAB2AE4FD051F07AB7A87846D2E6254FB4B517FEA2CC9D5450"
+    },
+    {
+      "entry": "MechanicsESpec/COVERAGE.md",
+      "bytes": 3832,
+      "sha256": "3B7DF65AF03DFF91153AA8C80875849BFFF0646462F84ADCA0D07ED34944F31A"
+    },
+    {
+      "entry": "MechanicsESpec/FOUNDATION_RECEIPT.json",
+      "bytes": 872,
+      "sha256": "1B1128172362AA2D39E60FED3A7579CD3355F37B336C082A6C61BD3305D30DBF"
+    },
+    {
+      "entry": "MechanicsESpec/HANDOFF.md",
+      "bytes": 1831,
+      "sha256": "C04A075DCE010039BBF791CD30AC76DB28F8E672ECAF295FB2600BD19675D8DE"
+    },
+    {
+      "entry": "MechanicsESpec/PACKET_PINS.json",
+      "bytes": 1401,
+      "sha256": "B89EEA883CADF34D5D901E15A855C936C56E70BD6097491A59138217DEA978EB"
+    },
+    {
+      "entry": "MechanicsESpec/SOURCE_PINS.json",
+      "bytes": 1833,
+      "sha256": "0C24BB06CBA0352CE2683ECCED2A4595F220B32098E84F17CFBC0E5ED9013E73"
+    },
+    {
+      "entry": "MechanicsESpec/SPEC.md",
+      "bytes": 15317,
+      "sha256": "8C6FF20C6656EBA0BFDD97B47A7C692F800A757184D443079F2F645391DF2586"
+    },
+    {
+      "entry": "MechanicsESpec/TEST_MATRIX.md",
+      "bytes": 3888,
+      "sha256": "9BD8B3ACB411B99878C3BEC176303C94D2EBA193B0BF04104C0043FA96522D41"
+    },
+    {
+      "entry": "Mapping/ACCESS_PROBE.txt",
+      "bytes": 6,
+      "sha256": "8697CA930D29CECAB2AE4FD051F07AB7A87846D2E6254FB4B517FEA2CC9D5450"
+    },
+    {
+      "entry": "Mapping/FOUNDATION_RECEIPT.json",
+      "bytes": 502,
+      "sha256": "64115D040AAF936EA61EC39775D58931CA48F882CB190E99C1F54F68FC9B68B9"
+    },
+    {
+      "entry": "Mapping/MAPPING_SPEC.md",
+      "bytes": 6674,
+      "sha256": "06BA34365CF05B6F379FF231FA4CD687396F8482579967562EF3300E0A2A4437"
+    },
+    {
+      "entry": "Mapping/PACKET.json",
+      "bytes": 1028,
+      "sha256": "56C1735AD9FC443D2ACB56BC875B7E8AA2D86179E0ABDEB3E18C4F9E6B89B564"
+    },
+    {
+      "entry": "Mapping/PREFLIGHT.json",
+      "bytes": 227,
+      "sha256": "3DBE6562289EBD006BF5E3F8F179B9091A6698B30EDD0B06D3787DD352D59377"
+    },
+    {
+      "entry": "Mapping/SOURCE_AND_ART_RECEIPT.json",
+      "bytes": 7080,
+      "sha256": "7D9DC0137B303E847E03F9AC009B19B3CB1E4D300CBADA2B6FE129758704645B"
+    },
+    {
+      "entry": "Mapping/TEST_MATRIX.json",
+      "bytes": 5241,
+      "sha256": "6785F117D265BB1F4BD9F339B584C72C1E46199D453FCC9C33DF38D231C28ED5"
+    },
+    {
+      "entry": "Mapping/VALIDATION.json",
+      "bytes": 293,
+      "sha256": "337A08F9849B7BD8CB354323D0E86783D606ADC4782BE99D9B716562FF2449AA"
+    },
+    {
+      "entry": "Visual/ACCESS_VERIFIED.txt",
+      "bytes": 8,
+      "sha256": "9ABE1BCA01AF19F35892971A7922F27028137E6F0A306E5E4F1D0055B060F229"
+    },
+    {
+      "entry": "Visual/FOUNDATION_RECEIPT.json",
+      "bytes": 3809,
+      "sha256": "BF2814FED630C75CD009ACBB48C8ABD5AEC03688A483F3F258C9476E2F41B779"
+    },
+    {
+      "entry": "Visual/HANDOFF.json",
+      "bytes": 740,
+      "sha256": "DDF200A7D2C3B208118666116D23ACA7F98AF6E83683D149A9ABB775524E3B08"
+    },
+    {
+      "entry": "Visual/HANDOFF.md",
+      "bytes": 3092,
+      "sha256": "609CE394483CD2BC0B3794D99B0C43D2EA3AC7CB83EDAB4F4FD696D50B1633E9"
+    },
+    {
+      "entry": "Visual/MANIFEST.json",
+      "bytes": 7076,
+      "sha256": "58D48F49F1569B6D23B92A356A8F2F210FE8FE1F0A08A0D762BA61972B125A08"
+    },
+    {
+      "entry": "Visual/MECHANICAL_BINDING_CHECKS.json",
+      "bytes": 2308,
+      "sha256": "FDEEB3DFAD8E8548D11D63F8B1C019091B7FD608D997C1F0C578A6C024529DCB"
+    },
+    {
+      "entry": "Visual/VISUAL_REVIEW_WORKSHEET.json",
+      "bytes": 9532,
+      "sha256": "0420425D08EEB676E19D176D58BDE8F0FDF374E61BC4EE254FAF4964AC46E6AA"
+    },
+    {
+      "entry": "Visual/capture-admission/ADAPTER_SOURCE_PINS.json",
+      "bytes": 3346956,
+      "sha256": "11A950EE6C2EB156DA183013190900F319D30A915F52BABCED2224E912A2A4EC"
+    },
+    {
+      "entry": "Visual/capture-admission/AFFECTED_ASSEMBLIES.json",
+      "bytes": 66,
+      "sha256": "8E39BDB8AB3AFD4199D07BA08DF6005BC432C62CEF24BBD42370703D3C64BE85"
+    },
+    {
+      "entry": "Visual/capture-admission/ARTIFACT_QUALIFICATION.json",
+      "bytes": 1392,
+      "sha256": "2A09D6B81D39DEFE75D990B6EC4F1B68810809F7B96BF695CAC818AA6849DD26"
+    },
+    {
+      "entry": "Visual/capture-admission/artifact-qualification.ps1",
+      "bytes": 3353,
+      "sha256": "3FD03A17B1DDA031F36E3F4560194552EB20CEBC50B2C2A78855BE60E0F43E2E"
+    },
+    {
+      "entry": "Visual/capture-admission/CAPTURE_ADMISSION.json",
+      "bytes": 1034,
+      "sha256": "5F58F301662A47C1AF971A47DF2ABC5FCA560066E1069F8503843600A1DB5D59"
+    },
+    {
+      "entry": "Visual/capture-admission/capture-git-context.ps1",
+      "bytes": 1076,
+      "sha256": "499064806D25CB01D58629C7E6ABAD23641B38844F55407B62C89D6418160F1B"
+    },
+    {
+      "entry": "Visual/capture-admission/COMPILE_CORRESPONDENCE.json",
+      "bytes": 1125,
+      "sha256": "1514062237BC6A2950835A4557A307F0A2A8AE290B5EE4C96CE8F0A552E88A30"
+    },
+    {
+      "entry": "Visual/capture-admission/COMPILER_CLEANUP_CONFIG.json",
+      "bytes": 3280,
+      "sha256": "759F89B9896473CDCB179B0B3F385F655305AC84212D0DB9E29CF508586C5E72"
+    },
+    {
+      "entry": "Visual/capture-admission/compiler-cleanup-policy.ps1",
+      "bytes": 1550,
+      "sha256": "CB22E485DAD52F1FA923FB7EDD3970AB4CD56BE94E848E9C94C4639F4146A8F3"
+    },
+    {
+      "entry": "Visual/capture-admission/compiler-cleanup.ps1",
+      "bytes": 11279,
+      "sha256": "51AFCF7D7421AF716DFB177AB3C180261762132A4B107E93CC3F54C9C8439808"
+    },
+    {
+      "entry": "Visual/capture-admission/CRITICAL_SOURCE_PINS.json",
+      "bytes": 2885819,
+      "sha256": "E1E6DE5407B0671802A1E510DC77ED11225260EC10A8946668DCEC9E1C46EDCD"
+    },
+    {
+      "entry": "Visual/capture-admission/CURRENT_DEPENDENCY_EVIDENCE.json",
+      "bytes": 73375,
+      "sha256": "57526672E3FF9901EDE40DD07F735668B0739129F61FC1A8E5BCBD3564DE5212"
+    },
+    {
+      "entry": "Visual/capture-admission/CURRENT_DEPENDENCY_PINS.json",
+      "bytes": 9614,
+      "sha256": "5990A29F516A19E789B2929231CC152D3F84F85ADE5866A5E25FE61046B1EDDE"
+    },
+    {
+      "entry": "Visual/capture-admission/EXACT_INPUT_PINS.json",
+      "bytes": 23350,
+      "sha256": "26BA2DBB620D8CE22838377BC2C002AAA765B6804D1DEA3E743AB010FAB9FCD0"
+    },
+    {
+      "entry": "Visual/capture-admission/FIXED_LAUNCH.json",
+      "bytes": 817,
+      "sha256": "3897C425818CC6312D337D827E42F9159F6BAF89C6F29A3510700F0737E65E03"
+    },
+    {
+      "entry": "Visual/capture-admission/FRAMEWORK_RUNTIME_QUALIFICATION.json",
+      "bytes": 2858,
+      "sha256": "E5D56CCE56FA34182045763FF6E6060923E26C2528F056F6B1EB46CFD4E7C2E1"
+    },
+    {
+      "entry": "Visual/capture-admission/identity-policy.ps1",
+      "bytes": 2202,
+      "sha256": "8508BA6E6FCE559843E4D029C7FF8761E32971A2413A3ED28B635B1AF459D37A"
+    },
+    {
+      "entry": "Visual/capture-admission/identity-runtime.ps1",
+      "bytes": 4563,
+      "sha256": "2D0597C85164DD122C55C7B43398DBEB5E478B778E6943987693129C8D82008B"
+    },
+    {
+      "entry": "Visual/capture-admission/input-cohort.ps1",
+      "bytes": 3111,
+      "sha256": "8EF0E39B54EF9705BB2F82C78653068DDF4B7403F811F604EF582F5727E9BAB5"
+    },
+    {
+      "entry": "Visual/capture-admission/INTEROP_ARTIFACT.json",
+      "bytes": 1316,
+      "sha256": "D8739036432BB9A1FB01D2557A1CCC61EFFC5199E888071AE08A5DFA1B610237"
+    },
+    {
+      "entry": "Visual/capture-admission/JOB_ADMISSION.json",
+      "bytes": 331,
+      "sha256": "CAF5082A916113C1FAA8B9B44DA18B9560C667838E957E6564A4A6624FF0103D"
+    },
+    {
+      "entry": "Visual/capture-admission/JOB_CONFIG.json",
+      "bytes": 111,
+      "sha256": "7F1E34C43A3F738EAE5F1CB90CC12406977CF93702E549CB9E179E05CE3FF076"
+    },
+    {
+      "entry": "Visual/capture-admission/job-admission.ps1",
+      "bytes": 11453,
+      "sha256": "91AEC5CC740983B6FDC7691DA0D39005ED6049B57FB574FC7E3015339FB8D184"
+    },
+    {
+      "entry": "Visual/capture-admission/PLAN.json",
+      "bytes": 9634,
+      "sha256": "37275D239062E116ED3F642FAA7CD97A3D4FCC06010878B3B54EFF42345FBF27"
+    },
+    {
+      "entry": "Visual/capture-admission/POSTPROMOTION_SEAL.json",
+      "bytes": 931,
+      "sha256": "1318B740797FE55120E5F5566D47EF97B3665D9792AD5714C342CDAA784A3D0E"
+    },
+    {
+      "entry": "Visual/capture-admission/read-typed-preferences.ps1",
+      "bytes": 1827,
+      "sha256": "D6F4FF946F3CA5CC81B38AAAFED364D0E0159450007A8174D5CBFCB7D7715EC6"
+    },
+    {
+      "entry": "Visual/capture-admission/ReadbackIdentity.Native.cs",
+      "bytes": 781,
+      "sha256": "EF6384C178C74DC851636A25F0790501B9E51DF08C86644F09F79E507AA8A643"
+    },
+    {
+      "entry": "Visual/capture-admission/REQUIRED_SIX_PINS.json",
+      "bytes": 1205,
+      "sha256": "B9F9F0F9282B4A2F28875E11F48516C451F0D3BEDE380A419A85464DD3607BF5"
+    },
+    {
+      "entry": "Visual/capture-admission/REVIEWED_MEMBERSHIP_PINS.json",
+      "bytes": 5032115,
+      "sha256": "04BA07ABA61A2B7C1B4CCAC1C1609FFA270A9D49E12138F839377117B94DF02A"
+    },
+    {
+      "entry": "Visual/capture-admission/run-job.ps1",
+      "bytes": 16464,
+      "sha256": "08E7F8F71D586C2E6BA55FD89F07ECA8041690909F55FA3B72EBA791778F4ACA"
+    },
+    {
+      "entry": "Visual/capture-admission/run-sequence.ps1",
+      "bytes": 4235,
+      "sha256": "CA68E552D3FFD7AFD38717D92C7998514952BA68D95825460871414D0889C9B5"
+    },
+    {
+      "entry": "Visual/capture-admission/RUNTIME_PINS.json",
+      "bytes": 955,
+      "sha256": "F20BC200A322023E09EA2523A5168420311BB5AFA059E5DAEE0D4BD3508230DD"
+    },
+    {
+      "entry": "Visual/capture-admission/snapshot-profile.ps1",
+      "bytes": 2229,
+      "sha256": "62184DFB2539EC89CD588BCE140856D36B78AA8DB1BDA3EFDC1C4525AC4CDBB7"
+    },
+    {
+      "entry": "Visual/capture-admission/snapshot-viewport.ps1",
+      "bytes": 1796,
+      "sha256": "DE66FE2EF46D03F1A76124E96D9A5365C54AD498AB49E4AC7AA8952DE8CAD07D"
+    },
+    {
+      "entry": "Visual/capture-admission/SOURCE_QA.json",
+      "bytes": 474,
+      "sha256": "C20FA35E07118B27A3C2C51D659D03864FC61737DBC636C120B6F8CE960918AE"
+    },
+    {
+      "entry": "Visual/capture-admission/VENDOR_OBSERVATION_CONFIG.json",
+      "bytes": 1165,
+      "sha256": "1CBD83F99D47AB04E9574122B61B2A6BF94EF007D97423FEB642B3FC1C7FA6EC"
+    },
+    {
+      "entry": "Visual/capture-admission/vendor-observation-policy.ps1",
+      "bytes": 7720,
+      "sha256": "15C0EA4E713F26805CD58E459A9753AD1C8701053C91B04F6A9288615A383BBE"
+    },
+    {
+      "entry": "Visual/capture-admission/vendor-observation-runtime.ps1",
+      "bytes": 2003,
+      "sha256": "B13EF3FF60FE3FD3C97AD46D83102A619165548EA28D4A60BEEED5FF8EAB705C"
+    },
+    {
+      "entry": "Visual/capture-admission/verify-search-index.ps1",
+      "bytes": 858,
+      "sha256": "7C4796B1A2B3C5B2C3FBDA5D04CDAED01173A73DFA84DDFDD348D3EDED0F35BA"
+    },
+    {
+      "entry": "ThinUnityRecipe/ACCESS.json",
+      "bytes": 239,
+      "sha256": "52C1B3AA4816DF4FF3D97CE18CEE3F772B71BA7CBE22603C0F67996AAEBA49C9"
+    },
+    {
+      "entry": "ThinUnityRecipe/access.verified",
+      "bytes": 8,
+      "sha256": "1C34F88707B55E6104C4EB20E71FFA3D33E414B71EF689A15FAD0640D0AC58CB"
+    },
+    {
+      "entry": "ThinUnityRecipe/MANIFEST.json",
+      "bytes": 3574,
+      "sha256": "6944349C77CD5B6B6D81BAE56451BFC5109E6C113A6771D736380BBA563A22D4"
+    },
+    {
+      "entry": "ThinUnityRecipe/PARSE_RESULTS.json",
+      "bytes": 1085,
+      "sha256": "A787050298B4B5344D436D554ED3F2C33A94CAECE956DDFC192CC5FACEA00082"
+    },
+    {
+      "entry": "ThinUnityRecipe/README.md",
+      "bytes": 4020,
+      "sha256": "6BA20C6C49CF7621CAB5182A64C87F04D79FF7256AE70B296B5CB7596D322966"
+    },
+    {
+      "entry": "ThinUnityRecipe/SOURCE_TEST_RESULTS.json",
+      "bytes": 2009,
+      "sha256": "717442D11C949EAAC4EC25221E295722C414DFB2807A9B7B29628B98AF4BA411"
+    },
+    {
+      "entry": "ThinUnityRecipe/source-tests.ps1",
+      "bytes": 3418,
+      "sha256": "21BE4C5D6351F5E14FE297015F597D5C6703CD415B6DEE9F8682120EC2DE8DC1"
+    },
+    {
+      "entry": "ThinUnityRecipe/common/BINDING.json",
+      "bytes": 4756,
+      "sha256": "771C26DE4F10247C0F0681393D85EFA1E3C1877BADA23B4060533C80AB6CDF42"
+    },
+    {
+      "entry": "ThinUnityRecipe/common/check-exact-xml.ps1",
+      "bytes": 4539,
+      "sha256": "35FEA8FA9373A33F4A04D52BEC0CE54DC23470ED8A60035C978C37D6F91460A5"
+    },
+    {
+      "entry": "ThinUnityRecipe/common/CLOSURE.json",
+      "bytes": 13318,
+      "sha256": "A48094F0D791E33A0B4536CDC6C123FCC3326DFFD31D81F0D5F40ED7A442EACE"
+    },
+    {
+      "entry": "ThinUnityRecipe/common/prepare-selection.ps1",
+      "bytes": 5370,
+      "sha256": "42C61F3AE77C1FC7B2B64D3FDCEB55A01290C86535B4F67749A35C7DC6B09344"
+    },
+    {
+      "entry": "ThinUnityRecipe/common/XML_GUARD_ORIGIN.json",
+      "bytes": 610,
+      "sha256": "FF3F8C37C0D444E964DD7B42299564F639D7DF51069423823C347FACC4FD3FDB"
+    },
+    {
+      "entry": "ThinUnityRecipe/selections/manual11.json",
+      "bytes": 1203,
+      "sha256": "8288906436E0B75DA3BD634C2ECF9AF85204EB5FFF46BD940D47975219EAD22D"
+    },
+    {
+      "entry": "ThinUnityRecipe/selections/manual11.ps1",
+      "bytes": 160,
+      "sha256": "23E262C594181E96B16BD2595E2608EEA9BFC9574F5D67B5EBA75FB0CA3C3610"
+    },
+    {
+      "entry": "ThinUnityRecipe/selections/story40.json",
+      "bytes": 1308,
+      "sha256": "0F9C1DD4AF9BE663C5A065EBE21BCF10E2B2379AA47ACAB2B97EE6DC2A4C4A69"
+    },
+    {
+      "entry": "ThinUnityRecipe/selections/story40.ps1",
+      "bytes": 159,
+      "sha256": "5DC430969CA30E8709CC8AFD219D4F10D192FE914AFD19CF2AE162A8426D9610"
+    },
+    {
+      "entry": "ThinUnityRecipe/selections/tower7.json",
+      "bytes": 1655,
+      "sha256": "D316FA5615788D3A4B7C9053F19EABCF342E5D07FF7603A9BF9FC61E4D7C7C23"
+    },
+    {
+      "entry": "ThinUnityRecipe/selections/tower7.ps1",
+      "bytes": 158,
+      "sha256": "35E70F9CB0FC3FE524948A658B5C3A74568071B13A98914B021B3CA51A58DC9B"
+    },
+    {
+      "entry": "ThinUnityRecipe/source-test-fixture/common/BINDING.json",
+      "bytes": 4756,
+      "sha256": "771C26DE4F10247C0F0681393D85EFA1E3C1877BADA23B4060533C80AB6CDF42"
+    },
+    {
+      "entry": "ThinUnityRecipe/source-test-fixture/common/prepare-selection.ps1",
+      "bytes": 5370,
+      "sha256": "42C61F3AE77C1FC7B2B64D3FDCEB55A01290C86535B4F67749A35C7DC6B09344"
+    },
+    {
+      "entry": "ThinUnityRecipe/source-test-fixture/selections/manual11.json",
+      "bytes": 1203,
+      "sha256": "8288906436E0B75DA3BD634C2ECF9AF85204EB5FFF46BD940D47975219EAD22D"
+    },
+    {
+      "entry": "PartialUnityWrapper/access.verified",
+      "bytes": 8,
+      "sha256": "1C34F88707B55E6104C4EB20E71FFA3D33E414B71EF689A15FAD0640D0AC58CB"
+    },
+    {
+      "entry": "PartialUnityWrapper/CHECKPOINT.txt",
+      "bytes": 4062,
+      "sha256": "09F48ECC9D64741CEDF3D72BFB71F4F0ACEAC9FADD3AD57D27D743667C64D316"
+    },
+    {
+      "entry": "PartialUnityWrapper/MANIFEST.json",
+      "bytes": 3579,
+      "sha256": "61A08C03F6E3A2AEB759FE0DDDE4730B9E76C02DC70AF469ACD1E8F65E873360"
+    },
+    {
+      "entry": "PartialUnityWrapper/ORIGINS.json",
+      "bytes": 3431,
+      "sha256": "5FCDC04711BE43F6B067DFA4314280CB9A0C4D8A2988CF0132550429EB9188A2"
+    },
+    {
+      "entry": "PartialUnityWrapper/PARSE_RESULTS.json",
+      "bytes": 759,
+      "sha256": "7A194357577BBF379CD3E222F56C9B3873686A03681E495EF32AC4468517F5B7"
+    },
+    {
+      "entry": "PartialUnityWrapper/STOP",
+      "bytes": 83,
+      "sha256": "2CDDFD47D5B9B82369AE70D9689B0303EF0F35740B581632080FA6C49B1D234A"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/BINDING.json",
+      "bytes": 5022,
+      "sha256": "DECF9E6965C23DABD9358C50B8FD989961A030055DC6EC436B4D97BBF7BA062A"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/capture-git-context.ps1",
+      "bytes": 1208,
+      "sha256": "C5107A2BCC4B331B7E898E30097E7BC8F725998620782753E947663EE67B0D7A"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/CLOSURE.json",
+      "bytes": 13318,
+      "sha256": "A48094F0D791E33A0B4536CDC6C123FCC3326DFFD31D81F0D5F40ED7A442EACE"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/compiler-cleanup-policy.ps1",
+      "bytes": 1550,
+      "sha256": "CB22E485DAD52F1FA923FB7EDD3970AB4CD56BE94E848E9C94C4639F4146A8F3"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/compiler-cleanup.ps1",
+      "bytes": 11237,
+      "sha256": "F021EF0009BA92A3EE06B1D731D7626E94246F32C1A91A7271516CF3A6F4EA6A"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/identity-policy.ps1",
+      "bytes": 2202,
+      "sha256": "8508BA6E6FCE559843E4D029C7FF8761E32971A2413A3ED28B635B1AF459D37A"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/identity-runtime.ps1",
+      "bytes": 4567,
+      "sha256": "1B80441335950011981BE74C433B728B0F669A50FEEAF202D4EAA4057A2DF64C"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/read-typed-preferences.ps1",
+      "bytes": 1913,
+      "sha256": "713A90FCB49FEDA8E5E27ED2C73EE67D590D006E80006D87A84846286023A36D"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/ReadbackIdentity.Native.cs",
+      "bytes": 781,
+      "sha256": "EF6384C178C74DC851636A25F0790501B9E51DF08C86644F09F79E507AA8A643"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/run-tests.ps1",
+      "bytes": 16195,
+      "sha256": "6F4D9F3EE5CFD2772F912D3EDBD6E4F79D64306EB47FE162441E435EF7CCB2E3"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/snapshot-profile.ps1",
+      "bytes": 2315,
+      "sha256": "38E74A65C29A47DE52EA05D744C47F41870B1E9D5BE377DC991D623CC8318DD4"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/snapshot-viewport.ps1",
+      "bytes": 1876,
+      "sha256": "17FF312CB06D3720ED09271FF7C1E4BAA6B365307D40A64719C7A2326DD386F0"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/VENDOR_METADATA.json",
+      "bytes": 4212,
+      "sha256": "946A8897520C4FA73158B5742D7592F32C1DF87E2B28B9E0CCC10E6E5F98111D"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/vendor-observation-policy.ps1",
+      "bytes": 7764,
+      "sha256": "E38074897AC7CBA00D008369FCE48D919C19BF9478798701DB361F88B3DA71B5"
+    },
+    {
+      "entry": "PartialUnityWrapper/common/vendor-observation-runtime.ps1",
+      "bytes": 1978,
+      "sha256": "6A06F92F4551C16C2A8EB0A590520088E71EA762A1B722318FB4745FD3B3A3E9"
+    },
+    {
+      "entry": "TowerSDKRecipe/ACCESS.json",
+      "bytes": 218,
+      "sha256": "59B92BFBB7FD50B74AADBBC9D5124846DF9E7B624F4104F228A39F976C39B57D"
+    },
+    {
+      "entry": "TowerSDKRecipe/access.verified",
+      "bytes": 8,
+      "sha256": "1C34F88707B55E6104C4EB20E71FFA3D33E414B71EF689A15FAD0640D0AC58CB"
+    },
+    {
+      "entry": "TowerSDKRecipe/BASELINE_PINS.json",
+      "bytes": 79165,
+      "sha256": "C8B388DD5A5AE0C9E41F796FDE222DC0453A83633FFFB6AD8ECE6E5AD5A83CBB"
+    },
+    {
+      "entry": "TowerSDKRecipe/ENVIRONMENT.json",
+      "bytes": 2400,
+      "sha256": "96067268625BBFDF980D19E898E435385F3220B9D4448AE8BB4FF50702CECC67"
+    },
+    {
+      "entry": "TowerSDKRecipe/Evidence.targets",
+      "bytes": 3556,
+      "sha256": "007B5B97CD6FE6F48B0A71DA2EFC6AAEFA1D92ABD6F56372FD9BDF9D61BDA898"
+    },
+    {
+      "entry": "TowerSDKRecipe/ExpectedSources.targets",
+      "bytes": 25866,
+      "sha256": "DF9213872C00319959CF8D186B345FAA92242D4811EEE1F0715A4886500DC3E8"
+    },
+    {
+      "entry": "TowerSDKRecipe/global.json",
+      "bytes": 109,
+      "sha256": "824C86B7FA9827AD8740977CBD461AD37A10F3059D05420B4BA4DD2503F7EAAE"
+    },
+    {
+      "entry": "TowerSDKRecipe/GRAPH_ACCEPTANCE.json",
+      "bytes": 205,
+      "sha256": "546EF65DB33383DDB992FFD0493B0F82F5705D59DACD560D73446F95D85DA16D"
+    },
+    {
+      "entry": "TowerSDKRecipe/HANDOFF.json",
+      "bytes": 749,
+      "sha256": "79E092BCFEC7222E2150C6BBA53D4A51B561C2C076298D05C8D9634A64A56A53"
+    },
+    {
+      "entry": "TowerSDKRecipe/INITIAL_MOCK_FAILURE.json",
+      "bytes": 362,
+      "sha256": "C16FACD01393333998BBA6AAC30B2BAE7014B2B1DF148A58EEBD78EC64C4C81C"
+    },
+    {
+      "entry": "TowerSDKRecipe/NEGATIVE_GUARDS.json",
+      "bytes": 724,
+      "sha256": "C868D5EA522AA6A513E486F4B9F866BEFDF739A0B60A8AAF0BC6691D6360D136"
+    },
+    {
+      "entry": "TowerSDKRecipe/NuGet.Config",
+      "bytes": 302,
+      "sha256": "4AF30A4CAE7CB94E17A2CD4125286AD9BF29E5C88C049202AC5AF544E7B7A222"
+    },
+    {
+      "entry": "TowerSDKRecipe/PACKAGES.json",
+      "bytes": 3209,
+      "sha256": "A747F95669D176C52B513FD7D4D3940982E11F92629FA15999A6F18806A3AAD0"
+    },
+    {
+      "entry": "TowerSDKRecipe/PACKET_SHA256.json",
+      "bytes": 5904,
+      "sha256": "35A2E88CEE1BFFE500B0AD4AD2E08AD527508B72135F503E7EBAA83959F2F853"
+    },
+    {
+      "entry": "TowerSDKRecipe/PHASES.json",
+      "bytes": 30529,
+      "sha256": "209C8A11ADDDD1CA4484B0FA6A905B4CBA3A1FA2190285C0DC6BB6D6F076896F"
+    },
+    {
+      "entry": "TowerSDKRecipe/Prepare.ps1",
+      "bytes": 6880,
+      "sha256": "DA8EF57FF8F0B3A3E81FD6732708038B48F87E517DCAEA56F0CE64E7DD6D190B"
+    },
+    {
+      "entry": "TowerSDKRecipe/README.md",
+      "bytes": 3934,
+      "sha256": "AA1FB1DB8F7F8D5F1B3C4533F3DE8366C485F9425EEB6DECC67B30DAE4834BC2"
+    },
+    {
+      "entry": "TowerSDKRecipe/RECIPE.json",
+      "bytes": 834,
+      "sha256": "E982BF02D4FA75A44E45060D8FB41ADAD0228F5147B32AC277008989F080254D"
+    },
+    {
+      "entry": "TowerSDKRecipe/REGRESSION_RESULTS_INITIAL_PASS.json",
+      "bytes": 4321,
+      "sha256": "3F567E5D26D1357D0C1C4FA916F68178CBFDBBDA4D84377A15BA8FE1C9128FD0"
+    },
+    {
+      "entry": "TowerSDKRecipe/REGRESSION_RESULTS.json",
+      "bytes": 4321,
+      "sha256": "3F567E5D26D1357D0C1C4FA916F68178CBFDBBDA4D84377A15BA8FE1C9128FD0"
+    },
+    {
+      "entry": "TowerSDKRecipe/ROOT_ADMISSION.template.json",
+      "bytes": 500,
+      "sha256": "CFAF262797B09CC9662DD357542787C08F59C57242F5E7CE64EA9363B2C31EBB"
+    },
+    {
+      "entry": "TowerSDKRecipe/Run-Machine.ps1",
+      "bytes": 13793,
+      "sha256": "B1D8E9A4BCEE8A04148AA5310FA54D496CB4DD8A263586913593D03CD6EB5D55"
+    },
+    {
+      "entry": "TowerSDKRecipe/SDK_CRITICAL_PINS.json",
+      "bytes": 7860,
+      "sha256": "403E26BFE04B41552EEFBDEFEFFAD0BE7AD12BBB88A934E61C69515DA0AA1F9C"
+    },
+    {
+      "entry": "TowerSDKRecipe/SDK_TREE_PINS.json",
+      "bytes": 1460018,
+      "sha256": "3C039B4B80223D47580724C9BB5C2EDA8CC65508316B5DCA524DA81968D90131"
+    },
+    {
+      "entry": "TowerSDKRecipe/STATIC_CHECKS.json",
+      "bytes": 520,
+      "sha256": "C3C4EB8E4761E17EEC92F3A69B5C9487FE4F0E079F7E95DD9A340C7AB1F992F3"
+    },
+    {
+      "entry": "TowerSDKRecipe/SUCCESSOR_BINDING.json",
+      "bytes": 651,
+      "sha256": "97898AF1FF0B6FF51E5E243E050DCCEF7BAEAD3038F1792BADBB56CB032E0F1D"
+    },
+    {
+      "entry": "TowerSDKRecipe/Test-ReviewFixes.ps1",
+      "bytes": 5934,
+      "sha256": "588F851066FE68A9D9610AB90A9DBF05D2ED18A252779B334E63A3141DEF86F6"
+    },
+    {
+      "entry": "TowerSDKRecipe/Verify-Evidence.ps1",
+      "bytes": 6760,
+      "sha256": "2D719CF8765BA86E34AFE84667ED633323925334767A29A7C3B0A6D08DA6863B"
+    },
+    {
+      "entry": "TowerSDKRecipe/Verify-Negative.ps1",
+      "bytes": 2089,
+      "sha256": "EB6C0F93BB65283498A6C90D3A90DC7C435E76F2D88ECDF362DDF61637A7C0FB"
+    }
+  ],
+  "createdUtc": "2026-10-14T07:45:37.4462369Z"
+}

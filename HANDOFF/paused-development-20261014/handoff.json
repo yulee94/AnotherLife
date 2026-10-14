@@ -1,0 +1,121 @@
+{
+  "ownerDirection": "Stabilize, publish, finish tasks underway and pause",
+  "phase1Complete": false,
+  "newDevelopmentStopped": true,
+  "localWorkersIdle": true,
+  "published": false,
+  "publicationTarget": "GITHUB_DRAFT_PR_DEVELOPMENT_HANDOFF_OWNER_APPROVED",
+  "requiredPRSkill": "Owner approved normal GitHub draft-PR fallback",
+  "canonicalPromotionsThisCloseout": 0,
+  "nativeJobsStarted": 0,
+  "packets": [
+    {
+      "status": "SOURCE_ACCEPTED_252_UNRUN",
+      "manifest": "PACKET_PINS.json",
+      "role": "CombatD3",
+      "sha": "AC10C226C897DC7AED7E36D28A2EA0ACE45336C3F5EE5E808272F5ABDDCA8378",
+      "path": "LOCAL-DEV-01/combat-d3-candidates-20261014-r001"
+    },
+    {
+      "status": "CORRECTED_PENDING_INDEPENDENT_REVIEW_NO_SDK",
+      "manifest": "PACKET_PINS.json",
+      "role": "SDK252",
+      "sha": "CEB746E0676BDAC874F59E9A9C62D981429896717C1C553E13E148A7DC63C650",
+      "path": "LOCAL-COORD/combat-d3-sdk252-preparation-20261014-r002"
+    },
+    {
+      "status": "SOURCE_ACCEPTED_30_UNRUN_NOT_PROMOTED",
+      "manifest": "PACKET.json",
+      "role": "StoryPresentation",
+      "sha": "3DEAA36D819A8463C755300F8DE9E1F5A9E94DBE826D124B074A436853BD35C7",
+      "path": "LOCAL-WEB/owned-story-presentation-adapter-20261014-r002"
+    },
+    {
+      "status": "SOURCE_ACCEPTED_26_UNRUN_NOT_PROMOTED",
+      "manifest": "PACKET.json",
+      "role": "StoryBoot",
+      "sha": "5ED7421CBD5FAC7946EBA2E5DB3404189ABA3A17774705CF9DF862F9CC0C6ACD",
+      "path": "LOCAL-WEB/owned-story-boot-preparation-hook-20261014-r001"
+    },
+    {
+      "status": "SOURCE_ACCEPTED_16_UNRUN",
+      "manifest": "PACKET_SHA256.json",
+      "role": "FiniteStage1",
+      "sha": "325A22897A835E4CDB0C0C8BAE8502A1608EECB8F58E136304E4B165C241122C",
+      "path": "LOCAL-BACKEND/finite-attempt-stage1-candidates-20261014-r001"
+    },
+    {
+      "status": "SEALED_11_UNREGISTERED_UNRUN_SOURCE_REVIEW_PENDING",
+      "manifest": "PACKET_SHA256.json",
+      "role": "FiniteStage2Pure",
+      "sha": "67D1D8B35FFBF593D1F4675E2380A09F3357998CBBF69780A0775F4CEEF7FC91",
+      "path": "LOCAL-BACKEND/finite-attempt-stage2-pure-candidates-20261014-r001"
+    },
+    {
+      "status": "SPEC_ONLY_FORMATS_UNRESERVED",
+      "manifest": "PACKET_SHA256.json",
+      "role": "FiniteStage2Spec",
+      "sha": "B2C824B1C2B52B8A89E34BF741D7A83B683E7664A8E60697375CEA0414D7463C",
+      "path": "LOCAL-BACKEND/finite-attempt-stage2-spec-20261014-r001"
+    },
+    {
+      "status": "SPEC_ONLY_NO_IMPLEMENTATION",
+      "manifest": "PACKET_PINS.json",
+      "role": "MechanicsESpec",
+      "sha": "B89EEA883CADF34D5D901E15A855C936C56E70BD6097491A59138217DEA978EB",
+      "path": "LOCAL-DEV-01/combat-e-preparation-20261014-r001"
+    },
+    {
+      "status": "SPEC_ONLY_ACTUAL_MAPPING_PENDING",
+      "manifest": "PACKET.json",
+      "role": "Mapping",
+      "sha": "56C1735AD9FC443D2ACB56BC875B7E8AA2D86179E0ABDEB3E18C4F9E6B89B564",
+      "path": "LOCAL-WEB/owned-story-mapping-completeness-20261014-r001"
+    },
+    {
+      "status": "MECHANICAL_SOURCE_ACCEPTED_NO_CAPTURE",
+      "manifest": "MANIFEST.json",
+      "role": "Visual",
+      "sha": "58D48F49F1569B6D23B92A356A8F2F210FE8FE1F0A08A0D762BA61972B125A08",
+      "path": "LOCAL-RIG/unity-owned-motion-supervisor-composition-20261014-r010"
+    },
+    {
+      "status": "HELD_PLAN_ONLY_NO_EXECUTOR",
+      "manifest": "MANIFEST.json",
+      "role": "ThinUnityRecipe",
+      "sha": "6944349C77CD5B6B6D81BAE56451BFC5109E6C113A6771D736380BBA563A22D4",
+      "path": "LOCAL-QA/isolated665-validation-recipe-20261014-r001"
+    },
+    {
+      "status": "INCOMPLETE_STOP_GUARDED",
+      "manifest": "MANIFEST.json",
+      "role": "PartialUnityWrapper",
+      "sha": "61A08C03F6E3A2AEB759FE0DDDE4730B9E76C02DC70AF469ACD1E8F65E873360",
+      "path": "LOCAL-QA/isolated665-native-wrapper-20261014-r001"
+    },
+    {
+      "status": "SOURCE_ACCEPTED_NO_SDK",
+      "manifest": "PACKET_SHA256.json",
+      "role": "TowerSDKRecipe",
+      "sha": "35A2E88CEE1BFFE500B0AD4AD2E08AD527508B72135F503E7EBAA83959F2F853",
+      "path": "LOCAL-BACKEND/tower-xml24-machine-recipe-20261014-r002"
+    }
+  ],
+  "sourceCapture": {
+    "session": 66567,
+    "status": "TERMINAL_SOURCE_PAUSE_EXPIRED_INCOMPLETE",
+    "backup": "F:\\AnotherLife\\outputs\\LOCAL-COORD\\unity-new-editor-source-backup-20261014-r003",
+    "pauseExpiresUtc": "2026-10-14T08:22:52.1205623Z",
+    "filesPresent": 25544,
+    "completeExists": false,
+    "releaseSha256": "CAD3BAA3FF0A6B09272D52FCDF2D0EAA97D615312762A36D7D6DDADF7D08C82B",
+    "retryAllowed": false
+  },
+  "omittedFromBundle": [
+    "Live18GiBsourcebackup",
+    "Vendorbinaries",
+    "Originalmodel/artworkbinaries",
+    "Secrets/accountdata"
+  ],
+  "createdUtc": "2026-10-14T07:44:42.7757812Z"
+}
